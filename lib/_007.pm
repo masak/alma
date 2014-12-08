@@ -198,7 +198,8 @@ role Q::Statement::VarDecl does Q {
 
     method run($runtime) {
         $runtime.declare-var($.ident.name);
-        # TODO: should have an if statement here, but need a test case for it
+        return
+            unless $.assignment;
         $.assignment.eval($runtime);
     }
 }
