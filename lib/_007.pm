@@ -154,6 +154,7 @@ role Q::Statement::VarDecl does Q {
     method Str { "VarDecl" ~ children($.ident, |$.assignment) }
 
     method run($runtime) {
+        $runtime.declare-var($.ident.name);
         # TODO: should have an if statement here, but need a test case for it
         $.assignment.eval($runtime);
     }
@@ -175,7 +176,9 @@ role Q::Statement::Block does Q {
     method Str { "Statement block" ~ children($.block) }
 
     method run($runtime) {
+        $runtime.enter;
         $.block.statements.run($runtime);
+        $runtime.leave;
     }
 }
 
@@ -185,9 +188,11 @@ role Q::CompUnit does Q {
     method Str { "CompUnit" ~ children(@.statements) }
 
     method run($runtime) {
+        $runtime.enter;
         for @.statements -> $statement {
             $statement.run($runtime);
         }
+        $runtime.leave;
     }
 }
 
@@ -211,18 +216,42 @@ role Q::Parameters does Q {
 
 role Runtime {
     has $.output;
-    has %!pad;
+    has @!pads;
 
     method run($compunit) {
         $compunit.run(self);
     }
 
+    method enter {
+        @!pads.push({});
+        return;
+    }
+
+    method leave {
+        @!pads.pop;
+        return;
+    }
+
+    method !find($name) {
+        for @!pads.reverse -> %pad {
+            return %pad
+                if %pad{$name} :exists;
+        }
+        die "Cannot find variable $name";          # XXX: turn this into an X:: type
+    }
+
     method put-var($name, $value) {
-        %!pad{$name} = $value;
+        my %pad := self!find($name);
+        %pad{$name} = $value;
     }
 
     method get-var($name) {
-        return %!pad{$name};
+        my %pad := self!find($name);
+        return %pad{$name};
+    }
+
+    method declare-var($name) {
+        @!pads[*-1]{$name} = Val::None.new;
     }
 }
 
