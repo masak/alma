@@ -4,7 +4,6 @@ A small language. A test bed for macro ideas.
 
 ## TODO
 
-* array indexing `[]`
 * `abs()`
 * subroutines
 * subroutines for ops
