@@ -177,14 +177,12 @@ role Q::Expr::Call::Sub does Q {
             die "Block with {$c.parameters.parameters.elems} parameters "
                 ~ "called with {@.args.elems} arguments"
                 unless $c.parameters.parameters == @.args;
+            my @args = @.args».eval($runtime);
             $runtime.enter;
-            for $c.parameters.parameters Z @.args -> $param, $arg {
+            for $c.parameters.parameters Z @args -> $param, $arg {
                 my $name = $param.name;
                 $runtime.declare-var($name);
-                # XXX: this is wrong (the argument should not be evaluated
-                #      in the new scope), and a test can be written to
-                #      show that
-                $runtime.put-var($name, $arg.eval($runtime));
+                $runtime.put-var($name, $arg);
             }
             $c.statements.run($runtime);
             $runtime.leave;

@@ -37,4 +37,16 @@ use _007::Test;
     is-result $ast, "Good evening, Mr Bond\n", "calling a block with parameters works";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
+            (stexpr (call (ident "say") (~ (ident "X") (ident "Y"))))))))
+          (vardecl (ident "X") (assign (ident "X") (str "y")))
+          (stexpr (call (ident "b") (str "X") (~ (ident "X") (ident "X")))))
+        .
+
+    is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
+}
+
 done;
