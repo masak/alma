@@ -6,6 +6,7 @@ sub read(Str $ast) is export {
     my %qclass_lookup =
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
+        array       => Q::Literal::Array,
         ident       => Q::Term::Identifier,
 
         assign      => Q::Expr::Assignment,

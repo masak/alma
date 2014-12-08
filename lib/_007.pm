@@ -1,7 +1,26 @@
 role Val {}
 role Val::None is Val {}
-role Val::Int is Val { has Int $.value }
-role Val::Str is Val { has Str $.value }
+role Val::Int is Val {
+    has Int $.value;
+
+    method Str {
+        $.value
+    }
+}
+role Val::Str is Val {
+    has Str $.value;
+
+    method Str {
+        $.value
+    }
+}
+role Val::Array is Val {
+    has @.elements;
+
+    method Str {
+        '[' ~ @.elements>>.Str.join(', ') ~ ']'
+    }
+}
 
 sub children(*@c) {
     "\n" ~ @c.join("\n").indent(2)
@@ -24,6 +43,16 @@ role Q::Literal::Str does Q {
     method Str { qq[Str["$.value"]] }
 
     method eval($) { Val::Str.new(:$.value) }
+}
+
+role Q::Literal::Array does Q {
+    has @.elements;
+    method new(*@elements) {
+        self.bless(:@elements)
+    }
+    method Str { "Array" ~ children(@.elements) }
+
+    method eval($) { Val::Array.new(:elements(@.elements>>.eval($))) }
 }
 
 role Q::Term::Identifier does Q {
@@ -60,7 +89,7 @@ role Q::Expr::Call::Sub does Q {
         die "Unknown sub {$.ident.name}"
             unless $.ident.name eq "say";
         my $arg = @.args[0].eval($runtime);
-        $runtime.output.say($arg.value);
+        $runtime.output.say($arg.Str);
         Val::None.new;
     }
 }

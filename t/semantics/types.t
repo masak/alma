@@ -22,4 +22,14 @@ use _007::Test;
     is-result $ast, "Bond\n", "str type works";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "n") (assign (ident "n") (array (int 1) (int 2))))
+          (stexpr (call (ident "say") (ident "n"))))
+        .
+
+    is-result $ast, "[1, 2]\n", "array type works";
+}
+
 done;
