@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (compunit
-          (stexpr (call (infix (ident "infix:<+>") (int 38) (int 4)))))
+          (stexpr (call (ident "say") (+ (int 38) (int 4)))))
         .
 
     is-result $ast, "42\n", "numeric addition works";
@@ -14,7 +14,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (compunit
-          (stexpr (call (infix (ident "infix:<~>") (str "Jame") (str "s Bond")))))
+          (stexpr (call (ident "say") (~ (str "Jame") (str "s Bond")))))
         .
 
     is-result $ast, "James Bond\n", "string concatenation works";
