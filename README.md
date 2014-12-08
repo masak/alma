@@ -6,7 +6,6 @@ A small language. A test bed for macro ideas.
 
 * array indexing `[]`
 * `abs()`
-* blocks and lexical pads
 * subroutines
 * subroutines for ops
 * fibonacci

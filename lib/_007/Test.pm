@@ -7,6 +7,7 @@ sub read(Str $ast) is export {
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
         array       => Q::Literal::Array,
+        block       => Q::Literal::Block,
         ident       => Q::Term::Identifier,
 
         '+'         => Q::Expr::Infix::Addition,
@@ -17,8 +18,11 @@ sub read(Str $ast) is export {
 
         vardecl     => Q::Statement::VarDecl,
         stexpr      => Q::Statement::Expr,
+        stblock     => Q::Statement::Block,
 
         compunit    => Q::CompUnit,
+        statements  => Q::Statements,
+        parameters  => Q::Parameters,
     ;
 
     my grammar _007::Syntax {
@@ -27,7 +31,7 @@ sub read(Str $ast) is export {
         token expr:list { '(' ~ ')' [<expr>+ % \s+] }
         token expr:int { \d+ }
         token expr:str { '"' ~ '"' (<-["]>+) }
-        token expr:symbol { <!before '"'><!before \d> \S+ }
+        token expr:symbol { <!before '"'><!before \d> [<!before ')'> \S]+ }
     }
 
     my $actions = role {

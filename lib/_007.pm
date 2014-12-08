@@ -55,6 +55,13 @@ role Q::Literal::Array does Q {
     method eval($) { Val::Array.new(:elements(@.elements>>.eval($))) }
 }
 
+role Q::Literal::Block does Q {
+    has $.parameters;
+    has $.statements;
+    method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
+    method Str { "Block" ~ children($.parameters, $.statements) }
+}
+
 role Q::Term::Identifier does Q {
     has $.name;
     method new(Str $name) { self.bless(:$name) }
@@ -140,6 +147,18 @@ role Q::Expr::Call::Sub does Q {
     }
 }
 
+role Q::Statement::VarDecl does Q {
+    has $.ident;
+    has $.assignment;
+    method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
+    method Str { "VarDecl" ~ children($.ident, |$.assignment) }
+
+    method run($runtime) {
+        # TODO: should have an if statement here, but need a test case for it
+        $.assignment.eval($runtime);
+    }
+}
+
 role Q::Statement::Expr does Q {
     has $.expr;
     method new($expr) { self.bless(:$expr) }
@@ -150,15 +169,13 @@ role Q::Statement::Expr does Q {
     }
 }
 
-role Q::Statement::VarDecl does Q {
-    has $.ident;
-    has $.assignment;
-    method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
-    method Str { "VarDecl" ~ children($.ident, |$.assignment) }
+role Q::Statement::Block does Q {
+    has $.block;
+    method new(Q::Literal::Block $block) { self.bless(:$block) }
+    method Str { "Statement block" ~ children($.block) }
 
     method run($runtime) {
-        # TODO: should have an if statement here, but need a test case for it
-        $.assignment.eval($runtime);
+        $.block.statements.run($runtime);
     }
 }
 
@@ -172,6 +189,24 @@ role Q::CompUnit does Q {
             $statement.run($runtime);
         }
     }
+}
+
+role Q::Statements does Q {
+    has @.statements;
+    method new(*@statements) { self.bless(:@statements) }
+    method Str { "Statements" ~ children(@.statements) }
+
+    method run($runtime) {
+        for @.statements -> $statement {
+            $statement.run($runtime);
+        }
+    }
+}
+
+role Q::Parameters does Q {
+    has @.parameters;
+    method new(*@parameters) { self.bless(:@parameters) }
+    method Str { "Parameters" ~ children(@.parameters) }
 }
 
 role Runtime {
