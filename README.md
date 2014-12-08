@@ -4,7 +4,6 @@ A small language. A test bed for macro ideas.
 
 ## TODO
 
-* array literals
 * addition `+`
 * concatenation `~`
 * array indexing `[]`
