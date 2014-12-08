@@ -28,6 +28,8 @@ role Val::Array does Val {
 role Val::Block does Val {
     has $.parameters;
     has $.statements;
+    has $.outer;
+    has %.pad;
 
     method Str { "<block>" }
 }
@@ -71,7 +73,10 @@ role Q::Literal::Block does Q {
     method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
     method Str { "Block" ~ children($.parameters, $.statements) }
 
-    method eval($) { Val::Block.new(:$.parameters, :$.statements) }
+    method eval($runtime) {
+        my $outer = $runtime.current-block;
+        Val::Block.new(:$.parameters, :$.statements, :$outer);
+    }
 }
 
 role Q::Term::Identifier does Q {
@@ -177,7 +182,7 @@ role Q::Expr::Call::Sub does Q {
                 ~ "called with {@.args.elems} arguments"
                 unless $c.parameters.parameters == @.args;
             my @args = @.args».eval($runtime);
-            $runtime.enter;
+            $runtime.enter($c);
             for $c.parameters.parameters Z @args -> $param, $arg {
                 my $name = $param.name;
                 $runtime.declare-var($name);
@@ -220,11 +225,14 @@ role Q::Statement::Block does Q {
     method Str { "Statement block" ~ children($.block) }
 
     method run($runtime) {
-        $runtime.enter;
+        my $c = $.block.eval($runtime);
+        $runtime.enter($c);
         $.block.statements.run($runtime);
         $runtime.leave;
     }
 }
+
+constant NO_OUTER = {};
 
 role Q::CompUnit does Q {
     has @.statements;
@@ -232,7 +240,8 @@ role Q::CompUnit does Q {
     method Str { "CompUnit" ~ children(@.statements) }
 
     method run($runtime) {
-        $runtime.enter;
+        my $c = Val::Block.new(:@.statements, :outer(NO_OUTER));
+        $runtime.enter($c);
         for @.statements -> $statement {
             $statement.run($runtime);
         }
@@ -260,26 +269,30 @@ role Q::Parameters does Q {
 
 role Runtime {
     has $.output;
-    has @!pads;
+    has @!blocks;
 
     method run($compunit) {
         $compunit.run(self);
     }
 
-    method enter {
-        @!pads.push({});
-        return;
+    method enter($block) {
+        @!blocks.push($block);
     }
 
     method leave {
-        @!pads.pop;
-        return;
+        @!blocks.pop;
+    }
+
+    method current-block {
+        @!blocks[*-1];
     }
 
     method !find($name) {
-        for @!pads.reverse -> %pad {
-            return %pad
-                if %pad{$name} :exists;
+        my $block = self.current-block;
+        repeat until $block === NO_OUTER {
+            return $block.pad
+                if $block.pad{$name} :exists;
+            $block.=outer;
         }
         die "Cannot find variable '$name'";          # XXX: turn this into an X:: type
     }
@@ -295,7 +308,7 @@ role Runtime {
     }
 
     method declare-var($name) {
-        @!pads[*-1]{$name} = Val::None.new;
+        self.current-block.pad{$name} = Val::None.new;
     }
 }
 

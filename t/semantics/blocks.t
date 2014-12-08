@@ -49,4 +49,18 @@ use _007::Test;
     is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "callback")) (statements
+            (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
+            (stexpr (call (ident "callback")))))))
+          (vardecl (ident "scoping") (assign (ident "scoping") (str "lexical")))
+          (stexpr (call (ident "b") (block (parameters) (statements
+            (stexpr (call (ident "say") (ident "scoping"))))))))
+        .
+
+    is-result $ast, "lexical\n", "scoping is lexical";
+}
+
 done;
