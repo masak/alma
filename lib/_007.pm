@@ -168,7 +168,6 @@ role Q::Expr::Call::Sub does Q {
         if $.ident.name eq "say" {
             my $arg = @.args[0].eval($runtime);
             $runtime.output.say($arg.Str);
-            return Val::None.new;
         }
         else {
             my $c = $runtime.get-var($.ident.name);
@@ -187,6 +186,7 @@ role Q::Expr::Call::Sub does Q {
             $c.statements.run($runtime);
             $runtime.leave;
         }
+        return Val::None.new;
     }
 }
 
