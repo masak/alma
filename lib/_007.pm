@@ -4,7 +4,7 @@ role Val::Int is Val {
     has Int $.value;
 
     method Str {
-        $.value
+        $.value.Str
     }
 }
 role Val::Str is Val {
