@@ -26,4 +26,15 @@ use _007::Test;
     is-result $ast, "one\ntwo\none\n", "blocks have their own variable scope";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
+            (stexpr (call (ident "say") (~ (str "Good evening, Mr ") (ident "name"))))))))
+          (stexpr (call (ident "b") (str "Bond"))))
+        .
+
+    is-result $ast, "Good evening, Mr Bond\n", "calling a block with parameters works";
+}
+
 done;

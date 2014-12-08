@@ -1,5 +1,9 @@
 role Val {}
-role Val::None does Val {}
+role Val::None does Val {
+    method Str {
+        "None"
+    }
+}
 role Val::Int does Val {
     has Int $.value;
 
@@ -20,6 +24,12 @@ role Val::Array does Val {
     method Str {
         '[' ~ @.elements>>.Str.join(', ') ~ ']'
     }
+}
+role Val::Block does Val {
+    has $.parameters;
+    has $.statements;
+
+    method Str { "<block>" }
 }
 
 sub children(*@c) {
@@ -60,6 +70,8 @@ role Q::Literal::Block does Q {
     has $.statements;
     method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
     method Str { "Block" ~ children($.parameters, $.statements) }
+
+    method eval($) { Val::Block.new(:$.parameters, :$.statements) }
 }
 
 role Q::Term::Identifier does Q {
@@ -153,11 +165,30 @@ role Q::Expr::Call::Sub does Q {
 
     method eval($runtime) {
         # TODO: de-hack -- wants to be a hash of builtins somewhere
-        die "Unknown sub {$.ident.name}"
-            unless $.ident.name eq "say";
-        my $arg = @.args[0].eval($runtime);
-        $runtime.output.say($arg.Str);
-        Val::None.new;
+        if $.ident.name eq "say" {
+            my $arg = @.args[0].eval($runtime);
+            $runtime.output.say($arg.Str);
+            return Val::None.new;
+        }
+        else {
+            my $c = $runtime.get-var($.ident.name);
+            die "{$.ident.name} is not callable"
+                unless $c ~~ Val::Block;
+            die "Block with {$c.parameters.parameters.elems} parameters "
+                ~ "called with {@.args.elems} arguments"
+                unless $c.parameters.parameters == @.args;
+            $runtime.enter;
+            for $c.parameters.parameters Z @.args -> $param, $arg {
+                my $name = $param.name;
+                $runtime.declare-var($name);
+                # XXX: this is wrong (the argument should not be evaluated
+                #      in the new scope), and a test can be written to
+                #      show that
+                $runtime.put-var($name, $arg.eval($runtime));
+            }
+            $c.statements.run($runtime);
+            $runtime.leave;
+        }
     }
 }
 
@@ -251,7 +282,7 @@ role Runtime {
             return %pad
                 if %pad{$name} :exists;
         }
-        die "Cannot find variable $name";          # XXX: turn this into an X:: type
+        die "Cannot find variable '$name'";          # XXX: turn this into an X:: type
     }
 
     method put-var($name, $value) {
