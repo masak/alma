@@ -1,20 +1,20 @@
 role Val {}
-role Val::None is Val {}
-role Val::Int is Val {
+role Val::None does Val {}
+role Val::Int does Val {
     has Int $.value;
 
     method Str {
         $.value.Str
     }
 }
-role Val::Str is Val {
+role Val::Str does Val {
     has Str $.value;
 
     method Str {
         $.value
     }
 }
-role Val::Array is Val {
+role Val::Array does Val {
     has @.elements;
 
     method Str {
