@@ -27,7 +27,18 @@ use _007::Test;
           (stexpr (call (ident "say") (index (ident "ns") (int 1)))))
         .
 
-    is-result $ast, "Bond\n", "string concatenation works";
+    is-result $ast, "Bond\n", "array indexing works";
+}
+
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "x") (assign (ident "x") (int 1)))
+          (stexpr (assign (ident "x") (int 2)))
+          (stexpr (call (ident "say") (ident "x"))))
+        .
+
+    is-result $ast, "2\n", "assignment works";
 }
 
 done;
