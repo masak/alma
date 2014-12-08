@@ -65,6 +65,31 @@ role Q::Term::Identifier does Q {
     }
 }
 
+role Q::Expr::Infix does Q {
+    has $.lhs;
+    has $.rhs;
+    method new($lhs, $rhs) { self.bless(:$lhs, :$rhs) }
+    method Str { "Infix" ~ children($.lhs, $.rhs) }
+
+    method eval($runtime) { ... }
+}
+
+role Q::Expr::Infix::Addition does Q::Expr::Infix {
+    method eval($runtime) {
+        return Val::Int.new(:value(
+            $.lhs.eval($runtime).value + $.rhs.eval($runtime).value
+        ));
+    }
+}
+
+role Q::Expr::Infix::Concat does Q::Expr::Infix {
+    method eval($runtime) {
+        return Val::Str.new(:value(
+            $.lhs.eval($runtime).value ~ $.rhs.eval($runtime).value
+        ));
+    }
+}
+
 role Q::Expr::Assignment does Q {
     has $.ident;
     has $.expr;

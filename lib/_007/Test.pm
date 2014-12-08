@@ -9,6 +9,8 @@ sub read(Str $ast) is export {
         array       => Q::Literal::Array,
         ident       => Q::Term::Identifier,
 
+        '+'         => Q::Expr::Infix::Addition,
+        '~'         => Q::Expr::Infix::Concat,
         assign      => Q::Expr::Assignment,
         call        => Q::Expr::Call::Sub,
 
@@ -23,8 +25,8 @@ sub read(Str $ast) is export {
         proto token expr {*}
         token expr:list { '(' ~ ')' [<expr>+ % \s+] }
         token expr:int { \d+ }
-        token expr:symbol { \w+ }
         token expr:str { '"' ~ '"' (<-["]>+) }
+        token expr:symbol { <!before '"'><!before \d> \S+ }
     }
 
     my $actions = role {
