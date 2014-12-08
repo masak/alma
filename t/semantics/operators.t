@@ -20,4 +20,14 @@ use _007::Test;
     is-result $ast, "James Bond\n", "string concatenation works";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
+          (stexpr (call (ident "say") (index (ident "ns") (int 1)))))
+        .
+
+    is-result $ast, "Bond\n", "string concatenation works";
+}
+
 done;
