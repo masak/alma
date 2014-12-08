@@ -131,6 +131,20 @@ role Q::Expr::Infix::Eq does Q::Expr::Infix {
     }
 }
 
+role Q::Expr::Index does Q {
+    has $.array;
+    has $.index;
+    method new($array, $index) { self.bless(:$array, :$index) }
+    method Str { "Index" ~ children($.array, $.index) }
+
+    method eval($runtime) {
+        multi index(Q::Term::Identifier $array, Q::Literal::Int $index) {
+            $runtime.get-var($array.name).elements[$index.value];
+        }
+        return index($.array, $.index);
+    }
+}
+
 role Q::Expr::Call::Sub does Q {
     has $.ident;
     has @.args;
