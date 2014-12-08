@@ -5,7 +5,6 @@ A small language. A test bed for macro ideas.
 ## TODO
 
 * array indexing `[]`
-* assignment `=`
 * equality `==` for all three types
 * `abs()`
 * blocks and lexical pads
