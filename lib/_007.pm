@@ -103,6 +103,27 @@ role Q::Expr::Assignment does Q {
     }
 }
 
+role Q::Expr::Infix::Eq does Q::Expr::Infix {
+    method eval($runtime) {
+        multi equal-value(Val $, Val $) { return False }
+        multi equal-value(Val::Int $r, Val::Int $l) { $r.value == $l.value }
+        multi equal-value(Val::Str $r, Val::Str $l) { $r.value eq $l.value }
+        multi equal-value(Val::Array $r, Val::Array $l) {
+            return False unless $r.elements == $l.elements;
+            for $r.elements.list Z $l.elements.list -> $re, $le {
+                return False unless equal-value($re, $le);
+            }
+            return True;
+        }
+
+        my $r = $.rhs.eval($runtime);
+        my $l = $.lhs.eval($runtime);
+        # converting Bool->Int because the implemented language doesn't have Bool
+        my $equal = +equal-value($r, $l);
+        return Val::Int.new(:value($equal));
+    }
+}
+
 role Q::Expr::Call::Sub does Q {
     has $.ident;
     has @.args;
