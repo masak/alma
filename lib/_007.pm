@@ -33,6 +33,11 @@ role Val::Block does Val {
 
     method Str { "<block>" }
 }
+role Val::Sub does Val::Block {
+    has $.name;
+
+    method Str { "<sub>" }
+}
 
 sub children(*@c) {
     "\n" ~ @c.join("\n").indent(2)
@@ -76,6 +81,21 @@ role Q::Literal::Block does Q {
     method eval($runtime) {
         my $outer = $runtime.current-block;
         Val::Block.new(:$.parameters, :$.statements, :$outer);
+    }
+}
+
+role Q::Literal::Sub does Q::Literal::Block {
+    has $.ident;
+
+    method new($ident, $parameters, $statements) {
+        self.bless(:$ident, :$parameters, :$statements);
+    }
+
+    method eval($runtime) {
+        my $outer = $runtime.current-block;
+        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer);
+        $runtime.declare-var($.ident.name);
+        $runtime.put-var($.ident.name, $sub);
     }
 }
 
@@ -250,6 +270,25 @@ role Q::Statement::Block does Q {
         $runtime.enter($c);
         $.block.statements.run($runtime);
         $runtime.leave;
+    }
+}
+
+role Q::Statement::Sub does Q {
+    has $.ident;
+    has $.parameters;
+    has $.statements;
+    has $.outer;
+    has %.pad;
+
+    method new($ident, $parameters, $statements) {
+        self.bless(:$ident, :$parameters, :$statements);
+    }
+
+    method run($runtime) {
+        my $outer = $runtime.current-block;
+        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer);
+        $runtime.declare-var($.ident.name);
+        $runtime.put-var($.ident.name, $sub);
     }
 }
 
