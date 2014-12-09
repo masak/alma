@@ -64,4 +64,27 @@ use _007::Test;
     is-result $ast, "lexical\n", "scoping is lexical";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (stexpr (call (ident "f")))
+          (sub (ident "f") (parameters) (statements
+            (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
+        .
+
+    is-result $ast, "OH HAI from inside sub\n", "call a sub before declaring it";
+}
+
+{
+    my $ast = q:to/./;
+        (compunit
+          (stexpr (call (ident "f")))
+          (vardecl (ident "x") (str "X"))
+          (sub (ident "f") (parameters) (statements
+            (stexpr (call (ident "say") (ident "x"))))))
+        .
+
+    is-result $ast, "X\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
+}
+
 done;
