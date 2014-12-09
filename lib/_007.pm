@@ -84,21 +84,6 @@ role Q::Literal::Block does Q {
     }
 }
 
-role Q::Literal::Sub does Q::Literal::Block {
-    has $.ident;
-
-    method new($ident, $parameters, $statements) {
-        self.bless(:$ident, :$parameters, :$statements);
-    }
-
-    method eval($runtime) {
-        my $outer = $runtime.current-block;
-        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer);
-        $runtime.declare-var($.ident.name);
-        $runtime.put-var($.ident.name, $sub);
-    }
-}
-
 role Q::Term::Identifier does Q {
     has $.name;
     method new(Str $name) { self.bless(:$name) }
