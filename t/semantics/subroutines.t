@@ -20,6 +20,7 @@ use _007::Test;
           (sub (ident "f") (parameters) (statements
             (vardecl (ident "x") (assign (ident "x") (str "two")))
             (stexpr (call (ident "say") (ident "x")))))
+          (stexpr (call (ident "f")))
           (stexpr (call (ident "say") (ident "x"))))
         .
 
