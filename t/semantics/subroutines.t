@@ -57,7 +57,7 @@ use _007::Test;
             (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
             (stexpr (call (ident "callback")))))
           (vardecl (ident "scoping") (assign (ident "scoping") (str "lexical")))
-          (stexpr (call (ident "f") (sub (ident "g") (parameters) (statements
+          (stexpr (call (ident "f") (block (parameters) (statements
             (stexpr (call (ident "say") (ident "scoping"))))))))
         .
 
