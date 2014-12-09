@@ -5,6 +5,8 @@ A small language. A test bed for macro ideas.
 ## TODO
 
 * `abs()`
+* `if` statements
+* `for` loops
 * subroutines
 * subroutines for ops
 * returning values
