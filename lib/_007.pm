@@ -219,6 +219,27 @@ role Q::Statement::Expr does Q {
     }
 }
 
+role Q::Statement::If does Q {
+    has $.expr;
+    has $.block;
+    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method Str { "If" ~ children($.expr, $.block) }
+
+    method run($runtime) {
+        multi truthy(Val::None) { False }
+        multi truthy(Val::Int $i) { ?$i.value }
+        multi truthy(Val::Str $s) { ?$s.value }
+        multi truthy(Val::Array $a) { ?$a.elements }
+
+        if truthy($.expr.eval($runtime)) {
+            my $c = $.block.eval($runtime);
+            $runtime.enter($c);
+            $.block.statements.run($runtime);
+            $runtime.leave;
+        }
+    }
+}
+
 role Q::Statement::Block does Q {
     has $.block;
     method new(Q::Literal::Block $block) { self.bless(:$block) }
