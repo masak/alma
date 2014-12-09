@@ -63,4 +63,17 @@ use _007::Test;
     is-result $ast, "lexical\n", "scoping is lexical";
 }
 
+{
+    my $ast = q:to/./;
+        (compunit
+          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "count")) (statements
+            (if (ident "count") (block (parameters) (statements
+              (stexpr (call (ident "b") (+ (ident "count") (int -1))))
+              (stexpr (call (ident "say") (ident "count"))))))))))
+          (stexpr (call (ident "b") (int 4))))
+        .
+
+    is-result $ast, "1\n2\n3\n4\n", "each block invocation gets its own callframe/scope";
+}
+
 done;
