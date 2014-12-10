@@ -272,10 +272,11 @@ role Q::Statement::Sub does Q {
     }
 
     method run($runtime) {
+        my $name = $.ident.name;
         my $outer-frame = $runtime.current-frame;
-        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer-frame);
-        $runtime.declare-var($.ident.name);
-        $runtime.put-var($.ident.name, $sub);
+        my $sub = Val::Sub.new(:$name, :$.parameters, :$.statements, :$outer-frame);
+        $runtime.declare-var($name);
+        $runtime.put-var($name, $sub);
     }
 }
 
