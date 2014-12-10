@@ -9,7 +9,7 @@ use _007::Test;
             (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
         .
 
-    is-result $ast, "", "immediate subs doesn't work";
+    is-result $ast, "", "subs are not immediate";
 }
 
 {
