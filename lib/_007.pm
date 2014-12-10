@@ -298,23 +298,6 @@ role Q::Statement::Sub does Q {
     }
 }
 
-constant NO_OUTER = {};
-
-role Q::CompUnit does Q {
-    has @.statements;
-    method new(*@statements) { self.bless(:@statements) }
-    method Str { "CompUnit" ~ children(@.statements) }
-
-    method run($runtime) {
-        my $c = Val::Block.new(:@.statements, :outer-frame(NO_OUTER));
-        $runtime.enter($c);
-        for @.statements -> $statement {
-            $statement.run($runtime);
-        }
-        $runtime.leave;
-    }
-}
-
 role Q::Statements does Q {
     has @.statements;
     method new(*@statements) { self.bless(:@statements) }
@@ -324,6 +307,24 @@ role Q::Statements does Q {
         for @.statements -> $statement {
             $statement.run($runtime);
         }
+    }
+}
+
+constant NO_OUTER = {};
+
+role Q::CompUnit does Q {
+    has @.statements;
+    method new(*@statements) { self.bless(:@statements) }
+    method Str { "CompUnit" ~ children(@.statements) }
+
+    method run($runtime) {
+        my $statements = Q::Statements.new(@.statements);
+        my $c = Val::Block.new(:$statements, :outer-frame(NO_OUTER));
+        $runtime.enter($c);
+        for @.statements -> $statement {
+            $statement.run($runtime);
+        }
+        $runtime.leave;
     }
 }
 
@@ -344,16 +345,8 @@ role Runtime {
     method enter($block) {
         my $frame = Frame.new(:$block);
         @!blocks.push($frame);
-        # XXX: this is a temporary hack. should remove compunit and just have statements
-        if $block.statements ~~ Q::Statements {
-            for $block.statements.statements.list -> $statement {
-                $statement.declare(self);
-            }
-        }
-        else {
-            for $block.statements.list -> $statement {
-                $statement.declare(self);
-            }
+        for $block.statements.statements -> $statement {
+            $statement.declare(self);
         }
     }
 
