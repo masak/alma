@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "u"))
           (if (ident "u") (block (parameters) (statements
             (stexpr (call (ident "say") (str "falsy none"))))))

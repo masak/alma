@@ -310,36 +310,24 @@ role Q::Statements does Q {
     }
 }
 
-constant NO_OUTER = {};
-
-role Q::CompUnit does Q {
-    has @.statements;
-    method new(*@statements) { self.bless(:@statements) }
-    method Str { "CompUnit" ~ children(@.statements) }
-
-    method run($runtime) {
-        my $statements = Q::Statements.new(@.statements);
-        my $c = Val::Block.new(:$statements, :outer-frame(NO_OUTER));
-        $runtime.enter($c);
-        for @.statements -> $statement {
-            $statement.run($runtime);
-        }
-        $runtime.leave;
-    }
-}
-
 role Q::Parameters does Q {
     has @.parameters;
     method new(*@parameters) { self.bless(:@parameters) }
     method Str { "Parameters" ~ children(@.parameters) }
 }
 
+constant NO_OUTER = {};
+
 role Runtime {
     has $.output;
     has @!blocks;
 
-    method run($compunit) {
-        $compunit.run(self);
+    method run(Q::Statements $statements) {
+        my $parameters = Q::Parameters.new();
+        my $block = Val::Block.new(:$parameters, :$statements, :outer-frame(NO_OUTER));
+        self.enter($block);
+        $statements.run(self);
+        self.leave;
     }
 
     method enter($block) {

@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (stblock (block (parameters) (statements
             (stexpr (call (ident "say") (str "OH HAI from inside block")))))))
         .
@@ -14,7 +14,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "x") (assign (ident "x") (str "one")))
           (stexpr (call (ident "say") (ident "x")))
           (stblock (block (parameters) (statements
@@ -28,7 +28,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
             (stexpr (call (ident "say") (~ (str "Good evening, Mr ") (ident "name"))))))))
           (stexpr (call (ident "b") (str "Bond"))))
@@ -39,7 +39,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
             (stexpr (call (ident "say") (~ (ident "X") (ident "Y"))))))))
           (vardecl (ident "X") (assign (ident "X") (str "y")))
@@ -51,7 +51,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "callback")) (statements
             (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
             (stexpr (call (ident "callback")))))))
@@ -65,7 +65,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "count")) (statements
             (if (ident "count") (block (parameters) (statements
               (stexpr (call (ident "b") (+ (ident "count") (int -1))))

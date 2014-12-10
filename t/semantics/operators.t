@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (stexpr (call (ident "say") (+ (int 38) (int 4)))))
         .
 
@@ -13,7 +13,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (stexpr (call (ident "say") (~ (str "Jame") (str "s Bond")))))
         .
 
@@ -22,7 +22,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
           (stexpr (call (ident "say") (index (ident "ns") (int 1)))))
         .
@@ -32,7 +32,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "x") (assign (ident "x") (int 1)))
           (stexpr (assign (ident "x") (int 2)))
           (stexpr (call (ident "say") (ident "x"))))
@@ -43,7 +43,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "i1") (assign (ident "i1") (int 10)))
           (vardecl (ident "i2") (assign (ident "i2") (int 11)))
           (vardecl (ident "s1") (assign (ident "s1") (str "10")))

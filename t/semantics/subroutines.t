@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (sub (ident "f") (parameters) (statements
             (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
         .
@@ -14,7 +14,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (vardecl (ident "x") (assign (ident "x") (str "one")))
           (stexpr (call (ident "say") (ident "x")))
           (sub (ident "f") (parameters) (statements
@@ -29,7 +29,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (sub (ident "f") (parameters (ident "name")) (statements
             (stexpr (call (ident "say") (~ (str "Good evening, Mr ") (ident "name"))))))
           (stexpr (call (ident "f") (str "Bond"))))
@@ -40,7 +40,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (sub (ident "f") (parameters (ident "X") (ident "Y")) (statements
             (stexpr (call (ident "say") (~ (ident "X") (ident "Y"))))))
           (vardecl (ident "X") (assign (ident "X") (str "y")))
@@ -52,7 +52,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (sub (ident "f") (parameters (ident "callback")) (statements
             (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
             (stexpr (call (ident "callback")))))
@@ -66,7 +66,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (stexpr (call (ident "f")))
           (sub (ident "f") (parameters) (statements
             (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
@@ -77,7 +77,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (compunit
+        (statements
           (stexpr (call (ident "f")))
           (vardecl (ident "x") (str "X"))
           (sub (ident "f") (parameters) (statements
