@@ -266,8 +266,6 @@ role Q::Statement::Sub does Q {
     has $.ident;
     has $.parameters;
     has $.statements;
-    has $.outer;
-    has %.pad;
 
     method new($ident, $parameters, $statements) {
         self.bless(:$ident, :$parameters, :$statements);
