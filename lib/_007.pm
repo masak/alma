@@ -1,9 +1,11 @@
 role Val {}
+
 role Val::None does Val {
     method Str {
         "None"
     }
 }
+
 role Val::Int does Val {
     has Int $.value;
 
@@ -11,6 +13,7 @@ role Val::Int does Val {
         $.value.Str
     }
 }
+
 role Val::Str does Val {
     has Str $.value;
 
@@ -18,6 +21,7 @@ role Val::Str does Val {
         $.value
     }
 }
+
 role Val::Array does Val {
     has @.elements;
 
@@ -25,6 +29,7 @@ role Val::Array does Val {
         '[' ~ @.elements>>.Str.join(', ') ~ ']'
     }
 }
+
 role Val::Block does Val {
     has $.parameters;
     has $.statements;
@@ -32,6 +37,7 @@ role Val::Block does Val {
 
     method Str { "<block>" }
 }
+
 role Val::Sub does Val::Block {
     has $.name;
 
