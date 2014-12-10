@@ -289,7 +289,7 @@ role Q::CompUnit does Q {
     method Str { "CompUnit" ~ children(@.statements) }
 
     method run($runtime) {
-        my $c = Val::Block.new(:@.statements, :outer(NO_OUTER));
+        my $c = Val::Block.new(:@.statements, :outer-frame(NO_OUTER));
         $runtime.enter($c);
         for @.statements -> $statement {
             $statement.run($runtime);
@@ -343,6 +343,7 @@ role Runtime {
             return $frame.pad
                 if $frame.pad{$name} :exists;
             $frame = $frame.block.outer-frame;
+            last if $frame === NO_OUTER;
         }
         die "Cannot find variable '$name'";          # XXX: turn this into an X:: type
     }
