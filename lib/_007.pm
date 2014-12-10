@@ -203,6 +203,12 @@ role Q::Expr::Call::Sub does Q {
                 $runtime.declare-var($name);
                 $runtime.put-var($name, $arg);
             }
+            if $c ~~ Val::Sub {
+                my $*RETVAL = Val::None.new;
+                $c.statements.run($runtime);
+                $runtime.leave;
+                return $*RETVAL;
+            }
             $c.statements.run($runtime);
             $runtime.leave;
         }
@@ -280,6 +286,20 @@ role Q::Statement::Block does Q {
         $runtime.enter($c);
         $.block.statements.run($runtime);
         $runtime.leave;
+    }
+}
+
+role Q::Statement::Return does Q {
+    has $.expr;
+    method new($expr) { self.bless(:$expr) }
+    method Str { "Return" ~ children($.expr) }
+
+    method declare($runtime) {
+        # a return statement makes no declarations
+    }
+
+    method run($runtime) {
+        $*RETVAL = $.expr.eval($runtime);
     }
 }
 
