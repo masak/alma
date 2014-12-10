@@ -210,8 +210,11 @@ role Q::Statement::VarDecl does Q {
     method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
     method Str { "VarDecl" ~ children($.ident, |$.assignment) }
 
-    method run($runtime) {
+    method declare($runtime) {
         $runtime.declare-var($.ident.name);
+    }
+
+    method run($runtime) {
         return
             unless $.assignment;
         $.assignment.eval($runtime);
@@ -223,6 +226,10 @@ role Q::Statement::Expr does Q {
     method new($expr) { self.bless(:$expr) }
     method Str { "Expr" ~ children($.expr) }
 
+    method declare($runtime) {
+        # an expression statement makes no declarations
+    }
+
     method run($runtime) {
         $.expr.eval($runtime);
     }
@@ -233,6 +240,10 @@ role Q::Statement::If does Q {
     has $.block;
     method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
     method Str { "If" ~ children($.expr, $.block) }
+
+    method declare($runtime) {
+        # an if statement makes no declarations
+    }
 
     method run($runtime) {
         multi truthy(Val::None) { False }
@@ -254,6 +265,10 @@ role Q::Statement::Block does Q {
     method new(Q::Literal::Block $block) { self.bless(:$block) }
     method Str { "Statement block" ~ children($.block) }
 
+    method declare($runtime) {
+        # an immediate block statement makes no declarations
+    }
+
     method run($runtime) {
         my $c = $.block.eval($runtime);
         $runtime.enter($c);
@@ -271,12 +286,15 @@ role Q::Statement::Sub does Q {
         self.bless(:$ident, :$parameters, :$statements);
     }
 
-    method run($runtime) {
+    method declare($runtime) {
         my $name = $.ident.name;
         my $outer-frame = $runtime.current-frame;
         my $sub = Val::Sub.new(:$name, :$.parameters, :$.statements, :$outer-frame);
         $runtime.declare-var($name);
         $runtime.put-var($name, $sub);
+    }
+
+    method run($runtime) {
     }
 }
 
@@ -326,6 +344,17 @@ role Runtime {
     method enter($block) {
         my $frame = Frame.new(:$block);
         @!blocks.push($frame);
+        # XXX: this is a temporary hack. should remove compunit and just have statements
+        if $block.statements ~~ Q::Statements {
+            for $block.statements.statements.list -> $statement {
+                $statement.declare(self);
+            }
+        }
+        else {
+            for $block.statements.list -> $statement {
+                $statement.declare(self);
+            }
+        }
     }
 
     method leave {

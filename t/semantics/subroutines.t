@@ -84,7 +84,7 @@ use _007::Test;
             (stexpr (call (ident "say") (ident "x"))))))
         .
 
-    is-result $ast, "X\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
+    is-result $ast, "None\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
 }
 
 done;
