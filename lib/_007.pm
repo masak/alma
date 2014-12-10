@@ -320,7 +320,7 @@ constant NO_OUTER = {};
 
 role Runtime {
     has $.output;
-    has @!blocks;
+    has @!frames;
 
     method run(Q::Statements $statements) {
         my $parameters = Q::Parameters.new();
@@ -332,18 +332,18 @@ role Runtime {
 
     method enter($block) {
         my $frame = Frame.new(:$block);
-        @!blocks.push($frame);
+        @!frames.push($frame);
         for $block.statements.statements -> $statement {
             $statement.declare(self);
         }
     }
 
     method leave {
-        @!blocks.pop;
+        @!frames.pop;
     }
 
     method current-frame {
-        @!blocks[*-1];
+        @!frames[*-1];
     }
 
     method !find($name) {
