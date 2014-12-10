@@ -35,4 +35,16 @@ use _007::Test;
     is-result $ast, "[1, 2, three]\n", "sub returning an Array";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters) (statements
+            (return (int 1953))
+            (stexpr (call (ident "say") (str "Dead code. Should have returned by now.")))))
+          (stexpr (call (ident "say") (call (ident "f")))))
+        .
+
+    is-result $ast, "1953\n", "a return statement forces immediate exit of the subroutine";
+}
+
 done;
