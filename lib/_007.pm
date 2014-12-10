@@ -28,8 +28,7 @@ role Val::Array does Val {
 role Val::Block does Val {
     has $.parameters;
     has $.statements;
-    has $.outer;
-    has %.pad;
+    has $.outer-frame;
 
     method Str { "<block>" }
 }
@@ -37,6 +36,11 @@ role Val::Sub does Val::Block {
     has $.name;
 
     method Str { "<sub>" }
+}
+
+role Frame {
+    has $.block;
+    has %.pad;
 }
 
 sub children(*@c) {
@@ -79,8 +83,8 @@ role Q::Literal::Block does Q {
     method Str { "Block" ~ children($.parameters, $.statements) }
 
     method eval($runtime) {
-        my $outer = $runtime.current-block;
-        Val::Block.new(:$.parameters, :$.statements, :$outer);
+        my $outer-frame = $runtime.current-frame;
+        Val::Block.new(:$.parameters, :$.statements, :$outer-frame);
     }
 }
 
@@ -270,8 +274,8 @@ role Q::Statement::Sub does Q {
     }
 
     method run($runtime) {
-        my $outer = $runtime.current-block;
-        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer);
+        my $outer-frame = $runtime.current-frame;
+        my $sub = Val::Sub.new(:name($.ident.name), :$.parameters, :$.statements, :$outer-frame);
         $runtime.declare-var($.ident.name);
         $runtime.put-var($.ident.name, $sub);
     }
@@ -321,23 +325,24 @@ role Runtime {
     }
 
     method enter($block) {
-        @!blocks.push($block);
+        my $frame = Frame.new(:$block);
+        @!blocks.push($frame);
     }
 
     method leave {
         @!blocks.pop;
     }
 
-    method current-block {
+    method current-frame {
         @!blocks[*-1];
     }
 
     method !find($name) {
-        my $block = self.current-block;
-        repeat until $block === NO_OUTER {
-            return $block.pad
-                if $block.pad{$name} :exists;
-            $block.=outer;
+        my $frame = self.current-frame;
+        loop {
+            return $frame.pad
+                if $frame.pad{$name} :exists;
+            $frame = $frame.block.outer-frame;
         }
         die "Cannot find variable '$name'";          # XXX: turn this into an X:: type
     }
@@ -353,7 +358,7 @@ role Runtime {
     }
 
     method declare-var($name) {
-        self.current-block.pad{$name} = Val::None.new;
+        self.current-frame.pad{$name} = Val::None.new;
     }
 }
 
