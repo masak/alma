@@ -289,6 +289,31 @@ role Q::Statement::Block does Q {
     }
 }
 
+role Q::Statement::For does Q {
+    has $.expr;
+    has $.block;
+    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method Str { "For" ~  children($.expr, $.block)}
+
+    method declare($runtime) {
+        # nothing is here so far
+    }
+    method run($runtime) {
+        multi args(Q::Literal::Array $array) {
+            return $array.elements>>.value;
+        }
+
+        my $c = $.block.eval($runtime);
+        for $c.parameters.parameters X args($.expr) -> $param, $arg {
+            $runtime.enter($c);
+            $runtime.declare-var($param.name);
+            $runtime.put-var($param.name, $arg);
+            $.block.statements.run($runtime);
+            $runtime.leave;
+        }
+    }
+}
+
 role Q::Statement::Return does Q {
     has $.expr;
     method new($expr) { self.bless(:$expr) }

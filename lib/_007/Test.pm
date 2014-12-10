@@ -23,6 +23,7 @@ sub read(Str $ast) is export {
         stblock     => Q::Statement::Block,
         sub         => Q::Statement::Sub,
         return      => Q::Statement::Return,
+        for         => Q::Statement::For,
 
         statements  => Q::Statements,
         parameters  => Q::Parameters,
