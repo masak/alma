@@ -299,12 +299,12 @@ role Q::Statement::For does Q {
         # nothing is here so far
     }
     method run($runtime) {
-        multi args(Q::Literal::Array $array) {
+        multi elements(Q::Literal::Array $array) {
             return $array.elements>>.value;
         }
 
-        multi split_args(@array, 1) { return @array }
-        multi split_args(@array, Int $n) {
+        multi split_elements(@array, 1) { return @array }
+        multi split_elements(@array, Int $n) {
             my $list = @array.list;
             my @split;
 
@@ -321,12 +321,12 @@ role Q::Statement::For does Q {
         my $count = $c.parameters.parameters.elems;
 
         if $count == 0 {
-            for ^args($.expr).elems {
+            for ^elements($.expr).elems {
                 $.block.statements.run($runtime);
             }
         }
         else {
-            for split_args(args($.expr), $count) -> $arg {
+            for split_elements(elements($.expr), $count) -> $arg {
                 $runtime.enter($c);
                 for $c.parameters.parameters Z $arg.list -> $param, $real_arg {
                     $runtime.declare-var($param.name);
