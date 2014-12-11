@@ -52,11 +52,11 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters) (statements
             (vardecl (ident "b") (assign (ident "b") (block (parameters) (statements
-              (return 5)))))
+              (return (int 5))))))
             (sub (ident "g") (parameters) (statements
               (stexpr (call (ident "b")))))
             (stexpr (call (ident "g")))
-            (stexpr (call (ident "say")) (str "Dead code. Should have returned from f."))))
+            (stexpr (call (ident "say") (str "Dead code. Should have returned from f.")))))
           (stexpr (call (ident "f"))))
         .
 
