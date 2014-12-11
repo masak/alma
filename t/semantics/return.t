@@ -77,4 +77,15 @@ use _007::Test;
     is-error $ast, X::ControlFlow::Return, "cannot run a return statement of a subroutine that already exited";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters) (statements
+            (return)))
+          (stexpr (call (ident "say") (call (ident "f")))))
+        .
+
+    is-result $ast, "None\n", "sub returning nothing";
+}
+
 done;

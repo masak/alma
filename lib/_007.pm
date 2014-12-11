@@ -352,7 +352,8 @@ role Q::Statement::For does Q {
 
 role Q::Statement::Return does Q {
     has $.expr;
-    method new($expr) { self.bless(:$expr) }
+    sub NONE { role { method eval($) { Val::None.new } } }
+    method new($expr = NONE) { self.bless(:$expr) }
     method Str { "Return" ~ children($.expr) }
 
     method declare($runtime) {
