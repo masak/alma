@@ -185,24 +185,24 @@ class X::Control::Return is Exception {
 
 role Q::Expr::Call::Sub does Q {
     has $.ident;
-    has @.args;
-    method new($ident, *@args) { self.bless(:$ident, :@args) }
-    method Str { "Call" ~ children($.ident, |@.args) }
+    has $.arguments;
+    method new($ident, $arguments) { self.bless(:$ident, :$arguments) }
+    method Str { "Call" ~ children($.ident, $.arguments) }
 
     method eval($runtime) {
         # TODO: de-hack -- wants to be a hash of builtins somewhere
         if $.ident.name eq "say" {
-            my $arg = @.args[0].eval($runtime);
+            my $arg = $.arguments.arguments[0].eval($runtime);
             $runtime.output.say($arg.Str);
         }
         else {
             my $c = $runtime.get-var($.ident.name);
             die "{$.ident.name} is not callable"
                 unless $c ~~ Val::Block;
-            die "Block with {$c.parameters.parameters.elems} parameters "
-                ~ "called with {@.args.elems} arguments"
-                unless $c.parameters.parameters == @.args;
-            my @args = @.args».eval($runtime);
+            die "Block with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
+                ~ "called with {$.arguments.arguments.elems} arguments"
+                unless $c.parameters.parameters == $.arguments.arguments;
+            my @args = $.arguments.arguments».eval($runtime);
             $runtime.enter($c);
             for $c.parameters.parameters Z @args -> $param, $arg {
                 my $name = $param.name;
@@ -404,6 +404,12 @@ role Q::Parameters does Q {
     has @.parameters;
     method new(*@parameters) { self.bless(:@parameters) }
     method Str { "Parameters" ~ children(@.parameters) }
+}
+
+role Q::Arguments does Q {
+    has @.arguments;
+    method new(*@arguments) { self.bless(:@arguments) }
+    method Str { "Arguments" ~ children(@.arguments) }
 }
 
 constant NO_OUTER = {};

@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (vardecl (ident "u"))
-          (stexpr (call (ident "say") (ident "u"))))
+          (stexpr (call (ident "say") (arguments (ident "u")))))
         .
 
     is-result $ast, "None\n", "variables can be declared without being assigned";

@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters) (statements
-            (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
+            (stexpr (call (ident "say") (arguments (str "OH HAI from inside sub")))))))
         .
 
     is-result $ast, "", "subs are not immediate";
@@ -16,12 +16,12 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (vardecl (ident "x") (assign (ident "x") (str "one")))
-          (stexpr (call (ident "say") (ident "x")))
+          (stexpr (call (ident "say") (arguments (ident "x"))))
           (sub (ident "f") (parameters) (statements
             (vardecl (ident "x") (assign (ident "x") (str "two")))
-            (stexpr (call (ident "say") (ident "x")))))
-          (stexpr (call (ident "f")))
-          (stexpr (call (ident "say") (ident "x"))))
+            (stexpr (call (ident "say") (arguments (ident "x"))))))
+          (stexpr (call (ident "f") (arguments)))
+          (stexpr (call (ident "say") (arguments (ident "x")))))
         .
 
     is-result $ast, "one\ntwo\none\n", "subs have their own variable scope";
@@ -31,8 +31,8 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters (ident "name")) (statements
-            (stexpr (call (ident "say") (~ (str "Good evening, Mr ") (ident "name"))))))
-          (stexpr (call (ident "f") (str "Bond"))))
+            (stexpr (call (ident "say") (arguments (~ (str "Good evening, Mr ") (ident "name")))))))
+          (stexpr (call (ident "f") (arguments (str "Bond")))))
         .
 
     is-result $ast, "Good evening, Mr Bond\n", "calling a sub with parameters works";
@@ -42,9 +42,9 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters (ident "X") (ident "Y")) (statements
-            (stexpr (call (ident "say") (~ (ident "X") (ident "Y"))))))
+            (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y")))))))
           (vardecl (ident "X") (assign (ident "X") (str "y")))
-          (stexpr (call (ident "f") (str "X") (~ (ident "X") (ident "X")))))
+          (stexpr (call (ident "f") (arguments (str "X") (~ (ident "X") (ident "X"))))))
         .
 
     is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
@@ -55,10 +55,10 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters (ident "callback")) (statements
             (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
-            (stexpr (call (ident "callback")))))
+            (stexpr (call (ident "callback") (arguments)))))
           (vardecl (ident "scoping") (assign (ident "scoping") (str "lexical")))
-          (stexpr (call (ident "f") (block (parameters) (statements
-            (stexpr (call (ident "say") (ident "scoping"))))))))
+          (stexpr (call (ident "f") (arguments (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (ident "scoping"))))))))))
         .
 
     is-result $ast, "lexical\n", "scoping is lexical";
@@ -67,9 +67,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (stexpr (call (ident "f")))
+          (stexpr (call (ident "f") (arguments)))
           (sub (ident "f") (parameters) (statements
-            (stexpr (call (ident "say") (str "OH HAI from inside sub"))))))
+            (stexpr (call (ident "say") (arguments (str "OH HAI from inside sub")))))))
         .
 
     is-result $ast, "OH HAI from inside sub\n", "call a sub before declaring it";
@@ -78,10 +78,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (stexpr (call (ident "f")))
+          (stexpr (call (ident "f") (arguments)))
           (vardecl (ident "x") (str "X"))
           (sub (ident "f") (parameters) (statements
-            (stexpr (call (ident "say") (ident "x"))))))
+            (stexpr (call (ident "say") (arguments (ident "x")))))))
         .
 
     is-result $ast, "None\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";

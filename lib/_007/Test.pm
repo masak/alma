@@ -27,6 +27,7 @@ sub read(Str $ast) is export {
 
         statements  => Q::Statements,
         parameters  => Q::Parameters,
+        arguments   => Q::Arguments,
     ;
 
     my grammar _007::Syntax {

@@ -7,19 +7,19 @@ use _007::Test;
         (statements
           (vardecl (ident "u"))
           (if (ident "u") (block (parameters) (statements
-            (stexpr (call (ident "say") (str "falsy none"))))))
+            (stexpr (call (ident "say") (arguments (str "falsy none")))))))
           (if (int 0) (block (parameters) (statements
-            (stexpr (call (ident "say") (str "falsy int"))))))
+            (stexpr (call (ident "say") (arguments (str "falsy int")))))))
           (if (int 7) (block (parameters) (statements
-            (stexpr (call (ident "say") (str "truthy int"))))))
+            (stexpr (call (ident "say") (arguments (str "truthy int")))))))
           (if (str "") (block (parameters) (statements
-            (stexpr (call (ident "say") (str "falsy str"))))))
+            (stexpr (call (ident "say") (arguments (str "falsy str")))))))
           (if (str "James") (block (parameters) (statements
-            (stexpr (call (ident "say") (str "truthy str"))))))
+            (stexpr (call (ident "say") (arguments (str "truthy str")))))))
           (if (array) (block (parameters) (statements
-            (stexpr (call (ident "say") (str "falsy array"))))))
+            (stexpr (call (ident "say") (arguments (str "falsy array")))))))
           (if (array (str "")) (block (parameters) (statements
-            (stexpr (call (ident "say") (str "truthy array")))))))
+            (stexpr (call (ident "say") (arguments (str "truthy array"))))))))
         .
 
     is-result $ast, "truthy int\ntruthy str\ntruthy array\n", "if statements run truthy things";
