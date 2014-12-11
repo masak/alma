@@ -177,6 +177,11 @@ role Q::Expr::Index does Q {
     }
 }
 
+class X::Control::Return is Exception {
+    has $.frame;
+    has $.value;
+}
+
 role Q::Expr::Call::Sub does Q {
     has $.ident;
     has @.args;
@@ -204,13 +209,19 @@ role Q::Expr::Call::Sub does Q {
                 $runtime.put-var($name, $arg);
             }
             if $c ~~ Val::Sub {
-                my $*RETVAL = Val::None.new;
-                $c.statements.run($runtime);
-                $runtime.leave;
-                return $*RETVAL;
+                $runtime.register-subhandler;
             }
+            my $frame = $runtime.current-frame;
             $c.statements.run($runtime);
             $runtime.leave;
+            CATCH {
+                when X::Control::Return {
+                    die $_   # keep unrolling the interpreter's stack until we're there
+                        unless .frame === $frame;
+                    $runtime.unroll-to($frame);
+                    return .value;
+                }
+            }
         }
         return Val::None.new;
     }
@@ -349,7 +360,8 @@ role Q::Statement::Return does Q {
     }
 
     method run($runtime) {
-        $*RETVAL = $.expr.eval($runtime);
+        my $frame = $runtime.get-var("--RETURN-TO--");
+        die X::Control::Return.new(:value($.expr.eval($runtime)), :$frame);
     }
 }
 
@@ -404,6 +416,11 @@ role Runtime {
         self.enter($block);
         $statements.run(self);
         self.leave;
+        CATCH {
+            when X::Control::Return {
+                die X::ControlFlow::Return.new;
+            }
+        }
     }
 
     method enter($block) {
@@ -416,6 +433,13 @@ role Runtime {
 
     method leave {
         @!frames.pop;
+    }
+
+    method unroll-to($frame) {
+        until self.current-frame === $frame {
+            self.leave;
+        }
+        return;
     }
 
     method current-frame {
@@ -445,6 +469,11 @@ role Runtime {
 
     method declare-var($name) {
         self.current-frame.pad{$name} = Val::None.new;
+    }
+
+    method register-subhandler {
+        self.declare-var("--RETURN-TO--");
+        self.put-var("--RETURN-TO--", $.current-frame);
     }
 }
 
