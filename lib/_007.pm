@@ -306,15 +306,15 @@ role Q::Statement::For does Q {
         multi split_args(@array, 1) { return @array }
         multi split_args(@array, Int $n) {
             my $list = @array.list;
-            my @splitted;
+            my @split;
 
             while True {
                 my @new = $list.splice(0, $n);
                 last unless @new;
-                @splitted.push: @new.item;
+                @split.push: @new.item;
             }
 
-            @splitted;
+            @split;
         }
 
         my $c = $.block.eval($runtime);
