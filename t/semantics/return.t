@@ -68,9 +68,10 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters) (statements
             (vardecl (ident "b") (assign (ident "b") (block (parameters) (statements
-              (return 5)))))
+              (return (int 5))))))
             (return (ident "b"))))
-          (stexpr (call (ident "f"))))
+          (vardecl (ident "c") (assign (ident "c") (call (ident "f"))))
+          (stexpr (call (ident "c"))))
         .
 
     is-error $ast, X::ControlFlow::Return, "cannot run a return statement of a subroutine that already exited";
