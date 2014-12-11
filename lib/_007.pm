@@ -144,7 +144,8 @@ role Q::Expr::Assignment does Q {
 
 role Q::Expr::Infix::Eq does Q::Expr::Infix {
     method eval($runtime) {
-        multi equal-value(Val $, Val $) { return False }
+        multi equal-value(Val $, Val $) { False }
+        multi equal-value(Val::None, Val::None) { True }
         multi equal-value(Val::Int $r, Val::Int $l) { $r.value == $l.value }
         multi equal-value(Val::Str $r, Val::Str $l) { $r.value eq $l.value }
         multi equal-value(Val::Array $r, Val::Array $l) {

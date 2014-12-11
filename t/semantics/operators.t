@@ -65,4 +65,18 @@ use _007::Test;
     is-result $ast, <1 0 1 0 1 0 0 0 0>.map(* ~ "\n").join, "equality testing works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "empty") (parameters) (statements))
+          (vardecl (ident "none") (assign (ident "none") (call (ident "empty"))))
+          (stexpr (call (ident "say") (== (ident "none") (ident "none"))))
+          (stexpr (call (ident "say") (== (ident "none") (int 0))))
+          (stexpr (call (ident "say") (== (ident "none") (str ""))))
+          (stexpr (call (ident "say") (== (ident "none") (array)))))
+        .
+
+    is-result $ast, "1\n0\n0\n0\n", "equality testing with none matches itself but nothing else";
+}
+
 done;
