@@ -19,7 +19,7 @@ use _007::Test;
             (stexpr (call (ident "say") (ident "i")))))))
         .
 
-    is-result $ast, "1\n2\n", "for-loops iterate over an array";
+    is-result $ast, "1\n2\n", "for-loops with 1 param iterate over an array";
 }
 
 {
@@ -30,7 +30,7 @@ use _007::Test;
             (stexpr (call (ident "say") (ident "j")))))))
         .
 
-    is-result $ast, "1\n2\n3\n4\n", "for-loops iterate over an array";
+    is-result $ast, "1\n2\n3\n4\n", "for-loops with more params iterate over an array";
 }
 
 done;

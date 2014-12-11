@@ -303,13 +303,38 @@ role Q::Statement::For does Q {
             return $array.elements>>.value;
         }
 
+        multi split_args(@array, 1) { return @array }
+        multi split_args(@array, Int $n) {
+            my $list = @array.list;
+            my @splitted;
+
+            while True {
+                my @new = $list.splice(0, $n);
+                last unless @new;
+                @splitted.push: @new.item;
+            }
+
+            @splitted;
+        }
+
         my $c = $.block.eval($runtime);
-        for $c.parameters.parameters X args($.expr) -> $param, $arg {
-            $runtime.enter($c);
-            $runtime.declare-var($param.name);
-            $runtime.put-var($param.name, $arg);
-            $.block.statements.run($runtime);
-            $runtime.leave;
+        my $count = $c.parameters.parameters.elems;
+
+        if $count == 0 {
+            for ^args($.expr).elems {
+                $.block.statements.run($runtime);
+            }
+        }
+        else {
+            for split_args(args($.expr), $count) -> $arg {
+                $runtime.enter($c);
+                for $c.parameters.parameters Z $arg.list -> $param, $real_arg {
+                    $runtime.declare-var($param.name);
+                    $runtime.put-var($param.name, $real_arg);
+                }
+                $.block.statements.run($runtime);
+                $runtime.leave;
+            }
         }
     }
 }
