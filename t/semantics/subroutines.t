@@ -87,4 +87,18 @@ use _007::Test;
     is-result $ast, "None\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "OH HAI"))))))
+          (sub (ident "g") (parameters) (statements
+            (return (block (parameters) (statements
+              (stexpr (call (ident "f") (arguments))))))))
+          (stexpr (call (call (ident "g") (arguments)) (arguments))))
+        .
+
+    is-result $ast, "OH HAI\n", "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
+}
+
 done;

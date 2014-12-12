@@ -184,20 +184,20 @@ class X::Control::Return is Exception {
 }
 
 role Q::Expr::Call::Sub does Q {
-    has $.ident;
+    has $.expr;
     has $.arguments;
-    method new($ident, $arguments) { self.bless(:$ident, :$arguments) }
+    method new($expr, $arguments) { self.bless(:$expr, :$arguments) }
     method Str { "Call" ~ children($.ident, $.arguments) }
 
     method eval($runtime) {
-        # TODO: de-hack -- wants to be a hash of builtins somewhere
-        if $.ident.name eq "say" {
+        # TODO: wants to be in a hash of builtins somewhere
+        if $.expr ~~ Q::Term::Identifier && $.expr.name eq "say" {
             my $arg = $.arguments.arguments[0].eval($runtime);
             $runtime.output.say($arg.Str);
         }
         else {
-            my $c = $runtime.get-var($.ident.name);
-            die "{$.ident.name} is not callable"
+            my $c = $.expr.eval($runtime);
+            die "Trying to invoke a {$c.^name.subst(/^'Val::'/)}" # XXX: make this into an X::
                 unless $c ~~ Val::Block;
             die "Block with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
                 ~ "called with {$.arguments.arguments.elems} arguments"
