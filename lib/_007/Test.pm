@@ -87,3 +87,20 @@ sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
     }
     flunk $desc;
 }
+
+sub empty-diff($text1 is copy, $text2 is copy, $desc) {
+    s/<!after \n> $/\n/ for $text1, $text2;  # get rid of "no newline" warnings
+    spurt("/tmp/t1", $text1);
+    spurt("/tmp/t2", $text2);
+    my $diff = qx[diff -U2 /tmp/t1 /tmp/t2];
+    $diff.=subst(/^\N+\n\N+\n/, '');  # remove uninformative headers
+    is $diff, "", $desc;
+}
+
+sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $expected-ast = read($expected);
+    my $parser = _007.parser;
+    my $actual-ast = $parser.parse($program);
+
+    empty-diff ~$expected-ast, ~$actual-ast, $desc;
+}
