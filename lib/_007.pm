@@ -488,8 +488,241 @@ role Runtime {
     }
 }
 
+class Parser {
+    grammar Syntax {
+        regex TOP {
+            <statements>
+        }
+
+        regex statements {
+            <statement>* %% [\s*]
+        }
+
+        proto token statement {*}
+        token statement:vardecl {
+            'my ' <identifier> [' = ' <expr1>]? ';'
+        }
+        token statement:expr {
+            <expr1> ';'
+        }
+        token statement:block {
+            '{' ~ '}' [\s* <statements>]
+        }
+        token statement:sub {
+            'sub' \s+
+            <identifier>
+            '(' ~ ')' <parameters> \s*
+            '{' ~ '}' [\s* <statements>]
+        }
+        token statement:return {
+            'return' \s+
+            <expr1>
+            ';'
+        }
+        token statement:if {
+            'if' \s+
+            <expr1> \s*
+            '{' ~ '}' [\s* <statements>]
+        }
+        token statement:for {
+            'for' \s+
+            <expr1> \s*
+            ['->' \s* <parameters>]? \s*
+            '{' ~ '}' [\s* <statements>]
+        }
+
+        # XXX: Besides being hilariously hacky and insufficient, the
+        #      whole approach to parsing expressions needs to be
+        #      reconsidered when we implement declaring custom operators
+        token expr1 { <expr2>+ % [\s* <op> \s*] }
+        token expr2 { <expr> <index>? <call>* }
+
+        token index { '[' ~ ']' <expr> }
+        token call { '(' ~ ')' <arguments> }
+
+        proto token op {*}
+        token op:addition { '+' }
+        token op:concat { '~' }
+        token op:assignment { '=' }
+        token op:eq { '==' }
+
+        proto token expr {*}
+        token expr:int { \d+ }
+        token expr:str { '"' (<-["]>*) '"' }
+        token expr:array { '[' ~ ']' <expr>* % [\h* ',' \h*] }
+        token expr:identifier { <identifier> }
+        token expr:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
+
+        token identifier {
+            \w+
+        }
+
+        token arguments {
+            <expr1>* % [\s* ',' \s*]
+        }
+
+        token parameters {
+            <identifier>* % [\s* ',' \s*]
+        }
+    }
+
+    class Actions {
+        method TOP($/) {
+            make $<statements>.ast;
+        }
+
+        method statements($/) {
+            make Q::Statements.new($<statement>».ast);
+        }
+
+        method statement:vardecl ($/) {
+            if $<expr1> {
+                make Q::Statement::VarDecl.new(
+                    $<identifier>.ast,
+                    Q::Expr::Infix::Assignment.new(
+                        $<identifier>.ast,
+                        $<expr1>.ast));
+            }
+            else {
+                make Q::Statement::VarDecl.new($<identifier>.ast);
+            }
+        }
+
+        method statement:expr ($/) {
+            make Q::Statement::Expr.new($<expr1>.ast);
+        }
+
+        method statement:block ($/) {
+            make Q::Statement::Block.new(
+                Q::Literal::Block.new(
+                    Q::Parameters.new,
+                    $<statements>.ast));
+        }
+
+        method statement:sub ($/) {
+            make Q::Statement::Sub.new(
+                $<identifier>.ast,
+                $<parameters>.ast,
+                $<statements>.ast);
+        }
+
+        method statement:return ($/) {
+            make Q::Statement::Return.new(
+                $<expr1>.ast);
+        }
+
+        method statement:if ($/) {
+            make Q::Statement::If.new(
+                $<expr1>.ast,
+                Q::Literal::Block.new(
+                    Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
+                    $<statements>.ast));
+        }
+
+        method statement:for ($/) {
+            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
+            make Q::Statement::For.new(
+                $<expr1>.ast,
+                Q::Literal::Block.new(
+                    $parameters,
+                    $<statements>.ast));
+        }
+
+        method expr1($/) {
+            if $<expr2> == 1 {
+                make $<expr2>[0].ast;
+            }
+            elsif $<expr2> == 2 {
+                make $<op>[0].ast.new(
+                    $<expr2>[0].ast,
+                    $<expr2>[1].ast);
+            }
+            else {  # XXX: generalize
+                die "Got {$<expr>.elems} exprs";
+            }
+        }
+
+        method expr2($/) {
+            if $<index> {
+                make Q::Expr::Index.new(
+                    $<expr>.ast,
+                    $<index><expr>.ast);
+            }
+            else {
+                make $<expr>.ast;
+            }
+            for $<call>.list -> $call {
+                make Q::Expr::Call::Sub.new(
+                    $/.ast,
+                    $call<arguments>.ast);
+            }
+        }
+
+        method op:addition ($/) {
+            make Q::Expr::Infix::Addition;
+        }
+
+        method op:concat ($/) {
+            make Q::Expr::Infix::Concat;
+        }
+
+        method op:assignment ($/) {
+            make Q::Expr::Infix::Assignment;
+        }
+
+        method op:eq ($/) {
+            make Q::Expr::Infix::Eq;
+        }
+
+        method expr:int ($/) {
+            make Q::Literal::Int.new(+$/);
+        }
+
+        method expr:str ($/) {
+            make Q::Literal::Str.new(~$0);
+        }
+
+        method expr:array ($/) {
+            make Q::Literal::Array.new($<expr>».ast);
+        }
+
+        method expr:identifier ($/) {
+            make $<identifier>.ast;
+        }
+
+        method expr:block ($/) {
+            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
+            make Q::Literal::Block.new(
+                $parameters,
+                $<statements>.ast);
+        }
+
+        method identifier($/) {
+            make Q::Term::Identifier.new(~$/);
+        }
+
+        method arguments($/) {
+            make Q::Arguments.new($<expr1>».ast);
+        }
+
+        method parameters($/) {
+            make Q::Parameters.new($<identifier>».ast);
+        }
+    }
+
+    method parse($program) {
+        Syntax.parse($program, :actions(Actions))
+            or die "Could not parse program";   # XXX: make this into X::
+        return $/.ast;
+    }
+}
+
 role _007 {
     method runtime(:$output = $*OUT) {
         Runtime.new(:$output);
+    }
+
+    method parser {
+        Parser.new;
     }
 }
