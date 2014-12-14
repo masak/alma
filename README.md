@@ -9,4 +9,6 @@ A small language. A test bed for macro ideas.
 * returning values
 * fibonacci
 * [man or boy](https://en.wikipedia.org/wiki/Man_or_boy_test)
+* BEGIN blocks
+* constants
 * macros
