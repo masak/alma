@@ -12,7 +12,7 @@ sub read(Str $ast) is export {
 
         '+'         => Q::Expr::Infix::Addition,
         '~'         => Q::Expr::Infix::Concat,
-        assign      => Q::Expr::Assignment,
+        assign      => Q::Expr::Infix::Assignment,
         '=='        => Q::Expr::Infix::Eq,
         call        => Q::Expr::Call::Sub,
         index       => Q::Expr::Index,

@@ -107,13 +107,15 @@ role Q::Term::Identifier does Q {
 role Q::Expr::Infix does Q {
     has $.lhs;
     has $.rhs;
+    has $.type = "";
     method new($lhs, $rhs) { self.bless(:$lhs, :$rhs) }
-    method Str { "Infix" ~ children($.lhs, $.rhs) }
+    method Str { "Infix" ~ self.type ~ children($.lhs, $.rhs) }
 
     method eval($runtime) { ... }
 }
 
 role Q::Expr::Infix::Addition does Q::Expr::Infix {
+    method type { "[+]" }
     method eval($runtime) {
         return Val::Int.new(:value(
             $.lhs.eval($runtime).value + $.rhs.eval($runtime).value
@@ -122,6 +124,7 @@ role Q::Expr::Infix::Addition does Q::Expr::Infix {
 }
 
 role Q::Expr::Infix::Concat does Q::Expr::Infix {
+    method type { "[~]" }
     method eval($runtime) {
         return Val::Str.new(:value(
             $.lhs.eval($runtime).value ~ $.rhs.eval($runtime).value
@@ -129,20 +132,19 @@ role Q::Expr::Infix::Concat does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Assignment does Q {
-    has $.ident;
-    has $.expr;
-    method new($ident, $expr) { self.bless(:$ident, :$expr) }
-    method Str { "Assign" ~ children($.ident, $.expr) }
-
+role Q::Expr::Infix::Assignment does Q::Expr::Infix {
+    method type { "[==]" }
     method eval($runtime) {
-        my $value = $.expr.eval($runtime);
-        $runtime.put-var($.ident.name, $value);
+        die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
+            unless $.lhs ~~ Q::Term::Identifier;
+        my $value = $.rhs.eval($runtime);
+        $runtime.put-var($.lhs.name, $value);
         return $value;
     }
 }
 
 role Q::Expr::Infix::Eq does Q::Expr::Infix {
+    method type { "[==]" }
     method eval($runtime) {
         multi equal-value(Val $, Val $) { False }
         multi equal-value(Val::None, Val::None) { True }
@@ -187,7 +189,7 @@ role Q::Expr::Call::Sub does Q {
     has $.expr;
     has $.arguments;
     method new($expr, $arguments) { self.bless(:$expr, :$arguments) }
-    method Str { "Call" ~ children($.ident, $.arguments) }
+    method Str { "Call" ~ children($.expr, $.arguments) }
 
     method eval($runtime) {
         # TODO: wants to be in a hash of builtins somewhere
@@ -375,6 +377,7 @@ role Q::Statement::Sub does Q {
     method new($ident, $parameters, $statements) {
         self.bless(:$ident, :$parameters, :$statements);
     }
+    method Str { "Sub[{$.ident.name}]" ~ children($.parameters, $.statements) }
 
     method declare($runtime) {
         my $name = $.ident.name;
