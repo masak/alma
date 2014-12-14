@@ -1,0 +1,8 @@
+use v6;
+use _007;
+
+sub MAIN($path) {
+    my $program = slurp($path);
+    my $ast = _007.parser.parse($program);
+    _007.runtime.run($ast);
+}
