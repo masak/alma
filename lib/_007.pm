@@ -540,7 +540,7 @@ class Parser {
         }
 
         token eat_terminator {
-            || ';'
+            || \s* ';'
             || <?after '}'> $$
             || \s* $
         }
@@ -549,7 +549,7 @@ class Parser {
         #      whole approach to parsing expressions needs to be
         #      reconsidered when we implement declaring custom operators
         token expr1 { <expr2>+ % [\s* <op> \s*] }
-        token expr2 { <expr> <index>? <call>* }
+        token expr2 { \s* <expr> <index>? \s* <call>* }
 
         token index { '[' ~ ']' <expr> }
         token call { '(' ~ ')' <arguments> }

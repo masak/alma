@@ -24,4 +24,21 @@ use _007::Test;
     parse-error $program, X::String::Newline, "can't have a newline in a string";
 }
 
+{
+    my $program = q:to/./;
+        say     (
+            38
+        +
+            4       )
+                ;
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (+ (int 38) (int 4))))))
+        .
+
+    parses-to $program, $ast, "spaces are fine here and there";
+}
+
 done;
