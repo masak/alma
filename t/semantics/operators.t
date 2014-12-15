@@ -99,4 +99,32 @@ use _007::Test;
     is-error $ast, X::Subscript::TooLarge, "indexing beyond the last element is an error";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (+ (int 38) (str "4"))))))
+        .
+
+    is-error $ast, X::TypeCheck, "adding non-ints is an error";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (~ (int 38) (str "4"))))))
+        .
+
+    is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "ns") (assign (ident "ns") (str "Jim")))
+          (stexpr (call (ident "say") (arguments (index (ident "ns") (int 0))))))
+        .
+
+    is-error $ast, X::TypeCheck, "indexing a non-array is an error";
+}
+
 done;

@@ -128,8 +128,14 @@ role Q::Expr::Infix does Q {
 role Q::Expr::Infix::Addition does Q::Expr::Infix {
     method type { "[+]" }
     method eval($runtime) {
+        my $lhs = $.lhs.eval($runtime);
+        die X::TypeCheck.new(:operation<+>, :got($lhs.^name), :expected<Int>)
+            unless $lhs ~~ Val::Int;
+        my $rhs = $.rhs.eval($runtime);
+        die X::TypeCheck.new(:operation<+>, :got($rhs.^name), :expected<Int>)
+            unless $rhs ~~ Val::Int;
         return Val::Int.new(:value(
-            $.lhs.eval($runtime).value + $.rhs.eval($runtime).value
+            $lhs.value + $rhs.value
         ));
     }
 }
@@ -137,8 +143,14 @@ role Q::Expr::Infix::Addition does Q::Expr::Infix {
 role Q::Expr::Infix::Concat does Q::Expr::Infix {
     method type { "[~]" }
     method eval($runtime) {
+        my $lhs = $.lhs.eval($runtime);
+        die X::TypeCheck.new(:operation<~>, :got($lhs.^name), :expected<Str>)
+            unless $lhs ~~ Val::Str;
+        my $rhs = $.rhs.eval($runtime);
+        die X::TypeCheck.new(:operation<~>, :got($lhs.^name), :expected<Str>)
+            unless $rhs ~~ Val::Str;
         return Val::Str.new(:value(
-            $.lhs.eval($runtime).value ~ $.rhs.eval($runtime).value
+            $lhs.value ~ $rhs.value
         ));
     }
 }
@@ -185,11 +197,13 @@ role Q::Expr::Index does Q {
 
     method eval($runtime) {
         my $array = $runtime.get-var($.array.name);
-        # XXX: also check array is indexable
+        my $index = $.index;
+        die X::TypeCheck.new(:operation<indexing>, :got($array.^name), :expected<Array>)
+            unless $array ~~ Val::Array;
         # XXX: also check index is integer
         die X::Subscript::TooLarge.new
             if $.index.value >= $array.elements;
-        return $array.elements[$.index.value];
+        return $array.elements[$index.value];
     }
 }
 
