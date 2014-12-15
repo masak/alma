@@ -79,4 +79,24 @@ use _007::Test;
     is-result $ast, "1\n0\n0\n0\n", "equality testing with none matches itself but nothing else";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
+          (stexpr (call (ident "say") (arguments (index (ident "ns") (int -2))))))
+        .
+
+    is-error $ast, X::Subscript::Negative, "negative array indexing is an error";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
+          (stexpr (call (ident "say") (arguments (index (ident "ns") (int 19))))))
+        .
+
+    is-error $ast, X::Subscript::TooLarge, "indexing beyond the last element is an error";
+}
+
 done;

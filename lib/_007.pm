@@ -44,6 +44,14 @@ role Val::Sub does Val::Block {
     method Str { "<sub>" }
 }
 
+class X::Control::Return is Exception {
+    has $.frame;
+    has $.value;
+}
+
+class X::Subscript::TooLarge is Exception {
+}
+
 role Frame {
     has $.block;
     has %.pad;
@@ -173,16 +181,13 @@ role Q::Expr::Index does Q {
     method Str { "Index" ~ children($.array, $.index) }
 
     method eval($runtime) {
-        multi index(Q::Term::Identifier $array, Q::Literal::Int $index) {
-            $runtime.get-var($array.name).elements[$index.value];
-        }
-        return index($.array, $.index);
+        my $array = $runtime.get-var($.array.name);
+        # XXX: also check array is indexable
+        # XXX: also check index is integer
+        die X::Subscript::TooLarge.new
+            if $.index.value >= $array.elements;
+        return $array.elements[$.index.value];
     }
-}
-
-class X::Control::Return is Exception {
-    has $.frame;
-    has $.value;
 }
 
 role Q::Expr::Call::Sub does Q {
