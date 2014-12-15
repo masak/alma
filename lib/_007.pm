@@ -144,7 +144,7 @@ role Q::Expr::Infix::Concat does Q::Expr::Infix {
 }
 
 role Q::Expr::Infix::Assignment does Q::Expr::Infix {
-    method type { "[==]" }
+    method type { "[=]" }
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Term::Identifier;
