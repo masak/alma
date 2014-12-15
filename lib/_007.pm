@@ -360,7 +360,7 @@ role Q::Statement::For does Q {
 
 role Q::Statement::Return does Q {
     has $.expr;
-    sub NONE { role { method eval($) { Val::None.new } } }
+    sub NONE { role { method eval($) { Val::None.new }; method Str { "(no return value)" } } }
     method new($expr = NONE) { self.bless(:$expr) }
     method Str { "Return" ~ children($.expr) }
 
@@ -520,9 +520,9 @@ class Parser {
             '{' ~ '}' [\s* <statements>]
         }
         token statement:return {
-            'return' \s+
-            <expr1>
-            ';'
+            'return'
+            [\s+ <expr1>]?
+            \s* ';'
         }
         token statement:if {
             'if' \s+
@@ -612,8 +612,13 @@ class Parser {
         }
 
         method statement:return ($/) {
-            make Q::Statement::Return.new(
-                $<expr1>.ast);
+            if $<expr1> {
+                make Q::Statement::Return.new(
+                    $<expr1>.ast);
+            }
+            else {
+                make Q::Statement::Return.new;
+            }
         }
 
         method statement:if ($/) {

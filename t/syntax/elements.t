@@ -227,6 +227,38 @@ use _007::Test;
 {
     my $program = q:to/./;
         sub f() {
+            return 7;
+        }
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters) (statements
+            (return (int 7)))))
+        .
+
+    parses-to $program, $ast, "return statement";
+}
+
+{
+    my $program = q:to/./;
+        sub f() {
+            return;
+        }
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters) (statements
+            (return))))
+        .
+
+    parses-to $program, $ast, "empty return statement";
+}
+
+{
+    my $program = q:to/./;
+        sub f() {
             say("OH HAI");
         }
         sub g() {
