@@ -52,6 +52,9 @@ class X::Control::Return is Exception {
 class X::Subscript::TooLarge is Exception {
 }
 
+class X::String::Newline is Exception {
+}
+
 role Frame {
     has $.block;
     has %.pad;
@@ -695,6 +698,10 @@ class Parser {
         }
 
         method expr:str ($/) {
+            sub check-for-newlines($s) {
+                die X::String::Newline.new
+                    if $s ~~ /\n/;
+            }(~$0);
             make Q::Literal::Str.new(~$0);
         }
 

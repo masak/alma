@@ -15,4 +15,13 @@ use _007::Test;
     parses-to $program, $ast, "can skip the last semicolon";
 }
 
+{
+    my $program = q:to/./;
+        my s = "Bond
+        ";
+        .
+
+    parse-error $program, X::String::Newline, "can't have a newline in a string";
+}
+
 done;

@@ -104,3 +104,15 @@ sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
 }
+
+sub parse-error($program, $expected-error, $desc = $expected-error.^name) is export {
+    my $parser = _007.parser;
+    $parser.parse($program);
+
+    CATCH {
+        when $expected-error {
+            pass $desc;
+        }
+    }
+    flunk $desc;
+}
