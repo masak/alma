@@ -500,15 +500,15 @@ class Parser {
         }
 
         regex statements {
-            <statement>* %% [\s*]
+            [<statement> <.eat_terminator> \s*]*
         }
 
         proto token statement {*}
         token statement:vardecl {
-            'my ' <identifier> [' = ' <expr1>]? ';'
+            'my ' <identifier> [' = ' <expr1>]?
         }
         token statement:expr {
-            <expr1> ';'
+            <expr1>
         }
         token statement:block {
             '{' ~ '}' [\s* <statements>]
@@ -522,7 +522,7 @@ class Parser {
         token statement:return {
             'return'
             [\s+ <expr1>]?
-            \s* ';'
+            \s*
         }
         token statement:if {
             'if' \s+
@@ -534,6 +534,12 @@ class Parser {
             <expr1> \s*
             ['->' \s* <parameters>]? \s*
             '{' ~ '}' [\s* <statements>]
+        }
+
+        token eat_terminator {
+            || ';'
+            || <?after '}'> $$
+            || \s* $
         }
 
         # XXX: Besides being hilariously hacky and insufficient, the
