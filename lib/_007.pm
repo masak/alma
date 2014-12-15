@@ -549,7 +549,7 @@ class Parser {
         #      whole approach to parsing expressions needs to be
         #      reconsidered when we implement declaring custom operators
         token expr1 { <expr2>+ % [\s* <op> \s*] }
-        token expr2 { \s* <expr> <index>? \s* <call>* }
+        token expr2 { \s* <expr> <index>* \s* <call>* }
 
         token index { '[' ~ ']' <expr> }
         token call { '(' ~ ')' <arguments> }
@@ -657,13 +657,11 @@ class Parser {
         }
 
         method expr2($/) {
-            if $<index> {
+            make $<expr>.ast;
+            for $<index>.list -> $ix {
                 make Q::Expr::Index.new(
-                    $<expr>.ast,
-                    $<index><expr>.ast);
-            }
-            else {
-                make $<expr>.ast;
+                    $/.ast,
+                    $ix<expr>.ast);
             }
             for $<call>.list -> $call {
                 make Q::Expr::Call::Sub.new(

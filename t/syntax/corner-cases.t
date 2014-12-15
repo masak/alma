@@ -54,4 +54,19 @@ use _007::Test;
     parses-to $program, $ast, "concat works any number of times (and is left-associative)";
 }
 
+{
+    my $program = q:to/./;
+        my aaa = [[[1]]];
+        say(aaa[0][0][0]);
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "aaa") (assign (ident "aaa") (array (array (array (int 1))))))
+          (stexpr (call (ident "say") (arguments (index (index (index (ident "aaa") (int 0)) (int 0)) (int 0))))))
+        .
+
+    parses-to $program, $ast, "array indexing works any number of times";
+}
+
 done;
