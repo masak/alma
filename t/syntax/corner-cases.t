@@ -41,4 +41,17 @@ use _007::Test;
     parses-to $program, $ast, "spaces are fine here and there";
 }
 
+{
+    my $program = q:to/./;
+        say("A" ~ "B" ~ "C" ~ "D");
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (~ (~ (~ (str "A") (str "B")) (str "C")) (str "D"))))))
+        .
+
+    parses-to $program, $ast, "concat works any number of times (and is left-associative)";
+}
+
 done;

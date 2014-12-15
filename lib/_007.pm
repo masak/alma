@@ -648,16 +648,11 @@ class Parser {
         }
 
         method expr1($/) {
-            if $<expr2> == 1 {
-                make $<expr2>[0].ast;
-            }
-            elsif $<expr2> == 2 {
-                make $<op>[0].ast.new(
-                    $<expr2>[0].ast,
-                    $<expr2>[1].ast);
-            }
-            else {  # XXX: generalize
-                die "Got {$<expr>.elems} exprs";
+            make $<expr2>[0].ast;
+            for ^$<op>.elems -> $i {
+                make $<op>[$i].ast.new(
+                    $/.ast,
+                    $<expr2>[$i+1].ast);
             }
         }
 
