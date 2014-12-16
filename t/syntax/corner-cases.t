@@ -71,6 +71,26 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        my x = 5;
+        {
+            say("inside");
+        }
+        x = 7;
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "x") (assign (ident "x") (int 5)))
+          (stblock (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "inside")))))))
+          (stexpr (assign (ident "x") (int 7))))
+        .
+
+    parses-to $program, $ast, "can have a statement after a block without a semicolon";
+}
+
+{
+    my $program = q:to/./;
         y = 5;
         .
 
