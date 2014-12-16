@@ -510,11 +510,29 @@ role Runtime {
     }
 }
 
+class Lexpad {
+    has %!variables;
+
+    method add_variable($var) {
+        %!variables{$var}++;
+    }
+
+    method knows($var) {
+        %!variables{$var} :exists;
+    }
+}
+
+sub add_variable($var) { @*PADS[*-1].add_variable($var) }
+
 class Parser {
     grammar Syntax {
         regex TOP {
+            :my @*PADS;
+            <.newpad>
             <statements>
         }
+
+        token newpad { <?> { @*PADS.push(Lexpad.new) } }
 
         regex statements {
             [<statement> <.eat_terminator> \s*]*
@@ -522,7 +540,12 @@ class Parser {
 
         proto token statement {*}
         token statement:vardecl {
-            'my ' <identifier> [' = ' <expr1>]?
+            'my ' <identifier>
+            {
+                my $var = $<identifier>.Str;
+                add_variable($var);
+            }
+            [' = ' <expr1>]?
         }
         token statement:expr {
             <expr1>
@@ -533,6 +556,10 @@ class Parser {
         token statement:sub {
             'sub' \s+
             <identifier>
+            {
+                my $var = $<identifier>.Str;
+                add_variable($var);
+            }
             '(' ~ ')' <parameters> \s*
             '{' ~ '}' [\s* <statements>]
         }
@@ -578,7 +605,15 @@ class Parser {
         token expr:int { \d+ }
         token expr:str { '"' (<-["]>*) '"' }
         token expr:array { '[' ~ ']' <expr>* % [\h* ',' \h*] }
-        token expr:identifier { <identifier> }
+        token expr:identifier {
+            <identifier>
+            {
+                my $symbol = $<identifier>.Str;
+                die X::Undeclared.new(:$symbol)
+                    unless @*PADS[*-1].knows($symbol)
+                     || $symbol eq 'say';   # XXX: remove this exception
+            }
+        }
         token expr:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
 
         token identifier {
@@ -590,7 +625,12 @@ class Parser {
         }
 
         token parameters {
-            <identifier>* % [\s* ',' \s*]
+            [<identifier>
+                {
+                    my $var = $<identifier>[*-1].Str;
+                    add_variable($var);
+                }
+            ]* % [\s* ',' \s*]
         }
     }
 

@@ -69,4 +69,12 @@ use _007::Test;
     parses-to $program, $ast, "array indexing works any number of times";
 }
 
+{
+    my $program = q:to/./;
+        y = 5;
+        .
+
+    parse-error $program, X::Undeclared, "undeclared variables are caught at compile time";
+}
+
 done;
