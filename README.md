@@ -7,7 +7,6 @@ A small language. A test bed for macro ideas.
 * `typeof()`
 * setting
 * subroutines for ops
-* returning values
 * fibonacci
 * [man or boy](https://en.wikipedia.org/wiki/Man_or_boy_test)
 * BEGIN blocks
