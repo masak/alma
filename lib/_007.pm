@@ -375,6 +375,31 @@ role Q::Statement::For does Q {
     }
 }
 
+role Q::Statement::While does Q {
+    has $.expr;
+    has $.block;
+    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method Str { "While" ~ children($.expr, $.block) }
+
+    method declare($runtime) {
+        # a while loop makes no declarations
+    }
+
+    method run($runtime) {
+        multi truthy(Val::None) { False }
+        multi truthy(Val::Int $i) { ?$i.value }
+        multi truthy(Val::Str $s) { ?$s.value }
+        multi truthy(Val::Array $a) { ?$a.elements }
+
+        while truthy($.expr.eval($runtime)) {
+            my $c = $.block.eval($runtime);
+            $runtime.enter($c);
+            $.block.statements.run($runtime);
+            $runtime.leave;
+        }
+    }
+}
+
 role Q::Statement::Return does Q {
     has $.expr;
     sub NONE { role { method eval($) { Val::None.new }; method Str { "(no return value)" } } }

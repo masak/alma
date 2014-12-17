@@ -24,6 +24,7 @@ sub read(Str $ast) is export {
         sub         => Q::Statement::Sub,
         return      => Q::Statement::Return,
         for         => Q::Statement::For,
+        while       => Q::Statement::While,
 
         statements  => Q::Statements,
         parameters  => Q::Parameters,
