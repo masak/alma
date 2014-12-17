@@ -97,4 +97,16 @@ use _007::Test;
     parse-error $program, X::Undeclared, "undeclared variables are caught at compile time";
 }
 
+{
+    my $program = q:to/./;
+        {
+            my y = 7;
+            say(y);
+        }
+        y = 5;
+        .
+
+    parse-error $program, X::Undeclared, "it's undeclared in the outer scope even if you declare it in an inner scope";
+}
+
 done;

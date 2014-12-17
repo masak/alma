@@ -558,6 +558,7 @@ class Parser {
         }
 
         token newpad { <?> { @*PADS.push(Lexpad.new) } }
+        token finishpad { <?> { @*PADS.pop } }
 
         regex statements {
             [<statement> <.eat_terminator> \s*]*
@@ -573,10 +574,14 @@ class Parser {
             [' = ' <expr1>]?
         }
         token statement:expr {
+            <!before \s* '{'>       # prevent mixup with statement:block
             <expr1>
         }
         token statement:block {
-            '{' ~ '}' [\s* <statements>]
+            '{' ~ '}' [
+             <.newpad>
+             \s* <statements>]
+             <.finishpad>
         }
         token statement:sub {
             'sub' \s+
@@ -585,8 +590,10 @@ class Parser {
                 my $var = $<identifier>.Str;
                 add_variable($var);
             }
+            <.newpad>
             '(' ~ ')' <parameters> \s*
             '{' ~ '}' [\s* <statements>]
+            <.finishpad>
         }
         token statement:return {
             'return'
@@ -596,13 +603,17 @@ class Parser {
         token statement:if {
             'if' \s+
             <expr1> \s*
+            <.newpad>
             '{' ~ '}' [\s* <statements>]
+            <.finishpad>
         }
         token statement:for {
             'for' \s+
             <expr1> \s*
+            <.newpad>
             ['->' \s* <parameters>]? \s*
             '{' ~ '}' [\s* <statements>]
+            <.finishpad>
         }
 
         token eat_terminator {
@@ -635,7 +646,7 @@ class Parser {
             {
                 my $symbol = $<identifier>.Str;
                 die X::Undeclared.new(:$symbol)
-                    unless @*PADS[*-1].knows($symbol)
+                    unless any(@*PADS).knows($symbol)
                      || $symbol eq 'say';   # XXX: remove this exception
             }
         }
