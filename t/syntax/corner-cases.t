@@ -109,4 +109,20 @@ use _007::Test;
     parse-error $program, X::Undeclared, "it's undeclared in the outer scope even if you declare it in an inner scope";
 }
 
+{
+    my $program = q:to/./;
+        {
+            say("immediate block")
+        }
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (stblock (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "immediate block"))))))))
+        .
+
+    parses-to $program, $ast, "can skip the last semicolon in a block, too";
+}
+
 done;

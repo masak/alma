@@ -619,6 +619,7 @@ class Parser {
         token eat_terminator {
             || \s* ';'
             || <?after '}'> $$
+            || \s* <?before '}'>
             || \s* $
         }
 
