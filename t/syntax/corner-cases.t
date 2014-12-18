@@ -135,4 +135,24 @@ use _007::Test;
     parse-error $program, X::PointyBlock::SinkContext, "a pointy block can not occur in sink context";
 }
 
+{
+    my $program = q:to/./;
+        my b = -> X, Y, X {
+            say(X ~ Y);
+        };
+        .
+
+    parse-error $program, X::Redeclaration, "cannot redeclare parameters";
+}
+
+{
+    my $program = q:to/./;
+        sub f(X, Y, X) {
+            say(X ~ Y);
+        }
+        .
+
+    parse-error $program, X::Redeclaration, "cannot redeclare parameters in sub";
+}
+
 done;

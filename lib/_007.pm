@@ -667,8 +667,10 @@ class Parser {
         token parameters {
             [<identifier>
                 {
-                    my $var = $<identifier>[*-1].Str;
-                    add_variable($var);
+                    my $symbol = $<identifier>[*-1].Str;
+                    die X::Redeclaration.new(:$symbol)
+                        if @*PADS[*-1].knows($symbol);
+                    add_variable($symbol);
                 }
             ]* % [\s* ',' \s*]
         }
