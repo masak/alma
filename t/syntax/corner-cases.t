@@ -125,4 +125,14 @@ use _007::Test;
     parses-to $program, $ast, "can skip the last semicolon in a block, too";
 }
 
+{
+    my $program = q:to/./;
+        -> name {
+            say("Good evening, Mr " ~ name);
+        };
+        .
+
+    parse-error $program, X::PointyBlock::SinkContext, "a pointy block can not occur in sink context";
+}
+
 done;

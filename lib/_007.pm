@@ -55,6 +55,9 @@ class X::Subscript::TooLarge is Exception {
 class X::String::Newline is Exception {
 }
 
+class X::PointyBlock::SinkContext is Exception {
+}
+
 role Frame {
     has $.block;
     has %.pad;
@@ -694,6 +697,8 @@ class Parser {
         }
 
         method statement:expr ($/) {
+            die X::PointyBlock::SinkContext.new
+                if $<expr1>.ast ~~ Q::Literal::Block;
             make Q::Statement::Expr.new($<expr1>.ast);
         }
 
