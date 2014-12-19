@@ -69,6 +69,21 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        my u = 0;
+        u = u + 1;
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "u") (assign (ident "u") (int 0)))
+          (stexpr (assign (ident "u") (+ (ident "u") (int 1)))))
+        .
+
+    parses-to $program, $ast, "assignment and addition";
+}
+
+{
+    my $program = q:to/./;
         say("Jame" ~ "s Bond");
         .
 
