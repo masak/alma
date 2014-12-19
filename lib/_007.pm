@@ -763,9 +763,19 @@ class Parser {
         method expr1($/) {
             make $<expr2>[0].ast;
             for ^$<op>.elems -> $i {
-                make $<op>[$i].ast.new(
-                    $/.ast,
-                    $<expr2>[$i+1].ast);
+                if $<op>[$i].ast === Q::Expr::Infix::Addition
+                    && $/.ast ~~ Q::Expr::Infix::Assignment {
+                    make Q::Expr::Infix::Assignment.new(
+                        $/.ast.lhs,
+                        $<op>[$i].ast.new(
+                            $/.ast.rhs,
+                            $<expr2>[$i+1].ast));
+                }
+                else {
+                    make $<op>[$i].ast.new(
+                        $/.ast,
+                        $<expr2>[$i+1].ast);
+                }
             }
         }
 
