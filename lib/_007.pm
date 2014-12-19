@@ -618,6 +618,13 @@ class Parser {
             '{' ~ '}' [\s* <statements>]
             <.finishpad>
         }
+        token statement:while {
+            'while' \s+
+            <expr1> \s*
+            <.newpad>
+            '{' ~ '}' [\s* <statements>]
+            <.finishpad>
+        }
 
         token eat_terminator {
             || \s* ';'
@@ -642,7 +649,7 @@ class Parser {
         token op:eq { '==' }
 
         proto token expr {*}
-        token expr:int { \d+ }
+        token expr:int { '-'? \d+ }
         token expr:str { '"' (<-["]>*) '"' }
         token expr:array { '[' ~ ']' <expr>* % [\h* ',' \h*] }
         token expr:identifier {
@@ -742,6 +749,14 @@ class Parser {
                 $<expr1>.ast,
                 Q::Literal::Block.new(
                     $parameters,
+                    $<statements>.ast));
+        }
+
+        method statement:while ($/) {
+            make Q::Statement::While.new(
+                $<expr1>.ast,
+                Q::Literal::Block.new(
+                    Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
                     $<statements>.ast));
         }
 

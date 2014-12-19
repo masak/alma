@@ -346,4 +346,22 @@ use _007::Test;
     parses-to $program, $ast, "for statement with two parameters";
 }
 
+{
+    my $program = q:to/./;
+        my u;
+        while u {
+            say(u);
+        }
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (vardecl (ident "u"))
+          (while (ident "u") (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (ident "u"))))))))
+        .
+
+    parses-to $program, $ast, "while statement";
+}
+
 done;
