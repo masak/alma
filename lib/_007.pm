@@ -124,6 +124,25 @@ role Q::Term::Identifier does Q {
     }
 }
 
+role Q::Expr::Prefix does Q {
+    has $.expr;
+    has $.type = "";
+    method new($expr) { self.bless(:$expr) }
+    method Str { "Prefix" ~ self.type ~ children($.expr) }
+
+    method eval($runtime) { ... }
+}
+
+role Q::Expr::Prefix::Minus does Q::Expr::Prefix {
+    method type { "[-]" }
+    method eval($runtime) {
+        my $expr = $.expr.eval($runtime);
+        die X::TypeCheck.new(:operation<->, :got($expr.^name), :expected<Int>)
+            unless $expr ~~ Val::Int;
+        return Val::Int.new(:value(-$expr.value));
+    }
+}
+
 role Q::Expr::Infix does Q {
     has $.lhs;
     has $.rhs;
@@ -580,6 +599,30 @@ class Lexpad {
 
 sub add_variable($var) { @*PADS[*-1].add_variable($var) }
 
+my %ops =
+    prefix => {},
+    infix => {},
+;
+my @infixprec;
+my @prepostfixprec;
+
+sub add-prefix($op, $q) {
+    %ops<prefix>{$op} = $q;
+    @prepostfixprec.push($q);
+}
+
+sub add-infix($op, $q) {
+    %ops<infix>{$op} = $q;
+    @infixprec.push($q);
+}
+
+add-prefix('-', Q::Expr::Prefix::Minus);
+
+add-infix('=', Q::Expr::Infix::Assignment);
+add-infix('==', Q::Expr::Infix::Eq);
+add-infix('+', Q::Expr::Infix::Addition);
+add-infix('~', Q::Expr::Infix::Concat);     # XXX: should really have the same prec as +
+
 class Parser {
     grammar Syntax {
         regex TOP {
@@ -602,11 +645,11 @@ class Parser {
                 my $var = $<identifier>.Str;
                 add_variable($var);
             }
-            [' = ' <expr1>]?
+            [' = ' <EXPR>]?
         }
         token statement:expr {
             <!before \s* '{'>       # prevent mixup with statement:block
-            <expr1>
+            <EXPR>
         }
         token statement:block {
             '{' ~ '}' [
@@ -628,19 +671,19 @@ class Parser {
         }
         token statement:return {
             'return'
-            [\s+ <expr1>]?
+            [\s+ <EXPR>]?
             \s*
         }
         token statement:if {
             'if' \s+
-            <expr1> \s*
+            <EXPR> \s*
             <.newpad>
             '{' ~ '}' [\s* <statements>]
             <.finishpad>
         }
         token statement:for {
             'for' \s+
-            <expr1> \s*
+            <EXPR> \s*
             <.newpad>
             ['->' \s* <parameters>]? \s*
             '{' ~ '}' [\s* <statements>]
@@ -648,7 +691,7 @@ class Parser {
         }
         token statement:while {
             'while' \s+
-            <expr1> \s*
+            <EXPR> \s*
             <.newpad>
             '{' ~ '}' [\s* <statements>]
             <.finishpad>
@@ -661,26 +704,27 @@ class Parser {
             || \s* $
         }
 
-        # XXX: Besides being hilariously hacky and insufficient, the
-        #      whole approach to parsing expressions needs to be
-        #      reconsidered when we implement declaring custom operators
-        token expr1 { <expr2>+ % [\s* <op> \s*] }
-        token expr2 { \s* <expr> <index>* \s* <call>* }
+        rule EXPR { <termish> +% <infix> }
 
-        token index { '[' ~ ']' <expr> }
-        token call { '(' ~ ')' <arguments> }
+        token termish { <prefix>* <term> <postfix>* }
 
-        proto token op {*}
-        token op:addition { '+' }
-        token op:concat { '~' }
-        token op:assignment { '=' }
-        token op:eq { '==' }
+        method prefix {
+            # XXX: remove this hack
+            if / '->' /(self) {
+                return /<!>/(self);
+            }
+            my @ops = %ops<prefix>.keys;
+            if /@ops/(self) -> $cur {
+                return $cur."!reduce"("prefix");
+            }
+            return /<!>/(self);
+        }
 
-        proto token expr {*}
-        token expr:int { '-'? \d+ }
-        token expr:str { '"' (<-["]>*) '"' }
-        token expr:array { '[' ~ ']' <expr>* % [\h* ',' \h*] }
-        token expr:identifier {
+        proto token term {*}
+        token term:int { \d+ }
+        token term:str { '"' (<-["]>*) '"' }
+        token term:array { '[' ~ ']' <EXPR>* % [\h* ',' \h*] }
+        token term:identifier {
             <identifier>
             {
                 my $symbol = $<identifier>.Str;
@@ -689,14 +733,27 @@ class Parser {
                      || $symbol eq 'say';   # XXX: remove this exception
             }
         }
-        token expr:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
+        token term:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
+
+        method infix {
+            my @ops = %ops<infix>.keys;
+            if /@ops/(self) -> $cur {
+                return $cur."!reduce"("infix");
+            }
+            return /<!>/(self);
+        }
+
+        token postfix {
+            | $<index>=[ \s* '[' ~ ']' [\s* <EXPR>] ]
+            | $<call>=[ \s* '(' ~ ')' [\s* <arguments>] ]
+        }
 
         token identifier {
             \w+
         }
 
         token arguments {
-            <expr1>* % [\s* ',' \s*]
+            <EXPR>* % [\s* ',' \s*]
         }
 
         token parameters {
@@ -721,12 +778,12 @@ class Parser {
         }
 
         method statement:vardecl ($/) {
-            if $<expr1> {
+            if $<EXPR> {
                 make Q::Statement::VarDecl.new(
                     $<identifier>.ast,
                     Q::Expr::Infix::Assignment.new(
                         $<identifier>.ast,
-                        $<expr1>.ast));
+                        $<EXPR>.ast));
             }
             else {
                 make Q::Statement::VarDecl.new($<identifier>.ast);
@@ -735,8 +792,8 @@ class Parser {
 
         method statement:expr ($/) {
             die X::PointyBlock::SinkContext.new
-                if $<expr1>.ast ~~ Q::Literal::Block;
-            make Q::Statement::Expr.new($<expr1>.ast);
+                if $<EXPR>.ast ~~ Q::Literal::Block;
+            make Q::Statement::Expr.new($<EXPR>.ast);
         }
 
         method statement:block ($/) {
@@ -754,9 +811,9 @@ class Parser {
         }
 
         method statement:return ($/) {
-            if $<expr1> {
+            if $<EXPR> {
                 make Q::Statement::Return.new(
-                    $<expr1>.ast);
+                    $<EXPR>.ast);
             }
             else {
                 make Q::Statement::Return.new;
@@ -765,7 +822,7 @@ class Parser {
 
         method statement:if ($/) {
             make Q::Statement::If.new(
-                $<expr1>.ast,
+                $<EXPR>.ast,
                 Q::Literal::Block.new(
                     Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
                     $<statements>.ast));
@@ -774,7 +831,7 @@ class Parser {
         method statement:for ($/) {
             my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
             make Q::Statement::For.new(
-                $<expr1>.ast,
+                $<EXPR>.ast,
                 Q::Literal::Block.new(
                     $parameters,
                     $<statements>.ast));
@@ -782,66 +839,61 @@ class Parser {
 
         method statement:while ($/) {
             make Q::Statement::While.new(
-                $<expr1>.ast,
+                $<EXPR>.ast,
                 Q::Literal::Block.new(
                     Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
                     $<statements>.ast));
         }
 
-        method expr1($/) {
-            make $<expr2>[0].ast;
-            for ^$<op>.elems -> $i {
-                if $<op>[$i].ast === Q::Expr::Infix::Addition
-                    && $/.ast ~~ Q::Expr::Infix::Assignment {
-                    make Q::Expr::Infix::Assignment.new(
-                        $/.ast.lhs,
-                        $<op>[$i].ast.new(
-                            $/.ast.rhs,
-                            $<expr2>[$i+1].ast));
+        sub tighter-or-equal($op1, $op2) {
+            return @infixprec.first-index($op1) >= @infixprec.first-index($op2);
+        }
+
+        method EXPR($/) {
+            my @opstack;
+            my @termstack = $<termish>[0].ast;
+            sub REDUCE {
+                my $t2 = @termstack.pop;
+                my $op = @opstack.pop;
+                my $t1 = @termstack.pop;
+                @termstack.push($op.new($t1, $t2));
+            }
+
+            for $<infix>».ast Z $<termish>[1..*]».ast -> $infix, $term {
+                while @opstack && tighter-or-equal(@opstack[*-1], $infix) {
+                    REDUCE;
                 }
-                else {
-                    make $<op>[$i].ast.new(
-                        $/.ast,
-                        $<expr2>[$i+1].ast);
-                }
+                @opstack.push($infix);
+                @termstack.push($term);
+            }
+            while @opstack {
+                REDUCE;
+            }
+
+            make @termstack[0];
+        }
+
+        method termish($/) {
+            make $<term>.ast;
+            # XXX: need to think more about precedence here
+            for $<postfix>.list -> $postfix {
+                my @p = $postfix.ast.list;
+                make @p[0].new($/.ast, @p[1]);
+            }
+            for $<prefix>.list -> $prefix {
+                make $prefix.ast.new($/.ast);
             }
         }
 
-        method expr2($/) {
-            make $<expr>.ast;
-            for $<index>.list -> $ix {
-                make Q::Expr::Index.new(
-                    $/.ast,
-                    $ix<expr>.ast);
-            }
-            for $<call>.list -> $call {
-                make Q::Expr::Call::Sub.new(
-                    $/.ast,
-                    $call<arguments>.ast);
-            }
+        method prefix($/) {
+            make %ops<prefix>{~$/};
         }
 
-        method op:addition ($/) {
-            make Q::Expr::Infix::Addition;
-        }
-
-        method op:concat ($/) {
-            make Q::Expr::Infix::Concat;
-        }
-
-        method op:assignment ($/) {
-            make Q::Expr::Infix::Assignment;
-        }
-
-        method op:eq ($/) {
-            make Q::Expr::Infix::Eq;
-        }
-
-        method expr:int ($/) {
+        method term:int ($/) {
             make Q::Literal::Int.new(+$/);
         }
 
-        method expr:str ($/) {
+        method term:str ($/) {
             sub check-for-newlines($s) {
                 die X::String::Newline.new
                     if $s ~~ /\n/;
@@ -849,19 +901,34 @@ class Parser {
             make Q::Literal::Str.new(~$0);
         }
 
-        method expr:array ($/) {
-            make Q::Literal::Array.new($<expr>».ast);
+        method term:array ($/) {
+            make Q::Literal::Array.new($<EXPR>».ast);
         }
 
-        method expr:identifier ($/) {
+        method term:identifier ($/) {
             make $<identifier>.ast;
         }
 
-        method expr:block ($/) {
+        method term:block ($/) {
             my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
             make Q::Literal::Block.new(
                 $parameters,
                 $<statements>.ast);
+        }
+
+        method infix($/) {
+            make %ops<infix>{~$/};
+        }
+
+        method postfix($/) {
+            # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
+            # to do these right enough
+            if $<index> {
+                make [Q::Expr::Index, $<EXPR>.ast];
+            }
+            else {
+                make [Q::Expr::Call::Sub, $<arguments>.ast];
+            }
         }
 
         method identifier($/) {
@@ -869,7 +936,7 @@ class Parser {
         }
 
         method arguments($/) {
-            make Q::Arguments.new($<expr1>».ast);
+            make Q::Arguments.new($<EXPR>».ast);
         }
 
         method parameters($/) {

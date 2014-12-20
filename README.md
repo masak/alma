@@ -5,7 +5,6 @@ A small language. A test bed for macro ideas.
 ## TODO
 
 * `typeof()`
-* EXPR parser
 * subroutines for ops
 * [man or boy](https://en.wikipedia.org/wiki/Man_or_boy_test)
 * BEGIN blocks
@@ -17,10 +16,10 @@ A small language. A test bed for macro ideas.
 
 Dependency graph for some important todo items:
 
-                    EXPR parser     BEGIN blocks
-                      /                 |
-        subroutines for ops         constants           first-class Q::
-                        \               |                /    |
-                         \----------macros--------------/   quasi
-                                         \                    |
-                                          \-----------------unquotes
+                                    BEGIN blocks
+                                        |
+                                    constants           first-class Q::
+                                        |                /    |
+        subroutines for ops         macros--------------/   quasi
+                 |                   /   \                    |
+        operator macros-------------/     \-----------------unquotes
