@@ -18,8 +18,8 @@ A small language. A test bed for macro ideas.
 
 Dependency graph for some important todo items:
 
-    setting         EXPR parser     BEGIN blocks
-         \            /                 |
+                    EXPR parser     BEGIN blocks
+                      /                 |
         subroutines for ops         constants           first-class Q::
                         \               |                /    |
                          \----------macros--------------/   quasi
