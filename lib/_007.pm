@@ -44,6 +44,10 @@ role Val::Sub does Val::Block {
     method Str { "<sub>" }
 }
 
+role Val::Sub::Builtin does Val::Sub {
+    has $.code;
+}
+
 class X::Control::Return is Exception {
     has $.frame;
     has $.value;
@@ -217,38 +221,33 @@ role Q::Expr::Call::Sub does Q {
     method Str { "Call" ~ children($.expr, $.arguments) }
 
     method eval($runtime) {
-        # TODO: wants to be in a hash of builtins somewhere
-        if $.expr ~~ Q::Term::Identifier && $.expr.name eq "say" {
-            my $arg = $.arguments.arguments[0].eval($runtime);
-            $runtime.output.say($arg.Str);
+        my $c = $.expr.eval($runtime);
+        die "Trying to invoke a {$c.^name.subst(/^'Val::'/)}" # XXX: make this into an X::
+            unless $c ~~ Val::Block;
+        die "Block with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
+            ~ "called with {$.arguments.arguments.elems} arguments"
+            unless $c.parameters.parameters == $.arguments.arguments;
+        my @args = $.arguments.arguments».eval($runtime);
+        $runtime.enter($c);
+        for $c.parameters.parameters Z @args -> $param, $arg {
+            my $name = $param.name;
+            $runtime.declare-var($name);
+            $runtime.put-var($name, $arg);
         }
-        else {
-            my $c = $.expr.eval($runtime);
-            die "Trying to invoke a {$c.^name.subst(/^'Val::'/)}" # XXX: make this into an X::
-                unless $c ~~ Val::Block;
-            die "Block with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
-                ~ "called with {$.arguments.arguments.elems} arguments"
-                unless $c.parameters.parameters == $.arguments.arguments;
-            my @args = $.arguments.arguments».eval($runtime);
-            $runtime.enter($c);
-            for $c.parameters.parameters Z @args -> $param, $arg {
-                my $name = $param.name;
-                $runtime.declare-var($name);
-                $runtime.put-var($name, $arg);
-            }
-            if $c ~~ Val::Sub {
-                $runtime.register-subhandler;
-            }
-            my $frame = $runtime.current-frame;
+        if $c ~~ Val::Sub {
+            $runtime.register-subhandler;
+        }
+        my $frame = $runtime.current-frame;
+        $c ~~ Val::Sub::Builtin ??
+            $c.code.($c.parameters.parameters>>.name.map({ $runtime.get-var($_) })) !!
             $c.statements.run($runtime);
-            $runtime.leave;
-            CATCH {
-                when X::Control::Return {
-                    die $_   # keep unrolling the interpreter's stack until we're there
-                        unless .frame === $frame;
-                    $runtime.unroll-to($frame);
-                    return .value;
-                }
+        $runtime.leave;
+        CATCH {
+            when X::Control::Return {
+                die $_   # keep unrolling the interpreter's stack until we're there
+                    unless .frame === $frame;
+                $runtime.unroll-to($frame);
+                return .value;
             }
         }
         return Val::None.new;
@@ -473,10 +472,14 @@ role Runtime {
 
     method run(Q::Statements $statements) {
         my $parameters = Q::Parameters.new();
-        my $block = Val::Block.new(:$parameters, :$statements, :outer-frame(NO_OUTER));
+        my $setting = Val::Block.new(:$parameters, :statements(Q::Statements.new), :outer-frame(NO_OUTER));
+        self.enter($setting);
+        self.load-builtins;
+
+        my $block = Val::Block.new(:$parameters, :$statements, :outer-frame(self.current-frame));
         self.enter($block);
         $statements.run(self);
-        self.leave;
+        self.leave for ^2;
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
@@ -535,6 +538,17 @@ role Runtime {
     method register-subhandler {
         self.declare-var("--RETURN-TO--");
         self.put-var("--RETURN-TO--", $.current-frame);
+    }
+
+    method load-builtins {
+        # XXX: should be in a hash
+        self.declare-var("say");
+        self.put-var("say",
+            Val::Sub::Builtin.new(
+                :name<say>,
+                :parameters(Q::Parameters.new(Q::Term::Identifier.new("u"))),
+                :statements(Q::Statements.new),
+                :code(-> $arg { self.output.say($arg) })));
     }
 }
 
