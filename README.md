@@ -5,7 +5,6 @@ A small language. A test bed for macro ideas.
 ## TODO
 
 * `typeof()`
-* setting
 * EXPR parser
 * subroutines for ops
 * fibonacci
