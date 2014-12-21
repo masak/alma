@@ -46,6 +46,8 @@ role Val::Sub does Val::Block {
 
 role Val::Sub::Builtin does Val::Sub {
     has $.code;
+
+    method new($code) { self.bless(:$code) }
 }
 
 class X::Control::Return is Exception {
@@ -224,33 +226,8 @@ role Q::Expr::Call::Sub does Q {
         my $c = $.expr.eval($runtime);
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/)}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
-        die "Block with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
-            ~ "called with {$.arguments.arguments.elems} arguments"
-            unless $c.parameters.parameters == $.arguments.arguments;
         my @args = $.arguments.arguments».eval($runtime);
-        $runtime.enter($c);
-        for $c.parameters.parameters Z @args -> $param, $arg {
-            my $name = $param.name;
-            $runtime.declare-var($name);
-            $runtime.put-var($name, $arg);
-        }
-        if $c ~~ Val::Sub {
-            $runtime.register-subhandler;
-        }
-        my $frame = $runtime.current-frame;
-        $c ~~ Val::Sub::Builtin ??
-            $c.code.($c.parameters.parameters>>.name.map({ $runtime.get-var($_) })) !!
-            $c.statements.run($runtime);
-        $runtime.leave;
-        CATCH {
-            when X::Control::Return {
-                die $_   # keep unrolling the interpreter's stack until we're there
-                    unless .frame === $frame;
-                $runtime.unroll-to($frame);
-                return .value;
-            }
-        }
-        return Val::None.new;
+        return $runtime.call($c, @args);
     }
 }
 
@@ -543,12 +520,48 @@ role Runtime {
     method load-builtins {
         # XXX: should be in a hash
         self.declare-var("say");
-        self.put-var("say",
-            Val::Sub::Builtin.new(
-                :name<say>,
-                :parameters(Q::Parameters.new(Q::Term::Identifier.new("u"))),
-                :statements(Q::Statements.new),
-                :code(-> $arg { self.output.say($arg) })));
+        self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say($arg) }));
+    }
+
+    method sigbind($type, $c, @args) {
+        die "$type with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
+            ~ "called with {@args.elems} arguments"
+            unless $c.parameters.parameters == @args;
+        self.enter($c);
+        for $c.parameters.parameters Z @args -> $param, $arg {
+            my $name = $param.name;
+            self.declare-var($name);
+            self.put-var($name, $arg);
+        }
+    }
+
+    multi method call(Val::Block $c, @args) {
+        self.sigbind("Block", $c, @args);
+        $c.statements.run(self);
+        self.leave;
+        return Val::None.new;
+    }
+
+    multi method call(Val::Sub $c, @args) {
+        self.sigbind("Sub", $c, @args);
+        self.register-subhandler;
+        my $frame = self.current-frame;
+        $c.statements.run(self);
+        self.leave;
+        CATCH {
+            when X::Control::Return {
+                die $_   # keep unrolling the interpreter's stack until we're there
+                    unless .frame === $frame;
+                self.unroll-to($frame);
+                return .value;
+            }
+        }
+        return Val::None.new;
+    }
+
+    multi method call(Val::Sub::Builtin $c, @args) {
+        $c.code.(|@args);
+        return Val::None.new;
     }
 }
 
