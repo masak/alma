@@ -520,7 +520,7 @@ role Runtime {
     method load-builtins {
         # XXX: should be in a hash
         self.declare-var("say");
-        self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say($arg) }));
+        self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say(~$arg) }));
     }
 
     method sigbind($type, $c, @args) {
