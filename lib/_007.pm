@@ -553,6 +553,7 @@ role Runtime {
                 die $_   # keep unrolling the interpreter's stack until we're there
                     unless .frame === $frame;
                 self.unroll-to($frame);
+                self.leave;
                 return .value;
             }
         }
