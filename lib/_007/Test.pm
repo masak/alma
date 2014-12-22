@@ -27,6 +27,7 @@ sub read(Str $ast) is export {
         return      => Q::Statement::Return,
         for         => Q::Statement::For,
         while       => Q::Statement::While,
+        begin       => Q::Statement::BEGIN,
 
         statements  => Q::Statements,
         parameters  => Q::Parameters,
@@ -118,4 +119,13 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
         }
     }
     flunk $desc;
+}
+
+sub outputs-during-parse($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $parser = _007.parser;
+    my $output = Output.new;
+    my $runtime = _007.runtime(:$output);
+    $parser.parse($program, :$runtime);
+
+    is $output.result, $expected, $desc;
 }

@@ -375,6 +375,20 @@ role Q::Statement::Sub does Q {
     }
 }
 
+role Q::Statement::BEGIN does Q {
+    has $.block;
+    method new(Q::Literal::Block $block) { self.bless(:$block) }
+    method Str { "BEGIN block" ~ children($.block) }
+
+    method declare($runtime) {
+        # a BEGIN block makes no declarations
+    }
+
+    method run($runtime) {
+        # a BEGIN block does not run at runtime
+    }
+}
+
 role Q::Statements does Q {
     has @.statements;
     method new(*@statements) { self.bless(:@statements) }

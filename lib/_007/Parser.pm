@@ -117,6 +117,13 @@ class Parser {
             '{' ~ '}' [\s* <statements>]
             <.finishpad>
         }
+        token statement:BEGIN {
+            'BEGIN' \s*
+            '{' ~ '}' [
+             <.newpad>
+             \s* <statements>]
+             <.finishpad>
+        }
 
         token eat_terminator {
             || \s* ';'
@@ -266,6 +273,14 @@ class Parser {
                     $<statements>.ast));
         }
 
+        method statement:BEGIN ($/) {
+            make Q::Statement::BEGIN.new(
+                Q::Literal::Block.new(
+                    Q::Parameters.new,
+                    $<statements>.ast));
+            $*runtime.run($<statements>.ast);
+        }
+
         sub tighter-or-equal($op1, $op2) {
             return @infixprec.first-index($op1) >= @infixprec.first-index($op2);
         }
@@ -365,7 +380,7 @@ class Parser {
         }
     }
 
-    method parse($program) {
+    method parse($program, :$*runtime) {
         Syntax.parse($program, :actions(Actions))
             or die "Could not parse program";   # XXX: make this into X::
         return $/.ast;
