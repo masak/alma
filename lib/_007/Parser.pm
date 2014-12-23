@@ -6,20 +6,6 @@ class X::String::Newline is Exception {
 class X::PointyBlock::SinkContext is Exception {
 }
 
-class Lexpad {
-    has %!variables;
-
-    method add_variable($var) {
-        %!variables{$var}++;
-    }
-
-    method knows($var) {
-        %!variables{$var} :exists;
-    }
-}
-
-sub add_variable($var) { @*PADS[*-1].add_variable($var) }
-
 my %ops =
     prefix => {},
     infix => {},
@@ -50,10 +36,15 @@ class Parser {
             :my @*PADS;
             <.newpad>
             <statements>
+            <.finishpad>
         }
 
-        token newpad { <?> { @*PADS.push(Lexpad.new) } }
-        token finishpad { <?> { @*PADS.pop } }
+        token newpad { <?> {
+            my $block = Val::Block.new(
+                :outer-frame($*runtime.current-frame));
+            $*runtime.enter($block)
+        } }
+        token finishpad { <?> { $*runtime.leave } }
 
         regex statements {
             [<statement> <.eat_terminator> \s*]*
@@ -64,7 +55,7 @@ class Parser {
             'my ' <identifier>
             {
                 my $var = $<identifier>.Str;
-                add_variable($var);
+                $*runtime.declare-var($var);
             }
             [' = ' <EXPR>]?
         }
@@ -83,7 +74,7 @@ class Parser {
             <identifier>
             {
                 my $var = $<identifier>.Str;
-                add_variable($var);
+                $*runtime.declare-var($var);
             }
             <.newpad>
             '(' ~ ')' <parameters> \s*
@@ -156,9 +147,9 @@ class Parser {
             <identifier>
             {
                 my $symbol = $<identifier>.Str;
+                $*runtime.get-var($symbol);     # will throw an exception if it isn't there
                 die X::Undeclared.new(:$symbol)
-                    unless any(@*PADS).knows($symbol)
-                     || $symbol eq 'say';   # XXX: remove this exception
+                    unless $*runtime.declared($symbol);
             }
         }
         token term:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
@@ -189,8 +180,8 @@ class Parser {
                 {
                     my $symbol = $<identifier>[*-1].Str;
                     die X::Redeclaration.new(:$symbol)
-                        if @*PADS[*-1].knows($symbol);
-                    add_variable($symbol);
+                        if $*runtime.declared-locally($symbol);
+                    $*runtime.declare-var($symbol);
                 }
             ]* % [\s* ',' \s*]
         }

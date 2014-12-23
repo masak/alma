@@ -11,17 +11,22 @@ role Runtime {
     has $.output;
     has @!frames;
 
-    method run(Q::Statements $statements) {
-        my $parameters = Q::Parameters.new();
-        my $setting = Val::Block.new(:$parameters, :statements(Q::Statements.new), :outer-frame(NO_OUTER));
+    submethod BUILD(:$output) {
+        $!output = $output;
+        my $setting = Val::Block.new(
+            :outer-frame(NO_OUTER));
         self.enter($setting);
         self.load-builtins;
+    }
 
-        my $compunit = Val::Block.new(:$parameters, :$statements, :outer-frame(self.current-frame));
+    method run(Q::Statements $statements) {
+        my $compunit = Val::Block.new(
+            :$statements,
+            :outer-frame(self.current-frame));
         self.enter($compunit);
 
         $statements.run(self);
-        self.leave for ^2;
+        self.leave;
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
@@ -52,15 +57,15 @@ role Runtime {
         @!frames[*-1];
     }
 
-    method !find($name) {
+    method !find($symbol) {
         my $frame = self.current-frame;
         loop {
             return $frame.pad
-                if $frame.pad{$name} :exists;
+                if $frame.pad{$symbol} :exists;
             $frame = $frame.block.outer-frame;
             last if $frame === NO_OUTER;
         }
-        die "Cannot find variable '$name'";          # XXX: turn this into an X:: type
+        die X::Undeclared.new(:$symbol);
     }
 
     method put-var($name, $value) {
@@ -75,6 +80,17 @@ role Runtime {
 
     method declare-var($name) {
         self.current-frame.pad{$name} = Val::None.new;
+    }
+
+    method declared($name) {
+        try self!find($name) && return True;
+        return False;
+    }
+
+    method declared-locally($name) {
+        my $frame = self.current-frame;
+        return True
+            if $frame.pad{$name} :exists;
     }
 
     method register-subhandler {

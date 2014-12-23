@@ -30,9 +30,12 @@ role Val::Array does Val {
     }
 }
 
+role Q::Parameters { ... }
+role Q::Statements { ... }
+
 role Val::Block does Val {
-    has $.parameters;
-    has $.statements;
+    has $.parameters = Q::Parameters.new;
+    has $.statements = Q::Statements.new;
     has $.outer-frame;
 
     method Str { "<block>" }
