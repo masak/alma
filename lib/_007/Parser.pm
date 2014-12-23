@@ -33,7 +33,6 @@ add-infix('~', Q::Expr::Infix::Concat);     # XXX: should really have the same p
 class Parser {
     grammar Syntax {
         regex TOP {
-            :my @*PADS;
             <.newpad>
             <statements>
         }
