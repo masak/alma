@@ -105,6 +105,9 @@ role Runtime {
         # XXX: should be in a hash
         self.declare-var("say");
         self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say(~$arg) }));
+
+        self.declare-var("typeof");
+        self.put-var("typeof", Val::Sub::Builtin.new(-> $arg { $arg.^name }));
     }
 
     method sigbind($type, $c, @args) {
@@ -145,7 +148,8 @@ role Runtime {
     }
 
     multi method call(Val::Sub::Builtin $c, @args) {
-        $c.code.(|@args);
+        my $result = $c.code.(|@args);
+        return $result if $result;
         return Val::None.new;
     }
 }
