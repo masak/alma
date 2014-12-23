@@ -5,7 +5,6 @@
 
 ## Int subs
 
-    abs(n)
     max(a, b)
     min(a, b)
     chr(n)

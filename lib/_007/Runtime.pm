@@ -108,6 +108,9 @@ role Runtime {
 
         self.declare-var("typeof");
         self.put-var("typeof", Val::Sub::Builtin.new(sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) }));
+
+        self.declare-var("abs");
+        self.put-var("abs", Val::Sub::Builtin.new(-> $arg { $arg.value.Int.abs }));
     }
 
     method sigbind($type, $c, @args) {
