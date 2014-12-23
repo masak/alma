@@ -10,8 +10,8 @@ use _007::Test;
               (return (int 1)))))
             (if (== (ident n) (int 1)) (block (parameters) (statements
               (return (int 1)))))
-            (return (+ (call (ident "fib") (arguments (+ (ident "n") (int -1))))
-                       (call (ident "fib") (arguments (+ (ident "n") (int -2))))))))
+            (return (+ (call (ident "fib") (arguments (+ (ident "n") (- (int 1)))))
+                       (call (ident "fib") (arguments (+ (ident "n") (- (int 2)))))))))
           (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 2))))))
           (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 3))))))
           (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 4)))))))

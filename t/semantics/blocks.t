@@ -68,7 +68,7 @@ use _007::Test;
         (statements
           (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "count")) (statements
             (if (ident "count") (block (parameters) (statements
-              (stexpr (call (ident "b") (arguments (+ (ident "count") (int -1)))))
+              (stexpr (call (ident "b") (arguments (+ (ident "count") (- (int 1))))))
               (stexpr (call (ident "say") (arguments (ident "count")))))))))))
           (stexpr (call (ident "b") (arguments (int 4)))))
         .

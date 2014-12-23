@@ -38,7 +38,7 @@ sub read(Str $ast) is export {
         regex TOP { \s* <expr> \s* }
         proto token expr {*}
         token expr:list { '(' ~ ')' [<expr>+ % \s+] }
-        token expr:int { '-'? \d+ }
+        token expr:int { \d+ }
         token expr:str { '"' ~ '"' (<-["]>*) }
         token expr:symbol { <!before '"'><!before \d> [<!before ')'> \S]+ }
     }

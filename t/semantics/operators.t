@@ -83,7 +83,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
-          (stexpr (call (ident "say") (arguments (index (ident "ns") (int -2))))))
+          (stexpr (call (ident "say") (arguments (index (ident "ns") (- (int 2)))))))
         .
 
     is-error $ast, X::Subscript::Negative, "negative array indexing is an error";
