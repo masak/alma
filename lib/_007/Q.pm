@@ -164,12 +164,12 @@ role Q::Expr::Index does Q {
 
     method eval($runtime) {
         my $array = $runtime.get-var($.array.name);
-        my $index = $.index;
         die X::TypeCheck.new(:operation<indexing>, :got($array.^name), :expected<Array>)
             unless $array ~~ Val::Array;
+        my $index = $.index.eval($runtime);
         # XXX: also check index is integer
         die X::Subscript::TooLarge.new
-            if $.index.value >= $array.elements;
+            if $index.value >= $array.elements;
         return $array.elements[$index.value];
     }
 }
