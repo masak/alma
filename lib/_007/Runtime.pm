@@ -107,7 +107,7 @@ role Runtime {
         self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say(~$arg) }));
 
         self.declare-var("typeof");
-        self.put-var("typeof", Val::Sub::Builtin.new(-> $arg { $arg.^name }));
+        self.put-var("typeof", Val::Sub::Builtin.new(sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) }));
     }
 
     method sigbind($type, $c, @args) {
