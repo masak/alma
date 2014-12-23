@@ -2,7 +2,6 @@
 
     int(s)                      -- only converts strings looking like /^ '-'? \d+ $/
     str(o)
-    typeof(o)                   -- returns a string with a typename, "Str", "Int", etc
 
 ## Int subs
 
