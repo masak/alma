@@ -17,8 +17,9 @@ role Runtime {
         self.enter($setting);
         self.load-builtins;
 
-        my $block = Val::Block.new(:$parameters, :$statements, :outer-frame(self.current-frame));
-        self.enter($block);
+        my $compunit = Val::Block.new(:$parameters, :$statements, :outer-frame(self.current-frame));
+        self.enter($compunit);
+
         $statements.run(self);
         self.leave for ^2;
         CATCH {
