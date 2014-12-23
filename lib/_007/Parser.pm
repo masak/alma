@@ -380,7 +380,7 @@ class Parser {
         }
     }
 
-    method parse($program, :$*runtime) {
+    method parse($program, :$*runtime = die "Must supply a runtime") {
         Syntax.parse($program, :actions(Actions))
             or die "Could not parse program";   # XXX: make this into X::
         return $/.ast;

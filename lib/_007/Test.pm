@@ -69,6 +69,10 @@ role Output {
     method say($s) { $!result ~= $s ~ "\n" }
 }
 
+role BadOutput {
+    method say($s) { die "Program printed '$s'; was not expected to print anything" }
+}
+
 sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $ast = read($input);
     my $output = Output.new;
@@ -104,14 +108,18 @@ sub empty-diff($text1 is copy, $text2 is copy, $desc) {
 sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $expected-ast = read($expected);
     my $parser = _007.parser;
-    my $actual-ast = $parser.parse($program);
+    my $output = BadOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $actual-ast = $parser.parse($program, :$runtime);
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
 }
 
 sub parse-error($program, $expected-error, $desc = $expected-error.^name) is export {
     my $parser = _007.parser;
-    $parser.parse($program);
+    my $output = BadOutput.new;
+    my $runtime = _007.runtime(:$output);
+    $parser.parse($program, :$runtime);
 
     CATCH {
         when $expected-error {
