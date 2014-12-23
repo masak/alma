@@ -36,7 +36,6 @@ class Parser {
             :my @*PADS;
             <.newpad>
             <statements>
-            <.finishpad>
         }
 
         token newpad { <?> {
@@ -189,7 +188,10 @@ class Parser {
 
     class Actions {
         method TOP($/) {
-            make $<statements>.ast;
+            my $st = $<statements>.ast;
+            make $st;
+            $st.static-lexpad = $*runtime.current-frame.pad;
+            $*runtime.leave;
         }
 
         method statements($/) {

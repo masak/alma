@@ -391,6 +391,7 @@ role Q::Statement::BEGIN does Q {
 
 role Q::Statements does Q {
     has @.statements;
+    has %.static-lexpad is rw;
     method new(*@statements) { self.bless(:@statements) }
     method Str { "Statements" ~ children(@.statements) }
 

@@ -137,3 +137,13 @@ sub outputs-during-parse($program, $expected, $desc = "MISSING TEST DESCRIPTION"
 
     is $output.result, $expected, $desc;
 }
+
+sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $parser = _007.parser;
+    my $output = Output.new;
+    my $runtime = _007.runtime(:$output);
+    my $ast = $parser.parse($program, :$runtime);
+    $runtime.run($ast, :$output);
+
+    is $output.result, $expected, $desc;
+}

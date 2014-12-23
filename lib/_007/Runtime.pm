@@ -24,6 +24,9 @@ role Runtime {
             :$statements,
             :outer-frame(self.current-frame));
         self.enter($compunit);
+        for $statements.static-lexpad.kv -> $name, $value {
+            self.put-var($name, $value);
+        }
 
         $statements.run(self);
         self.leave;

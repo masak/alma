@@ -59,4 +59,19 @@ use _007::Test;
         "BEGIN blocks are scoped just like everything else";
 }
 
+{
+    my $program = q:to/./;
+        my k;
+        BEGIN {
+            k = 23;
+        }
+        say(k);
+        .
+
+    outputs
+        $program,
+        "23\n",
+        "values survive from BEGIN time to runtime";
+}
+
 done;
