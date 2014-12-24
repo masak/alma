@@ -102,30 +102,21 @@ role Runtime {
     }
 
     method load-builtins {
-        # XXX: should be in a hash
-        self.declare-var("say");
-        self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say(~$arg) }));
+        my %builtins =
+            say  => -> $arg { self.output.say(~$arg) },
+            type => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
+            abs  => -> $arg { $arg.value.abs },
+            min  => -> $a, $b { min($a.value, $b.value) },
+            max  => -> $a, $b { max($a.value, $b.value) },
+            chr  => -> $arg { $arg.value.chr },
+            ord  => -> $arg { $arg.value.ord },
+            int  => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
+        ;
 
-        self.declare-var("type");
-        self.put-var("type", Val::Sub::Builtin.new(sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) }));
-
-        self.declare-var("abs");
-        self.put-var("abs", Val::Sub::Builtin.new(-> $arg { $arg.value.Int.abs }));
-
-        self.declare-var("min");
-        self.put-var("min", Val::Sub::Builtin.new(-> $a, $b { min($a.value, $b.value) }));
-
-        self.declare-var("max");
-        self.put-var("max", Val::Sub::Builtin.new(-> $a, $b { max($a.value, $b.value) }));
-
-        self.declare-var("chr");
-        self.put-var("chr", Val::Sub::Builtin.new(-> $arg { $arg.value.chr }));
-
-        self.declare-var("ord");
-        self.put-var("ord", Val::Sub::Builtin.new(-> $arg { $arg.value.ord }));
-
-        self.declare-var("int");
-        self.put-var("int", Val::Sub::Builtin.new(sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg }));
+        for %builtins.kv -> $name, $sub {
+            self.declare-var($name);
+            self.put-var($name, Val::Sub::Builtin.new($sub));
+        }
     }
 
     method sigbind($type, $c, @args) {
