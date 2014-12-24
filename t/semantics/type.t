@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "n"))
+          (my (ident "n"))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "n")))))))
         .
 
@@ -15,7 +15,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "n") (assign (ident "n") (int 7)))
+          (my (ident "n") (assign (ident "n") (int 7)))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "n")))))))
         .
 
@@ -25,7 +25,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "s") (assign (ident "s") (str "Bond")))
+          (my (ident "s") (assign (ident "s") (str "Bond")))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "s")))))))
         .
 
@@ -35,7 +35,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "a") (assign (ident "a") (array (int 1) (int 2))))
+          (my (ident "a") (assign (ident "a") (array (int 1) (int 2))))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "a")))))))
         .
 

@@ -9,7 +9,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "n") (assign (ident "n") (int 7))))
+          (my (ident "n") (assign (ident "n") (int 7))))
         .
 
     parses-to $program, $ast, "assigning an int";
@@ -22,7 +22,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "s") (assign (ident "s") (str "Bond"))))
+          (my (ident "s") (assign (ident "s") (str "Bond"))))
         .
 
     parses-to $program, $ast, "assigning a str";
@@ -35,7 +35,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "a") (assign (ident "a") (array (int 1) (int 2)))))
+          (my (ident "a") (assign (ident "a") (array (int 1) (int 2)))))
         .
 
     parses-to $program, $ast, "assigning an array";
@@ -48,7 +48,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "u")))
+          (my (ident "u")))
         .
 
     parses-to $program, $ast, "declaring without assigning";
@@ -75,7 +75,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "u") (assign (ident "u") (int 0)))
+          (my (ident "u") (assign (ident "u") (int 0)))
           (stexpr (assign (ident "u") (+ (ident "u") (int 1)))))
         .
 
@@ -103,7 +103,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
+          (my (ident "ns") (assign (ident "ns") (array (str "Jim") (str "Bond"))))
           (stexpr (call (ident "say") (arguments (index (ident "ns") (int 1))))))
         .
 
@@ -118,7 +118,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "x") (assign (ident "x") (int 1)))
+          (my (ident "x") (assign (ident "x") (int 1)))
           (stexpr (assign (ident "x") (int 2))))
         .
 
@@ -134,8 +134,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "i1") (assign (ident "i1") (int 10)))
-          (vardecl (ident "i2") (assign (ident "i2") (int 11)))
+          (my (ident "i1") (assign (ident "i1") (int 10)))
+          (my (ident "i2") (assign (ident "i2") (int 11)))
 
           (stexpr (call (ident "say") (arguments (== (ident "i1") (ident "i2"))))))
         .
@@ -168,7 +168,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
             (stexpr (call (ident "say") (arguments (~ (str "Good evening, Mr ") (ident "name"))))))))))
         .
 
@@ -184,7 +184,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
             (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y"))))))))))
         .
 
@@ -371,7 +371,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "u"))
+          (my (ident "u"))
           (while (ident "u") (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "u"))))))))
         .

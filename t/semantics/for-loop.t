@@ -37,7 +37,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (for (array (int 1) (int 2)) (block (parameters) (statements
-            (vardecl (ident "r") (assign (ident "r") (int 3)))
+            (my (ident "r") (assign (ident "r") (int 3)))
             (stexpr (call (ident "say") (arguments (ident "r"))))))))
         .
 

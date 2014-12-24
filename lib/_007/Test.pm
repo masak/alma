@@ -19,7 +19,7 @@ sub read(Str $ast) is export {
         call        => Q::Expr::Call::Sub,
         index       => Q::Expr::Index,
 
-        vardecl     => Q::Statement::VarDecl,
+        my          => Q::Statement::My,
         stexpr      => Q::Statement::Expr,
         if          => Q::Statement::If,
         stblock     => Q::Statement::Block,

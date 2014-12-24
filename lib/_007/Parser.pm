@@ -48,7 +48,7 @@ class Parser {
         }
 
         proto token statement {*}
-        token statement:vardecl {
+        token statement:my {
             'my ' <identifier>
             {
                 my $var = $<identifier>.Str;
@@ -203,16 +203,16 @@ class Parser {
             make Q::Statements.new($<statement>».ast);
         }
 
-        method statement:vardecl ($/) {
+        method statement:my ($/) {
             if $<EXPR> {
-                make Q::Statement::VarDecl.new(
+                make Q::Statement::My.new(
                     $<identifier>.ast,
                     Q::Expr::Infix::Assignment.new(
                         $<identifier>.ast,
                         $<EXPR>.ast));
             }
             else {
-                make Q::Statement::VarDecl.new($<identifier>.ast);
+                make Q::Statement::My.new($<identifier>.ast);
             }
         }
 

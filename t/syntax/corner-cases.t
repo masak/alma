@@ -9,7 +9,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "n") (assign (ident "n") (int 7))))
+          (my (ident "n") (assign (ident "n") (int 7))))
         .
 
     parses-to $program, $ast, "can skip the last semicolon";
@@ -62,7 +62,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "aaa") (assign (ident "aaa") (array (array (array (int 1))))))
+          (my (ident "aaa") (assign (ident "aaa") (array (array (array (int 1))))))
           (stexpr (call (ident "say") (arguments (index (index (index (ident "aaa") (int 0)) (int 0)) (int 0))))))
         .
 
@@ -80,7 +80,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "x") (assign (ident "x") (int 5)))
+          (my (ident "x") (assign (ident "x") (int 5)))
           (stblock (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (str "inside")))))))
           (stexpr (assign (ident "x") (int 7))))

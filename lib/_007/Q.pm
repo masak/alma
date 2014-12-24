@@ -189,11 +189,11 @@ role Q::Expr::Call::Sub does Q {
     }
 }
 
-role Q::Statement::VarDecl does Q {
+role Q::Statement::My does Q {
     has $.ident;
     has $.assignment;
     method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
-    method Str { "VarDecl" ~ children($.ident, |$.assignment) }
+    method Str { "My" ~ children($.ident, |$.assignment) }
 
     method declare($runtime) {
         $runtime.declare-var($.ident.name);

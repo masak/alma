@@ -15,10 +15,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "x") (assign (ident "x") (str "one")))
+          (my (ident "x") (assign (ident "x") (str "one")))
           (stexpr (call (ident "say") (arguments (ident "x"))))
           (stblock (block (parameters) (statements
-            (vardecl (ident "x") (assign (ident "x") (str "two")))
+            (my (ident "x") (assign (ident "x") (str "two")))
             (stexpr (call (ident "say") (arguments (ident "x")))))))
           (stexpr (call (ident "say") (arguments (ident "x")))))
         .
@@ -29,7 +29,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
             (stexpr (call (ident "say") (arguments (~ (str "Good evening, Mr ") (ident "name")))))))))
           (stexpr (call (ident "b") (arguments (str "Bond")))))
         .
@@ -40,9 +40,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
             (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y")))))))))
-          (vardecl (ident "X") (assign (ident "X") (str "y")))
+          (my (ident "X") (assign (ident "X") (str "y")))
           (stexpr (call (ident "b") (arguments (str "X") (~ (ident "X") (ident "X"))))))
         .
 
@@ -52,10 +52,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "callback")) (statements
-            (vardecl (ident "scoping") (assign (ident "scoping") (str "dynamic")))
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "callback")) (statements
+            (my (ident "scoping") (assign (ident "scoping") (str "dynamic")))
             (stexpr (call (ident "callback") (arguments)))))))
-          (vardecl (ident "scoping") (assign (ident "scoping") (str "lexical")))
+          (my (ident "scoping") (assign (ident "scoping") (str "lexical")))
           (stexpr (call (ident "b") (arguments (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "scoping"))))))))))
         .
@@ -66,7 +66,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (vardecl (ident "b") (assign (ident "b") (block (parameters (ident "count")) (statements
+          (my (ident "b") (assign (ident "b") (block (parameters (ident "count")) (statements
             (if (ident "count") (block (parameters) (statements
               (stexpr (call (ident "b") (arguments (+ (ident "count") (- (int 1))))))
               (stexpr (call (ident "say") (arguments (ident "count")))))))))))
