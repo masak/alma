@@ -114,4 +114,13 @@ use _007::Test;
     is-result $ast, "2\n", "elems() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "reversed") (arguments (array (int 1) (int 2))))))))
+        .
+
+    is-result $ast, "[2, 1]\n", "reversed() works";
+}
+
 done;

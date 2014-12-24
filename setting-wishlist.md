@@ -8,7 +8,6 @@
 ## Array subs
 
     join(a, sep)
-    reversed(a)
     sorted(a)
     map(fn, a)
     grep(fn, a)

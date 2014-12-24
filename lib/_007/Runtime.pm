@@ -103,20 +103,21 @@ role Runtime {
 
     method load-builtins {
         my %builtins =
-            say   => -> $arg { self.output.say(~$arg) },
-            type  => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
-            abs   => -> $arg { Val::Int.new(:value($arg.value.abs)) },
-            min   => -> $a, $b { Val::Int.new(:value(min($a.value, $b.value))) },
-            max   => -> $a, $b { Val::Int.new(:value(max($a.value, $b.value))) },
-            chr   => -> $arg { Val::Str.new(:value($arg.value.chr)) },
-            ord   => -> $arg { Val::Int.new(:value($arg.value.ord)) },
-            int   => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
-            str   => -> $arg { Val::Str.new(:value($arg.value.Str)) },
-            chars => -> $arg { Val::Int.new(:value($arg.value.Str.chars)) },
-            uc    => -> $arg { Val::Str.new(:value($arg.value.uc)) },
-            lc    => -> $arg { Val::Str.new(:value($arg.value.lc)) },
-            trim  => -> $arg { Val::Str.new(:value($arg.value.trim)) },
-            elems => -> $arg { Val::Int.new(:value($arg.elements.elems)) },
+            say      => -> $arg { self.output.say(~$arg) },
+            type     => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
+            abs      => -> $arg { Val::Int.new(:value($arg.value.abs)) },
+            min      => -> $a, $b { Val::Int.new(:value(min($a.value, $b.value))) },
+            max      => -> $a, $b { Val::Int.new(:value(max($a.value, $b.value))) },
+            chr      => -> $arg { Val::Str.new(:value($arg.value.chr)) },
+            ord      => -> $arg { Val::Int.new(:value($arg.value.ord)) },
+            int      => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
+            str      => -> $arg { Val::Str.new(:value($arg.value.Str)) },
+            chars    => -> $arg { Val::Int.new(:value($arg.value.Str.chars)) },
+            uc       => -> $arg { Val::Str.new(:value($arg.value.uc)) },
+            lc       => -> $arg { Val::Str.new(:value($arg.value.lc)) },
+            trim     => -> $arg { Val::Str.new(:value($arg.value.trim)) },
+            elems    => -> $arg { Val::Int.new(:value($arg.elements.elems)) },
+            reversed => -> $arg { Val::Array.new(:elements($arg.elements.reverse)) },
         ;
 
         for %builtins.kv -> $name, $sub {
