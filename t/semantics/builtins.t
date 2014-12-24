@@ -49,4 +49,14 @@ use _007::Test;
     is-result $ast, "97\n", "ord() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (call (ident "int") (arguments (str "6"))))))))
+          (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (call (ident "int") (arguments (str "-6")))))))))
+        .
+
+    is-result $ast, "Int\nInt\n", "int() works";
+}
+
 done;

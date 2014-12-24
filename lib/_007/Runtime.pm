@@ -123,6 +123,9 @@ role Runtime {
 
         self.declare-var("ord");
         self.put-var("ord", Val::Sub::Builtin.new(-> $arg { $arg.value.ord }));
+
+        self.declare-var("int");
+        self.put-var("int", Val::Sub::Builtin.new(sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg }));
     }
 
     method sigbind($type, $c, @args) {

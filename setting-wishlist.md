@@ -1,6 +1,5 @@
 ## Type conversion
 
-    int(s)                      -- only converts strings looking like /^ '-'? \d+ $/
     str(o)
 
 ## String subs
