@@ -114,6 +114,9 @@ role Runtime {
 
         self.declare-var("min");
         self.put-var("min", Val::Sub::Builtin.new(-> $a, $b { min($a.value, $b.value) }));
+
+        self.declare-var("max");
+        self.put-var("max", Val::Sub::Builtin.new(-> $a, $b { max($a.value, $b.value) }));
     }
 
     method sigbind($type, $c, @args) {

@@ -21,4 +21,14 @@ use _007::Test;
     is-result $ast, "-1\n-1\n", "min() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "max") (arguments (- (int 1)) (int 2))))))
+          (stexpr (call (ident "say") (arguments (call (ident "max") (arguments (int 2) (- (int 1))))))))
+        .
+
+    is-result $ast, "2\n2\n", "max() works";
+}
+
 done;

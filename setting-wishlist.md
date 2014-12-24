@@ -5,7 +5,6 @@
 
 ## Int subs
 
-    max(a, b)
     chr(n)
 
 ## String subs
