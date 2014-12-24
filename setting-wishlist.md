@@ -5,7 +5,6 @@
     index(s, substr)            -- returns -1 on substr not found
     split(s, sep)
     trim(s)
-    uc(s)
     lc(s)
 
 ## Array subs

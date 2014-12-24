@@ -78,4 +78,13 @@ use _007::Test;
     is-result $ast, "3\n", "chars() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "uc") (arguments (str "test")))))))
+        .
+
+    is-result $ast, "TEST\n", "uc() works";
+}
+
 done;
