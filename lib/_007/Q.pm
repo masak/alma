@@ -295,7 +295,9 @@ role Q::Statement::For does Q {
 
         if $count == 0 {
             for ^elements($.expr).elems {
+                $runtime.enter($c);
                 $.block.statements.run($runtime);
+                $runtime.leave;
             }
         }
         else {

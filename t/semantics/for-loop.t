@@ -33,4 +33,15 @@ use _007::Test;
     is-result $ast, "1\n2\n3\n4\n", "for-loops with more params iterate over an array";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (for (array (int 1) (int 2)) (block (parameters) (statements
+            (vardecl (ident "r") (assign (ident "r") (int 3)))
+            (stexpr (call (ident "say") (arguments (ident "r"))))))))
+        .
+
+    is-result $ast, "3\n3\n", "variable declarations work inside of for loop without parameters";
+}
+
 done;
