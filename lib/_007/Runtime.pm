@@ -111,6 +111,9 @@ role Runtime {
 
         self.declare-var("abs");
         self.put-var("abs", Val::Sub::Builtin.new(-> $arg { $arg.value.Int.abs }));
+
+        self.declare-var("min");
+        self.put-var("min", Val::Sub::Builtin.new(-> $a, $b { min($a.value, $b.value) }));
     }
 
     method sigbind($type, $c, @args) {
