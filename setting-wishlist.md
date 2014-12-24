@@ -1,6 +1,5 @@
 ## String subs
 
-    chars(s)
     substr(s, pos, chars)
     charat(s, pos)
     index(s, substr)            -- returns -1 on substr not found
