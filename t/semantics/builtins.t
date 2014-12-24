@@ -87,4 +87,13 @@ use _007::Test;
     is-result $ast, "TEST\n", "uc() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "lc") (arguments (str "TEST")))))))
+        .
+
+    is-result $ast, "test\n", "lc() works";
+}
+
 done;
