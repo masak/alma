@@ -31,4 +31,13 @@ use _007::Test;
     is-result $ast, "2\n2\n", "max() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "chr") (arguments (int 97)))))))
+        .
+
+    is-result $ast, "a\n", "chr() works";
+}
+
 done;

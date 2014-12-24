@@ -3,10 +3,6 @@
     int(s)                      -- only converts strings looking like /^ '-'? \d+ $/
     str(o)
 
-## Int subs
-
-    chr(n)
-
 ## String subs
 
     chars(s)

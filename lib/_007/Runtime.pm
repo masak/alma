@@ -117,6 +117,9 @@ role Runtime {
 
         self.declare-var("max");
         self.put-var("max", Val::Sub::Builtin.new(-> $a, $b { max($a.value, $b.value) }));
+
+        self.declare-var("chr");
+        self.put-var("chr", Val::Sub::Builtin.new(-> $arg { $arg.value.chr }));
     }
 
     method sigbind($type, $c, @args) {
