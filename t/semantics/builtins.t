@@ -123,4 +123,13 @@ use _007::Test;
     is-result $ast, "[2, 1]\n", "reversed() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "sorted") (arguments (array (int 2) (int 1))))))))
+        .
+
+    is-result $ast, "[1, 2]\n", "sorted() works";
+}
+
 done;

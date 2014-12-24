@@ -118,6 +118,7 @@ role Runtime {
             trim     => -> $arg { Val::Str.new(:value($arg.value.trim)) },
             elems    => -> $arg { Val::Int.new(:value($arg.elements.elems)) },
             reversed => -> $arg { Val::Array.new(:elements($arg.elements.reverse)) },
+            sorted   => -> $arg { Val::Array.new(:elements($arg.elements.sort)) },
         ;
 
         for %builtins.kv -> $name, $sub {

@@ -8,6 +8,5 @@
 ## Array subs
 
     join(a, sep)
-    sorted(a)
     map(fn, a)
     grep(fn, a)
