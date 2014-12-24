@@ -115,6 +115,7 @@ role Runtime {
             chars => -> $arg { Val::Int.new(:value($arg.value.Str.chars)) },
             uc    => -> $arg { Val::Str.new(:value($arg.value.uc)) },
             lc    => -> $arg { Val::Str.new(:value($arg.value.lc)) },
+            trim  => -> $arg { Val::Str.new(:value($arg.value.trim)) },
         ;
 
         for %builtins.kv -> $name, $sub {

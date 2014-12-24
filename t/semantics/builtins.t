@@ -96,4 +96,13 @@ use _007::Test;
     is-result $ast, "test\n", "lc() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "trim") (arguments (str "  test  ")))))))
+        .
+
+    is-result $ast, "test\n", "trim() works";
+}
+
 done;
