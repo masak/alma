@@ -105,4 +105,13 @@ use _007::Test;
     is-result $ast, "test\n", "trim() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "elems") (arguments (array (int 1) (int 2))))))))
+        .
+
+    is-result $ast, "2\n", "elems() works";
+}
+
 done;

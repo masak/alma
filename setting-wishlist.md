@@ -7,7 +7,6 @@
 
 ## Array subs
 
-    elems(a)
     join(a, sep)
     reversed(a)
     sorted(a)
