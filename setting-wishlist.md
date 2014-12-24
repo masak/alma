@@ -7,6 +7,5 @@
 
 ## Array subs
 
-    join(a, sep)
     map(fn, a)
     grep(fn, a)

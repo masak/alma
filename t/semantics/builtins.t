@@ -132,4 +132,13 @@ use _007::Test;
     is-result $ast, "[1, 2]\n", "sorted() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "join") (arguments (array (int 1) (int 2)) (str "|")))))))
+        .
+
+    is-result $ast, "1|2\n", "join() works";
+}
+
 done;
