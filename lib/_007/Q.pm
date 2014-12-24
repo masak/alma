@@ -206,6 +206,21 @@ role Q::Statement::VarDecl does Q {
     }
 }
 
+role Q::Statement::Constant does Q {
+    has $.ident;
+    has $.assignment;
+    method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
+    method Str { "Constant" ~ children($.ident, |$.assignment) }    # XXX: remove | once we guarantee it
+
+    method declare($runtime) {
+        $runtime.declare-var($.ident.name);
+    }
+
+    method run($runtime) {
+        # value has already been assigned
+    }
+}
+
 role Q::Statement::Expr does Q {
     has $.expr;
     method new($expr) { self.bless(:$expr) }

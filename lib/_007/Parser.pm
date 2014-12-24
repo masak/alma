@@ -56,6 +56,15 @@ class Parser {
             }
             [' = ' <EXPR>]?
         }
+        token statement:constant {
+            'constant ' <identifier>
+            {
+                my $var = $<identifier>.Str;
+                $*runtime.declare-var($var);
+            }
+            [' = ' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
+                                # 'Missing initializer on constant declaration'
+        }
         token statement:expr {
             <!before \s* '{'>       # prevent mixup with statement:block
             <EXPR>
@@ -205,6 +214,22 @@ class Parser {
             else {
                 make Q::Statement::VarDecl.new($<identifier>.ast);
             }
+        }
+
+        method statement:constant ($/) {
+            if $<EXPR> {
+                make Q::Statement::Constant.new(
+                    $<identifier>.ast,
+                    Q::Expr::Infix::Assignment.new(
+                        $<identifier>.ast,
+                        $<EXPR>.ast));
+            }
+            else {  # XXX: remove this part once we throw an error
+                make Q::Statement::Constant.new($<identifier>.ast);
+            }
+            my $name = $<identifier>.ast.name;
+            my $value = $<EXPR>.ast.eval($*runtime);
+            $*runtime.put-var($name, $value);
         }
 
         method statement:expr ($/) {
