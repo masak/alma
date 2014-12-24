@@ -40,4 +40,13 @@ use _007::Test;
     is-result $ast, "a\n", "chr() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "ord") (arguments (str "a")))))))
+        .
+
+    is-result $ast, "97\n", "ord() works";
+}
+
 done;

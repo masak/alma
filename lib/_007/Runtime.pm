@@ -120,6 +120,9 @@ role Runtime {
 
         self.declare-var("chr");
         self.put-var("chr", Val::Sub::Builtin.new(-> $arg { $arg.value.chr }));
+
+        self.declare-var("ord");
+        self.put-var("ord", Val::Sub::Builtin.new(-> $arg { $arg.value.ord }));
     }
 
     method sigbind($type, $c, @args) {

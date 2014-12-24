@@ -13,7 +13,6 @@
     trim(s)
     uc(s)
     lc(s)
-    ord(s)
 
 ## Array subs
 
