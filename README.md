@@ -6,7 +6,6 @@ A small language. A test bed for macro ideas.
 
 * subroutines for ops
 * [man or boy](https://en.wikipedia.org/wiki/Man_or_boy_test)
-* constants
 * making Q:: types first-class values
 * macros
 * quasi blocks
@@ -14,8 +13,8 @@ A small language. A test bed for macro ideas.
 
 Dependency graph for some important todo items:
 
-                                    constants           first-class Q::
-                                        |                /    |
+                                                        first-class Q::
+                                                         /    |
         subroutines for ops         macros--------------/   quasi
                  |                   /   \                    |
         operator macros-------------/     \-----------------unquotes
