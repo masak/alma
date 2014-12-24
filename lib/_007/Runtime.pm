@@ -24,9 +24,6 @@ role Runtime {
             :$statements,
             :outer-frame(self.current-frame));
         self.enter($compunit);
-        for $statements.static-lexpad.kv -> $name, $value {
-            self.put-var($name, $value);
-        }
 
         $statements.run(self);
         self.leave;
@@ -42,6 +39,12 @@ role Runtime {
         @!frames.push($frame);
         for $block.statements.statements -> $statement {
             $statement.declare(self);
+        }
+        for $block.statements.static-lexpad.kv -> $name, $value {
+            self.put-var($name, $value)
+                unless $value ~~ Val::None; # XXX: this is almost certainly wrong
+                                            # but I seemed to need it or subroutines
+                                            # would be overwritten by None
         }
     }
 

@@ -74,4 +74,109 @@ use _007::Test;
         "values survive from BEGIN time to runtime";
 }
 
+{
+    my $program = q:to/./;
+        {
+            my k;
+            BEGIN {
+                k = 117;
+            }
+            say(k);
+        }
+        .
+
+    outputs
+        $program,
+        "117\n",
+        "...same, but inside an immediate block";
+}
+
+{
+    my $program = q:to/./;
+        sub f() {
+            my k;
+            BEGIN {
+                k = 2;
+            }
+            say(k);
+        }
+
+        f();
+        .
+
+    outputs
+        $program,
+        "2\n",
+        "...same, but inside a sub";
+}
+
+{
+    my $program = q:to/./;
+        if 3 {
+            my k;
+            BEGIN {
+                k = 419;
+            }
+            say(k);
+        }
+        .
+
+    outputs
+        $program,
+        "419\n",
+        "...same, but inside an if statement";
+}
+
+{
+    my $program = q:to/./;
+        for [1, 2] {
+            my k;
+            BEGIN {
+                k = 1000;
+            }
+            say(k);
+        }
+        .
+
+    outputs
+        $program,
+        "1000\n1000\n",
+        "...same, but inside a for loop";
+}
+
+{
+    my $program = q:to/./;
+        my c = 3;
+        while c = c + -1 {
+            my k;
+            BEGIN {
+                k = 1000;
+            }
+            say(k);
+        }
+        .
+
+    outputs
+        $program,
+        "1000\n1000\n",
+        "...same, but inside a while loop";
+}
+
+{
+    my $program = q:to/./;
+        BEGIN {
+            my k;
+            BEGIN {
+                k = 1000;
+            }
+            say(k);
+        }
+        .
+
+    outputs
+        $program,
+        "1000\n",
+        "...same, but inside a BEGIN block";
+}
+
 done;

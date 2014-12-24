@@ -42,7 +42,6 @@ class Parser {
                 :outer-frame($*runtime.current-frame));
             $*runtime.enter($block)
         } }
-        token finishpad { <?> { $*runtime.leave } }
 
         regex statements {
             [<statement> <.eat_terminator> \s*]*
@@ -65,7 +64,6 @@ class Parser {
             '{' ~ '}' [
              <.newpad>
              \s* <statements>]
-             <.finishpad>
         }
         token statement:sub {
             'sub' \s+
@@ -77,7 +75,6 @@ class Parser {
             <.newpad>
             '(' ~ ')' <parameters> \s*
             '{' ~ '}' [\s* <statements>]
-            <.finishpad>
         }
         token statement:return {
             'return'
@@ -89,7 +86,6 @@ class Parser {
             <EXPR> \s*
             <.newpad>
             '{' ~ '}' [\s* <statements>]
-            <.finishpad>
         }
         token statement:for {
             'for' \s+
@@ -97,21 +93,18 @@ class Parser {
             <.newpad>
             ['->' \s* <parameters>]? \s*
             '{' ~ '}' [\s* <statements>]
-            <.finishpad>
         }
         token statement:while {
             'while' \s+
             <EXPR> \s*
             <.newpad>
             '{' ~ '}' [\s* <statements>]
-            <.finishpad>
         }
         token statement:BEGIN {
             'BEGIN' \s*
             '{' ~ '}' [
              <.newpad>
              \s* <statements>]
-             <.finishpad>
         }
 
         token eat_terminator {
@@ -186,11 +179,15 @@ class Parser {
     }
 
     class Actions {
+        method finish-block($st) {
+            $st.static-lexpad = $*runtime.current-frame.pad;
+            $*runtime.leave;
+        }
+
         method TOP($/) {
             my $st = $<statements>.ast;
             make $st;
-            $st.static-lexpad = $*runtime.current-frame.pad;
-            $*runtime.leave;
+            self.finish-block($st);
         }
 
         method statements($/) {
@@ -217,17 +214,22 @@ class Parser {
         }
 
         method statement:block ($/) {
+            my $st = $<statements>.ast;
             make Q::Statement::Block.new(
                 Q::Literal::Block.new(
                     Q::Parameters.new,
-                    $<statements>.ast));
+                    $st));
+            self.finish-block($st);
         }
 
         method statement:sub ($/) {
-            make Q::Statement::Sub.new(
+            my $st = $<statements>.ast;
+            my $sub = Q::Statement::Sub.new(
                 $<identifier>.ast,
                 $<parameters>.ast,
-                $<statements>.ast);
+                $st);
+            make $sub;
+            self.finish-block($st);
         }
 
         method statement:return ($/) {
@@ -241,35 +243,43 @@ class Parser {
         }
 
         method statement:if ($/) {
+            my $st = $<statements>.ast;
             make Q::Statement::If.new(
                 $<EXPR>.ast,
                 Q::Literal::Block.new(
                     Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
-                    $<statements>.ast));
+                    $st));
+            self.finish-block($st);
         }
 
         method statement:for ($/) {
             my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
+            my $st = $<statements>.ast;
             make Q::Statement::For.new(
                 $<EXPR>.ast,
                 Q::Literal::Block.new(
                     $parameters,
-                    $<statements>.ast));
+                    $st));
+            self.finish-block($st);
         }
 
         method statement:while ($/) {
+            my $st = $<statements>.ast;
             make Q::Statement::While.new(
                 $<EXPR>.ast,
                 Q::Literal::Block.new(
                     Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
-                    $<statements>.ast));
+                    $st));
+            self.finish-block($st);
         }
 
         method statement:BEGIN ($/) {
+            my $st = $<statements>.ast;
             make Q::Statement::BEGIN.new(
                 Q::Literal::Block.new(
                     Q::Parameters.new,
-                    $<statements>.ast));
+                    $st));
+            self.finish-block($st);
             $*runtime.run($<statements>.ast);
         }
 

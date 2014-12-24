@@ -96,10 +96,10 @@ role Q::Expr::Infix::Addition does Q::Expr::Infix {
     method type { "[+]" }
     method eval($runtime) {
         my $lhs = $.lhs.eval($runtime);
-        die X::TypeCheck.new(:operation<+>, :got($lhs.^name), :expected<Int>)
+        die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
             unless $lhs ~~ Val::Int;
         my $rhs = $.rhs.eval($runtime);
-        die X::TypeCheck.new(:operation<+>, :got($rhs.^name), :expected<Int>)
+        die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
             unless $rhs ~~ Val::Int;
         return Val::Int.new(:value(
             $lhs.value + $rhs.value
@@ -182,7 +182,7 @@ role Q::Expr::Call::Sub does Q {
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
-        die "Trying to invoke a {$c.^name.subst(/^'Val::'/)}" # XXX: make this into an X::
+        die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
         my @args = $.arguments.arguments».eval($runtime);
         return $runtime.call($c, @args);
