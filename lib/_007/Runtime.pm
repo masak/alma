@@ -106,8 +106,8 @@ role Runtime {
         self.declare-var("say");
         self.put-var("say", Val::Sub::Builtin.new(-> $arg { self.output.say(~$arg) }));
 
-        self.declare-var("typeof");
-        self.put-var("typeof", Val::Sub::Builtin.new(sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) }));
+        self.declare-var("type");
+        self.put-var("type", Val::Sub::Builtin.new(sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) }));
 
         self.declare-var("abs");
         self.put-var("abs", Val::Sub::Builtin.new(-> $arg { $arg.value.Int.abs }));
