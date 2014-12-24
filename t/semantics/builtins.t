@@ -1,6 +1,7 @@
 use v6;
 use Test;
 use _007::Test;
+
 {
     my $ast = q:to/./;
         (statements
@@ -66,6 +67,15 @@ use _007::Test;
         .
 
     is-result $ast, "Str\n", "str() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "chars") (arguments (str "007")))))))
+        .
+
+    is-result $ast, "3\n", "chars() works";
 }
 
 done;

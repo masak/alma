@@ -103,15 +103,16 @@ role Runtime {
 
     method load-builtins {
         my %builtins =
-            say  => -> $arg { self.output.say(~$arg) },
-            type => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
-            abs  => -> $arg { $arg.value.abs },
-            min  => -> $a, $b { min($a.value, $b.value) },
-            max  => -> $a, $b { max($a.value, $b.value) },
-            chr  => -> $arg { $arg.value.chr },
-            ord  => -> $arg { $arg.value.ord },
-            int  => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
-            str  => -> $arg { Val::Str.new(:value($arg.value.Str)) },
+            say   => -> $arg { self.output.say(~$arg) },
+            type  => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
+            abs   => -> $arg { $arg.value.abs },
+            min   => -> $a, $b { min($a.value, $b.value) },
+            max   => -> $a, $b { max($a.value, $b.value) },
+            chr   => -> $arg { $arg.value.chr },
+            ord   => -> $arg { $arg.value.ord },
+            int   => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
+            str   => -> $arg { Val::Str.new(:value($arg.value.Str)) },
+            chars => -> $arg { $arg.value.Str.chars },
         ;
 
         for %builtins.kv -> $name, $sub {
