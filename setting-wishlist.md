@@ -1,7 +1,3 @@
-## Type conversion
-
-    str(o)
-
 ## String subs
 
     chars(s)

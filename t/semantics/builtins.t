@@ -59,4 +59,13 @@ use _007::Test;
     is-result $ast, "Int\nInt\n", "int() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (call (ident "str") (arguments (int 6)))))))))
+        .
+
+    is-result $ast, "Str\n", "str() works";
+}
+
 done;

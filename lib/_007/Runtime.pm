@@ -111,6 +111,7 @@ role Runtime {
             chr  => -> $arg { $arg.value.chr },
             ord  => -> $arg { $arg.value.ord },
             int  => sub ($arg) { return Val::Int.new(:value($arg.value.Int)) if $arg.value ~~ /^ '-'? \d+ $/; return $arg },
+            str  => -> $arg { Val::Str.new(:value($arg.value.Str)) },
         ;
 
         for %builtins.kv -> $name, $sub {
