@@ -85,6 +85,17 @@ class Parser {
             '(' ~ ')' <parameters> \s*
             '{' ~ '}' [\s* <statements>]
         }
+        token statement:macro {
+            'macro' \s+
+            <identifier>
+            {
+                my $var = $<identifier>.Str;
+                $*runtime.declare-var($var);
+            }
+            <.newpad>
+            '(' ~ ')' <parameters> \s*
+            '{' ~ '}' [\s* <statements>]
+        }
         token statement:return {
             'return'
             [\s+ <EXPR>]?
@@ -168,7 +179,7 @@ class Parser {
         }
 
         token identifier {
-            \w+
+            <[\w:]>+
         }
 
         token arguments {
@@ -249,12 +260,22 @@ class Parser {
 
         method statement:sub ($/) {
             my $st = $<statements>.ast;
-            my $sub = Q::Statement::Sub.new(
+            make Q::Statement::Sub.new(
                 $<identifier>.ast,
                 $<parameters>.ast,
                 $st);
-            make $sub;
             self.finish-block($st);
+        }
+
+        method statement:macro ($/) {
+            my $st = $<statements>.ast;
+            my $macro = Q::Statement::Macro.new(
+                $<identifier>.ast,
+                $<parameters>.ast,
+                $st);
+            self.finish-block($st);
+            $macro.declare($*runtime);
+            make $macro;
         }
 
         method statement:return ($/) {
@@ -341,7 +362,16 @@ class Parser {
             # XXX: need to think more about precedence here
             for $<postfix>.list -> $postfix {
                 my @p = $postfix.ast.list;
-                make @p[0].new($/.ast, @p[1]);
+                if @p[0] ~~ Q::Expr::Call::Sub
+                && $/.ast ~~ Q::Term::Identifier
+                && (my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
+                    my @args = @p[1].arguments;
+                    my $qtree = $*runtime.call($macro, @args);
+                    make $qtree;
+                }
+                else {
+                    make @p[0].new($/.ast, @p[1]);
+                }
             }
             for $<prefix>.list -> $prefix {
                 make $prefix.ast.new($/.ast);

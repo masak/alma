@@ -47,6 +47,10 @@ role Val::Sub does Val::Block {
     method Str { "<sub>" }
 }
 
+role Val::Macro does Val::Sub {
+    method Str { "<macro>" }
+}
+
 role Val::Sub::Builtin does Val::Sub {
     has $.code;
 

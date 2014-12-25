@@ -123,6 +123,10 @@ role Runtime {
             reversed => -> $arg { Val::Array.new(:elements($arg.elements.reverse)) },
             sorted   => -> $arg { Val::Array.new(:elements($arg.elements.sort)) },
             join     => -> $a, $sep { Val::Str.new(:value($a.elements.join($sep.value.Str))) },
+            'Q::Expr::Call::Sub' => -> $expr, $arguments { Q::Expr::Call::Sub.new($expr, $arguments) },
+            'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
+            'Q::Term::Identifier' => -> $name { Q::Term::Identifier.new($name.value) },
+            'Q::Arguments' => -> $arguments { Q::Arguments.new($arguments.elements) },
         ;
 
         for %builtins.kv -> $name, $sub {

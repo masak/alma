@@ -184,6 +184,8 @@ role Q::Expr::Call::Sub does Q {
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
+        die "macro is called at runtime"
+            if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
         my @args = $.arguments.arguments».eval($runtime);
@@ -388,6 +390,28 @@ role Q::Statement::Sub does Q {
         my $sub = Val::Sub.new(:$name, :$.parameters, :$.statements, :$outer-frame);
         $runtime.declare-var($name);
         $runtime.put-var($name, $sub);
+    }
+
+    method run($runtime) {
+    }
+}
+
+role Q::Statement::Macro does Q {
+    has $.ident;
+    has $.parameters;
+    has $.statements;
+
+    method new($ident, $parameters, $statements) {
+        self.bless(:$ident, :$parameters, :$statements);
+    }
+    method Str { "Macro[{$.ident.name}]" ~ children($.parameters, $.statements) }
+
+    method declare($runtime) {
+        my $name = $.ident.name;
+        my $outer-frame = $runtime.current-frame;
+        my $macro = Val::Macro.new(:$name, :$.parameters, :$.statements, :$outer-frame);
+        $runtime.declare-var($name);
+        $runtime.put-var($name, $macro);
     }
 
     method run($runtime) {
