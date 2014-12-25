@@ -17,7 +17,7 @@ sub read(Str $ast) is export {
         assign      => Q::Expr::Infix::Assignment,
         '=='        => Q::Expr::Infix::Eq,
         call        => Q::Expr::Call::Sub,
-        index       => Q::Expr::Index,
+        index       => Q::Expr::Postfix::Index,
 
         my          => Q::Statement::My,
         stexpr      => Q::Statement::Expr,

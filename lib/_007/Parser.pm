@@ -387,7 +387,7 @@ class Parser {
             # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
             # to do these right enough
             if $<index> {
-                make [Q::Expr::Index, $<EXPR>.ast];
+                make [Q::Expr::Postfix::Index, $<EXPR>.ast];
             }
             else {
                 make [Q::Expr::Call::Sub, $<arguments>.ast];

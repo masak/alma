@@ -156,7 +156,7 @@ role Q::Expr::Infix::Eq does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Index does Q {
+role Q::Expr::Postfix::Index does Q {
     has $.array;
     has $.index;
     method new($array, $index) { self.bless(:$array, :$index) }
