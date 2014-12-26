@@ -38,7 +38,9 @@ role Q::Literal::Array does Q {
     }
     method Str { "Array" ~ children(@.elements) }
 
-    method eval($) { Val::Array.new(:elements(@.elements>>.eval($))) }
+    method eval($runtime) {
+        Val::Array.new(:elements(@.elements>>.eval($runtime)));
+    }
 }
 
 role Q::Literal::Block does Q {
