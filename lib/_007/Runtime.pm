@@ -127,6 +127,7 @@ role Runtime {
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
             'Q::Term::Identifier' => -> $name { Q::Term::Identifier.new($name.value) },
             'Q::Arguments' => -> $arguments { Q::Arguments.new($arguments.elements) },
+            'Q::Statements' => -> $statements { Q::Statements.new($statements.elements) },
         ;
 
         for %builtins.kv -> $name, $sub {

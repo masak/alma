@@ -32,4 +32,19 @@ use _007::Test;
         "expanding a macro and running the result at runtime";
 }
 
+{
+    my $program = q:to/./;
+        macro twice(st) {
+            return Q::Statements([st, st]);
+        }
+
+        twice( say("wow!") );
+        .
+
+    outputs
+        $program,
+        "wow!\nwow!\n",
+        "macros fuzz the border between expressions, statement, and statements";
+}
+
 done;
