@@ -52,8 +52,11 @@ class Parser {
             'my ' <identifier>
             {
                 my $symbol = $<identifier>.Str;
+                my $block = $*runtime.current-frame();
                 die X::Redeclaration.new(:$symbol)
                     if $*runtime.declared-locally($symbol);
+                die X::Redeclaration::Outer.new(:$symbol)
+                    if %*assigned{$block ~ $symbol};
                 $*runtime.declare-var($symbol);
             }
             [' = ' <EXPR>]?
@@ -343,6 +346,14 @@ class Parser {
                 my $op = @opstack.pop;
                 my $t1 = @termstack.pop;
                 @termstack.push($op.new($t1, $t2));
+
+                if $op === Q::Expr::Infix::Assignment {
+                    die "XXX: should X::Immutable on this"
+                        unless $t1 ~~ Q::Term::Identifier;
+                    my $block = $*runtime.current-frame();
+                    my $var = $t1.name;
+                    %*assigned{$block ~ $var}++;
+                }
             }
 
             for $<infix>».ast Z $<termish>[1..*]».ast -> $infix, $term {
@@ -440,6 +451,7 @@ class Parser {
     }
 
     method parse($program, :$*runtime = die "Must supply a runtime") {
+        my %*assigned;
         Syntax.parse($program, :actions(Actions))
             or die "Could not parse program";   # XXX: make this into X::
         return $/.ast;
