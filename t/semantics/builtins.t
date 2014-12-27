@@ -206,10 +206,12 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters (ident "n")) (statements
               (return (+ (ident "n") (int 1)))))
-          (stexpr (call (ident "say") (arguments (call (ident "map") (arguments (ident "f") (array (int 1) (int 2) (int 3))))))))
+          (my (ident "a") (assign (ident "a") (array (int 1) (int 2) (int 3))))
+          (stexpr (call (ident "say") (arguments (call (ident "map") (arguments (ident "f") (ident "a"))))))
+          (stexpr (call (ident "say") (arguments (ident "a")))))
         .
 
-    is-result $ast, "[2, 3, 4]\n", "map() works";
+    is-result $ast, "[2, 3, 4]\n[1, 2, 3]\n", "map() works";
 }
 
 done;
