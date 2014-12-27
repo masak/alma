@@ -186,4 +186,20 @@ use _007::Test;
     parse-error $program, X::Redeclaration, "cannot redeclare variable that's already a parameter";
 }
 
+{
+    my $program = q:to/./;
+        if "James" -> s {
+            say(s);
+        }
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (if (str "James") (block (parameters (ident "s")) (statements
+            (stexpr (call (ident "say") (arguments (ident "s"))))))))
+        .
+
+    parses-to $program, $ast, "if statement with a pointy block";
+}
+
 done;

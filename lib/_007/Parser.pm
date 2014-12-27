@@ -110,6 +110,7 @@ class Parser {
             'if' \s+
             <EXPR> \s*
             <.newpad>
+            ['->' \s* <parameters>]? \s*
             '{' ~ '}' [\s* <statements>]
         }
         token statement:for {
@@ -294,11 +295,12 @@ class Parser {
         }
 
         method statement:if ($/) {
+            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
             my $st = $<statements>.ast;
             make Q::Statement::If.new(
                 $<EXPR>.ast,
                 Q::Literal::Block.new(
-                    Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
+                    $parameters,
                     $st));
             self.finish-block($st);
         }
