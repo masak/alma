@@ -172,4 +172,14 @@ use _007::Test;
     is-result $ast, "a\nbc\nabc\n", "substr() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "charat") (arguments (str "abc") (int 0))))))
+          (stexpr (call (ident "say") (arguments (call (ident "charat") (arguments (str "abc") (int 3)))))))
+        .
+
+    is-result $ast, "a\n\n", "charat() works";
+}
+
 done;
