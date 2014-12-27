@@ -135,10 +135,11 @@ role Runtime {
                 $array;
             },
             map      => -> $fn, $a {
+                my $array = Val::Array.new;
                 for ^$a.elements.elems {
-                    $a.elements[$_] = self.call($fn, [$a.elements[$_]]);
+                    $array.elements[$_] = self.call($fn, [$a.elements[$_]]);
                 }
-                $a;
+                $array;
             },
             'Q::Expr::Call::Sub' => -> $expr, $arguments { Q::Expr::Call::Sub.new($expr, $arguments) },
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
