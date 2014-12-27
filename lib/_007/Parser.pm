@@ -356,7 +356,7 @@ class Parser {
                 @termstack.push($op.new($t1, $t2));
 
                 if $op === Q::Expr::Infix::Assignment {
-                    die "XXX: should X::Immutable on this"
+                    die X::Immutable.new(:method<assignment>, :typename($t1.^name))
                         unless $t1 ~~ Q::Term::Identifier;
                     my $block = $*runtime.current-frame();
                     my $var = $t1.name;

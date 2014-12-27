@@ -236,4 +236,13 @@ use _007::Test;
     parses-to $program, $ast, "don't have to have spaces around '=' in declaration";
 }
 
+{
+    my $program = q:to/./;
+        my a = [1, 2];
+        a[1] = 4;
+        .
+
+    parse-error $program, X::Immutable, "cannot assign to a non-identifier";
+}
+
 done;
