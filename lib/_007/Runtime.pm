@@ -136,8 +136,8 @@ role Runtime {
             },
             map      => -> $fn, $a {
                 my $array = Val::Array.new;
-                for ^$a.elements.elems {
-                    $array.elements[$_] = self.call($fn, [$a.elements[$_]]);
+                for $a.elements {
+                    $array.elements.push(self.call($fn, [$_]));
                 }
                 $array;
             },
