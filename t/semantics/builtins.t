@@ -141,4 +141,14 @@ use _007::Test;
     is-result $ast, "1|2\n", "join() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "bc"))))))
+          (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "d")))))))
+        .
+
+    is-result $ast, "1\n-1\n", "index() works";
+}
+
 done;
