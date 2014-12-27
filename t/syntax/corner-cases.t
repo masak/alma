@@ -223,4 +223,17 @@ use _007::Test;
     parses-to $program, $ast, "can escape quotes inside string";
 }
 
+{
+    my $program = q:to/./;
+        my n=7;
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (my (ident "n") (assign (ident "n") (int 7))))
+        .
+
+    parses-to $program, $ast, "don't have to have spaces around '=' in declaration";
+}
+
 done;

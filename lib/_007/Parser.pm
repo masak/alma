@@ -59,7 +59,7 @@ class Parser {
                     if %*assigned{$block ~ $symbol};
                 $*runtime.declare-var($symbol);
             }
-            [' = ' <EXPR>]?
+            [\s* '=' \s* <EXPR>]?
         }
         token statement:constant {
             'constant ' <identifier>
@@ -67,7 +67,7 @@ class Parser {
                 my $var = $<identifier>.Str;
                 $*runtime.declare-var($var);
             }
-            [' = ' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
+            [\s* '=' \s* <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
                                 # 'Missing initializer on constant declaration'
         }
         token statement:expr {
