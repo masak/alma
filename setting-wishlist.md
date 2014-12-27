@@ -2,7 +2,6 @@
 
     substr(s, pos, chars)
     charat(s, pos)
-    split(s, sep)
 
 ## Array subs
 

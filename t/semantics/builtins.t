@@ -144,6 +144,15 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
+          (stexpr (call (ident "say") (arguments (call (ident "split") (arguments (str "a|b") (str "|")))))))
+        .
+
+    is-result $ast, "[a, b]\n", "split() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
           (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "bc"))))))
           (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "d")))))))
         .
