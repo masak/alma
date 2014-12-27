@@ -201,4 +201,15 @@ use _007::Test;
     is-result $ast, "[2, 2]\n", "grep() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (sub (ident "f") (parameters (ident "n")) (statements
+              (return (+ (ident "n") (int 1)))))
+          (stexpr (call (ident "say") (arguments (call (ident "map") (arguments (ident "f") (array (int 1) (int 2) (int 3))))))))
+        .
+
+    is-result $ast, "[2, 3, 4]\n", "map() works";
+}
+
 done;
