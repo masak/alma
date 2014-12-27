@@ -154,10 +154,11 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "bc"))))))
+          (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "a"))))))
           (stexpr (call (ident "say") (arguments (call (ident "index") (arguments (str "abc") (str "d")))))))
         .
 
-    is-result $ast, "1\n-1\n", "index() works";
+    is-result $ast, "1\n0\n-1\n", "index() works";
 }
 
 done;
