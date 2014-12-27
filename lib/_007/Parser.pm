@@ -363,7 +363,7 @@ class Parser {
 
                 if $op === Q::Infix::Assignment {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
-                        unless $t1 ~~ Q::Term::Identifier;
+                        unless $t1 ~~ Q::Identifier;
                     my $block = $*runtime.current-frame();
                     my $var = $t1.name;
                     %*assigned{$block ~ $var}++;
@@ -390,7 +390,7 @@ class Parser {
             for $<postfix>.list -> $postfix {
                 my @p = $postfix.ast.list;
                 if @p[0] ~~ Q::Postfix::Call
-                && $/.ast ~~ Q::Term::Identifier
+                && $/.ast ~~ Q::Identifier
                 && (my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
                     my @args = @p[1].arguments;
                     my $qtree = $*runtime.call($macro, @args);
@@ -452,7 +452,7 @@ class Parser {
         }
 
         method identifier($/) {
-            make Q::Term::Identifier.new(~$/);
+            make Q::Identifier.new(~$/);
         }
 
         method arguments($/) {

@@ -143,7 +143,7 @@ role Runtime {
             },
             'Q::Postfix::Call' => -> $expr, $arguments { Q::Postfix::Call.new($expr, $arguments) },
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
-            'Q::Term::Identifier' => -> $name { Q::Term::Identifier.new($name.value) },
+            'Q::Identifier' => -> $name { Q::Identifier.new($name.value) },
             'Q::Arguments' => -> $arguments { Q::Arguments.new($arguments.elements) },
         ;
 

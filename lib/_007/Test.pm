@@ -8,7 +8,6 @@ sub read(Str $ast) is export {
         str         => Q::Literal::Str,
         array       => Q::Literal::Array,
         block       => Q::Literal::Block,
-        ident       => Q::Term::Identifier,
 
         '-'         => Q::Prefix::Minus,
 
@@ -31,6 +30,7 @@ sub read(Str $ast) is export {
         begin       => Q::Statement::BEGIN,
         macro       => Q::Statement::Macro,
 
+        ident       => Q::Identifier,
         statements  => Q::Statements,
         parameters  => Q::Parameters,
         arguments   => Q::Arguments,

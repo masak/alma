@@ -18,7 +18,7 @@ use _007::Test;
     my $program = q:to/./;
         macro foo() {
             return Q::Postfix::Call(
-                Q::Term::Identifier("say"),
+                Q::Identifier("say"),
                 Q::Arguments([Q::Literal::Str("OH HAI")])
             );
         }

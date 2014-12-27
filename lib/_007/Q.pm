@@ -60,7 +60,7 @@ role Q::Literal::Block does Q {
     }
 }
 
-role Q::Term::Identifier does Q {
+role Q::Identifier does Q {
     has $.name;
     method new(Str $name) { self.bless(:$name) }
     method Str { "Identifier[$.name]" }
@@ -133,7 +133,7 @@ role Q::Infix::Assignment does Q::Infix {
     method type { "[=]" }
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
-            unless $.lhs ~~ Q::Term::Identifier;
+            unless $.lhs ~~ Q::Identifier;
         my $value = $.rhs.eval($runtime);
         $runtime.put-var($.lhs.name, $value);
         return $value;
