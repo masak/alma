@@ -2,6 +2,10 @@
 
 A small language. A test bed for macro ideas.
 
+## Tutorial
+
+Read more: [007 tutorial](http://masak.github.io/007/)
+
 ## TODO
 
 * Q:: constructors/destructors in the setting
