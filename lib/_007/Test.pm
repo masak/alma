@@ -10,14 +10,14 @@ sub read(Str $ast) is export {
         block       => Q::Literal::Block,
         ident       => Q::Term::Identifier,
 
-        '-'         => Q::Expr::Prefix::Minus,
+        '-'         => Q::Prefix::Minus,
 
-        '+'         => Q::Expr::Infix::Addition,
-        '~'         => Q::Expr::Infix::Concat,
-        assign      => Q::Expr::Infix::Assignment,
-        '=='        => Q::Expr::Infix::Eq,
-        call        => Q::Expr::Call::Sub,
-        index       => Q::Expr::Postfix::Index,
+        '+'         => Q::Infix::Addition,
+        '~'         => Q::Infix::Concat,
+        assign      => Q::Infix::Assignment,
+        '=='        => Q::Infix::Eq,
+        call        => Q::Call::Sub,
+        index       => Q::Postfix::Index,
 
         my          => Q::Statement::My,
         stexpr      => Q::Statement::Expr,

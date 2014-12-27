@@ -70,7 +70,7 @@ role Q::Term::Identifier does Q {
     }
 }
 
-role Q::Expr::Prefix does Q {
+role Q::Prefix does Q {
     has $.expr;
     has $.type = "";
     method new($expr) { self.bless(:$expr) }
@@ -79,7 +79,7 @@ role Q::Expr::Prefix does Q {
     method eval($runtime) { ... }
 }
 
-role Q::Expr::Prefix::Minus does Q::Expr::Prefix {
+role Q::Prefix::Minus does Q::Prefix {
     method type { "[-]" }
     method eval($runtime) {
         my $expr = $.expr.eval($runtime);
@@ -89,7 +89,7 @@ role Q::Expr::Prefix::Minus does Q::Expr::Prefix {
     }
 }
 
-role Q::Expr::Infix does Q {
+role Q::Infix does Q {
     has $.lhs;
     has $.rhs;
     has $.type = "";
@@ -99,7 +99,7 @@ role Q::Expr::Infix does Q {
     method eval($runtime) { ... }
 }
 
-role Q::Expr::Infix::Addition does Q::Expr::Infix {
+role Q::Infix::Addition does Q::Infix {
     method type { "[+]" }
     method eval($runtime) {
         my $lhs = $.lhs.eval($runtime);
@@ -114,7 +114,7 @@ role Q::Expr::Infix::Addition does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Infix::Concat does Q::Expr::Infix {
+role Q::Infix::Concat does Q::Infix {
     method type { "[~]" }
     method eval($runtime) {
         my $lhs = $.lhs.eval($runtime);
@@ -129,7 +129,7 @@ role Q::Expr::Infix::Concat does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Infix::Assignment does Q::Expr::Infix {
+role Q::Infix::Assignment does Q::Infix {
     method type { "[=]" }
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
@@ -140,7 +140,7 @@ role Q::Expr::Infix::Assignment does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Infix::Eq does Q::Expr::Infix {
+role Q::Infix::Eq does Q::Infix {
     method type { "[==]" }
     method eval($runtime) {
         multi equal-value(Val $, Val $) { False }
@@ -163,7 +163,7 @@ role Q::Expr::Infix::Eq does Q::Expr::Infix {
     }
 }
 
-role Q::Expr::Postfix::Index does Q {
+role Q::Postfix::Index does Q {
     has $.array;
     has $.index;
     method new($array, $index) { self.bless(:$array, :$index) }
@@ -181,7 +181,7 @@ role Q::Expr::Postfix::Index does Q {
     }
 }
 
-role Q::Expr::Call::Sub does Q {
+role Q::Call::Sub does Q {
     has $.expr;
     has $.arguments;
     method new($expr, $arguments) { self.bless(:$expr, :$arguments) }

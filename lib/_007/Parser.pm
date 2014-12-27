@@ -23,12 +23,12 @@ sub add-infix($op, $q) {
     @infixprec.push($q);
 }
 
-add-prefix('-', Q::Expr::Prefix::Minus);
+add-prefix('-', Q::Prefix::Minus);
 
-add-infix('=', Q::Expr::Infix::Assignment);
-add-infix('==', Q::Expr::Infix::Eq);
-add-infix('+', Q::Expr::Infix::Addition);
-add-infix('~', Q::Expr::Infix::Concat);     # XXX: should really have the same prec as +
+add-infix('=', Q::Infix::Assignment);
+add-infix('==', Q::Infix::Eq);
+add-infix('+', Q::Infix::Addition);
+add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
 
 class Parser {
     grammar Syntax {
@@ -236,7 +236,7 @@ class Parser {
             if $<EXPR> {
                 make Q::Statement::My.new(
                     $<identifier>.ast,
-                    Q::Expr::Infix::Assignment.new(
+                    Q::Infix::Assignment.new(
                         $<identifier>.ast,
                         $<EXPR>.ast));
             }
@@ -249,7 +249,7 @@ class Parser {
             if $<EXPR> {
                 make Q::Statement::Constant.new(
                     $<identifier>.ast,
-                    Q::Expr::Infix::Assignment.new(
+                    Q::Infix::Assignment.new(
                         $<identifier>.ast,
                         $<EXPR>.ast));
             }
@@ -361,7 +361,7 @@ class Parser {
                 my $t1 = @termstack.pop;
                 @termstack.push($op.new($t1, $t2));
 
-                if $op === Q::Expr::Infix::Assignment {
+                if $op === Q::Infix::Assignment {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
                         unless $t1 ~~ Q::Term::Identifier;
                     my $block = $*runtime.current-frame();
@@ -389,7 +389,7 @@ class Parser {
             # XXX: need to think more about precedence here
             for $<postfix>.list -> $postfix {
                 my @p = $postfix.ast.list;
-                if @p[0] ~~ Q::Expr::Call::Sub
+                if @p[0] ~~ Q::Call::Sub
                 && $/.ast ~~ Q::Term::Identifier
                 && (my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
                     my @args = @p[1].arguments;
@@ -444,10 +444,10 @@ class Parser {
             # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
             # to do these right enough
             if $<index> {
-                make [Q::Expr::Postfix::Index, $<EXPR>.ast];
+                make [Q::Postfix::Index, $<EXPR>.ast];
             }
             else {
-                make [Q::Expr::Call::Sub, $<arguments>.ast];
+                make [Q::Call::Sub, $<arguments>.ast];
             }
         }
 
