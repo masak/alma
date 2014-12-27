@@ -130,7 +130,7 @@ role Runtime {
             grep     => -> $fn, $a {
                 my $array = Val::Array.new;
                 for $a.elements {
-                    $array.elements.push($_) if self.call($fn, [$_]).value == 1;
+                    $array.elements.push($_) if truthy(self.call($fn, [$_]));
                 }
                 $array;
             },
