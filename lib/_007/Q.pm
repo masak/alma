@@ -15,6 +15,11 @@ sub children(*@c) {
     "\n" ~ @c.join("\n").indent(2)
 }
 
+multi truthy(Val::None) { False }
+multi truthy(Val::Int $i) { ?$i.value }
+multi truthy(Val::Str $s) { ?$s.value }
+multi truthy(Val::Array $a) { ?$a.elements }
+
 role Q::Literal::Int does Q {
     has $.value;
     method new(Int $value) { self.bless(:$value) }
@@ -250,11 +255,6 @@ role Q::Statement::If does Q {
     }
 
     method run($runtime) {
-        multi truthy(Val::None) { False }
-        multi truthy(Val::Int $i) { ?$i.value }
-        multi truthy(Val::Str $s) { ?$s.value }
-        multi truthy(Val::Array $a) { ?$a.elements }
-
         if truthy($.expr.eval($runtime)) {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
@@ -344,11 +344,6 @@ role Q::Statement::While does Q {
     }
 
     method run($runtime) {
-        multi truthy(Val::None) { False }
-        multi truthy(Val::Int $i) { ?$i.value }
-        multi truthy(Val::Str $s) { ?$s.value }
-        multi truthy(Val::Array $a) { ?$a.elements }
-
         while truthy($.expr.eval($runtime)) {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
