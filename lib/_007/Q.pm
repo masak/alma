@@ -181,7 +181,7 @@ role Q::Postfix::Index does Q {
     }
 }
 
-role Q::Call::Sub does Q {
+role Q::Postfix::Call does Q {
     has $.expr;
     has $.arguments;
     method new($expr, $arguments) { self.bless(:$expr, :$arguments) }

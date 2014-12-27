@@ -389,7 +389,7 @@ class Parser {
             # XXX: need to think more about precedence here
             for $<postfix>.list -> $postfix {
                 my @p = $postfix.ast.list;
-                if @p[0] ~~ Q::Call::Sub
+                if @p[0] ~~ Q::Postfix::Call
                 && $/.ast ~~ Q::Term::Identifier
                 && (my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
                     my @args = @p[1].arguments;
@@ -447,7 +447,7 @@ class Parser {
                 make [Q::Postfix::Index, $<EXPR>.ast];
             }
             else {
-                make [Q::Call::Sub, $<arguments>.ast];
+                make [Q::Postfix::Call, $<arguments>.ast];
             }
         }
 
