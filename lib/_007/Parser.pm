@@ -82,6 +82,7 @@ class Parser {
         token statement:sub {
             'sub' \s+
             <identifier>
+            :my $*insub = True;
             {
                 my $var = $<identifier>.Str;
                 $*runtime.declare-var($var);
@@ -93,6 +94,7 @@ class Parser {
         token statement:macro {
             'macro' \s+
             <identifier>
+            :my $*insub = True;
             {
                 my $var = $<identifier>.Str;
                 $*runtime.declare-var($var);
@@ -104,6 +106,10 @@ class Parser {
         token statement:return {
             'return'
             [\s+ <EXPR>]?
+            {
+                die X::ControlFlow::Return.new
+                    unless $*insub;
+            }
             \s*
         }
         token statement:if {
@@ -454,6 +460,7 @@ class Parser {
 
     method parse($program, :$*runtime = die "Must supply a runtime") {
         my %*assigned;
+        my $*insub = False;
         Syntax.parse($program, :actions(Actions))
             or die "Could not parse program";   # XXX: make this into X::
         return $/.ast;

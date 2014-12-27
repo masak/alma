@@ -202,4 +202,12 @@ use _007::Test;
     parses-to $program, $ast, "if statement with a pointy block";
 }
 
+{
+    my $program = q:to/./;
+        return
+        .
+
+    parse-error $program, X::ControlFlow::Return, "cannot return from outside of a sub";
+}
+
 done;
