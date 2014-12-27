@@ -176,4 +176,14 @@ use _007::Test;
     parse-error $program, X::Redeclaration::Outer, "cannot first use outer and then declare inner variable";
 }
 
+{
+    my $program = q:to/./;
+        sub foo(x) {
+            my x;
+        }
+        .
+
+    parse-error $program, X::Redeclaration, "cannot redeclare variable that's already a parameter";
+}
+
 done;
