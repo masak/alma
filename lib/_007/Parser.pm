@@ -84,8 +84,11 @@ class Parser {
             <identifier>
             :my $*insub = True;
             {
-                my $var = $<identifier>.Str;
-                $*runtime.declare-var($var);
+                my $symbol = $<identifier>.Str;
+                my $block = $*runtime.current-frame();
+                die X::Redeclaration::Outer.new(:$symbol)
+                    if %*assigned{$block ~ $symbol};
+                $*runtime.declare-var($symbol);
             }
             <.newpad>
             '(' ~ ')' <parameters> \s*
@@ -96,8 +99,11 @@ class Parser {
             <identifier>
             :my $*insub = True;
             {
-                my $var = $<identifier>.Str;
-                $*runtime.declare-var($var);
+                my $symbol = $<identifier>.Str;
+                my $block = $*runtime.current-frame();
+                die X::Redeclaration::Outer.new(:$symbol)
+                    if %*assigned{$block ~ $symbol};
+                $*runtime.declare-var($symbol);
             }
             <.newpad>
             '(' ~ ')' <parameters> \s*
