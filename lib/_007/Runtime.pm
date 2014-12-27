@@ -126,7 +126,7 @@ role Runtime {
             split    => -> $s, $sep { Val::Array.new(:elements($s.value.split($sep.value))) },
             index    => -> $s, $substr { Val::Int.new(:value($s.value.index($substr.value) // -1)) },
             substr   => sub ($s, $pos, $chars?) { Val::Str.new(:value($s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars))) },
-            charat   => -> $s, $pos { Val::Str.new(:value($s.value.comb[$pos.value] // "")) },
+            charat   => -> $s, $pos { Val::Str.new(:value($s.value.comb[$pos.value] // die X::Subscript::TooLarge.new)) },
             'Q::Expr::Call::Sub' => -> $expr, $arguments { Q::Expr::Call::Sub.new($expr, $arguments) },
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
             'Q::Term::Identifier' => -> $name { Q::Term::Identifier.new($name.value) },

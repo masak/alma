@@ -175,11 +175,19 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (stexpr (call (ident "say") (arguments (call (ident "charat") (arguments (str "abc") (int 0))))))
+          (stexpr (call (ident "say") (arguments (call (ident "charat") (arguments (str "abc") (int 0)))))))
+        .
+
+    is-result $ast, "a\n", "charat() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
           (stexpr (call (ident "say") (arguments (call (ident "charat") (arguments (str "abc") (int 3)))))))
         .
 
-    is-result $ast, "a\n\n", "charat() works";
+    is-error $ast, X::Subscript::TooLarge, "charat() dies";
 }
 
 done;
