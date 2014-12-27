@@ -155,4 +155,13 @@ use _007::Test;
     parse-error $program, X::Redeclaration, "cannot redeclare parameters in sub";
 }
 
+{
+    my $program = q:to/./;
+        my x;
+        my x;
+        .
+
+    parse-error $program, X::Redeclaration, "cannot redeclare variable";
+}
+
 done;

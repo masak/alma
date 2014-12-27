@@ -51,8 +51,10 @@ class Parser {
         token statement:my {
             'my ' <identifier>
             {
-                my $var = $<identifier>.Str;
-                $*runtime.declare-var($var);
+                my $symbol = $<identifier>.Str;
+                die X::Redeclaration.new(:$symbol)
+                    if $*runtime.declared-locally($symbol);
+                $*runtime.declare-var($symbol);
             }
             [' = ' <EXPR>]?
         }
