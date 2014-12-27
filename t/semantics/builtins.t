@@ -161,4 +161,15 @@ use _007::Test;
     is-result $ast, "1\n0\n-1\n", "index() works";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (call (ident "substr") (arguments (str "abc") (int 0) (int 1))))))
+          (stexpr (call (ident "say") (arguments (call (ident "substr") (arguments (str "abc") (int 1))))))
+          (stexpr (call (ident "say") (arguments (call (ident "substr") (arguments (str "abc") (int 0) (int 5)))))))
+        .
+
+    is-result $ast, "a\nbc\nabc\n", "substr() works";
+}
+
 done;

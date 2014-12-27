@@ -1,6 +1,5 @@
 ## String subs
 
-    substr(s, pos, chars)
     charat(s, pos)
 
 ## Array subs
