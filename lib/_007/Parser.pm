@@ -164,7 +164,7 @@ class Parser {
 
         proto token term {*}
         token term:int { \d+ }
-        token term:str { '"' (<-["]>*) '"' }
+        token term:str { '"' ([<-["]> | '\\"']*) '"' }
         token term:array { '[' ~ ']' <EXPR>* % [\h* ',' \h*] }
         token term:identifier {
             <identifier>

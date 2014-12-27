@@ -210,4 +210,17 @@ use _007::Test;
     parse-error $program, X::ControlFlow::Return, "cannot return from outside of a sub";
 }
 
+{
+    my $program = q:to/./;
+        say("\"");
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (stexpr (call (ident "say") (arguments (str "\"")))))
+        .
+
+    parses-to $program, $ast, "can escape quotes inside string";
+}
+
 done;
