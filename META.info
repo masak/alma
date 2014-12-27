@@ -1,0 +1,16 @@
+{
+    "name"      : "007",
+    "version"   : "*",
+    "author"   : "github:masak",
+    "description"   : "Small experimental language with a license to macro",
+    "depends"   : [],
+    "provides" : {
+        "_007" : "lib/_007.pm",
+        "_007::Val" : "lib/_007/Val.pm",
+        "_007::Q" : "lib/_007/Q.pm",
+        "_007::Runtime" : "lib/_007/Runtime.pm",
+        "_007::Parser" : "lib/_007/Parser.pm",
+        "_007::Test" : "lib/_007/Test.pm"
+    },
+    "source-url"    : "git://github.com/masak/007.git"
+}
