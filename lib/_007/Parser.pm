@@ -32,7 +32,7 @@ add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as
 
 class Parser {
     grammar Syntax {
-        regex TOP {
+        token TOP {
             <.newpad>
             <statements>
         }
@@ -43,13 +43,13 @@ class Parser {
             $*runtime.enter($block)
         } }
 
-        regex statements {
-            [<statement> <.eat_terminator> \s*]*
+        rule statements {
+            '' [<statement><.eat_terminator> ]*
         }
 
         proto token statement {*}
-        token statement:my {
-            'my ' <identifier>
+        rule statement:my {
+            my <identifier>
             {
                 my $symbol = $<identifier>.Str;
                 my $block = $*runtime.current-frame();
@@ -59,29 +59,24 @@ class Parser {
                     if %*assigned{$block ~ $symbol};
                 $*runtime.declare-var($symbol);
             }
-            [\s* '=' \s* <EXPR>]?
+            ['=' <EXPR>]?
         }
-        token statement:constant {
-            'constant ' <identifier>
+        rule statement:constant {
+            constant <identifier>
             {
                 my $var = $<identifier>.Str;
                 $*runtime.declare-var($var);
             }
-            [\s* '=' \s* <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
+            ['=' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
                                 # 'Missing initializer on constant declaration'
         }
         token statement:expr {
-            <!before \s* '{'>       # prevent mixup with statement:block
+            <![{]>       # prevent mixup with statement:block
             <EXPR>
         }
-        token statement:block {
-            '{' ~ '}' [
-             <.newpad>
-             \s* <statements>]
-        }
-        token statement:sub {
-            'sub' \s+
-            <identifier>
+        token statement:block { <block> }
+        rule statement:sub {
+            sub <identifier>
             :my $*insub = True;
             {
                 my $symbol = $<identifier>.Str;
@@ -91,12 +86,11 @@ class Parser {
                 $*runtime.declare-var($symbol);
             }
             <.newpad>
-            '(' ~ ')' <parameters> \s*
-            '{' ~ '}' [\s* <statements>]
+            '(' ~ ')' <parameters>
+            <blockoid>:!s
         }
-        token statement:macro {
-            'macro' \s+
-            <identifier>
+        rule statement:macro {
+            macro <identifier>
             :my $*insub = True;
             {
                 my $symbol = $<identifier>.Str;
@@ -106,43 +100,49 @@ class Parser {
                 $*runtime.declare-var($symbol);
             }
             <.newpad>
-            '(' ~ ')' <parameters> \s*
-            '{' ~ '}' [\s* <statements>]
+            '(' ~ ')' <parameters>
+            <blockoid>:!s
         }
         token statement:return {
-            'return'
-            [\s+ <EXPR>]?
+            return [\s+ <EXPR>]?
             {
                 die X::ControlFlow::Return.new
                     unless $*insub;
             }
-            \s*
         }
         token statement:if {
-            'if' \s+
-            <EXPR> \s*
-            <.newpad>
-            ['->' \s* <parameters>]? \s*
-            '{' ~ '}' [\s* <statements>]
+            if \s+ <xblock>
         }
         token statement:for {
-            'for' \s+
-            <EXPR> \s*
-            <.newpad>
-            ['->' \s* <parameters>]? \s*
-            '{' ~ '}' [\s* <statements>]
+            for \s+ <xblock>
         }
         token statement:while {
-            'while' \s+
-            <EXPR> \s*
-            <.newpad>
-            '{' ~ '}' [\s* <statements>]
+            while \s+ <xblock>
         }
         token statement:BEGIN {
-            'BEGIN' \s*
-            '{' ~ '}' [
-             <.newpad>
-             \s* <statements>]
+            BEGIN <.ws> <block>
+        }
+
+        # requires a <.newpad> before invocation
+        token blockoid {
+            '{' ~ '}' <statements>
+        }
+        token block {
+            <?[{]> <.newpad> <blockoid>
+        }
+
+        # "pointy block"
+        token pblock {
+            | <lambda> <.newpad> <.ws>
+                <parameters>
+                <blockoid>
+            | <block>
+        }
+        token lambda { '->' }
+
+        # "eXpr block"
+        token xblock {
+            <EXPR> <pblock>
         }
 
         token eat_terminator {
@@ -181,7 +181,7 @@ class Parser {
                     unless $*runtime.declared($symbol);
             }
         }
-        token term:block { ['->' \s* <parameters>]? \s* '{' ~ '}' [\s* <statements> ] }
+        token term:block { <pblock> }
 
         method infix {
             my @ops = %ops<infix>.keys;
@@ -200,11 +200,11 @@ class Parser {
             <[\w:]>+
         }
 
-        token arguments {
-            <EXPR>* % [\s* ',' \s*]
+        rule arguments {
+            <EXPR> *% ','
         }
 
-        token parameters {
+        rule parameters {
             [<identifier>
                 {
                     my $symbol = $<identifier>[*-1].Str;
@@ -212,7 +212,7 @@ class Parser {
                         if $*runtime.declared-locally($symbol);
                     $*runtime.declare-var($symbol);
                 }
-            ]* % [\s* ',' \s*]
+            ]* % ','
         }
     }
 
@@ -268,30 +268,21 @@ class Parser {
         }
 
         method statement:block ($/) {
-            my $st = $<statements>.ast;
-            make Q::Statement::Block.new(
-                Q::Literal::Block.new(
-                    Q::Parameters.new,
-                    $st));
-            self.finish-block($st);
+            make Q::Statement::Block.new($<block>.ast);
         }
 
         method statement:sub ($/) {
-            my $st = $<statements>.ast;
             make Q::Statement::Sub.new(
                 $<identifier>.ast,
                 $<parameters>.ast,
-                $st);
-            self.finish-block($st);
+                $<blockoid>.ast);
         }
 
         method statement:macro ($/) {
-            my $st = $<statements>.ast;
             my $macro = Q::Statement::Macro.new(
                 $<identifier>.ast,
                 $<parameters>.ast,
-                $st);
-            self.finish-block($st);
+                $<blockoid>.ast);
             $macro.declare($*runtime);
             make $macro;
         }
@@ -307,49 +298,48 @@ class Parser {
         }
 
         method statement:if ($/) {
-            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
-            my $st = $<statements>.ast;
-            make Q::Statement::If.new(
-                $<EXPR>.ast,
-                Q::Literal::Block.new(
-                    $parameters,
-                    $st));
-            self.finish-block($st);
+            make Q::Statement::If.new(|$<xblock>.ast);
         }
 
         method statement:for ($/) {
-            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
-            my $st = $<statements>.ast;
-            make Q::Statement::For.new(
-                $<EXPR>.ast,
-                Q::Literal::Block.new(
-                    $parameters,
-                    $st));
-            self.finish-block($st);
+            make Q::Statement::For.new(|$<xblock>.ast);
         }
 
         method statement:while ($/) {
-            my $st = $<statements>.ast;
-            make Q::Statement::While.new(
-                $<EXPR>.ast,
-                Q::Literal::Block.new(
-                    Q::Parameters.new,  # XXX: generalize this (allow '->' syntax)
-                    $st));
-            self.finish-block($st);
+            make Q::Statement::While.new(|$<xblock>.ast);
         }
 
         method statement:BEGIN ($/) {
-            my $st = $<statements>.ast;
-            make Q::Statement::BEGIN.new(
-                Q::Literal::Block.new(
-                    Q::Parameters.new,
-                    $st));
-            self.finish-block($st);
-            $*runtime.run($<statements>.ast);
+            my $bl = $<block>.ast;
+            make Q::Statement::BEGIN.new($bl);
+            $*runtime.run($bl.statements);
         }
 
         sub tighter-or-equal($op1, $op2) {
             return @infixprec.first-index($op1) >= @infixprec.first-index($op2);
+        }
+
+        method blockoid ($/) {
+            my $st = $<statements>.ast;
+            make $st;
+            self.finish-block($st);
+        }
+        method block ($/) {
+            make Q::Literal::Block.new(
+                Q::Parameters.new,
+                $<blockoid>.ast);
+        }
+        method pblock ($/) {
+            if $<parameters> {
+                make Q::Literal::Block.new(
+                    $<parameters>.ast,
+                    $<blockoid>.ast);
+            } else {
+                make $<block>.ast;
+            }
+        }
+        method xblock ($/) {
+            make ($<EXPR>.ast, $<pblock>.ast);
         }
 
         method EXPR($/) {
@@ -430,10 +420,7 @@ class Parser {
         }
 
         method term:block ($/) {
-            my $parameters = ($<parameters> ?? $<parameters>.ast !! Q::Parameters.new);
-            make Q::Literal::Block.new(
-                $parameters,
-                $<statements>.ast);
+            make $<pblock>.ast;
         }
 
         method infix($/) {
