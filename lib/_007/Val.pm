@@ -33,6 +33,14 @@ role Val::Array does Val {
 role Q::Parameters { ... }
 role Q::Statements { ... }
 
+role Val::Quasi does Val {
+    has $.ast;
+
+    method Str {
+        $!ast.Str
+    }
+}
+
 role Val::Block does Val {
     has $.parameters = Q::Parameters.new;
     has $.statements = Q::Statements.new;

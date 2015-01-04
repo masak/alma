@@ -182,6 +182,7 @@ class Parser {
             }
         }
         token term:block { <pblock> }
+        token term:quasi { quasi <.ws> '{' ~ '}' <statements> }
 
         method infix {
             my @ops = %ops<infix>.keys;
@@ -421,6 +422,10 @@ class Parser {
 
         method term:block ($/) {
             make $<pblock>.ast;
+        }
+
+        method term:quasi ($/) {
+            make Q::Quasi.new($<statements>.ast);
         }
 
         method infix($/) {

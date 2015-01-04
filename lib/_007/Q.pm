@@ -198,6 +198,16 @@ role Q::Postfix::Call does Q {
     }
 }
 
+role Q::Quasi does Q {
+    has $.statements;
+    method new($statements) { self.bless(:$statements) }
+    method Str { "Quasi" ~ children($.statements) }
+
+    method eval($runtime) {
+        return Val::Quasi.new(ast => $.statements);
+    }
+}
+
 role Q::Statement::My does Q {
     has $.ident;
     has $.assignment;
