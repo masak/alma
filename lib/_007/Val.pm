@@ -36,9 +36,8 @@ role Q::Statements { ... }
 role Val::Quasi does Val {
     has $.ast;
 
-    method Str {
-        $!ast.Str
-    }
+    method Str { $!ast.Str }
+    method eval($runtime) { $!ast.run($runtime) }
 }
 
 role Val::Block does Val {
