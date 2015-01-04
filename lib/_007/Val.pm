@@ -30,15 +30,15 @@ role Val::Array does Val {
     }
 }
 
-role Q::Parameters { ... }
-role Q::Statements { ... }
-
 role Val::Quasi does Val {
     has $.ast;
 
     method Str { $!ast.Str }
     method eval($runtime) { $!ast.run($runtime) }
 }
+
+role Q::Parameters { ... }
+role Q::Statements { ... }
 
 role Val::Block does Val {
     has $.parameters = Q::Parameters.new;
