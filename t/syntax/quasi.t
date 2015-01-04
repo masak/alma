@@ -8,3 +8,13 @@ use _007::Test;
     .
     outputs $program, read("(statements (stexpr (+ (int 1) (int 1))))")~"\n", "Basic quasi quoting";
 }
+{
+    my $program = q:to/./;
+         macro foo() {
+             return quasi { say("OH HAI") }
+         }
+
+         foo();
+    .
+    outputs $program, "OH HAI\n", "Quasi quoting works for macro return value";
+}
