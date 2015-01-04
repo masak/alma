@@ -2,9 +2,16 @@
 use v6;
 use _007;
 
-sub MAIN($path) {
-    my $program = slurp($path);
+sub run_007($program) {
     my $runtime = _007.runtime;
     my $ast = _007.parser.parse($program, :$runtime);
     $runtime.run($ast);
+}
+
+multi MAIN($path) {
+    run_007(slurp($path));
+}
+
+multi MAIN(Str :e($program)!) {
+    run_007($program);
 }
