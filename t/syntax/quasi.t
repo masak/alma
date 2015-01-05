@@ -18,3 +18,5 @@ use _007::Test;
     .
     outputs $program, "OH HAI\n", "Quasi quoting works for macro return value";
 }
+
+done;
