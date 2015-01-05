@@ -265,7 +265,15 @@ class Parser {
         method statement:expr ($/) {
             die X::PointyBlock::SinkContext.new
                 if $<EXPR>.ast ~~ Q::Literal::Block;
-            make Q::Statement::Expr.new($<EXPR>.ast);
+            if $<EXPR>.ast ~~ Q::Statement::Block {
+                my @statements = $<EXPR>.ast.block.statements.statements.list;
+                die "Can't handle this case with more than one statement yet" # XXX
+                    if @statements > 1;
+                make @statements[0];
+            }
+            else {
+                make Q::Statement::Expr.new($<EXPR>.ast);
+            }
         }
 
         method statement:block ($/) {
@@ -379,6 +387,7 @@ class Parser {
             make $<term>.ast;
             # XXX: need to think more about precedence here
             for $<postfix>.list -> $postfix {
+                # XXX: factor the logic that checks for macro call out into its own helper sub
                 my @p = $postfix.ast.list;
                 if @p[0] ~~ Q::Postfix::Call
                 && $/.ast ~~ Q::Identifier

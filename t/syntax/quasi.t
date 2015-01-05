@@ -7,8 +7,9 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    outputs $program, read("(statements (stexpr (+ (int 1) (int 1))))")~"\n", "Basic quasi quoting";
+    outputs $program, read("(stblock (block (parameters) (statements (stexpr (+ (int 1) (int 1))))))")~"\n", "Basic quasi quoting";
 }
+
 {
     my $program = q:to/./;
         macro foo() {

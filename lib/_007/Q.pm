@@ -198,16 +198,6 @@ role Q::Postfix::Call does Q {
     }
 }
 
-role Q::Quasi does Q {
-    has $.statements;
-    method new($statements) { self.bless(:$statements) }
-    method Str { "Quasi" ~ children($.statements) }
-
-    method eval($runtime) {
-        return Val::Quasi.new(ast => $.statements);
-    }
-}
-
 role Q::Statement::My does Q {
     has $.ident;
     has $.assignment;
@@ -295,6 +285,18 @@ role Q::Statement::Block does Q {
         $runtime.enter($c);
         $.block.statements.run($runtime);
         $runtime.leave;
+    }
+}
+
+role Q::Quasi does Q {
+    has $.statements;
+    method new($statements) { self.bless(:$statements) }
+    method Str { "Quasi" ~ children($.statements) }
+
+    method eval($runtime) {
+        my $parameters = Q::Parameters.new();
+        my $block = Q::Literal::Block.new($parameters, $.statements);
+        return Q::Statement::Block.new($block);
     }
 }
 
