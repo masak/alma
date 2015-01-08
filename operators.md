@@ -17,7 +17,18 @@ illegal to define the other:
 
 However, `prefix:<[>` can co-exist with either of those.
 
-Anyway, matching an expression means getting a stream of tokens `[<prefix>*
+The three categories of operator and `term` have a kind of preconditions and
+postconditions regarding the expression parser state:
+
+    --ET--> term    --EO-->
+    --ET--> prefix  --ET-->
+    --EO--> infix   --ET-->
+    --EO--> postfix --EO-->
+
+Furthermore, the expression parser always starts in state `ET` (**Expect Term**)
+and ends in state `EO` (**Expect Operator**).
+
+So, matching an expression means getting a stream of tokens `[<prefix>*
 <term> <postfix>*] +% <infix>`. These tokens are constructed into a tree as
 follows.
 
