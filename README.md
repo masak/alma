@@ -36,7 +36,7 @@ Dryden picks up his gun from the drawer and aims it squarely at Bond, who sits, 
 
 "Shame," he says with mock regret and an acerbic smile, "we barely got to know each other." He pulls the trigger.
 
-*\*click\**
+\**click*\*
 
 Dryden lowers the handgun slightly. Understanding slowly dawns in his eyes.
 
@@ -214,7 +214,7 @@ Bond reaches into one of the man's pockets, gets out his gun, and shoots him.
 
 Dryden nods, sympathetically. "I understand fully. The Perl 6 macros have been a long way coming. I imagine prototyping them in this way will make the eventual work..."
 
-Bond takes swift aim, and pulls the trigger. The silencer makes the gun emit a professional kind of *\*PEW\** sound.
+Bond takes swift aim, and pulls the trigger. The silencer makes the gun emit a professional kind of \**PEW*\* sound.
 
 There's a quick shot of the view from Dryden's perspective as he tumbles backwards in his chair. A photo on his desk shows wife and daughter. He hits the floor on his back, dead.
 
