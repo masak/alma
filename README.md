@@ -14,7 +14,7 @@ When Dryden reviews the past few seconds, he *knows* he saw a flicker of movemen
 
 He keeps on staring straight ahead, waiting for the stranger to take the initiative.
 
-"M really doesn't mind you earning a little money on the side, Dryden," says the stranger, who is of course JAMES BOND, our titular character. His calm, deep voice that cuts through the silence. "She'd just prefer it if it wasn't selling secrets."
+"M really doesn't mind you earning a little money on the side, Dryden," says the stranger, who is of course JAMES BOND, our titular character. His calm, deep voice cuts through the silence. "She'd just prefer it if it wasn't selling secrets."
 
 Dryden, having composed himself, turns around, shoots Bond a dark glare and slowly sits down at his desk. As he does so, he surrepetitiously pulls out a desk drawer full of documents, on top of which are a remote control and a handgun. "If the theatrics are supposed to scare me, you have the wrong man, Bond." He pulls off his fine leather gloves. "If M was so sure I was bent, she'd have sent a Double-O." His rising tone on that last "Double-O" makes it abundantly clear that he knows Bond is not one.
 
