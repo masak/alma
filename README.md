@@ -102,7 +102,7 @@ Bond nods. "Yes, I suppose so."
 
 Silence.
 
-"Did you know I sat here for three hours?" says Bond suddenly. "My intel told me you were supposed to show up here by ten, so I was here waiting before that. I've been sitting so long my legs have gone to sleep."
+"Did you know I sat here for three hours?" says Bond suddenly. "My intel told me you were supposed to show up here by 23:00, so I was here waiting before that. I've been sitting so long my legs have gone to sleep."
 
 Dryden pulls a face. "My car broke down. Right in the middle of nowhere. I had to call a towing truck, and then I spent an hour or so at a repair shop."
 
