@@ -62,6 +62,8 @@ Bond takes a few heavy breaths. Still looking at his victim, he regains his comp
 
 ---
 
+*Office.*
+
 "Made you feel it, did he?" asks Dryden rhethorically. His brows are furrowed in understanding. Bond looks back, still expressionless.
 
 "Well, you needn't worry", Dryden continues. "The second is..."
@@ -205,6 +207,8 @@ The contact gets a distracted look on his face. "Wh...", he begins.
 Bond reaches into one of the man's pockets, gets out his gun, and shoots him.
 
 ---
+
+*Office.*
 
 "This is starting to feel like cheating," smiles Bond.
 
