@@ -2,7 +2,7 @@
 
 A single car pulls up to the section headquarters. Section chief JOHN DRYDEN gets out and looks around him before getting into the empty building.
 
-He takes one of the glass elevators up to his office. A silence hangs over the elevator as it rises up to his floor. The England-born station chief is wearing a western suit and tie; only the fur cap gives him an eastern look. An LED digital display quietly counts up the floors numbers: 3, 4, 5, 6...
+He takes one of the glass elevators up to his office. A silence hangs over the elevator as it rises up to his floor. The England-born station chief is wearing a western suit and tie; only the fur cap gives him a slightly slavic look. An LED digital display quietly counts up the floors numbers: 3, 4, 5, 6...
 
 The upper floor is all polished steel and glass. Dryden's footsteps are the only sounds heard as he heads to his office.
 
@@ -16,7 +16,7 @@ He keeps on staring straight ahead, waiting for the stranger to take the initiat
 
 "M really doesn't mind you earning a little money on the side, Dryden," says the stranger, who is of course JAMES BOND, our titular character. His calm, deep voice that cuts through the silence. "She'd just prefer it if it wasn't selling secrets."
 
-Dryden, having composed himself, shoots Bond a dark glare and slowly sits down at his desk. As he does so, he surrepetitiously pulls out a desk drawer full of documents, on top of which are a remote control and a handgun. "If the theatrics are supposed to scare me, you have the wrong man, Bond." He pulls off his fine leather gloves. "If M was so sure I was bent, she'd have sent a Double-O." His rising tone on that last "Double-O" makes it abundantly clear that he knows Bond is not one.
+Dryden, having composed himself, turns around, shoots Bond a dark glare and slowly sits down at his desk. As he does so, he surrepetitiously pulls out a desk drawer full of documents, on top of which are a remote control and a handgun. "If the theatrics are supposed to scare me, you have the wrong man, Bond." He pulls off his fine leather gloves. "If M was so sure I was bent, she'd have sent a Double-O." His rising tone on that last "Double-O" makes it abundantly clear that he knows Bond is not one.
 
 Having settled in, Dryden smiles and continues. "Benefits of being Section Chief. I'd know of anyone being promoted to Double-O status, wouldn't I? Your file shows no kills, and it takes..."
 
@@ -36,13 +36,13 @@ Dryden picks up his gun from the drawer and aims it squarely at Bond, who sits, 
 
 "Shame," he says with mock regret and an acerbic smile, "we barely got to know each other." He pulls the trigger.
 
-*click*
+*\*click\**
 
-Dryden lowers the handgun slightly, understanding slowly dawning in his eyes.
+Dryden lowers the handgun slightly. Understanding slowly dawns in his eyes.
 
 Bond holds up a pistol magazine. "I know where you keep your gun," he states, matter-of-factly. "I suppose that's something."
 
-Dryden has a look of dread and despair to him. "True," he says after a while. "How did he die?"
+Dryden has a mild look of dread and despair to him. "True," he says after a while. "How did he die?"
 
 "Your contact?" asks Bond. Dryden nods, minutely. "Not well."
 
@@ -67,6 +67,8 @@ Bond takes a few heavy breaths. Still looking at his victim, he regains his comp
 "Well, you needn't worry", Dryden continues. "The second is..."
 
 "Yes," Bond cuts him off. "Considerably."
+
+...
 
 A thick silence settles in the big office. The two men look at each other.
 
@@ -102,7 +104,7 @@ Silence.
 
 "Did you know I sat here for three hours?" says Bond suddenly. "My intel told me you were supposed to show up here by ten, so I was here waiting before that. I've been sitting so long my legs have gone to sleep."
 
-Dryden smirks. "My car broke down. Right in the middle of nowhere. I had to call a towing truck, and then I spent an hour or so at a repair shop."
+Dryden pulls a face. "My car broke down. Right in the middle of nowhere. I had to call a towing truck, and then I spent an hour or so at a repair shop."
 
 "Did you try to call your contact to tell him you were running late?"
 
@@ -140,7 +142,7 @@ They fight. Crashing through dividers, ultimately falling together onto the floo
 
 The man tries to rise from the floor. "*What?!*", he cries, panting. "Won't that lead to a Russell's paradox situation?" He half runs, half stumbles to the place on the floor here the gun is.
 
-Bond is right after him and kicks the pistol out of his hand. "No, I don't think so!", he shouts. "Computer programs are basically constructivist, so they don't fall prey to naive set-theoretic paradoxes." He takes the same kind of stranglehold on the agent as he did in the last flashback, and drags him to the nearest sink. "Besides, even `BEGIN` blocks are vulnerable to non-terminating code. It's all about freedom under responsibility."
+Bond is right after him and kicks the pistol out of his hand. "No, I don't think so!", he shouts. "Computer programs are basically constructivist, so they don't fall prey to naïve set-theoretic paradoxes." He takes the same kind of stranglehold on the agent as he did in the last flashback, and drags him to the nearest sink. "Besides, even `BEGIN` blocks are vulnerable to non-terminating code. It's all about freedom under responsibility."
 
 "But what are macros *good* for?!" shouts the man before he goes under the water tap.
 
@@ -150,7 +152,7 @@ Bond is right after him and kicks the pistol out of his hand. "No, I don't think
 
 *Office.*
 
-"Technically, *that* was my second kill," muses Bond, "even though technically, it was the same guy. And you're right, it was easier. I knew he was going to go for the pistol on the floor, so I could disarm him earlier."
+"In a way, *that* was my second kill," muses Bond, "even though technically, it was the same guy twice. And you're right, it was easier. I knew he was going to go for the pistol on the floor, so I could disarm him earlier."
 
 Dryden looks amused. "What was that thing about macros you were talking about?", he inquires.
 
@@ -160,11 +162,11 @@ Dryden looks amused. "What was that thing about macros you were talking about?",
 
 "Oh, not really. There's nothing revolutionary to it at all. But we're hoping it will shed some light on Perl 6 macros."
 
-A heartbeat of silence passes.
+Another beat of silence passes.
 
-"*You're* involved in the Perl 6 movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?"
+"*You're* involved in the Perl 6 movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?" Dryden is gaping, wide-eyed at the thought.
 
-"Er, I think we should stay within one franchise here," mumbles Bond, avoiding the sudden questions. "But I want to do the flashback again, I think I can do even better."
+"Er, I think we should stay within one franchise here," mumbles Bond, avoiding the sudden questions. "But I want to try the flashback again, I think I can do even better."
 
 ---
 
@@ -172,9 +174,9 @@ A heartbeat of silence passes.
 
 "So let me get this straight," says the contact, grunting between punches and blocks as they smash through the dividers again. "The parser produces an AST, as usual. The runtime is so simple that it just runs straight off the AST, which is slow as crap but works for a simple project, I guess." He blocks another blow.
 
-"Right," replies Bond, ramming an elbow into the agent with full force. "The innovation is really that AST fragments are also first-class objects, representable in the program itself. Which is of no use unless you can manage them at compile time. Macros are the way to do that." They tumble through a stall door and land hard at the same time. The pistol slides across the stone floor.
+"Right," replies Bond, ramming an elbow into the agent with full force. "The innovation is really that AST fragments are also first-class objects, occurring as values in the program itself. Which is of no use unless you can manage them at compile time and put them back into the program. Macros are a way to do that." They both tumble through a stall door and land hard at the same time. The pistol slides across the stone floor.
 
-They both get up, quickly. The man tries to throw a wastebasket at Bond, who kicks it away easily. "So, like a complicated version of Lisp macros, then?", shouts the contact. Bond punches him hard into the wall. The agent shatters a ceramic sink as he falls. While the other is down, Bond calmly walks over to the gun and picks it up.
+They get up, quickly. The man tries to throw a wastebasket at Bond, who kicks it away easily. "So, like a complicated version of Lisp macros, then?", shouts the contact. Bond punches him hard into the wall. The agent shatters a ceramic sink as he falls. While the other is down, Bond calmly walks over to the gun and snatches it from the ground.
 
 "Yes, kind of like Lisp macros. The extra complexity comes from the fact that Lisp doesn't really have any syntactic categories, whereas we do. In Lisp, everything is an expression, if you will. We are trying to have our cake and eat it: C-like syntax, but still with a flexible, AST-based macro system."
 
@@ -184,7 +186,7 @@ They both get up, quickly. The man tries to throw a wastebasket at Bond, who kic
 
 The contact gets an abstracted look. "But wait, won't there be weird and interesting interactions between AST fragments and lexical scoping?"
 
-"Like you wouldn't believe," says Bond and shoots the contact point blank.
+"Like you wouldn't believe," says Bond and shoots the contact point-blank.
 
 ---
 
@@ -216,4 +218,4 @@ Bond takes swift aim, and pulls the trigger. The silencer makes the gun emit a p
 
 There's a quick shot of the view from Dryden's perspective as he tumbles backwards in his chair. A photo on his desk shows wife and daughter. He hits the floor on his back, dead.
 
-"Yes," says Bond to no-one in particular, smiling dryly as he secures his gun and stows it in his trenchcoat. "Considerably."
+"Yes," says Bond to no-one in particular, smirking dryly as he secures his gun and stows it in his trenchcoat. "Considerably."
