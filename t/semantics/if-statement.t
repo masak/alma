@@ -25,4 +25,14 @@ use _007::Test;
     is-result $ast, "truthy int\ntruthy str\ntruthy array\n", "if statements run truthy things";
 }
 
+{
+    my $ast = q:to/./;
+        (statements
+          (if (int 7) (block (parameters (ident "a")) (statements
+            (stexpr (call (ident "say") (arguments (ident "a"))))))))
+        .
+
+    is-result $ast, "7\n", "if statements with parameters work as they should";
+}
+
 done;

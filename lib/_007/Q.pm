@@ -265,9 +265,16 @@ role Q::Statement::If does Q {
     }
 
     method run($runtime) {
-        if truthy($.expr.eval($runtime)) {
+        my $expr = $.expr.eval($runtime);
+        if truthy($expr) {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
+            die "Too many parameters in if statements"  # XXX: needs a test and a real exception
+                if $c.parameters.parameters > 1;
+            for $c.parameters.parameters Z $expr -> $param, $arg {
+                $runtime.declare-var($param.name);
+                $runtime.put-var($param.name, $arg);
+            }
             $.block.statements.run($runtime);
             $runtime.leave;
         }
