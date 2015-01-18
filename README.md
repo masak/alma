@@ -142,7 +142,7 @@ They fight. Crashing through dividers, ultimately falling together onto the floo
 
 "Did you know that macros allow introspection and modification of program elements from within the program itself?", Bond offers.
 
-The man tries to rise from the floor. "*What?!*", he cries, panting. "Won't that lead to a Russell's paradox situation?" He half runs, half stumbles to the place on the floor here the gun is.
+The man tries to rise from the floor. "*What?!*", he cries, panting. "Won't that lead to a Russell's paradox situation?" He half runs, half stumbles to the place on the floor where the gun is.
 
 Bond is right after him and kicks the pistol out of his hand. "No, I don't think so!", he shouts. "Computer programs are basically constructivist, so they don't fall prey to naïve set-theoretic paradoxes." He takes the same kind of stranglehold on the agent as he did in the last flashback, and drags him to the nearest sink. "Besides, even `BEGIN` blocks are vulnerable to non-terminating code. It's all about freedom under responsibility."
 
