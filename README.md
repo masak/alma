@@ -174,7 +174,7 @@ Another beat of silence passes.
 
 *Restroom. The tiles on the walls scream bright light.*
 
-"So let me get this straight," says the contact, grunting between punches and blocks as they smash through the dividers again. "The parser produces an AST, as usual. The runtime is so simple that it just runs straight off the AST, which is slow as crap but works for a simple project, I guess." He blocks another blow.
+"So let me get this straight," says the contact, grunting between punches and blocks as they smash through the dividers again. "The parser produces an abstract syntax tree, as usual. The runtime is so simple that it just runs straight off the AST, which is slow as crap but works for a simple project, I guess." He blocks another blow.
 
 "Right," replies Bond, ramming an elbow into the agent with full force. "The innovation is really that AST fragments are also first-class objects, occurring as values in the program itself. Which is of no use unless you can manage them at compile time and put them back into the program. Macros are a way to do that." They both tumble through a stall door and land hard at the same time. The pistol slides across the stone floor.
 
