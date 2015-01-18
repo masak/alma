@@ -118,7 +118,7 @@ Dryden pulls a face. "My car broke down. Right in the middle of nowhere. I had t
 
 "Hm, I wonder," says Bond. "We may not be able to re-do this scene, but maybe the flashback is amenable to modification?"
 
-"Interesting. Unorthodox, but worth a shot."
+"Huh. Unorthodox, but worth a shot."
 
 "Ok. Here goes."
 
@@ -166,13 +166,13 @@ Dryden looks amused. "What was that thing about macros you were talking about?",
 
 Another beat of silence passes.
 
-"*You're* involved in the Perl 6 movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?" Dryden is gaping, wide-eyed at the thought.
+"*You're* involved in the Perl 6 movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?" Dryden is gaping and wide-eyed, clearly relishing the thought.
 
 "Er, I think we should stay within one franchise here," mumbles Bond, avoiding the sudden questions. "But I want to try the flashback again, I think I can do even better."
 
 ---
 
-*Restroom. The tiles on the wall scream bright light.*
+*Restroom. The tiles on the walls scream bright light.*
 
 "So let me get this straight," says the contact, grunting between punches and blocks as they smash through the dividers again. "The parser produces an AST, as usual. The runtime is so simple that it just runs straight off the AST, which is slow as crap but works for a simple project, I guess." He blocks another blow.
 
