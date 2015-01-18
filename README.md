@@ -10,7 +10,7 @@ He opens the door. The office is veiled in darkness. Some lights from the street
 
 Someone is already in the office.
 
-When Dryden reviews the past few seconds, he *knows* he saw a flicker of movement from the corner near the door. Also, his peripheral vision must have caught a dark figure sitting in one of the chairs in that corner.
+When Dryden reviews the past few seconds, he *knows* he saw a flicker of movement from the corner near the door. Also, his peripheral vision must have caught sight in the mirror of a dark figure, sitting in one of the chairs in that corner.
 
 He keeps on staring straight ahead, waiting for the stranger to take the initiative.
 
