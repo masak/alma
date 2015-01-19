@@ -280,4 +280,12 @@ use _007::Test;
     parse-error $program, X::Redeclaration::Outer, "...same thing, but with an inner macro";
 }
 
+{
+    my $program = q:to/./;
+        my 5 = "five";
+        .
+
+    parse-error $program, X::Syntax::Missing, "an identifier can not start with a digit";
+}
+
 done;

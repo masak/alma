@@ -47,9 +47,13 @@ class Parser {
             '' [<statement><.eat_terminator> ]*
         }
 
+        method panic($what) {
+            die X::Syntax::Missing.new(:$what);
+        }
+
         proto token statement {*}
         rule statement:my {
-            my <identifier>
+            my [<identifier> || <.panic "identifier">]
             {
                 my $symbol = $<identifier>.Str;
                 my $block = $*runtime.current-frame();
@@ -198,7 +202,7 @@ class Parser {
         }
 
         token identifier {
-            <[\w:]>+
+            <!before \d> <[\w:]>+
         }
 
         rule arguments {
