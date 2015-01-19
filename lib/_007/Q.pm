@@ -177,6 +177,8 @@ role Q::Postfix::Index does Q {
         # XXX: also check index is integer
         die X::Subscript::TooLarge.new
             if $index.value >= $array.elements;
+        die X::Subscript::Negative.new(:$index, :type([]))
+            if $index.value < 0;
         return $array.elements[$index.value];
     }
 }
