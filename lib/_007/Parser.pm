@@ -80,7 +80,7 @@ class Parser {
         }
         token statement:block { <block> }
         rule statement:sub {
-            sub <identifier>
+            sub [<identifier> || <.panic "identifier">]
             :my $*insub = True;
             {
                 my $symbol = $<identifier>.Str;
