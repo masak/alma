@@ -127,6 +127,10 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
         when $expected-error {
             pass $desc;
         }
+        default {
+            is .^name, $expected-error.^name;   # which we know will flunk
+            return;
+        }
     }
     flunk $desc;
 }
