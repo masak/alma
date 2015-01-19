@@ -53,7 +53,7 @@ class Parser {
 
         proto token statement {*}
         rule statement:my {
-            my [<identifier> || <.panic "identifier">]
+            my [<identifier> || <.panic("identifier")>]
             {
                 my $symbol = $<identifier>.Str;
                 my $block = $*runtime.current-frame();
@@ -80,7 +80,7 @@ class Parser {
         }
         token statement:block { <block> }
         rule statement:sub {
-            sub [<identifier> || <.panic "identifier">]
+            sub [<identifier> || <.panic("identifier")>]
             :my $*insub = True;
             {
                 my $symbol = $<identifier>.Str;
