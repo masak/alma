@@ -204,7 +204,7 @@ class Parser {
         }
 
         token identifier {
-            <!before \d> <[\w:]>+
+            <!before \d> <[\w:]>+ ['<' <-[>]>+ '>']?
         }
 
         rule arguments {
