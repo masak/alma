@@ -163,6 +163,17 @@ role Q::Infix::Eq does Q::Infix {
     }
 }
 
+role Q::Infix::Custom[$type] does Q::Infix {
+    method type { $type }
+
+    method eval($runtime) {
+        my $l = $.lhs.eval($runtime);
+        my $r = $.rhs.eval($runtime);
+        my $c = $runtime.get-var("infix:<*>");    # XXX
+        return $runtime.call($c, [$l, $r]);
+    }
+}
+
 role Q::Postfix::Index does Q {
     has $.array;
     has $.index;

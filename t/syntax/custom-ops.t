@@ -16,4 +16,16 @@ use _007::Test;
     parses-to $program, $ast, "custom operator parses to the right thing";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<*>(left, right) {
+            return 20;
+        }
+
+        say(4 * 5);
+        .
+
+    outputs $program, "20\n", "using an operator after defining it works";
+}
+
 done;

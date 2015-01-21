@@ -31,6 +31,7 @@ add-infix('=', Q::Infix::Assignment);
 add-infix('==', Q::Infix::Eq);
 add-infix('+', Q::Infix::Addition);
 add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
+add-infix('*', Q::Infix::Custom['*']);
 
 class Parser {
     grammar Syntax {
