@@ -8,32 +8,34 @@ class X::PointyBlock::SinkContext is Exception {
     method message { "Pointy blocks cannot occur on the statement level" }
 }
 
-my %ops =
-    prefix => {},
-    infix => {},
-;
-my @infixprec;
-my @prepostfixprec;
-
-sub add-prefix($op, $q) {
-    %ops<prefix>{$op} = $q;
-    @prepostfixprec.push($q);
-}
-
-sub add-infix($op, $q) {
-    %ops<infix>{$op} = $q;
-    @infixprec.push($q);
-}
-
-add-prefix('-', Q::Prefix::Minus);
-
-add-infix('=', Q::Infix::Assignment);
-add-infix('==', Q::Infix::Eq);
-add-infix('+', Q::Infix::Addition);
-add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
-add-infix('*', Q::Infix::Custom['*']);
-
 class Parser {
+    has %.ops =
+        prefix => {},
+        infix => {},
+    ;
+
+    has @.infixprec;
+    has @.prepostfixprec;
+
+    method add-prefix($op, $q) {
+        %!ops<prefix>{$op} = $q;
+        @!prepostfixprec.push($q);
+    }
+
+    method add-infix($op, $q) {
+        %!ops<infix>{$op} = $q;
+        @!infixprec.push($q);
+    }
+
+    submethod BUILD {
+        self.add-prefix('-', Q::Prefix::Minus);
+
+        self.add-infix('=', Q::Infix::Assignment);
+        self.add-infix('==', Q::Infix::Eq);
+        self.add-infix('+', Q::Infix::Addition);
+        self.add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
+    }
+
     grammar Syntax {
         token TOP {
             <.newpad>
@@ -168,7 +170,7 @@ class Parser {
             if / '->' /(self) {
                 return /<!>/(self);
             }
-            my @ops = %ops<prefix>.keys;
+            my @ops = $*parser.ops<prefix>.keys;
             if /@ops/(self) -> $cur {
                 return $cur."!reduce"("prefix");
             }
@@ -192,7 +194,7 @@ class Parser {
         token term:parens { '(' ~ ')' <EXPR> }
 
         method infix {
-            my @ops = %ops<infix>.keys;
+            my @ops = $*parser.ops<infix>.keys;
             if /@ops/(self) -> $cur {
                 return $cur."!reduce"("infix");
             }
@@ -288,12 +290,18 @@ class Parser {
         }
 
         method statement:sub ($/) {
+            my $identifier = $<identifier>.ast;
+
             my $sub = Q::Statement::Sub.new(
-                $<identifier>.ast,
+                $identifier,
                 $<parameters>.ast,
                 $<blockoid>.ast);
             $sub.declare($*runtime);
             make $sub;
+
+            if $identifier.name eq 'infix:<*>' {
+                $*parser.add-infix('*', Q::Infix::Custom['*']);
+            }
         }
 
         method statement:macro ($/) {
@@ -334,7 +342,7 @@ class Parser {
         }
 
         sub tighter-or-equal($op1, $op2) {
-            return @infixprec.first-index($op1) >= @infixprec.first-index($op2);
+            return $*parser.infixprec.first-index($op1) >= $*parser.infixprec.first-index($op2);
         }
 
         method blockoid ($/) {
@@ -415,7 +423,7 @@ class Parser {
         }
 
         method prefix($/) {
-            make %ops<prefix>{~$/};
+            make $*parser.ops<prefix>{~$/};
         }
 
         method term:int ($/) {
@@ -451,7 +459,7 @@ class Parser {
         }
 
         method infix($/) {
-            make %ops<infix>{~$/};
+            make $*parser.ops<infix>{~$/};
         }
 
         method postfix($/) {
@@ -481,6 +489,7 @@ class Parser {
     method parse($program, :$*runtime = die "Must supply a runtime") {
         my %*assigned;
         my $*insub = False;
+        my $*parser = self;
         Syntax.parse($program, :actions(Actions))
             or die "Could not parse program";   # XXX: make this into X::
         return $/.ast;

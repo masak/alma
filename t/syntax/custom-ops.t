@@ -28,4 +28,12 @@ use _007::Test;
     outputs $program, "20\n", "using an operator after defining it works";
 }
 
+{
+    my $program = q:to/./;
+        say(4 * 5);
+        .
+
+    parse-error $program, X::AdHoc, "infix:<*> should not be defined unless we define it";
+}
+
 done;
