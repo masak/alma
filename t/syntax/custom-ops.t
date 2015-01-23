@@ -36,4 +36,17 @@ use _007::Test;
     parse-error $program, X::AdHoc, "infix:<*> should not be defined unless we define it";
 }
 
+{
+    my $program = q:to/./;
+        {
+            sub infix:<*>(left, right) {
+                return 7;
+            }
+        }
+        say(4 * 5);
+        .
+
+    parse-error $program, X::AdHoc, "infix:<*> should not be usable outside of its scope";
+}
+
 done;
