@@ -38,13 +38,13 @@ Dryden picks up his gun from the drawer and aims it squarely at Bond, who sits, 
 
 \**click*\*
 
-Dryden lowers the handgun slightly. Understanding slowly dawns in his eyes.
+Dryden lowers the handgun slightly. Cold, horrible realization slowly dawns in his eyes.
 
 Bond holds up a pistol magazine. "I know where you keep your gun," he states, matter-of-factly. "I suppose that's something."
 
 Dryden has a mild look of dread and despair to him. "True," he says after a while. "How did he die?"
 
-"Your contact?" asks Bond. Dryden nods, minutely. "Not well."
+"Your contact?" asks Bond. Dryden nods, minutely. "Not well," admits Bond.
 
 ---
 
@@ -82,7 +82,7 @@ A thick silence settles in the big office. The two men look at each other.
 
 Now Bond looks a trifle concerned. "Are you sure? I mean, that would make you my second kill, yes. But what if I killed a second person on my way here?"
 
-Dryden sighs. "That's possible, of course, but from a story point of view it's very unsatisfactory. Look at the chronological facts in play here. MI6 finds out I sell state secrets, which makes me a traitor. They send you to kill my contact, and then come for me. You sneak into my office, disarm my gun, and wait for me. Then we review my sins together, and how you already killed my contact. I even tried to kill *you* as you came out of your flashback. Then I serve you the *perfect* line about how the second kill is easier, and you cut me off before I even have time to say "easier". If you had shot me right there, that would have made *me* your second kill, creating a bit of situational (albeit dark) humor, along with a trademark Bond one-liner."
+Dryden sighs. "That's possible, of course, but unsatisfactory from a story point of view. Look at the chronological facts: MI6 finds out I sell state secrets, which makes me a traitor. They send you to kill my contact, and then come for me. You sneak into my office, disarm my gun, and wait for me. Then we review my sins together, and how you already killed my contact. I even tried to kill *you* as you came out of your flashback. Then I serve you the *perfect* line about how the second kill is easier, and you cut me off before I even have time to say "easier". If you had shot me right there, that would have made *me* your second kill, creating a bit of situational (albeit dark) humor, along with a trademark Bond one-liner."
 
 Now it's Bond's time to furrow his brows. "Oh dear, I believe you're right. That was clearly a missed opportunity. Apologies."
 
@@ -90,11 +90,11 @@ There's another pause.
 
 "I don't suppose I can just kill you now instead?" asks Bond hopefully.
 
-"No, now the moment has passed," grumbles Dryden and flops down into his chair again. "Besides, at this point we're already meta."
+"No, the moment has passed," grumbles Dryden and flops down into his chair, dejected. "Besides, at this point we're already meta."
 
-"I'm sorry to cause all this trouble. This *is* my first assignment, and frankly, it's not as easy as it looks."
+"I'm sorry to cause all this trouble. This *is* my first assignment. Frankly, it's not as easy as it looks."
 
-Another sigh. "I know, I know. Being a field agent is tough. Which is why I opted for a career as highly trusted, treacherous, and ultimately dispensable section chief instead."
+Another sigh. "I know, I know. Being a field agent is tough. Which is why I opted for a career as highly trusted, unreliable, and ultimately dispensable section chief in an East European country instead."
 
 "If you want, you could go out and come back in, and we could do it all over again."
 
@@ -142,9 +142,9 @@ They fight. Crashing through dividers, ultimately falling together onto the floo
 
 "Did you know that macros allow introspection and modification of program elements from within the program itself?", Bond offers.
 
-The man tries to rise from the floor. "*What?!*", he cries, panting. "Won't that lead to a Russell's paradox situation?" He half runs, half stumbles to the place on the floor where the gun is.
+The man tries to rise from the floor. "*What?!*", he pants. "Won't that lead to a Russell's paradox situation?" He half runs, half stumbles to the place on the floor where the gun is.
 
-Bond is right after him and kicks the pistol out of his hand. "No, I don't think so!", he shouts. "Computer programs are basically constructivist, so they don't fall prey to naïve set-theoretic paradoxes." He takes the same kind of stranglehold on the agent as he did in the last flashback, and drags him to the nearest sink. "Besides, even `BEGIN` blocks are vulnerable to non-terminating code. It's all about freedom under responsibility."
+Bond is right after him and kicks the pistol out of his hand. "No, I don't think so.", he muses. He takes the same kind of stranglehold on the agent as he did in the last flashback, and drags him to the nearest sink. "Besides, even `BEGIN` blocks are vulnerable to non-terminating code. It's all about freedom under responsibility."
 
 "But what are macros *good* for?!" shouts the man before he goes under the water tap.
 
