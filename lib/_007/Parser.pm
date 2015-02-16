@@ -8,7 +8,7 @@ class X::PointyBlock::SinkContext is Exception {
     method message { "Pointy blocks cannot occur on the statement level" }
 }
 
-class Parser {
+class OpLevel {
     has %.ops =
         prefix => {},
         infix => {},
@@ -27,25 +27,55 @@ class Parser {
         @!infixprec.push($q);
     }
 
-    submethod BUILD {
-        self.add-prefix('-', Q::Prefix::Minus);
+    method clone {
+        my $opl = OpLevel.new(
+            :@.infixprec,
+            :@.prepostfixprec,
+        );
+        for <prefix infix> -> $category {
+            for %.ops{$category}.kv -> $op, $q {
+                $opl.ops{$category}{$op} = $q;
+            }
+        }
+        return $opl;
+    }
+}
 
-        self.add-infix('=', Q::Infix::Assignment);
-        self.add-infix('==', Q::Infix::Eq);
-        self.add-infix('+', Q::Infix::Addition);
-        self.add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
+class Parser {
+    has @!oplevels;
+
+    method oplevel { @!oplevels[*-1] }
+    method push-oplevel { @!oplevels.push: @!oplevels[*-1].clone }
+    method pop-oplevel { @!oplevels.pop }
+
+    submethod BUILD {
+        my $opl = OpLevel.new;
+        @!oplevels.push: $opl;
+
+        $opl.add-prefix('-', Q::Prefix::Minus);
+
+        $opl.add-infix('=', Q::Infix::Assignment);
+        $opl.add-infix('==', Q::Infix::Eq);
+        $opl.add-infix('+', Q::Infix::Addition);
+        $opl.add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
     }
 
     grammar Syntax {
         token TOP {
             <.newpad>
             <statements>
+            <.finishpad>
         }
 
         token newpad { <?> {
+            $*parser.push-oplevel;
             my $block = Val::Block.new(
                 :outer-frame($*runtime.current-frame));
             $*runtime.enter($block)
+        } }
+
+        token finishpad { <?> {
+            $*parser.pop-oplevel;
         } }
 
         rule statements {
@@ -97,6 +127,7 @@ class Parser {
             <.newpad>
             '(' ~ ')' <parameters>
             <blockoid>:!s
+            <.finishpad>
         }
         rule statement:macro {
             macro <identifier>
@@ -111,6 +142,7 @@ class Parser {
             <.newpad>
             '(' ~ ')' <parameters>
             <blockoid>:!s
+            <.finishpad>
         }
         token statement:return {
             return [\s+ <EXPR>]?
@@ -133,11 +165,12 @@ class Parser {
         }
 
         # requires a <.newpad> before invocation
+        # and a <.finishpad> after
         token blockoid {
             '{' ~ '}' <statements>
         }
         token block {
-            <?[{]> <.newpad> <blockoid>
+            <?[{]> <.newpad> <blockoid> <.finishpad>
         }
 
         # "pointy block"
@@ -145,6 +178,7 @@ class Parser {
             | <lambda> <.newpad> <.ws>
                 <parameters>
                 <blockoid>
+                <.finishpad>
             | <block>
         }
         token lambda { '->' }
@@ -170,7 +204,7 @@ class Parser {
             if / '->' /(self) {
                 return /<!>/(self);
             }
-            my @ops = $*parser.ops<prefix>.keys;
+            my @ops = $*parser.oplevel.ops<prefix>.keys;
             if /@ops/(self) -> $cur {
                 return $cur."!reduce"("prefix");
             }
@@ -194,7 +228,7 @@ class Parser {
         token term:parens { '(' ~ ')' <EXPR> }
 
         method infix {
-            my @ops = $*parser.ops<infix>.keys;
+            my @ops = $*parser.oplevel.ops<infix>.keys;
             if /@ops/(self) -> $cur {
                 return $cur."!reduce"("infix");
             }
@@ -300,7 +334,7 @@ class Parser {
             make $sub;
 
             if $identifier.name eq 'infix:<*>' {
-                $*parser.add-infix('*', Q::Infix::Custom['*']);
+                $*parser.oplevel.add-infix('*', Q::Infix::Custom['*']);
             }
         }
 
@@ -342,7 +376,7 @@ class Parser {
         }
 
         sub tighter-or-equal($op1, $op2) {
-            return $*parser.infixprec.first-index($op1) >= $*parser.infixprec.first-index($op2);
+            return $*parser.oplevel.infixprec.first-index($op1) >= $*parser.oplevel.infixprec.first-index($op2);
         }
 
         method blockoid ($/) {
@@ -423,7 +457,7 @@ class Parser {
         }
 
         method prefix($/) {
-            make $*parser.ops<prefix>{~$/};
+            make $*parser.oplevel.ops<prefix>{~$/};
         }
 
         method term:int ($/) {
@@ -459,7 +493,7 @@ class Parser {
         }
 
         method infix($/) {
-            make $*parser.ops<infix>{~$/};
+            make $*parser.oplevel.ops<infix>{~$/};
         }
 
         method postfix($/) {
