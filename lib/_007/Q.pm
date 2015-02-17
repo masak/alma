@@ -169,7 +169,7 @@ role Q::Infix::Custom[$type] does Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
-        my $c = $runtime.get-var("infix:<*>");    # XXX
+        my $c = $runtime.get-var("infix:<$type>");
         return $runtime.call($c, [$l, $r]);
     }
 }

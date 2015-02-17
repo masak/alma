@@ -333,9 +333,12 @@ class Parser {
             $sub.declare($*runtime);
             make $sub;
 
-            if $identifier.name eq 'infix:<*>' {
-                $*parser.oplevel.add-infix('*', Q::Infix::Custom['*']);
-            }
+            sub check-if-infix($s) {
+                if $s ~~ /'infix:<' (.) '>'/ {  # XXX: >1 character
+                    my $op = ~$0;
+                    $*parser.oplevel.add-infix($op, Q::Infix::Custom[$op]);
+                }
+            }($identifier.name);
         }
 
         method statement:macro ($/) {
