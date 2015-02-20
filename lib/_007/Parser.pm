@@ -334,7 +334,7 @@ class Parser {
             make $sub;
 
             sub check-if-infix($s) {
-                if $s ~~ /'infix:<' (.) '>'/ {  # XXX: >1 character
+                if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
                     $*parser.oplevel.add-infix($op, Q::Infix::Custom[$op]);
                 }
