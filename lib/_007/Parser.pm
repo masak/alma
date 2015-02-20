@@ -285,10 +285,12 @@ class Parser {
         }
 
         method statement:sub ($/) {
-            make Q::Statement::Sub.new(
+            my $sub = Q::Statement::Sub.new(
                 $<identifier>.ast,
                 $<parameters>.ast,
                 $<blockoid>.ast);
+            $sub.declare($*runtime);
+            make $sub;
         }
 
         method statement:macro ($/) {
