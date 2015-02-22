@@ -126,6 +126,7 @@ class Parser {
             }
             <.newpad>
             '(' ~ ')' <parameters>
+            <trait>*
             <blockoid>:!s
             <.finishpad>
         }
@@ -162,6 +163,10 @@ class Parser {
         }
         token statement:BEGIN {
             BEGIN <.ws> <block>
+        }
+
+        token trait {
+            'is' \s* <identifier> '(' <EXPR> ')'
         }
 
         # requires a <.newpad> before invocation
@@ -376,6 +381,10 @@ class Parser {
             my $bl = $<block>.ast;
             make Q::Statement::BEGIN.new($bl);
             $*runtime.run($bl.statements);
+        }
+
+        method trait($/) {
+            make Q::Trait.new($<identifier>.ast, $<EXPR>.ast);
         }
 
         sub tighter-or-equal($op1, $op2) {

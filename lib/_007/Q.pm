@@ -483,3 +483,13 @@ role Q::Arguments does Q {
     method new(*@arguments) { self.bless(:@arguments) }
     method Str { "Arguments" ~ children(@.arguments) }
 }
+
+role Q::Trait does Q {
+    has $.ident;
+    has $.expr;
+
+    method new($ident, $expr) {
+        self.bless(:$ident, :$expr);
+    }
+    method Str { "Trait[{$.ident.name}]" ~ children($.expr) }
+}

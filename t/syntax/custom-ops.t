@@ -105,4 +105,28 @@ use _007::Test;
     outputs $program, "OH HAI\n", "defined operators work from within BEGIN blocks";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<*!>(left, right) {
+            return 10;
+        }
+
+        say(1 + 5 *! 5);
+        .
+
+    outputs $program, "11\n", "new operators bind maximally tightly";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<~?>(left, right) is looser(infix:<+>) {
+            return 6;
+        }
+
+        say(1 + 9 ~? 12);
+        .
+
+    outputs $program, "6\n", "can specify trait to bind loose";
+}
+
 done;

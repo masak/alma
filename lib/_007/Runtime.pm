@@ -145,6 +145,7 @@ role Runtime {
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
             'Q::Identifier' => -> $name { Q::Identifier.new($name.value) },
             'Q::Arguments' => -> $arguments { Q::Arguments.new($arguments.elements) },
+            'infix:<+>' => -> $l, $r { #`[not implemented here] },
         ;
 
         for %builtins.kv -> $name, $sub {
