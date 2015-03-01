@@ -164,7 +164,7 @@ role Q::Infix::Eq does Q::Infix {
 }
 
 role Q::Infix::Custom[$type] does Q::Infix {
-    method type { $type }
+    method type { "[$type]" }
 
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
