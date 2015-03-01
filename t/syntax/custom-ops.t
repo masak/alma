@@ -157,4 +157,13 @@ use _007::Test;
     outputs $program, "30\n", "the new op is tighter than +, but not *";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<!?!>(left, right) is tighter(infix:<+>) is looser(infix:<+>) {
+        }
+        .
+
+    parse-error $program, X::Trait::Conflict, "can't have both tighter and looser traits";
+}
+
 done;

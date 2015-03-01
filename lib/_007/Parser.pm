@@ -8,6 +8,9 @@ class X::PointyBlock::SinkContext is Exception {
     method message { "Pointy blocks cannot occur on the statement level" }
 }
 
+class X::Trait::Conflict is Exception {
+}
+
 class OpLevel {
     has %.ops =
         prefix => {},
@@ -138,7 +141,7 @@ class Parser {
             }
             <.newpad>
             '(' ~ ')' <parameters>
-            <trait>*
+            <trait> *
             <blockoid>:!s
             <.finishpad>
         }
