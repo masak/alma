@@ -141,4 +141,20 @@ use _007::Test;
     outputs $program, "7\n", "can specify trait to bind tight";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<*>(left, right) {
+            return 18;
+        }
+
+        sub infix:<~@>(left, right) is tighter(infix:<+>) {
+            return 30;
+        }
+
+        say(1 ~@ 2 * 9);
+        .
+
+    outputs $program, "30\n", "the new op is tighter than +, but not *";
+}
+
 done;
