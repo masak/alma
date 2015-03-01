@@ -33,6 +33,12 @@ class OpLevel {
         @!infixprec.splice($pos, 0, $q);
     }
 
+    method add-infix-tighter($op, $q, $tighter-than) {
+        %!ops<infix>{$op} = $q;
+        my $pos = @!infixprec.first-index({ .type eq "[$tighter-than]" });
+        @!infixprec.splice($pos + 1, 0, $q);
+    }
+
     method clone {
         my $opl = OpLevel.new(
             :@.infixprec,
@@ -345,6 +351,7 @@ class Parser {
             make $sub;
 
             my $looser;
+            my $tighter;
             for @<trait> -> $trait {
                 if $trait<identifier>.ast.name eq "looser" {
                     my $identifier = $trait<EXPR>.ast;
@@ -356,6 +363,16 @@ class Parser {
                         }
                     }($identifier.name);
                 }
+                elsif $trait<identifier>.ast.name eq "tighter" {
+                    my $identifier = $trait<EXPR>.ast;
+                    die "The thing your op is tighter than must be an identifier"
+                        unless $identifier ~~ Q::Identifier;
+                    sub check-if-infix($s) {
+                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                            $tighter = ~$0;
+                        }
+                    }($identifier.name);
+                }
             }
 
             sub check-if-infix($s) {
@@ -363,6 +380,9 @@ class Parser {
                     my $op = ~$0;
                     if $looser {
                         $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], $looser);
+                    }
+                    elsif $tighter {
+                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], $tighter);
                     }
                     else {
                         $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"]);

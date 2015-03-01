@@ -129,4 +129,16 @@ use _007::Test;
     outputs $program, "6\n", "can specify trait to bind loose";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<~?>(left, right) is tighter(infix:<+>) {
+            return 6;
+        }
+
+        say(1 + 9 ~? 12);
+        .
+
+    outputs $program, "7\n", "can specify trait to bind tight";
+}
+
 done;
