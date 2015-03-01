@@ -27,6 +27,12 @@ class OpLevel {
         @!infixprec.push($q);
     }
 
+    method add-infix-looser($op, $q, $looser-than) {
+        %!ops<infix>{$op} = $q;
+        my $pos = @!infixprec.first-index({ .type eq "[$looser-than]" });
+        @!infixprec.splice($pos, 0, $q);
+    }
+
     method clone {
         my $opl = OpLevel.new(
             :@.infixprec,
@@ -338,10 +344,29 @@ class Parser {
             $sub.declare($*runtime);
             make $sub;
 
+            my $looser;
+            for @<trait> -> $trait {
+                if $trait<identifier>.ast.name eq "looser" {
+                    my $identifier = $trait<EXPR>.ast;
+                    die "The thing your op is looser than must be an identifier"
+                        unless $identifier ~~ Q::Identifier;
+                    sub check-if-infix($s) {
+                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                            $looser = ~$0;
+                        }
+                    }($identifier.name);
+                }
+            }
+
             sub check-if-infix($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
-                    $*parser.oplevel.add-infix($op, Q::Infix::Custom[$op]);
+                    if $looser {
+                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], $looser);
+                    }
+                    else {
+                        $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"]);
+                    }
                 }
             }($identifier.name);
         }
