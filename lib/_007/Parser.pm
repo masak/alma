@@ -30,15 +30,15 @@ class OpLevel {
         @!infixprec.push($q);
     }
 
-    method add-infix-looser($op, $q, $looser-than) {
+    method add-infix-looser($op, $q, $other-op) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .type eq "[$looser-than]" });
+        my $pos = @!infixprec.first-index({ .type eq "[$other-op]" });
         @!infixprec.splice($pos, 0, $q);
     }
 
-    method add-infix-tighter($op, $q, $tighter-than) {
+    method add-infix-tighter($op, $q, $other-op) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .type eq "[$tighter-than]" });
+        my $pos = @!infixprec.first-index({ .type eq "[$other-op]" });
         @!infixprec.splice($pos + 1, 0, $q);
     }
 
