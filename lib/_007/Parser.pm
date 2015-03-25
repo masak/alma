@@ -9,6 +9,10 @@ class X::PointyBlock::SinkContext is Exception {
 }
 
 class X::Trait::Conflict is Exception {
+    has Str $.t1;
+    has Str $.t2;
+
+    method message { "Traits '$.t1' and '$.t2' cannot coexist on the same routine" }
 }
 
 class OpLevel {
@@ -377,6 +381,9 @@ class Parser {
                     }($identifier.name);
                 }
             }
+
+            die X::Trait::Conflict.new(:t1<looser>, :t2<tighter>)
+                if $looser && $tighter;
 
             sub check-if-infix($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
