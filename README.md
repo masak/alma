@@ -90,11 +90,11 @@ There's another pause.
 
 "I don't suppose I can just kill you now instead?" asks Bond hopefully.
 
-"No, the moment has passed," grumbles Dryden and flops down into his chair, dejected. "Besides, at this point we're already meta."
+"No, the moment has passed," grumbles Dryden and flops down into his chair, dejected. "Besides, at this point we're already meta, and the situation requires a postmodern solution instead of a straightforward one."
 
 "I'm sorry to cause all this trouble. This *is* my first assignment. Frankly, it's not as easy as it looks."
 
-Another sigh. "I know, I know. Being a field agent is tough. Which is why I opted for a career as highly trusted, unreliable, and ultimately dispensable section chief in an East European country instead."
+Another sigh. "I know, I know. Being a field agent is tough. Which is why I opted for a career as highly trusted but unreliable, ultimately dispensable section chief in an East European country instead."
 
 "If you want, you could go out and come back in, and we could do it all over again."
 
@@ -194,32 +194,62 @@ The contact gets an abstracted look. "But wait, won't there be weird and interes
 
 *Office.*
 
-"Wait," says Bond. "One last time. I just thought of something."
+"Interesting," says Bond. "I wonder what Bill Murray would have done in a situation like this? Hold on, let me try something else..."
 
 ---
 
 *Restroom.*
 
-Bond rams the man into the booth, brutally. He jumps in after him, and as he throws the first punch he says, "AST macros. In an ALGOLoid syntax."
+The scene fades in smoother this time. The contrasts aren't quite so bright, and the sharp light has dimmed a fraction. Both bond and the contact are busy each in one end of the room, filling the walls with scribbled notes about compilers, ASTs, and various macro transformations.
 
-The contact gets a distracted look on his face. "Wh...", he begins.
+"Ok, I think I'm getting the hang of Perl 6 macros. They're unorthodox, for sure," says the contact over his shoulder.
 
-Bond reaches into one of the man's pockets, gets out his gun, and shoots him.
+"Yes, but the end result feels very Perlish," replies Bond.
+
+"One thing I don't understand though," says the contact. "You mentioned that this whole scene we are in stands in as a kind of metaphor for macro processing. I'm still having trouble processing that this *is* a scene... could you explain again?"
+
+"Ok, look. This is a flashback showing how I killed you. Invoking a flashback in a movie is a little bit like calling a macro in a programming language. Unlike a normal subroutine, the macro doesn't run at the point of the call at runtime; instead it runs at the point of the call at *compile time*. When you do reach that call site at runtime, all you see is the effects of the macro invocation. The macro call itself has already happened. Just like this flashback."
+
+"But you're saying this is your fourth flashback of the same scene. Shouldn't all flashbacks be the same? Isn't it, like, a paradox that they're not?"
+
+"Not really. The same macro can be invoked from many different call sites with different parameters. Even if there are no differing parameters, the macro is just code, and can execute differently each time on a whim."
+
+"So, in a sense, we're in a bubble. This whole flashback is taking place in the actual time-line's past. Nothing we do here will have any real consequence."
+
+"Oh, don't say that," drawls Bond, smirking wryly. "A macro can still have pretty far-reaching consequences, up to and including stopping execution. So it might be possible for us to crash the universe from within here if we try hard enough."
+
+"Let's not do that."
+
+"Agreed."
+
+The two men look around the restroom, admiring their work. Advanced schematics and comments in sharp black marker pen cover the walls, from floor to ceiling. Some of the mirrors are covered with writings as well.
+
+"I don't feel like killing you anymore," offers Bond. "I'm having far too much fun discussing macros with you. If I kill you, I'll have to start over."
+
+"Fair enough," says the contact. "But how do you imagine we'll ever get out of this flashback?"
+
+Before Bond can answer, Dryden enters and shoots the contact.
 
 ---
 
 *Office.*
 
-"This is starting to feel like cheating," smiles Bond.
+"What did you to that for!?" shouts Bond.
 
-"While you were flashing back, I looked over [the tutorial](http://masak.github.io/007/) of that language of yours. I'm intrigued! I need to think of a use for macros so I can try it out!" Dryden gets a distant look.
+"You had been in there for days," growls Dryden. "I needed to extract you so we can finish this README."
+
+"I thought this was the pre-title sequence of a movie," mumbles Bond.
+
+"Anyway. While you were getting lost in your flashback, I looked over [the tutorial](http://masak.github.io/007/) of that language of yours. I'm intrigued! I need to think of a use for macros so I can try it out!" Dryden gets a distant look.
 
 "Well, the language itself is only a toy," confesses Bond. "A bit like the trinkets Q division tends to come up with. But we are hopeful about the lessons we will learn from building this."
 
-Dryden nods, sympathetically. "I understand fully. The Perl 6 macros have been a long way coming. I imagine prototyping them in this way will make the eventual work..."
+Dryden nods, sympathetically. "I understand fully. The Perl 6 macros have been a long way coming. You do a first implementation of macros in this fast-moving toy language. The second..."
 
 Bond takes swift aim, and pulls the trigger. The silencer makes the gun emit a professional kind of \**PEW*\* sound.
 
 There's a quick shot of the view from Dryden's perspective as he tumbles backwards in his chair. A photo on his desk shows wife and daughter. He hits the floor on his back, dead.
 
 "Yes," says Bond to no-one in particular, smirking dryly as he secures his gun and stows it in his trenchcoat. "Considerably."
+
+The Bond theme plays, brass instruments blaring.
