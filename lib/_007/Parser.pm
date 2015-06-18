@@ -375,7 +375,7 @@ class Parser {
                 }
             }
 
-            for $<infix>».ast Z $<termish>[1..*]».ast -> $infix, $term {
+            for $<infix>».ast Z $<termish>[1..*]».ast -> ($infix, $term) {
                 while @opstack && tighter-or-equal(@opstack[*-1], $infix) {
                     REDUCE;
                 }

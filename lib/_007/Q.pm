@@ -149,7 +149,7 @@ role Q::Infix::Eq does Q::Infix {
         multi equal-value(Val::Str $r, Val::Str $l) { $r.value eq $l.value }
         multi equal-value(Val::Array $r, Val::Array $l) {
             return False unless $r.elements == $l.elements;
-            for $r.elements.list Z $l.elements.list -> $re, $le {
+            for $r.elements.list Z $l.elements.list -> ($re, $le) {
                 return False unless equal-value($re, $le);
             }
             return True;
@@ -263,7 +263,7 @@ role Q::Statement::If does Q {
             $runtime.enter($c);
             die "Too many parameters in if statements"  # XXX: needs a test and a real exception
                 if $c.parameters.parameters > 1;
-            for $c.parameters.parameters Z $expr -> $param, $arg {
+            for $c.parameters.parameters Z $expr -> ($param, $arg) {
                 $runtime.declare-var($param.name);
                 $runtime.put-var($param.name, $arg);
             }
@@ -343,7 +343,7 @@ role Q::Statement::For does Q {
         else {
             for split_elements(elements($.expr), $count) -> $arg {
                 $runtime.enter($c);
-                for $c.parameters.parameters Z $arg.list -> $param, $real_arg {
+                for $c.parameters.parameters Z $arg.list -> ($param, $real_arg) {
                     $runtime.declare-var($param.name);
                     $runtime.put-var($param.name, $real_arg);
                 }

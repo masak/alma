@@ -158,7 +158,7 @@ role Runtime {
             ~ "called with {@args.elems} arguments"
             unless $c.parameters.parameters == @args;
         self.enter($c);
-        for $c.parameters.parameters Z @args -> $param, $arg {
+        for $c.parameters.parameters Z @args -> ($param, $arg) {
             my $name = $param.name;
             self.declare-var($name);
             self.put-var($name, $arg);
