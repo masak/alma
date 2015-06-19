@@ -83,7 +83,7 @@ role Q::Prefix::Minus does Q::Prefix {
     method type { "[-]" }
     method eval($runtime) {
         my $expr = $.expr.eval($runtime);
-        die X::TypeCheck.new(:operation<->, :got($expr.^name), :expected<Int>)
+        die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
             unless $expr ~~ Val::Int;
         return Val::Int.new(:value(-$expr.value));
     }
@@ -118,10 +118,10 @@ role Q::Infix::Concat does Q::Infix {
     method type { "[~]" }
     method eval($runtime) {
         my $lhs = $.lhs.eval($runtime);
-        die X::TypeCheck.new(:operation<~>, :got($lhs.^name), :expected<Str>)
+        die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
             unless $lhs ~~ Val::Str;
         my $rhs = $.rhs.eval($runtime);
-        die X::TypeCheck.new(:operation<~>, :got($lhs.^name), :expected<Str>)
+        die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
             unless $rhs ~~ Val::Str;
         return Val::Str.new(:value(
             $lhs.value ~ $rhs.value
@@ -171,7 +171,7 @@ role Q::Postfix::Index does Q {
 
     method eval($runtime) {
         my $array = $runtime.get-var($.array.name);
-        die X::TypeCheck.new(:operation<indexing>, :got($array.^name), :expected<Array>)
+        die X::TypeCheck.new(:operation<indexing>, :got($array), :expected(Val::Array))
             unless $array ~~ Val::Array;
         my $index = $.index.eval($runtime);
         # XXX: also check index is integer
