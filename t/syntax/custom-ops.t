@@ -183,4 +183,22 @@ use _007::Test;
     outputs $program, "!\n@\n", "can specify trait to bind equal";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<!?!>(left, right) is tighter(infix:<+>) is equal(infix:<+>) {
+        }
+        .
+
+    parse-error $program, X::Trait::Conflict, "can't have both tighter and equal traits";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<!++>(left, right) is looser(infix:<+>) is equal(infix:<+>) {
+        }
+        .
+
+    parse-error $program, X::Trait::Conflict, "can't have both looser and equal traits";
+}
+
 done;

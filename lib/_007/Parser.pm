@@ -399,6 +399,10 @@ class Parser {
 
             die X::Trait::Conflict.new(:t1<looser>, :t2<tighter>)
                 if $looser && $tighter;
+            die X::Trait::Conflict.new(:t1<looser>, :t2<equal>)
+                if $looser && $equal;
+            die X::Trait::Conflict.new(:t1<tighter>, :t2<equal>)
+                if $tighter && $equal;
 
             sub check-if-infix($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
