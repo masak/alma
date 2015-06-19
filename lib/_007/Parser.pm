@@ -82,7 +82,7 @@ class Parser {
         $opl.add-infix('=', Q::Infix::Assignment);
         $opl.add-infix('==', Q::Infix::Eq);
         $opl.add-infix('+', Q::Infix::Addition);
-        $opl.add-infix('~', Q::Infix::Concat);     # XXX: should really have the same prec as +
+        $opl.add-infix-equal('~', Q::Infix::Concat, "+");
     }
 
     grammar Syntax {
