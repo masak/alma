@@ -201,4 +201,16 @@ use _007::Test;
     parse-error $program, X::Trait::Conflict, "can't have both looser and equal traits";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<@>(left, right) is assoc("right") {
+            return "(" ~ left ~ ", " ~ right ~ ")";
+        }
+
+        say("A" @ "B" @ "C");
+        .
+
+    outputs $program, "(A, (B, C))\n", "associativity means we can control the shape of the expr tree";
+}
+
 done;
