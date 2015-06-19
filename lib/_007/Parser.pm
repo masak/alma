@@ -31,25 +31,31 @@ class OpLevel {
 
     method add-infix($op, $q) {
         %!ops<infix>{$op} = $q;
-        @!infixprec.push($q);
+        @!infixprec.push({ $op => $q });
     }
 
     method add-infix-looser($op, $q, $other-op) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .type eq "[$other-op]" });
-        @!infixprec.splice($pos, 0, $q);
+        my $pos = @!infixprec.first-index({ .{$other-op}:exists });
+        @!infixprec.splice($pos, 0, { $op => $q });
     }
 
     method add-infix-tighter($op, $q, $other-op) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .type eq "[$other-op]" });
-        @!infixprec.splice($pos + 1, 0, $q);
+        my $pos = @!infixprec.first-index({ .{$other-op}:exists });
+        @!infixprec.splice($pos + 1, 0, { $op => $q });
+    }
+
+    method add-infix-equal($op, $q, $other-op) {
+        %!ops<infix>{$op} = $q;
+        my $level = @!infixprec.first({ .{$other-op}:exists });
+        $level{$op} = $q;
     }
 
     method clone {
         my $opl = OpLevel.new(
-            :@.infixprec,
-            :@.prepostfixprec,
+            infixprec => @.infixprec.map({ .list.hash.item }),
+            prepostfixprec => @.prepostfixprec.map({ .list.hash.item }),
         );
         for <prefix infix> -> $category {
             for %.ops{$category}.kv -> $op, $q {
@@ -357,8 +363,7 @@ class Parser {
             $sub.declare($*runtime);
             make $sub;
 
-            my $looser;
-            my $tighter;
+            my ($looser, $tighter, $equal);
             for @<trait> -> $trait {
                 if $trait<identifier>.ast.name eq "looser" {
                     my $identifier = $trait<EXPR>.ast;
@@ -380,6 +385,16 @@ class Parser {
                         }
                     }($identifier.name);
                 }
+                elsif $trait<identifier>.ast.name eq "equal" {
+                    my $identifier = $trait<EXPR>.ast;
+                    die "The thing your op is equal to must be an identifier"
+                        unless $identifier ~~ Q::Identifier;
+                    sub check-if-infix($s) {
+                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                            $equal = ~$0;
+                        }
+                    }($identifier.name);
+                }
             }
 
             die X::Trait::Conflict.new(:t1<looser>, :t2<tighter>)
@@ -393,6 +408,9 @@ class Parser {
                     }
                     elsif $tighter {
                         $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], $tighter);
+                    }
+                    elsif $equal {
+                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], $equal);
                     }
                     else {
                         $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"]);
@@ -443,7 +461,10 @@ class Parser {
         }
 
         sub tighter-or-equal($op1, $op2) {
-            return $*parser.oplevel.infixprec.first-index($op1) >= $*parser.oplevel.infixprec.first-index($op2);
+            my $name1 = $op1.type.substr(1, *-1);
+            my $name2 = $op2.type.substr(1, *-1);
+            return $*parser.oplevel.infixprec.first-index({ .{$name1}:exists })
+                >= $*parser.oplevel.infixprec.first-index({ .{$name2}:exists });
         }
 
         method blockoid ($/) {

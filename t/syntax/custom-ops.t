@@ -166,4 +166,21 @@ use _007::Test;
     parse-error $program, X::Trait::Conflict, "can't have both tighter and looser traits";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<@>(left, right) {
+            return "@";
+        }
+
+        sub infix:<!>(left, right) is equal(infix:<@>) {
+            return "!";
+        }
+
+        say(10 @ 2 ! 3);
+        say(30 ! 2 @ 14);
+        .
+
+    outputs $program, "!\n@\n", "can specify trait to bind equal";
+}
+
 done;
