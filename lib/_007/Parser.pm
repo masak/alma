@@ -363,58 +363,40 @@ class Parser {
             $sub.declare($*runtime);
             make $sub;
 
-            my ($looser, $tighter, $equal);
+            my %trait;
             for @<trait> -> $trait {
-                if $trait<identifier>.ast.name eq "looser" {
-                    my $identifier = $trait<EXPR>.ast;
-                    die "The thing your op is looser than must be an identifier"
-                        unless $identifier ~~ Q::Identifier;
-                    sub check-if-infix($s) {
-                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                            $looser = ~$0;
-                        }
-                    }($identifier.name);
-                }
-                elsif $trait<identifier>.ast.name eq "tighter" {
-                    my $identifier = $trait<EXPR>.ast;
-                    die "The thing your op is tighter than must be an identifier"
-                        unless $identifier ~~ Q::Identifier;
-                    sub check-if-infix($s) {
-                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                            $tighter = ~$0;
-                        }
-                    }($identifier.name);
-                }
-                elsif $trait<identifier>.ast.name eq "equal" {
-                    my $identifier = $trait<EXPR>.ast;
-                    die "The thing your op is equal to must be an identifier"
-                        unless $identifier ~~ Q::Identifier;
-                    sub check-if-infix($s) {
-                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                            $equal = ~$0;
-                        }
-                    }($identifier.name);
-                }
+                my $name = $trait<identifier>.ast.name;
+                die "Unknown trait '$name'"
+                    unless $name eq any "looser", "tighter", "equal";
+                my $identifier = $trait<EXPR>.ast;
+                my $prep = $name eq "equal" ?? "to" !! "than";
+                die "The thing your op is $name $prep must be an identifier"
+                    unless $identifier ~~ Q::Identifier;
+                sub check-if-infix($s) {
+                    if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                        %trait{$name} = ~$0;
+                    }
+                }($identifier.name);
             }
 
             die X::Trait::Conflict.new(:t1<looser>, :t2<tighter>)
-                if $looser && $tighter;
+                if %trait<looser> && %trait<tighter>;
             die X::Trait::Conflict.new(:t1<looser>, :t2<equal>)
-                if $looser && $equal;
+                if %trait<looser> && %trait<equal>;
             die X::Trait::Conflict.new(:t1<tighter>, :t2<equal>)
-                if $tighter && $equal;
+                if %trait<tighter> && %trait<equal>;
 
             sub check-if-infix($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
-                    if $looser {
-                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], $looser);
+                    if %trait<looser> {
+                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>);
                     }
-                    elsif $tighter {
-                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], $tighter);
+                    elsif %trait<tighter> {
+                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>);
                     }
-                    elsif $equal {
-                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], $equal);
+                    elsif %trait<equal> {
+                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>);
                     }
                     else {
                         $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"]);
