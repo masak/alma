@@ -364,10 +364,11 @@ class Parser {
             make $sub;
 
             my %trait;
+            my @allowed-traits = <equal looser tighter>;
             for @<trait> -> $trait {
                 my $name = $trait<identifier>.ast.name;
                 die "Unknown trait '$name'"
-                    unless $name eq any "looser", "tighter", "equal";
+                    unless $name eq any @allowed-traits;
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equal" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
@@ -376,15 +377,17 @@ class Parser {
                     if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                         %trait{$name} = ~$0;
                     }
+                    else {
+                        die "Unknown thing in '$name' trait";
+                    }
                 }($identifier.name);
             }
 
-            die X::Trait::Conflict.new(:t1<looser>, :t2<tighter>)
-                if %trait<looser> && %trait<tighter>;
-            die X::Trait::Conflict.new(:t1<looser>, :t2<equal>)
-                if %trait<looser> && %trait<equal>;
-            die X::Trait::Conflict.new(:t1<tighter>, :t2<equal>)
-                if %trait<tighter> && %trait<equal>;
+            if %trait.keys > 1 {    # this might change in the future, when we have other traits
+                my ($t1, $t2) = %trait.keys.sort;
+                die X::Trait::Conflict.new(:$t1, :$t2)
+                    if %trait{$t1} && %trait{$t2};
+            }
 
             sub check-if-infix($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
