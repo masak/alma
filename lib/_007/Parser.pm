@@ -15,6 +15,19 @@ class X::Trait::Conflict is Exception {
     method message { "Traits '$.t1' and '$.t2' cannot coexist on the same routine" }
 }
 
+class Prec {
+    has $.assoc = "left";
+    has %.ops;
+
+    method contains($op) {
+        %.ops{$op}:exists;
+    }
+
+    method clone {
+        self.new(:$.assoc, :%.ops);
+    }
+}
+
 class OpLevel {
     has %.ops =
         prefix => {},
@@ -29,33 +42,38 @@ class OpLevel {
         @!prepostfixprec.push($q);
     }
 
-    method add-infix($op, $q) {
+    method add-infix($op, $q, :$assoc!) {
         %!ops<infix>{$op} = $q;
-        @!infixprec.push({ $op => $q });
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!infixprec.push($prec);
     }
 
-    method add-infix-looser($op, $q, $other-op) {
+    method add-infix-looser($op, $q, $other-op, :$assoc!) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .{$other-op}:exists });
-        @!infixprec.splice($pos, 0, { $op => $q });
+        my $pos = @!infixprec.first-index(*.contains($other-op));
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!infixprec.splice($pos, 0, $prec);
     }
 
-    method add-infix-tighter($op, $q, $other-op) {
+    method add-infix-tighter($op, $q, $other-op, :$assoc!) {
         %!ops<infix>{$op} = $q;
-        my $pos = @!infixprec.first-index({ .{$other-op}:exists });
-        @!infixprec.splice($pos + 1, 0, { $op => $q });
+        my $pos = @!infixprec.first-index(*.contains($other-op));
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!infixprec.splice($pos + 1, 0, $prec);
     }
 
-    method add-infix-equal($op, $q, $other-op) {
+    method add-infix-equal($op, $q, $other-op, :$assoc = "unspecified") {
         %!ops<infix>{$op} = $q;
-        my $level = @!infixprec.first({ .{$other-op}:exists });
-        $level{$op} = $q;
+        my $prec = @!infixprec.first(*.contains($other-op));
+        die "Conflicting associativities"
+            if $assoc ne "unspecified" && $assoc ne $prec.assoc;
+        $prec.ops{$op} = $q;
     }
 
     method clone {
         my $opl = OpLevel.new(
-            infixprec => @.infixprec.map({ .list.hash.item }),
-            prepostfixprec => @.prepostfixprec.map({ .list.hash.item }),
+            infixprec => @.infixprec.map(*.clone),
+            prepostfixprec => @.prepostfixprec.clone,
         );
         for <prefix infix> -> $category {
             for %.ops{$category}.kv -> $op, $q {
@@ -79,9 +97,9 @@ class Parser {
 
         $opl.add-prefix('-', Q::Prefix::Minus);
 
-        $opl.add-infix('=', Q::Infix::Assignment);
-        $opl.add-infix('==', Q::Infix::Eq);
-        $opl.add-infix('+', Q::Infix::Addition);
+        $opl.add-infix('=', Q::Infix::Assignment, :assoc<right>);
+        $opl.add-infix('==', Q::Infix::Eq, :assoc<left>);
+        $opl.add-infix('+', Q::Infix::Addition, :assoc<left>);
         $opl.add-infix-equal('~', Q::Infix::Concat, "+");
     }
 
@@ -364,23 +382,30 @@ class Parser {
             make $sub;
 
             my %trait;
-            my @allowed-traits = <equal looser tighter>;
+            my @prec-traits = <equal looser tighter>;
+            my $assoc = "left";
             for @<trait> -> $trait {
                 my $name = $trait<identifier>.ast.name;
-                die "Unknown trait '$name'"
-                    unless $name eq any @allowed-traits;
-                my $identifier = $trait<EXPR>.ast;
-                my $prep = $name eq "equal" ?? "to" !! "than";
-                die "The thing your op is $name $prep must be an identifier"
-                    unless $identifier ~~ Q::Identifier;
-                sub check-if-infix($s) {
-                    if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                        %trait{$name} = ~$0;
-                    }
-                    else {
-                        die "Unknown thing in '$name' trait";
-                    }
-                }($identifier.name);
+                if $name eq any @prec-traits {
+                    my $identifier = $trait<EXPR>.ast;
+                    my $prep = $name eq "equal" ?? "to" !! "than";
+                    die "The thing your op is $name $prep must be an identifier"
+                        unless $identifier ~~ Q::Identifier;
+                    sub check-if-infix($s) {
+                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                            %trait{$name} = ~$0;
+                        }
+                        else {
+                            die "Unknown thing in '$name' trait";
+                        }
+                    }($identifier.name);
+                }
+                elsif $name eq "assoc" {
+                    $assoc = "right";
+                }
+                else {
+                    die "Unknown trait '$name'";
+                }
             }
 
             if %trait.keys > 1 {    # this might change in the future, when we have other traits
@@ -393,16 +418,16 @@ class Parser {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
                     if %trait<looser> {
-                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>);
+                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>, :$assoc);
                     }
                     elsif %trait<tighter> {
-                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>);
+                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>, :$assoc);
                     }
                     elsif %trait<equal> {
-                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>);
+                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>, :$assoc);
                     }
                     else {
-                        $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"]);
+                        $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
                     }
                 }
             }($identifier.name);
@@ -449,11 +474,23 @@ class Parser {
             make Q::Trait.new($<identifier>.ast, $<EXPR>.ast);
         }
 
-        sub tighter-or-equal($op1, $op2) {
+        sub tighter($op1, $op2) {
             my $name1 = $op1.type.substr(1, *-1);
             my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first-index({ .{$name1}:exists })
-                >= $*parser.oplevel.infixprec.first-index({ .{$name2}:exists });
+            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
+                 > $*parser.oplevel.infixprec.first-index(*.contains($name2));
+        }
+
+        sub equal($op1, $op2) {
+            my $name1 = $op1.type.substr(1, *-1);
+            my $name2 = $op2.type.substr(1, *-1);
+            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
+                == $*parser.oplevel.infixprec.first-index(*.contains($name2));
+        }
+
+        sub left-associative($op) {
+            my $name = $op.type.substr(1, *-1);
+            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "left";
         }
 
         method blockoid ($/) {
@@ -498,7 +535,8 @@ class Parser {
             }
 
             for $<infix>».ast Z $<termish>[1..*]».ast -> ($infix, $term) {
-                while @opstack && tighter-or-equal(@opstack[*-1], $infix) {
+                while @opstack && (tighter(@opstack[*-1], $infix)
+                    || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                     REDUCE;
                 }
                 @opstack.push($infix);
