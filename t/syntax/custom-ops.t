@@ -213,4 +213,20 @@ use _007::Test;
     outputs $program, "(A, (B, C))\n", "associativity means we can control the shape of the expr tree";
 }
 
+# also test "left" associativity (which should be the default)
+
+# also test "non" associativity (which causes any chained ops of the same level to die)
+
+# also test that re-affirming the associativity of an "is equal" declaration is fine
+
+# also test for error on contradicting the associativity of an "is equal" declaration
+
+# also test for declaring a prefix op
+
+# also test for declaring a postfix op
+
+# also test for tighter/looser/equal prefix/postfix ops
+
+# also test for associativity with prefix/postfix ops (a prefix and a postfix can tie on prec; "left" prefers the prefix and "right" the postfix)
+
 done;
