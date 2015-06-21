@@ -441,7 +441,7 @@ class Parser {
                     if %trait{$t1} && %trait{$t2};
             }
 
-            sub check-if-infix($s) {
+            sub install-operator($s) {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
                     if %trait<looser> {
@@ -460,6 +460,11 @@ class Parser {
                         $assoc //= "left";
                         $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
                     }
+                }
+                elsif $s ~~ /'prefix:<' (<-[>]>+) '>'/ {
+                    my $op = ~$0;
+                    $assoc //= "left";
+                    $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
                 }
             }($identifier.name);
         }

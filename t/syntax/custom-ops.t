@@ -313,7 +313,17 @@ use _007::Test;
         "if you're using the 'is equal' trait, you can't contradict the associativity";
 }
 
-# also test for declaring a prefix op
+{
+    my $program = q:to/./;
+        sub prefix:<?>(term) {
+            return 42;
+        }
+
+        say(?"forty-two");
+        .
+
+    outputs $program, "42\n", "declaring and using a prefix op works";
+}
 
 # also test for declaring a postfix op
 

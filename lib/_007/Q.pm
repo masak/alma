@@ -89,6 +89,16 @@ role Q::Prefix::Minus does Q::Prefix {
     }
 }
 
+role Q::Prefix::Custom[$type] does Q::Prefix {
+    method type { "[$type]" }
+
+    method eval($runtime) {
+        my $e = $.expr.eval($runtime);
+        my $c = $runtime.get-var("prefix:<$type>");
+        return $runtime.call($c, [$e]);
+    }
+}
+
 role Q::Infix does Q {
     has $.lhs;
     has $.rhs;
