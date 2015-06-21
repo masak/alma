@@ -26,6 +26,13 @@ class X::Op::Nonassociative is Exception {
     }
 }
 
+class X::Trait::IllegalValue is Exception {
+    has Str $.trait;
+    has Str $.value;
+
+    method message { "The value '$.value' is not compatible with the trait '$.trait'" }
+}
+
 class Prec {
     has $.assoc = "left";
     has %.ops;
@@ -415,7 +422,10 @@ class Parser {
                     my $string = $trait<EXPR>.ast;
                     die "The associativity must be a string"
                         unless $string ~~ Q::Literal::Str;
-                    $assoc = $string.value;
+                    my $value = $string.value;
+                    die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
+                        unless $value eq any "left", "non", "right";
+                    $assoc = $value;
                 }
                 else {
                     die "Unknown trait '$name'";

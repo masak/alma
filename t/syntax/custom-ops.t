@@ -261,6 +261,15 @@ use _007::Test;
     parse-error $program, X::Op::Nonassociative, "a non-associative operator can't associate";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<&-&>(left, right) is assoc("salamander") {
+        }
+        .
+
+    parse-error $program, X::Trait::IllegalValue, "you can't just put any old value in an assoc trait";
+}
+
 # also test that re-affirming the associativity of an "is equal" declaration is fine
 
 # also test for error on contradicting the associativity of an "is equal" declaration
