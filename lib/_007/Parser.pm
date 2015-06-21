@@ -401,7 +401,10 @@ class Parser {
                     }($identifier.name);
                 }
                 elsif $name eq "assoc" {
-                    $assoc = "right";
+                    my $string = $trait<EXPR>.ast;
+                    die "The associativity must be a string"
+                        unless $string ~~ Q::Literal::Str;
+                    $assoc = $string.value;
                 }
                 else {
                     die "Unknown trait '$name'";

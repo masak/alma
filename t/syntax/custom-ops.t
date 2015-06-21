@@ -213,7 +213,29 @@ use _007::Test;
     outputs $program, "(A, (B, C))\n", "associativity means we can control the shape of the expr tree";
 }
 
-# also test "left" associativity (which should be the default)
+{
+    my $program = q:to/./;
+        sub infix:<%>(left, right) is assoc("left") {
+            return "(" ~ left ~ ", " ~ right ~ ")";
+        }
+
+        say("A" % "B" % "C");
+        .
+
+    outputs $program, "((A, B), C)\n", "left associativity can be specified";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:</>(left, right) {
+            return "(" ~ left ~ ", " ~ right ~ ")";
+        }
+
+        say("x" / "y" / "z");
+        .
+
+    outputs $program, "((x, y), z)\n", "left associativity is the default";
+}
 
 # also test "non" associativity (which causes any chained ops of the same level to die)
 
