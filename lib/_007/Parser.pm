@@ -33,6 +33,9 @@ class X::Trait::IllegalValue is Exception {
     method message { "The value '$.value' is not compatible with the trait '$.trait'" }
 }
 
+class X::Associativity::Conflict is Exception {
+}
+
 class Prec {
     has $.assoc = "left";
     has %.ops;
@@ -83,7 +86,7 @@ class OpLevel {
     method add-infix-equal($op, $q, $other-op, :$assoc?) {
         %!ops<infix>{$op} = $q;
         my $prec = @!infixprec.first(*.contains($other-op));
-        die "Conflicting associativities"
+        die X::Associativity::Conflict.new
             if defined($assoc) && $assoc ne $prec.assoc;
         $prec.ops{$op} = $q;
     }

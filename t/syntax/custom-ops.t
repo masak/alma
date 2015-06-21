@@ -300,7 +300,18 @@ use _007::Test;
     parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
 }
 
-# also test for error on contradicting the associativity of an "is equal" declaration
+{
+    my $program = q:to/./;
+        sub infix:<%>(left, right) is assoc("left") {
+        }
+
+        sub infix:<%%>(left, right) is equal(infix:<%>) is assoc("right") {
+        }
+        .
+
+    parse-error $program, X::Associativity::Conflict,
+        "if you're using the 'is equal' trait, you can't contradict the associativity";
+}
 
 # also test for declaring a prefix op
 
