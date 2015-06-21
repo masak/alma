@@ -237,7 +237,29 @@ use _007::Test;
     outputs $program, "((x, y), z)\n", "left associativity is the default";
 }
 
-# also test "non" associativity (which causes any chained ops of the same level to die)
+{
+    my $program = q:to/./;
+        sub infix:<!>(left, right) is assoc("non") {
+            return "oh, James";
+        }
+
+        say(0 ! 7);
+        .
+
+    outputs $program, "oh, James\n", "can define an operator to be non-associative";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<!>(left, right) is assoc("non") {
+            return "oh, James";
+        }
+
+        say(0 ! 0 ! 7);
+        .
+
+    parse-error $program, X::Op::Nonassociative, "a non-associative operator can't associate";
+}
 
 # also test that re-affirming the associativity of an "is equal" declaration is fine
 

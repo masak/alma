@@ -15,6 +15,17 @@ class X::Trait::Conflict is Exception {
     method message { "Traits '$.t1' and '$.t2' cannot coexist on the same routine" }
 }
 
+class X::Op::Nonassociative is Exception {
+    has Str $.op1;
+    has Str $.op2;
+
+    method message {
+        my $name1 = $.op1.type.substr(1, *-1);
+        my $name2 = $.op2.type.substr(1, *-1);
+        "'$name1' and '$name2' do not associate -- please use parentheses"
+    }
+}
+
 class Prec {
     has $.assoc = "left";
     has %.ops;
@@ -496,6 +507,11 @@ class Parser {
             return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "left";
         }
 
+        sub non-associative($op) {
+            my $name = $op.type.substr(1, *-1);
+            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "non";
+        }
+
         method blockoid ($/) {
             my $st = $<statements>.ast;
             make $st;
@@ -542,6 +558,8 @@ class Parser {
                     || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                     REDUCE;
                 }
+                die X::Op::Nonassociative.new(:op1(@opstack[*-1]), :op2($infix))
+                    if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
                 @opstack.push($infix);
                 @termstack.push($term);
             }
