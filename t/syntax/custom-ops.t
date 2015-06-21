@@ -331,4 +331,6 @@ use _007::Test;
 
 # also test for associativity with prefix/postfix ops (a prefix and a postfix can tie on prec; "left" prefers the prefix and "right" the postfix)
 
+# also test for trying to tighter/looser/equal across the infix/prepostfix barrier
+
 done;
