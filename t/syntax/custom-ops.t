@@ -325,7 +325,17 @@ use _007::Test;
     outputs $program, "42\n", "declaring and using a prefix op works";
 }
 
-# also test for declaring a postfix op
+{
+    my $program = q:to/./;
+        sub postfix:<!>(term) {
+            return 1;
+        }
+
+        say([]!);
+        .
+
+    outputs $program, "1\n", "declaring and using a postfix op works";
+}
 
 # also test for tighter/looser/equal prefix/postfix ops
 
