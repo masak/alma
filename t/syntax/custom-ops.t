@@ -270,7 +270,35 @@ use _007::Test;
     parse-error $program, X::Trait::IllegalValue, "you can't just put any old value in an assoc trait";
 }
 
-# also test that re-affirming the associativity of an "is equal" declaration is fine
+{
+    my $program = q:to/./;
+        sub infix:<@>(left, right) is assoc("right") {
+        }
+
+        sub infix:<@@>(left, right) is equal(infix:<@>) {
+            return "(" ~ left ~ ", " ~ right ~ ")";
+        }
+
+        say("A" @@ "B" @@ "C");
+        .
+
+    outputs $program, "(A, (B, C))\n", "right associativity inherits through the 'is equal' trait";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<@>(left, right) is assoc("non") {
+        }
+
+        sub infix:<@@>(left, right) is equal(infix:<@>) {
+            return "(" ~ left ~ ", " ~ right ~ ")";
+        }
+
+        say("A" @@ "B" @@ "C");
+        .
+
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
+}
 
 # also test for error on contradicting the associativity of an "is equal" declaration
 

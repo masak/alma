@@ -80,11 +80,11 @@ class OpLevel {
         @!infixprec.splice($pos + 1, 0, $prec);
     }
 
-    method add-infix-equal($op, $q, $other-op, :$assoc = "unspecified") {
+    method add-infix-equal($op, $q, $other-op, :$assoc?) {
         %!ops<infix>{$op} = $q;
         my $prec = @!infixprec.first(*.contains($other-op));
         die "Conflicting associativities"
-            if $assoc ne "unspecified" && $assoc ne $prec.assoc;
+            if defined($assoc) && $assoc ne $prec.assoc;
         $prec.ops{$op} = $q;
     }
 
@@ -401,7 +401,7 @@ class Parser {
 
             my %trait;
             my @prec-traits = <equal looser tighter>;
-            my $assoc = "left";
+            my $assoc;
             for @<trait> -> $trait {
                 my $name = $trait<identifier>.ast.name;
                 if $name eq any @prec-traits {
@@ -442,15 +442,19 @@ class Parser {
                 if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
                     if %trait<looser> {
+                        $assoc //= "left";
                         $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>, :$assoc);
                     }
                     elsif %trait<tighter> {
+                        $assoc //= "left";
                         $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>, :$assoc);
                     }
                     elsif %trait<equal> {
+                        # we leave the associativity unspecified
                         $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>, :$assoc);
                     }
                     else {
+                        $assoc //= "left";
                         $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
                     }
                 }
