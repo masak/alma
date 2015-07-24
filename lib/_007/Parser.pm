@@ -58,10 +58,23 @@ class OpLevel {
 
     has @.infixprec;
     has @.prepostfixprec;
+    has $!prepostfix-boundary = 0;
 
-    method add-prefix($op, $q) {
+    method add-prefix($op, $q, :$assoc!) {
         %!ops<prefix>{$op} = $q;
-        @!prepostfixprec.push($q);
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!prepostfixprec.splice($!prepostfix-boundary, 0, $prec);
+        $!prepostfix-boundary++;
+    }
+
+    method add-prefix-tighter($op, $q, $other-op, :$assoc!) {
+        %!ops<prefix>{$op} = $q;
+        my $pos = @!prepostfixprec.first-index(*.contains($other-op));
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!prepostfixprec.splice($pos + 1, 0, $prec);
+        if $pos <= $!prepostfix-boundary {
+            $!prepostfix-boundary++;
+        }
     }
 
     method add-infix($op, $q, :$assoc!) {
@@ -92,15 +105,27 @@ class OpLevel {
         $prec.ops{$op} = $q;
     }
 
-    method add-postfix($op, $q) {
+    method add-postfix($op, $q, :$assoc!) {
         %!ops<postfix>{$op} = $q;
-        @!prepostfixprec.push($q);
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!prepostfixprec.push($prec);
+    }
+
+    method add-postfix-looser($op, $q, $other-op, :$assoc!) {
+        %!ops<postfix>{$op} = $q;
+        my $pos = @!prepostfixprec.first-index(*.contains($other-op));
+        my $prec = Prec.new(:$assoc, :ops{ $op => $q });
+        @!prepostfixprec.splice($pos, 0, $prec);
+        if $pos <= $!prepostfix-boundary {
+            $!prepostfix-boundary++;
+        }
     }
 
     method clone {
         my $opl = OpLevel.new(
             infixprec => @.infixprec.map(*.clone),
-            prepostfixprec => @.prepostfixprec.clone,
+            prepostfixprec => @.prepostfixprec.map(*.clone),
+            :$!prepostfix-boundary,
         );
         for <prefix infix postfix> -> $category {
             for %.ops{$category}.kv -> $op, $q {
@@ -122,7 +147,7 @@ class Parser {
         my $opl = OpLevel.new;
         @!oplevels.push: $opl;
 
-        $opl.add-prefix('-', Q::Prefix::Minus);
+        $opl.add-prefix('-', Q::Prefix::Minus, :assoc<left>);
 
         $opl.add-infix('=', Q::Infix::Assignment, :assoc<right>);
         $opl.add-infix('==', Q::Infix::Eq, :assoc<left>);
@@ -429,8 +454,8 @@ class Parser {
                     my $prep = $name eq "equal" ?? "to" !! "than";
                     die "The thing your op is $name $prep must be an identifier"
                         unless $identifier ~~ Q::Identifier;
-                    sub check-if-infix($s) {
-                        if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
+                    sub check-if-op($s) {
+                        if $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/ {
                             %trait{$name} = ~$0;
                         }
                         else {
@@ -480,13 +505,41 @@ class Parser {
                 }
                 elsif $s ~~ /'prefix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
-                    $assoc //= "left";
-                    $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
+                    if %trait<looser> {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-prefix-looser($op, Q::Prefix::Custom["$op"], %trait<looser>, :$assoc);
+                    }
+                    elsif %trait<tighter> {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-prefix-tighter($op, Q::Prefix::Custom["$op"], %trait<tighter>, :$assoc);
+                    }
+                    elsif %trait<equal> {
+                        # we leave the associativity unspecified
+                        $*parser.oplevel.add-prefix-equal($op, Q::Prefix::Custom["$op"], %trait<equal>, :$assoc);
+                    }
+                    else {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
+                    }
                 }
                 elsif $s ~~ /'postfix:<' (<-[>]>+) '>'/ {
                     my $op = ~$0;
-                    $assoc //= "left";
-                    $*parser.oplevel.add-postfix($op, Q::Postfix::Custom["$op"], :$assoc);
+                    if %trait<looser> {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-postfix-looser($op, Q::Postfix::Custom["$op"], %trait<looser>, :$assoc);
+                    }
+                    elsif %trait<tighter> {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-postfix-tighter($op, Q::Postfix::Custom["$op"], %trait<tighter>, :$assoc);
+                    }
+                    elsif %trait<equal> {
+                        # we leave the associativity unspecified
+                        $*parser.oplevel.add-postfix-equal($op, Q::Postfix::Custom["$op"], %trait<equal>, :$assoc);
+                    }
+                    else {
+                        $assoc //= "left";
+                        $*parser.oplevel.add-postfix($op, Q::Postfix::Custom["$op"], :$assoc);
+                    }
                 }
             }($identifier.name);
         }
@@ -532,30 +585,6 @@ class Parser {
             make Q::Trait.new($<identifier>.ast, $<EXPR>.ast);
         }
 
-        sub tighter($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
-                 > $*parser.oplevel.infixprec.first-index(*.contains($name2));
-        }
-
-        sub equal($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
-                == $*parser.oplevel.infixprec.first-index(*.contains($name2));
-        }
-
-        sub left-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "left";
-        }
-
-        sub non-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "non";
-        }
-
         method blockoid ($/) {
             my $st = $<statements>.ast;
             make $st;
@@ -580,6 +609,30 @@ class Parser {
         }
 
         method EXPR($/) {
+            sub tighter($op1, $op2) {
+                my $name1 = $op1.type.substr(1, *-1);
+                my $name2 = $op2.type.substr(1, *-1);
+                return $*parser.oplevel.infixprec.first-index(*.contains($name1))
+                     > $*parser.oplevel.infixprec.first-index(*.contains($name2));
+            }
+
+            sub equal($op1, $op2) {
+                my $name1 = $op1.type.substr(1, *-1);
+                my $name2 = $op2.type.substr(1, *-1);
+                return $*parser.oplevel.infixprec.first-index(*.contains($name1))
+                    == $*parser.oplevel.infixprec.first-index(*.contains($name2));
+            }
+
+            sub left-associative($op) {
+                my $name = $op.type.substr(1, *-1);
+                return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "left";
+            }
+
+            sub non-associative($op) {
+                my $name = $op.type.substr(1, *-1);
+                return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "non";
+            }
+
             my @opstack;
             my @termstack = $<termish>[0].ast;
             sub REDUCE {
@@ -615,9 +668,37 @@ class Parser {
         }
 
         method termish($/) {
+            sub tighter($op1, $op2) {
+                my $name1 = $op1.type.substr(1, *-1);
+                my $name2 = $op2.type.substr(1, *-1);
+                return $*parser.oplevel.prepostfixprec.first-index(*.contains($name1))
+                     > $*parser.oplevel.prepostfixprec.first-index(*.contains($name2));
+            }
+
+            sub equal($op1, $op2) {
+                my $name1 = $op1.type.substr(1, *-1);
+                my $name2 = $op2.type.substr(1, *-1);
+                return $*parser.oplevel.prepostfixprec.first-index(*.contains($name1))
+                    == $*parser.oplevel.prepostfixprec.first-index(*.contains($name2));
+            }
+
+            sub left-associative($op) {
+                my $name = $op.type.substr(1, *-1);
+                return $*parser.oplevel.prepostfixprec.first(*.contains($name)).assoc eq "left";
+            }
+
             make $<term>.ast;
-            # XXX: need to think more about precedence here
-            for $<postfix>.list -> $postfix {
+
+            my @prefixes = @<prefix>.reverse;   # evaluated inside-out
+            my @postfixes = @<postfix>;
+
+            sub handle-prefix($/) {
+                my $prefix = shift @prefixes;
+                make $prefix.ast.new($/.ast);
+            }
+
+            sub handle-postfix($/) {
+                my $postfix = shift @postfixes;
                 # XXX: factor the logic that checks for macro call out into its own helper sub
                 my @p = $postfix.ast.list;
                 if @p[0] ~~ Q::Postfix::Call
@@ -634,8 +715,26 @@ class Parser {
                     make $postfix.ast.new($/.ast);
                 }
             }
-            for $<prefix>.list -> $prefix {
-                make $prefix.ast.new($/.ast);
+
+            while @postfixes || @prefixes {
+                if @postfixes && !@prefixes {
+                    handle-postfix($/);
+                }
+                elsif @prefixes && !@postfixes {
+                    handle-prefix($/);
+                }
+                else {
+                    my $prefix = @prefixes[0].ast;
+                    my $postfix = @postfixes[0].ast;
+                    if tighter($prefix, $postfix)
+                        || equal($prefix, $postfix) && left-associative($prefix) {
+
+                        handle-prefix($/);
+                    }
+                    else {
+                        handle-postfix($/);
+                    }
+                }
             }
         }
 
