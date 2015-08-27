@@ -412,7 +412,45 @@ use _007::Test;
     outputs $program, "postfix is looser\n" x 2, "prefixes can be made tighter with traits";
 }
 
-# also test for associativity with prefix/postfix ops (a prefix and a postfix can tie on prec; "left" prefers the prefix and "right" the postfix)
+{
+    my $program = q:to/./;
+        sub postfix:<!>(term) is assoc("right") {
+            return "postfix is looser";
+        }
+
+        sub prefix:<?>(term) is equal(postfix:<!>) {
+            return "prefix is looser";
+        }
+
+        sub prefix:<%>(term) is assoc("left") {
+            return "prefix is looser";
+        }
+
+        sub postfix:<$>(term) is equal(prefix:<%>) {
+            return "postfix is looser";
+        }
+
+        say(?[]!);
+        say(%[]$);
+        .
+
+    outputs $program, "prefix is looser\npostfix is looser\n",
+        "associativity works between pre- and postfixes";
+}
+
+{
+    my $program = q:to/./;
+        sub prefix:<?>(left, right) is assoc("non") {
+        }
+
+        sub postfix:<!>(left, right) is equal(prefix:<?>) {
+        }
+
+        say(?0!);
+        .
+
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
+}
 
 # also test for trying to tighter/looser/equal across the infix/prepostfix barrier
 

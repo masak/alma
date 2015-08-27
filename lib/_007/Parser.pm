@@ -77,6 +77,14 @@ class OpLevel {
         }
     }
 
+    method add-prefix-equal($op, $q, $other-op, :$assoc!) {
+        %!ops<prefix>{$op} = $q;
+        my $prec = @!prepostfixprec.first(*.contains($other-op));
+        die X::Associativity::Conflict.new
+            if defined($assoc) && $assoc ne $prec.assoc;
+        $prec.ops{$op} = $q;
+    }
+
     method add-infix($op, $q, :$assoc!) {
         %!ops<infix>{$op} = $q;
         my $prec = Prec.new(:$assoc, :ops{ $op => $q });
@@ -119,6 +127,14 @@ class OpLevel {
         if $pos <= $!prepostfix-boundary {
             $!prepostfix-boundary++;
         }
+    }
+
+    method add-postfix-equal($op, $q, $other-op, :$assoc!) {
+        %!ops<postfix>{$op} = $q;
+        my $prec = @!prepostfixprec.first(*.contains($other-op));
+        die X::Associativity::Conflict.new
+            if defined($assoc) && $assoc ne $prec.assoc;
+        $prec.ops{$op} = $q;
     }
 
     method clone {
@@ -687,6 +703,11 @@ class Parser {
                 return $*parser.oplevel.prepostfixprec.first(*.contains($name)).assoc eq "left";
             }
 
+            sub non-associative($op) {
+                my $name = $op.type.substr(1, *-1);
+                return $*parser.oplevel.prepostfixprec.first(*.contains($name)).assoc eq "non";
+            }
+
             make $<term>.ast;
 
             my @prefixes = @<prefix>.reverse;   # evaluated inside-out
@@ -726,6 +747,8 @@ class Parser {
                 else {
                     my $prefix = @prefixes[0].ast;
                     my $postfix = @postfixes[0].ast;
+                    die X::Op::Nonassociative.new(:op1($prefix), :op2($postfix))
+                        if equal($prefix, $postfix) && non-associative($prefix);
                     if tighter($prefix, $postfix)
                         || equal($prefix, $postfix) && left-associative($prefix) {
 
