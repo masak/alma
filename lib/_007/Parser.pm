@@ -188,6 +188,7 @@ class Parser {
             }
         }
         token term:quasi { quasi <.ws> '{' ~ '}' <statements> }
+        token term:parens { '(' ~ ')' <EXPR> }
 
         method infix {
             my @ops = %ops<infix>.keys;
@@ -442,6 +443,10 @@ class Parser {
 
         method term:quasi ($/) {
             make Q::Quasi.new($<statements>.ast);
+        }
+
+        method term:parens ($/) {
+            make $<EXPR>.ast;
         }
 
         method infix($/) {

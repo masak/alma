@@ -12,6 +12,7 @@ my @exprs = «
     "--1"               "(- (- (int 1)))"
     "a = 2 + 3 == 4"    '(assign (ident "a") (== (+ (int 2) (int 3)) (int 4)))'
     "1[2]"              "(index (int 1) (int 2))"
+    "1 + (2 + 3)"       "(+ (int 1) (+ (int 2) (int 3)))"
 »;
 
 for @exprs -> $expr, $frag {
