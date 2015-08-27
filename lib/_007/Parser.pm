@@ -80,7 +80,7 @@ class Parser {
             <![{]>       # prevent mixup with statement:block
             <EXPR>
         }
-        token statement:block { <block> }
+        token statement:block { <pblock> }
         rule statement:sub {
             sub [<identifier> || <.panic("identifier")>]
             :my $*insub = True;
@@ -187,7 +187,6 @@ class Parser {
                     unless $*runtime.declared($symbol);
             }
         }
-        token term:block { <pblock> }
         token term:quasi { quasi <.ws> '{' ~ '}' <statements> }
 
         method infix {
@@ -269,8 +268,6 @@ class Parser {
         }
 
         method statement:expr ($/) {
-            die X::PointyBlock::SinkContext.new
-                if $<EXPR>.ast ~~ Q::Literal::Block;
             if $<EXPR>.ast ~~ Q::Statement::Block {
                 my @statements = $<EXPR>.ast.block.statements.statements.list;
                 die "Can't handle this case with more than one statement yet" # XXX
@@ -283,7 +280,9 @@ class Parser {
         }
 
         method statement:block ($/) {
-            make Q::Statement::Block.new($<block>.ast);
+            die X::PointyBlock::SinkContext.new
+                if $<pblock><parameters>;
+            make Q::Statement::Block.new($<pblock>.ast);
         }
 
         method statement:sub ($/) {

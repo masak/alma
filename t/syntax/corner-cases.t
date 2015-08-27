@@ -137,16 +137,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my b = -> X, Y, X {
-            say(X ~ Y);
-        };
-        .
-
-    parse-error $program, X::Redeclaration, "cannot redeclare parameters";
-}
-
-{
-    my $program = q:to/./;
         sub f(X, Y, X) {
             say(X ~ Y);
         }

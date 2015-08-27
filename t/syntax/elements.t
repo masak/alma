@@ -161,38 +161,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my b = -> name {
-            say("Good evening, Mr " ~ name);
-        };
-        .
-
-    my $ast = q:to/./;
-        (statements
-          (my (ident "b") (assign (ident "b") (block (parameters (ident "name")) (statements
-            (stexpr (call (ident "say") (arguments (~ (str "Good evening, Mr ") (ident "name"))))))))))
-        .
-
-    parses-to $program, $ast, "block with parameter";
-}
-
-{
-    my $program = q:to/./;
-        my b = -> X, Y {
-            say(X ~ Y);
-        };
-        .
-
-    my $ast = q:to/./;
-        (statements
-          (my (ident "b") (assign (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
-            (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y"))))))))))
-        .
-
-    parses-to $program, $ast, "block with two parameters";
-}
-
-{
-    my $program = q:to/./;
         sub f() {
             say("sub");
         }
@@ -277,7 +245,8 @@ use _007::Test;
             say("OH HAI");
         }
         sub g() {
-            return { f(); };
+            sub h() { f() };
+            return h;
         }
         g()();
         .
@@ -287,8 +256,9 @@ use _007::Test;
           (sub (ident "f") (parameters) (statements
             (stexpr (call (ident "say") (arguments (str "OH HAI"))))))
           (sub (ident "g") (parameters) (statements
-            (return (block (parameters) (statements
-              (stexpr (call (ident "f") (arguments))))))))
+            (sub (ident "h") (parameters) (statements
+              (stexpr (call (ident "f") (arguments)))))
+            (return (ident "h"))))
           (stexpr (call (call (ident "g") (arguments)) (arguments))))
         .
 
