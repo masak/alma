@@ -1,9 +1,11 @@
 use _007::Q;
 
 class X::String::Newline is Exception {
+    method message { "Found a newline inside a string literal" }
 }
 
 class X::PointyBlock::SinkContext is Exception {
+    method message { "Pointy blocks cannot occur on the statement level" }
 }
 
 my %ops =
