@@ -452,6 +452,22 @@ use _007::Test;
     parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
 }
 
-# also test for trying to tighter/looser/equal across the infix/prepostfix barrier
+{
+    my $program = q:to/./;
+        sub postfix:<!>(left, right) is tighter(infix:<+>) {
+        }
+        .
+
+    parse-error $program, X::Precedence::Incompatible, "can't cross the infix/prepostfix prec barrier (I)";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<!>(left, right) is tighter(prefix:<->) {
+        }
+        .
+
+    parse-error $program, X::Precedence::Incompatible, "can't cross the infix/prepostfix prec barrier (II)";
+}
 
 done;

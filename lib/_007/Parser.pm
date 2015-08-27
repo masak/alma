@@ -34,6 +34,11 @@ class X::Trait::IllegalValue is Exception {
 }
 
 class X::Associativity::Conflict is Exception {
+    method message { "The operator already has a defined associativity" }
+}
+
+class X::Precedence::Incompatible is Exception {
+    method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }
 
 class Prec {
@@ -452,6 +457,7 @@ class Parser {
 
         method statement:sub ($/) {
             my $identifier = $<identifier>.ast;
+            my $subname = ~$<identifier>;
 
             my $sub = Q::Statement::Sub.new(
                 $identifier,
@@ -471,12 +477,12 @@ class Parser {
                     die "The thing your op is $name $prep must be an identifier"
                         unless $identifier ~~ Q::Identifier;
                     sub check-if-op($s) {
-                        if $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/ {
-                            %trait{$name} = ~$0;
-                        }
-                        else {
-                            die "Unknown thing in '$name' trait";
-                        }
+                        die "Unknown thing in '$name' trait"
+                            unless $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/;
+                        %trait{$name} = ~$0;
+                        die X::Precedence::Incompatible.new
+                            if $subname ~~ /^ < pre post >/ && $s ~~ /^ in/
+                            || $subname ~~ /^ in/ && $s ~~ /^ < pre post >/;
                     }($identifier.name);
                 }
                 elsif $name eq "assoc" {
