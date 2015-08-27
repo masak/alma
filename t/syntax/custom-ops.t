@@ -387,7 +387,30 @@ use _007::Test;
     outputs $program, "postfix is looser\n" x 2, "postfixes can be made looser with traits";
 }
 
-# also test for tighter/looser/equal prefix/postfix ops
+{
+    my $program = q:to/./;
+        sub postfix:<!>(term) {
+            return "postfix is looser";
+        }
+
+        sub prefix:<?>(term) is tighter(postfix:<!>) {
+            return "prefix is looser";
+        }
+
+        sub prefix:<%>(term) {
+            return "prefix is looser";
+        }
+
+        sub postfix:<$>(term) is looser(prefix:<%>) {
+            return "postfix is looser";
+        }
+
+        say(?[]!);
+        say(%[]$);
+        .
+
+    outputs $program, "postfix is looser\n" x 2, "prefixes can be made tighter with traits";
+}
 
 # also test for associativity with prefix/postfix ops (a prefix and a postfix can tie on prec; "left" prefers the prefix and "right" the postfix)
 
