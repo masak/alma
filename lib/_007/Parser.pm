@@ -455,21 +455,11 @@ class Parser {
             make Q::Statement::Block.new($<pblock>.ast);
         }
 
-        method statement:sub ($/) {
-            my $identifier = $<identifier>.ast;
-            my $subname = ~$<identifier>;
-
-            my $sub = Q::Statement::Sub.new(
-                $identifier,
-                $<parameters>.ast,
-                $<blockoid>.ast);
-            $sub.declare($*runtime);
-            make $sub;
-
+        sub maybe-install-operator($identname, @trait) {
             my %trait;
             my @prec-traits = <equal looser tighter>;
             my $assoc;
-            for @<trait> -> $trait {
+            for @trait -> $trait {
                 my $name = $trait<identifier>.ast.name;
                 if $name eq any @prec-traits {
                     my $identifier = $trait<EXPR>.ast;
@@ -481,8 +471,8 @@ class Parser {
                             unless $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/;
                         %trait{$name} = ~$0;
                         die X::Precedence::Incompatible.new
-                            if $subname ~~ /^ < pre post >/ && $s ~~ /^ in/
-                            || $subname ~~ /^ in/ && $s ~~ /^ < pre post >/;
+                            if $identname ~~ /^ < pre post >/ && $s ~~ /^ in/
+                            || $identname ~~ /^ in/ && $s ~~ /^ < pre post >/;
                     }($identifier.name);
                 }
                 elsif $name eq "assoc" {
@@ -505,65 +495,77 @@ class Parser {
                     if %trait{$t1} && %trait{$t2};
             }
 
-            sub install-operator($s) {
-                if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
-                    }
+            if $identname ~~ /'infix:<' (<-[>]>+) '>'/ {
+                my $op = ~$0;
+                if %trait<looser> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>, :$assoc);
                 }
-                elsif $s ~~ /'prefix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix-looser($op, Q::Prefix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix-tighter($op, Q::Prefix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-prefix-equal($op, Q::Prefix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
-                    }
+                elsif %trait<tighter> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>, :$assoc);
                 }
-                elsif $s ~~ /'postfix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix-looser($op, Q::Postfix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix-tighter($op, Q::Postfix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-postfix-equal($op, Q::Postfix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix($op, Q::Postfix::Custom["$op"], :$assoc);
-                    }
+                elsif %trait<equal> {
+                    # we leave the associativity unspecified
+                    $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>, :$assoc);
                 }
-            }($identifier.name);
+                else {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
+                }
+            }
+            elsif $identname ~~ /'prefix:<' (<-[>]>+) '>'/ {
+                my $op = ~$0;
+                if %trait<looser> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-prefix-looser($op, Q::Prefix::Custom["$op"], %trait<looser>, :$assoc);
+                }
+                elsif %trait<tighter> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-prefix-tighter($op, Q::Prefix::Custom["$op"], %trait<tighter>, :$assoc);
+                }
+                elsif %trait<equal> {
+                    # we leave the associativity unspecified
+                    $*parser.oplevel.add-prefix-equal($op, Q::Prefix::Custom["$op"], %trait<equal>, :$assoc);
+                }
+                else {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
+                }
+            }
+            elsif $identname ~~ /'postfix:<' (<-[>]>+) '>'/ {
+                my $op = ~$0;
+                if %trait<looser> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-postfix-looser($op, Q::Postfix::Custom["$op"], %trait<looser>, :$assoc);
+                }
+                elsif %trait<tighter> {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-postfix-tighter($op, Q::Postfix::Custom["$op"], %trait<tighter>, :$assoc);
+                }
+                elsif %trait<equal> {
+                    # we leave the associativity unspecified
+                    $*parser.oplevel.add-postfix-equal($op, Q::Postfix::Custom["$op"], %trait<equal>, :$assoc);
+                }
+                else {
+                    $assoc //= "left";
+                    $*parser.oplevel.add-postfix($op, Q::Postfix::Custom["$op"], :$assoc);
+                }
+            }
+        }
+
+        method statement:sub ($/) {
+            my $identifier = $<identifier>.ast;
+            my $subname = ~$<identifier>;
+
+            my $sub = Q::Statement::Sub.new(
+                $identifier,
+                $<parameters>.ast,
+                $<blockoid>.ast);
+            $sub.declare($*runtime);
+            make $sub;
+
+            maybe-install-operator($identifier.name, @<trait>);
         }
 
         method statement:macro ($/) {
@@ -577,104 +579,7 @@ class Parser {
             $macro.declare($*runtime);
             make $macro;
 
-            my %trait;
-            my @prec-traits = <equal looser tighter>;
-            my $assoc;
-            for @<trait> -> $trait {
-                my $name = $trait<identifier>.ast.name;
-                if $name eq any @prec-traits {
-                    my $identifier = $trait<EXPR>.ast;
-                    my $prep = $name eq "equal" ?? "to" !! "than";
-                    die "The thing your op is $name $prep must be an identifier"
-                        unless $identifier ~~ Q::Identifier;
-                    sub check-if-op($s) {
-                        die "Unknown thing in '$name' trait"
-                            unless $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/;
-                        %trait{$name} = ~$0;
-                        die X::Precedence::Incompatible.new
-                            if $macroname ~~ /^ < pre post >/ && $s ~~ /^ in/
-                            || $macroname ~~ /^ in/ && $s ~~ /^ < pre post >/;
-                    }($identifier.name);
-                }
-                elsif $name eq "assoc" {
-                    my $string = $trait<EXPR>.ast;
-                    die "The associativity must be a string"
-                        unless $string ~~ Q::Literal::Str;
-                    my $value = $string.value;
-                    die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
-                        unless $value eq any "left", "non", "right";
-                    $assoc = $value;
-                }
-                else {
-                    die "Unknown trait '$name'";
-                }
-            }
-
-            if %trait.keys > 1 {    # this might change in the future, when we have other traits
-                my ($t1, $t2) = %trait.keys.sort;
-                die X::Trait::Conflict.new(:$t1, :$t2)
-                    if %trait{$t1} && %trait{$t2};
-            }
-
-            sub install-operator($s) {
-                if $s ~~ /'infix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix-looser($op, Q::Infix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix-tighter($op, Q::Infix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-infix-equal($op, Q::Infix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-infix($op, Q::Infix::Custom["$op"], :$assoc);
-                    }
-                }
-                elsif $s ~~ /'prefix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix-looser($op, Q::Prefix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix-tighter($op, Q::Prefix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-prefix-equal($op, Q::Prefix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-prefix($op, Q::Prefix::Custom["$op"], :$assoc);
-                    }
-                }
-                elsif $s ~~ /'postfix:<' (<-[>]>+) '>'/ {
-                    my $op = ~$0;
-                    if %trait<looser> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix-looser($op, Q::Postfix::Custom["$op"], %trait<looser>, :$assoc);
-                    }
-                    elsif %trait<tighter> {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix-tighter($op, Q::Postfix::Custom["$op"], %trait<tighter>, :$assoc);
-                    }
-                    elsif %trait<equal> {
-                        # we leave the associativity unspecified
-                        $*parser.oplevel.add-postfix-equal($op, Q::Postfix::Custom["$op"], %trait<equal>, :$assoc);
-                    }
-                    else {
-                        $assoc //= "left";
-                        $*parser.oplevel.add-postfix($op, Q::Postfix::Custom["$op"], :$assoc);
-                    }
-                }
-            }($identifier.name);
+            maybe-install-operator($identifier.name, @<trait>);
         }
 
         method statement:return ($/) {
