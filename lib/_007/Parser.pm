@@ -182,7 +182,7 @@ class Parser {
                                 # 'Missing initializer on constant declaration'
         }
         token statement:expr {
-            <![{]>       # prevent mixup with statement:block
+            <![{]>       # }], you're welcome vim
             <EXPR>
         }
         token statement:block { <pblock> }
@@ -247,7 +247,7 @@ class Parser {
             '{' ~ '}' <statements>
         }
         token block {
-            <?[{]> <.newpad> <blockoid> <.finishpad>
+            <?[{]> <.newpad> <blockoid> <.finishpad>    # }], vim
         }
 
         # "pointy block"
