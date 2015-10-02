@@ -214,6 +214,7 @@ class Parser {
             }
             <.newpad>
             '(' ~ ')' <parameters>
+            <trait> *
             <blockoid>:!s
             <.finishpad>
         }
