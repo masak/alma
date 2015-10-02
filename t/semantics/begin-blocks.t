@@ -179,4 +179,4 @@ use _007::Test;
         "...same, but inside a BEGIN block";
 }
 
-done;
+done-testing;

@@ -12,4 +12,4 @@ use _007::Test;
     is-result $ast, "", "macro";
 }
 
-done;
+done-testing;

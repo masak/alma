@@ -17,4 +17,4 @@ use _007::Test;
         "calling a sub at BEGIN time works";
 }
 
-done;
+done-testing;

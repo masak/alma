@@ -14,4 +14,4 @@ use _007::Test;
     is-result $ast, "3\n2\n1\n", "while loops stops when the condition is false";
 }
 
-done;
+done-testing;

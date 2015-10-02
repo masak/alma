@@ -61,4 +61,4 @@ use _007::Test;
     is-result $ast, "Sub\n", "builtin sub type() returns the same as ordinary sub";
 }
 
-done;
+done-testing;

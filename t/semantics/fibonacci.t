@@ -20,4 +20,4 @@ use _007::Test;
     is-result $ast, "2\n3\n5\n", "recursive calls with returns work out fine";
 }
 
-done;
+done-testing;

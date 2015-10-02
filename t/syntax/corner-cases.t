@@ -278,4 +278,4 @@ use _007::Test;
     parse-error $program, X::Syntax::Missing, "an identifier can not start with a digit";
 }
 
-done;
+done-testing;

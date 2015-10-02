@@ -44,4 +44,4 @@ use _007::Test;
     is-result $ast, "3\n3\n", "variable declarations work inside of for loop without parameters";
 }
 
-done;
+done-testing;

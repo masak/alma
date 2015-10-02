@@ -470,4 +470,4 @@ use _007::Test;
     parse-error $program, X::Precedence::Incompatible, "can't cross the infix/prepostfix prec barrier (II)";
 }
 
-done;
+done-testing;

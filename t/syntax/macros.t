@@ -32,4 +32,4 @@ use _007::Test;
         "expanding a macro and running the result at runtime";
 }
 
-done;
+done-testing;

@@ -32,4 +32,4 @@ use _007::Test;
     is-result $ast, "[1, 2]\n", "array type works";
 }
 
-done;
+done-testing;

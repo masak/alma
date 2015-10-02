@@ -12,4 +12,4 @@ use _007::Test;
     is-result $ast, "None\n", "variables can be declared without being assigned";
 }
 
-done;
+done-testing;

@@ -35,4 +35,4 @@ use _007::Test;
     is-result $ast, "7\n", "if statements with parameters work as they should";
 }
 
-done;
+done-testing;

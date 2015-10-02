@@ -127,4 +127,4 @@ use _007::Test;
     is-error $ast, X::TypeCheck, "indexing a non-array is an error";
 }
 
-done;
+done-testing;

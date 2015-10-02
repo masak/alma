@@ -214,4 +214,4 @@ use _007::Test;
     is-result $ast, "[2, 3, 4]\n[1, 2, 3]\n", "map() works";
 }
 
-done;
+done-testing;

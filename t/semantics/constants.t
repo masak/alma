@@ -42,4 +42,4 @@ use _007::Test;
         "constants are visible from other constants";
 }
 
-done;
+done-testing;

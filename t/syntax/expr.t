@@ -21,4 +21,4 @@ for @exprs -> $expr, $frag {
     parses-to "my a; $expr", $ast, $expr;
 }
 
-done;
+done-testing;

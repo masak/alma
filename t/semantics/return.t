@@ -88,4 +88,4 @@ use _007::Test;
     is-result $ast, "None\n", "sub returning nothing";
 }
 
-done;
+done-testing;

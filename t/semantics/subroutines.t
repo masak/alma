@@ -101,4 +101,4 @@ use _007::Test;
     is-result $ast, "OH HAI\n", "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
 }
 
-done;
+done-testing;

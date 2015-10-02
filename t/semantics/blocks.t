@@ -76,4 +76,4 @@ use _007::Test;
     is-result $ast, "1\n2\n3\n4\n", "each block invocation gets its own callframe/scope";
 }
 
-done;
+done-testing;

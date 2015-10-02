@@ -10,4 +10,4 @@ use _007::Test;
     parse-error $program, X::Syntax::Missing, "must have a valid identifier after `sub`";
 }
 
-done;
+done-testing;

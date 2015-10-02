@@ -349,4 +349,4 @@ use _007::Test;
     parses-to $program, $ast, "while statement";
 }
 
-done;
+done-testing;
