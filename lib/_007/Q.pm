@@ -241,7 +241,7 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
 role Q::Statement::My does Q {
     has $.ident;
     has $.assignment;
-    method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
+    method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
     method Str { "My" ~ children($.ident, |$.assignment) }
 
     method declare($runtime) {
@@ -258,7 +258,7 @@ role Q::Statement::My does Q {
 role Q::Statement::Constant does Q {
     has $.ident;
     has $.assignment;
-    method new($ident, $assignment = Nil) { self.bless(:$ident, :$assignment) }
+    method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
     method Str { "Constant" ~ children($.ident, |$.assignment) }    # XXX: remove | once we guarantee it
 
     method declare($runtime) {
