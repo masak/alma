@@ -79,7 +79,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (stexpr (call (ident "f") (arguments)))
-          (my (ident "x") (str "X"))
+          (my (ident "x") (assign (ident "x") (str "X")))
           (sub (ident "f") (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "x")))))))
         .
