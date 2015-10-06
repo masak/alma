@@ -244,10 +244,6 @@ role Q::Statement::My does Q {
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
     method Str { "My" ~ children($.ident, |$.assignment) }
 
-    method declare($runtime) {
-        $runtime.declare-var($.ident.name);
-    }
-
     method run($runtime) {
         return
             unless $.assignment;
@@ -261,10 +257,6 @@ role Q::Statement::Constant does Q {
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
     method Str { "Constant" ~ children($.ident, |$.assignment) }    # XXX: remove | once we guarantee it
 
-    method declare($runtime) {
-        $runtime.declare-var($.ident.name);
-    }
-
     method run($runtime) {
         # value has already been assigned
     }
@@ -274,10 +266,6 @@ role Q::Statement::Expr does Q {
     has $.expr;
     method new($expr) { self.bless(:$expr) }
     method Str { "Expr" ~ children($.expr) }
-
-    method declare($runtime) {
-        # an expression statement makes no declarations
-    }
 
     method run($runtime) {
         $.expr.eval($runtime);
@@ -289,10 +277,6 @@ role Q::Statement::If does Q {
     has $.block;
     method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
     method Str { "If" ~ children($.expr, $.block) }
-
-    method declare($runtime) {
-        # an if statement makes no declarations
-    }
 
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
@@ -315,10 +299,6 @@ role Q::Statement::Block does Q {
     has $.block;
     method new(Q::Literal::Block $block) { self.bless(:$block) }
     method Str { "Statement block" ~ children($.block) }
-
-    method declare($runtime) {
-        # an immediate block statement makes no declarations
-    }
 
     method run($runtime) {
         my $c = $.block.eval($runtime);
@@ -346,9 +326,6 @@ role Q::Statement::For does Q {
     method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
     method Str { "For" ~  children($.expr, $.block)}
 
-    method declare($runtime) {
-        # nothing is here so far
-    }
     method run($runtime) {
         multi elements(Q::Literal::Array $array) {
             return $array.elements>>.value;
@@ -398,10 +375,6 @@ role Q::Statement::While does Q {
     method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
     method Str { "While" ~ children($.expr, $.block) }
 
-    method declare($runtime) {
-        # a while loop makes no declarations
-    }
-
     method run($runtime) {
         while truthy($.expr.eval($runtime)) {
             my $c = $.block.eval($runtime);
@@ -418,10 +391,6 @@ role Q::Statement::Return does Q {
     method new($expr = NONE) { self.bless(:$expr) }
     method Str { "Return" ~ children($.expr) }
 
-    method declare($runtime) {
-        # a return statement makes no declarations
-    }
-
     method run($runtime) {
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:value($.expr.eval($runtime)), :$frame);
@@ -436,15 +405,8 @@ role Q::Statement::Sub does Q {
     method new($ident, $parameters, $statements) {
         self.bless(:$ident, :$parameters, :$statements);
     }
-    method Str { "Sub[{$.ident.name}]" ~ children($.parameters, $.statements) }
 
-    method declare($runtime) {
-        my $name = $.ident.name;
-        my $outer-frame = $runtime.current-frame;
-        my $sub = Val::Sub.new(:$name, :$.parameters, :$.statements, :$outer-frame);
-        $runtime.declare-var($name);
-        $runtime.put-var($name, $sub);
-    }
+    method Str { "Sub[{$.ident.name}]" ~ children($.parameters, $.statements) }
 
     method run($runtime) {
     }
@@ -458,15 +420,8 @@ role Q::Statement::Macro does Q {
     method new($ident, $parameters, $statements) {
         self.bless(:$ident, :$parameters, :$statements);
     }
-    method Str { "Macro[{$.ident.name}]" ~ children($.parameters, $.statements) }
 
-    method declare($runtime) {
-        my $name = $.ident.name;
-        my $outer-frame = $runtime.current-frame;
-        my $macro = Val::Macro.new(:$name, :$.parameters, :$.statements, :$outer-frame);
-        $runtime.declare-var($name);
-        $runtime.put-var($name, $macro);
-    }
+    method Str { "Macro[{$.ident.name}]" ~ children($.parameters, $.statements) }
 
     method run($runtime) {
     }
@@ -476,10 +431,6 @@ role Q::Statement::BEGIN does Q {
     has $.block;
     method new(Q::Literal::Block $block) { self.bless(:$block) }
     method Str { "BEGIN block" ~ children($.block) }
-
-    method declare($runtime) {
-        # a BEGIN block makes no declarations
-    }
 
     method run($runtime) {
         # a BEGIN block does not run at runtime
@@ -518,5 +469,6 @@ role Q::Trait does Q {
     method new($ident, $expr) {
         self.bless(:$ident, :$expr);
     }
+
     method Str { "Trait[{$.ident.name}]" ~ children($.expr) }
 }

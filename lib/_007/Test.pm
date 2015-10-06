@@ -75,10 +75,81 @@ role BadOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
+sub check($ast, $runtime) {
+    my %*assigned;
+    handle($ast);
+    $ast.static-lexpad = $runtime.current-frame.pad;
+
+    multi handle(Q $ast) {
+        # Do nothing for most Q types; exceptions below
+    }
+
+    multi handle(Q::Statements $statements) {
+        for @($statements.statements) -> $statement {
+            handle($statement);
+        }
+    }
+
+    multi handle(Q::Statement::My $my) {
+        my $symbol = $my.ident.name;
+        my $block = $runtime.current-frame();
+        die X::Redeclaration.new(:$symbol)
+            if $runtime.declared-locally($symbol);
+        die X::Redeclaration::Outer.new(:$symbol)
+            if %*assigned{$block ~ $symbol};
+        $runtime.declare-var($symbol);
+
+        if $my.assignment {
+            handle($my.assignment.rhs);
+        }
+    }
+
+    multi handle(Q::Statement::Block $block) {
+        handle($block.block);
+    }
+
+    multi handle(Q::Statement::Sub $sub) {
+        my $outer-frame = $runtime.current-frame;
+        my $valblock = Val::Block.new(:$outer-frame);
+        $runtime.enter($valblock);
+        handle($sub.parameters);
+        handle($sub.statements);
+        $sub.statements.static-lexpad = $runtime.current-frame.pad;
+        $runtime.leave();
+
+        my $name = $sub.ident.name;
+        my $valsub = Val::Sub.new(:$name, :parameters($sub.parameters),
+            :statements($sub.statements), :$outer-frame);
+        $runtime.declare-var($name);
+        $runtime.put-var($name, $valsub);
+    }
+
+    multi handle(Q::Statement::For $for) {
+        handle($for.block);
+    }
+
+    multi handle(Q::Literal::Block $block) {
+        my $valblock = Val::Block.new(
+            :outer-frame($runtime.current-frame));
+        $runtime.enter($valblock);
+        handle($block.parameters);
+        handle($block.statements);
+        $block.statements.static-lexpad = $runtime.current-frame.pad;
+        $runtime.leave();
+    }
+
+    multi handle(Q::Parameters $parameters) {
+        for @($parameters.parameters) -> $parameter {
+            handle($parameter);
+        }
+    }
+}
+
 sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $ast = read($input);
     my $output = Output.new;
     my $runtime = _007.runtime(:$output);
+    check($ast, $runtime);
     $runtime.run($ast, :$output);
 
     is $output.result, $expected, $desc;
@@ -88,6 +159,7 @@ sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
     my $ast = read($input);
     my $output = Output.new;
     my $runtime = _007.runtime(:$output);
+    check($ast, $runtime);
     $runtime.run($ast, :$output);
 
     CATCH {

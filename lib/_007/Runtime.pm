@@ -37,14 +37,19 @@ role Runtime {
     method enter($block) {
         my $frame = Frame.new(:$block);
         @!frames.push($frame);
-        for $block.statements.statements -> $statement {
-            $statement.declare(self);
-        }
         for $block.statements.static-lexpad.kv -> $name, $value {
-            self.put-var($name, $value)
-                unless $value ~~ Val::None; # XXX: this is almost certainly wrong
-                                            # but I seemed to need it or subroutines
-                                            # would be overwritten by None
+            self.declare-var($name);
+            self.put-var($name, $value);
+        }
+        for $block.statements.statements.kv -> $i, $_ {
+            when Q::Statement::Sub {
+                my $name = .ident.name;
+                my $parameters = .parameters;
+                my $statements = .statements;
+                my $outer-frame = $frame;
+                my $val = Val::Sub.new(:$name, :$parameters, :$statements, :$outer-frame);
+                self.put-var($name, $val);
+            }
         }
     }
 
@@ -65,11 +70,10 @@ role Runtime {
 
     method !find($symbol) {
         my $frame = self.current-frame;
-        loop {
+        repeat while $frame !=== NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
             $frame = $frame.block.outer-frame;
-            last if $frame === NO_OUTER;
         }
         die X::Undeclared.new(:$symbol);
     }

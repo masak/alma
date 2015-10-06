@@ -464,13 +464,20 @@ class Parser {
 
         method statement:sub ($/) {
             my $identifier = $<identifier>.ast;
-            my $subname = ~$<identifier>;
+            my $name = ~$<identifier>;
+            my $parameters = $<parameters>.ast;
+            my $statements = $<blockoid>.ast;
 
             my $sub = Q::Statement::Sub.new(
                 $identifier,
-                $<parameters>.ast,
-                $<blockoid>.ast);
-            $sub.declare($*runtime);
+                $parameters,
+                $statements);
+
+            my $outer-frame = $*runtime.current-frame;
+            my $val = Val::Sub.new(:$name, :$parameters, :$statements, :$outer-frame);
+            $*runtime.declare-var($name);
+            $*runtime.put-var($name, $val);
+
             make $sub;
 
             maybe-install-operator($identifier.name, @<trait>);
@@ -478,13 +485,20 @@ class Parser {
 
         method statement:macro ($/) {
             my $identifier = $<identifier>.ast;
-            my $macroname = ~$<identifier>;
+            my $name = ~$<identifier>;
+            my $parameters = $<parameters>.ast;
+            my $statements = $<blockoid>.ast;
 
             my $macro = Q::Statement::Macro.new(
                 $identifier,
-                $<parameters>.ast,
-                $<blockoid>.ast);
-            $macro.declare($*runtime);
+                $parameters,
+                $statements);
+
+            my $outer-frame = $*runtime.current-frame;
+            my $val = Val::Macro.new(:$name, :$parameters, :$statements, :$outer-frame);
+            $*runtime.declare-var($name);
+            $*runtime.put-var($name, $val);
+
             make $macro;
 
             maybe-install-operator($identifier.name, @<trait>);
