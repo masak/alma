@@ -278,4 +278,12 @@ use _007::Test;
     parse-error $program, X::Syntax::Missing, "an identifier can not start with a digit";
 }
 
+{
+    my $program = q:to/./;
+        sub !() {}
+        .
+
+    parse-error $program, X::Syntax::Missing, "must have a valid identifier after `sub`";
+}
+
 done-testing;

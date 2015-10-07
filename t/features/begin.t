@@ -179,4 +179,19 @@ use _007::Test;
         "...same, but inside a BEGIN block";
 }
 
+{
+    my $program = q:to/./;
+        sub foo() {
+            say(7);
+        }
+
+        BEGIN { foo() }
+        .
+
+    outputs
+        $program,
+        "7\n",
+        "calling a sub at BEGIN time works";
+}
+
 done-testing;
