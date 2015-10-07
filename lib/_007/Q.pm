@@ -8,6 +8,9 @@ class X::Control::Return is Exception {
 class X::Subscript::TooLarge is Exception {
 }
 
+class X::Subscript::NonInteger is Exception {
+}
+
 role Q {
 }
 
@@ -210,7 +213,8 @@ role Q::Postfix::Index does Q::Postfix {
         die X::TypeCheck.new(:operation<indexing>, :got($expr), :expected(Val::Array))
             unless $expr ~~ Val::Array;
         my $index = $.index.eval($runtime);
-        # XXX: also check index is integer
+        die X::Subscript::NonInteger.new
+            if $index !~~ Val::Int;
         die X::Subscript::TooLarge.new
             if $index.value >= $expr.elements;
         die X::Subscript::Negative.new(:$index, :type([]))
