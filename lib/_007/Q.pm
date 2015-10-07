@@ -319,6 +319,18 @@ role Q::Statement::Block does Q {
     }
 }
 
+role Q::Parameters does Q {
+    has @.parameters;
+    method new(*@parameters) { self.bless(:@parameters) }
+    method Str { "Parameters" ~ children(@.parameters) }
+}
+
+role Q::Arguments does Q {
+    has @.arguments;
+    method new(*@arguments) { self.bless(:@arguments) }
+    method Str { "Arguments" ~ children(@.arguments) }
+}
+
 role Q::Quasi does Q {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
@@ -459,18 +471,6 @@ role Q::Statements does Q {
             $statement.run($runtime);
         }
     }
-}
-
-role Q::Parameters does Q {
-    has @.parameters;
-    method new(*@parameters) { self.bless(:@parameters) }
-    method Str { "Parameters" ~ children(@.parameters) }
-}
-
-role Q::Arguments does Q {
-    has @.arguments;
-    method new(*@arguments) { self.bless(:@arguments) }
-    method Str { "Arguments" ~ children(@.arguments) }
 }
 
 role Q::Trait does Q {
