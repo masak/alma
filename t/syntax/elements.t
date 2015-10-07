@@ -4,6 +4,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        my n = None;
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (my (ident "n") (assign (ident "n") (none))))
+        .
+
+    parses-to $program, $ast, "assigning a none";
+}
+
+{
+    my $program = q:to/./;
         my n = 7;
         .
 

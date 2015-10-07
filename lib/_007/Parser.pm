@@ -290,6 +290,7 @@ class Parser {
         }
 
         proto token term {*}
+        token term:none { None >> }
         token term:int { \d+ }
         token term:str { '"' ([<-["]> | '\\"']*) '"' }
         token term:array { '[' ~ ']' <EXPR>* % [\h* ',' \h*] }
@@ -720,6 +721,10 @@ class Parser {
 
         method prefix($/) {
             make $*parser.oplevel.ops<prefix>{~$/};
+        }
+
+        method term:none ($/) {
+            make Q::Literal::None.new;
         }
 
         method term:int ($/) {

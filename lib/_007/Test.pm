@@ -4,6 +4,7 @@ use Test;
 
 sub read(Str $ast) is export {
     my %qclass_lookup =
+        none        => Q::Literal::None,
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
         array       => Q::Literal::Array,

@@ -20,6 +20,13 @@ multi truthy(Val::Int $i) { ?$i.value }
 multi truthy(Val::Str $s) { ?$s.value }
 multi truthy(Val::Array $a) { ?$a.elements }
 
+role Q::Literal::None does Q {
+    method new() { self.bless }
+    method Str { "None" }
+
+    method eval($) { Val::None.new }
+}
+
 role Q::Literal::Int does Q {
     has $.value;
     method new(Int $value) { self.bless(:$value) }
