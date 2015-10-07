@@ -224,7 +224,7 @@ subroutines. These should be fairly self-explanatory.
     reversed(array)
     sorted(array)
     join(array, sep)
-    grep(fn, array)
+    filter(fn, array)
     map(fn, array)
 
 There are also constructor methods for creating program elements.

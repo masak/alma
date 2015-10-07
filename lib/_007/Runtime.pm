@@ -129,7 +129,7 @@ role Runtime {
             index    => -> $s, $substr { Val::Int.new(:value($s.value.index($substr.value) // -1)) },
             substr   => sub ($s, $pos, $chars?) { Val::Str.new(:value($s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars))) },
             charat   => -> $s, $pos { Val::Str.new(:value($s.value.comb[$pos.value] // die X::Subscript::TooLarge.new)) },
-            grep     => -> $fn, $a {
+            filter   => -> $fn, $a {
                 my $array = Val::Array.new;
                 for $a.elements {
                     $array.elements.push($_) if truthy(self.call($fn, [$_]));

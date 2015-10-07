@@ -195,10 +195,10 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters (ident "n")) (statements
               (return (== (ident "n") (int 2)))))
-          (stexpr (call (ident "say") (arguments (call (ident "grep") (arguments (ident "f") (array (int 1) (int 2) (int 3) (int 2))))))))
+          (stexpr (call (ident "say") (arguments (call (ident "filter") (arguments (ident "f") (array (int 1) (int 2) (int 3) (int 2))))))))
         .
 
-    is-result $ast, "[2, 2]\n", "grep() works";
+    is-result $ast, "[2, 2]\n", "filter() works";
 }
 
 {
