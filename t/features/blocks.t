@@ -5,8 +5,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (stblock (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "OH HAI from inside block"))))))))
+          (stblock (statements
+            (stexpr (call (ident "say") (arguments (str "OH HAI from inside block")))))))
         .
 
     is-result $ast, "OH HAI from inside block\n", "immediate blocks work";
@@ -17,9 +17,9 @@ use _007::Test;
         (statements
           (my (ident "x") (assign (ident "x") (str "one")))
           (stexpr (call (ident "say") (arguments (ident "x"))))
-          (stblock (block (parameters) (statements
+          (stblock (statements
             (my (ident "x") (assign (ident "x") (str "two")))
-            (stexpr (call (ident "say") (arguments (ident "x")))))))
+            (stexpr (call (ident "say") (arguments (ident "x"))))))
           (stexpr (call (ident "say") (arguments (ident "x")))))
         .
 

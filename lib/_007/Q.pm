@@ -306,19 +306,6 @@ role Q::Statement::If does Q {
     }
 }
 
-role Q::Statement::Block does Q {
-    has $.block;
-    method new(Q::Literal::Block $block) { self.bless(:$block) }
-    method Str { "Statement block" ~ children($.block) }
-
-    method run($runtime) {
-        my $c = $.block.eval($runtime);
-        $runtime.enter($c);
-        $.block.statements.run($runtime);
-        $runtime.leave;
-    }
-}
-
 role Q::Parameters does Q {
     has @.parameters;
     method new(*@parameters) { self.bless(:@parameters) }
@@ -331,15 +318,32 @@ role Q::Arguments does Q {
     method Str { "Arguments" ~ children(@.arguments) }
 }
 
+role Q::Statement::Block does Q {
+    has $.statements;
+    method new(Q::Statements $statements) { self.bless(:$statements) }
+    method Str { "Statement block" ~ children($.statements) }
+
+    method run($runtime) {
+        $runtime.enter(Q::Literal::Block.new(
+            Q::Parameters.new(),
+            $.statements
+        ).eval($runtime));
+        $.statements.run($runtime);
+        $runtime.leave;
+    }
+}
+
+role Q::Compunit does Q::Statement::Block {
+    method Str { "Compunit" ~ children($.block) }
+}
+
 role Q::Quasi does Q {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
     method Str { "Quasi" ~ children($.statements) }
 
     method eval($runtime) {
-        my $parameters = Q::Parameters.new();
-        my $block = Q::Literal::Block.new($parameters, $.statements);
-        return Q::Statement::Block.new($block);
+        return Q::Statement::Block.new($.statements);
     }
 }
 

@@ -397,7 +397,7 @@ class Parser {
 
         method statement:expr ($/) {
             if $<EXPR>.ast ~~ Q::Statement::Block {
-                my @statements = $<EXPR>.ast.block.statements.statements.list;
+                my @statements = $<EXPR>.ast.statements.statements.list;
                 die "Can't handle this case with more than one statement yet" # XXX
                     if @statements > 1;
                 make @statements[0];
@@ -410,7 +410,7 @@ class Parser {
         method statement:block ($/) {
             die X::PointyBlock::SinkContext.new
                 if $<pblock><parameters>;
-            make Q::Statement::Block.new($<pblock>.ast);
+            make Q::Statement::Block.new($<pblock>.ast.statements);
         }
 
         sub maybe-install-operator($identname, @trait) {
