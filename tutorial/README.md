@@ -236,6 +236,7 @@ There are also constructor methods for creating program elements.
     Q::Statements(array)
     Q::Parameters(array)
     Q::Arguments(array)
+    Q::Block(params, stmts)
     Q::Prefix::Minus(expr)
     Q::Infix::Addition(lhs, rhs)
     Q::Infix::Concat(lhs, rhs)
