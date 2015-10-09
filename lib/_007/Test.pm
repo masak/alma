@@ -48,7 +48,7 @@ sub read(Str $ast) is export {
 
     my $actions = role {
         method TOP($/) {
-            Q::Compunit.new(make $<expr>.ast);
+            Q::CompUnit.new(make $<expr>.ast);
         }
         method expr:list ($/) {
             my $qname = ~$<expr>[0];

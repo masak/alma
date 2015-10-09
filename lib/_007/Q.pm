@@ -333,8 +333,8 @@ role Q::Statement::Block does Q {
     }
 }
 
-role Q::Compunit does Q::Statement::Block {
-    method Str { "Compunit" ~ children($.block) }
+role Q::CompUnit does Q::Statement::Block {
+    method Str { "CompUnit" ~ children($.block) }
 }
 
 role Q::Quasi does Q {
