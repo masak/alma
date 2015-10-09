@@ -48,7 +48,7 @@ sub read(Str $ast) is export {
 
     my $actions = role {
         method TOP($/) {
-            Q::CompUnit.new(make $<expr>.ast);
+            make $<expr>.ast;
         }
         method expr:list ($/) {
             my $qname = ~$<expr>[0];
@@ -108,12 +108,9 @@ sub check($ast, $runtime) {
     }
 
     multi handle(Q::Statement::Block $block) {
-        $runtime.enter(Q::Block.new(
-            Q::Parameters.new(),
-            $block.statements
-        ).eval($runtime));
-        handle($block.statements);
-        $block.statements.static-lexpad = $runtime.current-frame.pad;
+        $runtime.enter($block.block.eval($runtime));
+        handle($block.block.statements);
+        $block.block.statements.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
     }
 

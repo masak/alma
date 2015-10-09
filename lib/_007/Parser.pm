@@ -377,7 +377,7 @@ my class Actions {
     }
 
     method statement:expr ($/) {
-        if $<EXPR>.ast ~~ Q::Statement::Block {
+        if $<EXPR>.ast ~~ Q::Block {
             my @statements = $<EXPR>.ast.statements.statements.list;
             die "Can't handle this case with more than one statement yet" # XXX
                 if @statements > 1;
@@ -391,7 +391,7 @@ my class Actions {
     method statement:block ($/) {
         die X::PointyBlock::SinkContext.new
             if $<pblock><parameters>;
-        make Q::Statement::Block.new($<pblock>.ast.statements);
+        make Q::Statement::Block.new($<pblock>.ast);
     }
 
     sub maybe-install-operator($identname, @trait) {

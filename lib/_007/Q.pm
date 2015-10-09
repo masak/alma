@@ -319,16 +319,13 @@ role Q::Arguments does Q {
 }
 
 role Q::Statement::Block does Q {
-    has $.statements;
-    method new(Q::Statements $statements) { self.bless(:$statements) }
-    method Str { "Statement block" ~ children($.statements) }
+    has $.block;
+    method new(Q::Block $block) { self.bless(:$block) }
+    method Str { "Statement block" ~ children($.block) }
 
     method run($runtime) {
-        $runtime.enter(Q::Block.new(
-            Q::Parameters.new(),
-            $.statements
-        ).eval($runtime));
-        $.statements.run($runtime);
+        $runtime.enter($.block.eval($runtime));
+        $.block.statements.run($runtime);
         $runtime.leave;
     }
 }
@@ -343,7 +340,7 @@ role Q::Quasi does Q {
     method Str { "Quasi" ~ children($.statements) }
 
     method eval($runtime) {
-        return Q::Statement::Block.new($.statements);
+        return Q::Block.new(Q::Parameters.new, $.statements);
     }
 }
 

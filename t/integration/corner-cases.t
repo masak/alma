@@ -81,8 +81,8 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (my (ident "x") (assign (ident "x") (int 5)))
-          (stblock (statements
-            (stexpr (call (ident "say") (arguments (str "inside"))))))
+          (stblock (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "inside")))))))
           (stexpr (assign (ident "x") (int 7))))
         .
 
@@ -118,8 +118,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (stblock (statements
-            (stexpr (call (ident "say") (arguments (str "immediate block")))))))
+          (stblock (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "immediate block"))))))))
         .
 
     parses-to $program, $ast, "can skip the last semicolon in a block, too";

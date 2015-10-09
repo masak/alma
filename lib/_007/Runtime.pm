@@ -166,7 +166,7 @@ role Runtime {
             'Q::Statement::Constant' => -> $ident, $assign { Q::Statement::Constant.new($ident, $assign) },
             'Q::Statement::Expr' => -> $expr { Q::Statement::Expr.new($expr) },
             'Q::Statement::If' => -> $expr, $block { Q::Statement::If.new($expr, $block) },
-            'Q::Statement::Block' => -> $stmts { Q::Statement::Block.new($stmts) },
+            'Q::Statement::Block' => -> $block { Q::Statement::Block.new($block) },
             'Q::Statement::Sub' => -> $ident, $params, $block { Q::Statement::Sub.new($ident, $params, $block) },
             'Q::Statement::Macro' => -> $ident, $params, $block { Q::Statement::Macro.new($ident, $params, $block) },
             'Q::Statement::Return' => -> $expr = Empty { Q::Statement::Return.new(|$expr) },

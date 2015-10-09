@@ -165,8 +165,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statements
-          (stblock (statements
-            (stexpr (call (ident "say") (arguments (str "immediate block")))))))
+          (stblock (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "immediate block"))))))))
         .
 
     parses-to $program, $ast, "immediate block";
