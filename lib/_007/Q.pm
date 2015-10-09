@@ -14,10 +14,6 @@ class X::Subscript::NonInteger is Exception {
 role Q {
 }
 
-sub children(*@c) {
-    "\n" ~ @c.join("\n").indent(2)
-}
-
 multi truthy(Val::None) is export { False }
 multi truthy(Val::Int $i) { ?$i.value }
 multi truthy(Val::Str $s) { ?$s.value }
@@ -44,6 +40,10 @@ role Q::Literal::Str does Q {
     method Str { qq[Str["$.value"]] }
 
     method eval($) { Val::Str.new(:$.value) }
+}
+
+sub children(*@c) {
+    "\n" ~ @c.join("\n").indent(2);
 }
 
 role Q::Literal::Array does Q {
