@@ -14,7 +14,8 @@ class X::Subscript::NonInteger is Exception {
 role Q {
 }
 
-multi truthy(Val::None) is export { False }
+multi truthy(Val) is export { True }
+multi truthy(Val::None) { False }
 multi truthy(Val::Int $i) { ?$i.value }
 multi truthy(Val::Str $s) { ?$s.value }
 multi truthy(Val::Array $a) { ?$a.elements }

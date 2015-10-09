@@ -19,10 +19,18 @@ use _007::Test;
           (if (array) (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (str "falsy array")))))))
           (if (array (str "")) (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy array"))))))))
+            (stexpr (call (ident "say") (arguments (str "truthy array")))))))
+          (sub (ident "foo") (parameters) (statements))
+          (if (ident "foo") (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "truthy sub")))))))
+          (macro (ident "bar") (parameters) (statements))
+          (if (ident "bar") (block (parameters) (statements
+            (stexpr (call (ident "say") (arguments (str "truthy macro"))))))))
         .
 
-    is-result $ast, "truthy int\ntruthy str\ntruthy array\n", "if statements run truthy things";
+    is-result $ast,
+        <int str array sub macro>.map({"truthy $_\n"}).join,
+        "if statements run truthy things";
 }
 
 {
