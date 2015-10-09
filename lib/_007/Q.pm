@@ -19,14 +19,17 @@ multi truthy(Val::Int $i) { ?$i.value }
 multi truthy(Val::Str $s) { ?$s.value }
 multi truthy(Val::Array $a) { ?$a.elements }
 
-role Q::Literal::None does Q {
+role Q::Literal does Q {
+}
+
+role Q::Literal::None does Q::Literal {
     method new() { self.bless }
     method Str { "None" }
 
     method eval($) { Val::None.new }
 }
 
-role Q::Literal::Int does Q {
+role Q::Literal::Int does Q::Literal {
     has $.value;
     method new(Int $value) { self.bless(:$value) }
     method Str { "Int[$.value]" }
@@ -34,7 +37,7 @@ role Q::Literal::Int does Q {
     method eval($) { Val::Int.new(:$.value) }
 }
 
-role Q::Literal::Str does Q {
+role Q::Literal::Str does Q::Literal {
     has $.value;
     method new(Str $value) { self.bless(:$value) }
     method Str { qq[Str["$.value"]] }
@@ -46,7 +49,7 @@ sub children(*@c) {
     "\n" ~ @c.join("\n").indent(2);
 }
 
-role Q::Literal::Array does Q {
+role Q::Literal::Array does Q::Literal {
     has @.elements;
     method new(*@elements) {
         self.bless(:@elements)
@@ -249,7 +252,22 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
     }
 }
 
-role Q::Statement::My does Q {
+role Q::Parameters does Q {
+    has @.parameters;
+    method new(*@parameters) { self.bless(:@parameters) }
+    method Str { "Parameters" ~ children(@.parameters) }
+}
+
+role Q::Arguments does Q {
+    has @.arguments;
+    method new(*@arguments) { self.bless(:@arguments) }
+    method Str { "Arguments" ~ children(@.arguments) }
+}
+
+role Q::Statement does Q {
+}
+
+role Q::Statement::My does Q::Statement {
     has $.ident;
     has $.assignment;
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
@@ -262,7 +280,7 @@ role Q::Statement::My does Q {
     }
 }
 
-role Q::Statement::Constant does Q {
+role Q::Statement::Constant does Q::Statement {
     has $.ident;
     has $.assignment;
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
@@ -273,7 +291,7 @@ role Q::Statement::Constant does Q {
     }
 }
 
-role Q::Statement::Expr does Q {
+role Q::Statement::Expr does Q::Statement {
     has $.expr;
     method new($expr) { self.bless(:$expr) }
     method Str { "Expr" ~ children($.expr) }
@@ -283,7 +301,7 @@ role Q::Statement::Expr does Q {
     }
 }
 
-role Q::Statement::If does Q {
+role Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
@@ -306,19 +324,7 @@ role Q::Statement::If does Q {
     }
 }
 
-role Q::Parameters does Q {
-    has @.parameters;
-    method new(*@parameters) { self.bless(:@parameters) }
-    method Str { "Parameters" ~ children(@.parameters) }
-}
-
-role Q::Arguments does Q {
-    has @.arguments;
-    method new(*@arguments) { self.bless(:@arguments) }
-    method Str { "Arguments" ~ children(@.arguments) }
-}
-
-role Q::Statement::Block does Q {
+role Q::Statement::Block does Q::Statement {
     has $.block;
     method new(Q::Block $block) { self.bless(:$block) }
     method Str { "Statement block" ~ children($.block) }
@@ -334,7 +340,7 @@ role Q::CompUnit does Q::Statement::Block {
     method Str { "CompUnit" ~ children($.block) }
 }
 
-role Q::Quasi does Q {
+role Q::Quasi does Q::Statement {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
     method Str { "Quasi" ~ children($.statements) }
@@ -344,7 +350,7 @@ role Q::Quasi does Q {
     }
 }
 
-role Q::Statement::For does Q {
+role Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
@@ -393,7 +399,7 @@ role Q::Statement::For does Q {
     }
 }
 
-role Q::Statement::While does Q {
+role Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
@@ -409,7 +415,7 @@ role Q::Statement::While does Q {
     }
 }
 
-role Q::Statement::Return does Q {
+role Q::Statement::Return does Q::Statement {
     has $.expr;
     sub NONE { role { method eval($) { Val::None.new }; method Str { "(no return value)" } } }
     method new($expr = NONE) { self.bless(:$expr) }
@@ -421,7 +427,7 @@ role Q::Statement::Return does Q {
     }
 }
 
-role Q::Statement::Sub does Q {
+role Q::Statement::Sub does Q::Statement {
     has $.ident;
     has $.parameters;
     has $.statements;
@@ -436,7 +442,7 @@ role Q::Statement::Sub does Q {
     }
 }
 
-role Q::Statement::Macro does Q {
+role Q::Statement::Macro does Q::Statement {
     has $.ident;
     has $.parameters;
     has $.statements;
@@ -451,7 +457,7 @@ role Q::Statement::Macro does Q {
     }
 }
 
-role Q::Statement::BEGIN does Q {
+role Q::Statement::BEGIN does Q::Statement {
     has $.block;
     method new(Q::Block $block) { self.bless(:$block) }
     method Str { "BEGIN block" ~ children($.block) }
