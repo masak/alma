@@ -130,6 +130,22 @@ sub check($ast, $runtime) {
         $runtime.put-var($name, $valsub);
     }
 
+    multi handle(Q::Statement::Macro $macro) {
+        my $outer-frame = $runtime.current-frame;
+        my $valblock = Val::Block.new(:$outer-frame);
+        $runtime.enter($valblock);
+        handle($macro.parameters);
+        handle($macro.statements);
+        $macro.statements.static-lexpad = $runtime.current-frame.pad;
+        $runtime.leave();
+
+        my $name = $macro.ident.name;
+        my $valmacro = Val::Macro.new(:$name, :parameters($macro.parameters),
+            :statements($macro.statements), :$outer-frame);
+        $runtime.declare-var($name);
+        $runtime.put-var($name, $valmacro);
+    }
+
     multi handle(Q::Statement::For $for) {
         handle($for.block);
     }
