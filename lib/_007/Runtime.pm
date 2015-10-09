@@ -132,7 +132,7 @@ role Runtime {
             filter   => -> $fn, $a {
                 my $array = Val::Array.new;
                 for $a.elements {
-                    $array.elements.push($_) if truthy(self.call($fn, [$_]));
+                    $array.elements.push($_) if self.call($fn, [$_]).truthy;
                 }
                 $array;
             },

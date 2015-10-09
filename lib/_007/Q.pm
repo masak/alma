@@ -14,12 +14,6 @@ class X::Subscript::NonInteger is Exception {
 role Q {
 }
 
-multi truthy(Val) is export { True }
-multi truthy(Val::None) { False }
-multi truthy(Val::Int $i) { ?$i.value }
-multi truthy(Val::Str $s) { ?$s.value }
-multi truthy(Val::Array $a) { ?$a.elements }
-
 role Q::Literal does Q {
 }
 
@@ -310,7 +304,7 @@ role Q::Statement::If does Q::Statement {
 
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
-        if truthy($expr) {
+        if $expr.truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
             die "Too many parameters in if statements"  # XXX: needs a test and a real exception
@@ -407,7 +401,7 @@ role Q::Statement::While does Q::Statement {
     method Str { "While" ~ children($.expr, $.block) }
 
     method run($runtime) {
-        while truthy($.expr.eval($runtime)) {
+        while $.expr.eval($runtime).truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
             $.block.statements.run($runtime);

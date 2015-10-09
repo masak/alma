@@ -1,8 +1,16 @@
-role Val {}
+role Val {
+    method truthy {
+        True
+    }
+}
 
 role Val::None does Val {
     method Str {
         "None"
+    }
+
+    method truthy {
+        False
     }
 }
 
@@ -12,6 +20,10 @@ role Val::Int does Val {
     method Str {
         $.value.Str
     }
+
+    method truthy {
+        ?$.value;
+    }
 }
 
 role Val::Str does Val {
@@ -20,6 +32,10 @@ role Val::Str does Val {
     method Str {
         $.value
     }
+
+    method truthy {
+        ?$.value;
+    }
 }
 
 role Val::Array does Val {
@@ -27,6 +43,10 @@ role Val::Array does Val {
 
     method Str {
         '[' ~ @.elements>>.Str.join(', ') ~ ']'
+    }
+
+    method truthy {
+        ?$.elements
     }
 }
 
