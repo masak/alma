@@ -58,7 +58,7 @@ role Q::Literal::Array does Q {
     }
 }
 
-role Q::Literal::Block does Q {
+role Q::Block does Q {
     has $.parameters;
     has $.statements;
     method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
@@ -286,7 +286,7 @@ role Q::Statement::Expr does Q {
 role Q::Statement::If does Q {
     has $.expr;
     has $.block;
-    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
     method Str { "If" ~ children($.expr, $.block) }
 
     method run($runtime) {
@@ -324,7 +324,7 @@ role Q::Statement::Block does Q {
     method Str { "Statement block" ~ children($.statements) }
 
     method run($runtime) {
-        $runtime.enter(Q::Literal::Block.new(
+        $runtime.enter(Q::Block.new(
             Q::Parameters.new(),
             $.statements
         ).eval($runtime));
@@ -350,7 +350,7 @@ role Q::Quasi does Q {
 role Q::Statement::For does Q {
     has $.expr;
     has $.block;
-    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
     method Str { "For" ~  children($.expr, $.block)}
 
     method run($runtime) {
@@ -399,7 +399,7 @@ role Q::Statement::For does Q {
 role Q::Statement::While does Q {
     has $.expr;
     has $.block;
-    method new($expr, Q::Literal::Block $block) { self.bless(:$expr, :$block) }
+    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
     method Str { "While" ~ children($.expr, $.block) }
 
     method run($runtime) {
@@ -456,7 +456,7 @@ role Q::Statement::Macro does Q {
 
 role Q::Statement::BEGIN does Q {
     has $.block;
-    method new(Q::Literal::Block $block) { self.bless(:$block) }
+    method new(Q::Block $block) { self.bless(:$block) }
     method Str { "BEGIN block" ~ children($.block) }
 
     method run($runtime) {

@@ -524,13 +524,13 @@ my class Actions {
         self.finish-block($st);
     }
     method block ($/) {
-        make Q::Literal::Block.new(
+        make Q::Block.new(
             Q::Parameters.new,
             $<blockoid>.ast);
     }
     method pblock ($/) {
         if $<parameters> {
-            make Q::Literal::Block.new(
+            make Q::Block.new(
                 $<parameters>.ast,
                 $<blockoid>.ast);
         } else {

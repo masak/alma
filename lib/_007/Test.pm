@@ -8,7 +8,6 @@ sub read(Str $ast) is export {
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
         array       => Q::Literal::Array,
-        block       => Q::Literal::Block,
 
         '-'         => Q::Prefix::Minus,
 
@@ -35,6 +34,7 @@ sub read(Str $ast) is export {
         statements  => Q::Statements,
         parameters  => Q::Parameters,
         arguments   => Q::Arguments,
+        block       => Q::Block,
     ;
 
     my grammar _007::Syntax {
@@ -108,7 +108,7 @@ sub check($ast, $runtime) {
     }
 
     multi handle(Q::Statement::Block $block) {
-        $runtime.enter(Q::Literal::Block.new(
+        $runtime.enter(Q::Block.new(
             Q::Parameters.new(),
             $block.statements
         ).eval($runtime));
@@ -137,7 +137,7 @@ sub check($ast, $runtime) {
         handle($for.block);
     }
 
-    multi handle(Q::Literal::Block $block) {
+    multi handle(Q::Block $block) {
         my $valblock = Val::Block.new(
             :outer-frame($runtime.current-frame));
         $runtime.enter($valblock);
