@@ -171,7 +171,7 @@ grammar _007::Parser::Syntax {
                 unless $*runtime.declared($symbol);
         }
     }
-    token term:quasi { quasi <.ws> '{' ~ '}' <statements> }
+    token term:quasi { quasi >> [<.ws> '{' ~ '}' <statements> || <.panic("quasi")>] }
     token term:parens { '(' ~ ')' <EXPR> }
 
     method infix {
