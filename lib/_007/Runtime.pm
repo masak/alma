@@ -224,11 +224,17 @@ role Runtime {
             },
             params => sub ($_) {
                 # XXX: typecheck
-                return .parameters;
+                my $retval = .parameters;
+                return $retval ~~ Array
+                    ?? Val::Array.new(:elements($retval))
+                    !! $retval;
             },
             stmts => sub ($_) {
                 # XXX: typecheck
-                return .statements;
+                my $retval = .statements;
+                return $retval ~~ Array
+                    ?? Val::Array.new(:elements($retval))
+                    !! $retval;
             },
             expr => sub ($_) {
                 # XXX: typecheck
@@ -248,7 +254,10 @@ role Runtime {
             },
             args => sub ($_) {
                 # XXX: typecheck
-                return .arguments;
+                my $retval = .arguments;
+                return $retval ~~ Array
+                    ?? Val::Array.new(:elements($retval))
+                    !! $retval;
             },
             ident => sub ($_) {
                 # XXX: typecheck
