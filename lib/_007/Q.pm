@@ -207,17 +207,17 @@ role Q::Postfix::Index does Q::Postfix {
     method Str { "Index" ~ children($.expr, $.index) }
 
     method eval($runtime) {
-        my $expr = $runtime.get-var($.expr.name);
-        die X::TypeCheck.new(:operation<indexing>, :got($expr), :expected(Val::Array))
-            unless $expr ~~ Val::Array;
+        my $e = $.expr.eval($runtime);
+        die X::TypeCheck.new(:operation<indexing>, :got($e), :expected(Val::Array))
+            unless $e ~~ Val::Array;
         my $index = $.index.eval($runtime);
         die X::Subscript::NonInteger.new
             if $index !~~ Val::Int;
         die X::Subscript::TooLarge.new
-            if $index.value >= $expr.elements;
+            if $index.value >= $e.elements;
         die X::Subscript::Negative.new(:$index, :type([]))
             if $index.value < 0;
-        return $expr.elements[$index.value];
+        return $e.elements[$index.value];
     }
 }
 

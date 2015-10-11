@@ -33,6 +33,16 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
+          (my (ident "ns") (assign (ident "ns") (array (array (str "Auric") (str "Goldfinger")))))
+          (stexpr (call (ident "say") (arguments (index (index (ident "ns") (int 0)) (int 1))))))
+        .
+
+    is-result $ast, "Goldfinger\n", "array indexing works on something that is not a variable name";
+}
+
+{
+    my $ast = q:to/./;
+        (statements
           (my (ident "x") (assign (ident "x") (int 1)))
           (stexpr (assign (ident "x") (int 2)))
           (stexpr (call (ident "say") (arguments (ident "x")))))
