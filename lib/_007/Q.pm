@@ -28,6 +28,14 @@ class X::ParameterMismatch is Exception {
     }
 }
 
+class X::PropertyNotFound is Exception {
+    has $.propname;
+
+    method message {
+        "Property '$.propname' not found"
+    }
+}
+
 role Q {
     method Str {
         sub pretty($_) {
@@ -116,6 +124,27 @@ role Q::Term::Array does Q::Term {
 }
 
 role Q::Expr::Block { ... }
+
+role Q::Term::Object does Q::Term {
+    has @.properties;
+    method new(*@properties) {
+        self.bless(:@properties)
+    }
+
+    method eval($runtime) {
+        Val::Object.new(:properties(
+            @.properties.map({.key => .value.eval($runtime)})
+        ));
+    }
+}
+
+role Q::Property does Q {
+    has $.key;
+    has $.value;
+    method new($key, $value) {
+        self.bless(:$key, :$value);
+    }
+}
 
 role Q::Block does Q {
     has $.parameterlist;
@@ -325,7 +354,14 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
         my $propname = $.ident.name;
-        return $runtime.property($obj, $propname);
+        do given $obj {
+          when Val::Object {
+            $obj.properties{$propname} // die X::PropertyNotFound.new(:$propname);
+          }
+          default {
+            $runtime.property($obj, $propname);
+          }
+        }
     }
 
     method interpolate($runtime) {

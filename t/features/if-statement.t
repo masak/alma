@@ -25,11 +25,15 @@ use _007::Test;
             (stexpr (call (ident "say") (arglist (str "truthy sub")))))))
           (macro (ident "bar") (block (paramlist) (stmtlist)))
           (if (ident "bar") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "truthy macro"))))))))
+            (stexpr (call (ident "say") (arglist (str "truthy macro")))))))
+          (if (object) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "falsy object")))))))
+          (if (object (property "a" (int 3))) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy object"))))))))
         .
 
     is-result $ast,
-        <int str array sub macro>.map({"truthy $_\n"}).join,
+        <int str array sub macro object>.map({"truthy $_\n"}).join,
         "if statements run truthy things";
 }
 
