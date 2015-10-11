@@ -1,6 +1,6 @@
 use _007::Q;
 
-class Actions {
+class _007::Parser::Actions {
     method finish-block($st) {
         $st.static-lexpad = $*runtime.current-frame.pad;
         $*runtime.leave;

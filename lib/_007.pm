@@ -3,10 +3,10 @@ use _007::Parser;
 
 role _007 {
     method runtime(:$output = $*OUT) {
-        Runtime.new(:$output);
+        _007::Runtime.new(:$output);
     }
 
     method parser {
-        Parser.new;
+        _007::Parser.new;
     }
 }

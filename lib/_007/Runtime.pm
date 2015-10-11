@@ -7,7 +7,7 @@ role Frame {
 
 constant NO_OUTER = {};
 
-role Runtime {
+role _007::Runtime {
     has $.output;
     has @!frames;
 

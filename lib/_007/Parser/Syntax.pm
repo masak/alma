@@ -1,6 +1,6 @@
 use _007::Val;
 
-grammar Syntax {
+grammar _007::Parser::Syntax {
     token TOP {
         <.newpad>
         <statements>
