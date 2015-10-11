@@ -181,9 +181,14 @@ grammar _007::Parser::Syntax {
             }
         }
     }
-    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
+    token term:quasi { quasi >> [<.ws> '{' ~ '}' <statementlist> || <.panic("quasi")>] }
+    token term:object { '{' ~ '}' <pair>* % [\h* ',' \h*] }
 
     token unquote { '{{{' <EXPR> '}}}' }
+
+    proto token pair {*}
+    rule pair:quoted { <key=term> ':' <value=term> }
+    token pair:sym { <identifier> }
 
     method infix {
         my @ops = $*parser.oplevel.ops<infix>.keys;

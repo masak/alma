@@ -8,6 +8,8 @@ sub read(Str $ast) is export {
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
         array       => Q::Term::Array,
+        object      => Q::Term::Object,
+        property    => Q::Property,
 
         '-'         => Q::Prefix::Minus,
 

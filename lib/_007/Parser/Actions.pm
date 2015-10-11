@@ -412,8 +412,20 @@ class _007::Parser::Actions {
         make Q::Term::Quasi.new($<block>.ast);
     }
 
+    method term:object ($/) {
+        make Q::Literal::Object.new($<pair>».ast);
+    }
+
     method unquote ($/) {
         make Q::Unquote.new($<EXPR>.ast);
+    }
+
+    method pair:quoted ($/) {
+        make Q::Property.new($<key>.made, $<value>.made);
+    }
+
+    method pair:sym ($/) {
+      make Q::Property.new($<identifier>.made, $<identifier>.made);
     }
 
     method infix($/) {
