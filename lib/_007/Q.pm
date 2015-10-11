@@ -22,6 +22,7 @@ role Q::Literal::None does Q::Literal {
     method Str { "None" }
 
     method eval($) { Val::None.new }
+    method interpolate($) { self }
 }
 
 role Q::Literal::Int does Q::Literal {
@@ -30,6 +31,7 @@ role Q::Literal::Int does Q::Literal {
     method Str { "Int[$.value]" }
 
     method eval($) { Val::Int.new(:$.value) }
+    method interpolate($) { self }
 }
 
 role Q::Literal::Str does Q::Literal {
@@ -38,6 +40,7 @@ role Q::Literal::Str does Q::Literal {
     method Str { qq[Str["$.value"]] }
 
     method eval($) { Val::Str.new(:$.value) }
+    method interpolate($) { self }
 }
 
 sub children(*@c) {
@@ -54,6 +57,9 @@ role Q::Literal::Array does Q::Literal {
     method eval($runtime) {
         Val::Array.new(:elements(@.elements>>.eval($runtime)));
     }
+    method interpolate($runtime) {
+        self.new(@.elements».interpolate($runtime));
+    }
 }
 
 role Q::Block does Q {
@@ -66,6 +72,11 @@ role Q::Block does Q {
         my $outer-frame = $runtime.current-frame;
         Val::Block.new(:$.parameters, :$.statements, :$outer-frame);
     }
+    method interpolate($runtime) {
+        self.new(
+            $.parameters.interpolate($runtime),
+            $.statements.interpolate($runtime));
+    }
 }
 
 role Q::Identifier does Q {
@@ -76,6 +87,23 @@ role Q::Identifier does Q {
     method eval($runtime) {
         return $runtime.get-var($.name);
     }
+    method interpolate($) { self }
+}
+
+role Q::Unquote does Q {
+    has $.expr;
+    method new($expr) { self.bless(:$expr) }
+    method Str { "Unquote" ~ children($.expr) }
+
+    method eval($runtime) {
+        die "Should never hit an unquote at runtime"; # XXX: turn into X::
+    }
+    method interpolate($runtime) {
+        my $q = $.expr.eval($runtime);
+        die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
+            unless $q ~~ Q;
+        return $q;
+    }
 }
 
 role Q::Prefix does Q {
@@ -85,6 +113,9 @@ role Q::Prefix does Q {
     method Str { "Prefix" ~ self.type ~ children($.expr) }
 
     method eval($runtime) { ... }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime));
+    }
 }
 
 role Q::Prefix::Minus does Q::Prefix {
@@ -115,6 +146,9 @@ role Q::Infix does Q {
     method Str { "Infix" ~ self.type ~ children($.lhs, $.rhs) }
 
     method eval($runtime) { ... }
+    method interpolate($runtime) {
+        self.new($.lhs.interpolate($runtime), $.rhs.interpolate($runtime));
+    }
 }
 
 role Q::Infix::Addition does Q::Infix {
@@ -219,6 +253,9 @@ role Q::Postfix::Index does Q::Postfix {
             if $index.value < 0;
         return $e.elements[$index.value];
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.index.interpolate($runtime));
+    }
 }
 
 role Q::Postfix::Call does Q::Postfix {
@@ -235,6 +272,9 @@ role Q::Postfix::Call does Q::Postfix {
         my @args = $.arguments.arguments».eval($runtime);
         return $runtime.call($c, @args);
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.arguments.interpolate($runtime));
+    }
 }
 
 role Q::Postfix::Custom[$type] does Q::Postfix {
@@ -245,18 +285,27 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
         my $c = $runtime.get-var("postfix:<$type>");
         return $runtime.call($c, [$e]);
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime));
+    }
 }
 
 role Q::Parameters does Q {
     has @.parameters;
     method new(*@parameters) { self.bless(:@parameters) }
     method Str { "Parameters" ~ children(@.parameters) }
+    method interpolate($runtime) {
+        self.new(@.parameters».interpolate($runtime));
+    }
 }
 
 role Q::Arguments does Q {
     has @.arguments;
     method new(*@arguments) { self.bless(:@arguments) }
     method Str { "Arguments" ~ children(@.arguments) }
+    method interpolate($runtime) {
+        self.new(@.arguments».interpolate($runtime));
+    }
 }
 
 role Q::Statement does Q {
@@ -273,6 +322,10 @@ role Q::Statement::My does Q::Statement {
             unless $.assignment;
         $.assignment.eval($runtime);
     }
+    method interpolate($runtime) {
+        self.new($.ident.interpolate($runtime),
+            $.assignment === Empty ?? Empty !! $.assignment.interpolate($runtime));
+    }
 }
 
 role Q::Statement::Constant does Q::Statement {
@@ -284,6 +337,10 @@ role Q::Statement::Constant does Q::Statement {
     method run($runtime) {
         # value has already been assigned
     }
+    method interpolate($runtime) {
+        self.new($.ident.interpolate($runtime),
+            $.assignment === Empty ?? Empty !! $.assignment.interpolate($runtime));   # XXX: and here
+    }
 }
 
 role Q::Statement::Expr does Q::Statement {
@@ -293,6 +350,9 @@ role Q::Statement::Expr does Q::Statement {
 
     method run($runtime) {
         $.expr.eval($runtime);
+    }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime));
     }
 }
 
@@ -317,6 +377,9 @@ role Q::Statement::If does Q::Statement {
             $runtime.leave;
         }
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+    }
 }
 
 role Q::Statement::Block does Q::Statement {
@@ -329,20 +392,13 @@ role Q::Statement::Block does Q::Statement {
         $.block.statements.run($runtime);
         $runtime.leave;
     }
+    method interpolate($runtime) {
+        self.new($.block.interpolate($runtime));
+    }
 }
 
 role Q::CompUnit does Q::Statement::Block {
     method Str { "CompUnit" ~ children($.block) }
-}
-
-role Q::Quasi does Q::Statement {
-    has $.statements;
-    method new($statements) { self.bless(:$statements) }
-    method Str { "Quasi" ~ children($.statements) }
-
-    method eval($runtime) {
-        return Q::Block.new(Q::Parameters.new, $.statements);
-    }
 }
 
 role Q::Statement::For does Q::Statement {
@@ -392,6 +448,9 @@ role Q::Statement::For does Q::Statement {
             }
         }
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+    }
 }
 
 role Q::Statement::While does Q::Statement {
@@ -408,6 +467,9 @@ role Q::Statement::While does Q::Statement {
             $runtime.leave;
         }
     }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+    }
 }
 
 role Q::Statement::Return does Q::Statement {
@@ -419,6 +481,9 @@ role Q::Statement::Return does Q::Statement {
     method run($runtime) {
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:value($.expr.eval($runtime)), :$frame);
+    }
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime));
     }
 }
 
@@ -435,6 +500,11 @@ role Q::Statement::Sub does Q::Statement {
 
     method run($runtime) {
     }
+    method interpolate($runtime) {
+        self.new($.ident.interpolate($runtime),
+            $.parameters.interpolate($runtime),
+            $.statements.interpolate($runtime));
+    }
 }
 
 role Q::Statement::Macro does Q::Statement {
@@ -450,6 +520,11 @@ role Q::Statement::Macro does Q::Statement {
 
     method run($runtime) {
     }
+    method interpolate($runtime) {
+        self.new($.ident.interpolate($runtime),
+            $.parameters.interpolate($runtime),
+            $.statements.interpolate($runtime));
+    }
 }
 
 role Q::Statement::BEGIN does Q::Statement {
@@ -459,6 +534,9 @@ role Q::Statement::BEGIN does Q::Statement {
 
     method run($runtime) {
         # a BEGIN block does not run at runtime
+    }
+    method interpolate($runtime) {
+        self.new($.block.interpolate($runtime));
     }
 }
 
@@ -473,6 +551,13 @@ role Q::Statements does Q {
             $statement.run($runtime);
         }
     }
+    method interpolate($runtime) {
+        self.new(@.statements».interpolate($runtime));
+        # XXX: but what about the static lexpad? we kind of lose it here, don't we?
+        # what does that *mean* in practice? can we come up with an example where
+        # it matters? if the static lexpad happens to contain a value which is a
+        # Q node, do we continue into *it*, interpolating it, too?
+    }
 }
 
 role Q::Trait does Q {
@@ -484,4 +569,26 @@ role Q::Trait does Q {
     }
 
     method Str { "Trait[{$.ident.name}]" ~ children($.expr) }
+    method interpolate($runtime) {
+        self.new($.ident.interpolate($runtime), $.expr.interpolate($runtime));
+    }
 }
+
+role Q::Quasi does Q::Statement {
+    has $.statements;
+    method new($statements) { self.bless(:$statements) }
+    method Str { "Quasi" ~ children($.statements) }
+
+    method eval($runtime) {
+        my $statements = $.statements.interpolate($runtime);
+        return Q::Block.new(Q::Parameters.new, $statements);
+    }
+    method interpolate($runtime) {
+        self.new($.statements.interpolate($runtime));
+        # XXX: the fact that we keep interpolating inside of the quasi means
+        # that unquotes encountered inside of this inner quasi will be
+        # interpolated in the context of the outer quasi. is this correct?
+        # can we come up with a case where it matters?
+    }
+}
+

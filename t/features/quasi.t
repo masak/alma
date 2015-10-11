@@ -25,4 +25,20 @@ use _007::Test;
     outputs $program, "OH HAI\n", "Quasi quoting works for macro return value";
 }
 
+{
+    my $program = q:to/./;
+        constant greeting_ast = Q::Literal::Str("Mr Bond!");
+
+        macro foo() {
+            return quasi {
+                say({{{greeting_ast}}});
+            }
+        }
+
+        foo();
+        .
+
+    outputs $program, "Mr Bond!\n", "very basic unquote";
+}
+
 done-testing;

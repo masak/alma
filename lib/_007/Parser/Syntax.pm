@@ -143,7 +143,7 @@ grammar _007::Parser::Syntax {
 
     rule EXPR { <termish> +% <infix> }
 
-    token termish { <prefix>* <term> <postfix>* }
+    token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
 
     method prefix {
         # XXX: remove this hack
@@ -162,6 +162,7 @@ grammar _007::Parser::Syntax {
     token term:int { \d+ }
     token term:str { '"' ([<-["]> | '\\"']*) '"' }
     token term:array { '[' ~ ']' <EXPR>* % [\h* ',' \h*] }
+    token term:parens { '(' ~ ')' <EXPR> }
     token term:identifier {
         <identifier>
         {
@@ -172,7 +173,8 @@ grammar _007::Parser::Syntax {
         }
     }
     token term:quasi { quasi >> [<.ws> '{' ~ '}' <statements> || <.panic("quasi")>] }
-    token term:parens { '(' ~ ')' <EXPR> }
+
+    token unquote { '{{{' <EXPR> '}}}' }
 
     method infix {
         my @ops = $*parser.oplevel.ops<infix>.keys;

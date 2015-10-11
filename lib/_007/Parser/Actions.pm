@@ -393,6 +393,10 @@ class _007::Parser::Actions {
         make Q::Literal::Array.new($<EXPR>».ast);
     }
 
+    method term:parens ($/) {
+        make $<EXPR>.ast;
+    }
+
     method term:identifier ($/) {
         make $<identifier>.ast;
     }
@@ -405,8 +409,8 @@ class _007::Parser::Actions {
         make Q::Quasi.new($<statements>.ast);
     }
 
-    method term:parens ($/) {
-        make $<EXPR>.ast;
+    method unquote ($/) {
+        make Q::Unquote.new($<EXPR>.ast);
     }
 
     method infix($/) {
