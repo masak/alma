@@ -201,7 +201,8 @@ grammar _007::Parser::Syntax {
     }
 
     token identifier {
-        <!before \d> <[\w:]>+ ['<' <-[>]>+ '>']?
+        <!before \d> [ \w | '::' ]+
+            [ <?after \w> [':<' <-[>]>+ '>']?  || <.panic("identifier")> ]
     }
 
     rule arguments {
