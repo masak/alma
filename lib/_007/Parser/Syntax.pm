@@ -159,6 +159,8 @@ grammar _007::Parser::Syntax {
         return /<!>/(self);
     }
 
+    token str { '"' ([<-["]> | '\\"']*) '"' }
+
     proto token term {*}
     token term:none { None >> }
     token term:int { \d+ }
@@ -187,8 +189,17 @@ grammar _007::Parser::Syntax {
     token unquote { '{{{' <EXPR> '}}}' }
 
     proto token pair {*}
-    rule pair:quoted { <key=term> ':' <value=term> }
-    token pair:sym { <identifier> }
+    rule pair:str-expr { <key=str> ':' <value=term> }
+    rule pair:ident-expr { <identifier> ':' <value=term> }
+    token pair:ident { <identifier> }
+    token pair:method {
+        <identifier>
+        <.newpad>
+        '(' ~ ')' <parameters>
+        <trait> *
+        <blockoid>:!s
+        <.finishpad>
+    }
 
     method infix {
         my @ops = $*parser.oplevel.ops<infix>.keys;

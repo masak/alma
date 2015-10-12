@@ -376,6 +376,14 @@ class _007::Parser::Actions {
         make $*parser.oplevel.ops<prefix>{~$/};
     }
 
+    method str($/) {
+        sub check-for-newlines($s) {
+            die X::String::Newline.new
+                if $s ~~ /\n/;
+        }(~$0);
+        make Q::Literal::Str.new(~$0);
+    }
+
     method term:none ($/) {
         make Q::Literal::None.new;
     }
@@ -385,11 +393,7 @@ class _007::Parser::Actions {
     }
 
     method term:str ($/) {
-        sub check-for-newlines($s) {
-            die X::String::Newline.new
-                if $s ~~ /\n/;
-        }(~$0);
-        make Q::Literal::Str.new(~$0);
+      make $<str>.ast;
     }
 
     method term:array ($/) {
@@ -420,12 +424,21 @@ class _007::Parser::Actions {
         make Q::Unquote.new($<EXPR>.ast);
     }
 
-    method pair:quoted ($/) {
-        make Q::Property.new($<key>.made, $<value>.made);
+    method pair:str-expr ($/) {
+        make Q::Property.new($<str>.ast, $<value>.ast);
     }
 
-    method pair:sym ($/) {
-      make Q::Property.new($<identifier>.made, $<identifier>.made);
+    method pair:ident-expr ($/) {
+        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
+            $<value>.ast);
+    }
+
+    method pair:ident ($/) {
+        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
+            $<identifier>.ast);
+    }
+
+    method pair:method ($/) {
     }
 
     method infix($/) {

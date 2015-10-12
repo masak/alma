@@ -139,7 +139,7 @@ role Q::Property does Q::Literal {
     self.bless(:$key, :$value);
   }
 
-  method Str { "Property" }
+  method Str { "Property" ~ children($!key, $!value) }
 
   method eval($runtime) {
     ... 'Property NYI'
