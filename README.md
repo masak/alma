@@ -2,7 +2,7 @@
 
 A single car pulls up to the section headquarters. Section chief JOHN DRYDEN gets out and looks around him before getting into the empty building.
 
-He takes one of the glass elevators up to his office. A silence hangs over the elevator as it rises up to his floor. The England-born station chief is wearing a western suit and tie; only the fur cap gives him a slightly slavic look. An LED digital display quietly counts up the floors numbers: 3, 4, 5, 6...
+He takes one of the glass elevators up to his office. A silence hangs over the elevator as it rises up to his floor. The England-born station chief is wearing a western suit and tie; only the fur cap gives him a slightly slavic look. An LED digital display quietly counts up the floor numbers: 3, 4, 5, 6...
 
 The upper floor is all polished steel and glass. Dryden's footsteps are the only sounds heard as he heads to his office.
 
