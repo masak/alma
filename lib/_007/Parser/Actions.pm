@@ -439,6 +439,8 @@ class _007::Parser::Actions {
     }
 
     method pair:method ($/) {
+        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
+           Q::Block.new($<parameters>.ast, $<blockoid>.ast)); 
     }
 
     method infix($/) {

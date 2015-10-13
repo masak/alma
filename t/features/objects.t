@@ -6,9 +6,11 @@ my @exprs = «
     '{}'  "(object)"
     '{"a": 1}' '(object (property (str "a") (int 1)))'
     '{a}' '(object (property (str "a") (ident "a")))'
-    '{a : 1}' '(object (property (int "a") (int 1)))'
+    '{a : 1}' '(object (property (str "a") (int 1)))'
     '{a: 1}' '(object (property (str "a") (int 1)))'
-    '{a() { }}' '(object (block))'
+    '{a() {}}' '(object (property (str "a") (block (parameters) (statements))))'
+    '{a(a, b) {}}' '(object (property (str "a") (block 
+      (parameters (ident "a") (ident "b")) (statements))))'
 »;
 
 for @exprs -> $expr, $frag {
