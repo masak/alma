@@ -160,7 +160,7 @@ grammar _007::Parser::Syntax {
     proto token term {*}
     token term:none { None >> }
     token term:int { \d+ }
-    token term:str { '"' ([<-["]> | '\\"']*) '"' }
+    token term:str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
     token term:array { '[' ~ ']' <EXPR>* % [\h* ',' \h*] }
     token term:parens { '(' ~ ')' <EXPR> }
     token term:identifier {
