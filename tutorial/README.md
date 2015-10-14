@@ -12,16 +12,16 @@ structure introspection.
 In terms of language features, it's perhaps easiest to think of 007 as
 the secret love child of Perl 6 and Python.
 
-    feature                  Perl 6   007   Python
-    ------------------------ -------- ----- --------
-    braces                   yes      yes   no
-    user-defined operators   yes      yes   no
-    variable declarations    yes      yes   no
-    macros                   yes      yes   no
-    implicit typecasts       yes      no    no
-    sigils                   yes      no    no
-    multis                   yes      no    no
-    implicit returns         yes      no    no
+| feature                  | Perl 6   | 007   | Python   |
+| ------------------------ | -------- | ----- | -------- |
+| braces                   | yes      | yes   | no       |
+| user-defined operators   | yes      | yes   | no       |
+| variable declarations    | yes      | yes   | no       |
+| macros                   | yes      | yes   | no       |
+| implicit typecasts       | yes      | no    | no       |
+| sigils                   | yes      | no    | no       |
+| multis                   | yes      | no    | no       |
+| implicit returns         | yes      | no    | no       |
 
 ## Values
 
