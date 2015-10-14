@@ -146,7 +146,7 @@ role _007::Runtime {
             reversed => -> $arg { Val::Array.new(:elements($arg.elements.reverse)) },
             sorted   => -> $arg { Val::Array.new(:elements($arg.elements.sort)) },
             join     => -> $a, $sep { Val::Str.new(:value($a.elements.join($sep.value.Str))) },
-            split    => -> $s, $sep { Val::Array.new(:elements($s.value.split($sep.value))) },
+            split    => -> $s, $sep { Val::Array.new(:elements($s.value.split($sep.value).map({ Val::Str.new(:value($_)) }))) },
             index    => -> $s, $substr { Val::Int.new(:value($s.value.index($substr.value) // -1)) },
             substr   => sub ($s, $pos, $chars?) { Val::Str.new(:value($s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars))) },
             charat   => -> $s, $pos { Val::Str.new(:value($s.value.comb[$pos.value] // die X::Subscript::TooLarge.new)) },
