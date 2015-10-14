@@ -23,6 +23,13 @@ use _007::Test;
 }
 
 {
+    outputs 'say("Mr \"Bond")', qq[Mr "Bond\n], qq[\\" gets unescaped correctly to "];
+    outputs 'say(chars("Mr \"Bond"))', qq[8\n], qq[...and counts as one character];
+    outputs 'say("Mr \\\\Bond")', qq[Mr \\Bond\n], qq[\\\\ gets unescaped correctly to \\];
+    outputs 'say(chars("Mr \\Bond"))', qq[8\n], qq[...and counts as one character];
+}
+
+{
     my $ast = q:to/./;
         (statements
           (my (ident "n") (assign (ident "n") (array (int 1) (int 2))))

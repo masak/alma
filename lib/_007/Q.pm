@@ -39,7 +39,10 @@ role Q::Literal::Str does Q::Literal {
     method new(Str $value) { self.bless(:$value) }
     method Str { qq[Str["$.value"]] }
 
-    method eval($) { Val::Str.new(:$.value) }
+    method eval($) {
+        my $value = $.value.subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
+        Val::Str.new(:$value);
+    }
     method interpolate($) { self }
 }
 
