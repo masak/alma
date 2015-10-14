@@ -147,7 +147,7 @@ use _007::Test;
           (stexpr (call (ident "say") (arguments (call (ident "split") (arguments (str "a|b") (str "|")))))))
         .
 
-    is-result $ast, "[a, b]\n", "split() works";
+    is-result $ast, qq|["a", "b"]\n|, "split() works";
 }
 
 {

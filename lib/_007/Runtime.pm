@@ -110,9 +110,13 @@ role _007::Runtime {
 
     method load-builtins {
         my %builtins =
-            say      => -> $arg { self.output.say(~$arg) },
+            say      => -> $arg { self.output.say($arg ~~ Val::Array ?? %builtins<str>($arg) !! ~$arg) },
             type     => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
             str => sub ($_) {
+                when Val::Array {
+                    return Val::Str.new(:value(stringify_inside_array($_)));
+                }
+                when Val::None { return Val::Str.new(:value(.Str)) }
                 when Val { return Val::Str.new(:value(.value.Str)) }
                 die X::TypeCheck.new(
                     :operation<str()>,
@@ -272,6 +276,20 @@ role _007::Runtime {
                 return .block;
             },
         ;
+
+        sub escape($_) {
+            return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
+        }
+
+        sub stringify_inside_array($_) {
+            when Val::Str {
+                return q["] ~ escape(.value) ~ q["]
+            }
+            when Val::Array {
+                return '[%s]'.&sprintf(.elements>>.&stringify_inside_array.join(', '));
+            }
+            return .value.Str;
+        }
 
         for %builtins.kv -> $name, $sub {
             self.declare-var($name);

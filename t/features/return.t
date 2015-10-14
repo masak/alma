@@ -32,7 +32,7 @@ use _007::Test;
           (stexpr (call (ident "say") (arguments (call (ident "f") (arguments))))))
         .
 
-    is-result $ast, "[1, 2, three]\n", "sub returning an Array";
+    is-result $ast, qq|[1, 2, "three"]\n|, "sub returning an Array";
 }
 
 {

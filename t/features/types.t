@@ -39,4 +39,18 @@ use _007::Test;
     is-result $ast, "[1, 2]\n", "array type works";
 }
 
+{
+    outputs 'say(str([1, 2, "foo"]))', qq|[1, 2, "foo"]\n|,
+        "strings inside arrays get quoted";
+
+    outputs 'say([1, 2, "foo"])', qq|[1, 2, "foo"]\n|,
+        "...and it works even without explicit str() coercion";
+
+    outputs qq|say(["'\\"\\\\"])|, qq|["'\\"\\\\"]\n|,
+        "double quotes and backslashes are escaped properly in strings in arrays";
+
+    outputs 'say([1, [2, "foo"]])', qq|[1, [2, "foo"]]\n|,
+        "still does the right thing one level down";
+}
+
 done-testing;
