@@ -112,6 +112,27 @@ role _007::Runtime {
         my %builtins =
             say      => -> $arg { self.output.say(~$arg) },
             type     => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
+            str => sub ($_) {
+                when Val { return Val::Str.new(:value(.value.Str)) }
+                die X::TypeCheck.new(
+                    :operation<str()>,
+                    :got($_),
+                    :expected("something that can be converted to a string"));
+            },
+            int => sub ($_) {
+                when Val::Str {
+                    return Val::Int.new(:value(.value.Int))
+                        if .value ~~ /^ '-'? \d+ $/;
+                    proceed;
+                }
+                when Val::Int {
+                    return $_;
+                }
+                die X::TypeCheck.new(
+                    :operation<int()>,
+                    :got($_),
+                    :expected("something that can be converted to an int"));
+            },
             abs      => -> $arg { Val::Int.new(:value($arg.value.abs)) },
             min      => -> $a, $b { Val::Int.new(:value(min($a.value, $b.value))) },
             max      => -> $a, $b { Val::Int.new(:value(max($a.value, $b.value))) },
@@ -174,39 +195,9 @@ role _007::Runtime {
             'Q::Statement::While' => -> $expr, $block { Q::Statement::While.new($expr, $block) },
             'Q::Statement::BEGIN' => -> $block { Q::Statement::BEGIN.new($block) },
 
-            int => sub ($_) {
-                when Val::Str {
-                    return Val::Int.new(:value(.value.Int))
-                        if .value ~~ /^ '-'? \d+ $/;
-                    proceed;
-                }
-                when Val::Int {
-                    return $_;
-                }
-                when Q::Literal::Int {
-                    return .eval(self);
-                }
-                die X::TypeCheck.new(
-                    :operation<int()>,
-                    :got($_),
-                    :expected("something that can be converted to an int"));
-            },
-            str => sub ($_) {
-                when Val { return Val::Str.new(:value(.value.Str)) }
-                when Q::Literal::Str {
-                    return .eval(self);
-                }
-                die X::TypeCheck.new(
-                    :operation<str()>,
-                    :got($_),
-                    :expected("something that can be converted to a string"));
-            },
             array => sub ($_) {
                 when Val::Array {
                     return $_;
-                }
-                when Q::Literal::Array {
-                    return .eval(self);
                 }
                 when Q::Statements {
                     return Val::Array.new(:elements(.statements));
@@ -221,6 +212,15 @@ role _007::Runtime {
                     :operation<str()>,
                     :got($_),
                     :expected("something that can be converted to an array"));
+            },
+            value => sub ($_) {
+                when Q::Literal {
+                    return .eval(self);
+                }
+                die X::TypeCheck.new(
+                    :operation<value()>,
+                    :got($_),
+                    :expected("a Q::Literal type that has a value()"));
             },
             params => sub ($_) {
                 # XXX: typecheck

@@ -229,9 +229,9 @@ subroutines. These should be fairly self-explanatory.
 
 There are also constructor methods for creating program elements.
 
-    Q::Literal::Int(int)
-    Q::Literal::Str(str)
-    Q::Literal::Array(array)
+    Q::Literal::Int(value)
+    Q::Literal::Str(value)
+    Q::Literal::Array(value)
     Q::Identifier(str)
     Q::Statements(array)
     Q::Parameters(array)
