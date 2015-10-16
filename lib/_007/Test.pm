@@ -71,7 +71,7 @@ sub read(Str $ast) is export {
 role Output {
     has $.result = "";
 
-    method say($s) { $!result ~= $s ~ "\n" }
+    method say($s) { $!result ~= $s.gist ~ "\n" }
 }
 
 role BadOutput {
