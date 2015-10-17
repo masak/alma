@@ -300,3 +300,22 @@ the latter case.
     }
 
     greet();
+
+Quasis can contain *unquotes*, where we momentarily jump back from
+code to Qtrees. Mixing code and Qtrees like that is the main point of
+quasis. For instance, instead of specifying the string directly as
+above, we can construct the Q node for it, and inject it:
+
+    constant greeting_ast = Q::Literal::Str("Mr Bond!");
+
+    macro greet() {
+        return quasi {
+            say({{{greeting_ast}}});
+        }
+    }
+
+    greet();
+
+Note the need for `constant` in the mainline, because the macro
+`greet` runs very early. If we moved `greeting_ast` into the macro
+body, we could use `my`.
