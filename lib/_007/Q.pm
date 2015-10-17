@@ -14,7 +14,10 @@ class X::Subscript::NonInteger is Exception {
 role Q {
 }
 
-role Q::Literal does Q {
+role Q::Expr does Q {
+}
+
+role Q::Literal does Q::Expr {
 }
 
 role Q::Literal::None does Q::Literal {
@@ -82,7 +85,7 @@ role Q::Block does Q {
     }
 }
 
-role Q::Identifier does Q {
+role Q::Identifier does Q::Expr {
     has $.name;
     method new(Str $name) { self.bless(:$name) }
     method Str { "Identifier[$.name]" }
@@ -109,7 +112,7 @@ role Q::Unquote does Q {
     }
 }
 
-role Q::Prefix does Q {
+role Q::Prefix does Q::Expr {
     has $.expr;
     has $.type = "";
     method new($expr) { self.bless(:$expr) }
@@ -141,7 +144,7 @@ role Q::Prefix::Custom[$type] does Q::Prefix {
     }
 }
 
-role Q::Infix does Q {
+role Q::Infix does Q::Expr {
     has $.lhs;
     has $.rhs;
     has $.type = "";
@@ -229,7 +232,7 @@ role Q::Infix::Custom[$type] does Q::Infix {
     }
 }
 
-role Q::Postfix does Q {
+role Q::Postfix does Q::Expr {
     has $.expr;
     has $.type = "";
     method new($expr) { self.bless(:$expr) }
@@ -577,7 +580,7 @@ role Q::Trait does Q {
     }
 }
 
-role Q::Quasi does Q {
+role Q::Quasi does Q::Expr {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
     method Str { "Quasi" ~ children($.statements) }
