@@ -12,6 +12,36 @@ class X::Subscript::NonInteger is Exception {
 }
 
 role Q {
+    method Str {
+        sub pretty($_) {
+            when Array {
+                return .elems == 0
+                    ?? "[]"
+                    !! .elems == 1 && .[0].Str.lines == 1
+                        ?? "[{.[0].Str}]"
+                        !! "[\n{.map({.Str}).join(",\n").indent(4)}\n]"
+            }
+            when Str { return .perl }
+            default { return .Str }
+        }
+        sub aname($attr) { $attr.name.substr(2) }
+        sub avalue($attr) { $attr.get_value(self) }
+        sub worthy($attr) {
+            avalue($attr) !~~ Hash  # avoids showing static-lexpad
+                && (aname($attr) ne "type" || avalue($attr) ne "")
+        }
+
+        my @attrs = self.^attributes.grep(&worthy);
+        if @attrs == 1 {
+            return "{self.^name} {pretty(avalue(@attrs[0]))}";
+        }
+        sub keyvalue($attr) { aname($attr) ~ ": " ~ pretty(avalue($attr)) }
+        if @attrs == 2 && aname(@attrs[1]) eq "expr" {  # prefix or postfix
+            @attrs .= reverse;  # because it looks nicer to have expr first
+        }
+        my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
+        return "{self.^name} \{\n$contents\n\}";
+    }
 }
 
 role Q::Expr does Q {
@@ -22,7 +52,6 @@ role Q::Literal does Q::Expr {
 
 role Q::Literal::None does Q::Literal {
     method new() { self.bless }
-    method Str { "None" }
 
     method eval($) { Val::None.new }
     method interpolate($) { self }
@@ -31,7 +60,6 @@ role Q::Literal::None does Q::Literal {
 role Q::Literal::Int does Q::Literal {
     has $.value;
     method new(Int $value) { self.bless(:$value) }
-    method Str { "Int[$.value]" }
 
     method eval($) { Val::Int.new(:$.value) }
     method interpolate($) { self }
@@ -40,7 +68,6 @@ role Q::Literal::Int does Q::Literal {
 role Q::Literal::Str does Q::Literal {
     has $.value;
     method new(Str $value) { self.bless(:$value) }
-    method Str { qq[Str["$.value"]] }
 
     method eval($) {
         my $value = $.value.subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
@@ -49,16 +76,11 @@ role Q::Literal::Str does Q::Literal {
     method interpolate($) { self }
 }
 
-sub children(*@c) {
-    "\n" ~ @c.join("\n").indent(2);
-}
-
 role Q::Literal::Array does Q::Literal {
     has @.elements;
     method new(*@elements) {
         self.bless(:@elements)
     }
-    method Str { "Array" ~ children(@.elements) }
 
     method eval($runtime) {
         Val::Array.new(:elements(@.elements>>.eval($runtime)));
@@ -72,7 +94,6 @@ role Q::Block does Q {
     has $.parameters;
     has $.statements;
     method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
-    method Str { "Block" ~ children($.parameters, $.statements) }
 
     method eval($runtime) {
         my $outer-frame = $runtime.current-frame;
@@ -88,7 +109,6 @@ role Q::Block does Q {
 role Q::Identifier does Q::Expr {
     has $.name;
     method new(Str $name) { self.bless(:$name) }
-    method Str { "Identifier[$.name]" }
 
     method eval($runtime) {
         return $runtime.get-var($.name);
@@ -99,7 +119,6 @@ role Q::Identifier does Q::Expr {
 role Q::Unquote does Q {
     has $.expr;
     method new($expr) { self.bless(:$expr) }
-    method Str { "Unquote" ~ children($.expr) }
 
     method eval($runtime) {
         die "Should never hit an unquote at runtime"; # XXX: turn into X::
@@ -116,7 +135,6 @@ role Q::Prefix does Q::Expr {
     has $.expr;
     has $.type = "";
     method new($expr) { self.bless(:$expr) }
-    method Str { "Prefix" ~ self.type ~ children($.expr) }
 
     method eval($runtime) { ... }
     method interpolate($runtime) {
@@ -149,7 +167,6 @@ role Q::Infix does Q::Expr {
     has $.rhs;
     has $.type = "";
     method new($lhs, $rhs) { self.bless(:$lhs, :$rhs) }
-    method Str { "Infix" ~ self.type ~ children($.lhs, $.rhs) }
 
     method eval($runtime) { ... }
     method interpolate($runtime) {
@@ -236,7 +253,6 @@ role Q::Postfix does Q::Expr {
     has $.expr;
     has $.type = "";
     method new($expr) { self.bless(:$expr) }
-    method Str { "Postfix" ~ self.type ~ children($.expr) }
 
     method eval($runtime) { ... }
 }
@@ -244,7 +260,6 @@ role Q::Postfix does Q::Expr {
 role Q::Postfix::Index does Q::Postfix {
     has $.index;
     method new($expr, $index) { self.bless(:$expr, :$index) }
-    method Str { "Index" ~ children($.expr, $.index) }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
@@ -267,7 +282,6 @@ role Q::Postfix::Index does Q::Postfix {
 role Q::Postfix::Call does Q::Postfix {
     has $.arguments;
     method new($expr, $arguments) { self.bless(:$expr, :$arguments) }
-    method Str { "Call" ~ children($.expr, $.arguments) }
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
@@ -299,7 +313,6 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
 role Q::Parameters does Q {
     has @.parameters;
     method new(*@parameters) { self.bless(:@parameters) }
-    method Str { "Parameters" ~ children(@.parameters) }
     method interpolate($runtime) {
         self.new(@.parameters».interpolate($runtime));
     }
@@ -308,7 +321,6 @@ role Q::Parameters does Q {
 role Q::Arguments does Q {
     has @.arguments;
     method new(*@arguments) { self.bless(:@arguments) }
-    method Str { "Arguments" ~ children(@.arguments) }
     method interpolate($runtime) {
         self.new(@.arguments».interpolate($runtime));
     }
@@ -321,7 +333,6 @@ role Q::Statement::My does Q::Statement {
     has $.ident;
     has $.assignment;
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
-    method Str { "My" ~ children($.ident, |$.assignment) }
 
     method run($runtime) {
         return
@@ -338,7 +349,6 @@ role Q::Statement::Constant does Q::Statement {
     has $.ident;
     has $.assignment;
     method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
-    method Str { "Constant" ~ children($.ident, |$.assignment) }    # XXX: remove | once we guarantee it
 
     method run($runtime) {
         # value has already been assigned
@@ -352,7 +362,6 @@ role Q::Statement::Constant does Q::Statement {
 role Q::Statement::Expr does Q::Statement {
     has $.expr;
     method new($expr) { self.bless(:$expr) }
-    method Str { "Expr" ~ children($.expr) }
 
     method run($runtime) {
         $.expr.eval($runtime);
@@ -366,7 +375,6 @@ role Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
-    method Str { "If" ~ children($.expr, $.block) }
 
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
@@ -391,7 +399,6 @@ role Q::Statement::If does Q::Statement {
 role Q::Statement::Block does Q::Statement {
     has $.block;
     method new(Q::Block $block) { self.bless(:$block) }
-    method Str { "Statement block" ~ children($.block) }
 
     method run($runtime) {
         $runtime.enter($.block.eval($runtime));
@@ -404,14 +411,12 @@ role Q::Statement::Block does Q::Statement {
 }
 
 role Q::CompUnit does Q::Statement::Block {
-    method Str { "CompUnit" ~ children($.block) }
 }
 
 role Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
-    method Str { "For" ~  children($.expr, $.block)}
 
     method run($runtime) {
         multi elements(Q::Literal::Array $array) {
@@ -463,7 +468,6 @@ role Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
-    method Str { "While" ~ children($.expr, $.block) }
 
     method run($runtime) {
         while $.expr.eval($runtime).truthy {
@@ -482,7 +486,6 @@ role Q::Statement::Return does Q::Statement {
     has $.expr;
     sub NONE { role { method eval($) { Val::None.new }; method Str { "(no return value)" } } }
     method new($expr = NONE) { self.bless(:$expr) }
-    method Str { "Return" ~ children($.expr) }
 
     method run($runtime) {
         my $frame = $runtime.get-var("--RETURN-TO--");
@@ -502,8 +505,6 @@ role Q::Statement::Sub does Q::Statement {
         self.bless(:$ident, :$parameters, :$statements);
     }
 
-    method Str { "Sub[{$.ident.name}]" ~ children($.parameters, $.statements) }
-
     method run($runtime) {
     }
     method interpolate($runtime) {
@@ -522,8 +523,6 @@ role Q::Statement::Macro does Q::Statement {
         self.bless(:$ident, :$parameters, :$statements);
     }
 
-    method Str { "Macro[{$.ident.name}]" ~ children($.parameters, $.statements) }
-
     method run($runtime) {
     }
     method interpolate($runtime) {
@@ -536,7 +535,6 @@ role Q::Statement::Macro does Q::Statement {
 role Q::Statement::BEGIN does Q::Statement {
     has $.block;
     method new(Q::Block $block) { self.bless(:$block) }
-    method Str { "BEGIN block" ~ children($.block) }
 
     method run($runtime) {
         # a BEGIN block does not run at runtime
@@ -550,7 +548,6 @@ role Q::Statements does Q {
     has @.statements;
     has %.static-lexpad is rw;
     method new(*@statements) { self.bless(:@statements) }
-    method Str { "Statements" ~ children(@.statements) }
 
     method run($runtime) {
         for @.statements -> $statement {
@@ -574,7 +571,6 @@ role Q::Trait does Q {
         self.bless(:$ident, :$expr);
     }
 
-    method Str { "Trait[{$.ident.name}]" ~ children($.expr) }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime), $.expr.interpolate($runtime));
     }
@@ -583,7 +579,6 @@ role Q::Trait does Q {
 role Q::Quasi does Q::Expr {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
-    method Str { "Quasi" ~ children($.statements) }
 
     method eval($runtime) {
         my $statements = $.statements.interpolate($runtime);
