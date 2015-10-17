@@ -577,7 +577,7 @@ role Q::Trait does Q {
     }
 }
 
-role Q::Quasi does Q::Statement {
+role Q::Quasi does Q {
     has $.statements;
     method new($statements) { self.bless(:$statements) }
     method Str { "Quasi" ~ children($.statements) }
