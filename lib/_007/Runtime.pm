@@ -114,7 +114,7 @@ role _007::Runtime {
             type     => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
             str => sub ($_) {
                 when Val::Array {
-                    return Val::Str.new(:value(stringify_inside_array($_)));
+                    return Val::Str.new(:value(stringify-inside-array($_)));
                 }
                 when Val::None { return Val::Str.new(:value(.Str)) }
                 when Val { return Val::Str.new(:value(.value.Str)) }
@@ -263,12 +263,15 @@ role _007::Runtime {
             return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
         }
 
-        sub stringify_inside_array($_) {
+        sub stringify-inside-array($_) {
             when Val::Str {
                 return q["] ~ escape(.value) ~ q["]
             }
             when Val::Array {
-                return '[%s]'.&sprintf(.elements>>.&stringify_inside_array.join(', '));
+                return '[%s]'.&sprintf(.elements>>.&stringify-inside-array.join(', '));
+            }
+            when Q {
+                return .Str;
             }
             return .value.Str;
         }
