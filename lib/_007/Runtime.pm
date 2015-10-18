@@ -110,8 +110,15 @@ role _007::Runtime {
 
     method load-builtins {
         my %builtins =
-            say      => -> $arg { self.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg) },
-            type     => sub ($arg) { return 'Sub' if $arg ~~ Val::Sub; $arg.^name.substr('Val::'.chars) },
+            say      => -> $arg {
+                self.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
+                Val::None.new;
+            },
+            type     => sub ($arg) {
+                Val::Str.new(:value($arg ~~ Val::Sub
+                    ?? "Sub"
+                    !! $arg.^name.substr('Val::'.chars)));
+            },
             str => sub ($_) {
                 when Val::Array {
                     return Val::Str.new(:value(stringify-inside-array($_)));
