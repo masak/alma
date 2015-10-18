@@ -12,6 +12,17 @@ class X::Subscript::NonInteger is Exception {
 }
 
 role Q {
+    method worthy-attributes {
+        sub aname($attr) { $attr.name.substr(2) }
+        sub avalue($attr) { $attr.get_value(self) }
+        sub worthy($attr) {
+            avalue($attr) !~~ Hash  # avoids showing static-lexpad
+                && (aname($attr) ne "type" || avalue($attr) ne "")
+        }
+
+        return self.^attributes.grep(&worthy);
+    }
+
     method Str {
         sub pretty($_) {
             when Array {
@@ -26,12 +37,8 @@ role Q {
         }
         sub aname($attr) { $attr.name.substr(2) }
         sub avalue($attr) { $attr.get_value(self) }
-        sub worthy($attr) {
-            avalue($attr) !~~ Hash  # avoids showing static-lexpad
-                && (aname($attr) ne "type" || avalue($attr) ne "")
-        }
 
-        my @attrs = self.^attributes.grep(&worthy);
+        my @attrs = @.worthy-attributes;
         if @attrs == 1 {
             return "{self.^name} {pretty(avalue(@attrs[0]))}";
         }
@@ -223,12 +230,32 @@ role Q::Infix::Eq does Q::Infix {
         multi equal-value(Val::Int $r, Val::Int $l) { $r.value == $l.value }
         multi equal-value(Val::Str $r, Val::Str $l) { $r.value eq $l.value }
         multi equal-value(Val::Array $r, Val::Array $l) {
-            return False unless $r.elements == $l.elements;
-            for $r.elements.list Z $l.elements.list -> ($re, $le) {
-                return False unless equal-value($re, $le);
+            sub equal-at-index($i) {
+                equal-value($r.elements[$i], $l.elements[$i]);
             }
-            return True;
+
+            [&&] $r.elements == $l.elements,
+                |(^$r.elements).map(&equal-at-index);
         }
+        multi equal-value(Val::Block $r, Val::Block $l) {
+            $r.name eq $l.name
+                && equal-value($r.parameters, $l.parameters)
+                && equal-value($r.statements, $l.statements)
+        }
+        multi equal-value(Q $r, Q $l) {
+            sub same-avalue($attr) {
+                equal-value($attr.get_value($r), $attr.get_value($l));
+            }
+
+            [&&] $r.WHAT === $l.WHAT,
+                |$r.worthy-attributes.map(&same-avalue);
+        }
+        multi equal-value(@r, @l) { # arrays occur in the internals of Qtrees
+            sub equal-at-index($i) { equal-value(@r[$i], @l[$i]) }
+
+            @r == @l && |(^@r).map(&equal-at-index);
+        }
+        multi equal-value(Str $r, Str $l) { $r eq $l } # strings do too
 
         my $r = $.rhs.eval($runtime);
         my $l = $.lhs.eval($runtime);

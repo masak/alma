@@ -76,6 +76,35 @@ use _007::Test;
 }
 
 {
+    outputs 'sub foo() {}; say(foo == foo)', "1\n", "a sub is equal to itself";
+    outputs 'macro foo() {}; say(foo == foo)', "1\n", "a macro is equal to itself";
+    outputs 'say(say == say)', "1\n", "a built-in sub is equal to itself";
+    outputs 'say(infix:<+> == infix:<+>)', "1\n", "a built-in operator is equal to itself";
+    outputs 'say(Q::Identifier("foo") == Q::Identifier("foo"))', "1\n",
+        "two Qtrees with equal content are equal";
+    outputs 'my a = []; for [1, 2] { sub fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
+        "1\n", "the same sub from two different frames compares favorably to itself";
+    outputs 'sub foo() {}; my x = foo; { sub foo() {}; say(x == foo) }', "1\n",
+        "subs with the same name and bodies are equal (I)";
+    outputs 'sub foo() { say("OH HAI") }; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }',
+        "1\n", "subs with the same name and bodies are equal (II)";
+
+    outputs 'sub foo() {}; sub bar() {}; say(foo == bar)', "0\n",
+        "distinct subs are unequal";
+    outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "0\n",
+        "distinct macros are unequal";
+    outputs 'say(say == chr)', "0\n", "distinct built-in subs are unequal";
+    outputs 'say(infix:<+> == prefix:<->)', "0\n",
+        "distinct built-in operators are unequal";
+    outputs 'sub foo(y) {}; my x = foo; { sub foo(x) {}; say(x == foo) }', "0\n",
+        "subs with different parameters are unequal";
+    outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "0\n",
+        "subs with different bodies are unequal";
+    outputs 'say(Q::Identifier("foo") == Q::Identifier("bar"))', "0\n",
+        "two Qtrees with distinct content are unequal";
+}
+
+{
     my $ast = q:to/./;
         (statements
           (sub (ident "empty") (parameters) (statements))

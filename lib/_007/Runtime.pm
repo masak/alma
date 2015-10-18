@@ -293,7 +293,7 @@ role _007::Runtime {
 
         for %builtins.kv -> $name, $sub {
             self.declare-var($name);
-            self.put-var($name, Val::Sub::Builtin.new($sub));
+            self.put-var($name, Val::Sub::Builtin.new($name, $sub));
         }
     }
 
