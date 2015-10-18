@@ -199,24 +199,6 @@ role _007::Runtime {
             'Q::Statement::While' => -> $expr, $block { Q::Statement::While.new($expr, $block) },
             'Q::Statement::BEGIN' => -> $block { Q::Statement::BEGIN.new($block) },
 
-            array => sub ($_) {
-                when Val::Array {
-                    return $_;
-                }
-                when Q::Statements {
-                    return Val::Array.new(:elements(.statements));
-                }
-                when Q::Parameters {
-                    return Val::Array.new(:elements(.parameters));
-                }
-                when Q::Arguments {
-                    return Val::Array.new(:elements(.arguments));
-                }
-                die X::TypeCheck.new(
-                    :operation<str()>,
-                    :got($_),
-                    :expected("something that can be converted to an array"));
-            },
             value => sub ($_) {
                 when Q::Literal {
                     return .eval(self);
