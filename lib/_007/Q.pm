@@ -316,7 +316,7 @@ role Q::Postfix::Call does Q::Postfix {
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
-        my @args = $.arguments.arguments».eval($runtime);
+        my @args = $.arguments».eval($runtime);
         return $runtime.call($c, @args);
     }
     method interpolate($runtime) {
@@ -338,7 +338,7 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
 }
 
 role Q::Parameters does Q {
-    has @.parameters;
+    has @.parameters handles <elems Numeric Real list>;
     method new(*@parameters) { self.bless(:@parameters) }
     method interpolate($runtime) {
         self.new(@.parameters».interpolate($runtime));
@@ -346,7 +346,7 @@ role Q::Parameters does Q {
 }
 
 role Q::Arguments does Q {
-    has @.arguments;
+    has @.arguments handles <elems Numeric Real list>;
     method new(*@arguments) { self.bless(:@arguments) }
     method interpolate($runtime) {
         self.new(@.arguments».interpolate($runtime));
@@ -409,8 +409,8 @@ role Q::Statement::If does Q::Statement {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
             die "Too many parameters in if statements"  # XXX: needs a test and a real exception
-                if $c.parameters.parameters > 1;
-            for $c.parameters.parameters Z $expr -> ($param, $arg) {
+                if $c.parameters > 1;
+            for $c.parameters Z $expr -> ($param, $arg) {
                 $runtime.declare-var($param.name);
                 $runtime.put-var($param.name, $arg);
             }
@@ -465,7 +465,7 @@ role Q::Statement::For does Q::Statement {
         }
 
         my $c = $.block.eval($runtime);
-        my $count = $c.parameters.parameters.elems;
+        my $count = $c.parameters.elems;
 
         if $count == 0 {
             for ^elements($.expr).elems {
@@ -477,7 +477,7 @@ role Q::Statement::For does Q::Statement {
         else {
             for split_elements(elements($.expr), $count) -> $arg {
                 $runtime.enter($c);
-                for $c.parameters.parameters Z $arg.list -> ($param, $real_arg) {
+                for $c.parameters Z $arg.list -> ($param, $real_arg) {
                     $runtime.declare-var($param.name);
                     $runtime.put-var($param.name, $real_arg);
                 }
@@ -572,7 +572,7 @@ role Q::Statement::BEGIN does Q::Statement {
 }
 
 role Q::Statements does Q {
-    has @.statements;
+    has @.statements handles <elems Numeric Real list>;
     has %.static-lexpad is rw;
     method new(*@statements) { self.bless(:@statements) }
 

@@ -47,7 +47,7 @@ class _007::Parser::Actions {
 
     method statement:expr ($/) {
         if $<EXPR>.ast ~~ Q::Block {
-            my @statements = $<EXPR>.ast.statements.statements.list;
+            my @statements = $<EXPR>.ast.statements.list;
             die "Can't handle this case with more than one statement yet" # XXX
                 if @statements > 1;
             make @statements[0];

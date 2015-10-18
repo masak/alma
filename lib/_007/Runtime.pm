@@ -41,7 +41,7 @@ role _007::Runtime {
             self.declare-var($name);
             self.put-var($name, $value);
         }
-        for $block.statements.statements.kv -> $i, $_ {
+        for $block.statements.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .ident.name;
                 my $parameters = .parameters;
@@ -210,11 +210,11 @@ role _007::Runtime {
             },
             params => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.parameters.parameters));
+                return Val::Array.new(:elements(.parameters));
             },
             stmts => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.statements.statements));
+                return Val::Array.new(:elements(.statements));
             },
             expr => sub ($_) {
                 # XXX: typecheck
@@ -234,7 +234,7 @@ role _007::Runtime {
             },
             args => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.arguments.arguments));
+                return Val::Array.new(:elements(.arguments));
             },
             ident => sub ($_) {
                 # XXX: typecheck
@@ -274,11 +274,11 @@ role _007::Runtime {
     }
 
     method sigbind($type, $c, @args) {
-        die "$type with {$c.parameters.parameters.elems} parameters "       # XXX: make this into an X::
+        die "$type with {$c.parameters.elems} parameters "       # XXX: make this into an X::
             ~ "called with {@args.elems} arguments"
-            unless $c.parameters.parameters == @args;
+            unless $c.parameters == @args;
         self.enter($c);
-        for $c.parameters.parameters Z @args -> ($param, $arg) {
+        for $c.parameters Z @args -> ($param, $arg) {
             my $name = $param.name;
             self.declare-var($name);
             self.put-var($name, $arg);

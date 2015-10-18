@@ -88,7 +88,7 @@ sub check($ast, $runtime) {
     }
 
     multi handle(Q::Statements $statements) {
-        for @($statements.statements) -> $statement {
+        for @$statements -> $statement {
             handle($statement);
         }
     }
@@ -161,7 +161,7 @@ sub check($ast, $runtime) {
     }
 
     multi handle(Q::Parameters $parameters) {
-        for @($parameters.parameters) -> $parameter {
+        for @$parameters -> $parameter {
             handle($parameter);
         }
     }

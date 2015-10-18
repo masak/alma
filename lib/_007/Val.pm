@@ -59,7 +59,7 @@ role Val::Block does Val {
     has $.outer-frame;
 
     method pretty-params {
-        sprintf "(%s)", $.parameters.parameters».name.join(", ");
+        sprintf "(%s)", $.parameters».name.join(", ");
     }
     method Str { "<block {$.pretty-params}>" }
 }
