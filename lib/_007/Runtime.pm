@@ -112,19 +112,19 @@ role _007::Runtime {
         my %builtins =
             say      => -> $arg {
                 self.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
-                Val::None.new;
+                Nil;
             },
-            type     => sub ($arg) {
-                Val::Str.new(:value($arg ~~ Val::Sub
+            type     => -> $arg {
+                $arg ~~ Val::Sub
                     ?? "Sub"
-                    !! $arg.^name.substr('Val::'.chars)));
+                    !! $arg.^name.substr('Val::'.chars);
             },
             str => sub ($_) {
                 when Val::Array {
-                    return Val::Str.new(:value(stringify-inside-array($_)));
+                    return stringify-inside-array($_);
                 }
-                when Val::None { return Val::Str.new(:value(.Str)) }
-                when Val { return Val::Str.new(:value(.value.Str)) }
+                when Val::None { return .Str }
+                when Val { return .value.Str }
                 die X::TypeCheck.new(
                     :operation<str()>,
                     :got($_),
@@ -132,49 +132,37 @@ role _007::Runtime {
             },
             int => sub ($_) {
                 when Val::Str {
-                    return Val::Int.new(:value(.value.Int))
+                    return .value.Int
                         if .value ~~ /^ '-'? \d+ $/;
                     proceed;
                 }
                 when Val::Int {
-                    return $_;
+                    return .value;
                 }
                 die X::TypeCheck.new(
                     :operation<int()>,
                     :got($_),
                     :expected("something that can be converted to an int"));
             },
-            abs      => -> $arg { Val::Int.new(:value($arg.value.abs)) },
-            min      => -> $a, $b { Val::Int.new(:value(min($a.value, $b.value))) },
-            max      => -> $a, $b { Val::Int.new(:value(max($a.value, $b.value))) },
-            chr      => -> $arg { Val::Str.new(:value($arg.value.chr)) },
-            ord      => -> $arg { Val::Int.new(:value($arg.value.ord)) },
-            chars    => -> $arg { Val::Int.new(:value($arg.value.Str.chars)) },
-            uc       => -> $arg { Val::Str.new(:value($arg.value.uc)) },
-            lc       => -> $arg { Val::Str.new(:value($arg.value.lc)) },
-            trim     => -> $arg { Val::Str.new(:value($arg.value.trim)) },
-            elems    => -> $arg { Val::Int.new(:value($arg.elements.elems)) },
-            reversed => -> $arg { Val::Array.new(:elements($arg.elements.reverse)) },
-            sorted   => -> $arg { Val::Array.new(:elements($arg.elements.sort)) },
-            join     => -> $a, $sep { Val::Str.new(:value($a.elements.join($sep.value.Str))) },
-            split    => -> $s, $sep { Val::Array.new(:elements($s.value.split($sep.value).map({ Val::Str.new(:value($_)) }))) },
-            index    => -> $s, $substr { Val::Int.new(:value($s.value.index($substr.value) // -1)) },
-            substr   => sub ($s, $pos, $chars?) { Val::Str.new(:value($s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars))) },
-            charat   => -> $s, $pos { Val::Str.new(:value($s.value.comb[$pos.value] // die X::Subscript::TooLarge.new)) },
-            filter   => -> $fn, $a {
-                my $array = Val::Array.new;
-                for $a.elements {
-                    $array.elements.push($_) if self.call($fn, [$_]).truthy;
-                }
-                $array;
-            },
-            map      => -> $fn, $a {
-                my $array = Val::Array.new;
-                for $a.elements {
-                    $array.elements.push(self.call($fn, [$_]));
-                }
-                $array;
-            },
+            abs      => -> $arg { $arg.value.abs },
+            min      => -> $a, $b { min($a.value, $b.value) },
+            max      => -> $a, $b { max($a.value, $b.value) },
+            chr      => -> $arg { $arg.value.chr },
+            ord      => -> $arg { $arg.value.ord },
+            chars    => -> $arg { $arg.value.Str.chars },
+            uc       => -> $arg { $arg.value.uc },
+            lc       => -> $arg { $arg.value.lc },
+            trim     => -> $arg { $arg.value.trim },
+            elems    => -> $arg { $arg.elements.elems },
+            reversed => -> $arg { $arg.elements.reverse },
+            sorted   => -> $arg { $arg.elements>>.value.sort },
+            join     => -> $a, $sep { $a.elements.join($sep.value.Str) },
+            split    => -> $s, $sep { $s.value.split($sep.value) },
+            index    => -> $s, $substr { $s.value.index($substr.value) // -1 },
+            substr   => sub ($s, $pos, $chars?) { $s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars) },
+            charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new },
+            filter   => -> $fn, $a { $a.elements.grep({ self.call($fn, [$_]).truthy }) },
+            map      => -> $fn, $a { $a.elements.map({ self.call($fn, [$_]) }) },
             'infix:<+>' => -> $lhs, $rhs { #`[not implemented here] },
             'prefix:<->' => -> $lhs, $rhs { #`[not implemented here] },
 
@@ -217,11 +205,11 @@ role _007::Runtime {
             },
             params => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.parameters));
+                return .parameters;
             },
             stmts => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.statements));
+                return .statements;
             },
             expr => sub ($_) {
                 # XXX: typecheck
@@ -241,7 +229,7 @@ role _007::Runtime {
             },
             args => sub ($_) {
                 # XXX: typecheck
-                return Val::Array.new(:elements(.arguments));
+                return .arguments;
             },
             ident => sub ($_) {
                 # XXX: typecheck
@@ -274,9 +262,22 @@ role _007::Runtime {
             return .value.Str;
         }
 
-        for %builtins.kv -> $name, $sub {
+        sub _007ize(&fn) {
+            sub wrap($_) {
+                when Val | Q { $_ }
+                when Nil { Val::None.new }
+                when Str { Val::Str.new(:value($_)) }
+                when Int { Val::Int.new(:value($_)) }
+                when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+                default { die "Got some unknown value of type ", .^name }
+            }
+
+            return sub (|c) { wrap &fn(|c) };
+        }
+
+        for %builtins.kv -> $name, &sub {
             self.declare-var($name);
-            self.put-var($name, Val::Sub::Builtin.new($name, $sub));
+            self.put-var($name, Val::Sub::Builtin.new($name, _007ize(&sub)));
         }
     }
 
