@@ -14,28 +14,32 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say("Why, the early bird gets the villain.");
+
         BEGIN {
             say("So early, Mr. Bond");
         }
         .
 
-    outputs-during-parse
+    outputs
         $program,
-        "So early, Mr. Bond\n",
+        "So early, Mr. Bond\nWhy, the early bird gets the villain.\n",
         "BEGIN blocks execute during parse";
 }
 
 {
     my $program = q:to/./;
         my r = 7;
+        say(r);
+
         BEGIN {
             say(r);
         }
         .
 
-    outputs-during-parse
+    outputs
         $program,
-        "None\n",
+        "None\n7\n",
         "variables are declared already at parse time (but not assigned)";
 }
 
@@ -53,7 +57,7 @@ use _007::Test;
         }
         .
 
-    outputs-during-parse
+    outputs
         $program,
         "None\n",
         "BEGIN blocks are scoped just like everything else";

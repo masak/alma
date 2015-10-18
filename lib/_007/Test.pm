@@ -229,15 +229,6 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
     flunk $desc;
 }
 
-sub outputs-during-parse($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
-    my $parser = _007.parser;
-    my $output = Output.new;
-    my $runtime = _007.runtime(:$output);
-    $parser.parse($program, :$runtime);
-
-    is $output.result, $expected, $desc;
-}
-
 sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $parser = _007.parser;
     my $output = Output.new;
