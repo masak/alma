@@ -71,7 +71,7 @@ grammar _007::Parser::Syntax {
         <.finishpad>
     }
     rule statement:macro {
-        macro <identifier>
+        macro [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
         {
             my $symbol = $<identifier>.Str;
