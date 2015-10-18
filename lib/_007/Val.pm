@@ -58,17 +58,20 @@ role Val::Block does Val {
     has $.statements = Q::Statements.new;
     has $.outer-frame;
 
-    method Str { "<block>" }
+    method pretty-params {
+        sprintf "(%s)", $.parameters.parameters».name.join(", ");
+    }
+    method Str { "<block {$.pretty-params}>" }
 }
 
 role Val::Sub does Val::Block {
     has $.name;
 
-    method Str { "<sub>" }
+    method Str { "<sub {$.name}{$.pretty-params}>" }
 }
 
 role Val::Macro does Val::Sub {
-    method Str { "<macro>" }
+    method Str { "<macro {$.name}{$.pretty-params}>" }
 }
 
 role Val::Sub::Builtin does Val::Sub {
