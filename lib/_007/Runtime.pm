@@ -1,5 +1,5 @@
 use _007::Q;
-use _007::Runtime::Setting;
+use _007::Runtime::Builtins;
 
 role Frame {
     has $.block;
@@ -123,8 +123,8 @@ role _007::Runtime {
             return sub (|c) { wrap &fn(|c) };
         }
 
-        my $setting = _007::Runtime::Setting.new;
-        for $setting.get-builtins(self).kv -> $name, &sub {
+        my $builtins = _007::Runtime::Builtins.new;
+        for $builtins.get-builtins(self).kv -> $name, &sub {
             self.declare-var($name);
             self.put-var($name, Val::Sub::Builtin.new($name, _007ize(&sub)));
         }

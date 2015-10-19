@@ -1,7 +1,7 @@
 use _007::Val;
 use _007::Q;
 
-class _007::Runtime::Setting {
+class _007::Runtime::Builtins {
     method get-builtins($runtime) {
         sub escape($_) {
             return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
