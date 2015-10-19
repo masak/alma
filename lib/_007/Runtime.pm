@@ -111,9 +111,9 @@ role _007::Runtime {
 
     method load-builtins {
         my $builtins = _007::Runtime::Builtins.new(:runtime(self));
-        for $builtins.get-subs.kv -> $name, &sub {
+        for $builtins.get-subs.kv -> $name, $subval {
             self.declare-var($name);
-            self.put-var($name, Val::Sub::Builtin.new($name, &sub));
+            self.put-var($name, $subval);
         }
     }
 

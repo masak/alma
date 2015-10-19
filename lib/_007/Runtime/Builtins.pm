@@ -35,7 +35,7 @@ class _007::Runtime::Builtins {
             return sub (|c) { wrap &fn(|c) };
         }
 
-        return my % = map { .key => _007ize(.value) }, my %builtins =
+        my %builtins =
             say      => -> $arg {
                 $.runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
                 Nil;
@@ -176,5 +176,9 @@ class _007::Runtime::Builtins {
                 return .block;
             },
         ;
+
+        return my % = %builtins.map: {
+            .key => Val::Sub::Builtin.new(.key, _007ize(.value))
+        };
     }
 }
