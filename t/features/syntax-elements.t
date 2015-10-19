@@ -56,6 +56,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        [1, 2, 3,];
+        .
+
+    my $ast = q:to/./;
+        (statements
+          (stexpr (array (int 1) (int 2) (int 3))))
+        .
+
+    parses-to $program, $ast, "trailing comma in array is fine";
+}
+
+{
+    my $program = q:to/./;
         my u;
         .
 
