@@ -20,7 +20,20 @@ class _007::Runtime::Builtins {
             return .value.Str;
         }
 
-        return my %builtins =
+        sub _007ize(&fn) {
+            sub wrap($_) {
+                when Val | Q { $_ }
+                when Nil { Val::None.new }
+                when Str { Val::Str.new(:value($_)) }
+                when Int { Val::Int.new(:value($_)) }
+                when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+                default { die "Got some unknown value of type ", .^name }
+            }
+
+            return sub (|c) { wrap &fn(|c) };
+        }
+
+        return my % = map { .key => _007ize(.value) }, my %builtins =
             say      => -> $arg {
                 $runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
                 Nil;

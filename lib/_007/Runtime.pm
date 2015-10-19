@@ -110,23 +110,10 @@ role _007::Runtime {
     }
 
     method load-builtins {
-        sub _007ize(&fn) {
-            sub wrap($_) {
-                when Val | Q { $_ }
-                when Nil { Val::None.new }
-                when Str { Val::Str.new(:value($_)) }
-                when Int { Val::Int.new(:value($_)) }
-                when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
-                default { die "Got some unknown value of type ", .^name }
-            }
-
-            return sub (|c) { wrap &fn(|c) };
-        }
-
         my $builtins = _007::Runtime::Builtins.new;
         for $builtins.get-builtins(self).kv -> $name, &sub {
             self.declare-var($name);
-            self.put-var($name, Val::Sub::Builtin.new($name, _007ize(&sub)));
+            self.put-var($name, Val::Sub::Builtin.new($name, &sub));
         }
     }
 
