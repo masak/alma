@@ -137,11 +137,11 @@ class _007::Runtime::Builtins {
             },
             params => sub ($_) {
                 # XXX: typecheck
-                return .parameters;
+                return .parameters.parameters;
             },
             stmts => sub ($_) {
                 # XXX: typecheck
-                return .statements;
+                return .statements.statements;
             },
             expr => sub ($_) {
                 # XXX: typecheck
@@ -161,7 +161,7 @@ class _007::Runtime::Builtins {
             },
             args => sub ($_) {
                 # XXX: typecheck
-                return .arguments;
+                return .arguments.arguments;
             },
             ident => sub ($_) {
                 # XXX: typecheck
