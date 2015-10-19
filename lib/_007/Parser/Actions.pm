@@ -212,15 +212,17 @@ class _007::Parser::Actions {
         sub tighter($op1, $op2) {
             my $name1 = $op1.type.substr(1, *-1);
             my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
-                 > $*parser.oplevel.infixprec.first-index(*.contains($name2));
+            my $b = $*parser.oplevel.infixprec.first(*.contains($name1), :k)
+                 > $*parser.oplevel.infixprec.first(*.contains($name2), :k);
+            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
             my $name1 = $op1.type.substr(1, *-1);
             my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first-index(*.contains($name1))
-                == $*parser.oplevel.infixprec.first-index(*.contains($name2));
+            my $b = $*parser.oplevel.infixprec.first(*.contains($name1), :k)
+                == $*parser.oplevel.infixprec.first(*.contains($name2), :k);
+            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {
@@ -279,15 +281,17 @@ class _007::Parser::Actions {
         sub tighter($op1, $op2) {
             my $name1 = $op1.type.substr(1, *-1);
             my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.prepostfixprec.first-index(*.contains($name1))
-                 > $*parser.oplevel.prepostfixprec.first-index(*.contains($name2));
+            my $b = $*parser.oplevel.prepostfixprec.first(*.contains($name1), :k)
+                 > $*parser.oplevel.prepostfixprec.first(*.contains($name2), :k);
+            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
             my $name1 = $op1.type.substr(1, *-1);
             my $name2 = $op2.type.substr(1, *-1);
-            return $*parser.oplevel.prepostfixprec.first-index(*.contains($name1))
-                == $*parser.oplevel.prepostfixprec.first-index(*.contains($name2));
+            my $b = $*parser.oplevel.prepostfixprec.first(*.contains($name1), :k)
+                == $*parser.oplevel.prepostfixprec.first(*.contains($name2), :k);
+            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {

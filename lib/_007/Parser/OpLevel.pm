@@ -23,7 +23,7 @@ class _007::Parser::OpLevel {
             return _007::Parser::Precedence.new(:assoc($assoc // "left"), :ops{ $op => $q });
         }
         if %precedence<tighter> || %precedence<looser> -> $other-op {
-            my $pos = @namespace.first-index(*.contains($other-op));
+            my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
             @namespace.splice($pos, 0, new-prec());
             if $type eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
