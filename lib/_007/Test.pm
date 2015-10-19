@@ -126,8 +126,7 @@ sub check($ast, $runtime) {
         my $name = $sub.ident.name;
         my $valsub = Val::Sub.new(:$name, :parameters($sub.parameters),
             :statements($sub.statements), :$outer-frame);
-        $runtime.declare-var($name);
-        $runtime.put-var($name, $valsub);
+        $runtime.declare-var($name, $valsub);
     }
 
     multi handle(Q::Statement::Macro $macro) {
@@ -142,8 +141,7 @@ sub check($ast, $runtime) {
         my $name = $macro.ident.name;
         my $valmacro = Val::Macro.new(:$name, :parameters($macro.parameters),
             :statements($macro.statements), :$outer-frame);
-        $runtime.declare-var($name);
-        $runtime.put-var($name, $valmacro);
+        $runtime.declare-var($name, $valmacro);
     }
 
     multi handle(Q::Statement::For $for) {

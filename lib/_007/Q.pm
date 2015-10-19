@@ -411,8 +411,7 @@ role Q::Statement::If does Q::Statement {
             die "Too many parameters in if statements"  # XXX: needs a test and a real exception
                 if $c.parameters > 1;
             for $c.parameters Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.name);
-                $runtime.put-var($param.name, $arg);
+                $runtime.declare-var($param.name, $arg);
             }
             $.block.statements.run($runtime);
             $runtime.leave;
@@ -478,8 +477,7 @@ role Q::Statement::For does Q::Statement {
             for split_elements(elements($.expr), $count) -> $arg {
                 $runtime.enter($c);
                 for $c.parameters Z $arg.list -> ($param, $real_arg) {
-                    $runtime.declare-var($param.name);
-                    $runtime.put-var($param.name, $real_arg);
+                    $runtime.declare-var($param.name, $real_arg);
                 }
                 $.block.statements.run($runtime);
                 $runtime.leave;

@@ -39,8 +39,7 @@ role _007::Runtime {
         my $frame = Frame.new(:$block);
         @!frames.push($frame);
         for $block.statements.static-lexpad.kv -> $name, $value {
-            self.declare-var($name);
-            self.put-var($name, $value);
+            self.declare-var($name, $value);
         }
         for $block.statements.kv -> $i, $_ {
             when Q::Statement::Sub {
@@ -89,8 +88,11 @@ role _007::Runtime {
         return %pad{$name};
     }
 
-    method declare-var($name) {
+    method declare-var($name, $value?) {
         self.current-frame.pad{$name} = Val::None.new;
+        if defined $value {
+            self.put-var($name, $value);
+        }
     }
 
     method declared($name) {
@@ -112,8 +114,7 @@ role _007::Runtime {
     method load-builtins {
         my $builtins = _007::Runtime::Builtins.new(:runtime(self));
         for $builtins.get-subs.kv -> $name, $subval {
-            self.declare-var($name);
-            self.put-var($name, $subval);
+            self.declare-var($name, $subval);
         }
     }
 
@@ -124,8 +125,7 @@ role _007::Runtime {
         self.enter($c);
         for $c.parameters Z @args -> ($param, $arg) {
             my $name = $param.name;
-            self.declare-var($name);
-            self.put-var($name, $arg);
+            self.declare-var($name, $arg);
         }
     }
 

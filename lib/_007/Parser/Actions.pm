@@ -126,8 +126,7 @@ class _007::Parser::Actions {
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Sub.new(:$name, :$parameters, :$statements, :$outer-frame);
-        $*runtime.declare-var($name);
-        $*runtime.put-var($name, $val);
+        $*runtime.declare-var($name, $val);
 
         make $sub;
 
@@ -147,8 +146,7 @@ class _007::Parser::Actions {
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Macro.new(:$name, :$parameters, :$statements, :$outer-frame);
-        $*runtime.declare-var($name);
-        $*runtime.put-var($name, $val);
+        $*runtime.declare-var($name, $val);
 
         make $macro;
 
