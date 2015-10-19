@@ -4,7 +4,7 @@ use _007::Q;
 class _007::Runtime::Builtins {
     has $.runtime;
 
-    method get-builtins {
+    method get-subs {
         sub escape($_) {
             return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
         }
