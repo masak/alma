@@ -141,7 +141,13 @@ grammar _007::Parser::Syntax {
         || \s* $
     }
 
-    rule EXPR { <termish> +% <infix> }
+    rule EXPR { <termish> +% [<infix> || <arguments1>
+        { die X::Syntax::BogusListop.new(
+            :wrong("$<termish>[*-1] $<arguments1>"),
+            :right("{$<termish>[*-1]}($<arguments1>)")
+          );
+        }]
+    }
 
     token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
 
@@ -207,6 +213,10 @@ grammar _007::Parser::Syntax {
 
     rule arguments {
         <EXPR> *% ','
+    }
+
+    rule arguments1 {
+        <EXPR> +% ','
     }
 
     rule parameters {

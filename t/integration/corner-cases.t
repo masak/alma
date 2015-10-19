@@ -286,4 +286,12 @@ use _007::Test;
     parse-error $program, X::Syntax::Missing, "must have a valid identifier after `sub`";
 }
 
+{
+    my $program = q:to/./;
+        say "Mr Bond!";
+        .
+
+    parse-error $program, X::Syntax::BogusListop, "confusing Perl 6 `say X` with 007 `say(X)`";
+}
+
 done-testing;
