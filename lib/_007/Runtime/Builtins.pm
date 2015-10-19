@@ -2,7 +2,9 @@ use _007::Val;
 use _007::Q;
 
 class _007::Runtime::Builtins {
-    method get-builtins($runtime) {
+    has $.runtime;
+
+    method get-builtins {
         sub escape($_) {
             return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
         }
@@ -35,7 +37,7 @@ class _007::Runtime::Builtins {
 
         return my % = map { .key => _007ize(.value) }, my %builtins =
             say      => -> $arg {
-                $runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
+                $.runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
                 Nil;
             },
             type     => -> $arg {
@@ -85,8 +87,8 @@ class _007::Runtime::Builtins {
             index    => -> $s, $substr { $s.value.index($substr.value) // -1 },
             substr   => sub ($s, $pos, $chars?) { $s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars) },
             charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new },
-            filter   => -> $fn, $a { $a.elements.grep({ $runtime.call($fn, [$_]).truthy }) },
-            map      => -> $fn, $a { $a.elements.map({ $runtime.call($fn, [$_]) }) },
+            filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
+            map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
             'infix:<+>' => -> $lhs, $rhs { #`[not implemented here] },
             'prefix:<->' => -> $lhs, $rhs { #`[not implemented here] },
 
