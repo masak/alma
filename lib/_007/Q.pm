@@ -328,6 +328,21 @@ role Q::Postfix::Call does Q::Postfix {
     }
 }
 
+role Q::Postfix::Property does Q::Postfix {
+    has $.ident;
+    method new($expr, $ident) { self.bless(:$expr, :$ident) }
+
+    method eval($runtime) {
+        my $obj = $.expr.eval($runtime);
+        my $propname = $.ident.name;
+        return $runtime.property($obj, $propname);
+    }
+
+    method interpolate($runtime) {
+        self.new($.expr.interpolate($runtime), $.ident.interpolate($runtime));
+    }
+}
+
 role Q::Postfix::Custom[$type] does Q::Postfix {
     method type { "[$type]" }
 
@@ -621,4 +636,3 @@ role Q::Quasi does Q::Expr {
         # can we come up with a case where it matters?
     }
 }
-

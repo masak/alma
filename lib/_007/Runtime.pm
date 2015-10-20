@@ -159,4 +159,9 @@ role _007::Runtime {
         return $result if $result;
         return Val::None.new;
     }
+
+    method property($obj, $propname) {
+        my $builtins = _007::Runtime::Builtins.new(:runtime(self));
+        return $builtins.property($obj, $propname);
+    }
 }

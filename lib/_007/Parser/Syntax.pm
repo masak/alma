@@ -191,11 +191,14 @@ grammar _007::Parser::Syntax {
     }
 
     method postfix {
-        # XXX: should find a way not to special-case [] and ()
+        # XXX: should find a way not to special-case [] and () and .
         if /$<index>=[ \s* '[' ~ ']' [\s* <EXPR>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         elsif /$<call>=[ \s* '(' ~ ')' [\s* <arguments>] ]/(self) -> $cur {
+            return $cur."!reduce"("postfix");
+        }
+        elsif /$<prop>=[ \s* '.' <identifier> ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
 

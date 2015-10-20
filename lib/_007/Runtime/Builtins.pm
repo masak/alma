@@ -4,6 +4,19 @@ use _007::Q;
 class _007::Runtime::Builtins {
     has $.runtime;
 
+    method !_007ize(&fn) {
+        sub wrap($_) {
+            when Val | Q { $_ }
+            when Nil { Val::None.new }
+            when Str { Val::Str.new(:value($_)) }
+            when Int { Val::Int.new(:value($_)) }
+            when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+            default { die "Got some unknown value of type ", .^name }
+        }
+
+        return sub (|c) { wrap &fn(|c) };
+    }
+
     method get-subs {
         sub escape($_) {
             return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
@@ -20,19 +33,6 @@ class _007::Runtime::Builtins {
                 return .Str;
             }
             return .value.Str;
-        }
-
-        sub _007ize(&fn) {
-            sub wrap($_) {
-                when Val | Q { $_ }
-                when Nil { Val::None.new }
-                when Str { Val::Str.new(:value($_)) }
-                when Int { Val::Int.new(:value($_)) }
-                when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
-                default { die "Got some unknown value of type ", .^name }
-            }
-
-            return sub (|c) { wrap &fn(|c) };
         }
 
         my %builtins =
@@ -125,7 +125,7 @@ class _007::Runtime::Builtins {
                     return Val::None.new;
                 }
                 when Q::Literal::Array {
-                    return Val::Array.new(:elements(.elements.map(%builtins<value>)));
+                    return Val::Array.new(:elements(.elements));
                 }
                 when Q::Literal {
                     return .value;
@@ -178,7 +178,148 @@ class _007::Runtime::Builtins {
         ;
 
         return my % = %builtins.map: {
-            .key => Val::Sub::Builtin.new(.key, _007ize(.value))
+            .key => Val::Sub::Builtin.new(.key, self!_007ize(.value))
         };
+    }
+
+    method property($obj, $propname) {
+        my $code = do given $propname {
+            when "value" {
+                given $obj {
+                    when Q::Literal::None {
+                        -> { Val::None.new };
+                    }
+                    when Q::Literal::Array {
+                        -> { Val::Array.new(:elements($obj.elements)) };
+                    }
+                    when Q::Literal {
+                        -> { $obj.value };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<value()>,
+                        :got($obj),
+                        :expected("a Q::Literal type that has a value()"));
+                }
+            }
+            when "params" {
+                given $obj {
+                    when Q::Block {
+                        -> { $obj.parameters.parameters };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<params()>,
+                        :got($obj),
+                        :expected("Q::Block"));
+                }
+            }
+            when "stmts" {
+                given $obj {
+                    when Q::Block {
+                        -> { $obj.statements.statements };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<stmts()>,
+                        :got($obj),
+                        :expected("Q::Block"));
+                }
+            }
+            when "lhs" {
+                given $obj {
+                    when Q::Infix {
+                        -> { $obj.lhs };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<lhs()>,
+                        :got($obj),
+                        :expected("Q::Infix"));
+                }
+            }
+            when "rhs" {
+                given $obj {
+                    when Q::Infix {
+                        -> { $obj.rhs };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<rhs()>,
+                        :got($obj),
+                        :expected("Q::Infix"));
+                }
+            }
+            when "pos" {
+                given $obj {
+                    when Q::Postfix::Index {
+                        -> { $obj.index };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<pos()>,
+                        :got($obj),
+                        :expected("Q::Postfix::Index"));
+                }
+            }
+            when "args" {
+                given $obj {
+                    when Q::Postfix::Call {
+                        -> { $obj.arguments.arguments };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<args()>,
+                        :got($obj),
+                        :expected("Q::Postfix::Call"));
+                }
+            }
+            when "ident" {
+                given $obj {
+                    when Q::Statement::My | Q::Statement::Constant
+                        | Q::Statement::Sub | Q::Statement::Macro
+                        | Q::Statement::Trait | Q::Postfix::Property {
+                        -> { $obj.ident };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<ident()>,
+                        :got($obj),
+                        :expected("any number of types with the .ident property"));
+                }
+            }
+            when "assign" {
+                given $obj {
+                    when Q::Statement::My | Q::Statement::Constant {
+                        -> { $obj.assign };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<ident()>,
+                        :got($obj),
+                        :expected("Q::Statement::My | Q::Statement::Constant"));
+                }
+            }
+            when "expr" {
+                given $obj {
+                    when Q::Statement::If | Q::Statement::For
+                        | Q::Statement::While | Q::Statement::Expr
+                        | Q::Unquote | Q::Prefix | Q::Postfix
+                        | Q::Statement::Return | Q::Trait {
+                        -> { $obj.expr };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<ident()>,
+                        :got($obj),
+                        :expected("Q::Statement::My | Q::Statement::Constant"));
+                }
+            }
+            when "block" {
+                given $obj {
+                    when Q::Statement::Block | Q::Statement::If
+                        | Q::Statement::For | Q::Statement::While
+                        | Q::Statement::BEGIN {
+                        -> { $obj.block };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<ident()>,
+                        :got($obj),
+                        :expected("Q::Statement::My | Q::Statement::Constant"));
+                }
+            }
+        };
+
+        return Val::Sub::Builtin.new($propname, self!_007ize($code));
     }
 }

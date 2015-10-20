@@ -428,6 +428,9 @@ class _007::Parser::Actions {
         elsif $<call> {
             make [Q::Postfix::Call, $<arguments>.ast];
         }
+        elsif $<prop> {
+            make [Q::Postfix::Property, $<identifier>.ast];
+        }
         else {
             make $*parser.oplevel.ops<postfix>{~$/};
         }
