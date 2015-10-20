@@ -86,7 +86,7 @@ class _007::Runtime::Builtins {
             split    => -> $s, $sep { $s.value.split($sep.value) },
             index    => -> $s, $substr { $s.value.index($substr.value) // -1 },
             substr   => sub ($s, $pos, $chars?) { $s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars) },
-            charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new },
+            charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new(:value($pos.value), :length($s.value.elems)) },
             filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
             map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
             'infix:<+>' => -> $lhs, $rhs { #`[not implemented here] },

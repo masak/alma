@@ -6,6 +6,10 @@ class X::Control::Return is Exception {
 }
 
 class X::Subscript::TooLarge is Exception {
+    has $.value;
+    has $.length;
+
+    method message() { "Subscript ($.value) too large (array length $.length)" }
 }
 
 class X::Subscript::NonInteger is Exception {
@@ -295,7 +299,7 @@ role Q::Postfix::Index does Q::Postfix {
         my $index = $.index.eval($runtime);
         die X::Subscript::NonInteger.new
             if $index !~~ Val::Int;
-        die X::Subscript::TooLarge.new
+        die X::Subscript::TooLarge.new(:value($index.value), :length($e.elements))
             if $index.value >= $e.elements;
         die X::Subscript::Negative.new(:$index, :type([]))
             if $index.value < 0;
