@@ -15,6 +15,9 @@ class X::Subscript::TooLarge is Exception {
 class X::Subscript::NonInteger is Exception {
 }
 
+class X::Subscript::NonString is Exception {
+}
+
 role Q {
     method worthy-attributes {
         sub aname($attr) { $attr.name.substr(2) }
@@ -293,17 +296,26 @@ role Q::Postfix::Index does Q::Postfix {
     method new($expr, $index) { self.bless(:$expr, :$index) }
 
     method eval($runtime) {
-        my $e = $.expr.eval($runtime);
-        die X::TypeCheck.new(:operation<indexing>, :got($e), :expected(Val::Array))
-            unless $e ~~ Val::Array;
-        my $index = $.index.eval($runtime);
-        die X::Subscript::NonInteger.new
-            if $index !~~ Val::Int;
-        die X::Subscript::TooLarge.new(:value($index.value), :length($e.elements))
-            if $index.value >= $e.elements;
-        die X::Subscript::Negative.new(:$index, :type([]))
-            if $index.value < 0;
-        return $e.elements[$index.value];
+        given $.expr.eval($runtime) {
+            when Val::Array {
+                my $index = $.index.eval($runtime);
+                die X::Subscript::NonInteger.new
+                    if $index !~~ Val::Int;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(.elements))
+                    if $index.value >= .elements;
+                die X::Subscript::Negative.new(:$index, :type([]))
+                    if $index.value < 0;
+                return .elements[$index.value];
+            }
+            when Q {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                return $runtime.property($_, $propname);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+        }
     }
     method interpolate($runtime) {
         self.new($.expr.interpolate($runtime), $.index.interpolate($runtime));
