@@ -318,6 +318,9 @@ class _007::Runtime::Builtins {
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
             }
+            default {
+                die "Property '$propname' not found on ", $obj.^name; # XXX: turn into X::
+            }
         };
 
         return Val::Sub::Builtin.new($propname, self!_007ize($code));
