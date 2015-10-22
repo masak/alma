@@ -51,8 +51,8 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters) (statements
-            (my (ident "b") (assign (ident "b") (block (parameters) (statements
-              (return (int 5))))))
+            (my (ident "b") (block (parameters) (statements
+              (return (int 5)))))
             (sub (ident "g") (parameters) (statements
               (stexpr (call (ident "b") (arguments)))))
             (stexpr (call (ident "g") (arguments)))
@@ -67,10 +67,10 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters) (statements
-            (my (ident "b") (assign (ident "b") (block (parameters) (statements
-              (return (int 5))))))
+            (my (ident "b") (block (parameters) (statements
+              (return (int 5)))))
             (return (ident "b"))))
-          (my (ident "c") (assign (ident "c") (call (ident "f") (arguments))))
+          (my (ident "c") (call (ident "f") (arguments)))
           (stexpr (call (ident "c") (arguments))))
         .
 

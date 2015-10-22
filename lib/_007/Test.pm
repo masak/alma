@@ -102,10 +102,12 @@ sub check($ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $my.assignment {
-            handle($my.assignment.rhs);
+        if $my.expr {
+            handle($my.expr);
         }
     }
+
+    # XXX: should handle Q::Statement::Constant, too
 
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($block.block.eval($runtime));

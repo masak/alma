@@ -206,7 +206,7 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters (ident "n")) (statements
               (return (+ (ident "n") (int 1)))))
-          (my (ident "a") (assign (ident "a") (array (int 1) (int 2) (int 3))))
+          (my (ident "a") (array (int 1) (int 2) (int 3)))
           (stexpr (call (ident "say") (arguments (call (ident "map") (arguments (ident "f") (ident "a"))))))
           (stexpr (call (ident "say") (arguments (ident "a")))))
         .
@@ -227,7 +227,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (my (ident "n") (assign (ident "n") (int 7)))
+          (my (ident "n") (int 7))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "n")))))))
         .
 
@@ -237,7 +237,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (my (ident "s") (assign (ident "s") (str "Bond")))
+          (my (ident "s") (str "Bond"))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "s")))))))
         .
 
@@ -247,7 +247,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (my (ident "a") (assign (ident "a") (array (int 1) (int 2))))
+          (my (ident "a") (array (int 1) (int 2)))
           (stexpr (call (ident "say") (arguments (call (ident "type") (arguments (ident "a")))))))
         .
 

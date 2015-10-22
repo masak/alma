@@ -18,11 +18,7 @@ class _007::Parser::Actions {
 
     method statement:my ($/) {
         if $<EXPR> {
-            make Q::Statement::My.new(
-                $<identifier>.ast,
-                Q::Infix::Assignment.new(
-                    $<identifier>.ast,
-                    $<EXPR>.ast));
+            make Q::Statement::My.new($<identifier>.ast, $<EXPR>.ast);
         }
         else {
             make Q::Statement::My.new($<identifier>.ast);
@@ -31,11 +27,7 @@ class _007::Parser::Actions {
 
     method statement:constant ($/) {
         if $<EXPR> {
-            make Q::Statement::Constant.new(
-                $<identifier>.ast,
-                Q::Infix::Assignment.new(
-                    $<identifier>.ast,
-                    $<EXPR>.ast));
+            make Q::Statement::Constant.new($<identifier>.ast, $<EXPR>.ast);
         }
         else {  # XXX: remove this part once we throw an error
             make Q::Statement::Constant.new($<identifier>.ast);

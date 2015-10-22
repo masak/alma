@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (my (ident "u") (assign (ident "u") (int 3)))
+          (my (ident "u") (int 3))
           (while (ident "u") (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "u"))))
             (stexpr (assign (ident "u") (+ (ident "u") (- (int 1)))))))))

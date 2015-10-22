@@ -389,31 +389,32 @@ role Q::Statement does Q {
 
 role Q::Statement::My does Q::Statement {
     has $.ident;
-    has $.assignment;
-    method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
+    has $.expr;
+    method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
 
     method run($runtime) {
         return
-            unless $.assignment;
-        $.assignment.eval($runtime);
+            unless $.expr;
+        my $value = $.expr.eval($runtime);
+        $runtime.put-var($.ident.name, $value);
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.assignment === Empty ?? Empty !! $.assignment.interpolate($runtime));
+            $.expr === Empty ?? Empty !! $.expr.interpolate($runtime));
     }
 }
 
 role Q::Statement::Constant does Q::Statement {
     has $.ident;
-    has $.assignment;
-    method new($ident, $assignment = Empty) { self.bless(:$ident, :$assignment) }
+    has $.expr;
+    method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
 
     method run($runtime) {
         # value has already been assigned
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.assignment === Empty ?? Empty !! $.assignment.interpolate($runtime));   # XXX: and here
+            $.expr === Empty ?? Empty !! $.expr.interpolate($runtime));   # XXX: and here
     }
 }
 

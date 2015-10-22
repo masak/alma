@@ -15,10 +15,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statements
-          (my (ident "x") (assign (ident "x") (str "one")))
+          (my (ident "x") (str "one"))
           (stexpr (call (ident "say") (arguments (ident "x"))))
           (sub (ident "f") (parameters) (statements
-            (my (ident "x") (assign (ident "x") (str "two")))
+            (my (ident "x") (str "two"))
             (stexpr (call (ident "say") (arguments (ident "x"))))))
           (stexpr (call (ident "f") (arguments)))
           (stexpr (call (ident "say") (arguments (ident "x")))))
@@ -43,7 +43,7 @@ use _007::Test;
         (statements
           (sub (ident "f") (parameters (ident "X") (ident "Y")) (statements
             (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y")))))))
-          (my (ident "X") (assign (ident "X") (str "y")))
+          (my (ident "X") (str "y"))
           (stexpr (call (ident "f") (arguments (str "X") (~ (ident "X") (ident "X"))))))
         .
 
@@ -54,9 +54,9 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (sub (ident "f") (parameters (ident "callback")) (statements
-            (my (ident "scoping") (assign (ident "scoping") (str "dynamic")))
+            (my (ident "scoping") (str "dynamic"))
             (stexpr (call (ident "callback") (arguments)))))
-          (my (ident "scoping") (assign (ident "scoping") (str "lexical")))
+          (my (ident "scoping") (str "lexical"))
           (stexpr (call (ident "f") (arguments (block (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "scoping"))))))))))
         .
@@ -79,7 +79,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statements
           (stexpr (call (ident "f") (arguments)))
-          (my (ident "x") (assign (ident "x") (str "X")))
+          (my (ident "x") (str "X"))
           (sub (ident "f") (parameters) (statements
             (stexpr (call (ident "say") (arguments (ident "x")))))))
         .
