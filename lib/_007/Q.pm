@@ -121,29 +121,27 @@ role Q::Term::Array does Q::Term {
 role Q::Expr::Block { ... }
 
 role Q::Literal::Object does Q::Literal {
-  has @.elements;
-  method new(*@elements) {
-    self.bless(elements => @elements)
-  }
-  method Str { "Object" ~ children(@.elements) }
+    has @.elements;
+    method new(*@elements) {
+        self.bless(:@elements)
+    }
 
-  method eval($runtime) {
-    ... 'Val::Object NYI'
-  }
+    method eval($runtime) {
+        Val::Object.new(:elements(@.elements>>.eval($runtime)));
+    }
 }
 
 role Q::Property does Q::Literal {
-  has $.key;
-  has $.value;
-  method new($key, $value) {
-    self.bless(:$key, :$value);
-  }
+    has $.key;
+    has $.value;
+    method new($key, $value) {
+        self.bless(:$key, :$value);
+    }
 
-  method Str { "Property" ~ children($!key, $!value) }
-
-  method eval($runtime) {
-    ... 'Property NYI'
-  }
+    method eval($runtime) {
+        Val::Property.new(:key($.key.eval($runtime)),
+          :value($.eval.eval($runtime)));
+    }
 }
 
 role Q::Block does Q {

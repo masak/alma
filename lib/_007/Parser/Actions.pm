@@ -417,28 +417,28 @@ class _007::Parser::Actions {
     }
 
     method term:object ($/) {
-        make Q::Literal::Object.new($<pair>».ast);
+        make Q::Literal::Object.new($<property>».ast);
     }
 
     method unquote ($/) {
         make Q::Unquote.new($<EXPR>.ast);
     }
 
-    method pair:str-expr ($/) {
+    method property:str-expr ($/) {
         make Q::Property.new($<str>.ast, $<value>.ast);
     }
 
-    method pair:ident-expr ($/) {
+    method property:ident-expr ($/) {
         make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
             $<value>.ast);
     }
 
-    method pair:ident ($/) {
+    method property:ident ($/) {
         make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
             $<identifier>.ast);
     }
 
-    method pair:method ($/) {
+    method property:method ($/) {
         make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
            Q::Block.new($<parameters>.ast, $<blockoid>.ast)); 
     }

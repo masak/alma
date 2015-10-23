@@ -69,6 +69,31 @@ role Val::Array does Val {
 role Q::ParameterList { ... }
 role Q::StatementList { ... }
 
+role Val::Object does Val {
+    has %.elements;
+
+    method Str {
+        '{' ~ %.elements.map({"{.key} => {.value}"}).join(', ') ~ '}'
+    }
+
+    method truthy {
+        ?$.elements
+    }
+}
+
+role Val::Property does Val {
+    has $.key;
+    has $.value;
+
+    method Str {
+        "$.key.Str() => $.value.Str()"
+    }
+
+    method truthy {
+        True
+    }
+}
+
 role Val::Block does Val {
     has $.parameterlist = Q::ParameterList.new;
     has $.statementlist = Q::StatementList.new;
