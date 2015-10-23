@@ -89,8 +89,6 @@ class _007::Runtime::Builtins {
             charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new(:value($pos.value), :length($s.value.elems)) },
             filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
             map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
-            'infix:<+>' => -> $lhs, $rhs { #`[not implemented here] },
-            'prefix:<->' => -> $lhs, $rhs { #`[not implemented here] },
 
             'Q::Literal::Int' => -> $int { Q::Literal::Int.new($int.value) },
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },

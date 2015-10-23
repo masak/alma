@@ -24,6 +24,14 @@ class _007::Parser {
     }
 
     method parse($program, :$*runtime = die "Must supply a runtime") {
+        for <prefix infix postfix> -> $type {
+            for @!oplevels[0].ops{$type}.keys -> $op {
+                my $name = "$type\:<$op>";
+                my $sub = $type eq "infix" ?? -> $l, $r {} !! -> $expr {};
+                $*runtime.declare-var($name, Val::Sub::Builtin.new($name, $sub));
+            }
+        }
+
         my %*assigned;
         my $*insub = False;
         my $*parser = self;
