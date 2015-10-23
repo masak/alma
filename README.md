@@ -212,7 +212,7 @@ The scene fades in smoother this time. The contrasts aren't quite so bright, and
 
 "But you're saying this is your fourth flashback of the same scene. Shouldn't all flashbacks be the same? Isn't it, like, a paradox that they're not?"
 
-"Not really. The same macro can be invoked from many different call sites with different parameters. Even if there are no differing parameters, the macro is just code, and can execute differently each time on a whim."
+"Not really. The same macro can be invoked from many different call sites with different inputs. Even if there are no differing inputs, the macro is just code, and can execute differently each time on a whim."
 
 "So, in a sense, we're in a bubble. This whole flashback is taking place in the actual time-line's past. Nothing we do here will have any real consequence."
 
