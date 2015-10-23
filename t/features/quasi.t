@@ -7,7 +7,7 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    outputs $program, read("(block (parameters) (statements (stexpr (+ (int 1) (int 1)))))") ~ "\n",
+    outputs $program, read("(block (paramlist) (stmtlist (stexpr (+ (int 1) (int 1)))))") ~ "\n",
         "Basic quasi quoting";
 }
 

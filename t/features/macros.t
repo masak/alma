@@ -4,9 +4,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (macro (ident "f") (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "OH HAI from inside macro")))))))
+        (stmtlist
+          (macro (ident "f") (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI from inside macro")))))))
         .
 
     is-result $ast, "", "macro";
@@ -29,7 +29,7 @@ use _007::Test;
         macro foo() {
             return Q::Postfix::Call(
                 Q::Identifier("say"),
-                Q::Arguments([Q::Literal::Str("OH HAI")])
+                Q::ArgumentList([Q::Literal::Str("OH HAI")])
             );
         }
 

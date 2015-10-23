@@ -9,8 +9,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (statements
-          (sub (ident "infix:<*>") (parameters (ident "left") (ident "right")) (statements)))
+        (stmtlist
+          (sub (ident "infix:<*>") (paramlist (ident "left") (ident "right")) (stmtlist)))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";

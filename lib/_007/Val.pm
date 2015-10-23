@@ -50,16 +50,16 @@ role Val::Array does Val {
     }
 }
 
-role Q::Parameters { ... }
-role Q::Statements { ... }
+role Q::ParameterList { ... }
+role Q::StatementList { ... }
 
 role Val::Block does Val {
-    has $.parameters = Q::Parameters.new;
-    has $.statements = Q::Statements.new;
+    has $.parameterlist = Q::ParameterList.new;
+    has $.statementlist = Q::StatementList.new;
     has $.outer-frame;
 
     method pretty-params {
-        sprintf "(%s)", $.parameters».name.join(", ");
+        sprintf "(%s)", $.parameterlist».name.join(", ");
     }
     method Str { "<block {$.pretty-params}>" }
 }

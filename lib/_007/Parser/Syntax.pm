@@ -3,7 +3,7 @@ use _007::Val;
 grammar _007::Parser::Syntax {
     token TOP {
         <.newpad>
-        <statements>
+        <statementlist>
         <.finishpad>
     }
 
@@ -18,7 +18,7 @@ grammar _007::Parser::Syntax {
         $*parser.pop-oplevel;
     } }
 
-    rule statements {
+    rule statementlist {
         '' [<statement><.eat_terminator> ]*
     }
 
@@ -65,7 +65,7 @@ grammar _007::Parser::Syntax {
             $*runtime.declare-var($symbol);
         }
         <.newpad>
-        '(' ~ ')' <parameters>
+        '(' ~ ')' <parameterlist>
         <trait> *
         <blockoid>:!s
         <.finishpad>
@@ -81,7 +81,7 @@ grammar _007::Parser::Syntax {
             $*runtime.declare-var($symbol);
         }
         <.newpad>
-        '(' ~ ')' <parameters>
+        '(' ~ ')' <parameterlist>
         <trait> *
         <blockoid>:!s
         <.finishpad>
@@ -113,7 +113,7 @@ grammar _007::Parser::Syntax {
     # requires a <.newpad> before invocation
     # and a <.finishpad> after
     token blockoid {
-        '{' ~ '}' <statements>
+        '{' ~ '}' <statementlist>
     }
     token block {
         <?[{]> <.newpad> <blockoid> <.finishpad>    # }], vim
@@ -122,7 +122,7 @@ grammar _007::Parser::Syntax {
     # "pointy block"
     token pblock {
         | <lambda> <.newpad> <.ws>
-            <parameters>
+            <parameterlist>
             <blockoid>
             <.finishpad>
         | <block>
@@ -141,10 +141,10 @@ grammar _007::Parser::Syntax {
         || \s* $
     }
 
-    rule EXPR { <termish> +% [<infix> || <arguments1>
+    rule EXPR { <termish> +% [<infix> || <argumentlist1>
         { die X::Syntax::BogusListop.new(
-            :wrong("$<termish>[*-1] $<arguments1>"),
-            :right("{$<termish>[*-1]}($<arguments1>)")
+            :wrong("$<termish>[*-1] $<argumentlist1>"),
+            :right("{$<termish>[*-1]}($<argumentlist1>)")
           );
         }]
     }
@@ -178,7 +178,7 @@ grammar _007::Parser::Syntax {
                 unless $*runtime.declared($symbol);
         }
     }
-    token term:quasi { quasi >> [<.ws> '{' ~ '}' <statements> || <.panic("quasi")>] }
+    token term:quasi { quasi >> [<.ws> '{' ~ '}' <statementlist> || <.panic("quasi")>] }
 
     token unquote { '{{{' <EXPR> '}}}' }
 
@@ -195,7 +195,7 @@ grammar _007::Parser::Syntax {
         if /$<index>=[ \s* '[' ~ ']' [\s* <EXPR>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
-        elsif /$<call>=[ \s* '(' ~ ')' [\s* <arguments>] ]/(self) -> $cur {
+        elsif /$<call>=[ \s* '(' ~ ')' [\s* <argumentlist>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         elsif /$<prop>=[ \s* '.' <identifier> ]/(self) -> $cur {
@@ -214,15 +214,15 @@ grammar _007::Parser::Syntax {
             [ <?after \w> [':<' <-[>]>+ '>']?  || <.panic("identifier")> ]
     }
 
-    rule arguments {
+    rule argumentlist {
         <EXPR> *% ','
     }
 
-    rule arguments1 {
+    rule argumentlist1 {
         <EXPR> +% ','
     }
 
-    rule parameters {
+    rule parameterlist {
         [<identifier>
             {
                 my $symbol = $<identifier>[*-1].Str;

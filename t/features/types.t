@@ -4,9 +4,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "n") (int 7))
-          (stexpr (call (ident "say") (arguments (ident "n")))))
+          (stexpr (call (ident "say") (arglist (ident "n")))))
         .
 
     is-result $ast, "7\n", "int type works";
@@ -14,9 +14,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "s") (str "Bond"))
-          (stexpr (call (ident "say") (arguments (ident "s")))))
+          (stexpr (call (ident "say") (arglist (ident "s")))))
         .
 
     is-result $ast, "Bond\n", "str type works";
@@ -31,9 +31,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "n") (array (int 1) (int 2)))
-          (stexpr (call (ident "say") (arguments (ident "n")))))
+          (stexpr (call (ident "say") (arglist (ident "n")))))
         .
 
     is-result $ast, "[1, 2]\n", "array type works";

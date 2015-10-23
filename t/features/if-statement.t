@@ -4,28 +4,28 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "u"))
-          (if (ident "u") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "falsy none")))))))
-          (if (int 0) (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "falsy int")))))))
-          (if (int 7) (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy int")))))))
-          (if (str "") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "falsy str")))))))
-          (if (str "James") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy str")))))))
-          (if (array) (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "falsy array")))))))
-          (if (array (str "")) (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy array")))))))
-          (sub (ident "foo") (parameters) (statements))
-          (if (ident "foo") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy sub")))))))
-          (macro (ident "bar") (parameters) (statements))
-          (if (ident "bar") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "truthy macro"))))))))
+          (if (ident "u") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "falsy none")))))))
+          (if (int 0) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "falsy int")))))))
+          (if (int 7) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy int")))))))
+          (if (str "") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "falsy str")))))))
+          (if (str "James") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy str")))))))
+          (if (array) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "falsy array")))))))
+          (if (array (str "")) (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy array")))))))
+          (sub (ident "foo") (paramlist) (stmtlist))
+          (if (ident "foo") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy sub")))))))
+          (macro (ident "bar") (paramlist) (stmtlist))
+          (if (ident "bar") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "truthy macro"))))))))
         .
 
     is-result $ast,
@@ -35,9 +35,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (if (int 7) (block (parameters (ident "a")) (statements
-            (stexpr (call (ident "say") (arguments (ident "a"))))))))
+        (stmtlist
+          (if (int 7) (block (paramlist (ident "a")) (stmtlist
+            (stexpr (call (ident "say") (arglist (ident "a"))))))))
         .
 
     is-result $ast, "7\n", "if statements with parameters work as they should";

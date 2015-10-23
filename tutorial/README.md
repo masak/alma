@@ -233,10 +233,12 @@ There are also constructor methods for creating program elements.
     Q::Literal::Str(value)
     Q::Literal::Array(value)
     Q::Identifier(str)
-    Q::Statements(array)
-    Q::Parameters(array)
-    Q::Arguments(array)
-    Q::Block(params, stmts)
+    Q::StatementList(array)
+    Q::ParameterList(array)
+    Q::ArgumentList(array)
+    Q::Block(paramlist, stmtlist)
+    Q::Quasi(stmtlist)
+    Q::Trait(ident, expr)
     Q::Prefix::Minus(expr)
     Q::Infix::Addition(lhs, rhs)
     Q::Infix::Concat(lhs, rhs)
@@ -249,8 +251,8 @@ There are also constructor methods for creating program elements.
     Q::Statement::Expr(expr)
     Q::Statement::If(expr, block)
     Q::Statement::Block(block)
-    Q::Statement::Sub(ident, params, block)
-    Q::Statement::Macro(ident, params, block)
+    Q::Statement::Sub(ident, paramlist, block)
+    Q::Statement::Macro(ident, paramlist, block)
     Q::Statement::Return(expr?)
     Q::Statement::For(expr, block)
     Q::Statement::While(expr, block)
@@ -277,7 +279,7 @@ call the macro, and then install whatever code the macro said to return.
     macro greet() {
         return Q::Postfix::Call(
             Q::Identifier("say"),
-            Q::Arguments([Q::Literal::Str("Mr Bond!")]));
+            Q::ArgumentList([Q::Literal::Str("Mr Bond!")]));
     }
 
     greet();    # prints "Mr Bond!" when run
@@ -294,7 +296,7 @@ above, and sometimes convenient to express it as code. Quasis are for
 the latter case.
 
     macro greet() {
-        quasi {
+        return quasi {
             say("Mr Bond!");
         }
     }

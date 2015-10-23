@@ -98,9 +98,9 @@ class _007::Runtime::Builtins {
             'Q::Literal::None' => -> { Q::Literal::None.new },
             'Q::Block' => -> $params, $stmts { Q::Block.new($params, $stmts) },
             'Q::Identifier' => -> $name { Q::Identifier.new($name.value) },
-            'Q::Statements' => -> $array { Q::Statements.new($array.value) },
-            'Q::Parameters' => -> $array { Q::Parameters.new($array.value) },
-            'Q::Arguments' => -> $array { Q::Arguments.new($array.elements) },
+            'Q::StatementList' => -> $array { Q::StatementList.new($array.value) },
+            'Q::ParameterList' => -> $array { Q::ParameterList.new($array.value) },
+            'Q::ArgumentList' => -> $array { Q::ArgumentList.new($array.elements) },
             'Q::Prefix::Minus' => -> $expr { Q::Prefix::Minus.new($expr) },
             'Q::Infix::Addition' => -> $lhs, $rhs { Q::Infix::Addition.new($lhs, $rhs) },
             'Q::Infix::Concat' => -> $lhs, $rhs { Q::Infix::Concat.new($lhs, $rhs) },
@@ -137,11 +137,11 @@ class _007::Runtime::Builtins {
             },
             params => sub ($_) {
                 # XXX: typecheck
-                return .parameters.parameters;
+                return .parameterlist.parameters;
             },
             stmts => sub ($_) {
                 # XXX: typecheck
-                return .statements.statements;
+                return .statementlist.statements;
             },
             expr => sub ($_) {
                 # XXX: typecheck
@@ -161,7 +161,7 @@ class _007::Runtime::Builtins {
             },
             args => sub ($_) {
                 # XXX: typecheck
-                return .arguments.arguments;
+                return .argumentlist.arguments;
             },
             ident => sub ($_) {
                 # XXX: typecheck
@@ -201,10 +201,10 @@ class _007::Runtime::Builtins {
                         :expected("a Q::Literal type that has a value()"));
                 }
             }
-            when "params" {
+            when "paramlist" {
                 given $obj {
                     when Q::Block {
-                        -> { $obj.parameters.parameters };
+                        -> { $obj.parameterlist.parameters };
                     }
                     die X::TypeCheck.new(
                         :operation<params()>,
@@ -212,10 +212,10 @@ class _007::Runtime::Builtins {
                         :expected("Q::Block"));
                 }
             }
-            when "stmts" {
+            when "stmtlist" {
                 given $obj {
                     when Q::Block {
-                        -> { $obj.statements.statements };
+                        -> { $obj.statementlist.statements };
                     }
                     die X::TypeCheck.new(
                         :operation<stmts()>,
@@ -259,7 +259,7 @@ class _007::Runtime::Builtins {
             when "args" {
                 given $obj {
                     when Q::Postfix::Call {
-                        -> { $obj.arguments.arguments };
+                        -> { $obj.argumentlist.arguments };
                     }
                     die X::TypeCheck.new(
                         :operation<args()>,

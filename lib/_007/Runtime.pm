@@ -20,13 +20,13 @@ role _007::Runtime {
         self.load-builtins;
     }
 
-    method run(Q::Statements $statements) {
+    method run(Q::StatementList $statementlist) {
         my $compunit = Val::Block.new(
-            :$statements,
+            :$statementlist,
             :outer-frame(self.current-frame));
         self.enter($compunit);
 
-        $statements.run(self);
+        $statementlist.run(self);
         self.leave;
         CATCH {
             when X::Control::Return {
@@ -38,16 +38,16 @@ role _007::Runtime {
     method enter($block) {
         my $frame = Frame.new(:$block);
         @!frames.push($frame);
-        for $block.statements.static-lexpad.kv -> $name, $value {
+        for $block.statementlist.static-lexpad.kv -> $name, $value {
             self.declare-var($name, $value);
         }
-        for $block.statements.kv -> $i, $_ {
+        for $block.statementlist.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .ident.name;
-                my $parameters = .parameters;
-                my $statements = .statements;
+                my $parameterlist = .parameterlist;
+                my $statementlist = .statementlist;
                 my $outer-frame = $frame;
-                my $val = Val::Sub.new(:$name, :$parameters, :$statements, :$outer-frame);
+                my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
                 self.put-var($name, $val);
             }
         }
@@ -119,11 +119,11 @@ role _007::Runtime {
     }
 
     method sigbind($type, $c, @args) {
-        die "$type with {$c.parameters.elems} parameters "       # XXX: make this into an X::
+        die "$type with {$c.parameterlist.elems} parameters "       # XXX: make this into an X::
             ~ "called with {@args.elems} arguments"
-            unless $c.parameters == @args;
+            unless $c.parameterlist == @args;
         self.enter($c);
-        for $c.parameters Z @args -> ($param, $arg) {
+        for @($c.parameterlist) Z @args -> ($param, $arg) {
             my $name = $param.name;
             self.declare-var($name, $arg);
         }
@@ -131,7 +131,7 @@ role _007::Runtime {
 
     multi method call(Val::Block $c, @args) {
         self.sigbind("Block", $c, @args);
-        $c.statements.run(self);
+        $c.statementlist.run(self);
         self.leave;
         return Val::None.new;
     }
@@ -140,7 +140,7 @@ role _007::Runtime {
         self.sigbind("Sub", $c, @args);
         self.register-subhandler;
         my $frame = self.current-frame;
-        $c.statements.run(self);
+        $c.statementlist.run(self);
         self.leave;
         CATCH {
             when X::Control::Return {

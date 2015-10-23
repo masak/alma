@@ -4,17 +4,17 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (sub (ident "fib") (parameters (ident "n")) (statements
-            (if (== (ident n) (int 0)) (block (parameters) (statements
+        (stmtlist
+          (sub (ident "fib") (paramlist (ident "n")) (stmtlist
+            (if (== (ident n) (int 0)) (block (paramlist) (stmtlist
               (return (int 1)))))
-            (if (== (ident n) (int 1)) (block (parameters) (statements
+            (if (== (ident n) (int 1)) (block (paramlist) (stmtlist
               (return (int 1)))))
-            (return (+ (call (ident "fib") (arguments (+ (ident "n") (- (int 1)))))
-                       (call (ident "fib") (arguments (+ (ident "n") (- (int 2)))))))))
-          (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 2))))))
-          (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 3))))))
-          (stexpr (call (ident "say") (arguments (call (ident "fib") (arguments (int 4)))))))
+            (return (+ (call (ident "fib") (arglist (+ (ident "n") (- (int 1)))))
+                       (call (ident "fib") (arglist (+ (ident "n") (- (int 2)))))))))
+          (stexpr (call (ident "say") (arglist (call (ident "fib") (arglist (int 2))))))
+          (stexpr (call (ident "say") (arglist (call (ident "fib") (arglist (int 3))))))
+          (stexpr (call (ident "say") (arglist (call (ident "fib") (arglist (int 4)))))))
         .
 
     is-result $ast, "2\n3\n5\n", "recursive calls with returns work out fine";

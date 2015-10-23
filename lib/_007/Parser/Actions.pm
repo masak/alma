@@ -7,13 +7,13 @@ class _007::Parser::Actions {
     }
 
     method TOP($/) {
-        my $st = $<statements>.ast;
+        my $st = $<statementlist>.ast;
         make $st;
         self.finish-block($st);
     }
 
-    method statements($/) {
-        make Q::Statements.new($<statement>».ast);
+    method statementlist($/) {
+        make Q::StatementList.new($<statement>».ast);
     }
 
     method statement:my ($/) {
@@ -39,10 +39,10 @@ class _007::Parser::Actions {
 
     method statement:expr ($/) {
         if $<EXPR>.ast ~~ Q::Block {
-            my @statements = $<EXPR>.ast.statements.list;
+            my @statementlist = $<EXPR>.ast.statementlist.list;
             die "Can't handle this case with more than one statement yet" # XXX
-                if @statements > 1;
-            make @statements[0];
+                if @statementlist > 1;
+            make @statementlist[0];
         }
         else {
             make Q::Statement::Expr.new($<EXPR>.ast);
@@ -51,7 +51,7 @@ class _007::Parser::Actions {
 
     method statement:block ($/) {
         die X::PointyBlock::SinkContext.new
-            if $<pblock><parameters>;
+            if $<pblock><parameterlist>;
         make Q::Statement::Block.new($<pblock>.ast);
     }
 
@@ -108,16 +108,16 @@ class _007::Parser::Actions {
     method statement:sub ($/) {
         my $identifier = $<identifier>.ast;
         my $name = ~$<identifier>;
-        my $parameters = $<parameters>.ast;
-        my $statements = $<blockoid>.ast;
+        my $parameterlist = $<parameterlist>.ast;
+        my $statementlist = $<blockoid>.ast;
 
         my $sub = Q::Statement::Sub.new(
             $identifier,
-            $parameters,
-            $statements);
+            $parameterlist,
+            $statementlist);
 
         my $outer-frame = $*runtime.current-frame;
-        my $val = Val::Sub.new(:$name, :$parameters, :$statements, :$outer-frame);
+        my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
         $*runtime.declare-var($name, $val);
 
         make $sub;
@@ -128,16 +128,16 @@ class _007::Parser::Actions {
     method statement:macro ($/) {
         my $identifier = $<identifier>.ast;
         my $name = ~$<identifier>;
-        my $parameters = $<parameters>.ast;
-        my $statements = $<blockoid>.ast;
+        my $parameterlist = $<parameterlist>.ast;
+        my $statementlist = $<blockoid>.ast;
 
         my $macro = Q::Statement::Macro.new(
             $identifier,
-            $parameters,
-            $statements);
+            $parameterlist,
+            $statementlist);
 
         my $outer-frame = $*runtime.current-frame;
-        my $val = Val::Macro.new(:$name, :$parameters, :$statements, :$outer-frame);
+        my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
         $*runtime.declare-var($name, $val);
 
         make $macro;
@@ -170,7 +170,7 @@ class _007::Parser::Actions {
     method statement:BEGIN ($/) {
         my $bl = $<block>.ast;
         make Q::Statement::BEGIN.new($bl);
-        $*runtime.run($bl.statements);
+        $*runtime.run($bl.statementlist);
     }
 
     method trait($/) {
@@ -178,19 +178,19 @@ class _007::Parser::Actions {
     }
 
     method blockoid ($/) {
-        my $st = $<statements>.ast;
+        my $st = $<statementlist>.ast;
         make $st;
         self.finish-block($st);
     }
     method block ($/) {
         make Q::Block.new(
-            Q::Parameters.new,
+            Q::ParameterList.new,
             $<blockoid>.ast);
     }
     method pblock ($/) {
-        if $<parameters> {
+        if $<parameterlist> {
             make Q::Block.new(
-                $<parameters>.ast,
+                $<parameterlist>.ast,
                 $<blockoid>.ast);
         } else {
             make $<block>.ast;
@@ -400,7 +400,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        make Q::Quasi.new($<statements>.ast);
+        make Q::Quasi.new($<statementlist>.ast);
     }
 
     method unquote ($/) {
@@ -418,7 +418,7 @@ class _007::Parser::Actions {
             make [Q::Postfix::Index, $<EXPR>.ast];
         }
         elsif $<call> {
-            make [Q::Postfix::Call, $<arguments>.ast];
+            make [Q::Postfix::Call, $<argumentlist>.ast];
         }
         elsif $<prop> {
             make [Q::Postfix::Property, $<identifier>.ast];
@@ -432,11 +432,11 @@ class _007::Parser::Actions {
         make Q::Identifier.new(~$/);
     }
 
-    method arguments($/) {
-        make Q::Arguments.new($<EXPR>».ast);
+    method argumentlist($/) {
+        make Q::ArgumentList.new($<EXPR>».ast);
     }
 
-    method parameters($/) {
-        make Q::Parameters.new($<identifier>».ast);
+    method parameterlist($/) {
+        make Q::ParameterList.new($<identifier>».ast);
     }
 }

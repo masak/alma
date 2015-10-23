@@ -4,9 +4,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (stblock (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (str "OH HAI from inside block"))))))))
+        (stmtlist
+          (stblock (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI from inside block"))))))))
         .
 
     is-result $ast, "OH HAI from inside block\n", "immediate blocks work";
@@ -14,13 +14,13 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "x") (str "one"))
-          (stexpr (call (ident "say") (arguments (ident "x"))))
-          (stblock (block (parameters) (statements
+          (stexpr (call (ident "say") (arglist (ident "x"))))
+          (stblock (block (paramlist) (stmtlist
             (my (ident "x") (str "two"))
-            (stexpr (call (ident "say") (arguments (ident "x")))))))
-          (stexpr (call (ident "say") (arguments (ident "x")))))
+            (stexpr (call (ident "say") (arglist (ident "x")))))))
+          (stexpr (call (ident "say") (arglist (ident "x")))))
         .
 
     is-result $ast, "one\ntwo\none\n", "blocks have their own variable scope";
@@ -28,10 +28,10 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (my (ident "b") (block (parameters (ident "name")) (statements
-            (stexpr (call (ident "say") (arguments (~ (str "Good evening, Mr ") (ident "name"))))))))
-          (stexpr (call (ident "b") (arguments (str "Bond")))))
+        (stmtlist
+          (my (ident "b") (block (paramlist (ident "name")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name"))))))))
+          (stexpr (call (ident "b") (arglist (str "Bond")))))
         .
 
     is-result $ast, "Good evening, Mr Bond\n", "calling a block with parameters works";
@@ -39,25 +39,25 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (my (ident "b") (block (parameters (ident "X") (ident "Y")) (statements
-            (stexpr (call (ident "say") (arguments (~ (ident "X") (ident "Y"))))))))
+        (stmtlist
+          (my (ident "b") (block (paramlist (ident "X") (ident "Y")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y"))))))))
           (my (ident "X") (str "y"))
-          (stexpr (call (ident "b") (arguments (str "X") (~ (ident "X") (ident "X"))))))
+          (stexpr (call (ident "b") (arglist (str "X") (~ (ident "X") (ident "X"))))))
         .
 
-    is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
+    is-result $ast, "Xyy\n", "arglist are evaluated before parameters are bound";
 }
 
 {
     my $ast = q:to/./;
-        (statements
-          (my (ident "b") (block (parameters (ident "callback")) (statements
+        (stmtlist
+          (my (ident "b") (block (paramlist (ident "callback")) (stmtlist
             (my (ident "scoping") (assign (ident "scoping") (str "dynamic")))
-            (stexpr (call (ident "callback") (arguments))))))
+            (stexpr (call (ident "callback") (arglist))))))
           (my (ident "scoping") (str "lexical"))
-          (stexpr (call (ident "b") (arguments (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (ident "scoping"))))))))))
+          (stexpr (call (ident "b") (arglist (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (ident "scoping"))))))))))
         .
 
     is-result $ast, "lexical\n", "scoping is lexical";
@@ -65,12 +65,12 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
-          (my (ident "b") (block (parameters (ident "count")) (statements
-            (if (ident "count") (block (parameters) (statements
-              (stexpr (call (ident "b") (arguments (+ (ident "count") (- (int 1))))))
-              (stexpr (call (ident "say") (arguments (ident "count"))))))))))
-          (stexpr (call (ident "b") (arguments (int 4)))))
+        (stmtlist
+          (my (ident "b") (block (paramlist (ident "count")) (stmtlist
+            (if (ident "count") (block (paramlist) (stmtlist
+              (stexpr (call (ident "b") (arglist (+ (ident "count") (- (int 1))))))
+              (stexpr (call (ident "say") (arglist (ident "count"))))))))))
+          (stexpr (call (ident "b") (arglist (int 4)))))
         .
 
     is-result $ast, "1\n2\n3\n4\n", "each block invocation gets its own callframe/scope";

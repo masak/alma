@@ -31,9 +31,9 @@ sub read(Str $ast) is export {
         macro       => Q::Statement::Macro,
 
         ident       => Q::Identifier,
-        statements  => Q::Statements,
-        parameters  => Q::Parameters,
-        arguments   => Q::Arguments,
+        stmtlist    => Q::StatementList,
+        paramlist   => Q::ParameterList,
+        arglist     => Q::ArgumentList,
         block       => Q::Block,
     ;
 
@@ -87,8 +87,8 @@ sub check($ast, $runtime) {
         # Do nothing for most Q types; exceptions below
     }
 
-    multi handle(Q::Statements $statements) {
-        for @$statements -> $statement {
+    multi handle(Q::StatementList $statementlist) {
+        for @$statementlist -> $statement {
             handle($statement);
         }
     }
@@ -111,8 +111,8 @@ sub check($ast, $runtime) {
 
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($block.block.eval($runtime));
-        handle($block.block.statements);
-        $block.block.statements.static-lexpad = $runtime.current-frame.pad;
+        handle($block.block.statementlist);
+        $block.block.statementlist.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
     }
 
@@ -120,14 +120,14 @@ sub check($ast, $runtime) {
         my $outer-frame = $runtime.current-frame;
         my $valblock = Val::Block.new(:$outer-frame);
         $runtime.enter($valblock);
-        handle($sub.parameters);
-        handle($sub.statements);
-        $sub.statements.static-lexpad = $runtime.current-frame.pad;
+        handle($sub.parameterlist);
+        handle($sub.statementlist);
+        $sub.statementlist.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
 
         my $name = $sub.ident.name;
-        my $valsub = Val::Sub.new(:$name, :parameters($sub.parameters),
-            :statements($sub.statements), :$outer-frame);
+        my $valsub = Val::Sub.new(:$name, :parameterlist($sub.parameterlist),
+            :statementlist($sub.statementlist), :$outer-frame);
         $runtime.declare-var($name, $valsub);
     }
 
@@ -135,14 +135,14 @@ sub check($ast, $runtime) {
         my $outer-frame = $runtime.current-frame;
         my $valblock = Val::Block.new(:$outer-frame);
         $runtime.enter($valblock);
-        handle($macro.parameters);
-        handle($macro.statements);
-        $macro.statements.static-lexpad = $runtime.current-frame.pad;
+        handle($macro.parameterlist);
+        handle($macro.statementlist);
+        $macro.statementlist.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
 
         my $name = $macro.ident.name;
-        my $valmacro = Val::Macro.new(:$name, :parameters($macro.parameters),
-            :statements($macro.statements), :$outer-frame);
+        my $valmacro = Val::Macro.new(:$name, :parameterlist($macro.parameterlist),
+            :statementlist($macro.statementlist), :$outer-frame);
         $runtime.declare-var($name, $valmacro);
     }
 
@@ -154,14 +154,14 @@ sub check($ast, $runtime) {
         my $valblock = Val::Block.new(
             :outer-frame($runtime.current-frame));
         $runtime.enter($valblock);
-        handle($block.parameters);
-        handle($block.statements);
-        $block.statements.static-lexpad = $runtime.current-frame.pad;
+        handle($block.parameterlist);
+        handle($block.statementlist);
+        $block.statementlist.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
     }
 
-    multi handle(Q::Parameters $parameters) {
-        for @$parameters -> $parameter {
+    multi handle(Q::ParameterList $parameterlist) {
+        for @$parameterlist -> $parameter {
             handle($parameter);
         }
     }

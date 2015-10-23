@@ -4,10 +4,10 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statements
+        (stmtlist
           (my (ident "u") (int 3))
-          (while (ident "u") (block (parameters) (statements
-            (stexpr (call (ident "say") (arguments (ident "u"))))
+          (while (ident "u") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (ident "u"))))
             (stexpr (assign (ident "u") (+ (ident "u") (- (int 1)))))))))
         .
 

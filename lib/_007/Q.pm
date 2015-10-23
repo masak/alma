@@ -105,18 +105,18 @@ role Q::Literal::Array does Q::Literal {
 }
 
 role Q::Block does Q {
-    has $.parameters;
-    has $.statements;
-    method new($parameters, $statements) { self.bless(:$parameters, :$statements) }
+    has $.parameterlist;
+    has $.statementlist;
+    method new($parameterlist, $statementlist) { self.bless(:$parameterlist, :$statementlist) }
 
     method eval($runtime) {
         my $outer-frame = $runtime.current-frame;
-        Val::Block.new(:$.parameters, :$.statements, :$outer-frame);
+        Val::Block.new(:$.parameterlist, :$.statementlist, :$outer-frame);
     }
     method interpolate($runtime) {
         self.new(
-            $.parameters.interpolate($runtime),
-            $.statements.interpolate($runtime));
+            $.parameterlist.interpolate($runtime),
+            $.statementlist.interpolate($runtime));
     }
 }
 
@@ -246,8 +246,8 @@ role Q::Infix::Eq does Q::Infix {
         }
         multi equal-value(Val::Block $r, Val::Block $l) {
             $r.name eq $l.name
-                && equal-value($r.parameters, $l.parameters)
-                && equal-value($r.statements, $l.statements)
+                && equal-value($r.parameterlist, $l.parameterlist)
+                && equal-value($r.statementlist, $l.statementlist)
         }
         multi equal-value(Q $r, Q $l) {
             sub same-avalue($attr) {
@@ -323,8 +323,8 @@ role Q::Postfix::Index does Q::Postfix {
 }
 
 role Q::Postfix::Call does Q::Postfix {
-    has $.arguments;
-    method new($expr, $arguments) { self.bless(:$expr, :$arguments) }
+    has $.argumentlist;
+    method new($expr, $argumentlist) { self.bless(:$expr, :$argumentlist) }
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
@@ -332,11 +332,11 @@ role Q::Postfix::Call does Q::Postfix {
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
-        my @args = $.arguments».eval($runtime);
+        my @args = $.argumentlist».eval($runtime);
         return $runtime.call($c, @args);
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.arguments.interpolate($runtime));
+        self.new($.expr.interpolate($runtime), $.argumentlist.interpolate($runtime));
     }
 }
 
@@ -368,7 +368,7 @@ role Q::Postfix::Custom[$type] does Q::Postfix {
     }
 }
 
-role Q::Parameters does Q {
+role Q::ParameterList does Q {
     has @.parameters handles <elems Numeric Real list>;
     method new(*@parameters) { self.bless(:@parameters) }
     method interpolate($runtime) {
@@ -376,7 +376,7 @@ role Q::Parameters does Q {
     }
 }
 
-role Q::Arguments does Q {
+role Q::ArgumentList does Q {
     has @.arguments handles <elems Numeric Real list>;
     method new(*@arguments) { self.bless(:@arguments) }
     method interpolate($runtime) {
@@ -440,12 +440,12 @@ role Q::Statement::If does Q::Statement {
         if $expr.truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
-            die "Too many parameters in if statements"  # XXX: needs a test and a real exception
-                if $c.parameters > 1;
-            for $c.parameters Z $expr -> ($param, $arg) {
+            die "Too many parameters in if statement"  # XXX: needs a test and a real exception
+                if @($c.parameterlist) > 1;
+            for @($c.parameterlist) Z $expr -> ($param, $arg) {
                 $runtime.declare-var($param.name, $arg);
             }
-            $.block.statements.run($runtime);
+            $.block.statementlist.run($runtime);
             $runtime.leave;
         }
     }
@@ -460,7 +460,7 @@ role Q::Statement::Block does Q::Statement {
 
     method run($runtime) {
         $runtime.enter($.block.eval($runtime));
-        $.block.statements.run($runtime);
+        $.block.statementlist.run($runtime);
         $runtime.leave;
     }
     method interpolate($runtime) {
@@ -496,22 +496,22 @@ role Q::Statement::For does Q::Statement {
         }
 
         my $c = $.block.eval($runtime);
-        my $count = $c.parameters.elems;
+        my $count = $c.parameterlist.elems;
 
         if $count == 0 {
             for ^elements($.expr).elems {
                 $runtime.enter($c);
-                $.block.statements.run($runtime);
+                $.block.statementlist.run($runtime);
                 $runtime.leave;
             }
         }
         else {
             for split_elements(elements($.expr), $count) -> $arg {
                 $runtime.enter($c);
-                for $c.parameters Z $arg.list -> ($param, $real_arg) {
+                for @($c.parameterlist) Z $arg.list -> ($param, $real_arg) {
                     $runtime.declare-var($param.name, $real_arg);
                 }
-                $.block.statements.run($runtime);
+                $.block.statementlist.run($runtime);
                 $runtime.leave;
             }
         }
@@ -530,7 +530,7 @@ role Q::Statement::While does Q::Statement {
         while $.expr.eval($runtime).truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
-            $.block.statements.run($runtime);
+            $.block.statementlist.run($runtime);
             $runtime.leave;
         }
     }
@@ -555,37 +555,37 @@ role Q::Statement::Return does Q::Statement {
 
 role Q::Statement::Sub does Q::Statement {
     has $.ident;
-    has $.parameters;
-    has $.statements;
+    has $.parameterlist;
+    has $.statementlist;
 
-    method new($ident, $parameters, $statements) {
-        self.bless(:$ident, :$parameters, :$statements);
+    method new($ident, $parameterlist, $statementlist) {
+        self.bless(:$ident, :$parameterlist, :$statementlist);
     }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.parameters.interpolate($runtime),
-            $.statements.interpolate($runtime));
+            $.parameterlist.interpolate($runtime),
+            $.statementlist.interpolate($runtime));
     }
 }
 
 role Q::Statement::Macro does Q::Statement {
     has $.ident;
-    has $.parameters;
-    has $.statements;
+    has $.parameterlist;
+    has $.statementlist;
 
-    method new($ident, $parameters, $statements) {
-        self.bless(:$ident, :$parameters, :$statements);
+    method new($ident, $parameterlist, $statementlist) {
+        self.bless(:$ident, :$parameterlist, :$statementlist);
     }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.parameters.interpolate($runtime),
-            $.statements.interpolate($runtime));
+            $.parameterlist.interpolate($runtime),
+            $.statementlist.interpolate($runtime));
     }
 }
 
@@ -601,7 +601,7 @@ role Q::Statement::BEGIN does Q::Statement {
     }
 }
 
-role Q::Statements does Q {
+role Q::StatementList does Q {
     has @.statements handles <elems Numeric Real list>;
     has %.static-lexpad is rw;
     method new(*@statements) { self.bless(:@statements) }
@@ -634,15 +634,15 @@ role Q::Trait does Q {
 }
 
 role Q::Quasi does Q::Expr {
-    has $.statements;
-    method new($statements) { self.bless(:$statements) }
+    has $.statementlist;
+    method new($statementlist) { self.bless(:$statementlist) }
 
     method eval($runtime) {
-        my $statements = $.statements.interpolate($runtime);
-        return Q::Block.new(Q::Parameters.new, $statements);
+        my $statementlist = $.statementlist.interpolate($runtime);
+        return Q::Block.new(Q::ParameterList.new, $statementlist);
     }
     method interpolate($runtime) {
-        self.new($.statements.interpolate($runtime));
+        self.new($.statementlist.interpolate($runtime));
         # XXX: the fact that we keep interpolating inside of the quasi means
         # that unquotes encountered inside of this inner quasi will be
         # interpolated in the context of the outer quasi. is this correct?
