@@ -18,6 +18,16 @@ class X::Subscript::NonInteger is Exception {
 class X::Subscript::NonString is Exception {
 }
 
+class X::ParameterMismatch is Exception {
+    has $.type;
+    has $.paramcount;
+    has $.argcount;
+
+    method message {
+        "$.type with $.paramcount parameters called with $.argcount arguments"
+    }
+}
+
 role Q {
     method worthy-attributes {
         sub aname($attr) { $attr.name.substr(2) }
@@ -440,8 +450,10 @@ role Q::Statement::If does Q::Statement {
         if $expr.truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
-            die "Too many parameters in if statement"  # XXX: needs a test and a real exception
-                if @($c.parameterlist) > 1;
+            my $paramcount = $c.parameterlist.elems;
+            die X::ParameterMismatch.new(
+                :type("If statement"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
             for @($c.parameterlist) Z $expr -> ($param, $arg) {
                 $runtime.declare-var($param.name, $arg);
             }
@@ -527,9 +539,16 @@ role Q::Statement::While does Q::Statement {
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
     method run($runtime) {
-        while $.expr.eval($runtime).truthy {
+        while (my $expr = $.expr.eval($runtime)).truthy {
             my $c = $.block.eval($runtime);
             $runtime.enter($c);
+            my $paramcount = $c.parameterlist.elems;
+            die X::ParameterMismatch.new(
+                :type("While loop"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
+            for @($c.parameterlist) Z $expr -> ($param, $arg) {
+                $runtime.declare-var($param.name, $arg);
+            }
             $.block.statementlist.run($runtime);
             $runtime.leave;
         }

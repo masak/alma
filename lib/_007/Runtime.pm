@@ -1,16 +1,6 @@
 use _007::Q;
 use _007::Runtime::Builtins;
 
-class X::ParameterMismatch {
-    has $.type;
-    has $.paramcount;
-    has $.argcount;
-
-    method message {
-        "$.type with $.paramcount parameters called with $.argcount arguments"
-    }
-}
-
 role Frame {
     has $.block;
     has %.pad;
