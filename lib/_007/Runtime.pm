@@ -1,6 +1,16 @@
 use _007::Q;
 use _007::Runtime::Builtins;
 
+class X::ParameterMismatch {
+    has $.type;
+    has $.paramcount;
+    has $.argcount;
+
+    method message {
+        "$.type with $.paramcount parameters called with $.argcount arguments"
+    }
+}
+
 role Frame {
     has $.block;
     has %.pad;
@@ -119,9 +129,10 @@ role _007::Runtime {
     }
 
     method sigbind($type, $c, @args) {
-        die "$type with {$c.parameterlist.elems} parameters "       # XXX: make this into an X::
-            ~ "called with {@args.elems} arguments"
-            unless $c.parameterlist == @args;
+        my $paramcount = $c.parameterlist.elems;
+        my $argcount = @args.elems;
+        die X::ParameterMismatch.new(:$type, :$paramcount, :$argcount)
+            unless $paramcount == $argcount;
         self.enter($c);
         for @($c.parameterlist) Z @args -> ($param, $arg) {
             my $name = $param.name;
