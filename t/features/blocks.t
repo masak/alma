@@ -46,7 +46,7 @@ use _007::Test;
           (stexpr (call (ident "b") (arglist (str "X") (~ (ident "X") (ident "X"))))))
         .
 
-    is-result $ast, "Xyy\n", "arglist are evaluated before parameters are bound";
+    is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
 }
 
 {
