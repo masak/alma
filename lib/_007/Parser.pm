@@ -12,7 +12,7 @@ class _007::Parser {
     method push-oplevel { @!oplevels.push: @!oplevels[*-1].clone }
     method pop-oplevel { @!oplevels.pop }
 
-    submethod BUILD(:$!runtime = die "Must supply a runtime") {
+    submethod BUILD(:$!runtime!) {
         my $opl = _007::Parser::OpLevel.new;
         @!oplevels.push: $opl;
 
