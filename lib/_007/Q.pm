@@ -244,40 +244,40 @@ role Q::Infix::Eq does Q::Infix {
     method eval($runtime) {
         multi equal-value(Val $, Val $) { False }
         multi equal-value(Val::None, Val::None) { True }
-        multi equal-value(Val::Int $r, Val::Int $l) { $r.value == $l.value }
-        multi equal-value(Val::Str $r, Val::Str $l) { $r.value eq $l.value }
-        multi equal-value(Val::Array $r, Val::Array $l) {
+        multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
+        multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
+        multi equal-value(Val::Array $l, Val::Array $r) {
             sub equal-at-index($i) {
-                equal-value($r.elements[$i], $l.elements[$i]);
+                equal-value($l.elements[$i], $r.elements[$i]);
             }
 
-            [&&] $r.elements == $l.elements,
-                |(^$r.elements).map(&equal-at-index);
+            [&&] $l.elements == $r.elements,
+                |(^$l.elements).map(&equal-at-index);
         }
-        multi equal-value(Val::Block $r, Val::Block $l) {
-            $r.name eq $l.name
-                && equal-value($r.parameterlist, $l.parameterlist)
-                && equal-value($r.statementlist, $l.statementlist)
+        multi equal-value(Val::Block $l, Val::Block $r) {
+            $l.name eq $r.name
+                && equal-value($l.parameterlist, $r.parameterlist)
+                && equal-value($l.statementlist, $r.statementlist)
         }
-        multi equal-value(Q $r, Q $l) {
+        multi equal-value(Q $l, Q $r) {
             sub same-avalue($attr) {
-                equal-value($attr.get_value($r), $attr.get_value($l));
+                equal-value($attr.get_value($l), $attr.get_value($r));
             }
 
-            [&&] $r.WHAT === $l.WHAT,
-                |$r.worthy-attributes.map(&same-avalue);
+            [&&] $l.WHAT === $r.WHAT,
+                |$l.worthy-attributes.map(&same-avalue);
         }
-        multi equal-value(@r, @l) { # arrays occur in the internals of Qtrees
-            sub equal-at-index($i) { equal-value(@r[$i], @l[$i]) }
+        multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
+            sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
 
-            @r == @l && |(^@r).map(&equal-at-index);
+            @l == @r && |(^@l).map(&equal-at-index);
         }
-        multi equal-value(Str $r, Str $l) { $r eq $l } # strings do too
+        multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
 
-        my $r = $.rhs.eval($runtime);
         my $l = $.lhs.eval($runtime);
+        my $r = $.rhs.eval($runtime);
         # converting Bool->Int because the implemented language doesn't have Bool
-        my $equal = +equal-value($r, $l);
+        my $equal = +equal-value($l, $r);
         return Val::Int.new(:value($equal));
     }
 }
