@@ -53,7 +53,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "b") (block (paramlist (ident "callback")) (stmtlist
-            (my (ident "scoping") (assign (ident "scoping") (str "dynamic")))
+            (my (ident "scoping") (str "dynamic"))
             (stexpr (call (ident "callback") (arglist))))))
           (my (ident "scoping") (str "lexical"))
           (stexpr (call (ident "b") (arglist (block (paramlist) (stmtlist
