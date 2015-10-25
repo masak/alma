@@ -194,8 +194,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "sub")))))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "sub"))))))))
         .
 
     parses-to $program, $ast, "sub";
@@ -210,8 +210,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist (ident "name")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (str "Mr ") (ident "name"))))))))
+          (sub (ident "f") (block (paramlist (ident "name")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (str "Mr ") (ident "name")))))))))
         .
 
     parses-to $program, $ast, "sub with parameter";
@@ -226,8 +226,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist (ident "X") (ident "Y")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y"))))))))
+          (sub (ident "f") (block (paramlist (ident "X") (ident "Y")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y")))))))))
         .
 
     parses-to $program, $ast, "sub with two parameters";
@@ -242,8 +242,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (return (int 7)))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (return (int 7))))))
         .
 
     parses-to $program, $ast, "return statement";
@@ -258,8 +258,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (return))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (return)))))
         .
 
     parses-to $program, $ast, "empty return statement";
@@ -279,12 +279,12 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI"))))))
-          (sub (ident "g") (paramlist) (stmtlist
-            (sub (ident "h") (paramlist) (stmtlist
-              (stexpr (call (ident "f") (arglist)))))
-            (return (ident "h"))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI")))))))
+          (sub (ident "g") (block (paramlist) (stmtlist
+            (sub (ident "h") (block (paramlist) (stmtlist
+              (stexpr (call (ident "f") (arglist))))))
+            (return (ident "h")))))
           (stexpr (call (call (ident "g") (arglist)) (arglist))))
         .
 

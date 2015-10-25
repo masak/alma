@@ -65,7 +65,10 @@ sub read(Str $ast) is export {
 
     _007::Syntax.parse($ast, :$actions)
         or die "failure";
-    return $/.ast;
+    return Q::CompUnit.new(Q::Block.new(
+        Q::ParameterList.new(),
+        $/.ast
+    ));
 }
 
 role StrOutput {
@@ -78,14 +81,17 @@ role UnwantedOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
-sub check($ast, $runtime) {
+sub check(Q::CompUnit $ast, $runtime) {
     my %*assigned;
     handle($ast);
-    $ast.static-lexpad = $runtime.current-frame.pad;
 
-    multi handle(Q $ast) {
-        # Do nothing for most Q types; exceptions below
-    }
+    # a bunch of nodes we don't care about descending into
+    multi handle(Q::ParameterList $) {}
+    multi handle(Q::Statement::Return $) {}
+    multi handle(Q::Statement::Expr $) {}
+    multi handle(Q::Statement::BEGIN $) {}
+    multi handle(Q::Literal $) {}
+    multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
         for @$statementlist -> $statement {
@@ -102,7 +108,7 @@ sub check($ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $my.expr {
+        if $my.expr !=== Empty {
             handle($my.expr);
         }
     }
@@ -112,7 +118,7 @@ sub check($ast, $runtime) {
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($block.block.eval($runtime));
         handle($block.block.statementlist);
-        $block.block.statementlist.static-lexpad = $runtime.current-frame.pad;
+        $block.block.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
     }
 
@@ -120,34 +126,47 @@ sub check($ast, $runtime) {
         my $outer-frame = $runtime.current-frame;
         my $valblock = Val::Block.new(:$outer-frame);
         $runtime.enter($valblock);
-        handle($sub.parameterlist);
-        handle($sub.statementlist);
-        $sub.statementlist.static-lexpad = $runtime.current-frame.pad;
+        handle($sub.block);
         $runtime.leave();
 
         my $name = $sub.ident.name;
-        my $valsub = Val::Sub.new(:$name, :parameterlist($sub.parameterlist),
-            :statementlist($sub.statementlist), :$outer-frame);
-        $runtime.declare-var($name, $valsub);
+        my $val = Val::Sub.new(:$name,
+            :parameterlist($sub.block.parameterlist),
+            :statementlist($sub.block.statementlist),
+            :static-lexpad($sub.block.static-lexpad),
+            :$outer-frame
+        );
+        $runtime.declare-var($name, $val);
     }
 
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
         my $valblock = Val::Block.new(:$outer-frame);
         $runtime.enter($valblock);
-        handle($macro.parameterlist);
-        handle($macro.statementlist);
-        $macro.statementlist.static-lexpad = $runtime.current-frame.pad;
+        handle($macro.block);
+        $macro.block.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
 
         my $name = $macro.ident.name;
-        my $valmacro = Val::Macro.new(:$name, :parameterlist($macro.parameterlist),
-            :statementlist($macro.statementlist), :$outer-frame);
-        $runtime.declare-var($name, $valmacro);
+        my $val = Val::Macro.new(:$name,
+            :parameterlist($macro.block.parameterlist),
+            :statementlist($macro.block.statementlist),
+            :static-lexpad($macro.block.static-lexpad),
+            :$outer-frame
+        );
+        $runtime.declare-var($name, $val);
+    }
+
+    multi handle(Q::Statement::If $if) {
+        handle($if.block);
     }
 
     multi handle(Q::Statement::For $for) {
         handle($for.block);
+    }
+
+    multi handle(Q::Statement::While $while) {
+        handle($while.block);
     }
 
     multi handle(Q::Block $block) {
@@ -156,14 +175,8 @@ sub check($ast, $runtime) {
         $runtime.enter($valblock);
         handle($block.parameterlist);
         handle($block.statementlist);
-        $block.statementlist.static-lexpad = $runtime.current-frame.pad;
+        $block.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
-    }
-
-    multi handle(Q::ParameterList $parameterlist) {
-        for @$parameterlist -> $parameter {
-            handle($parameter);
-        }
     }
 }
 

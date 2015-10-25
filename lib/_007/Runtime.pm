@@ -20,14 +20,8 @@ role _007::Runtime {
         self.load-builtins;
     }
 
-    method run(Q::StatementList $statementlist) {
-        my $compunit = Val::Block.new(
-            :$statementlist,
-            :outer-frame(self.current-frame));
-        self.enter($compunit);
-
-        $statementlist.run(self);
-        self.leave;
+    method run(Q::CompUnit $compunit) {
+        $compunit.run(self);
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
@@ -35,20 +29,27 @@ role _007::Runtime {
         }
     }
 
-    method enter($block) {
+    method enter(Val::Block $block) {
         my $frame = Frame.new(:$block);
         @!frames.push($frame);
-        for $block.statementlist.static-lexpad.kv -> $name, $value {
+        for $block.static-lexpad.kv -> $name, $value {
             self.declare-var($name, $value);
         }
         for $block.statementlist.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .ident.name;
-                my $parameterlist = .parameterlist;
-                my $statementlist = .statementlist;
+                my $parameterlist = .block.parameterlist;
+                my $statementlist = .block.statementlist;
+                my %static-lexpad = .block.static-lexpad;
                 my $outer-frame = $frame;
-                my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
-                self.put-var($name, $val);
+                my $val = Val::Sub.new(
+                    :$name,
+                    :$parameterlist,
+                    :$statementlist,
+                    :%static-lexpad,
+                    :$outer-frame
+                );
+                self.declare-var($name, $val);
             }
         }
     }

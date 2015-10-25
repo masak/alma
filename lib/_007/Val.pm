@@ -56,6 +56,7 @@ role Q::StatementList { ... }
 role Val::Block does Val {
     has $.parameterlist = Q::ParameterList.new;
     has $.statementlist = Q::StatementList.new;
+    has %.static-lexpad;
     has $.outer-frame;
 
     method pretty-params {

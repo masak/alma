@@ -20,10 +20,10 @@ use _007::Test;
             (stexpr (call (ident "say") (arglist (str "falsy array")))))))
           (if (array (str "")) (block (paramlist) (stmtlist
             (stexpr (call (ident "say") (arglist (str "truthy array")))))))
-          (sub (ident "foo") (paramlist) (stmtlist))
+          (sub (ident "foo") (block (paramlist) (stmtlist)))
           (if (ident "foo") (block (paramlist) (stmtlist
             (stexpr (call (ident "say") (arglist (str "truthy sub")))))))
-          (macro (ident "bar") (paramlist) (stmtlist))
+          (macro (ident "bar") (block (paramlist) (stmtlist)))
           (if (ident "bar") (block (paramlist) (stmtlist
             (stexpr (call (ident "say") (arglist (str "truthy macro"))))))))
         .

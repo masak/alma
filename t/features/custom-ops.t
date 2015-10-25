@@ -10,7 +10,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "infix:<*>") (paramlist (ident "left") (ident "right")) (stmtlist)))
+          (sub (ident "infix:<*>") (block (paramlist (ident "left") (ident "right")) (stmtlist))))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";

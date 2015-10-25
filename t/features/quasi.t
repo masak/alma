@@ -7,8 +7,10 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    outputs $program, read("(block (paramlist) (stmtlist (stexpr (+ (int 1) (int 1)))))") ~ "\n",
-        "Basic quasi quoting";
+    my $expected = read(
+        "(stmtlist (stexpr (+ (int 1) (int 1))))"
+    ).block; # need to peel off the CompUnit
+    outputs $program, "$expected\n", "Basic quasi quoting";
 }
 
 {

@@ -117,16 +117,27 @@ role Q::Literal::Array does Q::Literal {
 role Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
+    has %.static-lexpad;
+
     method new($parameterlist, $statementlist) { self.bless(:$parameterlist, :$statementlist) }
 
     method eval($runtime) {
         my $outer-frame = $runtime.current-frame;
-        Val::Block.new(:$.parameterlist, :$.statementlist, :$outer-frame);
+        Val::Block.new(
+            :$.parameterlist,
+            :$.statementlist,
+            :%.static-lexpad,
+            :$outer-frame
+        );
     }
     method interpolate($runtime) {
         self.new(
             $.parameterlist.interpolate($runtime),
             $.statementlist.interpolate($runtime));
+        # XXX: but what about the static lexpad? we kind of lose it here, don't we?
+        # what does that *mean* in practice? can we come up with an example where
+        # it matters? if the static lexpad happens to contain a value which is a
+        # Q node, do we continue into *it*, interpolating it, too?
     }
 }
 
@@ -574,37 +585,33 @@ role Q::Statement::Return does Q::Statement {
 
 role Q::Statement::Sub does Q::Statement {
     has $.ident;
-    has $.parameterlist;
-    has $.statementlist;
+    has $.block;
 
-    method new($ident, $parameterlist, $statementlist) {
-        self.bless(:$ident, :$parameterlist, :$statementlist);
+    method new($ident, $block) {
+        self.bless(:$ident, :$block);
     }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.parameterlist.interpolate($runtime),
-            $.statementlist.interpolate($runtime));
+            $.block.interpolate($runtime));
     }
 }
 
 role Q::Statement::Macro does Q::Statement {
     has $.ident;
-    has $.parameterlist;
-    has $.statementlist;
+    has $.block;
 
-    method new($ident, $parameterlist, $statementlist) {
-        self.bless(:$ident, :$parameterlist, :$statementlist);
+    method new($ident, $block) {
+        self.bless(:$ident, :$block);
     }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
         self.new($.ident.interpolate($runtime),
-            $.parameterlist.interpolate($runtime),
-            $.statementlist.interpolate($runtime));
+            $.block.interpolate($runtime));
     }
 }
 
@@ -622,7 +629,6 @@ role Q::Statement::BEGIN does Q::Statement {
 
 role Q::StatementList does Q {
     has @.statements handles <elems Numeric Real list>;
-    has %.static-lexpad is rw;
     method new(*@statements) { self.bless(:@statements) }
 
     method run($runtime) {
@@ -632,10 +638,6 @@ role Q::StatementList does Q {
     }
     method interpolate($runtime) {
         self.new(@.statements».interpolate($runtime));
-        # XXX: but what about the static lexpad? we kind of lose it here, don't we?
-        # what does that *mean* in practice? can we come up with an example where
-        # it matters? if the static lexpad happens to contain a value which is a
-        # Q node, do we continue into *it*, interpolating it, too?
     }
 }
 

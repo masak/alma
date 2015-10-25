@@ -5,8 +5,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub")))))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub"))))))))
         .
 
     is-result $ast, "", "subs are not immediate";
@@ -17,9 +17,9 @@ use _007::Test;
         (stmtlist
           (my (ident "x") (str "one"))
           (stexpr (call (ident "say") (arglist (ident "x"))))
-          (sub (ident "f") (paramlist) (stmtlist
+          (sub (ident "f") (block (paramlist) (stmtlist
             (my (ident "x") (str "two"))
-            (stexpr (call (ident "say") (arglist (ident "x"))))))
+            (stexpr (call (ident "say") (arglist (ident "x")))))))
           (stexpr (call (ident "f") (arglist)))
           (stexpr (call (ident "say") (arglist (ident "x")))))
         .
@@ -30,8 +30,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist (ident "name")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name")))))))
+          (sub (ident "f") (block (paramlist (ident "name")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name"))))))))
           (stexpr (call (ident "f") (arglist (str "Bond")))))
         .
 
@@ -41,8 +41,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist (ident "X") (ident "Y")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y")))))))
+          (sub (ident "f") (block (paramlist (ident "X") (ident "Y")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y"))))))))
           (my (ident "X") (str "y"))
           (stexpr (call (ident "f") (arglist (str "X") (~ (ident "X") (ident "X"))))))
         .
@@ -53,9 +53,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist (ident "callback")) (stmtlist
+          (sub (ident "f") (block (paramlist (ident "callback")) (stmtlist
             (my (ident "scoping") (str "dynamic"))
-            (stexpr (call (ident "callback") (arglist)))))
+            (stexpr (call (ident "callback") (arglist))))))
           (my (ident "scoping") (str "lexical"))
           (stexpr (call (ident "f") (arglist (block (paramlist) (stmtlist
             (stexpr (call (ident "say") (arglist (ident "scoping"))))))))))
@@ -68,8 +68,8 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (stexpr (call (ident "f") (arglist)))
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub")))))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub"))))))))
         .
 
     is-result $ast, "OH HAI from inside sub\n", "call a sub before declaring it";
@@ -80,8 +80,8 @@ use _007::Test;
         (stmtlist
           (stexpr (call (ident "f") (arglist)))
           (my (ident "x") (str "X"))
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "x")))))))
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (ident "x"))))))))
         .
 
     is-result $ast, "None\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
@@ -90,11 +90,11 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI"))))))
-          (sub (ident "g") (paramlist) (stmtlist
+          (sub (ident "f") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (arglist (str "OH HAI")))))))
+          (sub (ident "g") (block (paramlist) (stmtlist
             (return (block (paramlist) (stmtlist
-              (stexpr (call (ident "f") (arglist))))))))
+              (stexpr (call (ident "f") (arglist)))))))))
           (stexpr (call (call (ident "g") (arglist)) (arglist))))
         .
 

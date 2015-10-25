@@ -1,15 +1,18 @@
 use _007::Q;
 
 class _007::Parser::Actions {
-    method finish-block($st) {
-        $st.static-lexpad = $*runtime.current-frame.pad;
+    method finish-block($block) {
+        $block.static-lexpad = $*runtime.current-frame.pad;
         $*runtime.leave;
     }
 
     method TOP($/) {
-        my $st = $<statementlist>.ast;
-        make $st;
-        self.finish-block($st);
+        my $cu = Q::CompUnit.new(Q::Block.new(
+            Q::ParameterList.new,
+            $<statementlist>.ast
+        ));
+        make $cu;
+        self.finish-block($cu.block);
     }
 
     method statementlist($/) {
@@ -111,16 +114,17 @@ class _007::Parser::Actions {
         my $parameterlist = $<parameterlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
+        my $block = Q::Block.new($parameterlist, $statementlist);
+        self.finish-block($block);
         my $sub = Q::Statement::Sub.new(
             $identifier,
-            $parameterlist,
-            $statementlist);
+            $block);
+
+        make $sub;
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
         $*runtime.declare-var($name, $val);
-
-        make $sub;
 
         maybe-install-operator($identifier.name, @<trait>);
     }
@@ -131,16 +135,17 @@ class _007::Parser::Actions {
         my $parameterlist = $<parameterlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
+        my $block = Q::Block.new($parameterlist, $statementlist);
+        self.finish-block($block);
         my $macro = Q::Statement::Macro.new(
             $identifier,
-            $parameterlist,
-            $statementlist);
+            $block);
+
+        make $macro;
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
         $*runtime.declare-var($name, $val);
-
-        make $macro;
 
         maybe-install-operator($identifier.name, @<trait>);
     }
@@ -168,9 +173,9 @@ class _007::Parser::Actions {
     }
 
     method statement:BEGIN ($/) {
-        my $bl = $<block>.ast;
-        make Q::Statement::BEGIN.new($bl);
-        $*runtime.run($bl.statementlist);
+        my $block = $<block>.ast;
+        make Q::Statement::BEGIN.new($block);
+        $*runtime.run(Q::CompUnit.new($block));
     }
 
     method trait($/) {
@@ -178,14 +183,14 @@ class _007::Parser::Actions {
     }
 
     method blockoid ($/) {
-        my $st = $<statementlist>.ast;
-        make $st;
-        self.finish-block($st);
+        make $<statementlist>.ast;
     }
     method block ($/) {
-        make Q::Block.new(
+        my $block = Q::Block.new(
             Q::ParameterList.new,
             $<blockoid>.ast);
+        make $block;
+        self.finish-block($block);
     }
     method pblock ($/) {
         if $<parameterlist> {

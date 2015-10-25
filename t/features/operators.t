@@ -107,7 +107,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "empty") (paramlist) (stmtlist))
+          (sub (ident "empty") (block (paramlist) (stmtlist)))
           (my (ident "none") (call (ident "empty") (arglist)))
           (stexpr (call (ident "say") (arglist (== (ident "none") (ident "none")))))
           (stexpr (call (ident "say") (arglist (== (ident "none") (int 0)))))
