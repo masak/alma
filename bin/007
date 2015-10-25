@@ -4,7 +4,7 @@ use _007;
 
 sub run_007($program) {
     my $runtime = _007.runtime;
-    my $ast = _007.parser.parse($program, :$runtime);
+    my $ast = _007.parser(:$runtime).parse($program);
     $runtime.run($ast);
 }
 

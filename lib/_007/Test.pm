@@ -172,7 +172,7 @@ sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $output = Output.new;
     my $runtime = _007.runtime(:$output);
     check($ast, $runtime);
-    $runtime.run($ast, :$output);
+    $runtime.run($ast);
 
     is $output.result, $expected, $desc;
 }
@@ -182,7 +182,7 @@ sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
     my $output = Output.new;
     my $runtime = _007.runtime(:$output);
     check($ast, $runtime);
-    $runtime.run($ast, :$output);
+    $runtime.run($ast);
 
     CATCH {
         when $expected-error {
@@ -203,19 +203,19 @@ sub empty-diff($text1 is copy, $text2 is copy, $desc) {
 
 sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $expected-ast = read($expected);
-    my $parser = _007.parser;
     my $output = BadOutput.new;
     my $runtime = _007.runtime(:$output);
-    my $actual-ast = $parser.parse($program, :$runtime);
+    my $parser = _007.parser(:$runtime);
+    my $actual-ast = $parser.parse($program);
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
 }
 
 sub parse-error($program, $expected-error, $desc = $expected-error.^name) is export {
-    my $parser = _007.parser;
     my $output = BadOutput.new;
     my $runtime = _007.runtime(:$output);
-    $parser.parse($program, :$runtime);
+    my $parser = _007.parser(:$runtime);
+    $parser.parse($program);
 
     CATCH {
         when $expected-error {
@@ -230,11 +230,11 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
 }
 
 sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
-    my $parser = _007.parser;
     my $output = Output.new;
     my $runtime = _007.runtime(:$output);
-    my $ast = $parser.parse($program, :$runtime);
-    $runtime.run($ast, :$output);
+    my $parser = _007.parser(:$runtime);
+    my $ast = $parser.parse($program);
+    $runtime.run($ast);
 
     is $output.result, $expected, $desc;
 }

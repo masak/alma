@@ -6,7 +6,7 @@ role _007 {
         _007::Runtime.new(:$output);
     }
 
-    method parser {
-        _007::Parser.new;
+    method parser(:$runtime = $.runtime) {
+        _007::Parser.new(:$runtime);
     }
 }
