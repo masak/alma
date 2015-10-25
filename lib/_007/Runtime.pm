@@ -70,7 +70,7 @@ role _007::Runtime {
 
     method !find($symbol) {
         my $frame = self.current-frame;
-        repeat while $frame !=== NO_OUTER {
+        repeat until $frame === NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
             $frame = $frame.block.outer-frame;
