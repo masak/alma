@@ -68,13 +68,13 @@ sub read(Str $ast) is export {
     return $/.ast;
 }
 
-role Output {
+role StrOutput {
     has $.result = "";
 
     method say($s) { $!result ~= $s.gist ~ "\n" }
 }
 
-role BadOutput {
+role UnwantedOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
@@ -169,7 +169,7 @@ sub check($ast, $runtime) {
 
 sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $ast = read($input);
-    my $output = Output.new;
+    my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     check($ast, $runtime);
     $runtime.run($ast);
@@ -179,7 +179,7 @@ sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
 
 sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
     my $ast = read($input);
-    my $output = Output.new;
+    my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     check($ast, $runtime);
     $runtime.run($ast);
@@ -203,7 +203,7 @@ sub empty-diff($text1 is copy, $text2 is copy, $desc) {
 
 sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $expected-ast = read($expected);
-    my $output = BadOutput.new;
+    my $output = UnwantedOutput.new;
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     my $actual-ast = $parser.parse($program);
@@ -212,7 +212,7 @@ sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export
 }
 
 sub parse-error($program, $expected-error, $desc = $expected-error.^name) is export {
-    my $output = BadOutput.new;
+    my $output = UnwantedOutput.new;
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     $parser.parse($program);
@@ -230,7 +230,7 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
 }
 
 sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
-    my $output = Output.new;
+    my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     my $ast = $parser.parse($program);
