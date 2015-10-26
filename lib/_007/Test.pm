@@ -124,11 +124,6 @@ sub check(Q::CompUnit $ast, $runtime) {
 
     multi handle(Q::Statement::Sub $sub) {
         my $outer-frame = $runtime.current-frame;
-        my $valblock = Val::Block.new(:$outer-frame);
-        $runtime.enter($valblock);
-        handle($sub.block);
-        $runtime.leave();
-
         my $name = $sub.ident.name;
         my $val = Val::Sub.new(:$name,
             :parameterlist($sub.block.parameterlist),
@@ -136,17 +131,15 @@ sub check(Q::CompUnit $ast, $runtime) {
             :static-lexpad($sub.block.static-lexpad),
             :$outer-frame
         );
+        $runtime.enter($val);
+        handle($sub.block);
+        $runtime.leave();
+
         $runtime.declare-var($name, $val);
     }
 
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
-        my $valblock = Val::Block.new(:$outer-frame);
-        $runtime.enter($valblock);
-        handle($macro.block);
-        $macro.block.static-lexpad = $runtime.current-frame.pad;
-        $runtime.leave();
-
         my $name = $macro.ident.name;
         my $val = Val::Macro.new(:$name,
             :parameterlist($macro.block.parameterlist),
@@ -154,6 +147,10 @@ sub check(Q::CompUnit $ast, $runtime) {
             :static-lexpad($macro.block.static-lexpad),
             :$outer-frame
         );
+        $runtime.enter($val);
+        handle($macro.block);
+        $runtime.leave();
+
         $runtime.declare-var($name, $val);
     }
 
