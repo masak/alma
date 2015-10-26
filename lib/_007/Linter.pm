@@ -26,14 +26,13 @@ role _007::Linter {
             traverse($root);
 
             my @blocks;
-            sub currentblock { @blocks[*-1] }
 
             multi traverse(Q::Statement::Block $stblock) {
                 traverse($stblock.block);
             }
 
             multi traverse(Q::Block $block) {
-                @blocks.push: $block.WHICH.Str;
+                @blocks.push: $block;
                 traverse($block.parameterlist);
                 traverse($block.statementlist);
                 @blocks.pop;
@@ -50,7 +49,7 @@ role _007::Linter {
 
             multi traverse(Q::Statement::Sub $sub) {
                 my $name = $sub.ident.name;
-                %declared{"{currentblock}|$name"} = True;
+                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = True;
             }
 
             multi traverse(Q::Statement::Expr $stexpr) {
@@ -66,10 +65,10 @@ role _007::Linter {
                 my $name = $ident.name;
                 # XXX: what we should really do is whitelist all of he built-ins
                 return if $name eq "say";
-                # XXX: this won't really work for post-declared subs
-                for @blocks.reverse -> $scope {
-                    my $ref = "$scope|$name";
-                    if %declared{$ref} {
+                for @blocks.reverse -> $block {
+                    my $ref = "{$block.WHICH.Str}|$name";
+                    my %pad = $block.static-lexpad;
+                    if %pad{$name} {
                         %used{$ref} = True;
                         return;
                     }
