@@ -1,0 +1,10 @@
+#!/usr/bin/env perl6
+use v6;
+use _007;
+
+multi MAIN($path, Bool :$lint!) {
+    my $program = slurp($path);
+    for _007.linter.lint($program) -> $complaint {
+        say "line N, column N: $complaint.message()";
+    }
+}
