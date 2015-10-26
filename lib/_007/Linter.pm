@@ -20,13 +20,18 @@ role _007::Linter {
             my $root = $.parser.parse($program);
             traverse($root);
 
+            my @blocks;
+            sub currentblock { @blocks[*-1] }
+
             multi traverse(Q::Statement::Block $stblock) {
                 traverse($stblock.block);
             }
 
             multi traverse(Q::Block $block) {
+                @blocks.push: $block.WHICH.Str;
                 traverse($block.parameterlist);
                 traverse($block.statementlist);
+                @blocks.pop;
             }
 
             multi traverse(Q::ParameterList $paramlist) {
@@ -40,7 +45,7 @@ role _007::Linter {
 
             multi traverse(Q::Statement::Sub $sub) {
                 my $name = $sub.ident.name;
-                %declared{$name} = True;
+                %declared{"{currentblock}|$name"} = True;
             }
 
             multi traverse(Q::Statement::Expr $stexpr) {
@@ -53,9 +58,9 @@ role _007::Linter {
             }
 
             multi traverse(Q::Identifier $ident) {
-                # XXX: it's actually more intricate than this, due to block scoping
+                # XXX: still not quite there, because variable lookup goes up the OUTER:: chain
                 my $name = $ident.name;
-                %used{$name} = True;
+                %used{"{currentblock}|$name"} = True;
             }
 
             multi traverse(Q::ArgumentList $arglist) {
@@ -70,8 +75,9 @@ role _007::Linter {
 
         my @complaints;
 
-        for %declared.keys -> $name {
-            next if %used{$name};
+        for %declared.keys -> $ref {
+            next if %used{$ref};
+            my $name = $ref.subst(/^ .* \|/, "");
             @complaints.push: L::SubNotUsed.new(:$name);
         }
 

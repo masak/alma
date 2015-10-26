@@ -21,4 +21,16 @@ use _007::Linter;
     ok @complaints ~~ [], "sub is used as argument; no complaint";
 }
 
+{
+    my $program = '{ sub f() {} }; sub f() {}; f()';
+    my @complaints = _007.linter.lint($program);
+    ok @complaints ~~ [L::SubNotUsed], "outer sub used, but not inner";
+}
+
+{
+    my $program = '{ sub f() {}; f() }; sub f() {}';
+    my @complaints = _007.linter.lint($program);
+    ok @complaints ~~ [L::SubNotUsed], "inner sub used, but not outer";
+}
+
 done-testing;
