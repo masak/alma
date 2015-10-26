@@ -9,6 +9,11 @@ class L::SubNotUsed does Lint {
     method message { "Sub '$.name' is declared but never used." }
 }
 
+class X::AssertionFailure is Exception {
+    has $.message;
+    method new($message) { self.bless(:$message) }
+}
+
 role _007::Linter {
     has $.parser;
 
@@ -58,9 +63,18 @@ role _007::Linter {
             }
 
             multi traverse(Q::Identifier $ident) {
-                # XXX: still not quite there, because variable lookup goes up the OUTER:: chain
                 my $name = $ident.name;
-                %used{"{currentblock}|$name"} = True;
+                # XXX: what we should really do is whitelist all of he built-ins
+                return if $name eq "say";
+                # XXX: this won't really work for post-declared subs
+                for @blocks.reverse -> $scope {
+                    my $ref = "$scope|$name";
+                    if %declared{$ref} {
+                        %used{$ref} = True;
+                        return;
+                    }
+                }
+                die X::AssertionFailure.new("A thing that is used must be declared somewhere");
             }
 
             multi traverse(Q::ArgumentList $arglist) {
@@ -70,6 +84,11 @@ role _007::Linter {
             }
 
             multi traverse(Q::Literal $literal) {
+            }
+
+            multi traverse(Q::Statement::For $for) {
+                traverse($for.expr);
+                traverse($for.block);
             }
         }
 

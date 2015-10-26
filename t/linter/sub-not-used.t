@@ -33,4 +33,10 @@ use _007::Linter;
     ok @complaints ~~ [L::SubNotUsed], "inner sub used, but not outer";
 }
 
+{
+    my $program = 'sub f() {}; for [1, 2, 3] { f() }';
+    my @complaints = _007.linter.lint($program);
+    ok @complaints ~~ [], "using a sub from a more nested scope than it was defined";
+}
+
 done-testing;
