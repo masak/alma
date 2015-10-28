@@ -45,3 +45,9 @@ class X::Syntax::BogusListop is Exception {
 
     method message { "Illegal use of listop function call syntax '$.wrong'. (Did you mean '$.right'?)" }
 }
+
+class X::Macro::Postdeclared is Exception {
+    has Str $.name;
+
+    method message { "Macro $.name declared after it was called" }
+}

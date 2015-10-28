@@ -176,11 +176,11 @@ grammar _007::Parser::Syntax {
             if !$*runtime.declared($name) {
                 my $frame = $*runtime.current-frame;
                 $*parser.postpone: -> {
-                    if !$*runtime.declared($name, $frame)
-                        || $*runtime.get-var($name, $frame) !~~ Val::Sub {
-                        my $symbol = $name;
-                        die X::Undeclared.new(:$symbol);
-                    }
+                    my $value = $*runtime.get-var($name, $frame);
+                    die X::Macro::Postdeclared.new(:$name)
+                        if $value ~~ Val::Macro;
+                    die X::Undeclared.new(:symbol($name))
+                        unless $value ~~ Val::Sub;
                 };
             }
         }

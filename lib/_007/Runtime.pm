@@ -95,8 +95,8 @@ role _007::Runtime {
         }
     }
 
-    method declared($name, $frame = self.current-frame) {
-        try self!find($name, $frame) && return True;
+    method declared($name) {
+        try self!find($name, self.current-frame) && return True;
         return False;
     }
 

@@ -290,4 +290,33 @@ use _007::Test;
     parse-error $program, X::Undeclared, "can't post-declare a variable (unlike subs)";
 }
 
+{
+    my $program = q:to/./;
+        foo();
+        macro foo() {}
+        .
+
+    parse-error $program, X::Macro::Postdeclared, "can't post-declare a macro";
+
+    # XXX: Interestingly, this is not a hard-and-fast rule, since we now know
+    # that quasis can delay the evaluation of macros. So this ought still work
+    # (and we should at some point test that it does):
+
+    #     macro one() {
+    #         return quasi {
+    #             two();
+    #         };
+    #     }
+    #
+    #     macro two() {
+    #         return quasi { say("OH HAI") };
+    #     }
+    #
+    #     one();    # OH HAI
+
+    # The important point being, since `one()` is not evaluated before `two()` is
+    # declared, the `two()` in the quasi can actually be post-declared in this
+    # case.
+}
+
 done-testing;
