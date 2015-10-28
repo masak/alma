@@ -9,6 +9,11 @@ class L::SubNotUsed does Lint {
     method message { "Sub '$.name' is declared but never used." }
 }
 
+class L::VariableNotUsed does Lint {
+    has $.name;
+    method message { "Variable '$.name' is declared but never used." }
+}
+
 class X::AssertionFailure is Exception {
     has $.message;
     method new($message) { self.bless(:$message) }
@@ -49,7 +54,7 @@ role _007::Linter {
 
             multi traverse(Q::Statement::Sub $sub) {
                 my $name = $sub.ident.name;
-                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = True;
+                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::SubNotUsed;
             }
 
             multi traverse(Q::Statement::Expr $stexpr) {
@@ -89,6 +94,19 @@ role _007::Linter {
                 traverse($for.expr);
                 traverse($for.block);
             }
+
+            multi traverse(Q::Statement::My $my) {
+                my $name = $my.ident.name;
+                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::VariableNotUsed;
+                if $my.expr !=== Empty {
+                    traverse($my.expr);
+                }
+            }
+
+            multi traverse(Q::Infix $infix) {
+                traverse($infix.lhs);
+                traverse($infix.rhs);
+            }
         }
 
         my @complaints;
@@ -96,7 +114,8 @@ role _007::Linter {
         for %declared.keys -> $ref {
             next if %used{$ref};
             my $name = $ref.subst(/^ .* \|/, "");
-            @complaints.push: L::SubNotUsed.new(:$name);
+            my $linttype = %declared{$ref};
+            @complaints.push: $linttype.new(:$name);
         }
 
         return @complaints;
