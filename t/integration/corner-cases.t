@@ -281,4 +281,13 @@ use _007::Test;
     parse-error $program, X::Syntax::BogusListop, "confusing Perl 6 `say X` with 007 `say(X)`";
 }
 
+{
+    my $program = q:to/./;
+        say(x);
+        my x;
+        .
+
+    parse-error $program, X::Undeclared, "can't post-declare a variable (unlike subs)";
+}
+
 done-testing;

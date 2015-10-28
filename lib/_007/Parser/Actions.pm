@@ -324,7 +324,7 @@ class _007::Parser::Actions {
             my @p = $postfix.list;
             if @p[0] ~~ Q::Postfix::Call
             && $/.ast ~~ Q::Identifier
-            && (my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
+            && (try my $macro = $*runtime.get-var($/.ast.name)) ~~ Val::Macro {
                 my @args = @p[1].arguments;
                 my $qtree = $*runtime.call($macro, @args);
                 make $qtree;

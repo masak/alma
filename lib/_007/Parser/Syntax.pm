@@ -172,10 +172,17 @@ grammar _007::Parser::Syntax {
     token term:identifier {
         <identifier>
         {
-            my $symbol = $<identifier>.Str;
-            $*runtime.get-var($symbol);     # will throw an exception if it isn't there
-            die X::Undeclared.new(:$symbol)
-                unless $*runtime.declared($symbol);
+            my $name = $<identifier>.Str;
+            if !$*runtime.declared($name) {
+                my $frame = $*runtime.current-frame;
+                $*parser.postpone: -> {
+                    if !$*runtime.declared($name, $frame)
+                        || $*runtime.get-var($name, $frame) !~~ Val::Sub {
+                        my $symbol = $name;
+                        die X::Undeclared.new(:$symbol);
+                    }
+                };
+            }
         }
     }
     token term:quasi { quasi >> [<.ws> '{' ~ '}' <statementlist> || <.panic("quasi")>] }

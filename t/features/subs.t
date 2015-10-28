@@ -101,4 +101,21 @@ use _007::Test;
     is-result $ast, "OH HAI\n", "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
 }
 
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (call (ident "f") (arglist (str "Bond"))))
+          (sub (ident "f") (block (paramlist (ident "name")) (stmtlist
+            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name")))))))))
+        .
+
+    is-result $ast, "Good evening, Mr Bond\n", "calling a post-declared sub works (I)";
+}
+
+{
+    my $program = 'f("Bond"); sub f(name) { say("Good evening, Mr " ~ name) }';
+
+    outputs $program, "Good evening, Mr Bond\n", "calling a post-declared sub works (II)";
+}
+
 done-testing;

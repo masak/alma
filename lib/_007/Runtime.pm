@@ -69,8 +69,7 @@ role _007::Runtime {
         @!frames[*-1];
     }
 
-    method !find($symbol) {
-        my $frame = self.current-frame;
+    method !find($symbol, $frame is copy) {
         repeat until $frame === NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
@@ -80,12 +79,12 @@ role _007::Runtime {
     }
 
     method put-var($name, $value) {
-        my %pad := self!find($name);
+        my %pad := self!find($name, self.current-frame);
         %pad{$name} = $value;
     }
 
-    method get-var($name) {
-        my %pad := self!find($name);
+    method get-var($name, $frame = self.current-frame) {
+        my %pad := self!find($name, $frame);
         return %pad{$name};
     }
 
@@ -96,8 +95,8 @@ role _007::Runtime {
         }
     }
 
-    method declared($name) {
-        try self!find($name) && return True;
+    method declared($name, $frame = self.current-frame) {
+        try self!find($name, $frame) && return True;
         return False;
     }
 
