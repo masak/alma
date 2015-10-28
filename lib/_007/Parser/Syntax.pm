@@ -194,7 +194,7 @@ grammar _007::Parser::Syntax {
     rule property:method {
         <identifier>
         <.newpad>
-        '(' ~ ')' <parameters>
+        '(' ~ ')' <parameterlist>
         <trait> *
         <blockoid>:!s
         <.finishpad>
