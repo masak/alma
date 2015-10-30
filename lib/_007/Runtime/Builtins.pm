@@ -4,17 +4,13 @@ use _007::Q;
 class _007::Runtime::Builtins {
     has $.runtime;
 
-    method !_007ize(&fn) {
-        sub wrap($_) {
-            when Val | Q { $_ }
-            when Nil { Val::None.new }
-            when Str { Val::Str.new(:value($_)) }
-            when Int { Val::Int.new(:value($_)) }
-            when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
-            default { die "Got some unknown value of type ", .^name }
-        }
-
-        return sub (|c) { wrap &fn(|c) };
+    sub wrap($_) {
+        when Val | Q { $_ }
+        when Nil { Val::None.new }
+        when Str { Val::Str.new(:value($_)) }
+        when Int { Val::Int.new(:value($_)) }
+        when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+        default { die "Got some unknown value of type ", .^name }
     }
 
     method get-subs {
@@ -179,37 +175,41 @@ class _007::Runtime::Builtins {
             },
         ;
 
+        sub _007ize(&fn) {
+            return sub (|c) { wrap &fn(|c) };
+        }
+
         return my % = %builtins.map: {
-            .key => Val::Sub::Builtin.new(.key, self!_007ize(.value))
+            .key => Val::Sub::Builtin.new(.key, _007ize(.value))
         };
     }
 
     method property($obj, $propname) {
-        my $code = do given $propname {
+        my $value = do given $propname {
             when "value" {
                 given $obj {
                     when Q::Literal::None {
-                        -> { Val::None.new };
+                        Val::None.new;
                     }
                     when Q::Literal::Array {
-                        -> { Val::Array.new(:elements($obj.elements)) };
+                        Val::Array.new(:elements($obj.elements));
                     }
                     when Q::Literal {
-                        -> { $obj.value };
+                        $obj.value;
                     }
                     die X::TypeCheck.new(
-                        :operation<value()>,
+                        :operation<.value>,
                         :got($obj),
-                        :expected("a Q::Literal type that has a value()"));
+                        :expected("a Q::Literal type that has a .value"));
                 }
             }
             when "paramlist" {
                 given $obj {
                     when Q::Block {
-                        -> { $obj.parameterlist.parameters };
+                        $obj.parameterlist.parameters;
                     }
                     die X::TypeCheck.new(
-                        :operation<paramlist()>,
+                        :operation<.paramlist>,
                         :got($obj),
                         :expected("Q::Block"));
                 }
@@ -217,10 +217,10 @@ class _007::Runtime::Builtins {
             when "stmtlist" {
                 given $obj {
                     when Q::Block {
-                        -> { $obj.statementlist.statements };
+                        $obj.statementlist.statements;
                     }
                     die X::TypeCheck.new(
-                        :operation<stmtlist()>,
+                        :operation<.stmtlist>,
                         :got($obj),
                         :expected("Q::Block"));
                 }
@@ -228,10 +228,10 @@ class _007::Runtime::Builtins {
             when "lhs" {
                 given $obj {
                     when Q::Infix {
-                        -> { $obj.lhs };
+                        $obj.lhs;
                     }
                     die X::TypeCheck.new(
-                        :operation<lhs()>,
+                        :operation<.lhs>,
                         :got($obj),
                         :expected("Q::Infix"));
                 }
@@ -239,10 +239,10 @@ class _007::Runtime::Builtins {
             when "rhs" {
                 given $obj {
                     when Q::Infix {
-                        -> { $obj.rhs };
+                        $obj.rhs;
                     }
                     die X::TypeCheck.new(
-                        :operation<rhs()>,
+                        :operation<.rhs>,
                         :got($obj),
                         :expected("Q::Infix"));
                 }
@@ -250,10 +250,10 @@ class _007::Runtime::Builtins {
             when "pos" {
                 given $obj {
                     when Q::Postfix::Index {
-                        -> { $obj.index };
+                        $obj.index;
                     }
                     die X::TypeCheck.new(
-                        :operation<pos()>,
+                        :operation<.pos>,
                         :got($obj),
                         :expected("Q::Postfix::Index"));
                 }
@@ -261,10 +261,10 @@ class _007::Runtime::Builtins {
             when "arglist" {
                 given $obj {
                     when Q::Postfix::Call {
-                        -> { $obj.argumentlist.arguments };
+                        $obj.argumentlist.arguments;
                     }
                     die X::TypeCheck.new(
-                        :operation<arglist()>,
+                        :operation<.arglist>,
                         :got($obj),
                         :expected("Q::Postfix::Call"));
                 }
@@ -274,10 +274,10 @@ class _007::Runtime::Builtins {
                     when Q::Statement::My | Q::Statement::Constant
                         | Q::Statement::Sub | Q::Statement::Macro
                         | Q::Statement::Trait | Q::Postfix::Property {
-                        -> { $obj.ident };
+                        $obj.ident;
                     }
                     die X::TypeCheck.new(
-                        :operation<ident()>,
+                        :operation<.ident>,
                         :got($obj),
                         :expected("any number of types with the .ident property"));
                 }
@@ -285,10 +285,10 @@ class _007::Runtime::Builtins {
             when "assign" {
                 given $obj {
                     when Q::Statement::My | Q::Statement::Constant {
-                        -> { $obj.assign };
+                        $obj.assign;
                     }
                     die X::TypeCheck.new(
-                        :operation<assign()>,
+                        :operation<.assign>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
@@ -299,10 +299,10 @@ class _007::Runtime::Builtins {
                         | Q::Statement::While | Q::Statement::Expr
                         | Q::Unquote | Q::Prefix | Q::Postfix
                         | Q::Statement::Return | Q::Trait {
-                        -> { $obj.expr };
+                        $obj.expr;
                     }
                     die X::TypeCheck.new(
-                        :operation<expr()>,
+                        :operation<.expr>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
@@ -312,10 +312,10 @@ class _007::Runtime::Builtins {
                     when Q::Statement::Block | Q::Statement::If
                         | Q::Statement::For | Q::Statement::While
                         | Q::Statement::BEGIN {
-                        -> { $obj.block };
+                        $obj.block;
                     }
                     die X::TypeCheck.new(
-                        :operation<block()>,
+                        :operation<.block>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
@@ -323,10 +323,10 @@ class _007::Runtime::Builtins {
             when "name" {
                 given $obj {
                     when Q::Identifier {
-                        -> { $obj.name };
+                        $obj.name;
                     }
                     die X::TypeCheck.new(
-                        :operation<name()>,
+                        :operation<.name>,
                         :got($obj),
                         :expected("Q::Identifier"));
                 }
@@ -336,6 +336,6 @@ class _007::Runtime::Builtins {
             }
         };
 
-        return Val::Sub::Builtin.new($propname, self!_007ize($code));
+        return wrap($value);
     }
 }
