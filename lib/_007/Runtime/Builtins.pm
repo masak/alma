@@ -173,6 +173,10 @@ class _007::Runtime::Builtins {
                 # XXX: typecheck
                 return .block;
             },
+            name => sub ($_) {
+                # XXX: typecheck
+                return .name;
+            },
         ;
 
         return my % = %builtins.map: {
@@ -311,9 +315,20 @@ class _007::Runtime::Builtins {
                         -> { $obj.block };
                     }
                     die X::TypeCheck.new(
-                        :operation<ident()>,
+                        :operation<block()>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
+                }
+            }
+            when "name" {
+                given $obj {
+                    when Q::Identifier {
+                        -> { $obj.name };
+                    }
+                    die X::TypeCheck.new(
+                        :operation<name()>,
+                        :got($obj),
+                        :expected("Q::Identifier"));
                 }
             }
             default {
