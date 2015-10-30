@@ -288,7 +288,7 @@ class _007::Runtime::Builtins {
                         -> { $obj.assign };
                     }
                     die X::TypeCheck.new(
-                        :operation<ident()>,
+                        :operation<assign()>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
@@ -302,7 +302,7 @@ class _007::Runtime::Builtins {
                         -> { $obj.expr };
                     }
                     die X::TypeCheck.new(
-                        :operation<ident()>,
+                        :operation<expr()>,
                         :got($obj),
                         :expected("Q::Statement::My | Q::Statement::Constant"));
                 }
