@@ -14,6 +14,21 @@ class L::VariableNotUsed does Lint {
     method message { "Variable '$.name' is declared but never used." }
 }
 
+class L::VariableNeverAssigned does Lint {
+    has $.name;
+    method message { "Variable '$.name' is never assigned a value." }
+}
+
+class L::VariableReadBeforeAssigned does Lint {
+    has $.name;
+    method message { "Variable '$.name' was read before it was assigned." }
+}
+
+class L::RedundantAssignment does Lint {
+    has $.name;
+    method message { "Redundant assignment of variable '$.name' to itself is redundant." }
+}
+
 class X::AssertionFailure is Exception {
     has $.message;
     method new($message) { self.bless(:$message) }
@@ -25,6 +40,9 @@ role _007::Linter {
     method lint($program) {
         my %declared;
         my %used;
+        my %assigned;
+        my %readbeforeassigned;
+        my @complaints;
 
         {
             my $root = $.parser.parse($program);
@@ -66,19 +84,26 @@ role _007::Linter {
                 traverse($call.argumentlist);
             }
 
+            sub ref($name) {
+                for @blocks.reverse -> $block {
+                    my %pad = $block.static-lexpad;
+                    if %pad{$name} {
+                        return "{$block.WHICH.Str}|$name";
+                    }
+                }
+                fail X::AssertionFailure.new("A thing that is used must be declared somewhere");
+            }
+
             multi traverse(Q::Identifier $ident) {
                 my $name = $ident.name;
                 # XXX: what we should really do is whitelist all of he built-ins
                 return if $name eq "say";
-                for @blocks.reverse -> $block {
-                    my $ref = "{$block.WHICH.Str}|$name";
-                    my %pad = $block.static-lexpad;
-                    if %pad{$name} {
-                        %used{$ref} = True;
-                        return;
-                    }
+                my $ref = ref $name;
+
+                %used{ref $name} = True;
+                if !%assigned{ref $name} {
+                    %readbeforeassigned{$ref} = True;
                 }
-                die X::AssertionFailure.new("A thing that is used must be declared somewhere");
             }
 
             multi traverse(Q::ArgumentList $arglist) {
@@ -97,25 +122,54 @@ role _007::Linter {
 
             multi traverse(Q::Statement::My $my) {
                 my $name = $my.ident.name;
-                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::VariableNotUsed;
+                my $ref = "{@blocks[*-1].WHICH.Str}|$name";
+                %declared{$ref} = L::VariableNotUsed;
                 if $my.expr !=== Empty {
                     traverse($my.expr);
+                    %assigned{$ref} = True;
+                    if $my.expr ~~ Q::Identifier && $my.expr.name eq $name {
+                        @complaints.push: L::RedundantAssignment.new(:$name);
+                        %readbeforeassigned{$ref} :delete;
+                    }
                 }
             }
 
-            multi traverse(Q::Infix $infix) {
+            multi traverse(Q::Infix::Assignment $infix) {
+                traverse($infix.rhs);
+                die "LHS was not an identifier"
+                    unless $infix.lhs ~~ Q::Identifier;
+                my $name = $infix.lhs.name;
+                if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
+                    @complaints.push: L::RedundantAssignment.new(:$name);
+                }
+                %assigned{ref $name} = True;
+            }
+
+            multi traverse(Q::Infix::Addition $infix) {
                 traverse($infix.lhs);
                 traverse($infix.rhs);
             }
         }
-
-        my @complaints;
 
         for %declared.keys -> $ref {
             next if %used{$ref};
             my $name = $ref.subst(/^ .* \|/, "");
             my $linttype = %declared{$ref};
             @complaints.push: $linttype.new(:$name);
+        }
+        for %declared.keys -> $ref {
+            next if %assigned{$ref};
+            next if %declared{$ref} ~~ L::SubNotUsed;
+            next if !%used{$ref};
+            my $name = $ref.subst(/^ .* \|/, "");
+            @complaints.push: L::VariableNeverAssigned.new(:$name);
+            %readbeforeassigned{$ref} :delete;
+        }
+        for %declared.keys -> $ref {
+            next unless %readbeforeassigned{$ref};
+            next if %declared{$ref} ~~ L::SubNotUsed;
+            my $name = $ref.subst(/^ .* \|/, "");
+            @complaints.push: L::VariableReadBeforeAssigned.new(:$name);
         }
 
         return @complaints;
