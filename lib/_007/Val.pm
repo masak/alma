@@ -5,6 +5,10 @@ role Val {
 }
 
 role Val::None does Val {
+    method quoted-Str {
+        self.Str
+    }
+
     method Str {
         "None"
     }
@@ -16,6 +20,10 @@ role Val::None does Val {
 
 role Val::Int does Val {
     has Int $.value;
+
+    method quoted-Str {
+        self.Str
+    }
 
     method Str {
         $.value.Str
@@ -29,12 +37,12 @@ role Val::Int does Val {
 role Val::Str does Val {
     has Str $.value;
 
-    method Str {
-        $.value
-    }
-
     method quoted-Str {
         q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]
+    }
+
+    method Str {
+        $.value
     }
 
     method truthy {
@@ -45,14 +53,12 @@ role Val::Str does Val {
 role Val::Array does Val {
     has @.elements;
 
-    method Str {
-        sub strarray($_) {
-            when Val::Str { .quoted-Str }
-            when Val::Array { "[" ~ .elements>>.&strarray.join(', ') ~ "]" }
-            .Str;
-        }
+    method quoted-Str {
+        "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]"
+    }
 
-        strarray(self);
+    method Str {
+        self.quoted-Str
     }
 
     method truthy {
@@ -69,6 +75,10 @@ role Val::Block does Val {
     has %.static-lexpad;
     has $.outer-frame;
 
+    method quoted-Str {
+        self.Str
+    }
+
     method pretty-params {
         sprintf "(%s)", $.parameterlist».name.join(", ");
     }
@@ -78,10 +88,18 @@ role Val::Block does Val {
 role Val::Sub does Val::Block {
     has $.name;
 
+    method quoted-Str {
+        self.Str
+    }
+
     method Str { "<sub {$.name}{$.pretty-params}>" }
 }
 
 role Val::Macro does Val::Sub {
+    method quoted-Str {
+        self.Str
+    }
+
     method Str { "<macro {$.name}{$.pretty-params}>" }
 }
 
