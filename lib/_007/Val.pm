@@ -33,6 +33,10 @@ role Val::Str does Val {
         $.value
     }
 
+    method quoted-Str {
+        q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]
+    }
+
     method truthy {
         ?$.value;
     }
@@ -42,7 +46,13 @@ role Val::Array does Val {
     has @.elements;
 
     method Str {
-        '[' ~ @.elements>>.Str.join(', ') ~ ']'
+        sub strarray($_) {
+            when Val::Str { .quoted-Str }
+            when Val::Array { "[" ~ .elements>>.&strarray.join(', ') ~ "]" }
+            .Str;
+        }
+
+        strarray(self);
     }
 
     method truthy {

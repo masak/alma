@@ -14,23 +14,6 @@ class _007::Runtime::Builtins {
     }
 
     method get-subs {
-        sub escape($_) {
-            return (~$_).subst("\\", "\\\\", :g).subst(q["], q[\\"], :g);
-        }
-
-        sub stringify-inside-array($_) {
-            when Val::Str {
-                return q["] ~ escape(.value) ~ q["]
-            }
-            when Val::Array {
-                return '[%s]'.&sprintf(.elements>>.&stringify-inside-array.join(', '));
-            }
-            when Q {
-                return .Str;
-            }
-            return .value.Str;
-        }
-
         my %builtins =
             say      => -> $arg {
                 $.runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
@@ -42,11 +25,7 @@ class _007::Runtime::Builtins {
                     !! $arg.^name.substr('Val::'.chars);
             },
             str => sub ($_) {
-                when Val::Array {
-                    return stringify-inside-array($_);
-                }
-                when Val::None { return .Str }
-                when Val { return .value.Str }
+                when Val { return .Str }
                 die X::TypeCheck.new(
                     :operation<str()>,
                     :got($_),
