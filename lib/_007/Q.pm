@@ -137,11 +137,6 @@ role Q::Property does Q::Literal {
     method new($key, $value) {
         self.bless(:$key, :$value);
     }
-
-    method eval($runtime) {
-        Val::Property.new(:key($.key.eval($runtime)),
-          :value($.eval.eval($runtime)));
-    }
 }
 
 role Q::Block does Q {
