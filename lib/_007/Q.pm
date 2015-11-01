@@ -501,7 +501,7 @@ role Q::Statement::For does Q::Statement {
 
     method run($runtime) {
         multi elements(Q::Literal::Array $array) {
-            return $array.elements>>.value;
+            return [$array.elements.map(*.eval($runtime))];
         }
 
         multi split_elements(@array, 1) { return @array }
