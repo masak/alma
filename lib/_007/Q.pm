@@ -658,12 +658,11 @@ role Q::Trait does Q {
 }
 
 role Q::Term::Quasi does Q::Term {
-    has $.statementlist;
-    method new($statementlist) { self.bless(:$statementlist) }
+    has $.block;
+    method new($block) { self.bless(:$block) }
 
     method eval($runtime) {
-        my $statementlist = $.statementlist.interpolate($runtime);
-        return Q::Block.new(Q::ParameterList.new, $statementlist);
+        return $.block.interpolate($runtime);
     }
     method interpolate($runtime) {
         self.new($.statementlist.interpolate($runtime));

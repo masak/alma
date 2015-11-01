@@ -405,7 +405,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        make Q::Term::Quasi.new($<blockoid>.ast);
+        make Q::Term::Quasi.new($<block>.ast);
     }
 
     method unquote ($/) {

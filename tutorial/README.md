@@ -232,7 +232,7 @@ There are also constructor methods for creating program elements.
     Q::Literal::Int(value)
     Q::Literal::Str(value)
     Q::Term::Array(value)
-    Q::Term::Quasi(stmtlist)
+    Q::Term::Quasi(block)
     Q::Identifier(str)
     Q::StatementList(array)
     Q::ParameterList(array)

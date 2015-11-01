@@ -185,7 +185,7 @@ grammar _007::Parser::Syntax {
             }
         }
     }
-    token term:quasi { quasi >> [<.ws> <blockoid> || <.panic("quasi")>] }
+    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
 
     token unquote { '{{{' <EXPR> '}}}' }
 
