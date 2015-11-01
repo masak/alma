@@ -115,6 +115,9 @@ role _007::Linter {
             multi traverse(Q::Literal $literal) {
             }
 
+            multi traverse(Q::Term $term) {
+            }
+
             multi traverse(Q::Statement::For $for) {
                 traverse($for.expr);
                 traverse($for.block);

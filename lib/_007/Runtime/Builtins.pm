@@ -67,7 +67,7 @@ class _007::Runtime::Builtins {
 
             'Q::Literal::Int' => -> $int { Q::Literal::Int.new($int.value) },
             'Q::Literal::Str' => -> $str { Q::Literal::Str.new($str.value) },
-            'Q::Literal::Array' => -> $array { Q::Literal::Array.new($array.value) },
+            'Q::Term::Array' => -> $array { Q::Term::Array.new($array.value) },
             'Q::Literal::None' => -> { Q::Literal::None.new },
             'Q::Block' => -> $paramlist, $stmtlist { Q::Block.new($paramlist, $stmtlist) },
             'Q::Identifier' => -> $name { Q::Identifier.new($name.value) },
@@ -97,7 +97,7 @@ class _007::Runtime::Builtins {
                 when Q::Literal::None {
                     return Val::None.new;
                 }
-                when Q::Literal::Array {
+                when Q::Term::Array {
                     return Val::Array.new(:elements(.elements));
                 }
                 when Q::Literal {
@@ -170,11 +170,11 @@ class _007::Runtime::Builtins {
                     when Q::Literal::None {
                         Val::None.new;
                     }
-                    when Q::Literal::Array {
-                        Val::Array.new(:elements($obj.elements));
-                    }
                     when Q::Literal {
                         $obj.value;
+                    }
+                    when Q::Term::Array {
+                        Val::Array.new(:elements($obj.elements));
                     }
                     die X::TypeCheck.new(
                         :operation<.value>,

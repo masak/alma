@@ -389,7 +389,7 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        make Q::Literal::Array.new($<EXPR>».ast);
+        make Q::Term::Array.new($<EXPR>».ast);
     }
 
     method term:parens ($/) {
@@ -405,7 +405,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        make Q::Quasi.new($<blockoid>.ast);
+        make Q::Term::Quasi.new($<blockoid>.ast);
     }
 
     method unquote ($/) {

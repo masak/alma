@@ -7,7 +7,7 @@ sub read(Str $ast) is export {
         none        => Q::Literal::None,
         int         => Q::Literal::Int,
         str         => Q::Literal::Str,
-        array       => Q::Literal::Array,
+        array       => Q::Term::Array,
 
         '-'         => Q::Prefix::Minus,
 
@@ -91,6 +91,7 @@ sub check(Q::CompUnit $ast, $runtime) {
     multi handle(Q::Statement::Expr $) {}
     multi handle(Q::Statement::BEGIN $) {}
     multi handle(Q::Literal $) {}
+    multi handle(Q::Term $) {}
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {

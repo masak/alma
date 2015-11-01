@@ -100,7 +100,10 @@ role Q::Literal::Str does Q::Literal {
     method interpolate($) { self }
 }
 
-role Q::Literal::Array does Q::Literal {
+role Q::Term does Q::Expr {
+}
+
+role Q::Term::Array does Q::Term {
     has @.elements;
     method new(*@elements) {
         self.bless(:@elements)
@@ -654,7 +657,7 @@ role Q::Trait does Q {
     }
 }
 
-role Q::Quasi does Q::Expr {
+role Q::Term::Quasi does Q::Term {
     has $.statementlist;
     method new($statementlist) { self.bless(:$statementlist) }
 

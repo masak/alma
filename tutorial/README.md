@@ -29,8 +29,8 @@ A small number of values in 007 can be expressed using literal syntax.
 
     123                 Q::Literal::Int
     "Bond."             Q::Literal::Str
-    [0, 0, 7]           Q::Literal::Array
     None                Q::Literal::None
+    [0, 0, 7]           Q::Term::Array
 
 Only double quotes are allowed. Strings don't have any form of
 interpolation.
@@ -231,13 +231,13 @@ There are also constructor methods for creating program elements.
 
     Q::Literal::Int(value)
     Q::Literal::Str(value)
-    Q::Literal::Array(value)
+    Q::Term::Array(value)
+    Q::Term::Quasi(stmtlist)
     Q::Identifier(str)
     Q::StatementList(array)
     Q::ParameterList(array)
     Q::ArgumentList(array)
     Q::Block(paramlist, stmtlist)
-    Q::Quasi(stmtlist)
     Q::Trait(ident, expr)
     Q::Prefix::Minus(expr)
     Q::Infix::Addition(lhs, rhs)
