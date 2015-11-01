@@ -500,10 +500,6 @@ role Q::Statement::For does Q::Statement {
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
     method run($runtime) {
-        multi elements(Q::Literal::Array $array) {
-            return [$array.elements.map(*.eval($runtime))];
-        }
-
         multi split_elements(@array, 1) { return @array }
         multi split_elements(@array, Int $n) {
             my $list = @array.list;
@@ -521,15 +517,19 @@ role Q::Statement::For does Q::Statement {
         my $c = $.block.eval($runtime);
         my $count = $c.parameterlist.elems;
 
+        my $array = $.expr.eval($runtime);
+        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(Val::Array))
+            unless $array ~~ Val::Array;
+
         if $count == 0 {
-            for ^elements($.expr).elems {
+            for $array.elements {
                 $runtime.enter($c);
                 $.block.statementlist.run($runtime);
                 $runtime.leave;
             }
         }
         else {
-            for split_elements(elements($.expr), $count) -> $arg {
+            for split_elements($array.elements, $count) -> $arg {
                 $runtime.enter($c);
                 for @($c.parameterlist) Z $arg.list -> ($param, $real_arg) {
                     $runtime.declare-var($param.name, $real_arg);

@@ -44,4 +44,15 @@ use _007::Test;
     is-result $ast, "3\n3\n", "variable declarations work inside of for loop without parameters";
 }
 
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "a") (array (int 1) (int 2) (int 3)))
+          (for (ident "a") (block (paramlist) (stmtlist
+            (stexpr (call (ident "say") (str ".")))))))
+        .
+
+    is-result $ast, ".\n.\n.\n", "can loop over variable, not just literal array";
+}
+
 done-testing;
