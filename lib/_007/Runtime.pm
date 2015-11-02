@@ -107,8 +107,7 @@ role _007::Runtime {
     }
 
     method register-subhandler {
-        self.declare-var("--RETURN-TO--");
-        self.put-var("--RETURN-TO--", $.current-frame);
+        self.declare-var("--RETURN-TO--", $.current-frame);
     }
 
     method load-builtins {
