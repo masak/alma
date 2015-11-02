@@ -43,4 +43,19 @@ use _007::Test;
     outputs $program, "Mr Bond!\n", "very basic unquote";
 }
 
+{
+    my $program = q:to/./;
+        macro foo() {
+            my x = 7;
+            return quasi {
+                say(x);
+            }
+        }
+
+        foo();
+        .
+
+    outputs $program, "7\n", "a variable is looked up in the quasi's environment";
+}
+
 done-testing;

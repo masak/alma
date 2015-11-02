@@ -34,6 +34,7 @@ role Q {
         sub avalue($attr) { $attr.get_value(self) }
         sub worthy($attr) {
             avalue($attr) !~~ Hash  # avoids showing static-lexpad
+                && aname($attr) ne "outer-frame"
                 && (aname($attr) ne "type" || avalue($attr) ne "")
         }
 
@@ -121,11 +122,14 @@ role Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has %.static-lexpad;
+    has $.outer-frame;
 
-    method new($parameterlist, $statementlist) { self.bless(:$parameterlist, :$statementlist) }
+    method new($parameterlist, $statementlist, $outer-frame?) {
+        self.bless(:$parameterlist, :$statementlist, :$outer-frame)
+    }
 
     method eval($runtime) {
-        my $outer-frame = $runtime.current-frame;
+        my $outer-frame = $.outer-frame // $runtime.current-frame;
         Val::Block.new(
             :$.parameterlist,
             :$.statementlist,
@@ -134,9 +138,10 @@ role Q::Block does Q {
         );
     }
     method interpolate($runtime) {
-        self.new(
+        my $block = self.new(
             $.parameterlist.interpolate($runtime),
-            $.statementlist.interpolate($runtime));
+            $.statementlist.interpolate($runtime),
+            $runtime.current-frame);
         # XXX: but what about the static lexpad? we kind of lose it here, don't we?
         # what does that *mean* in practice? can we come up with an example where
         # it matters? if the static lexpad happens to contain a value which is a

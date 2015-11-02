@@ -41,11 +41,14 @@ class _007::Parser::Actions {
     }
 
     method statement:expr ($/) {
+        # XXX: this is a special case for macros that have been expanded at the
+        #      top level of an expression statement, but it could happen anywhere
+        #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
-            my @statementlist = $<EXPR>.ast.statementlist.list;
-            die "Can't handle this case with more than one statement yet" # XXX
-                if @statementlist > 1;
-            make @statementlist[0];
+            make Q::Statement::Expr.new(Q::Postfix::Call.new(
+                $<EXPR>.ast,
+                Q::ArgumentList.new
+            ));
         }
         else {
             make Q::Statement::Expr.new($<EXPR>.ast);
@@ -136,6 +139,7 @@ class _007::Parser::Actions {
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new($parameterlist, $statementlist);
+        my %static-lexpad = $*runtime.current-frame.pad;
         self.finish-block($block);
         my $macro = Q::Statement::Macro.new(
             $identifier,
@@ -144,7 +148,7 @@ class _007::Parser::Actions {
         make $macro;
 
         my $outer-frame = $*runtime.current-frame;
-        my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame);
+        my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         $*runtime.declare-var($name, $val);
 
         maybe-install-operator($identifier.name, @<trait>);
