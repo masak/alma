@@ -9,7 +9,7 @@ use _007::Test;
 
     my $expected = read(
         "(stmtlist (stexpr (+ (int 1) (int 1))))"
-    ).block; # need to peel off the CompUnit
+    ).block.Str.subst("Q::Block", "Q::Expr::Block");
     outputs $program, "$expected\n", "Basic quasi quoting";
 }
 

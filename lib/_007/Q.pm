@@ -118,18 +118,19 @@ role Q::Term::Array does Q::Term {
     }
 }
 
+role Q::Expr::Block { ... }
+
 role Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has %.static-lexpad;
-    has $.outer-frame;
 
-    method new($parameterlist, $statementlist, $outer-frame?) {
-        self.bless(:$parameterlist, :$statementlist, :$outer-frame)
+    method new($parameterlist, $statementlist) {
+        self.bless(:$parameterlist, :$statementlist)
     }
 
     method eval($runtime) {
-        my $outer-frame = $.outer-frame // $runtime.current-frame;
+        my $outer-frame = $runtime.current-frame;
         Val::Block.new(
             :$.parameterlist,
             :$.statementlist,
@@ -138,7 +139,7 @@ role Q::Block does Q {
         );
     }
     method interpolate($runtime) {
-        my $block = self.new(
+        my $block = Q::Expr::Block.new(
             $.parameterlist.interpolate($runtime),
             $.statementlist.interpolate($runtime),
             $runtime.current-frame);
@@ -146,6 +147,23 @@ role Q::Block does Q {
         # what does that *mean* in practice? can we come up with an example where
         # it matters? if the static lexpad happens to contain a value which is a
         # Q node, do we continue into *it*, interpolating it, too?
+    }
+}
+
+role Q::Expr::Block does Q::Block {
+    has $.outer-frame;
+
+    method new($parameterlist, $statementlist, $outer-frame) {
+        self.bless(:$parameterlist, :$statementlist, :$outer-frame)
+    }
+
+    method eval($runtime) {
+        Val::Block.new(
+            :$.parameterlist,
+            :$.statementlist,
+            :%.static-lexpad,
+            :$.outer-frame
+        );
     }
 }
 
