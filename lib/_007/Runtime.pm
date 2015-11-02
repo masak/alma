@@ -7,6 +7,7 @@ role Frame {
 }
 
 constant NO_OUTER = {};
+constant RETURN_TO = "--RETURN-TO--";
 
 role _007::Runtime {
     has $.output;
@@ -75,6 +76,8 @@ role _007::Runtime {
                 if $frame.pad{$symbol} :exists;
             $frame = $frame.block.outer-frame;
         }
+        die X::ControlFlow::Return.new
+            if $symbol eq RETURN_TO;
         die X::Undeclared.new(:$symbol);
     }
 
@@ -107,7 +110,7 @@ role _007::Runtime {
     }
 
     method register-subhandler {
-        self.declare-var("--RETURN-TO--", $.current-frame);
+        self.declare-var(RETURN_TO, $.current-frame);
     }
 
     method load-builtins {
