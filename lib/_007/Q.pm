@@ -279,7 +279,6 @@ role Q::Infix::Assignment does Q::Infix {
 role Q::Infix::Eq does Q::Infix {
     method type { "[==]" }
     method eval($runtime) {
-        multi equal-value(Val $, Val $) { False }
         multi equal-value(Val::None, Val::None) { True }
         multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
         multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
@@ -296,20 +295,23 @@ role Q::Infix::Eq does Q::Infix {
                 && equal-value($l.parameterlist, $r.parameterlist)
                 && equal-value($l.statementlist, $r.statementlist)
         }
-        multi equal-value(Q $l, Q $r) {
-            sub same-avalue($attr) {
-                equal-value($attr.get_value($l), $attr.get_value($r));
-            }
-
-            [&&] $l.WHAT === $r.WHAT,
-                |$l.worthy-attributes.map(&same-avalue);
-        }
         multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
             sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
 
             @l == @r && |(^@l).map(&equal-at-index);
         }
         multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
+        multi equal-value($l, $r) {
+            if $l ~~ Q && $r ~~ Q {
+                sub same-avalue($attr) {
+                    equal-value($attr.get_value($l), $attr.get_value($r));
+                }
+
+                return [&&] $l.WHAT === $r.WHAT,
+                    |$l.worthy-attributes.map(&same-avalue);
+            }
+            False;
+        }
 
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
