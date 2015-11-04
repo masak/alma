@@ -332,4 +332,17 @@ use _007::Test;
     # case.
 }
 
+{
+    my $program = q:to/./;
+        my a = [ 1, 2];
+        .
+
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "a") (array (int 1) (int 2))))
+        .
+
+    parses-to $program, $ast, "assigning an array - space at the start of an array";
+}
+
 done-testing;

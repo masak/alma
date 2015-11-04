@@ -167,7 +167,7 @@ grammar _007::Parser::Syntax {
     token term:none { None >> }
     token term:int { \d+ }
     token term:str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
-    token term:array { '[' ~ ']' <EXPR>* %% [\h* ',' \h*] }
+    token term:array { '[' ~ ']' [\s* <EXPR>]* %% [\h* ','] }
     token term:parens { '(' ~ ')' <EXPR> }
     token term:identifier {
         <identifier>
