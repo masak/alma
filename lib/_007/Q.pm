@@ -279,7 +279,7 @@ role Q::Infix::Assignment does Q::Infix {
 role Q::Infix::Eq does Q::Infix {
     method type { "[==]" }
     method eval($runtime) {
-        multi equal-value(Val $, Val $) { False }
+        multi equal-value($, $) { False }
         multi equal-value(Val::None, Val::None) { True }
         multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
         multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
