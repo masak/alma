@@ -302,7 +302,7 @@ role Q::Infix::Eq does Q::Infix {
         }
         multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
         multi equal-value($l, $r) {
-            if $l ~~ Val && $r ~~ Val {
+            if $l ~~ Q && $r ~~ Q {
                 sub same-avalue($attr) {
                     equal-value($attr.get_value($l), $attr.get_value($r));
                 }
