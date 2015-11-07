@@ -20,6 +20,7 @@ sub read(Str $ast) is export {
 
         call        => Q::Postfix::Call,
         index       => Q::Postfix::Index,
+        access      => Q::Postfix::Property,
 
         my          => Q::Statement::My,
         stexpr      => Q::Statement::Expr,

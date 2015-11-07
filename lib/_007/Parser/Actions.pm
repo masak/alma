@@ -416,31 +416,29 @@ class _007::Parser::Actions {
         make Q::Term::Quasi.new($<block>.ast);
     }
 
-    method term:object ($/) {
-        make Q::Literal::Object.new($<property>».ast);
-    }
-
     method unquote ($/) {
         make Q::Unquote.new($<EXPR>.ast);
     }
 
+    method term:object ($/) {
+        make Q::Term::Object.new($<property>».ast);
+    }
+
     method property:str-expr ($/) {
-        make Q::Property.new($<str>.ast, $<value>.ast);
+        make Q::Property.new($<str>.ast.value, $<value>.ast);
     }
 
     method property:ident-expr ($/) {
-        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
-            $<value>.ast);
+        make Q::Property.new(~$<identifier>, $<value>.ast);
     }
 
     method property:ident ($/) {
-        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
-            $<identifier>.ast);
+        make Q::Property.new(~$<identifier>, $<identifier>.ast);
     }
 
     method property:method ($/) {
-        make Q::Property.new(Q::Literal::Str.new(~$<identifier>),
-           Q::Block.new($<parameterlist>.ast, $<blockoid>.ast)); 
+        make Q::Property.new(~$<identifier>, Q::Block.new($<parameterlist>.ast,
+            $<blockoid>.ast)); 
     }
 
     method infix($/) {

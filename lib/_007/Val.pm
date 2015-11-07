@@ -70,10 +70,15 @@ role Q::ParameterList { ... }
 role Q::StatementList { ... }
 
 role Val::Object does Val {
-    has %.elements;
+    has %.properties{Str};
 
     method Str {
-        '{' ~ %.elements.map({"{.key}: {.value}"}).join(', ') ~ '}'
+        '{' ~ %.properties.map({
+            my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
+              ?? .key
+              !! Val::Str.new(value => .key).quoted-Str;
+            "{$key}: {.value}"
+        }).sort.join(', ') ~ '}'
     }
 
     method truthy {

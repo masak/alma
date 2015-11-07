@@ -120,14 +120,16 @@ role Q::Term::Array does Q::Term {
 
 role Q::Expr::Block { ... }
 
-role Q::Literal::Object does Q::Literal {
-    has @.elements;
-    method new(*@elements) {
-        self.bless(:@elements)
+role Q::Term::Object does Q::Literal {
+    has @.properties;
+    method new(*@properties) {
+        self.bless(:@properties)
     }
 
     method eval($runtime) {
-        Val::Object.new(:elements(@.elements>>.eval($runtime)));
+        Val::Object.new(:properties(
+            @.properties.map({.key => .value.eval($runtime)})
+        ));
     }
 }
 
@@ -336,8 +338,16 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
-        my $propname = $.ident.name;
-        return $runtime.property($obj, $propname);
+        do given $obj {
+          when Val::Object {
+            # TODO check if property exists (of course)
+            $obj.properties{$.ident} // die "no such property: $.ident";
+          }
+          default {
+            my $propname = $.ident.name;
+            $runtime.property($obj, $propname);
+          }
+        }
     }
 
     method interpolate($runtime) {
