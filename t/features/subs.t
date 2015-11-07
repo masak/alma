@@ -118,4 +118,16 @@ use _007::Test;
     outputs $program, "Good evening, Mr Bond\n", "calling a post-declared sub works (II)";
 }
 
+{
+    my $program = 'say(say);';
+
+    outputs $program, "<sub say(arg)>\n", 'builtins have proper signature';
+}
+
+{
+    my $program = 'say(infix:<+>);';
+
+    outputs $program, "<sub infix:<+>(l, r)>\n", 'builtins have proper signature - {pre,in,post}fixes';
+}
+
 done-testing;

@@ -30,7 +30,7 @@ class _007::Parser {
             for @!oplevels[0].ops{$type}.keys -> $op {
                 my $name = "$type\:<$op>";
                 my $sub = $type eq "infix" ?? -> $l, $r {} !! -> $expr {};
-                $!runtime.declare-var($name, Val::Sub::Builtin.new($name, $sub));
+                $!runtime.declare-builtin-sub($name, $sub);
             }
         }
     }

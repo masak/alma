@@ -158,8 +158,16 @@ class _007::Runtime::Builtins {
             return sub (|c) { wrap &fn(|c) };
         }
 
+        sub builtin-sub($name, &fn) {
+            my $builtin = Val::Sub::Builtin.new($name, _007ize(&fn));
+            for &fn.signature.params -> $p {
+                $builtin.parameterlist.parameters.push: Q::Identifier.new($p.name.substr(1));
+            }
+            return $builtin;
+        }
+
         return my % = %builtins.map: {
-            .key => Val::Sub::Builtin.new(.key, _007ize(.value))
+            .key => builtin-sub(.key, .value)
         };
     }
 

@@ -9,6 +9,21 @@ role Frame {
 constant NO_OUTER = {};
 constant RETURN_TO = "--RETURN-TO--";
 
+sub wrap($_) {
+    when Val | Q { $_ }
+    when Nil { Val::None.new }
+    when Str { Val::Str.new(:value($_)) }
+    when Int { Val::Int.new(:value($_)) }
+    when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+    default { die "Got some unknown value of type ", .^name }
+}
+
+
+sub _007ize(&fn) {
+    return sub (|c) { wrap &fn(|c) };
+}
+
+
 role _007::Runtime {
     has $.output;
     has @!frames;
@@ -96,6 +111,14 @@ role _007::Runtime {
         if defined $value {
             self.put-var($name, $value);
         }
+    }
+
+    method declare-builtin-sub($name, &sub) {
+        my $builtin = Val::Sub::Builtin.new($name, _007ize(&sub));
+        for &sub.signature.params -> $p {
+            $builtin.parameterlist.parameters.push: Q::Identifier.new($p.name.substr(1));
+        }
+        self.declare-var($name, $builtin);
     }
 
     method declared($name) {
