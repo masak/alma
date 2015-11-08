@@ -9,7 +9,7 @@ class _007::Runtime::Builtins {
         when Nil { Val::None.new }
         when Str { Val::Str.new(:value($_)) }
         when Int { Val::Int.new(:value($_)) }
-        when Array | Seq { Val::Array.new(:elements(.map(&wrap))) }
+        when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
         default { die "Got some unknown value of type ", .^name }
     }
 
