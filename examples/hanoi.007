@@ -1,0 +1,50 @@
+constant PIN   = "    |    ";
+
+constant DISK = {
+    tiny:  "   ===   ",
+    small: "  =====  ",
+    large: " ======= ",
+    huge:  "========="
+};
+
+my state = [
+    [DISK.huge, DISK.large, DISK.small, DISK.tiny],
+    [],
+    []
+];
+
+sub tw(n, L) {
+    my e = state[n].elems();
+    if L >= e {
+        return PIN;
+    }
+    return state[n][L];
+}
+
+sub show() {
+    for (^5).reverse() -> L {
+        say(tw(0, L) ~ " " ~ tw(1, L) ~ " " ~ tw(2, L));
+    }
+}
+
+sub move(diskname, from, to) {
+    say("");
+    say("Moving " ~ diskname ~ " from pile " ~ str(from + 1) ~ " to pile " ~ str(to + 1) ~ "...");
+    say("");
+    my disk = state[from].pop();
+    state[to].push(disk);
+    show();
+}
+
+sub solve_hanoi(n, from, helper, to) {
+    if n >= 2 {
+        solve_hanoi(n - 1, from, to, helper);
+    }
+    move(["tiny disk", "small disk", "large disk", "huge disk"][n - 1], from, to);
+    if n >= 2 {
+        solve_hanoi(n - 1, helper, from, to);
+    }
+}
+
+show();
+solve_hanoi(4, 0, 1, 2);
