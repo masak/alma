@@ -348,7 +348,7 @@ role Q::Postfix::Index does Q::Postfix {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
                     if $index !~~ Val::Int;
-                die X::Subscript::TooLarge.new(:value($index.value), :length(.elements))
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
                     if $index.value >= .elements;
                 die X::Subscript::Negative.new(:$index, :type([]))
                     if $index.value < 0;
