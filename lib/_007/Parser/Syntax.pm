@@ -87,27 +87,27 @@ grammar _007::Parser::Syntax {
         <.finishpad>
     }
     token statement:return {
-        return [\s+ <EXPR>]?
+        return [<.ws> <EXPR>]?
         {
             die X::ControlFlow::Return.new
                 unless $*insub;
         }
     }
     token statement:if {
-        if \s+ <xblock>
+        if <.ws> <xblock>
     }
     token statement:for {
-        for \s+ <xblock>
+        for <.ws> <xblock>
     }
     token statement:while {
-        while \s+ <xblock>
+        while <.ws> <xblock>
     }
     token statement:BEGIN {
         BEGIN <.ws> <block>
     }
 
     token trait {
-        'is' \s* <identifier> '(' <EXPR> ')'
+        'is' <.ws> <identifier> '(' <EXPR> ')'
     }
 
     # requires a <.newpad> before invocation
@@ -135,10 +135,10 @@ grammar _007::Parser::Syntax {
     }
 
     token eat_terminator {
-        || \s* ';'
+        || <.ws> ';'
         || <?after '}'> $$
-        || \s* <?before '}'>
-        || \s* $
+        || <.ws> <?before '}'>
+        || <.ws> $
     }
 
     rule EXPR { <termish> +% [<infix> || <argumentlist1>
@@ -167,7 +167,7 @@ grammar _007::Parser::Syntax {
     token term:none { None >> }
     token term:int { \d+ }
     token term:str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
-    token term:array { '[' ~ ']' [\s* <EXPR>]* %% [\h* ','] }
+    token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
     token term:parens { '(' ~ ')' <EXPR> }
     token term:identifier {
         <identifier>
@@ -199,13 +199,13 @@ grammar _007::Parser::Syntax {
 
     method postfix {
         # XXX: should find a way not to special-case [] and () and .
-        if /$<index>=[ \s* '[' ~ ']' [\s* <EXPR>] ]/(self) -> $cur {
+        if /$<index>=[ <.ws> '[' ~ ']' [<.ws> <EXPR>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
-        elsif /$<call>=[ \s* '(' ~ ')' [\s* <argumentlist>] ]/(self) -> $cur {
+        elsif /$<call>=[ <.ws> '(' ~ ')' [<.ws> <argumentlist>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
-        elsif /$<prop>=[ \s* '.' <identifier> ]/(self) -> $cur {
+        elsif /$<prop>=[ <.ws> '.' <identifier> ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
 
