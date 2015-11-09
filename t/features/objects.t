@@ -33,4 +33,32 @@ use _007::Test;
     is-result $ast, "1\n", "can access an object's property";
 }
 
+{ # test property access error
+    my $ast = q:to/./;
+          (stmtlist
+            (my (ident "o") (object))
+            (access (ident "o") "a"))
+        .
+
+    try {
+        is-result $ast, "you are NOT not getting there!";
+        CATCH {
+          default {
+            pass "Can't access a non-existing property";
+          }
+        }
+    }
+}
+
+{
+    my $ast = q:to/./;
+          (stmtlist
+            (my (ident "o") (object))
+            (stexpr (call (ident "say")
+              (arglist (ident "o")))))
+        .
+
+    is-result $ast, "false", "an empty object boolifies to false";
+}
+
 done-testing;

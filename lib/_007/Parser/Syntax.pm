@@ -183,7 +183,7 @@ grammar _007::Parser::Syntax {
             }
         }
     }
-    token term:quasi { quasi >> [<.ws> '{' ~ '}' <statementlist> || <.panic("quasi")>] }
+    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
     token term:object { '{' ~ '}' <property>* % [\h* ',' \h*] }
 
     token unquote { '{{{' <EXPR> '}}}' }

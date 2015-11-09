@@ -120,7 +120,7 @@ role Q::Term::Array does Q::Term {
 
 role Q::Expr::Block { ... }
 
-role Q::Term::Object does Q::Literal {
+role Q::Term::Object does Q::Term {
     has @.properties;
     method new(*@properties) {
         self.bless(:@properties)
@@ -133,7 +133,7 @@ role Q::Term::Object does Q::Literal {
     }
 }
 
-role Q::Property does Q::Literal {
+role Q::Property {
     has $.key;
     has $.value;
     method new($key, $value) {
@@ -340,7 +340,7 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
         my $obj = $.expr.eval($runtime);
         do given $obj {
           when Val::Object {
-            # TODO check if property exists (of course)
+            # XXX Promote the die to a X:: exception
             $obj.properties{$.ident} // die "no such property: $.ident";
           }
           default {
