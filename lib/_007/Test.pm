@@ -233,7 +233,7 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
             pass $desc;
         }
         default {
-            is .^name, $expected-error.^name;   # which we know will flunk
+            is .^name, $expected-error.^name, $desc;   # which we know will flunk
             return;
         }
     }
