@@ -1,6 +1,6 @@
 use _007::Parser::Precedence;
 
-class _007::Parser::OpLevel {
+class _007::Parser::OpScope {
     has %.ops =
         prefix => {},
         infix => {},

@@ -1,6 +1,6 @@
 use _007::Q;
 use _007::Parser::Exceptions;
-use _007::Parser::OpLevel;
+use _007::Parser::OpScope;
 use _007::Parser::Syntax;
 use _007::Parser::Actions;
 
@@ -16,7 +16,7 @@ class _007::Parser {
     method postpone(&check:()) { @!checks.push: &check }
 
     submethod BUILD(:$!runtime!) {
-        my $opl = _007::Parser::OpLevel.new;
+        my $opl = _007::Parser::OpScope.new;
         @!oplevels.push: $opl;
 
         $opl.install('prefix', '-', Q::Prefix::Minus, :assoc<left>);
