@@ -159,7 +159,7 @@ class _007::Runtime::Builtins {
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
                         unless $expr ~~ Val::Int;
-                    return Val::Int.new(:value(-$expr.value));
+                    return wrap(-$expr.value);
                 },
                 :qtype(Q::Prefix::Minus),
                 :assoc<left>,
@@ -207,8 +207,7 @@ class _007::Runtime::Builtins {
                     multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
 
                     # converting Bool->Int because the implemented language doesn't have Bool
-                    my $equal = +equal-value($lhs, $rhs);
-                    return Val::Int.new(:value($equal));
+                    return wrap(+equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
                 :assoc<left>,
@@ -219,9 +218,7 @@ class _007::Runtime::Builtins {
                         unless $lhs ~~ Val::Int;
                     die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
                         unless $rhs ~~ Val::Int;
-                    return Val::Int.new(:value(
-                        $lhs.value + $rhs.value
-                    ));
+                    return wrap($lhs.value + $rhs.value);
                 },
                 :qtype(Q::Infix::Addition),
                 :assoc<left>,
@@ -232,9 +229,7 @@ class _007::Runtime::Builtins {
                         unless $lhs ~~ Val::Str;
                     die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
                         unless $rhs ~~ Val::Str;
-                    return Val::Str.new(:value(
-                        $lhs.value ~ $rhs.value
-                    ));
+                    return wrap($lhs.value ~ $rhs.value);
                 },
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
