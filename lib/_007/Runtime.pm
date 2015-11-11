@@ -12,12 +12,14 @@ constant RETURN_TO = "--RETURN-TO--";
 role _007::Runtime {
     has $.output;
     has @!frames;
+    has $!builtins;
 
     submethod BUILD(:$output) {
         $!output = $output;
         my $setting = Val::Block.new(
             :outer-frame(NO_OUTER));
         self.enter($setting);
+        $!builtins = _007::Runtime::Builtins.new(:runtime(self));
         self.load-builtins;
     }
 
@@ -114,10 +116,13 @@ role _007::Runtime {
     }
 
     method load-builtins {
-        my $builtins = _007::Runtime::Builtins.new(:runtime(self));
-        for $builtins.get-subs.kv -> $name, $subval {
+        for $!builtins.get-subs -> Pair (:key($name), :value($subval)) {
             self.declare-var($name, $subval);
         }
+    }
+
+    method builtin-opscope {
+        return $!builtins.opscope;
     }
 
     method sigbind($type, $c, @args) {

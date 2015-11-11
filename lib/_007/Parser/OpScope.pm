@@ -1,3 +1,4 @@
+use _007::Parser::Exceptions;
 use _007::Parser::Precedence;
 
 class _007::Parser::OpScope {

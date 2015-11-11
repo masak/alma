@@ -105,6 +105,11 @@ role Val::Macro does Val::Sub {
 
 role Val::Sub::Builtin does Val::Sub {
     has $.code;
+    has $.qtype;
+    has $.assoc;
+    has %.precedence;
 
-    method new($name, $code) { self.bless(:$name, :$code) }
+    method new($name, $code, :$qtype, :$assoc, :%precedence) {
+        self.bless(:$name, :$code, :$qtype, :$assoc, :%precedence)
+    }
 }

@@ -1,5 +1,6 @@
 use _007::Val;
 use _007::Q;
+use _007::Parser::OpScope;
 
 class _007::Runtime::Builtins {
     has $.runtime;
@@ -14,9 +15,17 @@ class _007::Runtime::Builtins {
     }
 
     method get-subs {
-        my %builtins =
+        my &str = sub ($_) {
+            when Val { return .Str }
+            die X::TypeCheck.new(
+                :operation<str()>,
+                :got($_),
+                :expected("something that can be converted to a string"));
+        };
+
+        my @builtins =
             say      => -> $arg {
-                $.runtime.output.say($arg ~~ Val::Array ?? %builtins<str>($arg).Str !! ~$arg);
+                $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
                 Nil;
             },
             type     => -> $arg {
@@ -24,13 +33,7 @@ class _007::Runtime::Builtins {
                     ?? "Sub"
                     !! $arg.^name.substr('Val::'.chars);
             },
-            str => sub ($_) {
-                when Val { return .Str }
-                die X::TypeCheck.new(
-                    :operation<str()>,
-                    :got($_),
-                    :expected("something that can be converted to a string"));
-            },
+            str => &str,
             int => sub ($_) {
                 when Val::Str {
                     return .value.Int
@@ -152,15 +155,61 @@ class _007::Runtime::Builtins {
                 # XXX: typecheck
                 return .name;
             },
+            'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
+                -> $expr {},
+                :qtype(Q::Prefix::Minus),
+                :assoc<left>,
+            ),
+            'infix:<=>' => Val::Sub::Builtin.new('infix:<=>',
+                -> $lhs, $rhs {},
+                :qtype(Q::Infix::Assignment),
+                :assoc<right>,
+            ),
+            'infix:<==>' => Val::Sub::Builtin.new('infix:<=>',
+                -> $lhs, $rhs {},
+                :qtype(Q::Infix::Eq),
+                :assoc<left>,
+            ),
+            'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
+                -> $lhs, $rhs {},
+                :qtype(Q::Infix::Addition),
+                :assoc<left>,
+            ),
+            'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
+                -> $lhs, $rhs {},
+                :qtype(Q::Infix::Concat),
+                :precedence{ equal => "+" },
+            ),
         ;
 
         sub _007ize(&fn) {
             return sub (|c) { wrap &fn(|c) };
         }
 
-        return my % = %builtins.map: {
-            .key => Val::Sub::Builtin.new(.key, _007ize(.value))
+        return @builtins.map: {
+            when .value ~~ Callable {
+                .key => Val::Sub::Builtin.new(.key, _007ize(.value));
+            }
+            when .value ~~ Val::Sub::Builtin { $_ }
+            default { die "Unknown type {.value.^name}" }
         };
+    }
+
+    method opscope {
+        my $scope = _007::Parser::OpScope.new;
+
+        for self.get-subs -> Pair (:key($name), :value($subval)) {
+            $name ~~ /^ (prefix | infix | postfix) ':<' (<-[\>]>+) '>' $/
+                or next;
+            my $type = ~$0;
+            my $opname = ~$1;
+            my $qtype = $subval.qtype;
+            my $assoc = $subval.assoc;
+            my %precedence = $subval.precedence;
+            $scope.install($type, $opname, $qtype, :$assoc, :%precedence);
+        }
+
+        return $scope;
     }
 
     method property($obj, $propname) {

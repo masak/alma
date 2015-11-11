@@ -5,8 +5,8 @@ use _007::Parser::Syntax;
 use _007::Parser::Actions;
 
 class _007::Parser {
-    has $.runtime;
-    has @!oplevels;
+    has $.runtime = die "Must supply a runtime";
+    has @!oplevels = $!runtime.builtin-opscope;
     has @!checks;
 
     method oplevel { @!oplevels[*-1] }
@@ -14,26 +14,6 @@ class _007::Parser {
     method pop-oplevel { @!oplevels.pop }
 
     method postpone(&check:()) { @!checks.push: &check }
-
-    submethod BUILD(:$!runtime!) {
-        my $opl = _007::Parser::OpScope.new;
-        @!oplevels.push: $opl;
-
-        $opl.install('prefix', '-', Q::Prefix::Minus, :assoc<left>);
-
-        $opl.install('infix', '=', Q::Infix::Assignment, :assoc<right>);
-        $opl.install('infix', '==', Q::Infix::Eq, :assoc<left>);
-        $opl.install('infix', '+', Q::Infix::Addition, :assoc<left>);
-        $opl.install('infix', '~', Q::Infix::Concat, :precedence{ equal => "+" });
-
-        for <prefix infix postfix> -> $type {
-            for @!oplevels[0].ops{$type}.keys -> $op {
-                my $name = "$type\:<$op>";
-                my $sub = $type eq "infix" ?? -> $l, $r {} !! -> $expr {};
-                $!runtime.declare-var($name, Val::Sub::Builtin.new($name, $sub));
-            }
-        }
-    }
 
     method parse($program) {
         my %*assigned;
