@@ -50,15 +50,4 @@ use _007::Test;
     }
 }
 
-{
-    my $ast = q:to/./;
-          (stmtlist
-            (my (ident "o") (object))
-            (stexpr (call (ident "say")
-              (arglist (ident "o")))))
-        .
-
-    is-result $ast, "false", "an empty object boolifies to false";
-}
-
 done-testing;

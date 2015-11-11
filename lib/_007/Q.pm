@@ -133,7 +133,7 @@ role Q::Term::Object does Q::Term {
     }
 }
 
-role Q::Property {
+role Q::Property does Q {
     has $.key;
     has $.value;
     method new($key, $value) {

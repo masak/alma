@@ -82,7 +82,7 @@ role Val::Object does Val {
     }
 
     method truthy {
-        ?$.elements
+        ?%.properties
     }
 }
 
