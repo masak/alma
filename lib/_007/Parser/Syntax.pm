@@ -152,10 +152,6 @@ grammar _007::Parser::Syntax {
     token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
 
     method prefix {
-        # XXX: remove this hack
-        if / '->' /(self) {
-            return /<!>/(self);
-        }
         my @ops = $*parser.oplevel.ops<prefix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("prefix");
