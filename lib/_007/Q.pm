@@ -192,81 +192,51 @@ role Q::Unquote does Q {
     }
 }
 
-role Q::Prefix does Q::Expr {
+role Q::Prefix[$type] does Q::Expr {
     has $.expr;
-    has $.type = "";
+
+    method type { $type }
+
     method new($expr) { self.bless(:$expr) }
 
-    method eval($runtime) { ... }
+    method eval($runtime) {
+        my $e = $.expr.eval($runtime);
+        my $c = $runtime.get-var("prefix:$type");
+        return $runtime.call($c, [$e]);
+    }
+
     method interpolate($runtime) {
         self.new($.expr.interpolate($runtime));
     }
 }
 
-role Q::Prefix::Minus does Q::Prefix {
-    method type { "[-]" }
-    method eval($runtime) {
-        my $expr = $.expr.eval($runtime);
-        die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
-            unless $expr ~~ Val::Int;
-        return Val::Int.new(:value(-$expr.value));
-    }
-}
+role Q::Prefix::Minus does Q::Prefix["<->"] {}
 
-role Q::Prefix::Custom[$type] does Q::Prefix {
-    method type { "[$type]" }
-
-    method eval($runtime) {
-        my $e = $.expr.eval($runtime);
-        my $c = $runtime.get-var("prefix:<$type>");
-        return $runtime.call($c, [$e]);
-    }
-}
-
-role Q::Infix does Q::Expr {
+role Q::Infix[$type] does Q::Expr {
     has $.lhs;
     has $.rhs;
-    has $.type = "";
+
+    method type { $type }
+
     method new($lhs, $rhs) { self.bless(:$lhs, :$rhs) }
 
-    method eval($runtime) { ... }
+    method eval($runtime) {
+        my $l = $.lhs.eval($runtime);
+        my $r = $.rhs.eval($runtime);
+        my $c = $runtime.get-var("infix:$type");
+        return $runtime.call($c, [$l, $r]);
+    }
+
     method interpolate($runtime) {
         self.new($.lhs.interpolate($runtime), $.rhs.interpolate($runtime));
     }
 }
 
-role Q::Infix::Addition does Q::Infix {
-    method type { "[+]" }
-    method eval($runtime) {
-        my $lhs = $.lhs.eval($runtime);
-        die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
-            unless $lhs ~~ Val::Int;
-        my $rhs = $.rhs.eval($runtime);
-        die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
-            unless $rhs ~~ Val::Int;
-        return Val::Int.new(:value(
-            $lhs.value + $rhs.value
-        ));
-    }
-}
+role Q::Infix::Addition does Q::Infix["<+>"] {}
 
-role Q::Infix::Concat does Q::Infix {
-    method type { "[~]" }
-    method eval($runtime) {
-        my $lhs = $.lhs.eval($runtime);
-        die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
-            unless $lhs ~~ Val::Str;
-        my $rhs = $.rhs.eval($runtime);
-        die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
-            unless $rhs ~~ Val::Str;
-        return Val::Str.new(:value(
-            $lhs.value ~ $rhs.value
-        ));
-    }
-}
+role Q::Infix::Concat does Q::Infix["<~>"] {}
 
-role Q::Infix::Assignment does Q::Infix {
-    method type { "[=]" }
+role Q::Infix::Assignment does Q::Infix["<=>"] {
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
@@ -276,69 +246,23 @@ role Q::Infix::Assignment does Q::Infix {
     }
 }
 
-role Q::Infix::Eq does Q::Infix {
-    method type { "[==]" }
-    method eval($runtime) {
-        multi equal-value($, $) { False }
-        multi equal-value(Val::None, Val::None) { True }
-        multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
-        multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
-        multi equal-value(Val::Array $l, Val::Array $r) {
-            sub equal-at-index($i) {
-                equal-value($l.elements[$i], $r.elements[$i]);
-            }
+role Q::Infix::Eq does Q::Infix["<==>"] {}
 
-            [&&] $l.elements == $r.elements,
-                |(^$l.elements).map(&equal-at-index);
-        }
-        multi equal-value(Val::Block $l, Val::Block $r) {
-            $l.name eq $r.name
-                && equal-value($l.parameterlist, $r.parameterlist)
-                && equal-value($l.statementlist, $r.statementlist)
-        }
-        multi equal-value(Q $l, Q $r) {
-            sub same-avalue($attr) {
-                equal-value($attr.get_value($l), $attr.get_value($r));
-            }
-
-            [&&] $l.WHAT === $r.WHAT,
-                |$l.worthy-attributes.map(&same-avalue);
-        }
-        multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
-            sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
-
-            @l == @r && |(^@l).map(&equal-at-index);
-        }
-        multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
-
-        my $l = $.lhs.eval($runtime);
-        my $r = $.rhs.eval($runtime);
-        # converting Bool->Int because the implemented language doesn't have Bool
-        my $equal = +equal-value($l, $r);
-        return Val::Int.new(:value($equal));
-    }
-}
-
-role Q::Infix::Custom[$type] does Q::Infix {
-    method type { "[$type]" }
-
-    method eval($runtime) {
-        my $l = $.lhs.eval($runtime);
-        my $r = $.rhs.eval($runtime);
-        my $c = $runtime.get-var("infix:<$type>");
-        return $runtime.call($c, [$l, $r]);
-    }
-}
-
-role Q::Postfix does Q::Expr {
+role Q::Postfix[$type] does Q::Expr {
     has $.expr;
-    has $.type = "";
+
+    method type { $type }
+
     method new($expr) { self.bless(:$expr) }
 
-    method eval($runtime) { ... }
+    method eval($runtime) {
+        my $e = $.expr.eval($runtime);
+        my $c = $runtime.get-var("postfix:$type");
+        return $runtime.call($c, [$e]);
+    }
 }
 
-role Q::Postfix::Index does Q::Postfix {
+role Q::Postfix::Index does Q::Postfix["<[>"] {
     has $.index;
     method new($expr, $index) { self.bless(:$expr, :$index) }
 
@@ -369,7 +293,7 @@ role Q::Postfix::Index does Q::Postfix {
     }
 }
 
-role Q::Postfix::Call does Q::Postfix {
+role Q::Postfix::Call does Q::Postfix["<(>"] {
     has $.argumentlist;
     method new($expr, $argumentlist) { self.bless(:$expr, :$argumentlist) }
 
@@ -387,7 +311,7 @@ role Q::Postfix::Call does Q::Postfix {
     }
 }
 
-role Q::Postfix::Property does Q::Postfix {
+role Q::Postfix::Property does Q::Postfix["<.>"] {
     has $.ident;
     method new($expr, $ident) { self.bless(:$expr, :$ident) }
 
@@ -399,19 +323,6 @@ role Q::Postfix::Property does Q::Postfix {
 
     method interpolate($runtime) {
         self.new($.expr.interpolate($runtime), $.ident.interpolate($runtime));
-    }
-}
-
-role Q::Postfix::Custom[$type] does Q::Postfix {
-    method type { "[$type]" }
-
-    method eval($runtime) {
-        my $e = $.expr.eval($runtime);
-        my $c = $runtime.get-var("postfix:<$type>");
-        return $runtime.call($c, [$e]);
-    }
-    method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime));
     }
 }
 

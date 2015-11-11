@@ -156,27 +156,86 @@ class _007::Runtime::Builtins {
                 return .name;
             },
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
-                -> $expr {},
+                sub ($expr) {
+                    die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
+                        unless $expr ~~ Val::Int;
+                    return Val::Int.new(:value(-$expr.value));
+                },
                 :qtype(Q::Prefix::Minus),
                 :assoc<left>,
             ),
             'infix:<=>' => Val::Sub::Builtin.new('infix:<=>',
-                -> $lhs, $rhs {},
+                sub ($lhs, $rhs) {
+                    # can't express this one as a built-in sub -- because the lhs is an lvalue
+                    # XXX: investigate expressing it as a built-in macro
+                },
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
             'infix:<==>' => Val::Sub::Builtin.new('infix:<=>',
-                -> $lhs, $rhs {},
+                sub ($lhs, $rhs) {
+                    multi equal-value($, $) { False }
+                    multi equal-value(Val::None, Val::None) { True }
+                    multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
+                    multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
+                    multi equal-value(Val::Array $l, Val::Array $r) {
+                        sub equal-at-index($i) {
+                            equal-value($l.elements[$i], $r.elements[$i]);
+                        }
+
+                        [&&] $l.elements == $r.elements,
+                            |(^$l.elements).map(&equal-at-index);
+                    }
+                    multi equal-value(Val::Block $l, Val::Block $r) {
+                        $l.name eq $r.name
+                            && equal-value($l.parameterlist, $r.parameterlist)
+                            && equal-value($l.statementlist, $r.statementlist)
+                    }
+                    multi equal-value(Q $l, Q $r) {
+                        sub same-avalue($attr) {
+                            equal-value($attr.get_value($l), $attr.get_value($r));
+                        }
+
+                        [&&] $l.WHAT === $r.WHAT,
+                            |$l.worthy-attributes.map(&same-avalue);
+                    }
+                    multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
+                        sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
+
+                        @l == @r && |(^@l).map(&equal-at-index);
+                    }
+                    multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
+
+                    # converting Bool->Int because the implemented language doesn't have Bool
+                    my $equal = +equal-value($lhs, $rhs);
+                    return Val::Int.new(:value($equal));
+                },
                 :qtype(Q::Infix::Eq),
                 :assoc<left>,
             ),
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
-                -> $lhs, $rhs {},
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
+                        unless $lhs ~~ Val::Int;
+                    die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return Val::Int.new(:value(
+                        $lhs.value + $rhs.value
+                    ));
+                },
                 :qtype(Q::Infix::Addition),
                 :assoc<left>,
             ),
             'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
-                -> $lhs, $rhs {},
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
+                        unless $lhs ~~ Val::Str;
+                    die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
+                        unless $rhs ~~ Val::Str;
+                    return Val::Str.new(:value(
+                        $lhs.value ~ $rhs.value
+                    ));
+                },
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),

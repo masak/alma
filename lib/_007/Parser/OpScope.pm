@@ -14,9 +14,9 @@ class _007::Parser::OpScope {
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
-            prefix => Q::Prefix::Custom[$op],
-            infix => Q::Infix::Custom[$op],
-            postfix => Q::Postfix::Custom[$op],
+            prefix => Q::Prefix["<$op>"],
+            infix => Q::Infix["<$op>"],
+            postfix => Q::Postfix["<$op>"],
         }{$type};
 
         my @namespace := $type eq 'infix' ?? @!infixprec !! @!prepostfixprec;
