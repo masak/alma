@@ -29,17 +29,6 @@ class X::ParameterMismatch is Exception {
 }
 
 role Q {
-    method worthy-attributes {
-        sub aname($attr) { $attr.name.substr(2) }
-        sub avalue($attr) { $attr.get_value(self) }
-        sub worthy($attr) {
-            avalue($attr) !~~ Hash  # avoids showing static-lexpad
-                && aname($attr) ne "outer-frame"
-        }
-
-        return self.^attributes.grep(&worthy);
-    }
-
     method Str {
         sub pretty($_) {
             when Array {
@@ -55,7 +44,7 @@ role Q {
         sub aname($attr) { $attr.name.substr(2) }
         sub avalue($attr) { $attr.get_value(self) }
 
-        my @attrs = @.worthy-attributes;
+        my @attrs = self.attributes;
         if @attrs == 1 {
             return "{self.^name} {pretty(avalue(@attrs[0]))}";
         }
@@ -65,6 +54,15 @@ role Q {
         }
         my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
         return "{self.^name} \{\n$contents\n\}";
+    }
+
+    method attributes {
+        sub aname($attr) { $attr.name.substr(2) }
+        sub find($aname) { self.^attributes.first({ $aname eq aname($_) }) }
+
+        self.can("attribute-order")
+            ?? self.attribute-order.map({ find($_) })
+            !! self.^attributes;
     }
 }
 
@@ -124,6 +122,8 @@ role Q::Block does Q {
     has $.statementlist;
     has %.static-lexpad;
 
+    method attribute-order { <parameterlist statementlist> }
+
     method new($parameterlist, $statementlist) {
         self.bless(:$parameterlist, :$statementlist)
     }
@@ -151,6 +151,8 @@ role Q::Block does Q {
 
 role Q::Expr::Block does Q::Block {
     has $.outer-frame;
+
+    # attribute-order inherited and unchanged
 
     method new($parameterlist, $statementlist, $outer-frame) {
         self.bless(:$parameterlist, :$statementlist, :$outer-frame)
@@ -265,6 +267,8 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
     has $.index;
     method new($expr, $index) { self.bless(:$expr, :$index) }
 
+    method attribute-order { <expr index> }
+
     method eval($runtime) {
         given $.expr.eval($runtime) {
             when Val::Array {
@@ -296,6 +300,8 @@ role Q::Postfix::Call does Q::Postfix["<(>"] {
     has $.argumentlist;
     method new($expr, $argumentlist) { self.bless(:$expr, :$argumentlist) }
 
+    method attribute-order { <expr argumentlist> }
+
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
         die "macro is called at runtime"
@@ -313,6 +319,8 @@ role Q::Postfix::Call does Q::Postfix["<(>"] {
 role Q::Postfix::Property does Q::Postfix["<.>"] {
     has $.ident;
     method new($expr, $ident) { self.bless(:$expr, :$ident) }
+
+    method attribute-order { <expr ident> }
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
@@ -349,6 +357,8 @@ role Q::Statement::My does Q::Statement {
     has $.expr;
     method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
 
+    method attribute-order { <expr ident> }
+
     method run($runtime) {
         return
             unless $.expr;
@@ -365,6 +375,8 @@ role Q::Statement::Constant does Q::Statement {
     has $.ident;
     has $.expr;
     method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
+
+    method attribute-order { <expr ident> }
 
     method run($runtime) {
         # value has already been assigned
@@ -391,6 +403,8 @@ role Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
+
+    method attribute-order { <expr block> }
 
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
@@ -434,6 +448,8 @@ role Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
+
+    method attribute-order { <expr block> }
 
     method run($runtime) {
         multi split_elements(@array, 1) { return @array }
@@ -485,6 +501,8 @@ role Q::Statement::While does Q::Statement {
     has $.block;
     method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
+    method attribute-order { <expr block> }
+
     method run($runtime) {
         while (my $expr = $.expr.eval($runtime)).truthy {
             my $c = $.block.eval($runtime);
@@ -523,6 +541,8 @@ role Q::Statement::Sub does Q::Statement {
     has $.ident;
     has $.block;
 
+    method attribute-order { <ident block> }
+
     method new($ident, $block) {
         self.bless(:$ident, :$block);
     }
@@ -538,6 +558,8 @@ role Q::Statement::Sub does Q::Statement {
 role Q::Statement::Macro does Q::Statement {
     has $.ident;
     has $.block;
+
+    method attribute-order { <ident block> }
 
     method new($ident, $block) {
         self.bless(:$ident, :$block);
@@ -580,6 +602,8 @@ role Q::StatementList does Q {
 role Q::Trait does Q {
     has $.ident;
     has $.expr;
+
+    method attribute-order { <ident expr> }
 
     method new($ident, $expr) {
         self.bless(:$ident, :$expr);

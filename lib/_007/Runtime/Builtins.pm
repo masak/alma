@@ -197,7 +197,7 @@ class _007::Runtime::Builtins {
                         }
 
                         [&&] $l.WHAT === $r.WHAT,
-                            |$l.worthy-attributes.map(&same-avalue);
+                            |$l.attributes.map(&same-avalue);
                     }
                     multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
                         sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
