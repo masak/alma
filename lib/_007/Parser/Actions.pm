@@ -376,6 +376,14 @@ class _007::Parser::Actions {
         make $*parser.oplevel.ops<prefix>{~$/};
     }
 
+    method str($/) {
+        sub check-for-newlines($s) {
+            die X::String::Newline.new
+                if $s ~~ /\n/;
+        }(~$0);
+        make Q::Literal::Str.new(~$0);
+    }
+
     method term:none ($/) {
         make Q::Literal::None.new;
     }
@@ -385,11 +393,7 @@ class _007::Parser::Actions {
     }
 
     method term:str ($/) {
-        sub check-for-newlines($s) {
-            die X::String::Newline.new
-                if $s ~~ /\n/;
-        }(~$0);
-        make Q::Literal::Str.new(~$0);
+      make $<str>.ast;
     }
 
     method term:array ($/) {
@@ -414,6 +418,27 @@ class _007::Parser::Actions {
 
     method unquote ($/) {
         make Q::Unquote.new($<EXPR>.ast);
+    }
+
+    method term:object ($/) {
+        make Q::Term::Object.new($<property>».ast);
+    }
+
+    method property:str-expr ($/) {
+        make Q::Property.new($<str>.ast.value, $<value>.ast);
+    }
+
+    method property:ident-expr ($/) {
+        make Q::Property.new(~$<identifier>, $<value>.ast);
+    }
+
+    method property:ident ($/) {
+        make Q::Property.new(~$<identifier>, $<identifier>.ast);
+    }
+
+    method property:method ($/) {
+        make Q::Property.new(~$<identifier>, Q::Block.new($<parameterlist>.ast,
+            $<blockoid>.ast)); 
     }
 
     method infix($/) {

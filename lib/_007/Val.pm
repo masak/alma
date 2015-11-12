@@ -69,6 +69,23 @@ role Val::Array does Val {
 role Q::ParameterList { ... }
 role Q::StatementList { ... }
 
+role Val::Object does Val {
+    has %.properties{Str};
+
+    method Str {
+        '{' ~ %.properties.map({
+            my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
+              ?? .key
+              !! Val::Str.new(value => .key).quoted-Str;
+            "{$key}: {.value}"
+        }).sort.join(', ') ~ '}'
+    }
+
+    method truthy {
+        ?%.properties
+    }
+}
+
 role Val::Block does Val {
     has $.parameterlist = Q::ParameterList.new;
     has $.statementlist = Q::StatementList.new;

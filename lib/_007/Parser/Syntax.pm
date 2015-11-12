@@ -159,11 +159,13 @@ grammar _007::Parser::Syntax {
         return /<!>/(self);
     }
 
+    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
+
     proto token term {*}
     token term:none { None >> }
     token term:int { \d+ }
-    token term:str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
     token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
+    token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
     token term:identifier {
         <identifier>
@@ -182,8 +184,22 @@ grammar _007::Parser::Syntax {
         }
     }
     token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
+    token term:object { '{' ~ '}' <property>* % [\h* ',' \h*] }
 
     token unquote { '{{{' <EXPR> '}}}' }
+
+    proto token property {*}
+    rule property:str-expr { <key=str> ':' <value=term> }
+    rule property:ident-expr { <identifier> ':' <value=term> }
+    rule property:method {
+        <identifier>
+        <.newpad>
+        '(' ~ ')' <parameterlist>
+        <trait> *
+        <blockoid>:!s
+        <.finishpad>
+    }
+    token property:ident { <identifier> }
 
     method infix {
         my @ops = $*parser.oplevel.ops<infix>.keys;

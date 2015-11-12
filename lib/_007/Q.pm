@@ -117,6 +117,27 @@ role Q::Term::Array does Q::Term {
 
 role Q::Expr::Block { ... }
 
+role Q::Term::Object does Q::Term {
+    has @.properties;
+    method new(*@properties) {
+        self.bless(:@properties)
+    }
+
+    method eval($runtime) {
+        Val::Object.new(:properties(
+            @.properties.map({.key => .value.eval($runtime)})
+        ));
+    }
+}
+
+role Q::Property does Q {
+    has $.key;
+    has $.value;
+    method new($key, $value) {
+        self.bless(:$key, :$value);
+    }
+}
+
 role Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
@@ -324,8 +345,16 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
-        my $propname = $.ident.name;
-        return $runtime.property($obj, $propname);
+        do given $obj {
+          when Val::Object {
+            # XXX Promote the die to a X:: exception
+            $obj.properties{$.ident} // die "no such property: $.ident";
+          }
+          default {
+            my $propname = $.ident.name;
+            $runtime.property($obj, $propname);
+          }
+        }
     }
 
     method interpolate($runtime) {
