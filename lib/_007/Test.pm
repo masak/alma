@@ -114,7 +114,19 @@ sub check(Q::CompUnit $ast, $runtime) {
         }
     }
 
-    # XXX: should handle Q::Statement::Constant, too
+    multi handle(Q::Statement::Constant $constant) {
+        my $symbol = $constant.ident.name;
+        my $block = $runtime.current-frame();
+        die X::Redeclaration.new(:$symbol)
+            if $runtime.declared-locally($symbol);
+        die X::Redeclaration::Outer.new(:$symbol)
+            if %*assigned{$block ~ $symbol};
+        $runtime.declare-var($symbol);
+
+        if $constant.expr !=== Empty {    # XXX: this can go away once constants are guaranteed to have expressions
+            handle($constant.expr);
+        }
+    }
 
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($block.block.eval($runtime));
