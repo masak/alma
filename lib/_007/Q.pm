@@ -35,7 +35,6 @@ role Q {
         sub worthy($attr) {
             avalue($attr) !~~ Hash  # avoids showing static-lexpad
                 && aname($attr) ne "outer-frame"
-                && (aname($attr) ne "type" || avalue($attr) ne "")
         }
 
         return self.^attributes.grep(&worthy);
