@@ -69,17 +69,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my o = { bond: 7 };
+        my o = { james: "bond", bond: 7 };
 
         say(o.has("bond"));
-        say(o.has("james"));
+        say(o.has("jimmy"));
 
         say(o.get("bond"));
+
+        say(o.update({ bond: 8 }));
         .
 
     outputs
         $program,
-        "1\n0\n7\n",
+        qq[1\n0\n7\n\{bond: 8, james: "bond"\}\n],
         "built-in pseudo-inherited methods on objects";
 }
 

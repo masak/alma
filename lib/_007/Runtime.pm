@@ -193,6 +193,18 @@ role _007::Runtime {
                 }
             );
         }
+        elsif $propname eq "update" {
+            return Val::Sub::Builtin.new("update", sub ($newprops) {
+                    my @properties = $obj.properties.keys;
+                    sub updated($key) {
+                        $newprops.properties{$key} // $obj.properties{$key}
+                    }
+                    return Val::Object.new(:properties(@properties.map({
+                        $_ => updated($_)
+                    })));
+                }
+            );
+        }
         else {
             die X::PropertyNotFound.new(:$propname);
         }
