@@ -217,6 +217,10 @@ role _007::Runtime {
                 }
             );
         }
+        elsif $propname eq "id" {
+            # XXX: Make this work for Q-type objects, too.
+            return $obj.id;
+        }
         else {
             die X::PropertyNotFound.new(:$propname);
         }

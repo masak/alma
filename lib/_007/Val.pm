@@ -69,8 +69,11 @@ role Val::Array does Val {
 role Q::ParameterList { ... }
 role Q::StatementList { ... }
 
+our $global-object-id = 0;
+
 role Val::Object does Val {
     has %.properties{Str};
+    has $.id = $global-object-id++;
 
     method Str {
         '{' ~ %.properties.map({
