@@ -173,6 +173,23 @@ role _007::Runtime {
         if $obj ~~ Q {
             return $builtins.property($obj, $propname);
         }
-        return $obj.properties{$propname} // die X::PropertyNotFound.new(:$propname);
+        if $obj.properties{$propname} :exists {
+            return $obj.properties{$propname};
+        }
+        elsif $propname eq "has" {
+            return Val::Sub::Builtin.new(
+                "has", sub ($prop) {
+                    # XXX: problem: we're not lying hard enough here. we're missing
+                    #      both Q objects, which are still hard-coded into the
+                    #      substrate, and the special-cased properties
+                    #      <get has extend update id>
+                    my $exists = $obj.properties{$prop.value} :exists ?? 1 !! 0;
+                    return Val::Int.new(:value($exists));
+                }
+            );
+        }
+        else {
+            die X::PropertyNotFound.new(:$propname);
+        }
     }
 }

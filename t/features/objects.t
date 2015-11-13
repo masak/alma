@@ -67,4 +67,18 @@ use _007::Test;
     is-error $ast, X::PropertyNotFound, "can't access non-existing property (brackets syntax)";
 }
 
+{
+    my $program = q:to/./;
+        my o = { bond: 7 };
+
+        say(o.has("bond"));
+        say(o.has("james"));
+        .
+
+    outputs
+        $program,
+        "1\n0\n",
+        "built-in pseudo-inherited methods on objects";
+}
+
 done-testing;
