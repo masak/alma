@@ -315,7 +315,7 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
                 my $propname = $property.value;
-                return .properties{$propname} // die "no such property '$propname'";
+                return .properties{$propname} // die X::PropertyNotFound.new(:$propname);
             }
             when Q {
                 my $property = $.index.eval($runtime);

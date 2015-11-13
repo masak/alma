@@ -54,7 +54,17 @@ use _007::Test;
             (stexpr (access (ident "o") (ident "a"))))
         .
 
-    is-error $ast, X::PropertyNotFound, "can't access non-existing property";
+    is-error $ast, X::PropertyNotFound, "can't access non-existing property (dot syntax)";
+}
+
+{
+    my $ast = q:to/./;
+          (stmtlist
+            (my (ident "o") (object))
+            (stexpr (index (ident "o") (str "b"))))
+        .
+
+    is-error $ast, X::PropertyNotFound, "can't access non-existing property (brackets syntax)";
 }
 
 done-testing;
