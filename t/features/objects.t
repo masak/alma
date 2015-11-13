@@ -77,11 +77,13 @@ use _007::Test;
         say(o.get("bond"));
 
         say(o.update({ bond: 8 }));
+
+        say({ x: 1 }.extend({ y: 2 }));
         .
 
     outputs
         $program,
-        qq[1\n0\n7\n\{bond: 8, james: "bond"\}\n],
+        qq[1\n0\n7\n\{bond: 8, james: "bond"\}\n\{x: 1, y: 2\}\n],
         "built-in pseudo-inherited methods on objects";
 }
 

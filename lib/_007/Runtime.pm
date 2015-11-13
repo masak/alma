@@ -205,6 +205,18 @@ role _007::Runtime {
                 }
             );
         }
+        elsif $propname eq "extend" {
+            return Val::Sub::Builtin.new("update", sub ($newprops) {
+                    my @properties = $obj.properties.keys;
+                    my @newproperties = $newprops.properties.keys;
+                    return Val::Object.new(:properties(|@properties.map({
+                        $_ => $obj.properties{$_}
+                    }), |@newproperties.map({
+                        $_ => $newprops.properties{$_}
+                    })));
+                }
+            );
+        }
         else {
             die X::PropertyNotFound.new(:$propname);
         }
