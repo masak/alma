@@ -170,6 +170,9 @@ role _007::Runtime {
 
     method property($obj, $propname) {
         my $builtins = _007::Runtime::Builtins.new(:runtime(self));
-        return $builtins.property($obj, $propname);
+        if $obj ~~ Q {
+            return $builtins.property($obj, $propname);
+        }
+        return $obj.properties{$propname} // die X::PropertyNotFound.new(:$propname);
     }
 }

@@ -310,14 +310,7 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
-            when Val::Object {
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
-                my $propname = $property.value;
-                return .properties{$propname} // die X::PropertyNotFound.new(:$propname);
-            }
-            when Q {
+            when Val::Object | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
@@ -361,14 +354,7 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
         my $propname = $.ident.name;
-        do given $obj {
-          when Val::Object {
-            $obj.properties{$propname} // die X::PropertyNotFound.new(:$propname);
-          }
-          default {
-            $runtime.property($obj, $propname);
-          }
-        }
+        $runtime.property($obj, $propname);
     }
 
     method interpolate($runtime) {
