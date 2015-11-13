@@ -73,11 +73,13 @@ use _007::Test;
 
         say(o.has("bond"));
         say(o.has("james"));
+
+        say(o.get("bond"));
         .
 
     outputs
         $program,
-        "1\n0\n",
+        "1\n0\n7\n",
         "built-in pseudo-inherited methods on objects";
 }
 

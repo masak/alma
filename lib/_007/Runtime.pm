@@ -176,9 +176,14 @@ role _007::Runtime {
         if $obj.properties{$propname} :exists {
             return $obj.properties{$propname};
         }
+        elsif $propname eq "get" {
+            return Val::Sub::Builtin.new("get", sub ($prop) {
+                    return self.property($obj, $prop.value);
+                }
+            );
+        }
         elsif $propname eq "has" {
-            return Val::Sub::Builtin.new(
-                "has", sub ($prop) {
+            return Val::Sub::Builtin.new("has", sub ($prop) {
                     # XXX: problem: we're not lying hard enough here. we're missing
                     #      both Q objects, which are still hard-coded into the
                     #      substrate, and the special-cased properties
