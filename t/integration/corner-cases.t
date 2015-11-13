@@ -288,14 +288,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say "Mr Bond!";
-        .
-
-    parse-error $program, X::Syntax::BogusListop, "confusing Perl 6 `say X` with 007 `say(X)`";
-}
-
-{
-    my $program = q:to/./;
         say(x);
         my x;
         .

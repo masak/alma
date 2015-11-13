@@ -39,13 +39,6 @@ class X::Precedence::Incompatible is Exception {
     method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }
 
-class X::Syntax::BogusListop is Exception {
-    has Str $.wrong;
-    has Str $.right;
-
-    method message { "Illegal use of listop function call syntax '$.wrong'. (Did you mean '$.right'?)" }
-}
-
 class X::Macro::Postdeclared is Exception {
     has Str $.name;
 
