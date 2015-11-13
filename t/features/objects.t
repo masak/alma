@@ -32,7 +32,19 @@ use _007::Test;
             (access (ident "o") (ident "a"))))))
         .
 
-    is-result $ast, "1\n", "can access an object's property";
+    is-result $ast, "1\n", "can access an object's property (dot syntax)";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "o")
+            (object (property "b" (int 7))))
+          (stexpr (call (ident "say") (arglist
+            (index (ident "o") (str "b"))))))
+        .
+
+    is-result $ast, "7\n", "can access an object's property (brackets syntax)";
 }
 
 {

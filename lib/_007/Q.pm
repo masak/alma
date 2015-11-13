@@ -310,6 +310,13 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
+            when Val::Object {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                return .properties{$propname} // die "no such property '$propname'";
+            }
             when Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
