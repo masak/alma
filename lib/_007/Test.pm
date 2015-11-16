@@ -40,7 +40,7 @@ sub read(Str $ast) is export {
         block       => Q::Block,
     ;
 
-    my grammar _007::Syntax {
+    my grammar AST::Syntax {
         regex TOP { \s* <expr> \s* }
         proto token expr {*}
         token expr:list { '(' ~ ')' [<expr>+ % \s+] }
@@ -66,8 +66,8 @@ sub read(Str $ast) is export {
         method expr:str ($/) { make ~$0 }
     };
 
-    _007::Syntax.parse($ast, :$actions)
-        or die "failure";
+    AST::Syntax.parse($ast, :$actions)
+        or die "couldn't parse AST syntax";
     return Q::CompUnit.new(Q::Block.new(
         Q::ParameterList.new(),
         $/.ast
