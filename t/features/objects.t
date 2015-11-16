@@ -4,16 +4,17 @@ use _007::Test;
 
 {
     my @exprs = «
-        '{}'  "(object)"
-        '{"a": 1}' '(object (property "a" (int 1)))'
-        '{a}' '(object (property "a" (ident "a")))'
-        '{a : 1}' '(object (property "a" (int 1)))'
-        '{ a: 1}' '(object (property "a" (int 1)))'
-        '{a: 1 }' '(object (property "a" (int 1)))'
-        '{a: 1}' '(object (property "a" (int 1)))'
-        '{a() {}}' '(object (property "a" (block (paramlist) (stmtlist))))'
-        '{a(a, b) {}}' '(object (property "a" (block
-          (paramlist (ident "a") (ident "b")) (stmtlist))))'
+        '{}'  '(object (ident "Object") (proplist))'
+        '{"a": 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
+        '{a}' '(object (ident "Object") (proplist (property "a" (ident "a"))))'
+        '{a : 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
+        '{ a: 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
+        '{a: 1 }' '(object (ident "Object") (proplist (property "a" (int 1))))'
+        '{a: 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
+        '{a() {}}' '(object (ident "Object") (proplist
+          (property "a" (block (paramlist) (stmtlist)))))'
+        '{a(a, b) {}}' '(object (ident "Object") (proplist (property "a" (block
+          (paramlist (ident "a") (ident "b")) (stmtlist)))))'
     »;
 
     for @exprs -> $expr, $frag {
@@ -27,7 +28,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "o")
-            (object (property "a" (int 1))))
+            (object (ident "Object") (proplist (property "a" (int 1)))))
           (stexpr (call (ident "say") (arglist
             (access (ident "o") (ident "a"))))))
         .
@@ -39,7 +40,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "o")
-            (object (property "b" (int 7))))
+            (object (ident "Object") (proplist (property "b" (int 7)))))
           (stexpr (call (ident "say") (arglist
             (index (ident "o") (str "b"))))))
         .
@@ -50,7 +51,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-            (my (ident "o") (object))
+            (my (ident "o") (object (ident "Object") (proplist)))
             (stexpr (access (ident "o") (ident "a"))))
         .
 
@@ -60,7 +61,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-            (my (ident "o") (object))
+            (my (ident "o") (object (ident "Object") (proplist)))
             (stexpr (index (ident "o") (str "b"))))
         .
 

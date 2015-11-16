@@ -126,14 +126,15 @@ role Q::Term::Array does Q::Term {
 role Q::Expr::Block { ... }
 
 role Q::Term::Object does Q::Term {
-    has @.properties;
-    method new(*@properties) {
-        self.bless(:@properties)
+    has $.type;
+    has $.propertylist;
+    method new($type, $propertylist) {
+        self.bless(:$type, :$propertylist)
     }
 
     method eval($runtime) {
         Val::Object.new(:properties(
-            @.properties.map({.key => .value.eval($runtime)})
+            $.propertylist.properties.map({.key => .value.eval($runtime)})
         ));
     }
 }
@@ -143,6 +144,14 @@ role Q::Property does Q {
     has $.value;
     method new($key, $value) {
         self.bless(:$key, :$value);
+    }
+}
+
+role Q::PropertyList does Q {
+    has @.properties handles <elems Numeric Real list>;
+    method new(*@properties) { self.bless(:@properties) }
+    method interpolate($runtime) {
+        self.new(@.properties».interpolate($runtime));
     }
 }
 

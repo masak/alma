@@ -421,7 +421,13 @@ class _007::Parser::Actions {
     }
 
     method term:object ($/) {
-        make Q::Term::Object.new($<property>».ast);
+        make Q::Term::Object.new(
+            Q::Identifier.new("Object"),
+            $<propertylist>.ast);
+    }
+
+    method propertylist ($/) {
+        make Q::PropertyList.new($<property>».ast);
     }
 
     method property:str-expr ($/) {

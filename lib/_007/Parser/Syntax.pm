@@ -178,7 +178,9 @@ grammar _007::Parser::Syntax {
         }
     }
     token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
-    token term:object { '{' ~ '}' [[<.ws> <property>]* % [\h* ','] <.ws>] }
+    token term:object { '{' ~ '}' <propertylist> }
+
+    token propertylist { [<.ws> <property>]* % [\h* ','] <.ws> }
 
     token unquote { '{{{' <EXPR> '}}}' }
 

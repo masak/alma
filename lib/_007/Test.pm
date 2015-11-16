@@ -37,6 +37,7 @@ sub read(Str $ast) is export {
         stmtlist    => Q::StatementList,
         paramlist   => Q::ParameterList,
         arglist     => Q::ArgumentList,
+        proplist    => Q::PropertyList,
         block       => Q::Block,
     ;
 
