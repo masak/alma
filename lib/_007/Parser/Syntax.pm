@@ -1,4 +1,48 @@
 use _007::Val;
+use _007::Q;
+
+my %types = map { $_ => 1 }, <
+    Q::Identifier
+    Q::Literal::None
+    Q::Literal::Int
+    Q::Literal::Str
+    Q::Term::Array
+    Q::Term::Object
+    Q::Property
+    Q::PropertyList
+    Q::Block
+    Q::Expr::Block
+    Q::Identifier
+    Q::Unquote
+    Q::Prefix
+    Q::Prefix::Minus
+    Q::Infix
+    Q::Infix::Addition
+    Q::Infix::Concat
+    Q::Infix::Assignment
+    Q::Infix::Eq
+    Q::Postfix
+    Q::Postfix::Index
+    Q::Postfix::Call
+    Q::Postfix::Property
+    Q::ParameterList
+    Q::ArgumentList
+    Q::Statement::My
+    Q::Statement::Constant
+    Q::Statement::Expr
+    Q::Statement::If
+    Q::Statement::Block
+    Q::CompUnit
+    Q::Statement::For
+    Q::Statement::While
+    Q::Statement::Return
+    Q::Statement::Sub
+    Q::Statement::Macro
+    Q::Statement::BEGIN
+    Q::StatementList
+    Q::Trait
+    Q::Term::Quasi
+>;
 
 grammar _007::Parser::Syntax {
     token TOP {
@@ -161,6 +205,8 @@ grammar _007::Parser::Syntax {
     token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
+    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
+    token term:object { [<identifier> <?{ %types{$<identifier>} }> <.ws>]? '{' ~ '}' <propertylist> }
     token term:identifier {
         <identifier>
         {
@@ -177,8 +223,6 @@ grammar _007::Parser::Syntax {
             }
         }
     }
-    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
-    token term:object { '{' ~ '}' <propertylist> }
 
     token propertylist { [<.ws> <property>]* % [\h* ','] <.ws> }
 

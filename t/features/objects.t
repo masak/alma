@@ -91,4 +91,17 @@ use _007::Test;
         "built-in pseudo-inherited methods on objects";
 }
 
+{
+    my $program = q:to/./;
+        my q = Q::Identifier { name: "foo" };
+
+        say(q.name);
+        .
+
+    outputs
+        $program,
+        qq[foo\n],
+        "object literal syntax prefixed by type";
+}
+
 done-testing;
