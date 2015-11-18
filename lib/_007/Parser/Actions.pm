@@ -1,4 +1,5 @@
 use _007::Q;
+use _007::Parser::Exceptions;
 
 class _007::Parser::Actions {
     method finish-block($block) {
@@ -421,6 +422,17 @@ class _007::Parser::Actions {
     }
 
     method term:object ($/) {
+        if $<identifier> {
+            my $type = ~$<identifier>;
+            sub aname($attr) { $attr.name.substr(2) }
+            my %known-properties = $*parser.types{$type}.map({ aname($_) => 1 });
+            for $<propertylist>.ast.properties -> $p {
+                my $property = $p.key;
+                die X::Property::NotDeclared.new(:$type, :$property)
+                    unless %known-properties{$property};
+            }
+        }
+
         make Q::Term::Object.new(
             Q::Identifier.new("Object"),
             $<propertylist>.ast);

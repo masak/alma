@@ -104,4 +104,15 @@ use _007::Test;
         "object literal syntax prefixed by type";
 }
 
+{
+    my $program = q:to/./;
+        my q = Q::Identifier { dunnexist: "foo" };
+        .
+
+    parse-error
+        $program,
+        X::Property::NotDeclared,
+        "the object property doesn't exist on that type";
+}
+
 done-testing;

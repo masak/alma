@@ -44,3 +44,10 @@ class X::Macro::Postdeclared is Exception {
 
     method message { "Macro $.name declared after it was called" }
 }
+
+class X::Property::NotDeclared is Exception {
+    has Str $.type;
+    has Str $.property;
+
+    method message { "The property '$.name' is not defined on type '$.type'" }
+}
