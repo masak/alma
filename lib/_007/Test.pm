@@ -3,42 +3,43 @@ use _007;
 use Test;
 
 sub read(Str $ast) is export {
-    my %qclass_lookup =
-        none        => Q::Literal::None,
-        int         => Q::Literal::Int,
-        str         => Q::Literal::Str,
-        array       => Q::Term::Array,
-        object      => Q::Term::Object,
-        property    => Q::Property,
+    my %q_lookup =
+        none        => -> { Q::Literal::None.new },
+        int         => -> $value { Q::Literal::Int.new(:$value) },
+        str         => -> $value { Q::Literal::Str.new(:$value) },
+        array       => -> *@elements { Q::Term::Array.new(:@elements) },
+        object      => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
+        property    => -> $key, $value { Q::Property.new(:$key, :$value) },
 
-        '-'         => Q::Prefix::Minus,
+        '-'         => -> $expr { Q::Prefix::Minus.new(:$expr) },
 
-        '+'         => Q::Infix::Addition,
-        '~'         => Q::Infix::Concat,
-        assign      => Q::Infix::Assignment,
-        '=='        => Q::Infix::Eq,
+        '+'         => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
+        '~'         => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
+        assign      => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
+        '=='        => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs) },
 
-        call        => Q::Postfix::Call,
-        index       => Q::Postfix::Index,
-        access      => Q::Postfix::Property,
+        call        => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },
+        index       => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
+        access      => -> $expr, $ident { Q::Postfix::Property.new(:$expr, :$ident) },
 
-        my          => Q::Statement::My,
-        stexpr      => Q::Statement::Expr,
-        if          => Q::Statement::If,
-        stblock     => Q::Statement::Block,
-        sub         => Q::Statement::Sub,
-        return      => Q::Statement::Return,
-        for         => Q::Statement::For,
-        while       => Q::Statement::While,
-        begin       => Q::Statement::BEGIN,
-        macro       => Q::Statement::Macro,
+        my          => -> $ident, $expr = Any { Q::Statement::My.new(:$ident, :$expr) },
+        stexpr      => -> $expr { Q::Statement::Expr.new(:$expr) },
+        if          => -> $expr, $block { Q::Statement::If.new(:$expr, :$block) },
+        stblock     => -> $block { Q::Statement::Block.new(:$block) },
+        sub         => -> $ident, $block { Q::Statement::Sub.new(:$ident, :$block) },
+        macro       => -> $ident, $block { Q::Statement::Macro.new(:$ident, :$block) },
+        return      => -> $expr = Any { Q::Statement::Return.new(:$expr) },
+        for         => -> $expr, $block { Q::Statement::For.new(:$expr, :$block) },
+        while       => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
+        begin       => -> $block { Q::Statement::BEGIN.new(:$block) },
 
-        ident       => Q::Identifier,
-        stmtlist    => Q::StatementList,
-        paramlist   => Q::ParameterList,
-        arglist     => Q::ArgumentList,
-        proplist    => Q::PropertyList,
-        block       => Q::Block,
+        ident       => -> $name { Q::Identifier.new(:$name) },
+        block       => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
+
+        stmtlist    => -> *@statements { Q::StatementList.new(:@statements) },
+        paramlist   => -> *@parameters { Q::ParameterList.new(:@parameters) },
+        arglist     => -> *@arguments { Q::ArgumentList.new(:@arguments) },
+        proplist    => -> *@properties { Q::PropertyList.new(:@properties) },
     ;
 
     my grammar AST::Syntax {
@@ -57,10 +58,9 @@ sub read(Str $ast) is export {
         method expr:list ($/) {
             my $qname = ~$<expr>[0];
             die "Unknown name: $qname"
-                unless %qclass_lookup{$qname} :exists;
-            my $qclass = %qclass_lookup{$qname};
+                unless %q_lookup{$qname} :exists;
             my @rest = $<expr>».ast[1..*];
-            make $qclass.new(|@rest);
+            make %q_lookup{$qname}(|@rest);
         }
         method expr:symbol ($/) { make ~$/ }
         method expr:int ($/) { make +$/ }
@@ -69,10 +69,10 @@ sub read(Str $ast) is export {
 
     AST::Syntax.parse($ast, :$actions)
         or die "couldn't parse AST syntax";
-    return Q::CompUnit.new(Q::Block.new(
-        Q::ParameterList.new(),
-        $/.ast
-    ));
+    return Q::CompUnit.new(:block(Q::Block.new(
+        :parameterlist(Q::ParameterList.new()),
+        :statementlist($/.ast)
+    )));
 }
 
 role StrOutput {
@@ -113,7 +113,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $my.expr !=== Empty {
+        if $my.expr !=== Any {
             handle($my.expr);
         }
     }
@@ -127,7 +127,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $constant.expr !=== Empty {    # XXX: this can go away once constants are guaranteed to have expressions
+        if $constant.expr !=== Any {    # XXX: this can go away once constants are guaranteed to have expressions
             handle($constant.expr);
         }
     }

@@ -39,6 +39,7 @@ class X::PropertyNotFound is Exception {
 role Q {
     method Str {
         sub pretty($_) {
+            when Any:U { return "None" }
             when Array {
                 return .elems == 0
                     ?? "[]"
@@ -81,15 +82,12 @@ role Q::Literal does Q::Expr {
 }
 
 role Q::Literal::None does Q::Literal {
-    method new() { self.bless }
-
     method eval($) { Val::None.new }
     method interpolate($) { self }
 }
 
 role Q::Literal::Int does Q::Literal {
     has $.value;
-    method new(Int $value) { self.bless(:$value) }
 
     method eval($) { Val::Int.new(:$.value) }
     method interpolate($) { self }
@@ -97,7 +95,6 @@ role Q::Literal::Int does Q::Literal {
 
 role Q::Literal::Str does Q::Literal {
     has $.value;
-    method new(Str $value) { self.bless(:$value) }
 
     method eval($) {
         my $value = $.value.subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
@@ -111,15 +108,12 @@ role Q::Term does Q::Expr {
 
 role Q::Term::Array does Q::Term {
     has @.elements;
-    method new(*@elements) {
-        self.bless(:@elements)
-    }
 
     method eval($runtime) {
         Val::Array.new(:elements(@.elements>>.eval($runtime)));
     }
     method interpolate($runtime) {
-        self.new(@.elements».interpolate($runtime));
+        self.new(:elements(@.elements».interpolate($runtime)));
     }
 }
 
@@ -128,9 +122,6 @@ role Q::Expr::Block { ... }
 role Q::Term::Object does Q::Term {
     has $.type;
     has $.propertylist;
-    method new($type, $propertylist) {
-        self.bless(:$type, :$propertylist)
-    }
 
     method eval($runtime) {
         Val::Object.new(:properties(
@@ -142,16 +133,12 @@ role Q::Term::Object does Q::Term {
 role Q::Property does Q {
     has $.key;
     has $.value;
-    method new($key, $value) {
-        self.bless(:$key, :$value);
-    }
 }
 
 role Q::PropertyList does Q {
     has @.properties handles <elems Numeric Real list>;
-    method new(*@properties) { self.bless(:@properties) }
     method interpolate($runtime) {
-        self.new(@.properties».interpolate($runtime));
+        self.new(:properties(@.properties».interpolate($runtime)));
     }
 }
 
@@ -161,10 +148,6 @@ role Q::Block does Q {
     has %.static-lexpad;
 
     method attribute-order { <parameterlist statementlist> }
-
-    method new($parameterlist, $statementlist) {
-        self.bless(:$parameterlist, :$statementlist)
-    }
 
     method eval($runtime) {
         my $outer-frame = $runtime.current-frame;
@@ -176,10 +159,10 @@ role Q::Block does Q {
         );
     }
     method interpolate($runtime) {
-        my $block = Q::Expr::Block.new(
-            $.parameterlist.interpolate($runtime),
-            $.statementlist.interpolate($runtime),
-            $runtime.current-frame);
+        Q::Expr::Block.new(
+            :parameterlist($.parameterlist.interpolate($runtime)),
+            :statementlist($.statementlist.interpolate($runtime)),
+            :outer-frame($runtime.current-frame));
         # XXX: but what about the static lexpad? we kind of lose it here, don't we?
         # what does that *mean* in practice? can we come up with an example where
         # it matters? if the static lexpad happens to contain a value which is a
@@ -191,10 +174,6 @@ role Q::Expr::Block does Q::Block {
     has $.outer-frame;
 
     # attribute-order inherited and unchanged
-
-    method new($parameterlist, $statementlist, $outer-frame) {
-        self.bless(:$parameterlist, :$statementlist, :$outer-frame)
-    }
 
     method eval($runtime) {
         Val::Block.new(
@@ -208,7 +187,6 @@ role Q::Expr::Block does Q::Block {
 
 role Q::Identifier does Q::Expr {
     has $.name;
-    method new(Str $name) { self.bless(:$name) }
 
     method eval($runtime) {
         return $runtime.get-var($.name);
@@ -218,7 +196,6 @@ role Q::Identifier does Q::Expr {
 
 role Q::Unquote does Q {
     has $.expr;
-    method new($expr) { self.bless(:$expr) }
 
     method eval($runtime) {
         die "Should never hit an unquote at runtime"; # XXX: turn into X::
@@ -236,8 +213,6 @@ role Q::Prefix[$type] does Q::Expr {
 
     method type { $type }
 
-    method new($expr) { self.bless(:$expr) }
-
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
         my $c = $runtime.get-var("prefix:$type");
@@ -245,7 +220,7 @@ role Q::Prefix[$type] does Q::Expr {
     }
 
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)));
     }
 }
 
@@ -257,8 +232,6 @@ role Q::Infix[$type] does Q::Expr {
 
     method type { $type }
 
-    method new($lhs, $rhs) { self.bless(:$lhs, :$rhs) }
-
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
@@ -267,7 +240,7 @@ role Q::Infix[$type] does Q::Expr {
     }
 
     method interpolate($runtime) {
-        self.new($.lhs.interpolate($runtime), $.rhs.interpolate($runtime));
+        self.new(:lhs($.lhs.interpolate($runtime)), :rhs($.rhs.interpolate($runtime)));
     }
 }
 
@@ -292,8 +265,6 @@ role Q::Postfix[$type] does Q::Expr {
 
     method type { $type }
 
-    method new($expr) { self.bless(:$expr) }
-
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
         my $c = $runtime.get-var("postfix:$type");
@@ -303,7 +274,6 @@ role Q::Postfix[$type] does Q::Expr {
 
 role Q::Postfix::Index does Q::Postfix["<[>"] {
     has $.index;
-    method new($expr, $index) { self.bless(:$expr, :$index) }
 
     method attribute-order { <expr index> }
 
@@ -330,13 +300,12 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
         }
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.index.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :index($.index.interpolate($runtime)));
     }
 }
 
 role Q::Postfix::Call does Q::Postfix["<(>"] {
     has $.argumentlist;
-    method new($expr, $argumentlist) { self.bless(:$expr, :$argumentlist) }
 
     method attribute-order { <expr argumentlist> }
 
@@ -350,13 +319,12 @@ role Q::Postfix::Call does Q::Postfix["<(>"] {
         return $runtime.call($c, @args);
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.argumentlist.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :argumentlist($.argumentlist.interpolate($runtime)));
     }
 }
 
 role Q::Postfix::Property does Q::Postfix["<.>"] {
     has $.ident;
-    method new($expr, $ident) { self.bless(:$expr, :$ident) }
 
     method attribute-order { <expr ident> }
 
@@ -367,23 +335,21 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
     }
 
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.ident.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :ident($.ident.interpolate($runtime)));
     }
 }
 
 role Q::ParameterList does Q {
     has @.parameters handles <elems Numeric Real list>;
-    method new(*@parameters) { self.bless(:@parameters) }
     method interpolate($runtime) {
-        self.new(@.parameters».interpolate($runtime));
+        self.new(:parameters(@.parameters».interpolate($runtime)));
     }
 }
 
 role Q::ArgumentList does Q {
     has @.arguments handles <elems Numeric Real list>;
-    method new(*@arguments) { self.bless(:@arguments) }
     method interpolate($runtime) {
-        self.new(@.arguments».interpolate($runtime));
+        self.new(:arguments(@.arguments».interpolate($runtime)));
     }
 }
 
@@ -393,7 +359,6 @@ role Q::Statement does Q {
 role Q::Statement::My does Q::Statement {
     has $.ident;
     has $.expr;
-    method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
 
     method attribute-order { <expr ident> }
 
@@ -404,15 +369,15 @@ role Q::Statement::My does Q::Statement {
         $runtime.put-var($.ident.name, $value);
     }
     method interpolate($runtime) {
-        self.new($.ident.interpolate($runtime),
-            $.expr === Empty ?? Empty !! $.expr.interpolate($runtime));
+        self.new(
+            :ident($.ident.interpolate($runtime)),
+            :expr($.expr === Any ?? Any !! $.expr.interpolate($runtime)));
     }
 }
 
 role Q::Statement::Constant does Q::Statement {
     has $.ident;
     has $.expr;
-    method new($ident, $expr = Empty) { self.bless(:$ident, :$expr) }
 
     method attribute-order { <expr ident> }
 
@@ -420,27 +385,26 @@ role Q::Statement::Constant does Q::Statement {
         # value has already been assigned
     }
     method interpolate($runtime) {
-        self.new($.ident.interpolate($runtime),
-            $.expr === Empty ?? Empty !! $.expr.interpolate($runtime));   # XXX: and here
+        self.new(
+            :ident($.ident.interpolate($runtime)),
+            :expr($.expr === Any ?? Any !! $.expr.interpolate($runtime)));   # XXX: and here
     }
 }
 
 role Q::Statement::Expr does Q::Statement {
     has $.expr;
-    method new($expr) { self.bless(:$expr) }
 
     method run($runtime) {
         $.expr.eval($runtime);
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)));
     }
 }
 
 role Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
-    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
     method attribute-order { <expr block> }
 
@@ -461,13 +425,12 @@ role Q::Statement::If does Q::Statement {
         }
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
     }
 }
 
 role Q::Statement::Block does Q::Statement {
     has $.block;
-    method new(Q::Block $block) { self.bless(:$block) }
 
     method run($runtime) {
         $runtime.enter($.block.eval($runtime));
@@ -475,7 +438,7 @@ role Q::Statement::Block does Q::Statement {
         $runtime.leave;
     }
     method interpolate($runtime) {
-        self.new($.block.interpolate($runtime));
+        self.new(:block($.block.interpolate($runtime)));
     }
 }
 
@@ -485,7 +448,6 @@ role Q::CompUnit does Q::Statement::Block {
 role Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
-    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
     method attribute-order { <expr block> }
 
@@ -530,14 +492,13 @@ role Q::Statement::For does Q::Statement {
         }
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
     }
 }
 
 role Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
-    method new($expr, Q::Block $block) { self.bless(:$expr, :$block) }
 
     method attribute-order { <expr block> }
 
@@ -557,21 +518,20 @@ role Q::Statement::While does Q::Statement {
         }
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime), $.block.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
     }
 }
 
 role Q::Statement::Return does Q::Statement {
     has $.expr;
-    sub NONE { role { method eval($) { Val::None.new }; method Str { "(no return value)" } } }
-    method new($expr = NONE) { self.bless(:$expr) }
 
     method run($runtime) {
+        my $value = $.expr === Any ?? Val::None.new !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
-        die X::Control::Return.new(:value($.expr.eval($runtime)), :$frame);
+        die X::Control::Return.new(:$value, :$frame);
     }
     method interpolate($runtime) {
-        self.new($.expr.interpolate($runtime));
+        self.new(:expr($.expr.interpolate($runtime)));
     }
 }
 
@@ -581,15 +541,11 @@ role Q::Statement::Sub does Q::Statement {
 
     method attribute-order { <ident block> }
 
-    method new($ident, $block) {
-        self.bless(:$ident, :$block);
-    }
-
     method run($runtime) {
     }
     method interpolate($runtime) {
-        self.new($.ident.interpolate($runtime),
-            $.block.interpolate($runtime));
+        self.new(:ident($.ident.interpolate($runtime)),
+            :block($.block.interpolate($runtime)));
     }
 }
 
@@ -599,33 +555,27 @@ role Q::Statement::Macro does Q::Statement {
 
     method attribute-order { <ident block> }
 
-    method new($ident, $block) {
-        self.bless(:$ident, :$block);
-    }
-
     method run($runtime) {
     }
     method interpolate($runtime) {
-        self.new($.ident.interpolate($runtime),
-            $.block.interpolate($runtime));
+        self.new(:ident($.ident.interpolate($runtime)),
+            :block($.block.interpolate($runtime)));
     }
 }
 
 role Q::Statement::BEGIN does Q::Statement {
     has $.block;
-    method new(Q::Block $block) { self.bless(:$block) }
 
     method run($runtime) {
         # a BEGIN block does not run at runtime
     }
     method interpolate($runtime) {
-        self.new($.block.interpolate($runtime));
+        self.new(:block($.block.interpolate($runtime)));
     }
 }
 
 role Q::StatementList does Q {
     has @.statements handles <elems Numeric Real list>;
-    method new(*@statements) { self.bless(:@statements) }
 
     method run($runtime) {
         for @.statements -> $statement {
@@ -633,7 +583,7 @@ role Q::StatementList does Q {
         }
     }
     method interpolate($runtime) {
-        self.new(@.statements».interpolate($runtime));
+        self.new(:statements(@.statements».interpolate($runtime)));
     }
 }
 
@@ -643,24 +593,19 @@ role Q::Trait does Q {
 
     method attribute-order { <ident expr> }
 
-    method new($ident, $expr) {
-        self.bless(:$ident, :$expr);
-    }
-
     method interpolate($runtime) {
-        self.new($.ident.interpolate($runtime), $.expr.interpolate($runtime));
+        self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
     }
 }
 
 role Q::Term::Quasi does Q::Term {
     has $.block;
-    method new($block) { self.bless(:$block) }
 
     method eval($runtime) {
         return $.block.interpolate($runtime);
     }
     method interpolate($runtime) {
-        self.new($.statementlist.interpolate($runtime));
+        self.new(:block($.block.interpolate($runtime)));
         # XXX: the fact that we keep interpolating inside of the quasi means
         # that unquotes encountered inside of this inner quasi will be
         # interpolated in the context of the outer quasi. is this correct?
