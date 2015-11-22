@@ -8,7 +8,7 @@ use _007::Test;
         .
 
     my $expected = read(
-        "(stmtlist (stexpr (+ (int 1) (int 1))))"
+        "(stmtlist (stexpr (infix:<+> (int 1) (int 1))))"
     ).block.Str.subst("Q::Block", "Q::Expr::Block");
     outputs $program, "$expected\n", "Basic quasi quoting";
 }

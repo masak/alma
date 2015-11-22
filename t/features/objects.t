@@ -29,8 +29,8 @@ use _007::Test;
         (stmtlist
           (my (ident "o")
             (object (ident "Object") (proplist (property "a" (int 1)))))
-          (stexpr (call (ident "say") (arglist
-            (access (ident "o") (ident "a"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist
+            (postfix:<.> (ident "o") (ident "a"))))))
         .
 
     is-result $ast, "1\n", "can access an object's property (dot syntax)";
@@ -41,8 +41,8 @@ use _007::Test;
         (stmtlist
           (my (ident "o")
             (object (ident "Object") (proplist (property "b" (int 7)))))
-          (stexpr (call (ident "say") (arglist
-            (index (ident "o") (str "b"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist
+            (postfix:<[]> (ident "o") (str "b"))))))
         .
 
     is-result $ast, "7\n", "can access an object's property (brackets syntax)";
@@ -52,7 +52,7 @@ use _007::Test;
     my $ast = q:to/./;
           (stmtlist
             (my (ident "o") (object (ident "Object") (proplist)))
-            (stexpr (access (ident "o") (ident "a"))))
+            (stexpr (postfix:<.> (ident "o") (ident "a"))))
         .
 
     is-error $ast, X::PropertyNotFound, "can't access non-existing property (dot syntax)";
@@ -62,7 +62,7 @@ use _007::Test;
     my $ast = q:to/./;
           (stmtlist
             (my (ident "o") (object (ident "Object") (proplist)))
-            (stexpr (index (ident "o") (str "b"))))
+            (stexpr (postfix:<[]> (ident "o") (str "b"))))
         .
 
     is-error $ast, X::PropertyNotFound, "can't access non-existing property (brackets syntax)";

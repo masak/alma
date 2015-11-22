@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (begin (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "won't get printed"))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "won't get printed"))))))))
         .
 
     is-result $ast, "", "BEGIN blocks don't run at runtime";

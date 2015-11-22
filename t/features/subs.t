@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub"))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "OH HAI from inside sub"))))))))
         .
 
     is-result $ast, "", "subs are not immediate";
@@ -16,12 +16,12 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "x") (str "one"))
-          (stexpr (call (ident "say") (arglist (ident "x"))))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "x"))))
           (sub (ident "f") (block (paramlist) (stmtlist
             (my (ident "x") (str "two"))
-            (stexpr (call (ident "say") (arglist (ident "x")))))))
-          (stexpr (call (ident "f") (arglist)))
-          (stexpr (call (ident "say") (arglist (ident "x")))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "x")))))))
+          (stexpr (postfix:<()> (ident "f") (arglist)))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "x")))))
         .
 
     is-result $ast, "one\ntwo\none\n", "subs have their own variable scope";
@@ -31,8 +31,8 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "f") (block (paramlist (ident "name")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name"))))))))
-          (stexpr (call (ident "f") (arglist (str "Bond")))))
+            (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Good evening, Mr ") (ident "name"))))))))
+          (stexpr (postfix:<()> (ident "f") (arglist (str "Bond")))))
         .
 
     is-result $ast, "Good evening, Mr Bond\n", "calling a sub with parameters works";
@@ -42,9 +42,9 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "f") (block (paramlist (ident "X") (ident "Y")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (ident "X") (ident "Y"))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (ident "X") (ident "Y"))))))))
           (my (ident "X") (str "y"))
-          (stexpr (call (ident "f") (arglist (str "X") (~ (ident "X") (ident "X"))))))
+          (stexpr (postfix:<()> (ident "f") (arglist (str "X") (infix:<~> (ident "X") (ident "X"))))))
         .
 
     is-result $ast, "Xyy\n", "arglist are evaluated before parameters are bound";
@@ -55,10 +55,10 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist (ident "callback")) (stmtlist
             (my (ident "scoping") (str "dynamic"))
-            (stexpr (call (ident "callback") (arglist))))))
+            (stexpr (postfix:<()> (ident "callback") (arglist))))))
           (my (ident "scoping") (str "lexical"))
-          (stexpr (call (ident "f") (arglist (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "scoping"))))))))))
+          (stexpr (postfix:<()> (ident "f") (arglist (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "scoping"))))))))))
         .
 
     is-result $ast, "lexical\n", "scoping is lexical";
@@ -67,9 +67,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "f") (arglist)))
+          (stexpr (postfix:<()> (ident "f") (arglist)))
           (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI from inside sub"))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "OH HAI from inside sub"))))))))
         .
 
     is-result $ast, "OH HAI from inside sub\n", "call a sub before declaring it";
@@ -78,10 +78,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "f") (arglist)))
+          (stexpr (postfix:<()> (ident "f") (arglist)))
           (my (ident "x") (str "X"))
           (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "x"))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "x"))))))))
         .
 
     is-result $ast, "None\n", "using an outer lexical in a sub that's called before the outer lexical's declaration";
@@ -91,11 +91,11 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (str "OH HAI")))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "OH HAI")))))))
           (sub (ident "g") (block (paramlist) (stmtlist
             (return (block (paramlist) (stmtlist
-              (stexpr (call (ident "f") (arglist)))))))))
-          (stexpr (call (call (ident "g") (arglist)) (arglist))))
+              (stexpr (postfix:<()> (ident "f") (arglist)))))))))
+          (stexpr (postfix:<()> (postfix:<()> (ident "g") (arglist)) (arglist))))
         .
 
     is-result $ast, "OH HAI\n", "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
@@ -104,9 +104,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "f") (arglist (str "Bond"))))
+          (stexpr (postfix:<()> (ident "f") (arglist (str "Bond"))))
           (sub (ident "f") (block (paramlist (ident "name")) (stmtlist
-            (stexpr (call (ident "say") (arglist (~ (str "Good evening, Mr ") (ident "name")))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Good evening, Mr ") (ident "name")))))))))
         .
 
     is-result $ast, "Good evening, Mr Bond\n", "calling a post-declared sub works (I)";

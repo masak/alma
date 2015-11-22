@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "say") (arglist (+ (int 38) (int 4))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<+> (int 38) (int 4))))))
         .
 
     is-result $ast, "42\n", "numeric addition works";
@@ -14,7 +14,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "say") (arglist (~ (str "Jame") (str "s Bond"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 
     is-result $ast, "James Bond\n", "string concatenation works";
@@ -24,7 +24,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (call (ident "say") (arglist (index (ident "ns") (int 1))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (int 1))))))
         .
 
     is-result $ast, "Bond\n", "array indexing works";
@@ -34,7 +34,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "ns") (array (array (str "Auric") (str "Goldfinger"))))
-          (stexpr (call (ident "say") (arglist (index (index (ident "ns") (int 0)) (int 1))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (postfix:<[]> (ident "ns") (int 0)) (int 1))))))
         .
 
     is-result $ast, "Goldfinger\n", "array indexing works on something that is not a variable name";
@@ -44,8 +44,8 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "x") (int 1))
-          (stexpr (= (ident "x") (int 2)))
-          (stexpr (call (ident "say") (arglist (ident "x")))))
+          (stexpr (infix:<=> (ident "x") (int 2)))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "x")))))
         .
 
     is-result $ast, "2\n", "assignment works";
@@ -61,15 +61,15 @@ use _007::Test;
           (my (ident "a1") (array (int 1) (int 2) (int 3)))
           (my (ident "a2") (array (int 1) (int 2) (str "3")))
 
-          (stexpr (call (ident "say") (arglist (== (ident "i1") (ident "i1")))))
-          (stexpr (call (ident "say") (arglist (== (ident "i1") (ident "i2")))))
-          (stexpr (call (ident "say") (arglist (== (ident "s1") (ident "s1")))))
-          (stexpr (call (ident "say") (arglist (== (ident "s1") (ident "s2")))))
-          (stexpr (call (ident "say") (arglist (== (ident "a1") (ident "a1")))))
-          (stexpr (call (ident "say") (arglist (== (ident "a1") (ident "a2")))))
-          (stexpr (call (ident "say") (arglist (== (ident "i1") (ident "s1")))))
-          (stexpr (call (ident "say") (arglist (== (ident "s1") (ident "a1")))))
-          (stexpr (call (ident "say") (arglist (== (ident "a1") (ident "i1"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "i1") (ident "i1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "i1") (ident "i2")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "s1") (ident "s1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "s1") (ident "s2")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "a1") (ident "a1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "a1") (ident "a2")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "i1") (ident "s1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "s1") (ident "a1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "a1") (ident "i1"))))))
         .
 
     is-result $ast, <1 0 1 0 1 0 0 0 0>.map(* ~ "\n").join, "equality testing works";
@@ -108,11 +108,11 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "empty") (block (paramlist) (stmtlist)))
-          (my (ident "none") (call (ident "empty") (arglist)))
-          (stexpr (call (ident "say") (arglist (== (ident "none") (ident "none")))))
-          (stexpr (call (ident "say") (arglist (== (ident "none") (int 0)))))
-          (stexpr (call (ident "say") (arglist (== (ident "none") (str "")))))
-          (stexpr (call (ident "say") (arglist (== (ident "none") (array))))))
+          (my (ident "none") (postfix:<()> (ident "empty") (arglist)))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "none") (ident "none")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "none") (int 0)))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "none") (str "")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "none") (array))))))
         .
 
     is-result $ast, "1\n0\n0\n0\n", "equality testing with none matches itself but nothing else";
@@ -122,7 +122,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (call (ident "say") (arglist (index (ident "ns") (- (int 2)))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (prefix:<-> (int 2)))))))
         .
 
     is-error $ast, X::Subscript::Negative, "negative array indexing is an error";
@@ -132,7 +132,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (call (ident "say") (arglist (index (ident "ns") (int 19))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (int 19))))))
         .
 
     is-error $ast, X::Subscript::TooLarge, "indexing beyond the last element is an error";
@@ -141,7 +141,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "say") (arglist (+ (int 38) (str "4"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<+> (int 38) (str "4"))))))
         .
 
     is-error $ast, X::TypeCheck, "adding non-ints is an error";
@@ -150,7 +150,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (call (ident "say") (arglist (~ (int 38) (str "4"))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (int 38) (str "4"))))))
         .
 
     is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
@@ -160,7 +160,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "ns") (str "Jim"))
-          (stexpr (call (ident "say") (arglist (index (ident "ns") (int 0))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (int 0))))))
         .
 
     is-error $ast, X::TypeCheck, "indexing a non-array is an error";

@@ -7,7 +7,7 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
             (return (int 7)))))
-          (stexpr (call (ident "say") (arglist (call (ident "f") (arglist))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "f") (arglist))))))
         .
 
     is-result $ast, "7\n", "sub returning an Int";
@@ -18,7 +18,7 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
             (return (str "Bond. James Bond.")))))
-          (stexpr (call (ident "say") (arglist (call (ident "f") (arglist))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "f") (arglist))))))
         .
 
     is-result $ast, "Bond. James Bond.\n", "sub returning a Str";
@@ -29,7 +29,7 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
             (return (array (int 1) (int 2) (str "three"))))))
-          (stexpr (call (ident "say") (arglist (call (ident "f") (arglist))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "f") (arglist))))))
         .
 
     is-result $ast, qq|[1, 2, "three"]\n|, "sub returning an Array";
@@ -40,8 +40,8 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
             (return (int 1953))
-            (stexpr (call (ident "say") (arglist (str "Dead code. Should have returned by now.")))))))
-          (stexpr (call (ident "say") (arglist (call (ident "f") (arglist))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "Dead code. Should have returned by now.")))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "f") (arglist))))))
         .
 
     is-result $ast, "1953\n", "a return statement forces immediate exit of the subroutine";
@@ -54,10 +54,10 @@ use _007::Test;
             (my (ident "b") (block (paramlist) (stmtlist
               (return (int 5)))))
             (sub (ident "g") (block (paramlist) (stmtlist
-              (stexpr (call (ident "b") (arglist))))))
-            (stexpr (call (ident "g") (arglist)))
-            (stexpr (call (ident "say") (arglist (str "Dead code. Should have returned from f.")))))))
-          (stexpr (call (ident "f") (arglist))))
+              (stexpr (postfix:<()> (ident "b") (arglist))))))
+            (stexpr (postfix:<()> (ident "g") (arglist)))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "Dead code. Should have returned from f.")))))))
+          (stexpr (postfix:<()> (ident "f") (arglist))))
         .
 
     is-result $ast, "", "return statements bind lexically to their surrounding subroutine";
@@ -70,8 +70,8 @@ use _007::Test;
             (my (ident "b") (block (paramlist) (stmtlist
               (return (int 5)))))
             (return (ident "b")))))
-          (my (ident "c") (call (ident "f") (arglist)))
-          (stexpr (call (ident "c") (arglist))))
+          (my (ident "c") (postfix:<()> (ident "f") (arglist)))
+          (stexpr (postfix:<()> (ident "c") (arglist))))
         .
 
     is-error $ast, X::ControlFlow::Return, "cannot run a return statement of a subroutine that already exited";
@@ -82,7 +82,7 @@ use _007::Test;
         (stmtlist
           (sub (ident "f") (block (paramlist) (stmtlist
             (return))))
-          (stexpr (call (ident "say") (arglist (call (ident "f") (arglist))))))
+          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "f") (arglist))))))
         .
 
     is-result $ast, "None\n", "sub returning nothing";

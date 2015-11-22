@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "n") (int 7))
-          (stexpr (call (ident "say") (arglist (ident "n")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "n")))))
         .
 
     is-result $ast, "7\n", "int type works";
@@ -16,7 +16,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "s") (str "Bond"))
-          (stexpr (call (ident "say") (arglist (ident "s")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "s")))))
         .
 
     is-result $ast, "Bond\n", "str type works";
@@ -33,7 +33,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "n") (array (int 1) (int 2)))
-          (stexpr (call (ident "say") (arglist (ident "n")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (ident "n")))))
         .
 
     is-result $ast, "[1, 2]\n", "array type works";

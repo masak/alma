@@ -7,8 +7,8 @@ use _007::Test;
         (stmtlist
           (my (ident "u") (int 3))
           (while (ident "u") (block (paramlist) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "u"))))
-            (stexpr (= (ident "u") (+ (ident "u") (- (int 1)))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "u"))))
+            (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (prefix:<-> (int 1)))))))))
         .
 
     is-result $ast, "3\n2\n1\n", "while loops stops when the condition is false";
@@ -20,7 +20,7 @@ use _007::Test;
           (my (ident "u") (int 3))
           (while (ident "u") (block (paramlist (ident "x")) (stmtlist
             (stexpr (ident "x"))
-            (stexpr (= (ident "u") (+ (ident "u") (- (int 1)))))))))
+            (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (prefix:<-> (int 1)))))))))
         .
 
     is-result $ast, "", "the block parameter is available from inside the loop";
@@ -31,8 +31,8 @@ use _007::Test;
         (stmtlist
           (my (ident "u") (int 3))
           (while (ident "u") (block (paramlist (ident "x")) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "x"))))
-            (stexpr (= (ident "u") (+ (ident "u") (- (int 1)))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "x"))))
+            (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (prefix:<-> (int 1)))))))))
         .
 
     is-result $ast, "3\n2\n1\n", "the block parameter has the expected value";
@@ -58,8 +58,8 @@ use _007::Test;
         (stmtlist
           (my (ident "u") (int 3))
           (while (ident "u") (block (paramlist (ident "a") (ident "b") (ident "c")) (stmtlist
-            (stexpr (call (ident "say") (arglist (ident "x"))))
-            (stexpr (= (ident "u") (+ (ident "u") (- (int 1)))))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "x"))))
+            (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (prefix:<-> (int 1)))))))))
         .
 
     is-error $ast, X::ParameterMismatch, "while loops don't accept more than one parameter";

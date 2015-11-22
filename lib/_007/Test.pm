@@ -4,42 +4,42 @@ use Test;
 
 sub read(Str $ast) is export {
     my %q_lookup =
-        none        => -> { Q::Literal::None.new },
-        int         => -> $value { Q::Literal::Int.new(:$value) },
-        str         => -> $value { Q::Literal::Str.new(:$value) },
-        array       => -> *@elements { Q::Term::Array.new(:@elements) },
-        object      => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
-        property    => -> $key, $value { Q::Property.new(:$key, :$value) },
+        none           => -> { Q::Literal::None.new },
+        int            => -> $value { Q::Literal::Int.new(:$value) },
+        str            => -> $value { Q::Literal::Str.new(:$value) },
+        array          => -> *@elements { Q::Term::Array.new(:@elements) },
+        object         => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
+        property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
-        '-'         => -> $expr { Q::Prefix::Minus.new(:$expr) },
+        'prefix:<->'   => -> $expr { Q::Prefix::Minus.new(:$expr) },
 
-        '+'         => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
-        '~'         => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
-        '='         => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
-        '=='        => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs) },
+        'infix:<+>'    => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
+        'infix:<~>'    => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
+        'infix:<=>'    => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
+        'infix:<==>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs) },
 
-        call        => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },
-        index       => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
-        access      => -> $expr, $ident { Q::Postfix::Property.new(:$expr, :$ident) },
+        'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },
+        'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
+        'postfix:<.>'  => -> $expr, $ident { Q::Postfix::Property.new(:$expr, :$ident) },
 
-        my          => -> $ident, $expr = Any { Q::Statement::My.new(:$ident, :$expr) },
-        stexpr      => -> $expr { Q::Statement::Expr.new(:$expr) },
-        if          => -> $expr, $block { Q::Statement::If.new(:$expr, :$block) },
-        stblock     => -> $block { Q::Statement::Block.new(:$block) },
-        sub         => -> $ident, $block { Q::Statement::Sub.new(:$ident, :$block) },
-        macro       => -> $ident, $block { Q::Statement::Macro.new(:$ident, :$block) },
-        return      => -> $expr = Any { Q::Statement::Return.new(:$expr) },
-        for         => -> $expr, $block { Q::Statement::For.new(:$expr, :$block) },
-        while       => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
-        begin       => -> $block { Q::Statement::BEGIN.new(:$block) },
+        my             => -> $ident, $expr = Any { Q::Statement::My.new(:$ident, :$expr) },
+        stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },
+        if             => -> $expr, $block { Q::Statement::If.new(:$expr, :$block) },
+        stblock        => -> $block { Q::Statement::Block.new(:$block) },
+        sub            => -> $ident, $block { Q::Statement::Sub.new(:$ident, :$block) },
+        macro          => -> $ident, $block { Q::Statement::Macro.new(:$ident, :$block) },
+        return         => -> $expr = Any { Q::Statement::Return.new(:$expr) },
+        for            => -> $expr, $block { Q::Statement::For.new(:$expr, :$block) },
+        while          => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
+        begin          => -> $block { Q::Statement::BEGIN.new(:$block) },
 
-        ident       => -> $name { Q::Identifier.new(:$name) },
-        block       => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
+        ident          => -> $name { Q::Identifier.new(:$name) },
+        block          => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
 
-        stmtlist    => -> *@statements { Q::StatementList.new(:@statements) },
-        paramlist   => -> *@parameters { Q::ParameterList.new(:@parameters) },
-        arglist     => -> *@arguments { Q::ArgumentList.new(:@arguments) },
-        proplist    => -> *@properties { Q::PropertyList.new(:@properties) },
+        stmtlist       => -> *@statements { Q::StatementList.new(:@statements) },
+        paramlist      => -> *@parameters { Q::ParameterList.new(:@parameters) },
+        arglist        => -> *@arguments { Q::ArgumentList.new(:@arguments) },
+        proplist       => -> *@properties { Q::PropertyList.new(:@properties) },
     ;
 
     my grammar AST::Syntax {
@@ -48,7 +48,7 @@ sub read(Str $ast) is export {
         token expr:list { '(' ~ ')' [<expr>+ % \s+] }
         token expr:int { \d+ }
         token expr:str { '"' ~ '"' ([<-["]> | '\\"']*) }
-        token expr:symbol { <!before '"'><!before \d> [<!before ')'> \S]+ }
+        token expr:symbol { <!before '"'><!before \d> ['()' || <!before ')'> \S]+ }
     }
 
     my $actions = role {
