@@ -44,7 +44,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "x") (int 1))
-          (stexpr (assign (ident "x") (int 2)))
+          (stexpr (= (ident "x") (int 2)))
           (stexpr (call (ident "say") (arglist (ident "x")))))
         .
 

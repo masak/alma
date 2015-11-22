@@ -102,7 +102,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "u") (int 0))
-          (stexpr (assign (ident "u") (+ (ident "u") (int 1)))))
+          (stexpr (= (ident "u") (+ (ident "u") (int 1)))))
         .
 
     parses-to $program, $ast, "assignment and addition";
@@ -145,7 +145,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (ident "x") (int 1))
-          (stexpr (assign (ident "x") (int 2))))
+          (stexpr (= (ident "x") (int 2))))
         .
 
     parses-to $program, $ast, "assignment (outside of a declaration)";

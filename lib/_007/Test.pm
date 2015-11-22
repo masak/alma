@@ -15,7 +15,7 @@ sub read(Str $ast) is export {
 
         '+'         => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
         '~'         => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
-        assign      => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
+        '='         => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
         '=='        => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs) },
 
         call        => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },

@@ -83,7 +83,7 @@ use _007::Test;
           (my (ident "x") (int 5))
           (stblock (block (paramlist) (stmtlist
             (stexpr (call (ident "say") (arglist (str "inside")))))))
-          (stexpr (assign (ident "x") (int 7))))
+          (stexpr (= (ident "x") (int 7))))
         .
 
     parses-to $program, $ast, "can have a statement after a block without a semicolon";
