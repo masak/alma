@@ -6,9 +6,9 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (ident "fib") (block (paramlist (ident "n")) (stmtlist
-            (if (infix:<==> (ident n) (int 0)) (block (paramlist) (stmtlist
+            (if (infix:<==> (ident "n") (int 0)) (block (paramlist) (stmtlist
               (return (int 1)))))
-            (if (infix:<==> (ident n) (int 1)) (block (paramlist) (stmtlist
+            (if (infix:<==> (ident "n") (int 1)) (block (paramlist) (stmtlist
               (return (int 1)))))
             (return (infix:<+> (postfix:<()> (ident "fib") (arglist (infix:<+> (ident "n") (prefix:<-> (int 1)))))
                        (postfix:<()> (ident "fib") (arglist (infix:<+> (ident "n") (prefix:<-> (int 2))))))))))
