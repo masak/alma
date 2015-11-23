@@ -84,6 +84,10 @@ role Val::Object does Val {
         }).sort.join(', ') ~ '}'
     }
 
+    method quoted-Str {
+        self.Str
+    }
+
     method truthy {
         ?%.properties
     }
