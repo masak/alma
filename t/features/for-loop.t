@@ -49,7 +49,7 @@ use _007::Test;
         (stmtlist
           (my (ident "a") (array (int 1) (int 2) (int 3)))
           (for (ident "a") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (str ".")))))))
+            (stexpr (postfix:<()> (ident "say") (arglist (str "."))))))))
         .
 
     is-result $ast, ".\n.\n.\n", "can loop over variable, not just literal array";
