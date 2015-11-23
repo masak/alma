@@ -58,7 +58,7 @@ use _007::Test;
         (stmtlist
           (my (ident "u") (int 3))
           (while (ident "u") (block (paramlist (ident "a") (ident "b") (ident "c")) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "x"))))
+            (stexpr (postfix:<()> (ident "say") (arglist (ident "u"))))
             (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (prefix:<-> (int 1)))))))))
         .
 
