@@ -94,7 +94,7 @@ role Val::Object does Val {
 }
 
 role Val::Block does Val {
-    has $.parameterlist = Q::ParameterList.new;
+    has $.parameterlist is rw = Q::ParameterList.new;
     has $.statementlist = Q::StatementList.new;
     has %.static-lexpad;
     has $.outer-frame;
@@ -133,7 +133,7 @@ role Val::Sub::Builtin does Val::Sub {
     has $.assoc;
     has %.precedence;
 
-    method new($name, $code, :$qtype, :$assoc, :%precedence) {
-        self.bless(:$name, :$code, :$qtype, :$assoc, :%precedence)
+    method new($name, $code, :$qtype, :$assoc, :%precedence, :$parameterlist) {
+        self.bless(:$name, :$code, :$qtype, :$assoc, :%precedence, :$parameterlist)
     }
 }

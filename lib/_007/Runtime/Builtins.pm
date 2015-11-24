@@ -240,11 +240,21 @@ class _007::Runtime::Builtins {
             return sub (|c) { wrap &fn(|c) };
         }
 
+        sub create-paramlist(@params) {
+            Q::ParameterList.new(:parameters(
+                @params».name».substr(1).map({ Q::Identifier.new(:name($_)) })
+            ));
+        }
+
         return @builtins.map: {
             when .value ~~ Callable {
-                .key => Val::Sub::Builtin.new(.key, _007ize(.value));
+                 my $paramlist = create-paramlist(.value.signature.params);
+                 .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($paramlist));
             }
-            when .value ~~ Val::Sub::Builtin { $_ }
+            when .value ~~ Val::Sub::Builtin {
+                .value.parameterlist = create-paramlist(.value.code.signature.params);
+                $_
+            }
             default { die "Unknown type {.value.^name}" }
         };
     }
