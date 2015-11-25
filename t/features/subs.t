@@ -118,4 +118,10 @@ use _007::Test;
     outputs $program, "Good evening, Mr Bond\n", "calling a post-declared sub works (II)";
 }
 
+{
+    my $program = 'my b = 42; sub g() { say(b) }; g()';
+
+    outputs $program, "42\n", "lexical scope works correctly from inside a sub";
+}
+
 done-testing;
