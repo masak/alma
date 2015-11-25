@@ -115,4 +115,17 @@ use _007::Test;
         "the object property doesn't exist on that type";
 }
 
+{
+    my $program = q:to/./;
+        my q = Q::Identifier { name: "foo" };
+
+        say(type(q));
+        .
+
+    outputs
+        $program,
+        qq[Q::Identifier\n],
+        "an object literal is of the declared type";
+}
+
 done-testing;

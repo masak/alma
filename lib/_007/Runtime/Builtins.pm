@@ -29,9 +29,7 @@ class _007::Runtime::Builtins {
                 Nil;
             },
             type     => -> $arg {
-                $arg ~~ Val::Sub
-                    ?? "Sub"
-                    !! $arg.^name.substr('Val::'.chars);
+                $arg.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "");
             },
             str => &str,
             int => sub ($_) {

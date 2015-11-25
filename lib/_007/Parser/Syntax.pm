@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Q;
 use _007::Parser::Exceptions;
 
 grammar _007::Parser::Syntax {
@@ -165,7 +166,7 @@ grammar _007::Parser::Syntax {
     token term:parens { '(' ~ ')' <EXPR> }
     token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
     token term:object {
-        [<identifier> <?{ $*parser.types{$<identifier>} }> <.ws>]?
+        [<identifier> <?{ types(){$<identifier>} :exists }> <.ws>]?
         '{' ~ '}' <propertylist>
     }
     token term:identifier {

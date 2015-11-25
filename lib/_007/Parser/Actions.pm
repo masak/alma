@@ -410,10 +410,11 @@ class _007::Parser::Actions {
     }
 
     method term:object ($/) {
+        my $type = ~($<identifier> // "Object");
+
         if $<identifier> {
-            my $type = ~$<identifier>;
             sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $*parser.types{$type}.map({ aname($_) => 1 });
+            my %known-properties = types(){$type}.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
                 my $property = $p.key.value;
                 die X::Property::NotDeclared.new(:$type, :$property)
@@ -422,7 +423,7 @@ class _007::Parser::Actions {
         }
 
         make Q::Term::Object.new(
-            :type(Q::Identifier.new(:name(Val::Str.new(:value("Object"))))),
+            :type(Q::Identifier.new(:name(Val::Str.new(:value($type))))),
             :propertylist($<propertylist>.ast));
     }
 
