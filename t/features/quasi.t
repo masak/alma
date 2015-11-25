@@ -29,7 +29,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        constant greeting_ast = Q::Literal::Str("Mr Bond!");
+        constant greeting_ast = Q::Literal::Str { value: "Mr Bond!" };
 
         macro foo() {
             return quasi {

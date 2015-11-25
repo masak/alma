@@ -17,7 +17,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro infix:<!!!>(l, r) {
-            return Q::Literal::Str("OH HAI");
+            return Q::Literal::Str { value: "OH HAI" };
         }
 
         say(1 !!! 2);
@@ -32,7 +32,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro prefix:<@>(x) {
-            return Q::Literal::Str("OH HAI");
+            return Q::Literal::Str { value: "OH HAI" };
         }
 
         say(@7);
@@ -47,7 +47,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro postfix:<?!>(x) {
-            return Q::Literal::Str("OH HAI");
+            return Q::Literal::Str { value: "OH HAI" };
         }
 
         say([]?!);

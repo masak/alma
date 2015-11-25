@@ -125,7 +125,7 @@ use _007::Test;
     outputs 'macro foo() {}; say(foo == foo)', "1\n", "a macro is equal to itself";
     outputs 'say(say == say)', "1\n", "a built-in sub is equal to itself";
     outputs 'say(infix:<+> == infix:<+>)', "1\n", "a built-in operator is equal to itself";
-    outputs 'say(Q::Identifier("foo") == Q::Identifier("foo"))', "1\n",
+    outputs 'say(Q::Identifier { name: "foo" } == Q::Identifier { name: "foo" })', "1\n",
         "two Qtrees with equal content are equal";
     outputs 'my a = []; for [1, 2] { sub fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
         "1\n", "the same sub from two different frames compares favorably to itself";
@@ -145,7 +145,7 @@ use _007::Test;
         "subs with different parameters are unequal";
     outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "0\n",
         "subs with different bodies are unequal";
-    outputs 'say(Q::Identifier("foo") == Q::Identifier("bar"))', "0\n",
+    outputs 'say(Q::Identifier { name: "foo" } == Q::Identifier { name: "bar" })', "0\n",
         "two Qtrees with distinct content are unequal";
 }
 

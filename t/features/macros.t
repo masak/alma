@@ -27,10 +27,12 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro foo() {
-            return Q::Postfix::Call(
-                Q::Identifier("say"),
-                Q::ArgumentList([Q::Literal::Str("OH HAI")])
-            );
+            return Q::Postfix::Call {
+                expr: Q::Identifier { name: "say" },
+                argumentlist: Q::ArgumentList {
+                    arguments: [Q::Literal::Str { value: "OH HAI" }]
+                }
+            };
         }
 
         foo();
