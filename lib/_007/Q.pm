@@ -40,14 +40,6 @@ role Q {
     method Str {
         sub pretty($_) {
             when Any:U { return "None" }
-            when Array {
-                return .elems == 0
-                    ?? "[]"
-                    !! .elems == 1 && .[0].Str.lines == 1
-                        ?? "[{.[0].Str}]"
-                        !! "[\n{.map({.Str}).join(",\n").indent(4)}\n]"
-            }
-            when Str { return .perl }
             when Val::Array { return .quoted-Str }
             when Val::Str { return .quoted-Str }
             default { return .Str }

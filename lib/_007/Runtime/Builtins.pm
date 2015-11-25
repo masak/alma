@@ -194,12 +194,6 @@ class _007::Runtime::Builtins {
                         [&&] $l.WHAT === $r.WHAT,
                             |$l.attributes.map(&same-avalue);
                     }
-                    multi equal-value(@l, @r) { # arrays occur in the internals of Qtrees
-                        sub equal-at-index($i) { equal-value(@l[$i], @r[$i]) }
-
-                        @l == @r && |(^@l).map(&equal-at-index);
-                    }
-                    multi equal-value(Str $l, Str $r) { $l eq $r } # strings do too
 
                     # converting Bool->Int because the implemented language doesn't have Bool
                     return wrap(+equal-value($lhs, $rhs));
