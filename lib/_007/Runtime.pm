@@ -38,7 +38,7 @@ role _007::Runtime {
         for $block.static-lexpad.kv -> $name, $value {
             self.declare-var($name, $value);
         }
-        for $block.statementlist.kv -> $i, $_ {
+        for $block.statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .ident.name;
                 my $parameterlist = .block.parameterlist;
@@ -52,7 +52,7 @@ role _007::Runtime {
                     :%static-lexpad,
                     :$outer-frame
                 );
-                self.declare-var($name, $val);
+                self.declare-var($name.value, $val);
             }
         }
     }
@@ -72,7 +72,7 @@ role _007::Runtime {
         @!frames[*-1];
     }
 
-    method !find($symbol, $frame is copy) {
+    method !find(Str $symbol, $frame is copy) {
         repeat until $frame === NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
@@ -83,17 +83,17 @@ role _007::Runtime {
         die X::Undeclared.new(:$symbol);
     }
 
-    method put-var($name, $value) {
+    method put-var(Str $name, $value) {
         my %pad := self!find($name, self.current-frame);
         %pad{$name} = $value;
     }
 
-    method get-var($name, $frame = self.current-frame) {
+    method get-var(Str $name, $frame = self.current-frame) {
         my %pad := self!find($name, $frame);
         return %pad{$name};
     }
 
-    method declare-var($name, $value?) {
+    method declare-var(Str $name, $value?) {
         self.current-frame.pad{$name} = Val::None.new;
         if defined $value {
             self.put-var($name, $value);
@@ -125,14 +125,14 @@ role _007::Runtime {
         return $!builtins.opscope;
     }
 
-    method sigbind($type, $c, @args) {
-        my $paramcount = $c.parameterlist.elems;
+    method sigbind($type, Val::Block $c, @args) {
+        my $paramcount = $c.parameterlist.parameters.elements.elems;
         my $argcount = @args.elems;
         die X::ParameterMismatch.new(:$type, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
         self.enter($c);
-        for @($c.parameterlist) Z @args -> ($param, $arg) {
-            my $name = $param.name;
+        for @($c.parameterlist.parameters.elements) Z @args -> ($param, $arg) {
+            my $name = $param.name.value;
             self.declare-var($name, $arg);
         }
     }
@@ -168,7 +168,7 @@ role _007::Runtime {
         return Val::None.new;
     }
 
-    method property($obj, $propname) {
+    method property($obj, Str $propname) {
         my $builtins = _007::Runtime::Builtins.new(:runtime(self));
         if $obj ~~ Q {
             return $builtins.property($obj, $propname);

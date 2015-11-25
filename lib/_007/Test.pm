@@ -7,9 +7,8 @@ sub read(Str $ast) is export {
         none           => -> { Q::Literal::None.new },
         int            => -> $value { Q::Literal::Int.new(:$value) },
         str            => -> $value { Q::Literal::Str.new(:$value) },
-        array          => -> *@elements { Q::Term::Array.new(:@elements) },
+        array          => -> *@elements { Q::Term::Array.new(:elements(Val::Array.new(:@elements))) },
         object         => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
-        property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
         'prefix:<->'   => -> $expr { Q::Prefix::Minus.new(:$expr) },
 
@@ -35,11 +34,12 @@ sub read(Str $ast) is export {
 
         ident          => -> $name { Q::Identifier.new(:$name) },
         block          => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
+        property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
-        stmtlist       => -> *@statements { Q::StatementList.new(:@statements) },
-        paramlist      => -> *@parameters { Q::ParameterList.new(:@parameters) },
-        arglist        => -> *@arguments { Q::ArgumentList.new(:@arguments) },
-        proplist       => -> *@properties { Q::PropertyList.new(:@properties) },
+        stmtlist       => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },
+        paramlist      => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
+        arglist        => -> *@arguments { Q::ArgumentList.new(:arguments(Val::Array.new(:elements(@arguments)))) },
+        proplist       => -> *@properties { Q::PropertyList.new(:properties(Val::Array.new(:elements(@properties)))) },
     ;
 
     my grammar AST::Syntax {
@@ -63,8 +63,8 @@ sub read(Str $ast) is export {
             make %q_lookup{$qname}(|@rest);
         }
         method expr:symbol ($/) { make ~$/ }
-        method expr:int ($/) { make +$/ }
-        method expr:str ($/) { make ~$0 }
+        method expr:int ($/) { make Val::Int.new(:value(+$/)) }
+        method expr:str ($/) { make Val::Str.new(:value((~$0).subst(q[\\"], q["], :g))) }
     };
 
     AST::Syntax.parse($ast, :$actions)
@@ -99,13 +99,13 @@ sub check(Q::CompUnit $ast, $runtime) {
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
-        for @$statementlist -> $statement {
+        for $statementlist.statements.elements -> $statement {
             handle($statement);
         }
     }
 
     multi handle(Q::Statement::My $my) {
-        my $symbol = $my.ident.name;
+        my $symbol = $my.ident.name.value;
         my $block = $runtime.current-frame();
         die X::Redeclaration.new(:$symbol)
             if $runtime.declared-locally($symbol);
@@ -119,7 +119,7 @@ sub check(Q::CompUnit $ast, $runtime) {
     }
 
     multi handle(Q::Statement::Constant $constant) {
-        my $symbol = $constant.ident.name;
+        my $symbol = $constant.ident.name.value;
         my $block = $runtime.current-frame();
         die X::Redeclaration.new(:$symbol)
             if $runtime.declared-locally($symbol);
@@ -141,11 +141,10 @@ sub check(Q::CompUnit $ast, $runtime) {
 
     multi handle(Q::Statement::Sub $sub) {
         my $outer-frame = $runtime.current-frame;
-        my $name = $sub.ident.name;
+        my $name = $sub.ident.name.value;
         my $val = Val::Sub.new(:$name,
             :parameterlist($sub.block.parameterlist),
             :statementlist($sub.block.statementlist),
-            :static-lexpad($sub.block.static-lexpad),
             :$outer-frame
         );
         $runtime.enter($val);
@@ -157,11 +156,10 @@ sub check(Q::CompUnit $ast, $runtime) {
 
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
-        my $name = $macro.ident.name;
+        my $name = $macro.ident.name.value;
         my $val = Val::Macro.new(:$name,
             :parameterlist($macro.block.parameterlist),
             :statementlist($macro.block.statementlist),
-            :static-lexpad($macro.block.static-lexpad),
             :$outer-frame
         );
         $runtime.enter($val);

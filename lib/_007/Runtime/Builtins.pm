@@ -68,15 +68,15 @@ class _007::Runtime::Builtins {
             filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
             map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
 
-            'Q::Literal::Int' => -> $int { Q::Literal::Int.new(:value($int.value)) },
-            'Q::Literal::Str' => -> $str { Q::Literal::Str.new(:value($str.value)) },
-            'Q::Term::Array' => -> $array { Q::Term::Array.new(:elements($array.elements)) },
+            'Q::Literal::Int' => -> $int { Q::Literal::Int.new(:value($int)) },
+            'Q::Literal::Str' => -> $str { Q::Literal::Str.new(:value($str)) },
+            'Q::Term::Array' => -> $array { Q::Term::Array.new(:elements($array)) },
             'Q::Literal::None' => -> { Q::Literal::None.new },
             'Q::Block' => -> $paramlist, $stmtlist { Q::Block.new(:parameterlist($paramlist), :statementlist($stmtlist)) },
-            'Q::Identifier' => -> $name { Q::Identifier.new(:name($name.value)) },
-            'Q::StatementList' => -> $array { Q::StatementList.new(:statements($array.elements)) },
-            'Q::ParameterList' => -> $array { Q::ParameterList.new(:parameters($array.elements)) },
-            'Q::ArgumentList' => -> $array { Q::ArgumentList.new(:arguments($array.elements)) },
+            'Q::Identifier' => -> $name { Q::Identifier.new(:name($name)) },
+            'Q::StatementList' => -> $array { Q::StatementList.new(:statements($array)) },
+            'Q::ParameterList' => -> $array { Q::ParameterList.new(:parameters($array)) },
+            'Q::ArgumentList' => -> $array { Q::ArgumentList.new(:arguments($array)) },
             'Q::Prefix::Minus' => -> $expr { Q::Prefix::Minus.new(:$expr) },
             'Q::Infix::Addition' => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
             'Q::Infix::Concat' => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
@@ -99,9 +99,6 @@ class _007::Runtime::Builtins {
             value => sub ($_) {
                 when Q::Literal::None {
                     return Val::None.new;
-                }
-                when Q::Term::Array {
-                    return Val::Array.new(:elements(.elements));
                 }
                 when Q::Literal {
                     return .value;
@@ -242,7 +239,9 @@ class _007::Runtime::Builtins {
 
         sub create-paramlist(@params) {
             Q::ParameterList.new(:parameters(
-                @params».name».substr(1).map({ Q::Identifier.new(:name($_)) })
+                Val::Array.new(:elements(@params».name».substr(1).map({
+                    Q::Identifier.new(:name(Val::Str.new(:value($_))))
+                })))
             ));
         }
 

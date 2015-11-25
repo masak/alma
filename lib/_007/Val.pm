@@ -104,7 +104,7 @@ role Val::Block does Val {
     }
 
     method pretty-params {
-        sprintf "(%s)", $.parameterlist».name.join(", ");
+        sprintf "(%s)", $.parameterlist.parameters.elements».name.join(", ");
     }
     method Str { "<block {$.pretty-params}>" }
 }

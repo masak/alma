@@ -49,5 +49,5 @@ class X::Property::NotDeclared is Exception {
     has Str $.type;
     has Str $.property;
 
-    method message { "The property '$.name' is not defined on type '$.type'" }
+    method message { "The property '$.property' is not defined on type '$.type'" }
 }

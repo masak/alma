@@ -65,7 +65,7 @@ role _007::Linter {
             }
 
             multi traverse(Q::StatementList $stmtlist) {
-                for @$stmtlist -> $stmt {
+                for $stmtlist.statements.elements -> $stmt {
                     traverse($stmt);
                 }
             }
@@ -107,7 +107,7 @@ role _007::Linter {
             }
 
             multi traverse(Q::ArgumentList $arglist) {
-                for @$arglist -> $expr {
+                for $arglist.arguments.elements -> $expr {
                     traverse($expr);
                 }
             }

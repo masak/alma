@@ -45,6 +45,7 @@ grammar _007::Parser::Syntax {
         constant <identifier>
         {
             my $var = $<identifier>.Str;
+            # XXX: a suspicious lack of redeclaration checks here
             $*runtime.declare-var($var);
         }
         ['=' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
