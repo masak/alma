@@ -181,6 +181,14 @@ class _007::Runtime::Builtins {
                         [&&] $l.elements == $r.elements,
                             |(^$l.elements).map(&equal-at-index);
                     }
+                    multi equal-value(Val::Object $l, Val::Object $r) {
+                        sub equal-at-key(Str $key) {
+                            equal-value($l.properties{$key}, $r.properties{$key});
+                        }
+
+                        [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
+                            |($l.properties.keys).map(&equal-at-key);
+                    }
                     multi equal-value(Val::Block $l, Val::Block $r) {
                         $l.name eq $r.name
                             && equal-value($l.parameterlist, $r.parameterlist)
