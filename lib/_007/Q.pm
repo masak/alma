@@ -625,6 +625,7 @@ role Q::Term::Quasi does Q::Term {
 
 sub types() is export {
     return %(
+        "Object"                 => Val::Object,
         "Q::Identifier"          => Q::Identifier,
         "Q::Literal::None"       => Q::Literal::None,
         "Q::Literal::Int"        => Q::Literal::Int,

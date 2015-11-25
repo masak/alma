@@ -412,7 +412,9 @@ class _007::Parser::Actions {
     method term:object ($/) {
         my $type = ~($<identifier> // "Object");
 
-        if $<identifier> {
+        # XXX: It's not really the name "Object" we should special-case,
+        #      it's the type object "Object" among the built-ins
+        if $type ne "Object" {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = types(){$type}.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {

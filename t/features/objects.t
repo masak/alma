@@ -128,4 +128,17 @@ use _007::Test;
         "an object literal is of the declared type";
 }
 
+{
+    my $program = q:to/./;
+        my q = Object { foo: 42 };
+
+        say(q.foo);
+        .
+
+    outputs
+        $program,
+        qq[42\n],
+        "can create a Val::Object by explicitly naming 'Object'";
+}
+
 done-testing;
