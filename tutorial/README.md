@@ -31,6 +31,7 @@ A small number of values in 007 can be expressed using literal syntax.
     "Bond."             Q::Literal::Str
     None                Q::Literal::None
     [0, 0, 7]           Q::Term::Array
+    { name: "Bond" }    Q::Term::Object
 
 Only double quotes are allowed. Strings don't have any form of
 interpolation.
@@ -227,41 +228,34 @@ subroutines. These should be fairly self-explanatory.
     filter(fn, array)
     map(fn, array)
 
-There are also constructor methods for creating program elements.
+## Objects
 
-    Q::Literal::Int(value)
-    Q::Literal::Str(value)
-    Q::Term::Array(value)
-    Q::Term::Quasi(block)
-    Q::Identifier(str)
-    Q::StatementList(array)
-    Q::ParameterList(array)
-    Q::ArgumentList(array)
-    Q::Block(paramlist, stmtlist)
-    Q::Trait(ident, expr)
-    Q::Prefix::Minus(expr)
-    Q::Infix::Addition(lhs, rhs)
-    Q::Infix::Concat(lhs, rhs)
-    Q::Infix::Assignment(lhs, rhs)
-    Q::Infix::Eq(lhs, rhs)
-    Q::Postfix::Call(lhs, args)
-    Q::Postfix::Index(lhs, rhs)
-    Q::Statement::My(ident, expr?)
-    Q::Statement::Constant(ident, expr)
-    Q::Statement::Expr(expr)
-    Q::Statement::If(expr, block)
-    Q::Statement::Block(block)
-    Q::Statement::Sub(ident, block)
-    Q::Statement::Macro(ident, block)
-    Q::Statement::Return(expr?)
-    Q::Statement::For(expr, block)
-    Q::Statement::While(expr, block)
-    Q::Statement::BEGIN(block)
+Object terms are delimited by braces, and contain property declarations
+separated by commas:
 
-If you put an expression into a `Q::Statement::Expr` by passing it to
-its constructor, you can get it out of the resulting Q object by calling
-the destructor `expr(q)`. All the parameter names above are also
-represented as destructors in the setting.
+    { name: "Bond", agency: "MI6" }
+
+Property keys can be quoted, for example when they aren't simple identifiers:
+
+    { "no, Mr Bond": "I expect you to die" }
+
+There's also syntactic sugar for defining properties with function values,
+making these two forms more or less equivalent:
+
+    { quip() { say("I'd say one of their aircraft is missing") } }
+
+    sub quip() { say("I'd say one of their aircraft is missing") }
+    { quip: quip }
+
+## Q objects
+
+All the different Q types can be created by specifying the type before an
+object term:
+
+    my q = Q::Statement::My {
+        ident: Q::Identifier { name: "name" },
+        expr: Q::Literal::Str { value: "Bond" }
+    };
 
 ## Macros
 
@@ -277,9 +271,12 @@ When a call to a macro is seen in the source code, the compiler will
 call the macro, and then install whatever code the macro said to return.
 
     macro greet() {
-        return Q::Postfix::Call(
-            Q::Identifier("say"),
-            Q::ArgumentList([Q::Literal::Str("Mr Bond!")]));
+        return Q::Postfix::Call {
+            expr: Q::Identifier { name: "say" },
+            argumentlist: Q::ArgumentList {
+                [Q::Literal::Str { value: "Mr Bond!" }]
+            }
+        };
     }
 
     greet();    # prints "Mr Bond!" when run
@@ -308,7 +305,7 @@ code to Qtrees. Mixing code and Qtrees like that is the main point of
 quasis. For instance, instead of specifying the string directly as
 above, we can construct the Q node for it, and inject it:
 
-    constant greeting_ast = Q::Literal::Str("Mr Bond!");
+    constant greeting_ast = Q::Literal::Str { value: "Mr Bond!" };
 
     macro greet() {
         return quasi {
