@@ -133,6 +133,16 @@ role Q::Term::Object does Q::Term {
                 $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
             ));
         }
+        elsif $.type.name.value eq "Int" | "Str" {
+            return types(){$.type.name.value}.new(
+                :value($.propertylist.properties.elements[0].value.eval($runtime).value)
+            );
+        }
+        elsif $.type.name.value eq "Array" {
+            return types(){$.type.name.value}.new(
+                :elements($.propertylist.properties.elements[0].value.eval($runtime).elements)
+            );
+        }
         else {
             return types(){$.type.name.value}.new(
                 |%($.propertylist.properties.elements.map({.key.value => .value.eval($runtime)}))
@@ -617,6 +627,10 @@ role Q::Term::Quasi does Q::Term {
 
 sub types() is export {
     return %(
+        "None"                   => Val::None,
+        "Int"                    => Val::Int,
+        "Str"                    => Val::Str,
+        "Array"                  => Val::Array,
         "Object"                 => Val::Object,
         "Q::Identifier"          => Q::Identifier,
         "Q::Literal::None"       => Q::Literal::None,

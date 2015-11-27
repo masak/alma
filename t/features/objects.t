@@ -141,4 +141,23 @@ use _007::Test;
         "can create a Val::Object by explicitly naming 'Object'";
 }
 
+{
+    my $program = q:to/./;
+        my i = Int { value: 7 };
+        my s = Str { value: "Bond" };
+        my a = Array { elements: [0, 0, 7] };
+        my n = None {};
+
+        say(i == 7);
+        say(s == "Bond");
+        say(a == [0, 0, 7]);
+        say(n == None);
+        .
+
+    outputs
+        $program,
+        qq[1\n1\n1\n1\n],
+        "can create normal Val:: objects using typed object literals";
+}
+
 done-testing;

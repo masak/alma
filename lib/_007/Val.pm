@@ -2,6 +2,10 @@ role Val {
     method truthy {
         True
     }
+
+    method attributes {
+        self.^attributes
+    }
 }
 
 role Val::None does Val {
