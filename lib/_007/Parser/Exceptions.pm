@@ -51,3 +51,10 @@ class X::Property::NotDeclared is Exception {
 
     method message { "The property '$.property' is not defined on type '$.type'" }
 }
+
+class X::Property::Required is Exception {
+    has Str $.type;
+    has Str $.property;
+
+    method message { "The property '$.property' is required on type '$.type'" }
+}

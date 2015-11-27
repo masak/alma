@@ -160,4 +160,15 @@ use _007::Test;
         "can create normal Val:: objects using typed object literals";
 }
 
+{
+    my $program = q:to/./;
+        my q = Q::Identifier {};
+        .
+
+    parse-error
+        $program,
+        X::Property::Required,
+        "need to specify required properties on objects";
+}
+
 done-testing;

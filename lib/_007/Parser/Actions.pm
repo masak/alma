@@ -422,6 +422,10 @@ class _007::Parser::Actions {
                 die X::Property::NotDeclared.new(:$type, :$property)
                     unless %known-properties{$property};
             }
+            for %known-properties.keys -> $property {
+                die X::Property::Required.new(:$type, :$property)
+                    unless $property eq any($<propertylist>.ast.properties.elements».key».value);
+            }
         }
 
         make Q::Term::Object.new(
