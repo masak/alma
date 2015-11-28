@@ -21,13 +21,13 @@ sub read(Str $ast) is export {
         'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
         'postfix:<.>'  => -> $expr, $ident { Q::Postfix::Property.new(:$expr, :$ident) },
 
-        my             => -> $ident, $expr = Any { Q::Statement::My.new(:$ident, :$expr) },
+        my             => -> $ident, $expr = Val::None.new { Q::Statement::My.new(:$ident, :$expr) },
         stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },
         if             => -> $expr, $block { Q::Statement::If.new(:$expr, :$block) },
         stblock        => -> $block { Q::Statement::Block.new(:$block) },
         sub            => -> $ident, $block { Q::Statement::Sub.new(:$ident, :$block) },
         macro          => -> $ident, $block { Q::Statement::Macro.new(:$ident, :$block) },
-        return         => -> $expr = Any { Q::Statement::Return.new(:$expr) },
+        return         => -> $expr = Val::None.new { Q::Statement::Return.new(:$expr) },
         for            => -> $expr, $block { Q::Statement::For.new(:$expr, :$block) },
         while          => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
         begin          => -> $block { Q::Statement::BEGIN.new(:$block) },
@@ -113,7 +113,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $my.expr !=== Any {
+        if $my.expr !~~ Val::None {
             handle($my.expr);
         }
     }
@@ -127,7 +127,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $constant.expr !=== Any {    # XXX: this can go away once constants are guaranteed to have expressions
+        if $constant.expr !~~ Val::None {    # XXX: this can go away once constants are guaranteed to have expressions
             handle($constant.expr);
         }
     }

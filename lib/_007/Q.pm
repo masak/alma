@@ -39,7 +39,6 @@ class X::PropertyNotFound is Exception {
 role Q {
     method Str {
         sub pretty($_) {
-            when Any:U { return "None" }
             when Val::Array { return .quoted-Str }
             when Val::Str { return .quoted-Str }
             default { return .Str }
@@ -376,14 +375,14 @@ role Q::Statement::My does Q::Statement {
 
     method run($runtime) {
         return
-            unless $.expr;
+            unless $.expr !~~ Val::None;
         my $value = $.expr.eval($runtime);
         $runtime.put-var($.ident.name.value, $value);
     }
     method interpolate($runtime) {
         self.new(
             :ident($.ident.interpolate($runtime)),
-            :expr($.expr === Any ?? Any !! $.expr.interpolate($runtime)));
+            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));
     }
 }
 
@@ -399,7 +398,7 @@ role Q::Statement::Constant does Q::Statement {
     method interpolate($runtime) {
         self.new(
             :ident($.ident.interpolate($runtime)),
-            :expr($.expr === Any ?? Any !! $.expr.interpolate($runtime)));   # XXX: and here
+            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));   # XXX: and here
     }
 }
 
@@ -538,7 +537,7 @@ role Q::Statement::Return does Q::Statement {
     has $.expr;
 
     method run($runtime) {
-        my $value = $.expr === Any ?? Val::None.new !! $.expr.eval($runtime);
+        my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }

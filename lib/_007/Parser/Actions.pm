@@ -23,13 +23,13 @@ class _007::Parser::Actions {
     method statement:my ($/) {
         make Q::Statement::My.new(
             :ident($<identifier>.ast),
-            :expr($<EXPR> ?? $<EXPR>.ast !! Any));
+            :expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
     }
 
     method statement:constant ($/) {
         make Q::Statement::Constant.new(
             :ident($<identifier>.ast),
-            :expr($<EXPR> ?? $<EXPR>.ast !! Any)); # XXX: remove ?? !! once we throw an error
+            :expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new)); # XXX: remove ?? !! once we throw an error
         my $name = $<identifier>.ast.name.value;
         my $value = $<EXPR>.ast.eval($*runtime);
         $*runtime.put-var($name, $value);
@@ -145,7 +145,7 @@ class _007::Parser::Actions {
     }
 
     method statement:return ($/) {
-        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! Any));
+        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
     }
 
     method statement:if ($/) {
