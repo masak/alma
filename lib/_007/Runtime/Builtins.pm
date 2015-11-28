@@ -66,8 +66,8 @@ class _007::Runtime::Builtins {
             filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
             map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
             melt     => sub ($q) {
-                die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Literal))
-                    unless $q ~~ Q::Literal;
+                die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Expr))
+                    unless $q ~~ Q::Expr;
                 return $q.eval($.runtime);
             },
 

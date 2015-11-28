@@ -32,4 +32,18 @@ use _007::Test;
         "cannot melt() a statement";
 }
 
+{
+    my $program = q:to/./;
+        my x = "Bond";
+        my q = Q::Identifier { name: "x" };
+
+        say(melt(q));
+        .
+
+    outputs
+        $program,
+        qq[Bond\n],
+        "melt() on a variable";
+}
+
 done-testing;
