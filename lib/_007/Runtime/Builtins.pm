@@ -69,7 +69,7 @@ class _007::Runtime::Builtins {
                 die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Literal))
                     unless $q ~~ Q::Literal;
                 return $q.eval($.runtime);
-            }
+            },
 
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
