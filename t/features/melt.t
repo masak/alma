@@ -15,4 +15,21 @@ use _007::Test;
         "melt() on literal int";
 }
 
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "q")
+            (object (ident "Q::Statement::My") (proplist
+              (property "ident" (object (ident "Q::Identifier") (proplist
+                (property "name" (str "agent")))))
+              (property "expr" (str "James Bond")))))
+          (stexpr (postfix:<()> (ident "melt") (arglist (ident "q")))))
+        .
+
+    is-error
+        $ast,
+        X::TypeCheck,
+        "cannot melt() a statement";
+}
+
 done-testing;

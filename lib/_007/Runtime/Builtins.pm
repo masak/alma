@@ -65,7 +65,11 @@ class _007::Runtime::Builtins {
             charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new(:value($pos.value), :length($s.value.elems)) },
             filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
             map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
-            melt     => -> $q { $q.eval($.runtime) }
+            melt     => sub ($q) {
+                die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Literal))
+                    unless $q ~~ Q::Literal;
+                return $q.eval($.runtime);
+            }
 
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
