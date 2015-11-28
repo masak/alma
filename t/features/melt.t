@@ -46,4 +46,22 @@ use _007::Test;
         "melt() on a variable";
 }
 
+{
+    my $program = q:to/./;
+        sub foo() {
+            my lookup = "hygienic";
+            return Q::Identifier { name: "lookup" };
+        }
+
+        my lookup = "unhygienic";
+        my ident = foo();
+        say(melt(ident));
+        .
+
+    outputs
+        $program,
+        qq[unhygienic\n],
+        "melted identifier lookup is unhygienic";
+}
+
 done-testing;
