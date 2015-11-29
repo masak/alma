@@ -1,5 +1,3 @@
-use _007::Q;
-use _007::Parser::OpScope;
 use _007::Parser::Syntax;
 use _007::Parser::Actions;
 
