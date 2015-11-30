@@ -38,19 +38,14 @@ class X::PropertyNotFound is Exception {
 
 role Q {
     method Str {
-        sub pretty($_) {
-            when Val::Array { return .quoted-Str }
-            when Val::Str { return .quoted-Str }
-            default { return .Str }
-        }
         sub aname($attr) { $attr.name.substr(2) }
         sub avalue($attr) { $attr.get_value(self) }
 
         my @attrs = self.attributes;
         if @attrs == 1 {
-            return "{self.^name} {pretty(avalue(@attrs[0]))}";
+            return "{self.^name} { avalue(@attrs[0]).Str }";
         }
-        sub keyvalue($attr) { aname($attr) ~ ": " ~ pretty(avalue($attr)) }
+        sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr) }
         if @attrs == 2 && aname(@attrs[1]) eq "expr" {  # prefix or postfix
             @attrs .= reverse;  # because it looks nicer to have expr first
         }
