@@ -112,6 +112,21 @@ role Q::Term::Array does Q::Term {
     }
 }
 
+role Q::Term::Quasi does Q::Term {
+    has $.block;
+
+    method eval($runtime) {
+        return $.block.interpolate($runtime);
+    }
+    method interpolate($runtime) {
+        self.new(:block($.block.interpolate($runtime)));
+        # XXX: the fact that we keep interpolating inside of the quasi means
+        # that unquotes encountered inside of this inner quasi will be
+        # interpolated in the context of the outer quasi. is this correct?
+        # can we come up with a case where it matters?
+    }
+}
+
 role Q::Expr::Block { ... }
 
 role Q::Term::Object does Q::Term {
@@ -598,21 +613,6 @@ role Q::Trait does Q {
 
     method interpolate($runtime) {
         self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
-    }
-}
-
-role Q::Term::Quasi does Q::Term {
-    has $.block;
-
-    method eval($runtime) {
-        return $.block.interpolate($runtime);
-    }
-    method interpolate($runtime) {
-        self.new(:block($.block.interpolate($runtime)));
-        # XXX: the fact that we keep interpolating inside of the quasi means
-        # that unquotes encountered inside of this inner quasi will be
-        # interpolated in the context of the outer quasi. is this correct?
-        # can we come up with a case where it matters?
     }
 }
 
