@@ -46,9 +46,6 @@ role Q {
             return "{self.^name} { avalue(@attrs[0]).Str }";
         }
         sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr) }
-        if @attrs == 2 && aname(@attrs[1]) eq "expr" {  # prefix or postfix
-            @attrs .= reverse;  # because it looks nicer to have expr first
-        }
         my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
         return "{self.^name} \{\n$contents\n\}";
     }
