@@ -14,6 +14,15 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<-> (int 46) (int 4))))))
+        .
+
+    is-result $ast, "42\n", "numeric subtraction works";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 
