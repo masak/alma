@@ -141,6 +141,28 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Addition),
                 :assoc<left>,
             ),
+            'infix:<->' => Val::Sub::Builtin.new('infix:<->',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<->, :got($lhs), :expected(Val::Int))
+                        unless $lhs ~~ Val::Int;
+                    die X::TypeCheck.new(:operation<->, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap($lhs.value - $rhs.value);
+                },
+                :qtype(Q::Infix::Subtraction),
+                :assoc<left>,
+            ),
+            'infix:<*>' => Val::Sub::Builtin.new('infix:<*>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
+                        unless $lhs ~~ Val::Int;
+                    die X::TypeCheck.new(:operation<*>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap($lhs.value * $rhs.value);
+                },
+                :qtype(Q::Infix::Multiplication),
+                :assoc<left>,
+            ),
             'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))

@@ -4,13 +4,13 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<*>(left, right) {
+        sub infix:<n>(left, right) {
         }
         .
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "infix:<*>") (block (paramlist (ident "left") (ident "right")) (stmtlist))))
+          (sub (ident "infix:<n>") (block (paramlist (ident "left") (ident "right")) (stmtlist))))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";
@@ -18,7 +18,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<*>(left, right) {
+        sub infix:<n>(left, right) {
             return 20;
         }
 
@@ -30,23 +30,23 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(4 * 5);
+        say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<*> should not be defined unless we define it";
+    parse-error $program, X::AdHoc, "infix:<n> should not be defined unless we define it";
 }
 
 {
     my $program = q:to/./;
         {
-            sub infix:<*>(left, right) {
+            sub infix:<n>(left, right) {
                 return 7;
             }
         }
-        say(4 * 5);
+        say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<*> should not be usable outside of its scope";
+    parse-error $program, X::AdHoc, "infix:<n> should not be usable outside of its scope";
 }
 
 {
