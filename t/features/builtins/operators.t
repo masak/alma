@@ -23,6 +23,15 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<*> (int 6) (int 7))))))
+        .
+
+    is-result $ast, "42\n", "numeric multiplication works";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 

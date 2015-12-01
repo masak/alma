@@ -266,6 +266,8 @@ role Q::Infix::Addition does Q::Infix["<+>"] {}
 
 role Q::Infix::Subtraction does Q::Infix["<->"] {}
 
+role Q::Infix::Multiplication does Q::Infix["<*>"] {}
+
 role Q::Infix::Concat does Q::Infix["<~>"] {}
 
 role Q::Infix::Assignment does Q::Infix["<=>"] {
