@@ -18,7 +18,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<*>(left, right) {
+        sub infix:<n>(left, right) {
             return 20;
         }
 
@@ -30,7 +30,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(4 * 5);
+        say(4 n 5);
         .
 
     parse-error $program, X::AdHoc, "infix:<*> should not be defined unless we define it";
@@ -39,11 +39,11 @@ use _007::Test;
 {
     my $program = q:to/./;
         {
-            sub infix:<*>(left, right) {
+            sub infix:<n>(left, right) {
                 return 7;
             }
         }
-        say(4 * 5);
+        say(4 n 5);
         .
 
     parse-error $program, X::AdHoc, "infix:<*> should not be usable outside of its scope";
