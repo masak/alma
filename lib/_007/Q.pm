@@ -409,7 +409,7 @@ role Q::Statement::Constant does Q::Statement {
     method interpolate($runtime) {
         self.new(
             :ident($.ident.interpolate($runtime)),
-            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));   # XXX: and here
+            :expr($.expr.interpolate($runtime)));
     }
 }
 

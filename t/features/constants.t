@@ -42,4 +42,15 @@ use _007::Test;
         "constants are visible from other constants";
 }
 
+{
+    my $program = q:to/./;
+        constant C;
+        .
+
+    parse-error
+        $program,
+        X::Syntax::Missing,
+        "constant declarations must have an assignment";
+}
+
 done-testing;

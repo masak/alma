@@ -129,9 +129,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($symbol);
 
-        if $constant.expr !~~ Val::None {    # XXX: this can go away once constants are guaranteed to have expressions
-            handle($constant.expr);
-        }
+        handle($constant.expr);
     }
 
     multi handle(Q::Statement::Block $block) {

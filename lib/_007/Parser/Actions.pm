@@ -27,9 +27,13 @@ class _007::Parser::Actions {
     }
 
     method statement:constant ($/) {
+        die X::Syntax::Missing.new(:what("initializer on constant declaration"))
+            unless $<EXPR>;
+
         make Q::Statement::Constant.new(
             :ident($<identifier>.ast),
-            :expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new)); # XXX: remove ?? !! once we throw an error
+            :expr($<EXPR>.ast));
+
         my $name = $<identifier>.ast.name.value;
         my $value = $<EXPR>.ast.eval($*runtime);
         $*runtime.put-var($name, $value);
