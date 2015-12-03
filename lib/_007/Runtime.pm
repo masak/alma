@@ -73,6 +73,11 @@ role _007::Runtime {
     }
 
     method !find(Str $symbol, $frame is copy) {
+        self!maybe-find($symbol, $frame)
+            // die X::Undeclared.new(:$symbol);
+    }
+
+    method !maybe-find(Str $symbol, $frame is copy) {
         repeat until $frame === NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
@@ -80,7 +85,7 @@ role _007::Runtime {
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;
-        die X::Undeclared.new(:$symbol);
+        return;
     }
 
     method put-var(Str $name, $value) {
@@ -93,6 +98,13 @@ role _007::Runtime {
         return %pad{$name};
     }
 
+    method maybe-get-var(Str $name) {
+        if self!maybe-find($name, self.current-frame) -> %pad {
+            return %pad{$name};
+        }
+        return;
+    }
+
     method declare-var(Str $name, $value?) {
         self.current-frame.pad{$name} = Val::None.new;
         if defined $value {
@@ -101,8 +113,7 @@ role _007::Runtime {
     }
 
     method declared($name) {
-        try self!find($name, self.current-frame) && return True;
-        return False;
+        so self!maybe-find($name, self.current-frame);
     }
 
     method declared-locally($name) {
