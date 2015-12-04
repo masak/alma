@@ -1,3 +1,8 @@
+* [tutorial](http://masak.github.io/007/)
+* [roadmap](https://github.com/masak/007/blob/master/ROADMAP.md)
+
+----
+
 *Prague, Czech Republic. Around two o'clock at night.*
 
 A single car pulls up to the section headquarters. Section chief JOHN DRYDEN gets out and looks around him before getting into the empty building.
@@ -240,7 +245,7 @@ Before Bond can answer, Dryden enters and shoots the contact.
 
 "I thought this was the pre-title sequence of a movie," mumbles Bond.
 
-"Anyway. While you were getting lost in your flashback, I looked over [the tutorial](http://masak.github.io/007/) of that language of yours. I'm intrigued! I need to think of a use for macros so I can try it out!" Dryden gets a distant look.
+"Anyway. While you were getting lost in your flashback, I looked over that language of yours. I'm intrigued! I need to think of a use for macros so I can try it out!" Dryden gets a distant look.
 
 "Well, the language itself is only a toy," confesses Bond. "A bit like the trinkets Q division tends to come up with. But we are hopeful about the lessons we will learn from building this."
 
