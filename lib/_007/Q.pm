@@ -28,7 +28,7 @@ class X::ParameterMismatch is Exception {
     }
 }
 
-class X::PropertyNotFound is Exception {
+class X::Property::NotFound is Exception {
     has $.propname;
 
     method message {
