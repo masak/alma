@@ -124,4 +124,32 @@ use _007::Test;
     outputs $program, "42\n", "lexical scope works correctly from inside a sub";
 }
 
+{
+    my $program = q:to/./;
+        sub f() {}
+        f = 5;
+        .
+
+    parse-error
+        $program,
+        X::Assignment::RO,
+        "cannot assign to a subroutine";
+}
+
+{
+    my $program = q:to/./;
+        sub f() {}
+        sub h(a, b, f) {
+            f = 17;
+            say(f == 17);
+        }
+        h(0, 0, 7);
+        say(f == 17);
+        .
+
+    outputs $program,
+        "1\n0\n",
+        "can assign to a parameter which hides a subroutine";
+}
+
 done-testing;

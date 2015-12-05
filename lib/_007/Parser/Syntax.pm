@@ -11,12 +11,14 @@ grammar _007::Parser::Syntax {
 
     token newpad { <?> {
         $*parser.push-oplevel;
+        @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
         my $block = Val::Block.new(
             :outer-frame($*runtime.current-frame));
         $*runtime.enter($block)
     } }
 
     token finishpad { <?> {
+        @*declstack.pop;
         $*parser.pop-oplevel;
     } }
 
@@ -28,26 +30,28 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
+    sub declare($decltype, $symbol) {
+        die X::Redeclaration.new(:$symbol)
+            if $*runtime.declared-locally($symbol);
+        my $block = $*runtime.current-frame();
+        die X::Redeclaration::Outer.new(:$symbol)
+            if %*assigned{$block ~ $symbol};
+        $*runtime.declare-var($symbol);
+        @*declstack[*-1]{$symbol} = $decltype;
+    }
+
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        {
-            my $symbol = $<identifier>.Str;
-            my $block = $*runtime.current-frame();
-            die X::Redeclaration.new(:$symbol)
-                if $*runtime.declared-locally($symbol);
-            die X::Redeclaration::Outer.new(:$symbol)
-                if %*assigned{$block ~ $symbol};
-            $*runtime.declare-var($symbol);
-        }
+        { declare("my", $<identifier>.Str); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
         constant <identifier>
         {
-            my $var = $<identifier>.Str;
+            my $symbol = $<identifier>.Str;
             # XXX: a suspicious lack of redeclaration checks here
-            $*runtime.declare-var($var);
+            declare("constant", $symbol);
         }
         ['=' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
                             # 'Missing initializer on constant declaration'
@@ -60,13 +64,7 @@ grammar _007::Parser::Syntax {
     rule statement:sub {
         sub [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
-        {
-            my $symbol = $<identifier>.Str;
-            my $block = $*runtime.current-frame();
-            die X::Redeclaration::Outer.new(:$symbol)
-                if %*assigned{$block ~ $symbol};
-            $*runtime.declare-var($symbol);
-        }
+        { declare("sub", $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <trait> *
@@ -76,13 +74,7 @@ grammar _007::Parser::Syntax {
     rule statement:macro {
         macro [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
-        {
-            my $symbol = $<identifier>.Str;
-            my $block = $*runtime.current-frame();
-            die X::Redeclaration::Outer.new(:$symbol)
-                if %*assigned{$block ~ $symbol};
-            $*runtime.declare-var($symbol);
-        }
+        { declare("macro", $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <trait> *
@@ -241,12 +233,7 @@ grammar _007::Parser::Syntax {
 
     rule parameterlist {
         [<identifier>
-            {
-                my $symbol = $<identifier>[*-1].Str;
-                die X::Redeclaration.new(:$symbol)
-                    if $*runtime.declared-locally($symbol);
-                $*runtime.declare-var($symbol);
-            }
+        { declare("parameter", $<identifier>[*-1].Str); }
         ]* % ','
     }
 }

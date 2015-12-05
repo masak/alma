@@ -14,6 +14,7 @@ class _007::Parser {
 
     method parse($program) {
         my %*assigned;
+        my @*declstack;
         my $*insub = False;
         my $*parser = self;
         my $*runtime = $!runtime;

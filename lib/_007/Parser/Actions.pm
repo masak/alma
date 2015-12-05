@@ -246,8 +246,13 @@ class _007::Parser::Actions {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
                         unless $t1 ~~ Q::Identifier;
                     my $block = $*runtime.current-frame();
-                    my $var = $t1.name;
-                    %*assigned{$block ~ $var}++;
+                    my $symbol = $t1.name.value;
+                    my %mutable = :my, :parameter;
+                    my $decltype = @*declstack[*-1]{$symbol}
+                        // die X::Undeclared.new(:$symbol);
+                    die X::Assignment::RO.new(:typename("$decltype '$symbol'"))
+                        unless %mutable{$decltype};
+                    %*assigned{$block ~ $symbol}++;
                 }
             }
         }

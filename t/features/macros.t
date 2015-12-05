@@ -44,4 +44,16 @@ use _007::Test;
         "expanding a macro and running the result at runtime";
 }
 
+{
+    my $program = q:to/./;
+        macro m() {}
+        m = 18000;
+        .
+
+    parse-error
+        $program,
+        X::Assignment::RO,
+        "cannot assign to a macro";
+}
+
 done-testing;

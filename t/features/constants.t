@@ -53,4 +53,47 @@ use _007::Test;
         "constant declarations must have an assignment";
 }
 
+{
+    my $program = q:to/./;
+        constant C = 42;
+        C = 5;
+        .
+
+    parse-error
+        $program,
+        X::Assignment::RO,
+        "cannot assign to a constant";
+}
+
+{
+    my $program = q:to/./;
+        constant C = 42;
+        if 1 {
+            C = 8;
+        }
+        .
+
+    parse-error
+        $program,
+        X::Assignment::RO,
+        "cannot assign to a constant (assignment is in a nested block)";
+}
+
+{
+    my $program = q:to/./;
+        constant C = "so very constant";
+        {
+            my C = "override";
+            C = "ok to assign";
+            say(C);
+        }
+        say(C);
+        .
+
+    outputs
+        $program,
+        "ok to assign\nso very constant\n",
+        "the 'cannot assign to constant' error is aware of lexical overrides";
+}
+
 done-testing;
