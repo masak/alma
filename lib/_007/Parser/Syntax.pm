@@ -30,7 +30,7 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    sub declare($decltype, $symbol) {
+    sub declare(Q::Declaration $decltype, $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $block = $*runtime.current-frame();
@@ -43,7 +43,7 @@ grammar _007::Parser::Syntax {
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        { declare("my", $<identifier>.Str); }
+        { declare(Q::Statement::My, $<identifier>.Str); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
@@ -51,7 +51,7 @@ grammar _007::Parser::Syntax {
         {
             my $symbol = $<identifier>.Str;
             # XXX: a suspicious lack of redeclaration checks here
-            declare("constant", $symbol);
+            declare(Q::Statement::Constant, $symbol);
         }
         ['=' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
                             # 'Missing initializer on constant declaration'
@@ -64,7 +64,7 @@ grammar _007::Parser::Syntax {
     rule statement:sub {
         sub [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
-        { declare("sub", $<identifier>.Str); }
+        { declare(Q::Statement::Sub, $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <trait> *
@@ -74,7 +74,7 @@ grammar _007::Parser::Syntax {
     rule statement:macro {
         macro [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
-        { declare("macro", $<identifier>.Str); }
+        { declare(Q::Statement::Macro, $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <trait> *
@@ -233,7 +233,7 @@ grammar _007::Parser::Syntax {
 
     rule parameterlist {
         [<parameter>
-        { declare("parameter", $<parameter>[*-1]<identifier>.Str); }
+        { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
         ]* % ','
     }
 

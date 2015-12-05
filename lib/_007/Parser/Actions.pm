@@ -247,11 +247,12 @@ class _007::Parser::Actions {
                         unless $t1 ~~ Q::Identifier;
                     my $block = $*runtime.current-frame();
                     my $symbol = $t1.name.value;
-                    my %mutable = :my, :parameter;
-                    my $decltype = @*declstack[*-1]{$symbol}
-                        // die X::Undeclared.new(:$symbol);
-                    die X::Assignment::RO.new(:typename("$decltype '$symbol'"))
-                        unless %mutable{$decltype};
+                    die X::Undeclared.new(:$symbol)
+                        unless @*declstack[*-1]{$symbol} :exists;
+                    my $decltype = @*declstack[*-1]{$symbol};
+                    my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
+                    die X::Assignment::RO.new(:typename("$declname '$symbol'"))
+                        unless $decltype.is-assignable;
                     %*assigned{$block ~ $symbol}++;
                 }
             }

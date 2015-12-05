@@ -361,6 +361,10 @@ role Q::Postfix::Property does Q::Postfix["<.>"] {
     }
 }
 
+role Q::Declaration {
+    method is-assignable { False }
+}
+
 role Q::ParameterList does Q {
     has Val::Array $.parameters = Val::Array.new;
     method interpolate($runtime) {
@@ -368,8 +372,11 @@ role Q::ParameterList does Q {
     }
 }
 
-role Q::Parameter does Q {
+role Q::Parameter does Q does Q::Declaration {
     has $.ident;
+
+    method is-assignable { True }
+
     method interpolate($runtime) {
         self.new(:ident($.ident.interpolate));
     }
@@ -385,11 +392,13 @@ role Q::ArgumentList does Q {
 role Q::Statement does Q {
 }
 
-role Q::Statement::My does Q::Statement {
+role Q::Statement::My does Q::Statement does Q::Declaration {
     has $.ident;
     has $.expr;
 
     method attribute-order { <expr ident> }
+
+    method is-assignable { True }
 
     method run($runtime) {
         return
@@ -404,7 +413,7 @@ role Q::Statement::My does Q::Statement {
     }
 }
 
-role Q::Statement::Constant does Q::Statement {
+role Q::Statement::Constant does Q::Statement does Q::Declaration {
     has $.ident;
     has $.expr;
 
@@ -564,7 +573,7 @@ role Q::Statement::Return does Q::Statement {
     }
 }
 
-role Q::Statement::Sub does Q::Statement {
+role Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.ident;
     has $.block;
 
@@ -578,7 +587,7 @@ role Q::Statement::Sub does Q::Statement {
     }
 }
 
-role Q::Statement::Macro does Q::Statement {
+role Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.ident;
     has $.block;
 
