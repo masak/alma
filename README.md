@@ -11,7 +11,7 @@ He takes one of the glass elevators up to his office. A silence hangs over the e
 
 The upper floor is all polished steel and glass. Dryden's footsteps are the only sounds heard as he heads to his office.
 
-He opens the door. The office is veiled in darkness. Some lights from the street is coming in from the outside, casting a few stark shadows. Dryden walks across the room, takes off his ushanka and places it on his desk, turns on a desk light, and... stops, eyes wide.
+He opens the door. The office is veiled in darkness. Some light from the street is coming in from the outside, casting a few stark shadows. Dryden walks across the room, takes off his ushanka and places it on his desk, turns on a desk light, and... stops, eyes wide.
 
 Someone is already in the office.
 
