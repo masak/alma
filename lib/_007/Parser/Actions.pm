@@ -124,7 +124,7 @@ class _007::Parser::Actions {
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
-        $*runtime.declare-var($name, $val);
+        $*runtime.put-var($name, $val);
 
         maybe-install-operator($name, @<trait>);
     }
@@ -143,7 +143,7 @@ class _007::Parser::Actions {
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
-        $*runtime.declare-var($name, $val);
+        $*runtime.put-var($name, $val);
 
         maybe-install-operator($name, @<trait>);
     }
