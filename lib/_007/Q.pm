@@ -368,6 +368,13 @@ role Q::ParameterList does Q {
     }
 }
 
+role Q::Parameter does Q {
+    has $.ident;
+    method interpolate($runtime) {
+        self.new(:ident($.ident.interpolate));
+    }
+}
+
 role Q::ArgumentList does Q {
     has Val::Array $.arguments = Val::Array.new;
     method interpolate($runtime) {
@@ -440,7 +447,7 @@ role Q::Statement::If does Q::Statement {
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.name.value, $arg);
+                $runtime.declare-var($param.ident.name.value, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -506,7 +513,7 @@ role Q::Statement::For does Q::Statement {
             for split_elements($array.elements, $count) -> $arg {
                 $runtime.enter($c);
                 for @($c.parameterlist.parameters.elements) Z $arg.list -> ($param, $real_arg) {
-                    $runtime.declare-var($param.name.value, $real_arg);
+                    $runtime.declare-var($param.ident.name.value, $real_arg);
                 }
                 $.block.statementlist.run($runtime);
                 $runtime.leave;
@@ -533,7 +540,7 @@ role Q::Statement::While does Q::Statement {
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.name.value, $arg);
+                $runtime.declare-var($param.ident.name.value, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;

@@ -36,6 +36,7 @@ sub read(Str $ast) is export {
 
         ident          => -> $name { Q::Identifier.new(:$name) },
         block          => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
+        param          => -> $ident { Q::Parameter.new(:$ident) },
         property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
         stmtlist       => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },

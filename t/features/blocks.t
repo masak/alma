@@ -29,7 +29,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "b") (block (paramlist (ident "name")) (stmtlist
+          (my (ident "b") (block (paramlist (param (ident "name"))) (stmtlist
             (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Good evening, Mr ") (ident "name"))))))))
           (stexpr (postfix:<()> (ident "b") (arglist (str "Bond")))))
         .
@@ -40,7 +40,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "b") (block (paramlist (ident "X") (ident "Y")) (stmtlist
+          (my (ident "b") (block (paramlist (param (ident "X")) (param (ident "Y"))) (stmtlist
             (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (ident "X") (ident "Y"))))))))
           (my (ident "X") (str "y"))
           (stexpr (postfix:<()> (ident "b") (arglist (str "X") (infix:<~> (ident "X") (ident "X"))))))
@@ -52,7 +52,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "b") (block (paramlist (ident "callback")) (stmtlist
+          (my (ident "b") (block (paramlist (param (ident "callback"))) (stmtlist
             (my (ident "scoping") (str "dynamic"))
             (stexpr (postfix:<()> (ident "callback") (arglist))))))
           (my (ident "scoping") (str "lexical"))
@@ -66,7 +66,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "b") (block (paramlist (ident "count")) (stmtlist
+          (my (ident "b") (block (paramlist (param (ident "count"))) (stmtlist
             (if (ident "count") (block (paramlist) (stmtlist
               (stexpr (postfix:<()> (ident "b") (arglist (infix:<+> (ident "count") (prefix:<-> (int 1))))))
               (stexpr (postfix:<()> (ident "say") (arglist (ident "count"))))))))))

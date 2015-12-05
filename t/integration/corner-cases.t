@@ -185,7 +185,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (if (str "James") (block (paramlist (ident "s")) (stmtlist
+          (if (str "James") (block (paramlist (param (ident "s"))) (stmtlist
             (stexpr (postfix:<()> (ident "say") (arglist (ident "s"))))))))
         .
 

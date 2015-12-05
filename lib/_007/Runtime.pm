@@ -143,7 +143,7 @@ role _007::Runtime {
             unless $paramcount == $argcount;
         self.enter($c);
         for @($c.parameterlist.parameters.elements) Z @args -> ($param, $arg) {
-            my $name = $param.name.value;
+            my $name = $param.ident.name.value;
             self.declare-var($name, $arg);
         }
     }

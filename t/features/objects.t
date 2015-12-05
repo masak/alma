@@ -14,7 +14,7 @@ use _007::Test;
         '{a() {}}' '(object (ident "Object") (proplist
           (property "a" (block (paramlist) (stmtlist)))))'
         '{a(a, b) {}}' '(object (ident "Object") (proplist (property "a" (block
-          (paramlist (ident "a") (ident "b")) (stmtlist)))))'
+          (paramlist (param (ident "a")) (param (ident "b"))) (stmtlist)))))'
     »;
 
     for @exprs -> $expr, $frag {

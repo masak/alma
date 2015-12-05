@@ -202,7 +202,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (ident "n")) (stmtlist
+          (sub (ident "f") (block (paramlist (param (ident "n"))) (stmtlist
               (return (infix:<==> (ident "n") (int 2))))))
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "filter") (arglist (ident "f") (array (int 1) (int 2) (int 3) (int 2))))))))
         .
@@ -213,7 +213,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (ident "n")) (stmtlist
+          (sub (ident "f") (block (paramlist (param (ident "n"))) (stmtlist
               (return (infix:<+> (ident "n") (int 1))))))
           (my (ident "a") (array (int 1) (int 2) (int 3)))
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "map") (arglist (ident "f") (ident "a"))))))

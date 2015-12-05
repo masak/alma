@@ -232,8 +232,12 @@ grammar _007::Parser::Syntax {
     }
 
     rule parameterlist {
-        [<identifier>
-        { declare("parameter", $<identifier>[*-1].Str); }
+        [<parameter>
+        { declare("parameter", $<parameter>[*-1]<identifier>.Str); }
         ]* % ','
+    }
+
+    rule parameter {
+        <identifier>
     }
 }

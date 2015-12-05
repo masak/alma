@@ -40,7 +40,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (if (int 7) (block (paramlist (ident "a")) (stmtlist
+          (if (int 7) (block (paramlist (param (ident "a"))) (stmtlist
             (stexpr (postfix:<()> (ident "say") (arglist (ident "a"))))))))
         .
 

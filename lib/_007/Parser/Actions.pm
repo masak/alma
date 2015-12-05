@@ -494,6 +494,10 @@ class _007::Parser::Actions {
     }
 
     method parameterlist($/) {
-        make Q::ParameterList.new(:parameters(Val::Array.new(:elements($<identifier>».ast))));
+        make Q::ParameterList.new(:parameters(Val::Array.new(:elements($<parameter>».ast))));
+    }
+
+    method parameter($/) {
+        make Q::Parameter.new(:ident($<identifier>.ast));
     }
 }
