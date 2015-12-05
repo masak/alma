@@ -98,7 +98,7 @@ sub check(Q::CompUnit $ast, $runtime) {
     multi handle(Q::Statement::Expr $) {}
     multi handle(Q::Statement::BEGIN $) {}
     multi handle(Q::Literal $) {}
-    multi handle(Q::Term $) {}
+    multi handle(Q::Term $) {} # except Q::Term::Object, see below
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
@@ -190,6 +190,19 @@ sub check(Q::CompUnit $ast, $runtime) {
         handle($block.statementlist);
         $block.static-lexpad = $runtime.current-frame.pad;
         $runtime.leave();
+    }
+
+    multi handle(Q::Term::Object $object) {
+        handle($object.propertylist);
+    }
+
+    multi handle(Q::PropertyList $propertylist) {
+        my %seen;
+        for $propertylist.properties.elements -> Q::Property $p {
+            my Str $property = $p.key.value;
+            die X::Property::Duplicate.new(:$property)
+                if %seen{$property}++;
+        }
     }
 }
 

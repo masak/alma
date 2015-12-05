@@ -444,6 +444,13 @@ class _007::Parser::Actions {
     }
 
     method propertylist ($/) {
+        my %seen;
+        for $<property>».ast -> Q::Property $p {
+            my Str $property = $p.key.value;
+            die X::Property::Duplicate.new(:$property)
+                if %seen{$property}++;
+        }
+
         make Q::PropertyList.new(:properties(Val::Array.new(:elements($<property>».ast))));
     }
 

@@ -61,6 +61,31 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
+            (my (ident "o") (object (ident "Object") (proplist
+              (property "foo" (int 1))
+              (property "foo" (int 2))))))
+        .
+
+    is-error
+        $ast,
+        X::Property::Duplicate,
+        "can't have duplicate properties (I)";
+}
+
+{
+    my $program = q:to/./;
+        my o = { foo: 1, foo: 2 };
+        .
+
+    parse-error
+        $program,
+        X::Property::Duplicate,
+        "can't have duplicate properties (II)";
+}
+
+{
+    my $ast = q:to/./;
+          (stmtlist
             (my (ident "o") (object (ident "Object") (proplist)))
             (stexpr (postfix:<[]> (ident "o") (str "b"))))
         .

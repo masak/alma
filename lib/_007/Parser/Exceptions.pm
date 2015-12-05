@@ -58,3 +58,10 @@ class X::Property::Required is Exception {
 
     method message { "The property '$.property' is required on type '$.type'" }
 }
+
+class X::Property::Duplicate is Exception {
+    has Str $.property;
+
+    method message { "The property '$.property' may not be declared more than once in an object term" }
+}
+
