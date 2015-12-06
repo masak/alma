@@ -665,6 +665,7 @@ sub types() is export {
         "Q::Postfix::Call"       => Q::Postfix::Call,
         "Q::Postfix::Property"   => Q::Postfix::Property,
         "Q::ParameterList"       => Q::ParameterList,
+        "Q::Parameter"           => Q::Parameter,
         "Q::ArgumentList"        => Q::ArgumentList,
         "Q::Statement::My"       => Q::Statement::My,
         "Q::Statement::Constant" => Q::Statement::Constant,
