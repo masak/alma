@@ -28,6 +28,7 @@ class X::ParameterMismatch is Exception {
     }
 }
 
+# XXX: rename to X::Property::NotFound once [RT #126827] has been fixed
 class X::PropertyNotFound is Exception {
     has $.propname;
 
