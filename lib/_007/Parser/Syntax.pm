@@ -158,7 +158,7 @@ grammar _007::Parser::Syntax {
     token term:parens { '(' ~ ')' <EXPR> }
     token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
     token term:object {
-        [<identifier> <?{ types(){$<identifier>} :exists }> <.ws>]?
+        [<identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>]?
         '{' ~ '}' <propertylist>
     }
     token term:identifier {

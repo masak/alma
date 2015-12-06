@@ -135,26 +135,9 @@ role Q::Term::Object does Q::Term {
     has $.propertylist;
 
     method eval($runtime) {
-        if $.type.name.value eq "Object" {
-            return Val::Object.new(:properties(
-                $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
-            ));
-        }
-        elsif $.type.name.value eq "Int" | "Str" {
-            return types(){$.type.name.value}.new(
-                :value($.propertylist.properties.elements[0].value.eval($runtime).value)
-            );
-        }
-        elsif $.type.name.value eq "Array" {
-            return types(){$.type.name.value}.new(
-                :elements($.propertylist.properties.elements[0].value.eval($runtime).elements)
-            );
-        }
-        else {
-            return types(){$.type.name.value}.new(
-                |%($.propertylist.properties.elements.map({.key.value => .value.eval($runtime)}))
-            );
-        }
+        return $runtime.get-var($.type.name.value).create(
+            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+        );
     }
 }
 
@@ -635,52 +618,4 @@ role Q::Trait does Q {
     method interpolate($runtime) {
         self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
     }
-}
-
-sub types() is export {
-    return %(
-        "None"                   => Val::None,
-        "Int"                    => Val::Int,
-        "Str"                    => Val::Str,
-        "Array"                  => Val::Array,
-        "Object"                 => Val::Object,
-        "Q::Identifier"          => Q::Identifier,
-        "Q::Literal::None"       => Q::Literal::None,
-        "Q::Literal::Int"        => Q::Literal::Int,
-        "Q::Literal::Str"        => Q::Literal::Str,
-        "Q::Term::Array"         => Q::Term::Array,
-        "Q::Term::Object"        => Q::Term::Object,
-        "Q::Property"            => Q::Property,
-        "Q::PropertyList"        => Q::PropertyList,
-        "Q::Block"               => Q::Block,
-        "Q::Expr::Block"         => Q::Expr::Block,
-        "Q::Identifier"          => Q::Identifier,
-        "Q::Unquote"             => Q::Unquote,
-        "Q::Prefix::Minus"       => Q::Prefix::Minus,
-        "Q::Infix::Addition"     => Q::Infix::Addition,
-        "Q::Infix::Concat"       => Q::Infix::Concat,
-        "Q::Infix::Assignment"   => Q::Infix::Assignment,
-        "Q::Infix::Eq"           => Q::Infix::Eq,
-        "Q::Postfix::Index"      => Q::Postfix::Index,
-        "Q::Postfix::Call"       => Q::Postfix::Call,
-        "Q::Postfix::Property"   => Q::Postfix::Property,
-        "Q::ParameterList"       => Q::ParameterList,
-        "Q::Parameter"           => Q::Parameter,
-        "Q::ArgumentList"        => Q::ArgumentList,
-        "Q::Statement::My"       => Q::Statement::My,
-        "Q::Statement::Constant" => Q::Statement::Constant,
-        "Q::Statement::Expr"     => Q::Statement::Expr,
-        "Q::Statement::If"       => Q::Statement::If,
-        "Q::Statement::Block"    => Q::Statement::Block,
-        "Q::CompUnit"            => Q::CompUnit,
-        "Q::Statement::For"      => Q::Statement::For,
-        "Q::Statement::While"    => Q::Statement::While,
-        "Q::Statement::Return"   => Q::Statement::Return,
-        "Q::Statement::Sub"      => Q::Statement::Sub,
-        "Q::Statement::Macro"    => Q::Statement::Macro,
-        "Q::Statement::BEGIN"    => Q::Statement::BEGIN,
-        "Q::StatementList"       => Q::StatementList,
-        "Q::Trait"               => Q::Trait,
-        "Q::Term::Quasi"         => Q::Term::Quasi,
-    );
 }

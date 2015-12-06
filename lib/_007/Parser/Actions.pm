@@ -426,7 +426,7 @@ class _007::Parser::Actions {
         #      it's the type object "Object" among the built-ins
         if $type ne "Object" {
             sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = types(){$type}.attributes.map({ aname($_) => 1 });
+            my %known-properties = $*runtime.get-var($type).type.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
                 my $property = $p.key.value;
                 die X::Property::NotDeclared.new(:$type, :$property)

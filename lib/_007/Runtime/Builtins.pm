@@ -174,6 +174,49 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
+            "None"                   => Val::Type.of(Val::None),
+            "Int"                    => Val::Type.of(Val::Int),
+            "Str"                    => Val::Type.of(Val::Str),
+            "Array"                  => Val::Type.of(Val::Array),
+            "Object"                 => Val::Type.of(Val::Object),
+            "Q::Identifier"          => Val::Type.of(Q::Identifier),
+            "Q::Literal::None"       => Val::Type.of(Q::Literal::None),
+            "Q::Literal::Int"        => Val::Type.of(Q::Literal::Int),
+            "Q::Literal::Str"        => Val::Type.of(Q::Literal::Str),
+            "Q::Term::Array"         => Val::Type.of(Q::Term::Array),
+            "Q::Term::Object"        => Val::Type.of(Q::Term::Object),
+            "Q::Property"            => Val::Type.of(Q::Property),
+            "Q::PropertyList"        => Val::Type.of(Q::PropertyList),
+            "Q::Block"               => Val::Type.of(Q::Block),
+            "Q::Expr::Block"         => Val::Type.of(Q::Expr::Block),
+            "Q::Identifier"          => Val::Type.of(Q::Identifier),
+            "Q::Unquote"             => Val::Type.of(Q::Unquote),
+            "Q::Prefix::Minus"       => Val::Type.of(Q::Prefix::Minus),
+            "Q::Infix::Addition"     => Val::Type.of(Q::Infix::Addition),
+            "Q::Infix::Concat"       => Val::Type.of(Q::Infix::Concat),
+            "Q::Infix::Assignment"   => Val::Type.of(Q::Infix::Assignment),
+            "Q::Infix::Eq"           => Val::Type.of(Q::Infix::Eq),
+            "Q::Postfix::Index"      => Val::Type.of(Q::Postfix::Index),
+            "Q::Postfix::Call"       => Val::Type.of(Q::Postfix::Call),
+            "Q::Postfix::Property"   => Val::Type.of(Q::Postfix::Property),
+            "Q::ParameterList"       => Val::Type.of(Q::ParameterList),
+            "Q::Parameter"           => Val::Type.of(Q::Parameter),
+            "Q::ArgumentList"        => Val::Type.of(Q::ArgumentList),
+            "Q::Statement::My"       => Val::Type.of(Q::Statement::My),
+            "Q::Statement::Constant" => Val::Type.of(Q::Statement::Constant),
+            "Q::Statement::Expr"     => Val::Type.of(Q::Statement::Expr),
+            "Q::Statement::If"       => Val::Type.of(Q::Statement::If),
+            "Q::Statement::Block"    => Val::Type.of(Q::Statement::Block),
+            "Q::CompUnit"            => Val::Type.of(Q::CompUnit),
+            "Q::Statement::For"      => Val::Type.of(Q::Statement::For),
+            "Q::Statement::While"    => Val::Type.of(Q::Statement::While),
+            "Q::Statement::Return"   => Val::Type.of(Q::Statement::Return),
+            "Q::Statement::Sub"      => Val::Type.of(Q::Statement::Sub),
+            "Q::Statement::Macro"    => Val::Type.of(Q::Statement::Macro),
+            "Q::Statement::BEGIN"    => Val::Type.of(Q::Statement::BEGIN),
+            "Q::StatementList"       => Val::Type.of(Q::StatementList),
+            "Q::Trait"               => Val::Type.of(Q::Trait),
+            "Q::Term::Quasi"         => Val::Type.of(Q::Term::Quasi),
         ;
 
         sub _007ize(&fn) {
@@ -189,6 +232,9 @@ class _007::Runtime::Builtins {
         }
 
         return @builtins.map: {
+            when .value ~~ Val::Type {
+                .key => .value;
+            }
             when .value ~~ Callable {
                  my $paramlist = create-paramlist(.value.signature.params);
                  .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($paramlist));

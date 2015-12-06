@@ -97,6 +97,31 @@ role Val::Object does Val {
     }
 }
 
+role Val::Type does Val {
+    has $.type;
+
+    method of($type) {
+        self.bless(:$type);
+    }
+
+    method create(@properties) {
+        if $.type ~~ Val::Object {
+            return $.type.new(:@properties);
+        }
+        elsif $.type ~~ Val::Int | Val::Str {
+            return $.type.new(:value(@properties[0].value.value));
+        }
+        elsif $.type ~~ Val::Array {
+            return $.type.new(:elements(@properties[0].value.elements));
+        }
+        else {
+            return $.type.new(|%(@properties));
+        }
+    }
+
+    method Str { "<type {$.type.^name.subst(/^'Val::'/, "")}>" }
+}
+
 role Val::Block does Val {
     has $.parameterlist is rw = Q::ParameterList.new;
     has $.statementlist = Q::StatementList.new;
