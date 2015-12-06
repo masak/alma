@@ -99,6 +99,7 @@ the next major version. However, from this vantage point, these are the
 expected areas of focus after v1.0.0.
 
 * [imports](https://github.com/masak/007/issues/53)
+* [exceptions](https://github.com/masak/007/issues/65)
 * [class declarations](https://github.com/masak/007/issues/32)
 * [ADTs and pattern matching](https://github.com/masak/007/issues/34)
 * [007 runtime in 007](https://github.com/masak/007/issues/51)
