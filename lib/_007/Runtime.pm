@@ -233,7 +233,7 @@ role _007::Runtime {
             return $obj.id;
         }
         else {
-            die X::Property::NotFound.new(:$propname);
+            die X::PropertyNotFound.new(:$propname);
         }
     }
 }
