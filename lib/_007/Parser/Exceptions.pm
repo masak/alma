@@ -31,10 +31,6 @@ class X::Trait::IllegalValue is Exception {
     method message { "The value '$.value' is not compatible with the trait '$.trait'" }
 }
 
-class X::Associativity::Conflict is Exception {
-    method message { "The operator already has a defined associativity" }
-}
-
 class X::Precedence::Incompatible is Exception {
     method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }

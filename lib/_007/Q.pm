@@ -37,6 +37,10 @@ class X::PropertyNotFound is Exception {
     }
 }
 
+class X::Associativity::Conflict is Exception {
+    method message { "The operator already has a defined associativity" }
+}
+
 role Q {
     method Str {
         sub aname($attr) { $attr.name.substr(2) }
