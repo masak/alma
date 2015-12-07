@@ -122,7 +122,7 @@ role Val::Type does Val {
         }
     }
 
-    method Str { "<type {$.type.^name.subst(/^'Val::'/, "")}>" }
+    method Str { "<type {$.type.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "")}>" }
 }
 
 role Val::Block does Val {
