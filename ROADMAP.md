@@ -91,6 +91,7 @@ The first track is still the *raison d'être* for 007. The second track rounds
   issue](https://github.com/masak/007/issues/76).
 * Go through the code base and remove all `XXX` comments, fixing them or
   promoting them into issues.
+* [Start keeping a changelog](http://keepachangelog.com/).
 
 ## Post-v1.0.0
 
