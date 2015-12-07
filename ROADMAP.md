@@ -88,7 +88,8 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * Various things to make the parser give better errors, like [this
   issue](https://github.com/masak/007/issues/10) and [this
   issue](https://github.com/masak/007/issues/48) and [this
-  issue](https://github.com/masak/007/issues/76).
+  issue](https://github.com/masak/007/issues/76) and [this
+  issue](https://github.com/masak/007/issues/94).
 * Go through the code base and remove all `XXX` comments, fixing them or
   promoting them into issues.
 * [Start keeping a changelog](http://keepachangelog.com/).
