@@ -1,7 +1,7 @@
 use _007::Q;
 use _007::Parser::Exceptions;
 
-class _007::Parser::OpScope {
+class _007::OpScope {
     has %.ops =
         prefix => {},
         infix => {},

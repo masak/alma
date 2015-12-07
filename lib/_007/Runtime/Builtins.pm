@@ -1,6 +1,6 @@
 use _007::Val;
 use _007::Q;
-use _007::Parser::OpScope;
+use _007::OpScope;
 
 class _007::Runtime::Builtins {
     has $.runtime;
@@ -250,7 +250,7 @@ class _007::Runtime::Builtins {
     }
 
     method opscope {
-        my $scope = _007::Parser::OpScope.new;
+        my $scope = _007::OpScope.new;
 
         for self.get-subs -> Pair (:key($name), :value($subval)) {
             $name ~~ /^ (prefix | infix | postfix) ':<' (<-[\>]>+) '>' $/
