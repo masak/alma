@@ -28,9 +28,7 @@ class _007::Runtime::Builtins {
                 $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
                 Nil;
             },
-            type     => -> $arg {
-                $arg.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "");
-            },
+            type => -> $arg { Val::Type.of($arg.WHAT) },
             str => &str,
             int => sub ($_) {
                 when Val::Str {

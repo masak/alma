@@ -66,7 +66,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (postfix:<()> (ident "int") (arglist (str "-6")))))))))
         .
 
-    is-result $ast, "Int\nInt\n", "int() works";
+    is-result $ast, "<type Int>\n<type Int>\n", "int() works";
 }
 
 {
@@ -75,7 +75,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (postfix:<()> (ident "str") (arglist (int 6)))))))))
         .
 
-    is-result $ast, "Str\n", "str() works";
+    is-result $ast, "<type Str>\n", "str() works";
 }
 
 {
@@ -292,7 +292,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "n")))))))
         .
 
-    is-result $ast, "None\n", "none type() works";
+    is-result $ast, "<type None>\n", "none type() works";
 }
 
 {
@@ -302,7 +302,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "n")))))))
         .
 
-    is-result $ast, "Int\n", "int type() works";
+    is-result $ast, "<type Int>\n", "int type() works";
 }
 
 {
@@ -312,7 +312,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "s")))))))
         .
 
-    is-result $ast, "Str\n", "str type() works";
+    is-result $ast, "<type Str>\n", "str type() works";
 }
 
 {
@@ -322,7 +322,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "a")))))))
         .
 
-    is-result $ast, "Array\n", "array type() works";
+    is-result $ast, "<type Array>\n", "array type() works";
 }
 
 {
@@ -332,7 +332,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "f")))))))
         .
 
-    is-result $ast, "Sub\n", "sub type() works";
+    is-result $ast, "<type Sub>\n", "sub type() works";
 }
 
 {
@@ -341,7 +341,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "say")))))))
         .
 
-    is-result $ast, "Sub\n", "builtin sub type() returns the same as ordinary sub";
+    is-result $ast, "<type Sub>\n", "builtin sub type() returns the same as ordinary sub";
 }
 
 done-testing;

@@ -149,7 +149,7 @@ use _007::Test;
 
     outputs
         $program,
-        qq[Q::Identifier\n],
+        qq[<type Q::Identifier>\n],
         "an object literal is of the declared type";
 }
 
