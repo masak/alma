@@ -182,6 +182,7 @@ class _007::Runtime::Builtins {
             "Str"                    => Val::Type.of(Val::Str),
             "Array"                  => Val::Type.of(Val::Array),
             "Object"                 => Val::Type.of(Val::Object),
+            "Type"                   => Val::Type.of(Val::Type),
             "Q::Identifier"          => Val::Type.of(Q::Identifier),
             "Q::Literal::None"       => Val::Type.of(Q::Literal::None),
             "Q::Literal::Int"        => Val::Type.of(Q::Literal::Int),
