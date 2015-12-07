@@ -114,6 +114,9 @@ role Val::Type does Val {
         elsif $.type ~~ Val::Array {
             return $.type.new(:elements(@properties[0].value.elements));
         }
+        elsif $.type ~~ Val::Type {
+            return $.type.new(:type(@properties[0].value.type));
+        }
         else {
             return $.type.new(|%(@properties));
         }
