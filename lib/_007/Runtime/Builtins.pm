@@ -110,6 +110,9 @@ class _007::Runtime::Builtins {
                         [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
                             |($l.properties.keys).map(&equal-at-key);
                     }
+                    multi equal-value(Val::Type $l, Val::Type $r) {
+                        $l.type === $r.type
+                    }
                     multi equal-value(Val::Block $l, Val::Block $r) {
                         $l.name eq $r.name
                             && equal-value($l.parameterlist, $r.parameterlist)

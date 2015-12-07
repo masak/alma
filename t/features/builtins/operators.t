@@ -124,6 +124,16 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "Int") (ident "Int")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "Int") (ident "Str"))))))
+        .
+
+    is-result $ast, "1\n0\n", "type equality";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (my (ident "i1") (int 10))
           (my (ident "s1") (str "10"))
           (my (ident "a1") (array (int 1) (int 2) (int 3)))
