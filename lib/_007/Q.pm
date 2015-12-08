@@ -44,11 +44,11 @@ class X::Associativity::Conflict is Exception {
 role Q {
     method Str {
         sub aname($attr) { $attr.name.substr(2) }
-        sub avalue($attr) { $attr.get_value(self) }
+        sub avalue($attr) { $attr.get_value(self).quoted-Str }
 
         my @attrs = self.attributes;
         if @attrs == 1 {
-            return "{self.^name} { avalue(@attrs[0]).Str }";
+            return "{self.^name} { avalue(@attrs[0]) }";
         }
         sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr) }
         my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
