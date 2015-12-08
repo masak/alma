@@ -211,7 +211,6 @@ class _007::Runtime::Builtins {
             "Q::Property"            => Val::Type.of(Q::Property),
             "Q::PropertyList"        => Val::Type.of(Q::PropertyList),
             "Q::Block"               => Val::Type.of(Q::Block),
-            "Q::Expr::Block"         => Val::Type.of(Q::Expr::Block),
             "Q::Identifier"          => Val::Type.of(Q::Identifier),
             "Q::Unquote"             => Val::Type.of(Q::Unquote),
             "Q::Prefix::Minus"       => Val::Type.of(Q::Prefix::Minus),

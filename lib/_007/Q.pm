@@ -96,11 +96,20 @@ class Q::Literal::Str does Q::Literal {
 
 class Q::Identifier does Q::Expr {
     has Val::Str $.name;
+    has $.frame = Val::None.new;
+
+    method attribute-order { ("name",) }
 
     method eval($runtime) {
-        return $runtime.get-var($.name.value);
+        return $runtime.get-var(
+            $.name.value,
+            $.frame ~~ Val::None ?? $runtime.current-frame !! $.frame
+        );
     }
-    method interpolate($) { self }
+
+    method interpolate($runtime) {
+        return self.new(:$.name, :frame($runtime.current-frame));
+    }
 }
 
 role Q::Term does Q::Expr {
@@ -155,8 +164,6 @@ class Q::PropertyList does Q {
     }
 }
 
-class Q::Expr::Block { ... }
-
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
@@ -174,29 +181,13 @@ class Q::Block does Q {
         );
     }
     method interpolate($runtime) {
-        Q::Expr::Block.new(
+        Q::Block.new(
             :parameterlist($.parameterlist.interpolate($runtime)),
-            :statementlist($.statementlist.interpolate($runtime)),
-            :outer-frame($runtime.current-frame));
+            :statementlist($.statementlist.interpolate($runtime)));
         # XXX: but what about the static lexpad? we kind of lose it here, don't we?
         # what does that *mean* in practice? can we come up with an example where
         # it matters? if the static lexpad happens to contain a value which is a
         # Q node, do we continue into *it*, interpolating it, too?
-    }
-}
-
-class Q::Expr::Block is Q::Block {
-    has $.outer-frame;
-
-    # attribute-order inherited and unchanged
-
-    method eval($runtime) {
-        Val::Block.new(
-            :$.parameterlist,
-            :$.statementlist,
-            :%.static-lexpad,
-            :$.outer-frame
-        );
     }
 }
 
