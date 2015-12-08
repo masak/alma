@@ -1,7 +1,7 @@
 use _007::Q;
 use _007::Runtime::Builtins;
 
-role Frame {
+class Frame {
     has $.block;
     has %.pad;
 }
@@ -9,7 +9,7 @@ role Frame {
 constant NO_OUTER = {};
 constant RETURN_TO = "--RETURN-TO--";
 
-role _007::Runtime {
+class _007::Runtime {
     has $.output;
     has @!frames;
     has $!builtins;
@@ -17,6 +17,8 @@ role _007::Runtime {
     submethod BUILD(:$output) {
         $!output = $output;
         my $setting = Val::Block.new(
+            :parameterlist(Q::ParameterList.new),
+            :statementlist(Q::StatementList.new),
             :outer-frame(NO_OUTER));
         self.enter($setting);
         $!builtins = _007::Runtime::Builtins.new(:runtime(self));

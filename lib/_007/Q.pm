@@ -75,26 +75,26 @@ role Q::Expr does Q {
 role Q::Literal does Q::Expr {
 }
 
-role Q::Literal::None does Q::Literal {
+class Q::Literal::None does Q::Literal {
     method eval($) { Val::None.new }
     method interpolate($) { self }
 }
 
-role Q::Literal::Int does Q::Literal {
+class Q::Literal::Int does Q::Literal {
     has Val::Int $.value;
 
     method eval($) { $.value }
     method interpolate($) { self }
 }
 
-role Q::Literal::Str does Q::Literal {
+class Q::Literal::Str does Q::Literal {
     has Val::Str $.value;
 
     method eval($) { $.value }
     method interpolate($) { self }
 }
 
-role Q::Identifier does Q::Expr {
+class Q::Identifier does Q::Expr {
     has Val::Str $.name;
 
     method eval($runtime) {
@@ -106,7 +106,7 @@ role Q::Identifier does Q::Expr {
 role Q::Term does Q::Expr {
 }
 
-role Q::Term::Array does Q::Term {
+class Q::Term::Array does Q::Term {
     has Val::Array $.elements;
 
     method eval($runtime) {
@@ -117,7 +117,7 @@ role Q::Term::Array does Q::Term {
     }
 }
 
-role Q::Term::Quasi does Q::Term {
+class Q::Term::Quasi does Q::Term {
     has $.block;
 
     method eval($runtime) {
@@ -132,9 +132,9 @@ role Q::Term::Quasi does Q::Term {
     }
 }
 
-role Q::Expr::Block { ... }
+class Q::Expr::Block { ... }
 
-role Q::Term::Object does Q::Term {
+class Q::Term::Object does Q::Term {
     has Q::Identifier $.type;
     has $.propertylist;
 
@@ -145,19 +145,19 @@ role Q::Term::Object does Q::Term {
     }
 }
 
-role Q::Property does Q {
+class Q::Property does Q {
     has Val::Str $.key;
     has $.value;
 }
 
-role Q::PropertyList does Q {
+class Q::PropertyList does Q {
     has Val::Array $.properties = Val::Array.new;
     method interpolate($runtime) {
         self.new(:properties(@.properties».interpolate($runtime)));
     }
 }
 
-role Q::Block does Q {
+class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has %.static-lexpad;
@@ -185,7 +185,7 @@ role Q::Block does Q {
     }
 }
 
-role Q::Expr::Block does Q::Block {
+class Q::Expr::Block is Q::Block {
     has $.outer-frame;
 
     # attribute-order inherited and unchanged
@@ -200,7 +200,7 @@ role Q::Expr::Block does Q::Block {
     }
 }
 
-role Q::Unquote does Q {
+class Q::Unquote does Q {
     has $.expr;
 
     method eval($runtime) {
@@ -230,7 +230,7 @@ role Q::Prefix[$type] does Q::Expr {
     }
 }
 
-role Q::Prefix::Minus does Q::Prefix["<->"] {}
+class Q::Prefix::Minus does Q::Prefix["<->"] {}
 
 role Q::Infix[$type] does Q::Expr {
     has $.lhs;
@@ -250,15 +250,15 @@ role Q::Infix[$type] does Q::Expr {
     }
 }
 
-role Q::Infix::Addition does Q::Infix["<+>"] {}
+class Q::Infix::Addition does Q::Infix["<+>"] {}
 
-role Q::Infix::Subtraction does Q::Infix["<->"] {}
+class Q::Infix::Subtraction does Q::Infix["<->"] {}
 
-role Q::Infix::Multiplication does Q::Infix["<*>"] {}
+class Q::Infix::Multiplication does Q::Infix["<*>"] {}
 
-role Q::Infix::Concat does Q::Infix["<~>"] {}
+class Q::Infix::Concat does Q::Infix["<~>"] {}
 
-role Q::Infix::Assignment does Q::Infix["<=>"] {
+class Q::Infix::Assignment does Q::Infix["<=>"] {
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
@@ -268,7 +268,7 @@ role Q::Infix::Assignment does Q::Infix["<=>"] {
     }
 }
 
-role Q::Infix::Eq does Q::Infix["<==>"] {}
+class Q::Infix::Eq does Q::Infix["<==>"] {}
 
 role Q::Postfix[$type] does Q::Expr {
     has $.expr;
@@ -282,7 +282,7 @@ role Q::Postfix[$type] does Q::Expr {
     }
 }
 
-role Q::Postfix::Index does Q::Postfix["<[>"] {
+class Q::Postfix::Index does Q::Postfix["<[>"] {
     has $.index;
 
     method attribute-order { <expr index> }
@@ -314,7 +314,7 @@ role Q::Postfix::Index does Q::Postfix["<[>"] {
     }
 }
 
-role Q::Postfix::Call does Q::Postfix["<(>"] {
+class Q::Postfix::Call does Q::Postfix["<(>"] {
     has $.argumentlist;
 
     method attribute-order { <expr argumentlist> }
@@ -333,7 +333,7 @@ role Q::Postfix::Call does Q::Postfix["<(>"] {
     }
 }
 
-role Q::Postfix::Property does Q::Postfix["<.>"] {
+class Q::Postfix::Property does Q::Postfix["<.>"] {
     has $.ident;
 
     method attribute-order { <expr ident> }
@@ -353,14 +353,14 @@ role Q::Declaration {
     method is-assignable { False }
 }
 
-role Q::ParameterList does Q {
+class Q::ParameterList does Q {
     has Val::Array $.parameters = Val::Array.new;
     method interpolate($runtime) {
         self.new(:parameters(Val::Array.new(:elements($.parameters.elements».interpolate($runtime)))));
     }
 }
 
-role Q::Parameter does Q does Q::Declaration {
+class Q::Parameter does Q does Q::Declaration {
     has $.ident;
 
     method is-assignable { True }
@@ -370,7 +370,7 @@ role Q::Parameter does Q does Q::Declaration {
     }
 }
 
-role Q::ArgumentList does Q {
+class Q::ArgumentList does Q {
     has Val::Array $.arguments = Val::Array.new;
     method interpolate($runtime) {
         self.new(:arguments(Val::Array.new(:elements($.arguments.elements».interpolate($runtime)))));
@@ -380,7 +380,7 @@ role Q::ArgumentList does Q {
 role Q::Statement does Q {
 }
 
-role Q::Statement::My does Q::Statement does Q::Declaration {
+class Q::Statement::My does Q::Statement does Q::Declaration {
     has $.ident;
     has $.expr;
 
@@ -401,7 +401,7 @@ role Q::Statement::My does Q::Statement does Q::Declaration {
     }
 }
 
-role Q::Statement::Constant does Q::Statement does Q::Declaration {
+class Q::Statement::Constant does Q::Statement does Q::Declaration {
     has $.ident;
     has $.expr;
 
@@ -417,7 +417,7 @@ role Q::Statement::Constant does Q::Statement does Q::Declaration {
     }
 }
 
-role Q::Statement::Expr does Q::Statement {
+class Q::Statement::Expr does Q::Statement {
     has $.expr;
 
     method run($runtime) {
@@ -428,7 +428,7 @@ role Q::Statement::Expr does Q::Statement {
     }
 }
 
-role Q::Statement::If does Q::Statement {
+class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
 
@@ -455,7 +455,7 @@ role Q::Statement::If does Q::Statement {
     }
 }
 
-role Q::Statement::Block does Q::Statement {
+class Q::Statement::Block does Q::Statement {
     has $.block;
 
     method run($runtime) {
@@ -468,10 +468,10 @@ role Q::Statement::Block does Q::Statement {
     }
 }
 
-role Q::CompUnit does Q::Statement::Block {
+class Q::CompUnit is Q::Statement::Block {
 }
 
-role Q::Statement::For does Q::Statement {
+class Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
 
@@ -522,7 +522,7 @@ role Q::Statement::For does Q::Statement {
     }
 }
 
-role Q::Statement::While does Q::Statement {
+class Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
 
@@ -548,7 +548,7 @@ role Q::Statement::While does Q::Statement {
     }
 }
 
-role Q::Statement::Return does Q::Statement {
+class Q::Statement::Return does Q::Statement {
     has $.expr;
 
     method run($runtime) {
@@ -561,7 +561,7 @@ role Q::Statement::Return does Q::Statement {
     }
 }
 
-role Q::Statement::Sub does Q::Statement does Q::Declaration {
+class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.ident;
     has $.block;
 
@@ -575,7 +575,7 @@ role Q::Statement::Sub does Q::Statement does Q::Declaration {
     }
 }
 
-role Q::Statement::Macro does Q::Statement does Q::Declaration {
+class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.ident;
     has $.block;
 
@@ -589,7 +589,7 @@ role Q::Statement::Macro does Q::Statement does Q::Declaration {
     }
 }
 
-role Q::Statement::BEGIN does Q::Statement {
+class Q::Statement::BEGIN does Q::Statement {
     has $.block;
 
     method run($runtime) {
@@ -600,7 +600,7 @@ role Q::Statement::BEGIN does Q::Statement {
     }
 }
 
-role Q::StatementList does Q {
+class Q::StatementList does Q {
     has Val::Array $.statements = Val::Array.new;
 
     method run($runtime) {
@@ -613,7 +613,7 @@ role Q::StatementList does Q {
     }
 }
 
-role Q::Trait does Q {
+class Q::Trait does Q {
     has $.ident;
     has $.expr;
 

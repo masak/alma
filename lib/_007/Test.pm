@@ -78,13 +78,13 @@ sub read(Str $ast) is export {
     )));
 }
 
-role StrOutput {
+class StrOutput {
     has $.result = "";
 
     method say($s) { $!result ~= $s.gist ~ "\n" }
 }
 
-role UnwantedOutput {
+class UnwantedOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
@@ -184,6 +184,8 @@ sub check(Q::CompUnit $ast, $runtime) {
 
     multi handle(Q::Block $block) {
         my $valblock = Val::Block.new(
+            :parameterlist(Q::ParameterList.new),
+            :statementlist(Q::StatementList.new),
             :outer-frame($runtime.current-frame));
         $runtime.enter($valblock);
         handle($block.parameterlist);

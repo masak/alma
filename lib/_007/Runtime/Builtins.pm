@@ -2,6 +2,27 @@ use _007::Val;
 use _007::Q;
 use _007::OpScope;
 
+class Val::Sub::Builtin is Val::Sub {
+    has $.code;
+    has $.qtype;
+    has $.assoc;
+    has %.precedence;
+
+    method new($name, $code, :$qtype, :$assoc, :%precedence,
+            :$parameterlist = Q::ParameterList.new,
+            :$statementlist = Q::StatementList.new) {
+        self.bless(
+            :$name,
+            :$code,
+            :$qtype,
+            :$assoc,
+            :%precedence,
+            :$parameterlist,
+            :$statementlist,
+        )
+    }
+}
+
 class _007::Runtime::Builtins {
     has $.runtime;
 

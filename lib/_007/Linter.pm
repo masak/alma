@@ -34,7 +34,7 @@ class X::AssertionFailure is Exception {
     method new($message) { self.bless(:$message) }
 }
 
-role _007::Linter {
+class _007::Linter {
     has $.parser;
 
     method lint($program) {

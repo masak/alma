@@ -13,6 +13,8 @@ grammar _007::Parser::Syntax {
         $*parser.push-oplevel;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
         my $block = Val::Block.new(
+            :parameterlist(Q::ParameterList.new),
+            :statementlist(Q::StatementList.new),
             :outer-frame($*runtime.current-frame));
         $*runtime.enter($block)
     } }

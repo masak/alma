@@ -8,7 +8,7 @@ role Val {
     }
 }
 
-role Val::None does Val {
+class Val::None does Val {
     method quoted-Str {
         self.Str
     }
@@ -22,7 +22,7 @@ role Val::None does Val {
     }
 }
 
-role Val::Int does Val {
+class Val::Int does Val {
     has Int $.value;
 
     method quoted-Str {
@@ -38,7 +38,7 @@ role Val::Int does Val {
     }
 }
 
-role Val::Str does Val {
+class Val::Str does Val {
     has Str $.value;
 
     method quoted-Str {
@@ -54,7 +54,7 @@ role Val::Str does Val {
     }
 }
 
-role Val::Array does Val {
+class Val::Array does Val {
     has @.elements;
 
     method quoted-Str {
@@ -70,12 +70,9 @@ role Val::Array does Val {
     }
 }
 
-role Q::ParameterList { ... }
-role Q::StatementList { ... }
-
 our $global-object-id = 0;
 
-role Val::Object does Val {
+class Val::Object does Val {
     has %.properties{Str};
     has $.id = $global-object-id++;
 
@@ -97,7 +94,7 @@ role Val::Object does Val {
     }
 }
 
-role Val::Type does Val {
+class Val::Type does Val {
     has $.type;
 
     method of($type) {
@@ -125,9 +122,9 @@ role Val::Type does Val {
     method Str { "<type {$.type.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "")}>" }
 }
 
-role Val::Block does Val {
-    has $.parameterlist is rw = Q::ParameterList.new;
-    has $.statementlist = Q::StatementList.new;
+class Val::Block does Val {
+    has $.parameterlist is rw;
+    has $.statementlist;
     has %.static-lexpad;
     has $.outer-frame;
 
@@ -141,7 +138,7 @@ role Val::Block does Val {
     method Str { "<block {$.pretty-params}>" }
 }
 
-role Val::Sub does Val::Block {
+class Val::Sub is Val::Block {
     has $.name;
 
     method quoted-Str {
@@ -151,21 +148,10 @@ role Val::Sub does Val::Block {
     method Str { "<sub {$.name}{$.pretty-params}>" }
 }
 
-role Val::Macro does Val::Sub {
+class Val::Macro is Val::Sub {
     method quoted-Str {
         self.Str
     }
 
     method Str { "<macro {$.name}{$.pretty-params}>" }
-}
-
-role Val::Sub::Builtin does Val::Sub {
-    has $.code;
-    has $.qtype;
-    has $.assoc;
-    has %.precedence;
-
-    method new($name, $code, :$qtype, :$assoc, :%precedence, :$parameterlist) {
-        self.bless(:$name, :$code, :$qtype, :$assoc, :%precedence, :$parameterlist)
-    }
 }

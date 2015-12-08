@@ -2,7 +2,7 @@ use _007::Runtime;
 use _007::Parser;
 use _007::Linter;
 
-role _007 {
+class _007 {
     method runtime(:$output = $*OUT) {
         _007::Runtime.new(:$output);
     }
