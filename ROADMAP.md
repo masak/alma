@@ -31,9 +31,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
-    * It has been identified that in order for quasis (and macro arguments) to
-      work the way we want, [identifiers have to be endowed with a
-      context](http://irclog.perlgeek.de/6macros/2015-11-18#i_11557980).
 * Operators need to become less string-based and instead [have names that are
   identifiers](https://github.com/masak/007/issues/82). This will likely
   simplify a number of other things in the parser.
