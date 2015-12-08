@@ -58,4 +58,20 @@ use _007::Test;
     outputs $program, "7\n", "a variable is looked up in the quasi's environment";
 }
 
+{
+    my $program = q:to/./;
+        macro foo(expr) {
+            my x = "oh noes";
+            return quasi {
+                say({{{expr}}});
+            }
+        }
+
+        my x = "yay";
+        foo(x);
+        .
+
+    outputs $program, "yay\n", "macro arguments also carry their original environment";
+}
+
 done-testing;
