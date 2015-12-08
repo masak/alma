@@ -132,8 +132,6 @@ class Q::Term::Quasi does Q::Term {
     }
 }
 
-class Q::Expr::Block { ... }
-
 class Q::Term::Object does Q::Term {
     has Q::Identifier $.type;
     has $.propertylist;
@@ -156,6 +154,8 @@ class Q::PropertyList does Q {
         self.new(:properties(@.properties».interpolate($runtime)));
     }
 }
+
+class Q::Expr::Block { ... }
 
 class Q::Block does Q {
     has $.parameterlist;
