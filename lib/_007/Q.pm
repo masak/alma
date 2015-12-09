@@ -222,11 +222,7 @@ role Q::Prefix does Q::Expr {
     }
 }
 
-class Q::Prefix::Minus does Q::Prefix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("prefix:<->"))))
-    }
-}
+class Q::Prefix::Minus does Q::Prefix {}
 
 role Q::Infix does Q::Expr {
     has $.ident;
@@ -250,35 +246,15 @@ role Q::Infix does Q::Expr {
     }
 }
 
-class Q::Infix::Addition does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<+>"))))
-    }
-}
+class Q::Infix::Addition does Q::Infix {}
 
-class Q::Infix::Subtraction does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<->"))))
-    }
-}
+class Q::Infix::Subtraction does Q::Infix {}
 
-class Q::Infix::Multiplication does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<*>"))))
-    }
-}
+class Q::Infix::Multiplication does Q::Infix {}
 
-class Q::Infix::Concat does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<~>"))))
-    }
-}
+class Q::Infix::Concat does Q::Infix {}
 
 class Q::Infix::Assignment does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<=>"))))
-    }
-
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
@@ -288,11 +264,7 @@ class Q::Infix::Assignment does Q::Infix {
     }
 }
 
-class Q::Infix::Eq does Q::Infix {
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("infix:<==>"))))
-    }
-}
+class Q::Infix::Eq does Q::Infix {}
 
 role Q::Postfix does Q::Expr {
     has $.ident;
@@ -311,10 +283,6 @@ class Q::Postfix::Index does Q::Postfix {
     has $.index;
 
     method attribute-order { <expr index> }
-
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<[>"))))
-    }
 
     method eval($runtime) {
         given $.expr.eval($runtime) {
@@ -348,10 +316,6 @@ class Q::Postfix::Call does Q::Postfix {
 
     method attribute-order { <expr argumentlist> }
 
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<(>"))))
-    }
-
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
         die "macro is called at runtime"
@@ -370,10 +334,6 @@ class Q::Postfix::Property does Q::Postfix {
     has $.property;
 
     method attribute-order { <expr ident> }
-
-    method ident {
-        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<.>"))))
-    }
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);

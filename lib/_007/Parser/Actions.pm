@@ -239,7 +239,7 @@ class _007::Parser::Actions {
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :ident($infix.ident)));
 
-                if $infix === Q::Infix::Assignment {
+                if $infix ~~ Q::Infix::Assignment {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
                         unless $t1 ~~ Q::Identifier;
                     my $block = $*runtime.current-frame();
@@ -363,7 +363,12 @@ class _007::Parser::Actions {
     }
 
     method prefix($/) {
-        make $*parser.oplevel.ops<prefix>{~$/};
+        my $op = ~$/;
+        my $ident = Q::Identifier.new(
+            :name(Val::Str.new(:value("prefix:<$op>"))),
+            :frame($*runtime.current-frame),
+        );
+        make $*parser.oplevel.ops<prefix>{$op}.new(:$ident);
     }
 
     method str($/) {
@@ -466,7 +471,12 @@ class _007::Parser::Actions {
     }
 
     method infix($/) {
-        make $*parser.oplevel.ops<infix>{~$/};
+        my $op = ~$/;
+        my $ident = Q::Identifier.new(
+            :name(Val::Str.new(:value("infix:<$op>"))),
+            :frame($*runtime.current-frame),
+        );
+        make $*parser.oplevel.ops<infix>{$op}.new(:$ident);
     }
 
     method postfix($/) {
@@ -482,7 +492,12 @@ class _007::Parser::Actions {
             make [Q::Postfix::Property, { property => $<identifier>.ast }];
         }
         else {
-            make $*parser.oplevel.ops<postfix>{~$/};
+            my $op = ~$/;
+            my $ident = Q::Identifier.new(
+                :name(Val::Str.new(:value("postfix:<$op>"))),
+                :frame($*runtime.current-frame),
+            );
+            make $*parser.oplevel.ops<postfix>{$op}.new(:$ident);
         }
     }
 

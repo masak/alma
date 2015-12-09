@@ -94,4 +94,22 @@ use _007::Test;
         "operator used in quasi block carries its original environement";
 }
 
+{
+    my $program = q:to/./;
+        macro gah() {
+            return quasi { say(2 + 2) }
+        }
+
+        {
+            sub infix:<+>(l, r) { return "lol, pwnd!" }
+            gah()
+        }
+        .
+
+    outputs
+        $program,
+        "4\n",
+        "operators in quasi aren't unhygienically overriden by mainline environment";
+}
+
 done-testing;

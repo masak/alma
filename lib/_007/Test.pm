@@ -3,6 +3,10 @@ use _007;
 use Test;
 
 sub read(Str $ast) is export {
+    sub n($type, $op) {
+        Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
+    }
+
     my %q_lookup =
         none           => -> { Q::Literal::None.new },
         int            => -> $value { Q::Literal::Int.new(:$value) },
@@ -10,14 +14,14 @@ sub read(Str $ast) is export {
         array          => -> *@elements { Q::Term::Array.new(:elements(Val::Array.new(:@elements))) },
         object         => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
 
-        'prefix:<->'   => -> $expr { Q::Prefix::Minus.new(:$expr) },
+        'prefix:<->'   => -> $expr { Q::Prefix::Minus.new(:$expr, :ident(n("prefix", "-"))) },
 
-        'infix:<+>'    => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs) },
-        'infix:<->'    => -> $lhs, $rhs { Q::Infix::Subtraction.new(:$lhs, :$rhs) },
-        'infix:<*>'    => -> $lhs, $rhs { Q::Infix::Multiplication.new(:$lhs, :$rhs) },
-        'infix:<~>'    => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs) },
-        'infix:<=>'    => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs) },
-        'infix:<==>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs) },
+        'infix:<+>'    => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs, :ident(n("infix", "+"))) },
+        'infix:<->'    => -> $lhs, $rhs { Q::Infix::Subtraction.new(:$lhs, :$rhs, :ident(n("infix", "-"))) },
+        'infix:<*>'    => -> $lhs, $rhs { Q::Infix::Multiplication.new(:$lhs, :$rhs, :ident(n("infix", "*"))) },
+        'infix:<~>'    => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs, :ident(n("infix", "~"))) },
+        'infix:<=>'    => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs, :ident(n("infix", "="))) },
+        'infix:<==>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs, :ident(n("infix", "=="))) },
 
         'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },
         'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
