@@ -31,9 +31,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
-* Operators need to become less string-based and instead [have names that are
-  identifiers](https://github.com/masak/007/issues/82). This will likely
-  simplify a number of other things in the parser.
 * We want [a `.detach()` operation on
   Qtrees](https://github.com/masak/007/issues/62).
 * Also want to close [a philosophical
