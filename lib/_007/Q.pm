@@ -243,7 +243,10 @@ role Q::Infix does Q::Expr {
     }
 
     method interpolate($runtime) {
-        self.new(:lhs($.lhs.interpolate($runtime)), :rhs($.rhs.interpolate($runtime)));
+        self.new(
+            :lhs($.lhs.interpolate($runtime)),
+            :rhs($.rhs.interpolate($runtime)),
+            :ident($.ident.interpolate($runtime)));
     }
 }
 

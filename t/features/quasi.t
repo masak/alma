@@ -74,4 +74,24 @@ use _007::Test;
     outputs $program, "yay\n", "macro arguments also carry their original environment";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            sub infix:<**>(l, r) {
+                return l ~ " to the " ~ r;
+            }
+            return quasi {
+                say("pedal" ** "metal");
+            }
+        }
+
+        moo();
+        .
+
+    outputs
+        $program,
+        "pedal to the metal\n",
+        "operator used in quasi block carries its original environement";
+}
+
 done-testing;
