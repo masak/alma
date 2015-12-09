@@ -21,7 +21,7 @@ sub read(Str $ast) is export {
 
         'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist) },
         'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index) },
-        'postfix:<.>'  => -> $expr, $ident { Q::Postfix::Property.new(:$expr, :$ident) },
+        'postfix:<.>'  => -> $expr, $property { Q::Postfix::Property.new(:$expr, :$property) },
 
         my             => -> $ident, $expr = Val::None.new { Q::Statement::My.new(:$ident, :$expr) },
         stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },

@@ -375,13 +375,24 @@ class _007::Runtime::Builtins {
                 given $obj {
                     when Q::Statement::My | Q::Statement::Constant
                         | Q::Statement::Sub | Q::Statement::Macro
-                        | Q::Statement::Trait | Q::Postfix::Property {
+                        | Q::Trait {
                         $obj.ident;
                     }
                     die X::TypeCheck.new(
                         :operation<.ident>,
                         :got($obj),
                         :expected("any number of types with the .ident property"));
+                }
+            }
+            when "property" {
+                given $obj {
+                    when Q::Postfix::Property {
+                        $obj.property;
+                    }
+                    die X::TypeCheck.new(
+                        :operation<.property>,
+                        :got($obj),
+                        :expected(Q::Postfix::Property));
                 }
             }
             when "assign" {

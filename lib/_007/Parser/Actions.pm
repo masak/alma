@@ -201,48 +201,45 @@ class _007::Parser::Actions {
     }
 
     method EXPR($/) {
+        sub name($op) {
+            $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+        }
+
         sub tighter($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            my $b = $*parser.oplevel.infixprec.first(*.contains($name1), :k)
-                 > $*parser.oplevel.infixprec.first(*.contains($name2), :k);
+            my $b = $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
+                 > $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
             return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            my $b = $*parser.oplevel.infixprec.first(*.contains($name1), :k)
-                == $*parser.oplevel.infixprec.first(*.contains($name2), :k);
+            my $b = $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
+                == $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
             return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "left";
+            return $*parser.oplevel.infixprec.first(*.contains(name($op))).assoc eq "left";
         }
 
         sub non-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.infixprec.first(*.contains($name)).assoc eq "non";
+            return $*parser.oplevel.infixprec.first(*.contains(name($op))).assoc eq "non";
         }
 
         my @opstack;
         my @termstack = $<termish>[0].ast;
         sub REDUCE {
             my $t2 = @termstack.pop;
-            my $op = @opstack.pop;
+            my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
-            my $name = $op.type.substr(1, *-1);
-            my $c = $*runtime.maybe-get-var("infix:<$name>");
+            my $c = $*runtime.maybe-get-var($infix.ident.name.value);
             if $c ~~ Val::Macro {
                 @termstack.push($*runtime.call($c, [$t1, $t2]));
             }
             else {
-                @termstack.push($op.new(:lhs($t1), :rhs($t2)));
+                @termstack.push($infix.new(:lhs($t1), :rhs($t2), :ident($infix.ident)));
 
-                if $op === Q::Infix::Assignment {
+                if $infix === Q::Infix::Assignment {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
                         unless $t1 ~~ Q::Identifier;
                     my $block = $*runtime.current-frame();
@@ -263,7 +260,7 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1]), :op2($infix))
+            die X::Op::Nonassociative.new(:op1(@opstack[*-1].ident.name.value), :op2($infix.ident.name.value))
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -276,30 +273,28 @@ class _007::Parser::Actions {
     }
 
     method termish($/) {
+        sub name($op) {
+            $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+        }
+
         sub tighter($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            my $b = $*parser.oplevel.prepostfixprec.first(*.contains($name1), :k)
-                 > $*parser.oplevel.prepostfixprec.first(*.contains($name2), :k);
+            my $b = $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
+                 > $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
             return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
-            my $name1 = $op1.type.substr(1, *-1);
-            my $name2 = $op2.type.substr(1, *-1);
-            my $b = $*parser.oplevel.prepostfixprec.first(*.contains($name1), :k)
-                == $*parser.oplevel.prepostfixprec.first(*.contains($name2), :k);
+            my $b = $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
+                == $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
             return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.prepostfixprec.first(*.contains($name)).assoc eq "left";
+            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op))).assoc eq "left";
         }
 
         sub non-associative($op) {
-            my $name = $op.type.substr(1, *-1);
-            return $*parser.oplevel.prepostfixprec.first(*.contains($name)).assoc eq "non";
+            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op))).assoc eq "non";
         }
 
         make $<term>.ast;
@@ -309,13 +304,12 @@ class _007::Parser::Actions {
 
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
-            my $name = $prefix.type.substr(1, *-1);
-            my $c = $*runtime.maybe-get-var("prefix:<$name>");
+            my $c = $*runtime.maybe-get-var($prefix.ident.name.value);
             if $c ~~ Val::Macro {
                 make $*runtime.call($c, [$/.ast]);
             }
             else {
-                make $prefix.new(:expr($/.ast));
+                make $prefix.new(:expr($/.ast), :ident($prefix.ident));
             }
         }
 
@@ -334,13 +328,12 @@ class _007::Parser::Actions {
                 make @p[0].new(:expr($/.ast), |@p[1]);
             }
             else {
-                my $name = $postfix.type.substr(1, *-1);
-                my $c = $*runtime.maybe-get-var("postfix:<$name>");
+                my $c = $*runtime.maybe-get-var($postfix.ident.name.value);
                 if $c ~~ Val::Macro {
                     make $*runtime.call($c, [$/.ast]);
                 }
                 else {
-                    make $postfix.new(:expr($/.ast));
+                    make $postfix.new(:expr($/.ast), :ident($postfix.ident));
                 }
             }
         }
@@ -355,7 +348,7 @@ class _007::Parser::Actions {
             else {
                 my $prefix = @prefixes[0].ast;
                 my $postfix = @postfixes[0].ast;
-                die X::Op::Nonassociative.new(:op1($prefix), :op2($postfix))
+                die X::Op::Nonassociative.new(:op1($prefix.ident.name.value), :op2($postfix.ident.name.value))
                     if equal($prefix, $postfix) && non-associative($prefix);
                 if tighter($prefix, $postfix)
                     || equal($prefix, $postfix) && left-associative($prefix) {
@@ -486,7 +479,7 @@ class _007::Parser::Actions {
             make [Q::Postfix::Call, { argumentlist => $<argumentlist>.ast }];
         }
         elsif $<prop> {
-            make [Q::Postfix::Property, { ident => $<identifier>.ast }];
+            make [Q::Postfix::Property, { property => $<identifier>.ast }];
         }
         else {
             make $*parser.oplevel.ops<postfix>{~$/};

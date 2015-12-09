@@ -205,14 +205,15 @@ class Q::Unquote does Q {
     }
 }
 
-role Q::Prefix[$type] does Q::Expr {
+role Q::Prefix does Q::Expr {
+    has $.ident;
     has $.expr;
 
-    method type { $type }
+    method attribute-order { <expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
-        my $c = $runtime.get-var("prefix:$type");
+        my $c = $.ident.eval($runtime);
         return $runtime.call($c, [$e]);
     }
 
@@ -221,18 +222,23 @@ role Q::Prefix[$type] does Q::Expr {
     }
 }
 
-class Q::Prefix::Minus does Q::Prefix["<->"] {}
+class Q::Prefix::Minus does Q::Prefix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("prefix:<->"))))
+    }
+}
 
-role Q::Infix[$type] does Q::Expr {
+role Q::Infix does Q::Expr {
+    has $.ident;
     has $.lhs;
     has $.rhs;
 
-    method type { $type }
+    method attribute-order { <lhs rhs> }
 
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
-        my $c = $runtime.get-var("infix:$type");
+        my $c = $.ident.eval($runtime);
         return $runtime.call($c, [$l, $r]);
     }
 
@@ -241,15 +247,35 @@ role Q::Infix[$type] does Q::Expr {
     }
 }
 
-class Q::Infix::Addition does Q::Infix["<+>"] {}
+class Q::Infix::Addition does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<+>"))))
+    }
+}
 
-class Q::Infix::Subtraction does Q::Infix["<->"] {}
+class Q::Infix::Subtraction does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<->"))))
+    }
+}
 
-class Q::Infix::Multiplication does Q::Infix["<*>"] {}
+class Q::Infix::Multiplication does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<*>"))))
+    }
+}
 
-class Q::Infix::Concat does Q::Infix["<~>"] {}
+class Q::Infix::Concat does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<~>"))))
+    }
+}
 
-class Q::Infix::Assignment does Q::Infix["<=>"] {
+class Q::Infix::Assignment does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<=>"))))
+    }
+
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
@@ -259,24 +285,33 @@ class Q::Infix::Assignment does Q::Infix["<=>"] {
     }
 }
 
-class Q::Infix::Eq does Q::Infix["<==>"] {}
+class Q::Infix::Eq does Q::Infix {
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("infix:<==>"))))
+    }
+}
 
-role Q::Postfix[$type] does Q::Expr {
+role Q::Postfix does Q::Expr {
+    has $.ident;
     has $.expr;
 
-    method type { $type }
+    method attribute-order { <expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
-        my $c = $runtime.get-var("postfix:$type");
+        my $c = $.ident.eval($runtime);
         return $runtime.call($c, [$e]);
     }
 }
 
-class Q::Postfix::Index does Q::Postfix["<[>"] {
+class Q::Postfix::Index does Q::Postfix {
     has $.index;
 
     method attribute-order { <expr index> }
+
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<[>"))))
+    }
 
     method eval($runtime) {
         given $.expr.eval($runtime) {
@@ -305,10 +340,14 @@ class Q::Postfix::Index does Q::Postfix["<[>"] {
     }
 }
 
-class Q::Postfix::Call does Q::Postfix["<(>"] {
+class Q::Postfix::Call does Q::Postfix {
     has $.argumentlist;
 
     method attribute-order { <expr argumentlist> }
+
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<(>"))))
+    }
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
@@ -324,19 +363,23 @@ class Q::Postfix::Call does Q::Postfix["<(>"] {
     }
 }
 
-class Q::Postfix::Property does Q::Postfix["<.>"] {
-    has $.ident;
+class Q::Postfix::Property does Q::Postfix {
+    has $.property;
 
     method attribute-order { <expr ident> }
 
+    method ident {
+        Q::Identifier.new(:name(Val::Str.new(:value("postfix:<.>"))))
+    }
+
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
-        my $propname = $.ident.name.value;
+        my $propname = $.property.name.value;
         $runtime.property($obj, $propname);
     }
 
     method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :ident($.ident.interpolate($runtime)));
+        self.new(:expr($.expr.interpolate($runtime)), :property($.property.interpolate($runtime)));
     }
 }
 
