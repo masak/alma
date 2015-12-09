@@ -98,7 +98,7 @@ class Q::Identifier does Q::Expr {
     has Val::Str $.name;
     has $.frame = Val::None.new;
 
-    method attribute-order { ("name",) }
+    method attribute-order { <name> }
 
     method eval($runtime) {
         return $runtime.get-var(
