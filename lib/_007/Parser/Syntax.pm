@@ -55,8 +55,7 @@ grammar _007::Parser::Syntax {
             # XXX: a suspicious lack of redeclaration checks here
             declare(Q::Statement::Constant, $symbol);
         }
-        ['=' <EXPR>]?     # XXX: X::Syntax::Missing if this doesn't happen
-                            # 'Missing initializer on constant declaration'
+        ['=' <EXPR>]?
     }
     token statement:expr {
         <![{]>       # }], you're welcome vim
