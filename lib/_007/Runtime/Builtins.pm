@@ -35,7 +35,7 @@ class _007::Runtime::Builtins {
         default { die "Got some unknown value of type ", .^name }
     }
 
-    method get-subs {
+    method get-builtins {
         my &str = sub ($_) {
             when Val { return .Str }
             die X::TypeCheck.new(
@@ -272,7 +272,7 @@ class _007::Runtime::Builtins {
     method opscope {
         my $scope = _007::OpScope.new;
 
-        for self.get-subs -> Pair (:key($name), :value($subval)) {
+        for self.get-builtins -> Pair (:key($name), :value($subval)) {
             $name ~~ /^ (prefix | infix | postfix) ':<' (<-[\>]>+) '>' $/
                 or next;
             my $type = ~$0;

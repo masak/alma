@@ -129,7 +129,7 @@ class _007::Runtime {
     }
 
     method load-builtins {
-        for $!builtins.get-subs -> Pair (:key($name), :value($subval)) {
+        for $!builtins.get-builtins -> Pair (:key($name), :value($subval)) {
             self.declare-var($name, $subval);
         }
     }
