@@ -480,23 +480,29 @@ class _007::Parser::Actions {
     }
 
     method postfix($/) {
+        my $op = (~$/).trim;
+        if $op.substr(0, 1) eq "[" && $op.substr(*-1) eq "]" {  # XXX: more hardcoding :(
+            $op = "[]";
+        }
+        elsif $op.substr(0, 1) eq "(" && $op.substr(*-1) eq ")" {
+            $op = "()";
+        }
+        my $ident = Q::Identifier.new(
+            :name(Val::Str.new(:value("postfix:<$op>"))),
+            :frame($*runtime.current-frame),
+        );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make [Q::Postfix::Index, { index => $<EXPR>.ast }];
+            make [Q::Postfix::Index, { index => $<EXPR>.ast, :$ident }];
         }
         elsif $<call> {
-            make [Q::Postfix::Call, { argumentlist => $<argumentlist>.ast }];
+            make [Q::Postfix::Call, { argumentlist => $<argumentlist>.ast, :$ident }];
         }
         elsif $<prop> {
-            make [Q::Postfix::Property, { property => $<identifier>.ast }];
+            make [Q::Postfix::Property, { property => $<identifier>.ast, :$ident }];
         }
         else {
-            my $op = ~$/;
-            my $ident = Q::Identifier.new(
-                :name(Val::Str.new(:value("postfix:<$op>"))),
-                :frame($*runtime.current-frame),
-            );
             make $*parser.oplevel.ops<postfix>{$op}.new(:$ident);
         }
     }

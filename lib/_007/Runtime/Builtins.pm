@@ -196,6 +196,27 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
+            'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
+                sub ($expr, $index) {
+                    # can't express this one as a built-in sub
+                },
+                :qtype(Q::Postfix::Index),
+                :assoc<right>,
+            ),
+            'postfix:<()>' => Val::Sub::Builtin.new('postfix:<()>',
+                sub ($expr, $arguments) {
+                    # can't express this one as a built-in sub
+                },
+                :qtype(Q::Postfix::Call),
+                :assoc<right>,
+            ),
+            'postfix:<.>' => Val::Sub::Builtin.new('postfix:<.>',
+                sub ($expr, $property) {
+                    # can't express this one as a built-in sub
+                },
+                :qtype(Q::Postfix::Property),
+                :assoc<right>,
+            ),
             "None"                   => Val::Type.of(Val::None),
             "Int"                    => Val::Type.of(Val::Int),
             "Str"                    => Val::Type.of(Val::Str),
