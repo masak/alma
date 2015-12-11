@@ -333,7 +333,7 @@ class Q::Postfix::Call does Q::Postfix {
 class Q::Postfix::Property does Q::Postfix {
     has $.property;
 
-    method attribute-order { <expr ident> }
+    method attribute-order { <expr property> }
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
