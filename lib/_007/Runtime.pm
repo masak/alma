@@ -14,8 +14,7 @@ class _007::Runtime {
     has @!frames;
     has $!builtins;
 
-    submethod BUILD(:$output) {
-        $!output = $output;
+    submethod BUILD(:$!output) {
         my $setting = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist(Q::StatementList.new),
