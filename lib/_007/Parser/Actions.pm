@@ -368,7 +368,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("prefix:<$op>"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<prefix>{$op}.new(:$ident);
+        make $*parser.oplevel.ops<prefix>{$op}.new(:$ident, :expr(Val::None));
     }
 
     method str($/) {
@@ -412,6 +412,9 @@ class _007::Parser::Actions {
     method term:quasi ($/) {
         if $<infix> {
             make Q::Term::Quasi.new(:contents($<infix>.ast));
+        }
+        elsif $<prefix> {
+            make Q::Term::Quasi.new(:contents($<prefix>.ast));
         }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));

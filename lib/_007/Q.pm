@@ -218,7 +218,7 @@ class Q::Prefix does Q::Expr {
     }
 
     method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)));
+        self.new(:expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));
     }
 }
 
