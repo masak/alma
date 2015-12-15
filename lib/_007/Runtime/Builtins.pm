@@ -459,7 +459,9 @@ class _007::Runtime::Builtins {
                     die X::TypeCheck.new(
                         :operation<.block>,
                         :got($obj),
-                        :expected("Q::Statement::My | Q::Statement::Constant"));
+                        :expected("Q::Statement::Block | Q::Statement::If | "
+                            ~ "Q::Statement::For | Q::Statement::While | "
+                            ~ "Q::Statement::BEGIN"));
                 }
             }
             when "name" {
