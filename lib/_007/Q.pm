@@ -205,7 +205,7 @@ class Q::Unquote does Q {
     }
 }
 
-role Q::Prefix does Q::Expr {
+class Q::Prefix does Q::Expr {
     has $.ident;
     has $.expr;
 
@@ -222,9 +222,9 @@ role Q::Prefix does Q::Expr {
     }
 }
 
-class Q::Prefix::Minus does Q::Prefix {}
+class Q::Prefix::Minus is Q::Prefix {}
 
-role Q::Infix does Q::Expr {
+class Q::Infix does Q::Expr {
     has $.ident;
     has $.lhs;
     has $.rhs;
@@ -246,15 +246,15 @@ role Q::Infix does Q::Expr {
     }
 }
 
-class Q::Infix::Addition does Q::Infix {}
+class Q::Infix::Addition is Q::Infix {}
 
-class Q::Infix::Subtraction does Q::Infix {}
+class Q::Infix::Subtraction is Q::Infix {}
 
-class Q::Infix::Multiplication does Q::Infix {}
+class Q::Infix::Multiplication is Q::Infix {}
 
-class Q::Infix::Concat does Q::Infix {}
+class Q::Infix::Concat is Q::Infix {}
 
-class Q::Infix::Assignment does Q::Infix {
+class Q::Infix::Assignment is Q::Infix {
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
@@ -264,9 +264,9 @@ class Q::Infix::Assignment does Q::Infix {
     }
 }
 
-class Q::Infix::Eq does Q::Infix {}
+class Q::Infix::Eq is Q::Infix {}
 
-role Q::Postfix does Q::Expr {
+class Q::Postfix does Q::Expr {
     has $.ident;
     has $.expr;
 
@@ -279,7 +279,7 @@ role Q::Postfix does Q::Expr {
     }
 }
 
-class Q::Postfix::Index does Q::Postfix {
+class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
     method attribute-order { <expr index> }
@@ -311,7 +311,7 @@ class Q::Postfix::Index does Q::Postfix {
     }
 }
 
-class Q::Postfix::Call does Q::Postfix {
+class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
     method attribute-order { <expr argumentlist> }
@@ -330,7 +330,7 @@ class Q::Postfix::Call does Q::Postfix {
     }
 }
 
-class Q::Postfix::Property does Q::Postfix {
+class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
     method attribute-order { <expr property> }
