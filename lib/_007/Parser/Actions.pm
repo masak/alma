@@ -410,7 +410,12 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        make Q::Term::Quasi.new(:block($<block>.ast));
+        if $<infix> {
+            make Q::Term::Quasi.new(:contents($<infix>.ast));
+        }
+        else {
+            make Q::Term::Quasi.new(:contents($<block>.ast));
+        }
     }
 
     method unquote ($/) {
@@ -476,7 +481,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("infix:<$op>"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<infix>{$op}.new(:$ident);
+        make $*parser.oplevel.ops<infix>{$op}.new(:$ident, :lhs(Val::None.new), :rhs(Val::None.new));
     }
 
     method postfix($/) {

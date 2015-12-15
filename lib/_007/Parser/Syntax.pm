@@ -157,7 +157,11 @@ grammar _007::Parser::Syntax {
     token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
-    token term:quasi { quasi >> [<.ws> <block> || <.panic("quasi")>] }
+    token term:quasi { quasi <.ws> [
+        "@" <.ws> "Q::Infix" <.ws> '{' <.ws> <infix> <.ws> '}'
+        || <block>
+        || <.panic("quasi")>]
+    }
     token term:object {
         [<identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>]?
         '{' ~ '}' <propertylist>

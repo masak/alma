@@ -127,13 +127,13 @@ class Q::Term::Array does Q::Term {
 }
 
 class Q::Term::Quasi does Q::Term {
-    has $.block;
+    has $.contents;
 
     method eval($runtime) {
-        return $.block.interpolate($runtime);
+        return $.contents.interpolate($runtime);
     }
     method interpolate($runtime) {
-        self.new(:block($.block.interpolate($runtime)));
+        self.new(:contents($.contents.interpolate($runtime)));
         # XXX: the fact that we keep interpolating inside of the quasi means
         # that unquotes encountered inside of this inner quasi will be
         # interpolated in the context of the outer quasi. is this correct?
@@ -240,8 +240,8 @@ class Q::Infix does Q::Expr {
 
     method interpolate($runtime) {
         self.new(
-            :lhs($.lhs.interpolate($runtime)),
-            :rhs($.rhs.interpolate($runtime)),
+            :lhs($.lhs ~~ Val::None ?? $.lhs !! $.lhs.interpolate($runtime)),
+            :rhs($.rhs ~~ Val::None ?? $.rhs !! $.rhs.interpolate($runtime)),
             :ident($.ident.interpolate($runtime)));
     }
 }
