@@ -307,7 +307,10 @@ class Q::Postfix::Index is Q::Postfix {
         }
     }
     method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :index($.index.interpolate($runtime)));
+        self.new(
+            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
+            :index($.index.interpolate($runtime))
+        );
     }
 }
 
@@ -326,7 +329,10 @@ class Q::Postfix::Call is Q::Postfix {
         return $runtime.call($c, @args);
     }
     method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :argumentlist($.argumentlist.interpolate($runtime)));
+        self.new(
+            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
+            :argumentlist($.argumentlist.interpolate($runtime))
+        );
     }
 }
 
@@ -342,7 +348,10 @@ class Q::Postfix::Property is Q::Postfix {
     }
 
     method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :property($.property.interpolate($runtime)));
+        self.new(
+            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
+            :property($.property.interpolate($runtime))
+        );
     }
 }
 

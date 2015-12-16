@@ -421,6 +421,9 @@ class _007::Parser::Actions {
         elsif $<prefix> {
             make Q::Term::Quasi.new(:contents($<prefix>.ast));
         }
+        elsif $<postfix> {
+            make Q::Term::Quasi.new(:contents($<postfix>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
@@ -494,11 +497,14 @@ class _007::Parser::Actions {
 
     method postfix($/) {
         my $op = (~$/).trim;
-        if $op.substr(0, 1) eq "[" && $op.substr(*-1) eq "]" {  # XXX: more hardcoding :(
+        if $<index> {  # XXX: more hardcoding :(
             $op = "[]";
         }
-        elsif $op.substr(0, 1) eq "(" && $op.substr(*-1) eq ")" {
+        elsif $<call> {
             $op = "()";
+        }
+        elsif $<prop> {
+            $op = ".";
         }
         my $ident = Q::Identifier.new(
             :name(Val::Str.new(:value("postfix:<$op>"))),
@@ -507,16 +513,16 @@ class _007::Parser::Actions {
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$ident);
+            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$ident, :expr(Val::None.new));
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$ident);
+            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$ident, :expr(Val::None.new));
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$ident);
+            make Q::Postfix::Property.new(property => $<identifier>.ast, :$ident, :expr(Val::None.new));
         }
         else {
-            make $*parser.oplevel.ops<postfix>{$op}.new(:$ident);
+            make $*parser.oplevel.ops<postfix>{$op}.new(:$ident, :expr(Val::None.new));
         }
     }
 

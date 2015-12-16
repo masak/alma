@@ -128,4 +128,12 @@ use _007::Test;
     outputs $program, "<type Q::Prefix::Minus>\n", "quasi @ Q::Prefix";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Postfix { .foo }));
+        .
+
+    outputs $program, "<type Q::Postfix::Property>\n", "quasi @ Q::Postfix";
+}
+
 done-testing;

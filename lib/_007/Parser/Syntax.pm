@@ -161,6 +161,7 @@ grammar _007::Parser::Syntax {
         [
             || "@" <.ws> "Q::Infix" <.ws> '{' <.ws> <infix> <.ws> '}'
             || "@" <.ws> "Q::Prefix" <.ws> '{' <.ws> <prefix> <.ws> '}'
+            || "@" <.ws> "Q::Postfix" <.ws> '{' <.ws> <postfix> <.ws> '}'
             || <block>
             || <.panic("quasi")>
         ]
