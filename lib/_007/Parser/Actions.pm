@@ -316,16 +316,21 @@ class _007::Parser::Actions {
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
             # XXX: factor the logic that checks for macro call out into its own helper sub
-            my @p = $postfix.list;
-            if @p[0] ~~ Q::Postfix::Call
+            if $postfix ~~ Q::Postfix::Call
             && $/.ast ~~ Q::Identifier
             && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
-                my @args = @p[1]<argumentlist>.arguments.elements;
+                my @args = $postfix.argumentlist.arguments.elements;
                 my $qtree = $*runtime.call($macro, @args);
                 make $qtree;
             }
-            elsif @p >= 2 {
-                make @p[0].new(:expr($/.ast), |@p[1]);
+            elsif $postfix ~~ Q::Postfix::Index {
+                make $postfix.new(:expr($/.ast), :index($postfix.index));
+            }
+            elsif $postfix ~~ Q::Postfix::Call {
+                make $postfix.new(:expr($/.ast), :argumentlist($postfix.argumentlist));
+            }
+            elsif $postfix ~~ Q::Postfix::Property {
+                make $postfix.new(:expr($/.ast), :property($postfix.property));
             }
             else {
                 my $c = $*runtime.maybe-get-var($postfix.ident.name.value);
@@ -502,13 +507,13 @@ class _007::Parser::Actions {
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make [Q::Postfix::Index, { index => $<EXPR>.ast, :$ident }];
+            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$ident);
         }
         elsif $<call> {
-            make [Q::Postfix::Call, { argumentlist => $<argumentlist>.ast, :$ident }];
+            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$ident);
         }
         elsif $<prop> {
-            make [Q::Postfix::Property, { property => $<identifier>.ast, :$ident }];
+            make Q::Postfix::Property.new(property => $<identifier>.ast, :$ident);
         }
         else {
             make $*parser.oplevel.ops<postfix>{$op}.new(:$ident);
