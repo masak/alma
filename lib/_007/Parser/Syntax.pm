@@ -91,7 +91,9 @@ grammar _007::Parser::Syntax {
     }
     token statement:if {
         if <.ws> <xblock>
+        [  <.ws> else <.ws> <else-block=block> ]?
     }
+    
     token statement:for {
         for <.ws> <xblock>
     }
