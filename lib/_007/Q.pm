@@ -437,7 +437,7 @@ class Q::Statement::Expr does Q::Statement {
 class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
-    has $.else = Val::None.new;
+    has $.else;
     
     method attribute-order { <expr block else> }
 
