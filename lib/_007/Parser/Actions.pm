@@ -153,7 +153,6 @@ class _007::Parser::Actions {
     }
 
     method statement:if ($/) {
-        
         my %params = $<xblock>.ast;
         %params<else> = $<else-block>.ast if $<else-block> :exists;
 
