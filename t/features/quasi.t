@@ -136,4 +136,12 @@ use _007::Test;
     outputs $program, "<type Q::Postfix::Property>\n", "quasi @ Q::Postfix";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Expr { 2 + (2 + 2) + -2 + [2][2] }));
+        .
+
+    outputs $program, "<type Q::Infix::Addition>\n", "quasi @ Q::Expr";
+}
+
 done-testing;

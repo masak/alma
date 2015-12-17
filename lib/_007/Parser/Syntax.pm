@@ -164,6 +164,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Infix" <.ws> '{' <.ws> <infix> <.ws> '}'
             || "@" <.ws> "Q::Prefix" <.ws> '{' <.ws> <prefix> <.ws> '}'
             || "@" <.ws> "Q::Postfix" <.ws> '{' <.ws> <postfix> <.ws> '}'
+            || "@" <.ws> "Q::Expr" <.ws> '{' <.ws> <EXPR> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>
