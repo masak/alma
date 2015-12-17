@@ -93,7 +93,7 @@ grammar _007::Parser::Syntax {
         if <.ws> <xblock>
         [  <.ws> else <.ws> <else-block=block> ]?
     }
-    
+
     token statement:for {
         for <.ws> <xblock>
     }

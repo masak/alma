@@ -438,7 +438,7 @@ class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
     has $.else;
-    
+
     method attribute-order { <expr block else> }
 
     method run($runtime) {
@@ -462,7 +462,7 @@ class Q::Statement::If does Q::Statement {
            $runtime.enter($c);
            $.else.statementlist.run($runtime);
            $runtime.leave;
-        }       
+        }
     }
     method interpolate($runtime) {
         self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
