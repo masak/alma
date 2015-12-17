@@ -144,4 +144,13 @@ use _007::Test;
     outputs $program, "<type Q::Infix::Addition>\n", "quasi @ Q::Expr";
 }
 
+{
+    my $program = q:to/./;
+        my foo;
+        say(type(quasi @ Q::Identifier { foo }));
+        .
+
+    outputs $program, "<type Q::Identifier>\n", "quasi @ Q::Identifier";
+}
+
 done-testing;

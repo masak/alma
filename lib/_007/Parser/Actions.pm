@@ -432,6 +432,9 @@ class _007::Parser::Actions {
         elsif $<EXPR> {
             make Q::Term::Quasi.new(:contents($<EXPR>.ast));
         }
+        elsif $<term> {
+            make Q::Term::Quasi.new(:contents($<term>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
