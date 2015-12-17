@@ -30,6 +30,7 @@ sub read(Str $ast) is export {
         my             => -> $ident, $expr = Val::None.new { Q::Statement::My.new(:$ident, :$expr) },
         stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },
         if             => -> $expr, $block { Q::Statement::If.new(:$expr, :$block) },
+        if-else        => -> $expr, $block, $else { Q::Statement::If.new(:$expr, :$block, :$else) },      
         stblock        => -> $block { Q::Statement::Block.new(:$block) },
         sub            => -> $ident, $block { Q::Statement::Sub.new(:$ident, :$block) },
         macro          => -> $ident, $block { Q::Statement::Macro.new(:$ident, :$block) },

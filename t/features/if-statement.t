@@ -47,4 +47,34 @@ use _007::Test;
     is-result $ast, "7\n", "if statements with parameters work as they should";
 }
 
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+         (if-else (int 1) 
+                  (block (paramlist)
+                    (stmtlist
+                     (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+                  (block (paramlist)
+                    (stmtlist
+                     (stexpr (postfix:<()> (ident "say") (arglist (str  "else"))))))))
+        .
+    is-result $ast, "if\n", "if-else statements run if-clause";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+         (if-else (int 0) 
+                  (block (paramlist)
+                    (stmtlist
+                     (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+                  (block (paramlist)
+                    (stmtlist
+                     (stexpr (postfix:<()> (ident "say") (arglist (str  "else"))))))))
+        .
+
+    is-result $ast, "else\n", "if-else statements run else-clause";
+}
+
 done-testing;

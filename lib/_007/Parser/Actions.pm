@@ -153,7 +153,11 @@ class _007::Parser::Actions {
     }
 
     method statement:if ($/) {
-        make Q::Statement::If.new(|$<xblock>.ast);
+        
+        my %params = $<xblock>.ast;
+        %params<else> = $<else-block>.ast if $<else-block> :exists;
+
+        make Q::Statement::If.new(|%params);
     }
 
     method statement:for ($/) {
