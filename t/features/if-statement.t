@@ -52,12 +52,12 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 1)
-                  (block (paramlist)
-                    (stmtlist
-                     (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
-                  (block (paramlist)
-                    (stmtlist
-                     (stexpr (postfix:<()> (ident "say") (arglist (str  "else"))))))))
+           (block (paramlist)
+             (stmtlist
+              (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+           (block (paramlist)
+             (stmtlist
+              (stexpr (postfix:<()> (ident "say") (arglist (str "else"))))))))
         .
     is-result $ast, "if\n", "if-else statements run if-clause";
 }
@@ -66,12 +66,12 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 0)
-                  (block (paramlist)
-                    (stmtlist
-                     (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
-                  (block (paramlist)
-                    (stmtlist
-                     (stexpr (postfix:<()> (ident "say") (arglist (str  "else"))))))))
+           (block (paramlist)
+             (stmtlist
+              (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+           (block (paramlist)
+             (stmtlist
+              (stexpr (postfix:<()> (ident "say") (arglist (str "else"))))))))
         .
 
     is-result $ast, "else\n", "if-else statements run else-clause";
