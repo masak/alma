@@ -122,7 +122,7 @@ class Q::Term::Array does Q::Term {
         Val::Array.new(:elements($.elements.elements».eval($runtime)));
     }
     method interpolate($runtime) {
-        self.new(:elements(@.elements».interpolate($runtime)));
+        self.new(:elements(Val::Array.new(:elements($.elements.elements».interpolate($runtime)))));
     }
 }
 
