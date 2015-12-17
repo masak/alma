@@ -51,7 +51,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-         (if-else (int 1) 
+         (if (int 1)
                   (block (paramlist)
                     (stmtlist
                      (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
@@ -65,7 +65,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-         (if-else (int 0) 
+         (if (int 0)
                   (block (paramlist)
                     (stmtlist
                      (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
