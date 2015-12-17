@@ -437,7 +437,7 @@ class Q::Statement::Expr does Q::Statement {
 class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
-    has $.else = Val::None;
+    has $.else = Val::None.new;
     
     method attribute-order { <expr block else> }
 
@@ -457,7 +457,7 @@ class Q::Statement::If does Q::Statement {
             $runtime.leave;
         }
         else {
-           return unless $.else;
+           return if $.else ~~ Val::None;
            my $c = $.else.eval($runtime);
            $runtime.enter($c);
            $.else.statementlist.run($runtime);
