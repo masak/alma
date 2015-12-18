@@ -196,6 +196,17 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
+            'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
+                        unless $lhs ~~ Val::Str;
+                    die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap($lhs.value x $rhs.value);
+                },
+                :qtype(Q::Infix::Replicate),
+                :precedence{ equal => "*" },
+            ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
                     # can't express this one as a built-in sub
@@ -244,6 +255,7 @@ class _007::Runtime::Builtins {
             "Q::Infix::Subtraction"  => Val::Type.of(Q::Infix::Subtraction),
             "Q::Infix::Multiplication" => Val::Type.of(Q::Infix::Multiplication),
             "Q::Infix::Concat"       => Val::Type.of(Q::Infix::Concat),
+            "Q::Infix::Replicate"    => Val::Type.of(Q::Infix::Replicate),
             "Q::Infix::Assignment"   => Val::Type.of(Q::Infix::Assignment),
             "Q::Infix::Eq"           => Val::Type.of(Q::Infix::Eq),
             "Q::Postfix"             => Val::Type.of(Q::Postfix),

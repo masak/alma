@@ -41,6 +41,15 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<x> (str "hi ") (int 3))))))
+        .
+
+    is-result $ast, "hi hi hi \n", "string concatenation works";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (my (ident "ns") (array (str "Jim") (str "Bond")))
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (int 1))))))
         .

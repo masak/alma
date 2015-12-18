@@ -254,6 +254,8 @@ class Q::Infix::Multiplication is Q::Infix {}
 
 class Q::Infix::Concat is Q::Infix {}
 
+class Q::Infix::Replicate is Q::Infix {}
+
 class Q::Infix::Assignment is Q::Infix {
     method eval($runtime) {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
