@@ -77,4 +77,43 @@ use _007::Test;
     is-result $ast, "else\n", "if-else statements run else-clause";
 }
 
+{
+    my $ast = q:to/./;
+        (stmtlist
+         (if (int 0)
+             (block (paramlist)
+               (stmtlist
+                (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+           (if (int 0)
+               (block (paramlist)
+                 (stmtlist
+                  (stexpr (postfix:<()> (ident "say") (arglist (str "else-if"))))))
+             (block (paramlist)
+               (stmtlist
+                (stexpr (postfix:<()> (ident "say") (arglist (str "else")))))))))
+        .
+
+    is-result $ast, "else\n", "if-else-if-else statements run else-clause";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+         (if (int 0)
+             (block (paramlist)
+               (stmtlist
+                (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+           (if (int 1)
+               (block (paramlist)
+                 (stmtlist
+                  (stexpr (postfix:<()> (ident "say") (arglist (str "else-if"))))))
+             (block (paramlist)
+               (stmtlist
+                (stexpr (postfix:<()> (ident "say") (arglist (str "else")))))))))
+        .
+
+    is-result $ast, "else-if\n", "if-else-if-else statements run else-if-clause";
+}
+
+
 done-testing;

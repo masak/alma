@@ -457,11 +457,18 @@ class Q::Statement::If does Q::Statement {
             $runtime.leave;
         }
         else {
-           return if $.else ~~ Val::None;
-           my $c = $.else.eval($runtime);
-           $runtime.enter($c);
-           $.else.statementlist.run($runtime);
-           $runtime.leave;
+           given $.else {
+               when Val::None { }
+               when Q::Statement::If {
+                   $.else.run($runtime)
+               }
+               when Q::Block {
+                   my $c = $.else.eval($runtime);
+                   $runtime.enter($c);
+                   $.else.statementlist.run($runtime);
+                   $runtime.leave;
+               }
+           }
         }
     }
     method interpolate($runtime) {
