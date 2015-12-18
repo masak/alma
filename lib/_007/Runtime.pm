@@ -66,7 +66,6 @@ class _007::Runtime {
         until self.current-frame === $frame {
             self.leave;
         }
-        return;
     }
 
     method current-frame {
@@ -86,7 +85,6 @@ class _007::Runtime {
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;
-        return;
     }
 
     method put-var(Str $name, $value) {
@@ -103,7 +101,6 @@ class _007::Runtime {
         if self!maybe-find($name, self.current-frame) -> %pad {
             return %pad{$name};
         }
-        return;
     }
 
     method declare-var(Str $name, $value?) {
