@@ -196,6 +196,17 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
+            'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
+                        unless $lhs ~~ Val::Str;
+                    die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap($lhs.value x $rhs.value);
+                },
+                :qtype(Q::Infix::Replicate),
+                :precedence{ equal => "*" },
+            ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
                     # can't express this one as a built-in sub
