@@ -154,8 +154,8 @@ class _007::Parser::Actions {
 
     method statement:if ($/) {
         my %params = $<xblock>.ast;
-        %params<else> = $<else-block> :exists
-            ?? $<else-block>.ast
+        %params<else> = $<else> :exists
+            ?? $<else>.ast
             !! Val::None.new;
 
         make Q::Statement::If.new(|%params);

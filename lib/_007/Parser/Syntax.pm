@@ -93,8 +93,8 @@ grammar _007::Parser::Syntax {
         if <.ws> <xblock>
         [  <.ws> else <.ws>
            [
-               | <else-block=block>
-               | <else-block=statement:if>
+               | <else=block>
+               | <else=statement:if>
            ]
         ] ?
     }
