@@ -44,8 +44,31 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<x> (str "hi ") (int 3))))))
         .
 
-    is-result $ast, "hi hi hi \n", "string concatenation works";
+    is-result $ast, "hi hi hi \n", "string repeatition works";
 }
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<xx> (array (int 1) (int 2)) (int 3))))))
+        .
+
+    is-result $ast, "[1, 2, 1, 2, 1, 2]\n", "array repeatition works";
+}
+
+{
+    my $ast = q:to/./;
+    (stmtlist
+     (stexpr (postfix:<()> (ident "say")
+       (arglist
+        (infix:<::> (int 0)
+        (infix:<::> (int 0)
+        (infix:<::> (int 7) (array))))))))
+    .
+
+    is-result $ast, "[0, 0, 7]\n", "cons works";
+}
+
 
 {
     my $ast = q:to/./;
