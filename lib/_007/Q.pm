@@ -388,7 +388,7 @@ role Q::Statement does Q {
 
 class Q::Statement::My does Q::Statement does Q::Declaration {
     has $.ident;
-    has $.expr;
+    has $.expr = Val::None.new;
 
     method attribute-order { <expr ident> }
 
@@ -437,7 +437,7 @@ class Q::Statement::Expr does Q::Statement {
 class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
-    has $.else;
+    has $.else = Val::None.new;
 
     method attribute-order { <expr block else> }
 
@@ -570,7 +570,7 @@ class Q::Statement::While does Q::Statement {
 }
 
 class Q::Statement::Return does Q::Statement {
-    has $.expr;
+    has $.expr = Val::None.new;
 
     method run($runtime) {
         my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
@@ -582,9 +582,30 @@ class Q::Statement::Return does Q::Statement {
     }
 }
 
+class Q::Trait does Q {
+    has $.ident;
+    has $.expr;
+
+    method attribute-order { <ident expr> }
+
+    method interpolate($runtime) {
+        self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
+    }
+}
+
+class Q::TraitList does Q {
+    has Val::Array $.traits = Val::Array.new;
+
+    method attribute-order { <traits> }
+
+    method interpolate($runtime) {
+        self.new(:traits(Val::Array.new(:elements($.traits.elements».interpolate($runtime)))));
+    }
+}
+
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.ident;
-    has $.traitlist;
+    has $.traitlist = Q::TraitList.new;
     has $.block;
 
     method attribute-order { <ident traitlist block> }
@@ -601,7 +622,7 @@ class Q::Statement::Sub does Q::Statement does Q::Declaration {
 
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.ident;
-    has $.traitlist;
+    has $.traitlist = Q::TraitList.new;
     has $.block;
 
     method attribute-order { <ident traitlist block> }
@@ -637,26 +658,5 @@ class Q::StatementList does Q {
     }
     method interpolate($runtime) {
         self.new(:statements(Val::Array.new(:elements($.statements.elements».interpolate($runtime)))));
-    }
-}
-
-class Q::Trait does Q {
-    has $.ident;
-    has $.expr;
-
-    method attribute-order { <ident expr> }
-
-    method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
-    }
-}
-
-class Q::TraitList does Q {
-    has Val::Array $.traits = Val::Array.new;
-
-    method attribute-order { <traits> }
-
-    method interpolate($runtime) {
-        self.new(:traits(Val::Array.new(:elements($.traits.elements».interpolate($runtime)))));
     }
 }

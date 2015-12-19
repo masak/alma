@@ -453,6 +453,10 @@ class _007::Parser::Actions {
                     unless %known-properties{$property};
             }
             for %known-properties.keys -> $property {
+                # If an attribute has an initializer, then we don't require that it be
+                # passed, since it will get a sensible value anyway.
+                next if $*runtime.get-var($type).type.^attributes.first({ .name.substr(2) eq $property }).build;
+
                 die X::Property::Required.new(:$type, :$property)
                     unless $property eq any($<propertylist>.ast.properties.elements».key».value);
             }
