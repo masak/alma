@@ -117,6 +117,20 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (my (ident "i1") (int 10))
+          (my (ident "i2") (int 11))
+
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "i1") (ident "i1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "i1") (ident "i2"))))))
+        .
+
+    is-result $ast, "0\n1\n", "integer inequality";
+}
+
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (my (ident "s1") (str "10"))
           (my (ident "s2") (str "11"))
 
@@ -125,6 +139,19 @@ use _007::Test;
         .
 
     is-result $ast, "1\n0\n", "string equality";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "s1") (str "10"))
+          (my (ident "s2") (str "11"))
+
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "s1") (ident "s1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "s1") (ident "s2"))))))
+        .
+
+    is-result $ast, "0\n1\n", "string inequality";
 }
 
 {
@@ -143,6 +170,20 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (my (ident "a1") (array (int 1) (int 2) (int 3)))
+          (my (ident "a2") (array (int 1) (int 2) (str "3")))
+
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "a1") (ident "a1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "a1") (ident "a2"))))))
+        .
+
+    is-result $ast, "0\n1\n", "array inequality";
+}
+
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (my (ident "o1") (object (ident "Object") (proplist (property "x" (int 7)))))
           (my (ident "o2") (object (ident "Object") (proplist (property "x" (int 9)))))
 
@@ -156,11 +197,34 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+          (my (ident "o1") (object (ident "Object") (proplist (property "x" (int 7)))))
+          (my (ident "o2") (object (ident "Object") (proplist (property "x" (int 9)))))
+
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "o1") (ident "o1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "o1") (ident "o2"))))))
+        .
+
+    is-result $ast, "0\n1\n", "object inequality";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "Int") (ident "Int")))))
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "Int") (ident "Str"))))))
         .
 
     is-result $ast, "1\n0\n", "type equality";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "Int") (ident "Int")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "Int") (ident "Str"))))))
+        .
+
+    is-result $ast, "0\n1\n", "type inequality";
 }
 
 {
@@ -178,6 +242,23 @@ use _007::Test;
         .
 
     is-result $ast, "0\n0\n0\n0\n", "equality testing across types (always false)";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (my (ident "i1") (int 10))
+          (my (ident "s1") (str "10"))
+          (my (ident "a1") (array (int 1) (int 2) (int 3)))
+          (my (ident "o1") (object (ident "Object") (proplist (property "x" (int 7)))))
+
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "i1") (ident "s1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "s1") (ident "a1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "a1") (ident "i1")))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "o1") (ident "i1"))))))
+        .
+
+    is-result $ast, "1\n1\n1\n1\n", "inequality testing across types (always false)";
 }
 
 {

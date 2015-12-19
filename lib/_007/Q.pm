@@ -271,6 +271,7 @@ class Q::Infix::Assignment is Q::Infix {
 }
 
 class Q::Infix::Eq is Q::Infix {}
+class Q::Infix::NotEq is Q::Infix {}
 
 class Q::Postfix does Q::Expr {
     has $.ident;
