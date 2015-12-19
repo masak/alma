@@ -178,9 +178,8 @@ class _007::Runtime {
     }
 
     method property($obj, Str $propname) {
-        my $builtins = _007::Runtime::Builtins.new(:runtime(self));
         if $obj ~~ Q {
-            return $builtins.property($obj, $propname);
+            return $!builtins.property($obj, $propname);
         }
         if $obj.properties{$propname} :exists {
             return $obj.properties{$propname};
