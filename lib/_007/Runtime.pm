@@ -194,7 +194,7 @@ class _007::Runtime {
             die X::PropertyNotFound.new(:$propname)
                 unless %known-properties{$propname};
 
-            return self.wrap($obj."$propname"());
+            return $obj."$propname"();
         }
         if $obj.properties{$propname} :exists {
             return $obj.properties{$propname};
