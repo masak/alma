@@ -107,7 +107,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
-            'infix:<==>' => Val::Sub::Builtin.new('infix:<=>',
+            'infix:<==>' => my $equal-builtin = Val::Sub::Builtin.new('infix:<=>',
                 sub ($lhs, $rhs) {
                     multi equal-value($, $) { False }
                     multi equal-value(Val::None, Val::None) { True }
@@ -150,6 +150,13 @@ class _007::Runtime::Builtins {
                     return wrap(+equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
+                :assoc<left>,
+            ),
+            'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
+                sub ($lhs, $rhs) {
+                  return wrap(+!$equal-builtin.code.($lhs, $rhs).?value)
+                },
+                :qtype(Q::Infix::NotEq),
                 :assoc<left>,
             ),
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
@@ -279,6 +286,10 @@ class _007::Runtime::Builtins {
             Q::Infix::Concat,
             Q::Infix::Assignment,
             Q::Infix::Eq,
+            Q::Infix::NotEq,
+            Q::Infix::Replicate,
+            Q::Infix::ArrayReplicate,
+            Q::Infix::Cons,
             Q::Literal::Int,
             Q::Literal::None,
             Q::Literal::Str,
