@@ -26,15 +26,6 @@ class Val::Sub::Builtin is Val::Sub {
 class _007::Runtime::Builtins {
     has $.runtime;
 
-    sub wrap($_) {
-        when Val | Q { $_ }
-        when Nil { Val::None.new }
-        when Str { Val::Str.new(:value($_)) }
-        when Int { Val::Int.new(:value($_)) }
-        when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
-        default { die "Got some unknown value of type ", .^name }
-    }
-
     method get-builtins {
         my &str = sub ($_) {
             when Val { return .Str }
@@ -43,6 +34,10 @@ class _007::Runtime::Builtins {
                 :got($_),
                 :expected("something that can be converted to a string"));
         };
+
+        sub wrap($value) {
+            $!runtime.wrap($value);
+        }
 
         my @builtins =
             say      => -> $arg {
@@ -313,15 +308,5 @@ class _007::Runtime::Builtins {
         }
 
         return $scope;
-    }
-
-    method property($obj, $propname) {
-        sub aname($attr) { $attr.name.substr(2) }
-        my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
-
-        die X::PropertyNotFound.new(:$propname)
-            unless %known-properties{$propname};
-
-        return wrap($obj."$propname"());
     }
 }
