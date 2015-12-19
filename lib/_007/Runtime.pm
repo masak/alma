@@ -178,9 +178,14 @@ class _007::Runtime {
     }
 
     method property($obj, Str $propname) {
-        my $builtins = _007::Runtime::Builtins.new(:runtime(self));
         if $obj ~~ Q {
-            return $builtins.property($obj, $propname);
+            sub aname($attr) { $attr.name.substr(2) }
+            my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
+
+            die X::PropertyNotFound.new(:$propname)
+                unless %known-properties{$propname};
+
+            return $obj."$propname"();
         }
         if $obj.properties{$propname} :exists {
             return $obj.properties{$propname};
