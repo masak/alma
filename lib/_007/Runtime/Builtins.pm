@@ -226,7 +226,6 @@ class _007::Runtime::Builtins {
             "Block"                  => Val::Type.of(Val::Block),
             "Sub"                    => Val::Type.of(Val::Sub),
             "Macro"                  => Val::Type.of(Val::Macro),
-            "Q::Identifier"          => Val::Type.of(Q::Identifier),
             "Q::Literal::None"       => Val::Type.of(Q::Literal::None),
             "Q::Literal::Int"        => Val::Type.of(Q::Literal::Int),
             "Q::Literal::Str"        => Val::Type.of(Q::Literal::Str),
