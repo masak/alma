@@ -584,28 +584,34 @@ class Q::Statement::Return does Q::Statement {
 
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.ident;
+    has $.traitlist;
     has $.block;
 
-    method attribute-order { <ident block> }
+    method attribute-order { <ident traitlist block> }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate($runtime)),
+        self.new(
+            :ident($.ident.interpolate($runtime)),
+            :traitlist($.traitlist.interpolate($runtime)),
             :block($.block.interpolate($runtime)));
     }
 }
 
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.ident;
+    has $.traitlist;
     has $.block;
 
-    method attribute-order { <ident block> }
+    method attribute-order { <ident traitlist block> }
 
     method run($runtime) {
     }
     method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate($runtime)),
+        self.new(
+            :ident($.ident.interpolate($runtime)),
+            :traitlist($.traitlist.interpolate($runtime)),
             :block($.block.interpolate($runtime)));
     }
 }

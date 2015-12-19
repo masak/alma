@@ -68,7 +68,7 @@ grammar _007::Parser::Syntax {
         { declare(Q::Statement::Sub, $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
-        <trait> *
+        <traitlist>
         <blockoid>:!s
         <.finishpad>
     }
@@ -78,7 +78,7 @@ grammar _007::Parser::Syntax {
         { declare(Q::Statement::Macro, $<identifier>.Str); }
         <.newpad>
         '(' ~ ')' <parameterlist>
-        <trait> *
+        <traitlist>
         <blockoid>:!s
         <.finishpad>
     }
@@ -109,6 +109,9 @@ grammar _007::Parser::Syntax {
         BEGIN <.ws> <block>
     }
 
+    rule traitlist {
+        <trait> *
+    }
     token trait {
         'is' <.ws> <identifier> '(' <EXPR> ')'
     }

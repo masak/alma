@@ -114,38 +114,40 @@ class _007::Parser::Actions {
         my $ident = $<identifier>.ast;
         my $name = ~$<identifier>;
         my $parameterlist = $<parameterlist>.ast;
+        my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         my %static-lexpad = $*runtime.current-frame.pad;
         self.finish-block($block);
 
-        make Q::Statement::Sub.new(:$ident, :$block);
+        make Q::Statement::Sub.new(:$ident, :$traitlist, :$block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         $*runtime.put-var($name, $val);
 
-        maybe-install-operator($name, @<trait>);
+        maybe-install-operator($name, $<traitlist><trait>);
     }
 
     method statement:macro ($/) {
         my $ident = $<identifier>.ast;
         my $name = ~$<identifier>;
         my $parameterlist = $<parameterlist>.ast;
+        my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         my %static-lexpad = $*runtime.current-frame.pad;
         self.finish-block($block);
 
-        make Q::Statement::Macro.new(:$ident, :$block);
+        make Q::Statement::Macro.new(:$ident, :$traitlist, :$block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         $*runtime.put-var($name, $val);
 
-        maybe-install-operator($name, @<trait>);
+        maybe-install-operator($name, $<traitlist><trait>);
     }
 
     method statement:return ($/) {
@@ -175,6 +177,9 @@ class _007::Parser::Actions {
         $*runtime.run(Q::CompUnit.new(:$block));
     }
 
+    method traitlist($/) {
+        make Q::TraitList.new(:traits(Val::Array.new(:elements($<trait>».ast))));
+    }
     method trait($/) {
         make Q::Trait.new(:ident($<identifier>.ast), :expr($<EXPR>.ast));
     }
