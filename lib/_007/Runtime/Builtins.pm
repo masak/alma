@@ -207,6 +207,17 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Replicate),
                 :precedence{ equal => "*" },
             ),
+            'infix:<xx>' => Val::Sub::Builtin.new('infix:<xx>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
+                        unless $lhs ~~ Val::Array;
+                    die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap(| $lhs.elements xx $rhs.value);
+                },
+                :qtype(Q::Infix::ArrayReplicate),
+                :precedence{ equal => "*" },
+            ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
                     # can't express this one as a built-in sub
@@ -256,6 +267,7 @@ class _007::Runtime::Builtins {
             "Q::Infix::Multiplication" => Val::Type.of(Q::Infix::Multiplication),
             "Q::Infix::Concat"       => Val::Type.of(Q::Infix::Concat),
             "Q::Infix::Replicate"    => Val::Type.of(Q::Infix::Replicate),
+            "Q::Infix::ArrayReplicate" => Val::Type.of(Q::Infix::ArrayReplicate),
             "Q::Infix::Assignment"   => Val::Type.of(Q::Infix::Assignment),
             "Q::Infix::Eq"           => Val::Type.of(Q::Infix::Eq),
             "Q::Postfix"             => Val::Type.of(Q::Postfix),
