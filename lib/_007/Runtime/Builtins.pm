@@ -276,6 +276,7 @@ class _007::Runtime::Builtins {
             Q::Term::Object,
             Q::Term::Quasi,
             Q::Trait,
+            Q::TraitList,
             Q::Unquote,
         ;
 
