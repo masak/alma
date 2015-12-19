@@ -207,6 +207,17 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Replicate),
                 :precedence{ equal => "*" },
             ),
+            'infix:<xx>' => Val::Sub::Builtin.new('infix:<xx>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
+                        unless $lhs ~~ Val::Array;
+                    die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    return wrap(| $lhs.elements xx $rhs.value);
+                },
+                :qtype(Q::Infix::ArrayReplicate),
+                :precedence{ equal => "*" },
+            ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
                     # can't express this one as a built-in sub
