@@ -177,15 +177,6 @@ class _007::Runtime {
         return Val::None.new;
     }
 
-    method wrap($_) {
-        when Val | Q { $_ }
-        when Nil { Val::None.new }
-        when Str { Val::Str.new(:value($_)) }
-        when Int { Val::Int.new(:value($_)) }
-        when Array | Seq | List { Val::Array.new(:elements(.map({ self.wrap($_) }))) }
-        default { die "Got some unknown value of type ", .^name }
-    }
-
     method property($obj, Str $propname) {
         if $obj ~~ Q {
             sub aname($attr) { $attr.name.substr(2) }

@@ -35,8 +35,13 @@ class _007::Runtime::Builtins {
                 :expected("something that can be converted to a string"));
         };
 
-        sub wrap($value) {
-            $!runtime.wrap($value);
+        sub wrap($_) {
+            when Val | Q { $_ }
+            when Nil { Val::None.new }
+            when Str { Val::Str.new(:value($_)) }
+            when Int { Val::Int.new(:value($_)) }
+            when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
+            default { die "Got some unknown value of type ", .^name }
         }
 
         my @builtins =
