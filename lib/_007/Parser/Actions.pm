@@ -110,7 +110,7 @@ class _007::Parser::Actions {
         $*parser.oplevel.install($type, $op, :%precedence, :$assoc);
     }
 
-    method statement:sub ($/) {
+    method statement:sub-or-macro ($/) {
         my $ident = $<identifier>.ast;
         my $name = ~$<identifier>;
         my $parameterlist = $<parameterlist>.ast;
@@ -121,30 +121,20 @@ class _007::Parser::Actions {
         my %static-lexpad = $*runtime.current-frame.pad;
         self.finish-block($block);
 
-        make Q::Statement::Sub.new(:$ident, :$traitlist, :$block);
-
         my $outer-frame = $*runtime.current-frame;
-        my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
-        $*runtime.put-var($name, $val);
+        my $val;
+        if $<routine> eq "sub" {
+            make Q::Statement::Sub.new(:$ident, :$traitlist, :$block);
+            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+        }
+        elsif $<routine> eq "macro" {
+            make Q::Statement::Macro.new(:$ident, :$traitlist, :$block);
+            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+        }
+        else {
+            die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
+        }
 
-        maybe-install-operator($name, $<traitlist><trait>);
-    }
-
-    method statement:macro ($/) {
-        my $ident = $<identifier>.ast;
-        my $name = ~$<identifier>;
-        my $parameterlist = $<parameterlist>.ast;
-        my $traitlist = $<traitlist>.ast;
-        my $statementlist = $<blockoid>.ast;
-
-        my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my %static-lexpad = $*runtime.current-frame.pad;
-        self.finish-block($block);
-
-        make Q::Statement::Macro.new(:$ident, :$traitlist, :$block);
-
-        my $outer-frame = $*runtime.current-frame;
-        my $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         $*runtime.put-var($name, $val);
 
         maybe-install-operator($name, $<traitlist><trait>);

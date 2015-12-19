@@ -62,20 +62,15 @@ grammar _007::Parser::Syntax {
         <EXPR>
     }
     token statement:block { <pblock> }
-    rule statement:sub {
-        sub [<identifier> || <.panic("identifier")>]
+    rule statement:sub-or-macro {
+        $<routine>=(sub|macro) [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
-        { declare(Q::Statement::Sub, $<identifier>.Str); }
-        <.newpad>
-        '(' ~ ')' <parameterlist>
-        <traitlist>
-        <blockoid>:!s
-        <.finishpad>
-    }
-    rule statement:macro {
-        macro [<identifier> || <.panic("identifier")>]
-        :my $*insub = True;
-        { declare(Q::Statement::Macro, $<identifier>.Str); }
+        {
+            declare($<routine> eq "sub"
+                        ?? Q::Statement::Sub
+                        !! Q::Statement::Macro,
+                    $<identifier>.Str);
+        }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <traitlist>
