@@ -44,6 +44,44 @@ class _007::Runtime::Builtins {
             default { die "Got some unknown value of type ", .^name }
         }
 
+        # These multis are used below by infix:<==> and infix:<!=>
+        multi equal-value($, $) { False }
+        multi equal-value(Val::None, Val::None) { True }
+        multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
+        multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
+        multi equal-value(Val::Array $l, Val::Array $r) {
+            sub equal-at-index($i) {
+                equal-value($l.elements[$i], $r.elements[$i]);
+            }
+
+            [&&] $l.elements == $r.elements,
+                |(^$l.elements).map(&equal-at-index);
+        }
+        multi equal-value(Val::Object $l, Val::Object $r) {
+            sub equal-at-key(Str $key) {
+                equal-value($l.properties{$key}, $r.properties{$key});
+            }
+
+            [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
+                |($l.properties.keys).map(&equal-at-key);
+        }
+        multi equal-value(Val::Type $l, Val::Type $r) {
+            $l.type === $r.type
+        }
+        multi equal-value(Val::Block $l, Val::Block $r) {
+            $l.name eq $r.name
+                && equal-value($l.parameterlist, $r.parameterlist)
+                && equal-value($l.statementlist, $r.statementlist)
+        }
+        multi equal-value(Q $l, Q $r) {
+            sub same-avalue($attr) {
+                equal-value($attr.get_value($l), $attr.get_value($r));
+            }
+
+            [&&] $l.WHAT === $r.WHAT,
+                |$l.attributes.map(&same-avalue);
+        }
+
         my @builtins =
             say      => -> $arg {
                 $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
@@ -107,46 +145,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
-            'infix:<==>' => my $equal-builtin = Val::Sub::Builtin.new('infix:<=>',
+            'infix:<==>' => Val::Sub::Builtin.new('infix:<=>',
                 sub ($lhs, $rhs) {
-                    multi equal-value($, $) { False }
-                    multi equal-value(Val::None, Val::None) { True }
-                    multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
-                    multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
-                    multi equal-value(Val::Array $l, Val::Array $r) {
-                        sub equal-at-index($i) {
-                            equal-value($l.elements[$i], $r.elements[$i]);
-                        }
-
-                        [&&] $l.elements == $r.elements,
-                            |(^$l.elements).map(&equal-at-index);
-                    }
-                    multi equal-value(Val::Object $l, Val::Object $r) {
-                        sub equal-at-key(Str $key) {
-                            equal-value($l.properties{$key}, $r.properties{$key});
-                        }
-
-                        [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
-                            |($l.properties.keys).map(&equal-at-key);
-                    }
-                    multi equal-value(Val::Type $l, Val::Type $r) {
-                        $l.type === $r.type
-                    }
-                    multi equal-value(Val::Block $l, Val::Block $r) {
-                        $l.name eq $r.name
-                            && equal-value($l.parameterlist, $r.parameterlist)
-                            && equal-value($l.statementlist, $r.statementlist)
-                    }
-                    multi equal-value(Q $l, Q $r) {
-                        sub same-avalue($attr) {
-                            equal-value($attr.get_value($l), $attr.get_value($r));
-                        }
-
-                        [&&] $l.WHAT === $r.WHAT,
-                            |$l.attributes.map(&same-avalue);
-                    }
-
-                    # converting Bool->Int because the implemented language doesn't have Bool
                     return wrap(+equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
@@ -154,7 +154,7 @@ class _007::Runtime::Builtins {
             ),
             'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
                 sub ($lhs, $rhs) {
-                  return wrap(+!$equal-builtin.code.($lhs, $rhs).?value)
+                  return wrap(+!equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::NotEq),
                 :assoc<left>,
