@@ -441,12 +441,11 @@ class _007::Parser::Actions {
 
     method term:object ($/) {
         my $type = ~($<identifier> // "Object");
+        my $type-obj = $*runtime.get-var($type).type;
 
-        # XXX: It's not really the name "Object" we should special-case,
-        #      it's the type object "Object" among the built-ins
-        if $type ne "Object" {
+        if $type-obj !=== Val::Object {
             sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $*runtime.get-var($type).type.attributes.map({ aname($_) => 1 });
+            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
                 my $property = $p.key.value;
                 die X::Property::NotDeclared.new(:$type, :$property)
@@ -455,7 +454,7 @@ class _007::Parser::Actions {
             for %known-properties.keys -> $property {
                 # If an attribute has an initializer, then we don't require that it be
                 # passed, since it will get a sensible value anyway.
-                next if $*runtime.get-var($type).type.^attributes.first({ .name.substr(2) eq $property }).build;
+                next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
                 die X::Property::Required.new(:$type, :$property)
                     unless $property eq any($<propertylist>.ast.properties.elements».key».value);
