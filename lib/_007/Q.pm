@@ -158,6 +158,7 @@ class Q::Property does Q {
 }
 
 class Q::PropertyList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.properties = Val::Array.new;
     method interpolate($runtime) {
         self.new(:properties(@.properties».interpolate($runtime)));
@@ -367,6 +368,7 @@ role Q::Declaration {
 }
 
 class Q::ParameterList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.parameters = Val::Array.new;
     method interpolate($runtime) {
         self.new(:parameters(Val::Array.new(:elements($.parameters.elements».interpolate($runtime)))));
@@ -384,6 +386,7 @@ class Q::Parameter does Q does Q::Declaration {
 }
 
 class Q::ArgumentList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.arguments = Val::Array.new;
     method interpolate($runtime) {
         self.new(:arguments(Val::Array.new(:elements($.arguments.elements».interpolate($runtime)))));
@@ -601,6 +604,7 @@ class Q::Trait does Q {
 }
 
 class Q::TraitList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.traits = Val::Array.new;
 
     method attribute-order { <traits> }
@@ -656,6 +660,7 @@ class Q::Statement::BEGIN does Q::Statement {
 }
 
 class Q::StatementList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.statements = Val::Array.new;
 
     method run($runtime) {
