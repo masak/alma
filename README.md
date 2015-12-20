@@ -1,3 +1,5 @@
+# 007 [![Build Status](https://secure.travis-ci.org/masak/007.svg?branch=master)](http://travis-ci.org/masak/007)
+
 * [tutorial](http://masak.github.io/007/)
 * [roadmap](https://github.com/masak/007/blob/master/ROADMAP.md)
 
