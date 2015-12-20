@@ -35,7 +35,8 @@ follows.
 * Prefixes and postfixes around a term are handled from innermost to outermost.
 
 * If a prefix and a postfix are both about to be handled, then the one with
-  the tightest priority gets handled first.
+  the tightest precedence gets handled first. If they tie on precedence, then
+  associativity determines which of them gets handled first.
 
 * Infixes are then handled in order of decreasing tightness.
 
