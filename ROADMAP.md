@@ -36,8 +36,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * Also want to close [a philosophical
   issue](https://github.com/masak/007/issues/7) about the statement/expression
   discrepancy that's exhibited in quasi blocks.
-* A small thing, but we will probably want to enable [creating Q nodes with
-  some optional properties omitted](https://github.com/masak/007/issues/84).
 * Make unhygienic declarations that are injected into code [actually declare
   stuff](https://github.com/masak/007/issues/88). We can cheat majorly at this
   one at first, as long as it works.
