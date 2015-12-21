@@ -159,6 +159,27 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::NotEq),
                 :assoc<left>,
             ),
+            'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
+                sub ($lhs, $rhs) {
+                  return wrap($lhs.value || $rhs.value)
+                },
+                :qtype(Q::Infix::Bool::Or),
+                :assoc<left>,
+            ),
+            'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
+                sub ($lhs, $rhs) {
+                  return wrap($lhs.value && $rhs.value)
+                },
+                :qtype(Q::Infix::Bool::And),
+                :assoc<left>,
+            ),
+            'prefix:<!>' => Val::Sub::Builtin.new('infix:<!>',
+                sub ($expr) {
+                  return wrap(!$expr.value)
+                },
+                :qtype(Q::Prefix::Bool::Neg),
+                :assoc<left>,
+            ),
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))

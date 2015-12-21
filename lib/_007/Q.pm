@@ -225,6 +225,8 @@ class Q::Prefix does Q::Expr {
 
 class Q::Prefix::Minus is Q::Prefix {}
 
+class Q::Prefix::Bool::Neg is Q::Prefix {}
+
 class Q::Infix does Q::Expr {
     has $.ident;
     has $.lhs;
@@ -260,6 +262,10 @@ class Q::Infix::Replicate is Q::Infix {}
 class Q::Infix::ArrayReplicate is Q::Infix {}
 
 class Q::Infix::Cons is Q::Infix {}
+
+class Q::Infix::Bool::Or is Q::Infix {}
+
+class Q::Infix::Bool::And is Q::Infix {}
 
 class Q::Infix::Assignment is Q::Infix {
     method eval($runtime) {
