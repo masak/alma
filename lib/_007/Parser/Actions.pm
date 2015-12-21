@@ -205,14 +205,12 @@ class _007::Parser::Actions {
             $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
         }
 
-        sub tighter($op1, $op2) {
-            return $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
-                 > $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
+        sub tighter($op1, $op2, $_ = $*parser.oplevel.infixprec) {
+            .first(*.contains(name($op1)), :k) > .first(*.contains(name($op2)), :k);
         }
 
-        sub equal($op1, $op2) {
-            return $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
-                == $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
+        sub equal($op1, $op2, $_ = $*parser.oplevel.infixprec) {
+            .first(*.contains(name($op1)), :k) == .first(*.contains(name($op2)), :k);
         }
 
         sub left-associative($op) {
@@ -275,14 +273,12 @@ class _007::Parser::Actions {
             $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
         }
 
-        sub tighter($op1, $op2) {
-            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
-                 > $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
+        sub tighter($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
+            .first(*.contains(name($op1)), :k) > .first(*.contains(name($op2)), :k);
         }
 
-        sub equal($op1, $op2) {
-            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
-                == $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
+        sub equal($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
+            .first(*.contains(name($op1)), :k) == .first(*.contains(name($op2)), :k);
         }
 
         sub left-associative($op) {
