@@ -206,15 +206,13 @@ class _007::Parser::Actions {
         }
 
         sub tighter($op1, $op2) {
-            my $b = $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
+            return $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
                  > $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
-            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
-            my $b = $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
+            return $*parser.oplevel.infixprec.first(*.contains(name($op1)), :k)
                 == $*parser.oplevel.infixprec.first(*.contains(name($op2)), :k);
-            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {
@@ -278,15 +276,13 @@ class _007::Parser::Actions {
         }
 
         sub tighter($op1, $op2) {
-            my $b = $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
+            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
                  > $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
-            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub equal($op1, $op2) {
-            my $b = $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
+            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op1)), :k)
                 == $*parser.oplevel.prepostfixprec.first(*.contains(name($op2)), :k);
-            return $b;  # XXX: inexplicable runtime error if we return the value directly
         }
 
         sub left-associative($op) {
