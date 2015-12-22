@@ -144,6 +144,18 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
+         (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()>
+          (ident "concat") (arglist
+                           (array (int 1) (int 2))
+                           (array (int 3) (int 4))))))))
+        .
+
+    is-result $ast, "[1, 2, 3, 4]\n", "concat() works";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
           (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "join") (arglist (array (int 1) (int 2)) (str "|")))))))
         .
 
