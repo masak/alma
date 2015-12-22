@@ -258,7 +258,7 @@ use _007::Test;
           (stexpr (postfix:<()> (ident "say") (arglist (infix:<!=> (ident "o1") (ident "i1"))))))
         .
 
-    is-result $ast, "1\n1\n1\n1\n", "inequality testing across types (always false)";
+    is-result $ast, "1\n1\n1\n1\n", "inequality testing across types (always true)";
 }
 
 {
@@ -288,6 +288,11 @@ use _007::Test;
         "subs with different bodies are unequal";
     outputs 'say(Q::Identifier { name: "foo" } == Q::Identifier { name: "bar" })', "0\n",
         "two Qtrees with distinct content are unequal";
+
+    outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "1\n1\n1\n0\n",
+        "relational operators work on integers";
+    outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "1\n1\n1\n0\n",
+        "relational operators work on strings";
 }
 
 {
