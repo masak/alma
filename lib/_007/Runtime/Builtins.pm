@@ -145,7 +145,11 @@ class _007::Runtime::Builtins {
                     unless $q ~~ Q::Expr;
                 return $q.eval($.runtime);
             },
-
+            concat   => sub ($a, $b) {
+                 die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
+                     unless $a | $b ~~ Val::Array;
+                 return wrap([|$a.elements , |$b.elements]);
+            },
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
