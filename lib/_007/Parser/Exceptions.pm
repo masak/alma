@@ -13,6 +13,12 @@ class X::Trait::Conflict is Exception {
     method message { "Traits '$.t1' and '$.t2' cannot coexist on the same routine" }
 }
 
+class X::Trait::Duplicate is Exception {
+    has Str $.t;
+
+    method message { "Trait '$.t' is used more than once" }
+}
+
 class X::Op::Nonassociative is Exception {
     has Str $.op1;
     has Str $.op2;

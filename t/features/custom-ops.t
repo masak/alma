@@ -168,6 +168,16 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        sub infix:<!?!>(left, right) is equal(infix:<+>) is equal(infix:<*>) {
+        }
+        .
+
+    parse-error $program, X::Trait::Duplicate, "can't use the same trait more than once";
+}
+
+
+{
+    my $program = q:to/./;
         sub infix:<@>(left, right) {
             return "@";
         }

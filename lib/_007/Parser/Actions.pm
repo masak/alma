@@ -168,7 +168,11 @@ class _007::Parser::Actions {
     }
 
     method traitlist($/) {
-        make Q::TraitList.new(:traits(Val::Array.new(:elements($<trait>».ast))));
+        my @traits = $<trait>».ast;
+        if bag( @traits.map: *.ident.name.value ).grep( *.value > 1 )[0] -> $p {
+             die X::Trait::Duplicate.new: :t($p.key)
+        }
+        make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
     }
     method trait($/) {
         make Q::Trait.new(:ident($<identifier>.ast), :expr($<EXPR>.ast));
