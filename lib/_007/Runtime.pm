@@ -187,7 +187,7 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
-        if $obj.properties{$propname} :exists {
+        if $obj.?properties{$propname} :exists {
             return $obj.properties{$propname};
         }
         elsif $propname eq "get" {
