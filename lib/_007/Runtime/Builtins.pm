@@ -209,6 +209,28 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Ge),
                 :assoc<left>,
              ),
+             'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
+                sub ($lhs, $rhs) {
+                  return wrap($lhs.truthy || $rhs.truthy);
+                },
+                :qtype(Q::Infix::Or),
+                :assoc<left>,
+             ),
+             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
+                sub ($lhs, $rhs) {
+                  return wrap($lhs.truthy && $rhs.truthy);
+                },
+                :qtype(Q::Infix::And),
+                :assoc<left>,
+             ),
+             'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
+                sub ($a) {
+                  return wrap(!$a.truthy)
+                },
+                :qtype(Q::Prefix::Not),
+                :assoc<left>,
+             ),
+
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
@@ -341,6 +363,9 @@ class _007::Runtime::Builtins {
             Q::Infix::Ge,
             Q::Infix::Lt,
             Q::Infix::Le,
+            Q::Infix::And,
+            Q::Infix::Or,
+            Q::Prefix::Not,
             Q::Infix::Replicate,
             Q::Infix::ArrayReplicate,
             Q::Infix::Cons,

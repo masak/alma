@@ -414,11 +414,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<!>(term) is assoc("right") {
+        sub postfix:<¡>(term) is assoc("right") {
             return "postfix is looser";
         }
 
-        sub prefix:<?>(term) is equal(postfix:<!>) {
+        sub prefix:<?>(term) is equal(postfix:<¡>) {
             return "prefix is looser";
         }
 
@@ -430,7 +430,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        say(?[]!);
+        say(?[]¡);
         say(%[]$);
         .
 

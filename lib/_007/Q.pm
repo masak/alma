@@ -281,6 +281,11 @@ class Q::Infix::Ge is Q::Infix {}
 class Q::Infix::Le is Q::Infix {}
 
 
+class Q::Infix::Or  is Q::Infix {}
+class Q::Infix::And is Q::Infix {}
+
+class Q::Prefix::Not is Q::Prefix {}
+
 class Q::Postfix does Q::Expr {
     has $.ident;
     has $.expr;
