@@ -293,6 +293,8 @@ use _007::Test;
         "relational operators work on integers";
     outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "1\n1\n1\n0\n",
         "relational operators work on strings";
+    outputs 'say(!0);say(!1);say(1 || 0); say(0||"a"); say("" && 1)', "1\n0\n1\n1\n0\n",
+        "boolean operators works"
 }
 
 {
