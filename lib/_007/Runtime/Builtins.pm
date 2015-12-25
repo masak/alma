@@ -37,9 +37,10 @@ class _007::Runtime::Builtins {
 
         sub wrap($_) {
             when Val | Q { $_ }
-            when Nil { Val::None.new }
-            when Str { Val::Str.new(:value($_)) }
-            when Int { Val::Int.new(:value($_)) }
+            when Nil  { Val::None.new }
+            when Bool { Val::Int.new(:value(+$_)) }
+            when Int  { Val::Int.new(:value($_)) }
+            when Str  { Val::Str.new(:value($_)) }
             when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
             default { die "Got some unknown value of type ", .^name }
         }
@@ -81,6 +82,23 @@ class _007::Runtime::Builtins {
             [&&] $l.WHAT === $r.WHAT,
                 |$l.attributes.map(&same-avalue);
         }
+
+        multi less-value($, $) {
+              die X::TypeCheck.new(
+                    :operation<less>,
+                    :got($_),
+                    :expected("string or integer"));
+        }
+        multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
+        multi less-value(Val::Str $l, Val::Str $r) { $l.value le $r.value }
+        multi more-value($, $) {
+              die X::TypeCheck.new(
+                    :operation<more>,
+                    :got($_),
+                    :expected("string or integer"));
+        }
+        multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
+        multi more-value(Val::Str $l, Val::Str $r) { $l.value ge $r.value }
 
         my @builtins =
             say      => -> $arg {
@@ -127,7 +145,11 @@ class _007::Runtime::Builtins {
                     unless $q ~~ Q::Expr;
                 return $q.eval($.runtime);
             },
-
+            concat   => sub ($a, $b) {
+                 die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
+                     unless $a | $b ~~ Val::Array;
+                 return wrap([|$a.elements , |$b.elements]);
+            },
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
@@ -145,20 +167,48 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
-            'infix:<==>' => Val::Sub::Builtin.new('infix:<=>',
+            'infix:<==>' => Val::Sub::Builtin.new('infix:<==>',
                 sub ($lhs, $rhs) {
-                    return wrap(+equal-value($lhs, $rhs));
+                    return wrap(equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
                 :assoc<left>,
             ),
             'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
                 sub ($lhs, $rhs) {
-                  return wrap(+!equal-value($lhs, $rhs))
+                  return wrap(!equal-value($lhs, $rhs))
                 },
-                :qtype(Q::Infix::NotEq),
+                :qtype(Q::Infix::Ne),
                 :assoc<left>,
             ),
+            'infix:<<>' => Val::Sub::Builtin.new('infix:<<=>',
+                sub ($lhs, $rhs) {
+                  return wrap(less-value($lhs, $rhs))
+                },
+                :qtype(Q::Infix::Lt),
+                :assoc<left>,
+             ),
+             'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
+                sub ($lhs, $rhs) {
+                  return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                },
+                :qtype(Q::Infix::Le),
+                :assoc<left>,
+             ),
+             'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
+                sub ($lhs, $rhs) {
+                  return wrap(more-value($lhs, $rhs) )
+                },
+                :qtype(Q::Infix::Gt),
+                :assoc<left>,
+             ),
+             'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
+                sub ($lhs, $rhs) {
+                  return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                },
+                :qtype(Q::Infix::Ge),
+                :assoc<left>,
+             ),
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
@@ -286,7 +336,11 @@ class _007::Runtime::Builtins {
             Q::Infix::Concat,
             Q::Infix::Assignment,
             Q::Infix::Eq,
-            Q::Infix::NotEq,
+            Q::Infix::Ne,
+            Q::Infix::Gt,
+            Q::Infix::Ge,
+            Q::Infix::Lt,
+            Q::Infix::Le,
             Q::Infix::Replicate,
             Q::Infix::ArrayReplicate,
             Q::Infix::Cons,
@@ -359,7 +413,7 @@ class _007::Runtime::Builtins {
         my $scope = _007::OpScope.new;
 
         for self.get-builtins -> Pair (:key($name), :value($subval)) {
-            $name ~~ /^ (prefix | infix | postfix) ':<' (<-[\>]>+) '>' $/
+            $name ~~ /^ (prefix | infix | postfix) ':<' (.+) '>' $/
                 or next;
             my $type = ~$0;
             my $opname = ~$1;
