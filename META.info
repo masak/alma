@@ -6,11 +6,17 @@
     "depends"   : [],
     "provides" : {
         "_007" : "lib/_007.pm",
-        "_007::Val" : "lib/_007/Val.pm",
+        "_007::Linter" : "lib/_007/Linter.pm",
+        "_007::OpScope" : "lib/_007/OpScope.pm",
+        "_007::Parser" : "lib/_007/Parser.pm",
+        "_007::Parser::Exceptions" : "lib/_007/Parser/Exceptions.pm",
+        "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm",
+        "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm",
         "_007::Q" : "lib/_007/Q.pm",
         "_007::Runtime" : "lib/_007/Runtime.pm",
-        "_007::Parser" : "lib/_007/Parser.pm",
-        "_007::Test" : "lib/_007/Test.pm"
+        "_007::Runtime::Builtins" : "lib/_007/Runtime/Builtins.pm",
+        "_007::Test" : "lib/_007/Test.pm",
+        "_007::Val" : "lib/_007/Val.pm",
     },
     "source-url"    : "git://github.com/masak/007.git"
 }
