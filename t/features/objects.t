@@ -61,6 +61,15 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
+           (stexpr (postfix:<.> (int 42) (ident "a"))))
+        .
+
+    is-error $ast, X::PropertyNotFound, "can't access property on Val::Int (dot syntax)";
+}
+
+{
+    my $ast = q:to/./;
+          (stmtlist
             (my (ident "o") (object (ident "Object") (proplist
               (property "foo" (int 1))
               (property "foo" (int 2))))))
