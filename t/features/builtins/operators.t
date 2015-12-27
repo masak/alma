@@ -352,4 +352,36 @@ use _007::Test;
     is-error $ast, X::TypeCheck, "indexing a non-array is an error";
 }
 
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<||> (int 1) (int 0)))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<||> (int 0) (int 0)))))          
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<||> (str "1") (str "0"))))))
+        .
+
+    is-result $ast, "1\n0\n1\n", "boolean or";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<&&> (int 1) (int 0)))))
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<&&> (int 0) (int 0)))))          
+          (stexpr (postfix:<()> (ident "say") (arglist (infix:<&&> (str "1") (str "1"))))))
+        .
+
+    is-result $ast, "0\n0\n1\n", "boolean and";
+}
+
+{
+    my $ast = q:to/./;
+        (stmtlist
+          (stexpr (postfix:<()> (ident "say") (arglist (prefix:<!> (int 1)))))
+          (stexpr (postfix:<()> (ident "say") (arglist (prefix:<!> (int 0))))))
+        .
+
+    is-result $ast, "False\nTrue\n", "boolean negation";
+}
+
 done-testing;

@@ -26,6 +26,9 @@ sub read(Str $ast) is export {
         'infix:<=>'    => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs, :ident(n("infix", "="))) },
         'infix:<==>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs, :ident(n("infix", "=="))) },
         'infix:<!=>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs, :ident(n("infix", "!="))) },
+        'infix:<||>'   => -> $lhs, $rhs { Q::Infix::Bool::Or.new(:$lhs, :$rhs, :ident(n("infix", "||"))) },
+        'infix:<&&>'   => -> $lhs, $rhs { Q::Infix::Bool::And.new(:$lhs, :$rhs, :ident(n("infix", "&&"))) },
+        'prefix:<!>'   => -> $expr { Q::Prefix::Bool::Neg.new(:$expr, :ident(n("prefix", "!"))) },        
 
         'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist, :ident(n("postfix", "()"))) },
         'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index, :ident(n("postfix", "[]"))) },
