@@ -102,9 +102,9 @@ class _007::Parser::Actions {
         }
 
         if %precedence.keys > 1 {
-            my ($t1, $t2) = %precedence.keys.sort;
-            die X::Trait::Conflict.new(:$t1, :$t2)
-                if %precedence{$t1} && %precedence{$t2};
+            my ($trait1, $trait2) = %precedence.keys.sort;
+            die X::Trait::Conflict.new(:$trait1, :$trait2)
+                if %precedence{$trait1} && %precedence{$trait2};
         }
 
         $*parser.oplevel.install($type, $op, :%precedence, :$assoc);
@@ -170,7 +170,8 @@ class _007::Parser::Actions {
     method traitlist($/) {
         my @traits = $<trait>».ast;
         if bag( @traits.map: *.ident.name.value ).grep( *.value > 1 )[0] -> $p {
-             die X::Trait::Duplicate.new: :t($p.key)
+            my $trait = $p.key;
+            die X::Trait::Duplicate.new(:$trait);
         }
         make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
     }

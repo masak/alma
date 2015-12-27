@@ -7,16 +7,16 @@ class X::PointyBlock::SinkContext is Exception {
 }
 
 class X::Trait::Conflict is Exception {
-    has Str $.t1;
-    has Str $.t2;
+    has Str $.trait1;
+    has Str $.trait2;
 
-    method message { "Traits '$.t1' and '$.t2' cannot coexist on the same routine" }
+    method message { "Traits '$.trait1' and '$.trait2' cannot coexist on the same routine" }
 }
 
 class X::Trait::Duplicate is Exception {
-    has Str $.t;
+    has Str $.trait;
 
-    method message { "Trait '$.t' is used more than once" }
+    method message { "Trait '$.trait' is used more than once" }
 }
 
 class X::Op::Nonassociative is Exception {
