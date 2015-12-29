@@ -84,18 +84,18 @@ class _007::Runtime::Builtins {
         }
 
         multi less-value($, $) {
-              die X::TypeCheck.new(
-                    :operation<less>,
-                    :got($_),
-                    :expected("string or integer"));
+            die X::TypeCheck.new(
+                :operation<less>,
+                :got($_),
+                :expected("string or integer"));
         }
         multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
         multi less-value(Val::Str $l, Val::Str $r) { $l.value le $r.value }
         multi more-value($, $) {
-              die X::TypeCheck.new(
-                    :operation<more>,
-                    :got($_),
-                    :expected("string or integer"));
+            die X::TypeCheck.new(
+                :operation<more>,
+                :got($_),
+                :expected("string or integer"));
         }
         multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
         multi more-value(Val::Str $l, Val::Str $r) { $l.value ge $r.value }
@@ -146,9 +146,9 @@ class _007::Runtime::Builtins {
                 return $q.eval($.runtime);
             },
             concat   => sub ($a, $b) {
-                 die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
-                     unless $a | $b ~~ Val::Array;
-                 return wrap([|$a.elements , |$b.elements]);
+                die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
+                    unless $a | $b ~~ Val::Array;
+                return wrap([|$a.elements , |$b.elements]);
             },
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
@@ -176,60 +176,60 @@ class _007::Runtime::Builtins {
             ),
             'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
                 sub ($lhs, $rhs) {
-                  return wrap(!equal-value($lhs, $rhs))
+                    return wrap(!equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ne),
                 :assoc<left>,
             ),
             'infix:<<>' => Val::Sub::Builtin.new('infix:<<=>',
                 sub ($lhs, $rhs) {
-                  return wrap(less-value($lhs, $rhs))
+                    return wrap(less-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Lt),
                 :assoc<left>,
-             ),
-             'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
+            ),
+            'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
                 sub ($lhs, $rhs) {
-                  return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                    return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Le),
                 :assoc<left>,
-             ),
-             'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
+            ),
+            'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
                 sub ($lhs, $rhs) {
-                  return wrap(more-value($lhs, $rhs) )
+                    return wrap(more-value($lhs, $rhs) )
                 },
                 :qtype(Q::Infix::Gt),
                 :assoc<left>,
-             ),
-             'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
+            ),
+            'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
                 sub ($lhs, $rhs) {
-                  return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                    return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ge),
                 :assoc<left>,
-             ),
-             'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
+            ),
+            'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
                 sub ($lhs, $rhs) {
-                  return wrap($lhs.truthy || $rhs.truthy);
+                    return wrap($lhs.truthy || $rhs.truthy);
                 },
                 :qtype(Q::Infix::Or),
                 :assoc<left>,
-             ),
-             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
+            ),
+            'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
                 sub ($lhs, $rhs) {
-                  return wrap($lhs.truthy && $rhs.truthy);
+                    return wrap($lhs.truthy && $rhs.truthy);
                 },
                 :qtype(Q::Infix::And),
                 :assoc<left>,
-             ),
-             'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
+            ),
+            'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
                 sub ($a) {
-                  return wrap(!$a.truthy)
+                    return wrap(!$a.truthy)
                 },
                 :qtype(Q::Prefix::Not),
                 :assoc<left>,
-             ),
+            ),
 
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
@@ -423,8 +423,8 @@ class _007::Runtime::Builtins {
                 .key => .value;
             }
             when .value ~~ Callable {
-                 my $paramlist = create-paramlist(.value.signature.params);
-                 .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($paramlist));
+                my $paramlist = create-paramlist(.value.signature.params);
+                .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($paramlist));
             }
             when .value ~~ Val::Sub::Builtin {
                 .value.parameterlist = create-paramlist(.value.code.signature.params);

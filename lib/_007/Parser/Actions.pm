@@ -63,7 +63,7 @@ class _007::Parser::Actions {
     sub maybe-install-operator($identname, @trait) {
         return
             unless $identname ~~ / (< prefix infix postfix >)
-                                   ':<' (<-[>]>+) '>' /;
+                                    ':<' (<-[>]>+) '>' /;
 
         my $type = ~$0;
         my $op = ~$1;
@@ -392,7 +392,7 @@ class _007::Parser::Actions {
     }
 
     method term:str ($/) {
-      make $<str>.ast;
+        make $<str>.ast;
     }
 
     method term:array ($/) {

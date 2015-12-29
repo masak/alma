@@ -79,8 +79,8 @@ class Val::Object does Val {
     method Str {
         '{' ~ %.properties.map({
             my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
-              ?? .key
-              !! Val::Str.new(value => .key).quoted-Str;
+                ?? .key
+                !! Val::Str.new(value => .key).quoted-Str;
             "{$key}: {.value.quoted-Str}"
         }).sort.join(', ') ~ '}'
     }
