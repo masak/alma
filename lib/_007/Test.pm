@@ -1,4 +1,3 @@
-use v6;
 use _007;
 use _007::Val;
 use _007::Q;
