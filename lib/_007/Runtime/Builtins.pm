@@ -147,7 +147,9 @@ class _007::Runtime::Builtins {
             },
             concat   => sub ($a, $b) {
                 die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
-                    unless $a | $b ~~ Val::Array;
+                    unless $a ~~ Val::Array;
+                die X::TypeCheck.new(:operation<concat>, :got($b), :expected(Val::Array))
+                    unless $b ~~ Val::Array;
                 return wrap([|$a.elements , |$b.elements]);
             },
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
