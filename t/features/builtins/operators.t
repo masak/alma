@@ -288,15 +288,20 @@ use _007::Test;
         "subs with different bodies are unequal";
     outputs 'say(Q::Identifier { name: "foo" } == Q::Identifier { name: "bar" })', "0\n",
         "two Qtrees with distinct content are unequal";
+}
 
+{
     outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "1\n1\n1\n0\n",
         "relational operators work on integers";
     outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "1\n1\n1\n0\n",
         "relational operators work on strings";
+}
+
+{
     outputs 'say(!0);say(!1);say(1 || 0); say(0||"a"); say("" && 1)', "1\n0\n1\n1\n0\n",
-        "boolean operators works";
+        "boolean operators give the values expected";
     outputs 'say( 0 && say("foo") ) ; say( 1 || say("bar"))', "0\n1\n",
-        "boolean operators are short-circuited";
+        "boolean operators short-circuit";
 }
 
 {
