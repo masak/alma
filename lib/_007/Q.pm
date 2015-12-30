@@ -77,21 +77,18 @@ role Q::Literal does Q::Expr {
 
 class Q::Literal::None does Q::Literal {
     method eval($) { Val::None.new }
-    method interpolate($) { self }
 }
 
 class Q::Literal::Int does Q::Literal {
     has Val::Int $.value;
 
     method eval($) { $.value }
-    method interpolate($) { self }
 }
 
 class Q::Literal::Str does Q::Literal {
     has Val::Str $.value;
 
     method eval($) { $.value }
-    method interpolate($) { self }
 }
 
 class Q::Identifier does Q::Expr {
@@ -106,10 +103,6 @@ class Q::Identifier does Q::Expr {
             $.frame ~~ Val::None ?? $runtime.current-frame !! $.frame
         );
     }
-
-    method interpolate($runtime) {
-        return self.new(:$.name, :frame($runtime.current-frame));
-    }
 }
 
 role Q::Term does Q::Expr {
@@ -121,23 +114,13 @@ class Q::Term::Array does Q::Term {
     method eval($runtime) {
         Val::Array.new(:elements($.elements.elements».eval($runtime)));
     }
-    method interpolate($runtime) {
-        self.new(:elements(Val::Array.new(:elements($.elements.elements».interpolate($runtime)))));
-    }
 }
 
-class Q::Term::Quasi does Q::Term {
-    has $.contents;
+class Q::Unquote does Q {
+    has $.expr;
 
     method eval($runtime) {
-        return $.contents.interpolate($runtime);
-    }
-    method interpolate($runtime) {
-        self.new(:contents($.contents.interpolate($runtime)));
-        # XXX: the fact that we keep interpolating inside of the quasi means
-        # that unquotes encountered inside of this inner quasi will be
-        # interpolated in the context of the outer quasi. is this correct?
-        # can we come up with a case where it matters?
+        die "Should never hit an unquote at runtime"; # XXX: turn into X::
     }
 }
 
@@ -160,9 +143,6 @@ class Q::Property does Q {
 class Q::PropertyList does Q {
     # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.properties = Val::Array.new;
-    method interpolate($runtime) {
-        self.new(:properties(@.properties».interpolate($runtime)));
-    }
 }
 
 class Q::Block does Q {
@@ -181,29 +161,6 @@ class Q::Block does Q {
             :$outer-frame
         );
     }
-    method interpolate($runtime) {
-        Q::Block.new(
-            :parameterlist($.parameterlist.interpolate($runtime)),
-            :statementlist($.statementlist.interpolate($runtime)));
-        # XXX: but what about the static lexpad? we kind of lose it here, don't we?
-        # what does that *mean* in practice? can we come up with an example where
-        # it matters? if the static lexpad happens to contain a value which is a
-        # Q node, do we continue into *it*, interpolating it, too?
-    }
-}
-
-class Q::Unquote does Q {
-    has $.expr;
-
-    method eval($runtime) {
-        die "Should never hit an unquote at runtime"; # XXX: turn into X::
-    }
-    method interpolate($runtime) {
-        my $q = $.expr.eval($runtime);
-        die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-            unless $q ~~ Q;
-        return $q;
-    }
 }
 
 class Q::Prefix does Q::Expr {
@@ -216,10 +173,6 @@ class Q::Prefix does Q::Expr {
         my $e = $.expr.eval($runtime);
         my $c = $.ident.eval($runtime);
         return $runtime.call($c, [$e]);
-    }
-
-    method interpolate($runtime) {
-        self.new(:expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));
     }
 }
 
@@ -237,13 +190,6 @@ class Q::Infix does Q::Expr {
         my $r = $.rhs.eval($runtime);
         my $c = $.ident.eval($runtime);
         return $runtime.call($c, [$l, $r]);
-    }
-
-    method interpolate($runtime) {
-        self.new(
-            :lhs($.lhs ~~ Val::None ?? $.lhs !! $.lhs.interpolate($runtime)),
-            :rhs($.rhs ~~ Val::None ?? $.rhs !! $.rhs.interpolate($runtime)),
-            :ident($.ident.interpolate($runtime)));
     }
 }
 
@@ -343,13 +289,6 @@ class Q::Postfix::Index is Q::Postfix {
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
         }
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
-            :index($.index.interpolate($runtime))
-        );
-    }
 }
 
 class Q::Postfix::Call is Q::Postfix {
@@ -366,13 +305,6 @@ class Q::Postfix::Call is Q::Postfix {
         my @args = $.argumentlist.arguments.elements».eval($runtime);
         return $runtime.call($c, @args);
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
-            :argumentlist($.argumentlist.interpolate($runtime))
-        );
-    }
 }
 
 class Q::Postfix::Property is Q::Postfix {
@@ -385,13 +317,43 @@ class Q::Postfix::Property is Q::Postfix {
         my $propname = $.property.name.value;
         $runtime.property($obj, $propname);
     }
+}
 
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
-            :property($.property.interpolate($runtime))
-        );
+class Q::Term::Quasi does Q::Term {
+    has $.contents;
+
+    method eval($runtime) {
+        sub interpolate($thing) {
+            return $thing.new(:elements($thing.elements.map(&interpolate)))
+                if $thing ~~ Val::Array;
+
+            return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
+                if $thing ~~ Val::Object;
+
+            return $thing
+                if $thing ~~ Val;
+
+            return $thing.new(:name($thing.name), :frame($runtime.current-frame))
+                if $thing ~~ Q::Identifier;
+
+            if $thing ~~ Q::Unquote {
+                my $ast = $thing.expr.eval($runtime);
+                die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
+                    unless $ast ~~ Q;
+                return $ast;
+            }
+
+            sub aname($attr) { $attr.name.substr(2) }
+            sub avalue($attr) { $attr.get_value($thing) }
+
+            my %attributes = $thing.attributes.map: -> $attr {
+                aname($attr) => interpolate(avalue($attr))
+            };
+
+            $thing.new(|%attributes);
+        }
+
+        return interpolate($.contents);
     }
 }
 
@@ -402,27 +364,17 @@ role Q::Declaration {
 class Q::ParameterList does Q {
     # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.parameters = Val::Array.new;
-    method interpolate($runtime) {
-        self.new(:parameters(Val::Array.new(:elements($.parameters.elements».interpolate($runtime)))));
-    }
 }
 
 class Q::Parameter does Q does Q::Declaration {
     has $.ident;
 
     method is-assignable { True }
-
-    method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate($runtime)));
-    }
 }
 
 class Q::ArgumentList does Q {
     # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.arguments = Val::Array.new;
-    method interpolate($runtime) {
-        self.new(:arguments(Val::Array.new(:elements($.arguments.elements».interpolate($runtime)))));
-    }
 }
 
 role Q::Statement does Q {
@@ -442,11 +394,6 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
         my $value = $.expr.eval($runtime);
         $runtime.put-var($.ident.name.value, $value);
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::Constant does Q::Statement does Q::Declaration {
@@ -458,11 +405,6 @@ class Q::Statement::Constant does Q::Statement does Q::Declaration {
     method run($runtime) {
         # value has already been assigned
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :expr($.expr.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::Expr does Q::Statement {
@@ -470,9 +412,6 @@ class Q::Statement::Expr does Q::Statement {
 
     method run($runtime) {
         $.expr.eval($runtime);
-    }
-    method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)));
     }
 }
 
@@ -513,9 +452,6 @@ class Q::Statement::If does Q::Statement {
             }
         }
     }
-    method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::Block does Q::Statement {
@@ -525,9 +461,6 @@ class Q::Statement::Block does Q::Statement {
         $runtime.enter($.block.eval($runtime));
         $.block.statementlist.run($runtime);
         $runtime.leave;
-    }
-    method interpolate($runtime) {
-        self.new(:block($.block.interpolate($runtime)));
     }
 }
 
@@ -580,9 +513,6 @@ class Q::Statement::For does Q::Statement {
             }
         }
     }
-    method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::While does Q::Statement {
@@ -606,9 +536,6 @@ class Q::Statement::While does Q::Statement {
             $runtime.leave;
         }
     }
-    method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)), :block($.block.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::Return does Q::Statement {
@@ -619,9 +546,6 @@ class Q::Statement::Return does Q::Statement {
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
-    method interpolate($runtime) {
-        self.new(:expr($.expr.interpolate($runtime)));
-    }
 }
 
 class Q::Trait does Q {
@@ -629,10 +553,6 @@ class Q::Trait does Q {
     has $.expr;
 
     method attribute-order { <ident expr> }
-
-    method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate($runtime)), :expr($.expr.interpolate($runtime)));
-    }
 }
 
 class Q::TraitList does Q {
@@ -655,12 +575,6 @@ class Q::Statement::Sub does Q::Statement does Q::Declaration {
 
     method run($runtime) {
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :traitlist($.traitlist.interpolate($runtime)),
-            :block($.block.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
@@ -672,12 +586,6 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
 
     method run($runtime) {
     }
-    method interpolate($runtime) {
-        self.new(
-            :ident($.ident.interpolate($runtime)),
-            :traitlist($.traitlist.interpolate($runtime)),
-            :block($.block.interpolate($runtime)));
-    }
 }
 
 class Q::Statement::BEGIN does Q::Statement {
@@ -685,9 +593,6 @@ class Q::Statement::BEGIN does Q::Statement {
 
     method run($runtime) {
         # a BEGIN block does not run at runtime
-    }
-    method interpolate($runtime) {
-        self.new(:block($.block.interpolate($runtime)));
     }
 }
 
@@ -699,8 +604,5 @@ class Q::StatementList does Q {
         for $.statements.elements -> $statement {
             $statement.run($runtime);
         }
-    }
-    method interpolate($runtime) {
-        self.new(:statements(Val::Array.new(:elements($.statements.elements».interpolate($runtime)))));
     }
 }
