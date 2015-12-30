@@ -312,6 +312,7 @@ class _007::Parser::Actions {
 
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
+            my $ident = $postfix.ident;
             # XXX: factor the logic that checks for macro call out into its own helper sub
             if $postfix ~~ Q::Postfix::Call
             && $/.ast ~~ Q::Identifier
@@ -321,13 +322,13 @@ class _007::Parser::Actions {
                 make $qtree;
             }
             elsif $postfix ~~ Q::Postfix::Index {
-                make $postfix.new(:expr($/.ast), :index($postfix.index));
+                make $postfix.new(:$ident, :expr($/.ast), :index($postfix.index));
             }
             elsif $postfix ~~ Q::Postfix::Call {
-                make $postfix.new(:expr($/.ast), :argumentlist($postfix.argumentlist));
+                make $postfix.new(:$ident, :expr($/.ast), :argumentlist($postfix.argumentlist));
             }
             elsif $postfix ~~ Q::Postfix::Property {
-                make $postfix.new(:expr($/.ast), :property($postfix.property));
+                make $postfix.new(:$ident, :expr($/.ast), :property($postfix.property));
             }
             else {
                 my $c = $*runtime.maybe-get-var($postfix.ident.name.value);
@@ -335,7 +336,7 @@ class _007::Parser::Actions {
                     make $*runtime.call($c, [$/.ast]);
                 }
                 else {
-                    make $postfix.new(:expr($/.ast), :ident($postfix.ident));
+                    make $postfix.new(:$ident, :expr($/.ast));
                 }
             }
         }

@@ -28,6 +28,7 @@ use _007::Test;
     my $program = q:to/./;
         macro foo() {
             return Q::Postfix::Call {
+                ident: Q::Identifier { name: "postfix:<()>" },
                 expr: Q::Identifier { name: "say" },
                 argumentlist: Q::ArgumentList {
                     arguments: [Q::Literal::Str { value: "OH HAI" }]

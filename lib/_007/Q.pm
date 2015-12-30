@@ -210,7 +210,7 @@ class Q::Prefix does Q::Expr {
     has $.ident;
     has $.expr;
 
-    method attribute-order { <expr> }
+    method attribute-order { <ident expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
@@ -230,7 +230,7 @@ class Q::Infix does Q::Expr {
     has $.lhs;
     has $.rhs;
 
-    method attribute-order { <lhs rhs> }
+    method attribute-order { <ident lhs rhs> }
 
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
@@ -307,7 +307,7 @@ class Q::Postfix does Q::Expr {
     has $.ident;
     has $.expr;
 
-    method attribute-order { <expr> }
+    method attribute-order { <ident expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
@@ -319,7 +319,7 @@ class Q::Postfix does Q::Expr {
 class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
-    method attribute-order { <expr index> }
+    method attribute-order { <ident expr index> }
 
     method eval($runtime) {
         given $.expr.eval($runtime) {
@@ -345,6 +345,7 @@ class Q::Postfix::Index is Q::Postfix {
     }
     method interpolate($runtime) {
         self.new(
+            :ident($.ident.interpolate($runtime)),
             :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
             :index($.index.interpolate($runtime))
         );
@@ -354,7 +355,7 @@ class Q::Postfix::Index is Q::Postfix {
 class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
-    method attribute-order { <expr argumentlist> }
+    method attribute-order { <ident expr argumentlist> }
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
@@ -367,6 +368,7 @@ class Q::Postfix::Call is Q::Postfix {
     }
     method interpolate($runtime) {
         self.new(
+            :ident($.ident.interpolate($runtime)),
             :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
             :argumentlist($.argumentlist.interpolate($runtime))
         );
@@ -376,7 +378,7 @@ class Q::Postfix::Call is Q::Postfix {
 class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
-    method attribute-order { <expr property> }
+    method attribute-order { <ident expr property> }
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
@@ -386,6 +388,7 @@ class Q::Postfix::Property is Q::Postfix {
 
     method interpolate($runtime) {
         self.new(
+            :ident($.ident.interpolate($runtime)),
             :expr($.expr ~~ Val::None ?? $.expr !! $.expr.interpolate($runtime)),
             :property($.property.interpolate($runtime))
         );
@@ -410,7 +413,7 @@ class Q::Parameter does Q does Q::Declaration {
     method is-assignable { True }
 
     method interpolate($runtime) {
-        self.new(:ident($.ident.interpolate));
+        self.new(:ident($.ident.interpolate($runtime)));
     }
 }
 
