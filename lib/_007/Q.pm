@@ -281,8 +281,22 @@ class Q::Infix::Ge is Q::Infix {}
 class Q::Infix::Le is Q::Infix {}
 
 
-class Q::Infix::Or  is Q::Infix {}
-class Q::Infix::And is Q::Infix {}
+class Q::Infix::Or  is Q::Infix {
+    method eval($runtime) {
+        my $l = $.lhs.eval($runtime);
+        return 1 if $l.truthy;
+        my $r = $.rhs.eval($runtime);
+        return +$r.truthy;
+    }
+}
+class Q::Infix::And is Q::Infix {
+    method eval($runtime) {
+        my $l = $.lhs.eval($runtime);
+        return 0 unless $l.truthy;
+        my $r = $.rhs.eval($runtime);
+        return +$r.truthy;
+    }
+}
 
 class Q::Prefix::Not is Q::Prefix {}
 

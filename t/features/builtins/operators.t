@@ -294,7 +294,9 @@ use _007::Test;
     outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "1\n1\n1\n0\n",
         "relational operators work on strings";
     outputs 'say(!0);say(!1);say(1 || 0); say(0||"a"); say("" && 1)', "1\n0\n1\n1\n0\n",
-        "boolean operators works"
+        "boolean operators works";
+    outputs 'say( 0 && say("foo") ) ; say( 1 || say("bar"))', "0\n1\n",
+        "boolean operators are short-circuited";
 }
 
 {

@@ -213,14 +213,14 @@ class _007::Runtime::Builtins {
             ),
             'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
                 sub ($lhs, $rhs) {
-                    return wrap($lhs.truthy || $rhs.truthy);
+                    # implemented in Q.pm as .eval method
                 },
                 :qtype(Q::Infix::Or),
                 :assoc<left>,
             ),
             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
                 sub ($lhs, $rhs) {
-                    return wrap($lhs.truthy && $rhs.truthy);
+                    # implemented in Q.pm as .eval method
                 },
                 :qtype(Q::Infix::And),
                 :assoc<left>,
