@@ -272,16 +272,18 @@ class Q::Infix::Assignment is Q::Infix {
 }
 
 class Q::Infix::Eq is Q::Infix {}
+
 class Q::Infix::Ne is Q::Infix {}
 
 class Q::Infix::Gt is Q::Infix {}
+
 class Q::Infix::Lt is Q::Infix {}
 
 class Q::Infix::Ge is Q::Infix {}
+
 class Q::Infix::Le is Q::Infix {}
 
-
-class Q::Infix::Or  is Q::Infix {
+class Q::Infix::Or is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         return 1 if $l.truthy;
@@ -289,6 +291,7 @@ class Q::Infix::Or  is Q::Infix {
         return +$r.truthy;
     }
 }
+
 class Q::Infix::And is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
