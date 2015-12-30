@@ -286,18 +286,18 @@ class Q::Infix::Le is Q::Infix {}
 class Q::Infix::Or is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return 1 if $l.truthy;
-        my $r = $.rhs.eval($runtime);
-        return +$r.truthy;
+        return $l.truthy
+            ?? $l
+            !! $.rhs.eval($runtime);
     }
 }
 
 class Q::Infix::And is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return 0 unless $l.truthy;
-        my $r = $.rhs.eval($runtime);
-        return +$r.truthy;
+        return !$l.truthy
+            ?? $l
+            !! $.rhs.eval($runtime);
     }
 }
 

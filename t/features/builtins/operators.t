@@ -298,10 +298,12 @@ use _007::Test;
 }
 
 {
-    outputs 'say(!0);say(!1);say(1 || 0); say(0||"a"); say("" && 1)', "1\n0\n1\n1\n0\n",
+    outputs 'say(!0); say(!1); say(1 || 0); say(0 || 1); say(0 && 1)', "1\n0\n1\n1\n0\n",
         "boolean operators give the values expected";
-    outputs 'say( 0 && say("foo") ) ; say( 1 || say("bar"))', "0\n1\n",
+    outputs 'say(0 && say("foo")); say(1 || say("bar"))', "0\n1\n",
         "boolean operators short-circuit";
+    outputs 'say(1 && 2); say("" && 3); say(0 || None); say([0, 0, 7] || 0)', "2\n\nNone\n[0, 0, 7]\n",
+        "boolean operators return one of their operands";
 }
 
 {
