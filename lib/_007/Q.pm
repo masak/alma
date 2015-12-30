@@ -41,16 +41,16 @@ class X::Associativity::Conflict is Exception {
     method message { "The operator already has a defined associativity" }
 }
 
+sub aname($attr) { $attr.name.substr(2) }
+sub avalue($attr, $obj) { $attr.get_value($obj) }
+
 role Q {
     method Str {
-        sub aname($attr) { $attr.name.substr(2) }
-        sub avalue($attr) { $attr.get_value(self).quoted-Str }
-
         my @attrs = self.attributes;
         if @attrs == 1 {
-            return "{self.^name} { avalue(@attrs[0]) }";
+            return "{self.^name} { avalue(@attrs[0], self).quoted-Str }";
         }
-        sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr) }
+        sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, self).quoted-Str }
         my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
         return "{self.^name} \{\n$contents\n\}";
     }
@@ -60,7 +60,6 @@ role Q {
     }
 
     method attributes {
-        sub aname($attr) { $attr.name.substr(2) }
         sub find($aname) { self.^attributes.first({ $aname eq aname($_) }) }
 
         self.can("attribute-order")
@@ -343,11 +342,8 @@ class Q::Term::Quasi does Q::Term {
                 return $ast;
             }
 
-            sub aname($attr) { $attr.name.substr(2) }
-            sub avalue($attr) { $attr.get_value($thing) }
-
             my %attributes = $thing.attributes.map: -> $attr {
-                aname($attr) => interpolate(avalue($attr))
+                aname($attr) => interpolate(avalue($attr, $thing))
             };
 
             $thing.new(|%attributes);
