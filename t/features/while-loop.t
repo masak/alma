@@ -4,9 +4,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u") (int 3))
-          (while (identifier "u") (block (parameterlist) (stmtlist
+          (while (identifier "u") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
@@ -16,9 +16,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u") (int 3))
-          (while (identifier "u") (block (parameterlist (param (identifier "x"))) (stmtlist
+          (while (identifier "u") (block (parameterlist (param (identifier "x"))) (statementlist
             (stexpr (identifier "x"))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
@@ -28,9 +28,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u") (int 3))
-          (while (identifier "u") (block (parameterlist (param (identifier "x"))) (stmtlist
+          (while (identifier "u") (block (parameterlist (param (identifier "x"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
@@ -55,9 +55,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u") (int 3))
-          (while (identifier "u") (block (parameterlist (param (identifier "a")) (param (identifier "b")) (param (identifier "c"))) (stmtlist
+          (while (identifier "u") (block (parameterlist (param (identifier "a")) (param (identifier "b")) (param (identifier "c"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .

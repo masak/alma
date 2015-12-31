@@ -4,8 +4,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2)) (block (parameterlist) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2)) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "i"))))))))
         .
 
@@ -14,8 +14,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2)) (block (parameterlist (param (identifier "i"))) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2)) (block (parameterlist (param (identifier "i"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "i"))))))))
         .
 
@@ -24,8 +24,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "i"))))
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "j"))))))))
         .
@@ -35,8 +35,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2)) (block (parameterlist) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2)) (block (parameterlist) (statementlist
             (my (identifier "r") (int 3))
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "r"))))))))
         .
@@ -46,9 +46,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "a") (array (int 1) (int 2) (int 3)))
-          (for (identifier "a") (block (parameterlist) (stmtlist
+          (for (identifier "a") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "."))))))))
         .
 

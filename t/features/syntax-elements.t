@@ -8,7 +8,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "n") (none)))
         .
 
@@ -21,7 +21,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "n") (int 7)))
         .
 
@@ -34,7 +34,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "s") (str "Bond")))
         .
 
@@ -47,7 +47,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "a") (array (int 1) (int 2))))
         .
 
@@ -60,7 +60,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (array (int 1) (int 2) (int 3))))
         .
 
@@ -73,7 +73,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u")))
         .
 
@@ -86,7 +86,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<+> (int 38) (int 4))))))
         .
 
@@ -100,7 +100,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u") (int 0))
           (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (int 1)))))
         .
@@ -114,7 +114,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 
@@ -128,7 +128,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "ns") (array (str "Jim") (str "Bond")))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (identifier "ns") (int 1))))))
         .
@@ -143,7 +143,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "x") (int 1))
           (stexpr (infix:<=> (identifier "x") (int 2))))
         .
@@ -159,7 +159,7 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "i1") (int 10))
           (my (identifier "i2") (int 11))
 
@@ -177,8 +177,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (stblock (block (parameterlist) (stmtlist
+        (statementlist
+          (stblock (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "immediate block"))))))))
         .
 
@@ -193,8 +193,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "sub"))))))))
         .
 
@@ -209,8 +209,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Mr ") (identifier "name")))))))))
         .
 
@@ -225,8 +225,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (identifier "X") (identifier "Y")))))))))
         .
 
@@ -241,8 +241,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (return (int 7))))))
         .
 
@@ -257,8 +257,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (return)))))
         .
 
@@ -278,11 +278,11 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI")))))))
-          (sub (identifier "g") (block (parameterlist) (stmtlist
-            (sub (identifier "h") (block (parameterlist) (stmtlist
+          (sub (identifier "g") (block (parameterlist) (statementlist
+            (sub (identifier "h") (block (parameterlist) (statementlist
               (stexpr (postfix:<()> (identifier "f") (argumentlist))))))
             (return (identifier "h")))))
           (stexpr (postfix:<()> (postfix:<()> (identifier "g") (argumentlist)) (argumentlist))))
@@ -299,8 +299,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (if (str "James") (block (parameterlist) (stmtlist
+        (statementlist
+          (if (str "James") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "oh wow, if statement"))))))))
         .
 
@@ -315,8 +315,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2)) (block (parameterlist) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2)) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "i"))))))))
         .
 
@@ -331,8 +331,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2)) (block (parameterlist (param (identifier "i"))) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2)) (block (parameterlist (param (identifier "i"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "i"))))))))
         .
 
@@ -348,8 +348,8 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
-          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (stmtlist
+        (statementlist
+          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "i"))))
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "j"))))))))
         .
@@ -366,9 +366,9 @@ use _007::Test;
         .
 
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u"))
-          (while (identifier "u") (block (parameterlist) (stmtlist
+          (while (identifier "u") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u"))))))))
         .
 

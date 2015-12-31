@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "n") (int 7))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "n")))))
         .
@@ -14,7 +14,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "s") (str "Bond"))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "s")))))
         .
@@ -31,7 +31,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "n") (array (int 1) (int 2)))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "n")))))
         .

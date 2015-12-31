@@ -16,7 +16,7 @@ my @exprs = «
 »;
 
 for @exprs -> $expr, $frag {
-    my $ast = qq[(stmtlist (my (identifier "a")) (stexpr {$frag}))];
+    my $ast = qq[(statementlist (my (identifier "a")) (stexpr {$frag}))];
 
     parses-to "my a; $expr", $ast, $expr;
 }

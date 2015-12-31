@@ -4,11 +4,11 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "fib") (block (parameterlist (param (identifier "n"))) (stmtlist
-            (if (infix:<==> (identifier "n") (int 0)) (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "fib") (block (parameterlist (param (identifier "n"))) (statementlist
+            (if (infix:<==> (identifier "n") (int 0)) (block (parameterlist) (statementlist
               (return (int 1)))))
-            (if (infix:<==> (identifier "n") (int 1)) (block (parameterlist) (stmtlist
+            (if (infix:<==> (identifier "n") (int 1)) (block (parameterlist) (statementlist
               (return (int 1)))))
             (return (infix:<+> (postfix:<()> (identifier "fib") (argumentlist (infix:<+> (identifier "n") (prefix:<-> (int 1)))))
                        (postfix:<()> (identifier "fib") (argumentlist (infix:<+> (identifier "n") (prefix:<-> (int 2))))))))))

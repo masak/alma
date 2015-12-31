@@ -4,8 +4,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI from inside sub"))))))))
         .
 
@@ -14,10 +14,10 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "x") (str "one"))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (my (identifier "x") (str "two"))
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x")))))))
           (stexpr (postfix:<()> (identifier "f") (argumentlist)))
@@ -29,8 +29,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Good evening, Mr ") (identifier "name"))))))))
           (stexpr (postfix:<()> (identifier "f") (argumentlist (str "Bond")))))
         .
@@ -40,8 +40,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (identifier "X") (identifier "Y"))))))))
           (my (identifier "X") (str "y"))
           (stexpr (postfix:<()> (identifier "f") (argumentlist (str "X") (infix:<~> (identifier "X") (identifier "X"))))))
@@ -52,12 +52,12 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "callback"))) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "callback"))) (statementlist
             (my (identifier "scoping") (str "dynamic"))
             (stexpr (postfix:<()> (identifier "callback") (argumentlist))))))
           (my (identifier "scoping") (str "lexical"))
-          (stexpr (postfix:<()> (identifier "f") (argumentlist (block (parameterlist) (stmtlist
+          (stexpr (postfix:<()> (identifier "f") (argumentlist (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "scoping"))))))))))
         .
 
@@ -66,9 +66,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (postfix:<()> (identifier "f") (argumentlist)))
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI from inside sub"))))))))
         .
 
@@ -77,10 +77,10 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (postfix:<()> (identifier "f") (argumentlist)))
           (my (identifier "x") (str "X"))
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))))))
         .
 
@@ -89,11 +89,11 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (sub (identifier "f") (block (parameterlist) (stmtlist
+        (statementlist
+          (sub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI")))))))
-          (sub (identifier "g") (block (parameterlist) (stmtlist
-            (return (block (parameterlist) (stmtlist
+          (sub (identifier "g") (block (parameterlist) (statementlist
+            (return (block (parameterlist) (statementlist
               (stexpr (postfix:<()> (identifier "f") (argumentlist)))))))))
           (stexpr (postfix:<()> (postfix:<()> (identifier "g") (argumentlist)) (argumentlist))))
         .
@@ -103,9 +103,9 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (stexpr (postfix:<()> (identifier "f") (argumentlist (str "Bond"))))
-          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (stmtlist
+          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Good evening, Mr ") (identifier "name")))))))))
         .
 

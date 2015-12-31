@@ -4,8 +4,8 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
-          (begin (block (parameterlist) (stmtlist
+        (statementlist
+          (begin (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "won't get printed"))))))))
         .
 

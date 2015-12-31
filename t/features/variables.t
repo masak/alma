@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "u"))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u")))))
         .

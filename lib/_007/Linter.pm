@@ -64,8 +64,8 @@ class _007::Linter {
             multi traverse(Q::ParameterList $parameterlist) {
             }
 
-            multi traverse(Q::StatementList $stmtlist) {
-                for $stmtlist.statements.elements -> $stmt {
+            multi traverse(Q::StatementList $statementlist) {
+                for $statementlist.statements.elements -> $stmt {
                     traverse($stmt);
                 }
             }

@@ -12,13 +12,13 @@ use _007::Test;
         '{a: 1 }' '(object (identifier "Object") (proplist (property "a" (int 1))))'
         '{a: 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
         '{a() {}}' '(object (identifier "Object") (proplist
-          (property "a" (block (parameterlist) (stmtlist)))))'
+          (property "a" (block (parameterlist) (statementlist)))))'
         '{a(a, b) {}}' '(object (identifier "Object") (proplist (property "a" (block
-          (parameterlist (param (identifier "a")) (param (identifier "b"))) (stmtlist)))))'
+          (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist)))))'
     »;
 
     for @exprs -> $expr, $frag {
-        my $ast = qq[(stmtlist (my (identifier "a")) (stexpr {$frag}))];
+        my $ast = qq[(statementlist (my (identifier "a")) (stexpr {$frag}))];
 
         parses-to "my a; ($expr)", $ast, $expr;
     }
@@ -26,7 +26,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "o")
             (object (identifier "Object") (proplist (property "a" (int 1)))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist
@@ -38,7 +38,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (stmtlist
+        (statementlist
           (my (identifier "o")
             (object (identifier "Object") (proplist (property "b" (int 7)))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist
@@ -50,7 +50,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-          (stmtlist
+          (statementlist
             (my (identifier "o") (object (identifier "Object") (proplist)))
             (stexpr (postfix:<.> (identifier "o") (identifier "a"))))
         .
@@ -60,7 +60,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-          (stmtlist
+          (statementlist
            (stexpr (postfix:<.> (int 42) (identifier "a"))))
         .
 
@@ -69,7 +69,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-          (stmtlist
+          (statementlist
             (my (identifier "o") (object (identifier "Object") (proplist
               (property "foo" (int 1))
               (property "foo" (int 2))))))
@@ -94,7 +94,7 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-          (stmtlist
+          (statementlist
             (my (identifier "o") (object (identifier "Object") (proplist)))
             (stexpr (postfix:<[]> (identifier "o") (str "b"))))
         .
