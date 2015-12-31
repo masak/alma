@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (macro (identifier "f") (block (paramlist) (stmtlist
+          (macro (identifier "f") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "OH HAI from inside macro"))))))))
         .
 

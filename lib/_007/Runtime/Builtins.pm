@@ -412,9 +412,9 @@ class _007::Runtime::Builtins {
             return sub (|c) { wrap &fn(|c) };
         }
 
-        sub create-paramlist(@params) {
+        sub create-parameterlist(@parameters) {
             Q::ParameterList.new(:parameters(
-                Val::Array.new(:elements(@params».name».substr(1).map({
+                Val::Array.new(:elements(@parameters».name».substr(1).map({
                     Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:value($_))))))
                 })))
             ));
@@ -425,11 +425,11 @@ class _007::Runtime::Builtins {
                 .key => .value;
             }
             when .value ~~ Callable {
-                my $paramlist = create-paramlist(.value.signature.params);
-                .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($paramlist));
+                my $parameterlist = create-parameterlist(.value.signature.params);
+                .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($parameterlist));
             }
             when .value ~~ Val::Sub::Builtin {
-                .value.parameterlist = create-paramlist(.value.code.signature.params);
+                .value.parameterlist = create-parameterlist(.value.code.signature.params);
                 $_
             }
             default { die "Unknown type {.value.^name}" }

@@ -309,7 +309,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "empty") (block (paramlist) (stmtlist)))
+          (sub (identifier "empty") (block (parameterlist) (stmtlist)))
           (my (identifier "none") (postfix:<()> (identifier "empty") (arglist)))
           (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (identifier "none")))))
           (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (int 0)))))

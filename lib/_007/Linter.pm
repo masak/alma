@@ -61,7 +61,7 @@ class _007::Linter {
                 @blocks.pop;
             }
 
-            multi traverse(Q::ParameterList $paramlist) {
+            multi traverse(Q::ParameterList $parameterlist) {
             }
 
             multi traverse(Q::StatementList $stmtlist) {

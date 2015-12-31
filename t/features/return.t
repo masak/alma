@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
             (return (int 7)))))
           (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "f") (arglist))))))
         .
@@ -16,7 +16,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
             (return (str "Bond. James Bond.")))))
           (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "f") (arglist))))))
         .
@@ -27,7 +27,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
             (return (array (int 1) (int 2) (str "three"))))))
           (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "f") (arglist))))))
         .
@@ -38,7 +38,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
             (return (int 1953))
             (stexpr (postfix:<()> (identifier "say") (arglist (str "Dead code. Should have returned by now.")))))))
           (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "f") (arglist))))))
@@ -50,10 +50,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
-            (my (identifier "b") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
+            (my (identifier "b") (block (parameterlist) (stmtlist
               (return (int 5)))))
-            (sub (identifier "g") (block (paramlist) (stmtlist
+            (sub (identifier "g") (block (parameterlist) (stmtlist
               (stexpr (postfix:<()> (identifier "b") (arglist))))))
             (stexpr (postfix:<()> (identifier "g") (arglist)))
             (stexpr (postfix:<()> (identifier "say") (arglist (str "Dead code. Should have returned from f.")))))))
@@ -66,8 +66,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
-            (my (identifier "b") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
+            (my (identifier "b") (block (parameterlist) (stmtlist
               (return (int 5)))))
             (return (identifier "b")))))
           (my (identifier "c") (postfix:<()> (identifier "f") (arglist)))
@@ -80,7 +80,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (identifier "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (parameterlist) (stmtlist
             (return))))
           (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "f") (arglist))))))
         .

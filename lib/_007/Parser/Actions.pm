@@ -145,12 +145,12 @@ class _007::Parser::Actions {
     }
 
     method statement:if ($/) {
-        my %params = $<xblock>.ast;
-        %params<else> = $<else> :exists
+        my %parameters = $<xblock>.ast;
+        %parameters<else> = $<else> :exists
             ?? $<else>.ast
             !! Val::None.new;
 
-        make Q::Statement::If.new(|%params);
+        make Q::Statement::If.new(|%parameters);
     }
 
     method statement:for ($/) {

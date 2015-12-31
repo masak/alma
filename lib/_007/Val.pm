@@ -132,10 +132,10 @@ class Val::Block does Val {
         self.Str
     }
 
-    method pretty-params {
+    method pretty-parameters {
         sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
-    method Str { "<block {$.pretty-params}>" }
+    method Str { "<block {$.pretty-parameters}>" }
 }
 
 class Val::Sub is Val::Block {
@@ -145,7 +145,7 @@ class Val::Sub is Val::Block {
         self.Str
     }
 
-    method Str { "<sub {$.name}{$.pretty-params}>" }
+    method Str { "<sub {$.name}{$.pretty-parameters}>" }
 }
 
 class Val::Macro is Val::Sub {
@@ -153,5 +153,5 @@ class Val::Macro is Val::Sub {
         self.Str
     }
 
-    method Str { "<macro {$.name}{$.pretty-params}>" }
+    method Str { "<macro {$.name}{$.pretty-parameters}>" }
 }

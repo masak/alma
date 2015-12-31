@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stblock (block (paramlist) (stmtlist
+          (stblock (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "OH HAI from inside block"))))))))
         .
 
@@ -17,7 +17,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "x") (str "one"))
           (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x"))))
-          (stblock (block (paramlist) (stmtlist
+          (stblock (block (parameterlist) (stmtlist
             (my (identifier "x") (str "two"))
             (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x")))))))
           (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x")))))
@@ -29,7 +29,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (identifier "b") (block (paramlist (param (identifier "name"))) (stmtlist
+          (my (identifier "b") (block (parameterlist (param (identifier "name"))) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (str "Good evening, Mr ") (identifier "name"))))))))
           (stexpr (postfix:<()> (identifier "b") (arglist (str "Bond")))))
         .
@@ -40,7 +40,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (identifier "b") (block (paramlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
+          (my (identifier "b") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (identifier "X") (identifier "Y"))))))))
           (my (identifier "X") (str "y"))
           (stexpr (postfix:<()> (identifier "b") (arglist (str "X") (infix:<~> (identifier "X") (identifier "X"))))))
@@ -52,11 +52,11 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (identifier "b") (block (paramlist (param (identifier "callback"))) (stmtlist
+          (my (identifier "b") (block (parameterlist (param (identifier "callback"))) (stmtlist
             (my (identifier "scoping") (str "dynamic"))
             (stexpr (postfix:<()> (identifier "callback") (arglist))))))
           (my (identifier "scoping") (str "lexical"))
-          (stexpr (postfix:<()> (identifier "b") (arglist (block (paramlist) (stmtlist
+          (stexpr (postfix:<()> (identifier "b") (arglist (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (identifier "scoping"))))))))))
         .
 
@@ -66,8 +66,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (identifier "b") (block (paramlist (param (identifier "count"))) (stmtlist
-            (if (identifier "count") (block (paramlist) (stmtlist
+          (my (identifier "b") (block (parameterlist (param (identifier "count"))) (stmtlist
+            (if (identifier "count") (block (parameterlist) (stmtlist
               (stexpr (postfix:<()> (identifier "b") (arglist (infix:<+> (identifier "count") (prefix:<-> (int 1))))))
               (stexpr (postfix:<()> (identifier "say") (arglist (identifier "count"))))))))))
           (stexpr (postfix:<()> (identifier "b") (arglist (int 4)))))

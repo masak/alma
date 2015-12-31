@@ -6,29 +6,29 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "u"))
-          (if (identifier "u") (block (paramlist) (stmtlist
+          (if (identifier "u") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy none")))))))
-          (if (int 0) (block (paramlist) (stmtlist
+          (if (int 0) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy int")))))))
-          (if (int 7) (block (paramlist) (stmtlist
+          (if (int 7) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy int")))))))
-          (if (str "") (block (paramlist) (stmtlist
+          (if (str "") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy str")))))))
-          (if (str "James") (block (paramlist) (stmtlist
+          (if (str "James") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy str")))))))
-          (if (array) (block (paramlist) (stmtlist
+          (if (array) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy array")))))))
-          (if (array (str "")) (block (paramlist) (stmtlist
+          (if (array (str "")) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy array")))))))
-          (sub (identifier "foo") (block (paramlist) (stmtlist)))
-          (if (identifier "foo") (block (paramlist) (stmtlist
+          (sub (identifier "foo") (block (parameterlist) (stmtlist)))
+          (if (identifier "foo") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy sub")))))))
-          (macro (identifier "bar") (block (paramlist) (stmtlist)))
-          (if (identifier "bar") (block (paramlist) (stmtlist
+          (macro (identifier "bar") (block (parameterlist) (stmtlist)))
+          (if (identifier "bar") (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy macro")))))))
-          (if (object (identifier "Object") (proplist)) (block (paramlist) (stmtlist
+          (if (object (identifier "Object") (proplist)) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy object")))))))
-          (if (object (identifier "Object") (proplist (property "a" (int 3)))) (block (paramlist) (stmtlist
+          (if (object (identifier "Object") (proplist (property "a" (int 3)))) (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy object"))))))))
         .
 
@@ -40,7 +40,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (if (int 7) (block (paramlist (param (identifier "a"))) (stmtlist
+          (if (int 7) (block (parameterlist (param (identifier "a"))) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (identifier "a"))))))))
         .
 
@@ -52,10 +52,10 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 1)
-           (block (paramlist)
+           (block (parameterlist)
              (stmtlist
               (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
-           (block (paramlist)
+           (block (parameterlist)
              (stmtlist
               (stexpr (postfix:<()> (identifier "say") (arglist (str "else"))))))))
         .
@@ -66,10 +66,10 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 0)
-           (block (paramlist)
+           (block (parameterlist)
              (stmtlist
               (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
-           (block (paramlist)
+           (block (parameterlist)
              (stmtlist
               (stexpr (postfix:<()> (identifier "say") (arglist (str "else"))))))))
         .
@@ -81,14 +81,14 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 0)
-             (block (paramlist)
+             (block (parameterlist)
                (stmtlist
                 (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (if (int 0)
-               (block (paramlist)
+               (block (parameterlist)
                  (stmtlist
                   (stexpr (postfix:<()> (identifier "say") (arglist (str "else-if"))))))
-             (block (paramlist)
+             (block (parameterlist)
                (stmtlist
                 (stexpr (postfix:<()> (identifier "say") (arglist (str "else")))))))))
         .
@@ -100,14 +100,14 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
          (if (int 0)
-             (block (paramlist)
+             (block (parameterlist)
                (stmtlist
                 (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (if (int 1)
-               (block (paramlist)
+               (block (parameterlist)
                  (stmtlist
                   (stexpr (postfix:<()> (identifier "say") (arglist (str "else-if"))))))
-             (block (paramlist)
+             (block (parameterlist)
                (stmtlist
                 (stexpr (postfix:<()> (identifier "say") (arglist (str "else")))))))))
         .

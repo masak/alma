@@ -53,7 +53,7 @@ sub read(Str $ast) is export {
         property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
         stmtlist       => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },
-        paramlist      => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
+        parameterlist      => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
         arglist        => -> *@arguments { Q::ArgumentList.new(:arguments(Val::Array.new(:elements(@arguments)))) },
         proplist       => -> *@properties { Q::PropertyList.new(:properties(Val::Array.new(:elements(@properties)))) },
     ;

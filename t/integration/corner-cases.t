@@ -81,7 +81,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "x") (int 5))
-          (stblock (block (paramlist) (stmtlist
+          (stblock (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "inside")))))))
           (stexpr (infix:<=> (identifier "x") (int 7))))
         .
@@ -118,7 +118,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stblock (block (paramlist) (stmtlist
+          (stblock (block (parameterlist) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (str "immediate block"))))))))
         .
 
@@ -185,7 +185,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (if (str "James") (block (paramlist (param (identifier "s"))) (stmtlist
+          (if (str "James") (block (parameterlist (param (identifier "s"))) (stmtlist
             (stexpr (postfix:<()> (identifier "say") (arglist (identifier "s"))))))))
         .
 
