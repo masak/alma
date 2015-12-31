@@ -4,16 +4,16 @@ use _007::Test;
 
 {
     my @exprs = «
-        '{}'  '(object (identifier "Object") (proplist))'
-        '{"a": 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
-        '{a}' '(object (identifier "Object") (proplist (property "a" (identifier "a"))))'
-        '{a : 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
-        '{ a: 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
-        '{a: 1 }' '(object (identifier "Object") (proplist (property "a" (int 1))))'
-        '{a: 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
-        '{a() {}}' '(object (identifier "Object") (proplist
+        '{}'  '(object (identifier "Object") (propertylist))'
+        '{"a": 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{a}' '(object (identifier "Object") (propertylist (property "a" (identifier "a"))))'
+        '{a : 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{ a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{a: 1 }' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{a() {}}' '(object (identifier "Object") (propertylist
           (property "a" (block (parameterlist) (statementlist)))))'
-        '{a(a, b) {}}' '(object (identifier "Object") (proplist (property "a" (block
+        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (block
           (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist)))))'
     »;
 
@@ -28,7 +28,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "o")
-            (object (identifier "Object") (proplist (property "a" (int 1)))))
+            (object (identifier "Object") (propertylist (property "a" (int 1)))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist
             (postfix:<.> (identifier "o") (identifier "a"))))))
         .
@@ -40,7 +40,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "o")
-            (object (identifier "Object") (proplist (property "b" (int 7)))))
+            (object (identifier "Object") (propertylist (property "b" (int 7)))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist
             (postfix:<[]> (identifier "o") (str "b"))))))
         .
@@ -51,7 +51,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (statementlist
-            (my (identifier "o") (object (identifier "Object") (proplist)))
+            (my (identifier "o") (object (identifier "Object") (propertylist)))
             (stexpr (postfix:<.> (identifier "o") (identifier "a"))))
         .
 
@@ -70,7 +70,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (statementlist
-            (my (identifier "o") (object (identifier "Object") (proplist
+            (my (identifier "o") (object (identifier "Object") (propertylist
               (property "foo" (int 1))
               (property "foo" (int 2))))))
         .
@@ -95,7 +95,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (statementlist
-            (my (identifier "o") (object (identifier "Object") (proplist)))
+            (my (identifier "o") (object (identifier "Object") (propertylist)))
             (stexpr (postfix:<[]> (identifier "o") (str "b"))))
         .
 

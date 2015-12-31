@@ -252,8 +252,8 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "q")
-            (object (identifier "Q::Statement::My") (proplist
-              (property "identifier" (object (identifier "Q::Identifier") (proplist
+            (object (identifier "Q::Statement::My") (propertylist
+              (property "identifier" (object (identifier "Q::Identifier") (propertylist
                 (property "name" (str "agent")))))
               (property "expr" (str "James Bond")))))
           (stexpr (postfix:<()> (identifier "melt") (argumentlist (identifier "q")))))

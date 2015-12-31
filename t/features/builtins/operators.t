@@ -184,8 +184,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (proplist (property "x" (int 9)))))
+          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o1") (identifier "o2"))))))
@@ -197,8 +197,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (proplist (property "x" (int 9)))))
+          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "o1") (identifier "o2"))))))
@@ -233,7 +233,7 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "s1") (str "10"))
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
+          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
 
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "i1") (identifier "s1")))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "s1") (identifier "a1")))))
@@ -250,7 +250,7 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "s1") (str "10"))
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
+          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
 
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "i1") (identifier "s1")))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "s1") (identifier "a1")))))

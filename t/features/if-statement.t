@@ -26,9 +26,9 @@ use _007::Test;
           (macro (identifier "bar") (block (parameterlist) (statementlist)))
           (if (identifier "bar") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy macro")))))))
-          (if (object (identifier "Object") (proplist)) (block (parameterlist) (statementlist
+          (if (object (identifier "Object") (propertylist)) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "falsy object")))))))
-          (if (object (identifier "Object") (proplist (property "a" (int 3)))) (block (parameterlist) (statementlist
+          (if (object (identifier "Object") (propertylist (property "a" (int 3)))) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy object"))))))))
         .
 
