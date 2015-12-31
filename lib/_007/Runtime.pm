@@ -134,27 +134,27 @@ class _007::Runtime {
         return $!builtins.opscope;
     }
 
-    method sigbind($type, Val::Block $c, @args) {
+    method sigbind($type, Val::Block $c, @arguments) {
         my $paramcount = $c.parameterlist.parameters.elements.elems;
-        my $argcount = @args.elems;
+        my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:$type, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
         self.enter($c);
-        for @($c.parameterlist.parameters.elements) Z @args -> ($param, $arg) {
+        for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
             my $name = $param.identifier.name.value;
             self.declare-var($name, $arg);
         }
     }
 
-    multi method call(Val::Block $c, @args) {
-        self.sigbind("Block", $c, @args);
+    multi method call(Val::Block $c, @arguments) {
+        self.sigbind("Block", $c, @arguments);
         $c.statementlist.run(self);
         self.leave;
         return Val::None.new;
     }
 
-    multi method call(Val::Sub $c, @args) {
-        self.sigbind("Sub", $c, @args);
+    multi method call(Val::Sub $c, @arguments) {
+        self.sigbind("Sub", $c, @arguments);
         self.register-subhandler;
         my $frame = self.current-frame;
         $c.statementlist.run(self);
@@ -171,8 +171,8 @@ class _007::Runtime {
         return Val::None.new;
     }
 
-    multi method call(Val::Sub::Builtin $c, @args) {
-        my $result = $c.code.(|@args);
+    multi method call(Val::Sub::Builtin $c, @arguments) {
+        my $result = $c.code.(|@arguments);
         return $result if $result;
         return Val::None.new;
     }

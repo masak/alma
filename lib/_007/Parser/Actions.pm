@@ -317,8 +317,8 @@ class _007::Parser::Actions {
             if $postfix ~~ Q::Postfix::Call
             && $/.ast ~~ Q::Identifier
             && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
-                my @args = $postfix.argumentlist.arguments.elements;
-                my $qtree = $*runtime.call($macro, @args);
+                my @arguments = $postfix.argumentlist.arguments.elements;
+                my $qtree = $*runtime.call($macro, @arguments);
                 make $qtree;
             }
             elsif $postfix ~~ Q::Postfix::Index {

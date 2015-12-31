@@ -301,8 +301,8 @@ class Q::Postfix::Call is Q::Postfix {
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Block;
-        my @args = $.argumentlist.arguments.elements».eval($runtime);
-        return $runtime.call($c, @args);
+        my @arguments = $.argumentlist.arguments.elements».eval($runtime);
+        return $runtime.call($c, @arguments);
     }
 }
 

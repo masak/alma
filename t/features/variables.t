@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "u"))
-          (stexpr (postfix:<()> (identifier "say") (arglist (identifier "u")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u")))))
         .
 
     is-result $ast, "None\n", "variables can be declared without being assigned";

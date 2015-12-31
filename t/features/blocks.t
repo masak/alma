@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (stblock (block (parameterlist) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (str "OH HAI from inside block"))))))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI from inside block"))))))))
         .
 
     is-result $ast, "OH HAI from inside block\n", "immediate blocks work";
@@ -16,11 +16,11 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "x") (str "one"))
-          (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x"))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
           (stblock (block (parameterlist) (stmtlist
             (my (identifier "x") (str "two"))
-            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x")))))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x")))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x")))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x")))))
         .
 
     is-result $ast, "one\ntwo\none\n", "blocks have their own variable scope";
@@ -30,8 +30,8 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "b") (block (parameterlist (param (identifier "name"))) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (str "Good evening, Mr ") (identifier "name"))))))))
-          (stexpr (postfix:<()> (identifier "b") (arglist (str "Bond")))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Good evening, Mr ") (identifier "name"))))))))
+          (stexpr (postfix:<()> (identifier "b") (argumentlist (str "Bond")))))
         .
 
     is-result $ast, "Good evening, Mr Bond\n", "calling a block with parameters works";
@@ -41,9 +41,9 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "b") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (identifier "X") (identifier "Y"))))))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (identifier "X") (identifier "Y"))))))))
           (my (identifier "X") (str "y"))
-          (stexpr (postfix:<()> (identifier "b") (arglist (str "X") (infix:<~> (identifier "X") (identifier "X"))))))
+          (stexpr (postfix:<()> (identifier "b") (argumentlist (str "X") (infix:<~> (identifier "X") (identifier "X"))))))
         .
 
     is-result $ast, "Xyy\n", "arguments are evaluated before parameters are bound";
@@ -54,10 +54,10 @@ use _007::Test;
         (stmtlist
           (my (identifier "b") (block (parameterlist (param (identifier "callback"))) (stmtlist
             (my (identifier "scoping") (str "dynamic"))
-            (stexpr (postfix:<()> (identifier "callback") (arglist))))))
+            (stexpr (postfix:<()> (identifier "callback") (argumentlist))))))
           (my (identifier "scoping") (str "lexical"))
-          (stexpr (postfix:<()> (identifier "b") (arglist (block (parameterlist) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "scoping"))))))))))
+          (stexpr (postfix:<()> (identifier "b") (argumentlist (block (parameterlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "scoping"))))))))))
         .
 
     is-result $ast, "lexical\n", "scoping is lexical";
@@ -68,9 +68,9 @@ use _007::Test;
         (stmtlist
           (my (identifier "b") (block (parameterlist (param (identifier "count"))) (stmtlist
             (if (identifier "count") (block (parameterlist) (stmtlist
-              (stexpr (postfix:<()> (identifier "b") (arglist (infix:<+> (identifier "count") (prefix:<-> (int 1))))))
-              (stexpr (postfix:<()> (identifier "say") (arglist (identifier "count"))))))))))
-          (stexpr (postfix:<()> (identifier "b") (arglist (int 4)))))
+              (stexpr (postfix:<()> (identifier "b") (argumentlist (infix:<+> (identifier "count") (prefix:<-> (int 1))))))
+              (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "count"))))))))))
+          (stexpr (postfix:<()> (identifier "b") (argumentlist (int 4)))))
         .
 
     is-result $ast, "1\n2\n3\n4\n", "each block invocation gets its own callframe/scope";

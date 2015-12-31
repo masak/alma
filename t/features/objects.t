@@ -29,7 +29,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "o")
             (object (identifier "Object") (proplist (property "a" (int 1)))))
-          (stexpr (postfix:<()> (identifier "say") (arglist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist
             (postfix:<.> (identifier "o") (identifier "a"))))))
         .
 
@@ -41,7 +41,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "o")
             (object (identifier "Object") (proplist (property "b" (int 7)))))
-          (stexpr (postfix:<()> (identifier "say") (arglist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist
             (postfix:<[]> (identifier "o") (str "b"))))))
         .
 

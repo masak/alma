@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<+> (int 38) (int 4))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<+> (int 38) (int 4))))))
         .
 
     is-result $ast, "42\n", "numeric addition works";
@@ -14,7 +14,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<-> (int 46) (int 4))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<-> (int 46) (int 4))))))
         .
 
     is-result $ast, "42\n", "numeric subtraction works";
@@ -23,7 +23,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<*> (int 6) (int 7))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<*> (int 6) (int 7))))))
         .
 
     is-result $ast, "42\n", "numeric multiplication works";
@@ -32,7 +32,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 
     is-result $ast, "James Bond\n", "string concatenation works";
@@ -41,7 +41,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<x> (str "hi ") (int 3))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<x> (str "hi ") (int 3))))))
         .
 
     is-result $ast, "hi hi hi \n", "string repeatition works";
@@ -50,7 +50,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<xx> (array (int 1) (int 2)) (int 3))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<xx> (array (int 1) (int 2)) (int 3))))))
         .
 
     is-result $ast, "[1, 2, 1, 2, 1, 2]\n", "array repeatition works";
@@ -60,7 +60,7 @@ use _007::Test;
     my $ast = q:to/./;
     (stmtlist
      (stexpr (postfix:<()> (identifier "say")
-       (arglist
+       (argumentlist
         (infix:<::> (int 0)
         (infix:<::> (int 0)
         (infix:<::> (int 7) (array))))))))
@@ -74,7 +74,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (identifier "ns") (int 1))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (identifier "ns") (int 1))))))
         .
 
     is-result $ast, "Bond\n", "array indexing works";
@@ -84,7 +84,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "ns") (array (array (str "Auric") (str "Goldfinger"))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (postfix:<[]> (identifier "ns") (int 0)) (int 1))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (postfix:<[]> (identifier "ns") (int 0)) (int 1))))))
         .
 
     is-result $ast, "Goldfinger\n", "array indexing works on something that is not a variable name";
@@ -95,7 +95,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "x") (int 1))
           (stexpr (infix:<=> (identifier "x") (int 2)))
-          (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x")))))
         .
 
     is-result $ast, "2\n", "assignment works";
@@ -107,8 +107,8 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "i2") (int 11))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "i1") (identifier "i1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "i1") (identifier "i2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "i1") (identifier "i1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "i1") (identifier "i2"))))))
         .
 
     is-result $ast, "1\n0\n", "integer equality";
@@ -120,8 +120,8 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "i2") (int 11))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "i1") (identifier "i1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "i1") (identifier "i2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "i1") (identifier "i1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "i1") (identifier "i2"))))))
         .
 
     is-result $ast, "0\n1\n", "integer inequality";
@@ -134,8 +134,8 @@ use _007::Test;
           (my (identifier "s1") (str "10"))
           (my (identifier "s2") (str "11"))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "s1") (identifier "s2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "s1") (identifier "s1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "s1") (identifier "s2"))))))
         .
 
     is-result $ast, "1\n0\n", "string equality";
@@ -147,8 +147,8 @@ use _007::Test;
           (my (identifier "s1") (str "10"))
           (my (identifier "s2") (str "11"))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "s1") (identifier "s2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "s1") (identifier "s1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "s1") (identifier "s2"))))))
         .
 
     is-result $ast, "0\n1\n", "string inequality";
@@ -160,8 +160,8 @@ use _007::Test;
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
           (my (identifier "a2") (array (int 1) (int 2) (str "3")))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "a1") (identifier "a1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "a1") (identifier "a2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "a1") (identifier "a1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "a1") (identifier "a2"))))))
         .
 
     is-result $ast, "1\n0\n", "array equality";
@@ -173,8 +173,8 @@ use _007::Test;
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
           (my (identifier "a2") (array (int 1) (int 2) (str "3")))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "a1") (identifier "a1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "a1") (identifier "a2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "a1") (identifier "a1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "a1") (identifier "a2"))))))
         .
 
     is-result $ast, "0\n1\n", "array inequality";
@@ -187,8 +187,8 @@ use _007::Test;
           (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
           (my (identifier "o2") (object (identifier "Object") (proplist (property "x" (int 9)))))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "o1") (identifier "o1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "o1") (identifier "o2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o1") (identifier "o1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o1") (identifier "o2"))))))
         .
 
     is-result $ast, "1\n0\n", "object equality";
@@ -200,8 +200,8 @@ use _007::Test;
           (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
           (my (identifier "o2") (object (identifier "Object") (proplist (property "x" (int 9)))))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "o1") (identifier "o1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "o1") (identifier "o2"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "o1") (identifier "o1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "o1") (identifier "o2"))))))
         .
 
     is-result $ast, "0\n1\n", "object inequality";
@@ -210,8 +210,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "Int") (identifier "Int")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "Int") (identifier "Str"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "Int") (identifier "Int")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "Int") (identifier "Str"))))))
         .
 
     is-result $ast, "1\n0\n", "type equality";
@@ -220,8 +220,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "Int") (identifier "Int")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "Int") (identifier "Str"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "Int") (identifier "Int")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "Int") (identifier "Str"))))))
         .
 
     is-result $ast, "0\n1\n", "type inequality";
@@ -235,10 +235,10 @@ use _007::Test;
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
           (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "i1") (identifier "s1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "s1") (identifier "a1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "a1") (identifier "i1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "o1") (identifier "i1"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "i1") (identifier "s1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "s1") (identifier "a1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "a1") (identifier "i1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o1") (identifier "i1"))))))
         .
 
     is-result $ast, "0\n0\n0\n0\n", "equality testing across types (always false)";
@@ -252,10 +252,10 @@ use _007::Test;
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
           (my (identifier "o1") (object (identifier "Object") (proplist (property "x" (int 7)))))
 
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "i1") (identifier "s1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "s1") (identifier "a1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "a1") (identifier "i1")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<!=> (identifier "o1") (identifier "i1"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "i1") (identifier "s1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "s1") (identifier "a1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "a1") (identifier "i1")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<!=> (identifier "o1") (identifier "i1"))))))
         .
 
     is-result $ast, "1\n1\n1\n1\n", "inequality testing across types (always true)";
@@ -310,11 +310,11 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (sub (identifier "empty") (block (parameterlist) (stmtlist)))
-          (my (identifier "none") (postfix:<()> (identifier "empty") (arglist)))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (identifier "none")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (int 0)))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (str "")))))
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "none") (array))))))
+          (my (identifier "none") (postfix:<()> (identifier "empty") (argumentlist)))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "none") (identifier "none")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "none") (int 0)))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "none") (str "")))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "none") (array))))))
         .
 
     is-result $ast, "1\n0\n0\n0\n", "equality testing with none matches itself but nothing else";
@@ -324,7 +324,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (identifier "ns") (prefix:<-> (int 2)))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (identifier "ns") (prefix:<-> (int 2)))))))
         .
 
     is-error $ast, X::Subscript::Negative, "negative array indexing is an error";
@@ -334,7 +334,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (identifier "ns") (int 19))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (identifier "ns") (int 19))))))
         .
 
     is-error $ast, X::Subscript::TooLarge, "indexing beyond the last element is an error";
@@ -343,7 +343,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<+> (int 38) (str "4"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<+> (int 38) (str "4"))))))
         .
 
     is-error $ast, X::TypeCheck, "adding non-ints is an error";
@@ -352,7 +352,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (int 38) (str "4"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (int 38) (str "4"))))))
         .
 
     is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
@@ -362,7 +362,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (my (identifier "ns") (str "Jim"))
-          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (identifier "ns") (int 0))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<[]> (identifier "ns") (int 0))))))
         .
 
     is-error $ast, X::TypeCheck, "indexing a non-array is an error";

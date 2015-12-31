@@ -7,7 +7,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "u") (int 3))
           (while (identifier "u") (block (parameterlist) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "u"))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
 
@@ -31,7 +31,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "u") (int 3))
           (while (identifier "u") (block (parameterlist (param (identifier "x"))) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "x"))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
 
@@ -58,7 +58,7 @@ use _007::Test;
         (stmtlist
           (my (identifier "u") (int 3))
           (while (identifier "u") (block (parameterlist (param (identifier "a")) (param (identifier "b")) (param (identifier "c"))) (stmtlist
-            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "u"))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "u"))))
             (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (prefix:<-> (int 1)))))))))
         .
 

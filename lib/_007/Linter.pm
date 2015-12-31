@@ -106,8 +106,8 @@ class _007::Linter {
                 }
             }
 
-            multi traverse(Q::ArgumentList $arglist) {
-                for $arglist.arguments.elements -> $expr {
+            multi traverse(Q::ArgumentList $argumentlist) {
+                for $argumentlist.arguments.elements -> $expr {
                     traverse($expr);
                 }
             }
