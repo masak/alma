@@ -12,12 +12,12 @@ class _007::OpScope {
     has $!prepostfix-boundary = 0;
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
-        my $ident = Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
+        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
-            prefix => Q::Prefix.new(:$ident),
-            infix => Q::Infix.new(:$ident),
-            postfix => Q::Postfix.new(:$ident),
+            prefix => Q::Prefix.new(:$identifier),
+            infix => Q::Infix.new(:$identifier),
+            postfix => Q::Postfix.new(:$identifier),
         }{$type};
 
         my class Precedence {

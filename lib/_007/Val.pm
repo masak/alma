@@ -133,7 +133,7 @@ class Val::Block does Val {
     }
 
     method pretty-params {
-        sprintf "(%s)", $.parameterlist.parameters.elements».ident».name.join(", ");
+        sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
     method Str { "<block {$.pretty-params}>" }
 }

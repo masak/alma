@@ -9,7 +9,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n") (int 7)))
+          (my (identifier "n") (int 7)))
         .
 
     parses-to $program, $ast, "can skip the last semicolon";
@@ -35,7 +35,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (infix:<+> (int 38) (int 4))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<+> (int 38) (int 4))))))
         .
 
     parses-to $program, $ast, "spaces are fine here and there";
@@ -48,7 +48,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (infix:<~> (infix:<~> (str "A") (str "B")) (str "C")) (str "D"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (infix:<~> (infix:<~> (str "A") (str "B")) (str "C")) (str "D"))))))
         .
 
     parses-to $program, $ast, "concat works any number of times (and is left-associative)";
@@ -62,8 +62,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "aaa") (array (array (array (int 1)))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (postfix:<[]> (postfix:<[]> (ident "aaa") (int 0)) (int 0)) (int 0))))))
+          (my (identifier "aaa") (array (array (array (int 1)))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (postfix:<[]> (postfix:<[]> (identifier "aaa") (int 0)) (int 0)) (int 0))))))
         .
 
     parses-to $program, $ast, "array indexing works any number of times";
@@ -80,10 +80,10 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "x") (int 5))
+          (my (identifier "x") (int 5))
           (stblock (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "inside")))))))
-          (stexpr (infix:<=> (ident "x") (int 7))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "inside")))))))
+          (stexpr (infix:<=> (identifier "x") (int 7))))
         .
 
     parses-to $program, $ast, "can have a statement after a block without a semicolon";
@@ -119,7 +119,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (stblock (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "immediate block"))))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "immediate block"))))))))
         .
 
     parses-to $program, $ast, "can skip the last semicolon in a block, too";
@@ -185,8 +185,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (if (str "James") (block (paramlist (param (ident "s"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "s"))))))))
+          (if (str "James") (block (paramlist (param (identifier "s"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "s"))))))))
         .
 
     parses-to $program, $ast, "if statement with a pointy block";
@@ -207,7 +207,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (str "\"")))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (str "\"")))))
         .
 
     parses-to $program, $ast, "can escape quotes inside string";
@@ -220,7 +220,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n") (int 7)))
+          (my (identifier "n") (int 7)))
         .
 
     parses-to $program, $ast, "don't have to have spaces around '=' in declaration";
@@ -331,7 +331,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "a") (array (int 1) (int 2))))
+          (my (identifier "a") (array (int 1) (int 2))))
         .
 
     parses-to $program, $ast, "assigning an array - space at the start of an array";

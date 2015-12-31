@@ -415,7 +415,7 @@ class _007::Runtime::Builtins {
         sub create-paramlist(@params) {
             Q::ParameterList.new(:parameters(
                 Val::Array.new(:elements(@params».name».substr(1).map({
-                    Q::Parameter.new(:ident(Q::Identifier.new(:name(Val::Str.new(:value($_))))))
+                    Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:value($_))))))
                 })))
             ));
         }

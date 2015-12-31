@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (int 1)))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (int 1)))))
         .
 
     is-result $ast, "1\n", "say() works";
@@ -14,8 +14,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "abs") (arglist (prefix:<-> (int 1)))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "abs") (arglist (int 1)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "abs") (arglist (prefix:<-> (int 1)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "abs") (arglist (int 1)))))))
         .
 
     is-result $ast, "1\n1\n", "abs() works";
@@ -24,8 +24,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "min") (arglist (prefix:<-> (int 1)) (int 2))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "min") (arglist (int 2) (prefix:<-> (int 1))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "min") (arglist (prefix:<-> (int 1)) (int 2))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "min") (arglist (int 2) (prefix:<-> (int 1))))))))
         .
 
     is-result $ast, "-1\n-1\n", "min() works";
@@ -34,8 +34,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "max") (arglist (prefix:<-> (int 1)) (int 2))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "max") (arglist (int 2) (prefix:<-> (int 1))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "max") (arglist (prefix:<-> (int 1)) (int 2))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "max") (arglist (int 2) (prefix:<-> (int 1))))))))
         .
 
     is-result $ast, "2\n2\n", "max() works";
@@ -44,7 +44,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "chr") (arglist (int 97)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "chr") (arglist (int 97)))))))
         .
 
     is-result $ast, "a\n", "chr() works";
@@ -53,7 +53,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "ord") (arglist (str "a")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "ord") (arglist (str "a")))))))
         .
 
     is-result $ast, "97\n", "ord() works";
@@ -62,8 +62,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (postfix:<()> (ident "int") (arglist (str "6"))))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (postfix:<()> (ident "int") (arglist (str "-6")))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (postfix:<()> (identifier "int") (arglist (str "6"))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (postfix:<()> (identifier "int") (arglist (str "-6")))))))))
         .
 
     is-result $ast, "<type Int>\n<type Int>\n", "int() works";
@@ -72,7 +72,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (postfix:<()> (ident "str") (arglist (int 6)))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (postfix:<()> (identifier "str") (arglist (int 6)))))))))
         .
 
     is-result $ast, "<type Str>\n", "str() works";
@@ -81,7 +81,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "chars") (arglist (str "007")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "chars") (arglist (str "007")))))))
         .
 
     is-result $ast, "3\n", "chars() works";
@@ -90,7 +90,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "uc") (arglist (str "test")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "uc") (arglist (str "test")))))))
         .
 
     is-result $ast, "TEST\n", "uc() works";
@@ -99,7 +99,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "lc") (arglist (str "TEST")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "lc") (arglist (str "TEST")))))))
         .
 
     is-result $ast, "test\n", "lc() works";
@@ -108,7 +108,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "trim") (arglist (str "  test  ")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "trim") (arglist (str "  test  ")))))))
         .
 
     is-result $ast, "test\n", "trim() works";
@@ -117,7 +117,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "elems") (arglist (array (int 1) (int 2))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "elems") (arglist (array (int 1) (int 2))))))))
         .
 
     is-result $ast, "2\n", "elems() works";
@@ -126,7 +126,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "reversed") (arglist (array (int 1) (int 2))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "reversed") (arglist (array (int 1) (int 2))))))))
         .
 
     is-result $ast, "[2, 1]\n", "reversed() works";
@@ -135,7 +135,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "sorted") (arglist (array (int 2) (int 1))))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "sorted") (arglist (array (int 2) (int 1))))))))
         .
 
     is-result $ast, "[1, 2]\n", "sorted() works";
@@ -144,8 +144,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-         (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()>
-          (ident "concat") (arglist
+         (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()>
+          (identifier "concat") (arglist
                            (array (int 1) (int 2))
                            (array (int 3) (int 4))))))))
         .
@@ -156,7 +156,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "join") (arglist (array (int 1) (int 2)) (str "|")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "join") (arglist (array (int 1) (int 2)) (str "|")))))))
         .
 
     is-result $ast, "1|2\n", "join() works";
@@ -165,7 +165,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "split") (arglist (str "a|b") (str "|")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "split") (arglist (str "a|b") (str "|")))))))
         .
 
     is-result $ast, qq|["a", "b"]\n|, "split() works";
@@ -174,9 +174,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "index") (arglist (str "abc") (str "bc"))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "index") (arglist (str "abc") (str "a"))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "index") (arglist (str "abc") (str "d")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "index") (arglist (str "abc") (str "bc"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "index") (arglist (str "abc") (str "a"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "index") (arglist (str "abc") (str "d")))))))
         .
 
     is-result $ast, "1\n0\n-1\n", "index() works";
@@ -185,9 +185,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "substr") (arglist (str "abc") (int 0) (int 1))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "substr") (arglist (str "abc") (int 1))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "substr") (arglist (str "abc") (int 0) (int 5)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "substr") (arglist (str "abc") (int 0) (int 1))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "substr") (arglist (str "abc") (int 1))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "substr") (arglist (str "abc") (int 0) (int 5)))))))
         .
 
     is-result $ast, "a\nbc\nabc\n", "substr() works";
@@ -196,7 +196,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "charat") (arglist (str "abc") (int 0)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "charat") (arglist (str "abc") (int 0)))))))
         .
 
     is-result $ast, "a\n", "charat() works";
@@ -205,7 +205,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "charat") (arglist (str "abc") (int 3)))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "charat") (arglist (str "abc") (int 3)))))))
         .
 
     is-error $ast, X::Subscript::TooLarge, "charat() dies";
@@ -214,9 +214,9 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (param (ident "n"))) (stmtlist
-              (return (infix:<==> (ident "n") (int 2))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "filter") (arglist (ident "f") (array (int 1) (int 2) (int 3) (int 2))))))))
+          (sub (identifier "f") (block (paramlist (param (identifier "n"))) (stmtlist
+              (return (infix:<==> (identifier "n") (int 2))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "filter") (arglist (identifier "f") (array (int 1) (int 2) (int 3) (int 2))))))))
         .
 
     is-result $ast, "[2, 2]\n", "filter() works";
@@ -225,11 +225,11 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (param (ident "n"))) (stmtlist
-              (return (infix:<+> (ident "n") (int 1))))))
-          (my (ident "a") (array (int 1) (int 2) (int 3)))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "map") (arglist (ident "f") (ident "a"))))))
-          (stexpr (postfix:<()> (ident "say") (arglist (ident "a")))))
+          (sub (identifier "f") (block (paramlist (param (identifier "n"))) (stmtlist
+              (return (infix:<+> (identifier "n") (int 1))))))
+          (my (identifier "a") (array (int 1) (int 2) (int 3)))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "map") (arglist (identifier "f") (identifier "a"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (identifier "a")))))
         .
 
     is-result $ast, "[2, 3, 4]\n[1, 2, 3]\n", "map() works";
@@ -251,12 +251,12 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "q")
-            (object (ident "Q::Statement::My") (proplist
-              (property "ident" (object (ident "Q::Identifier") (proplist
+          (my (identifier "q")
+            (object (identifier "Q::Statement::My") (proplist
+              (property "identifier" (object (identifier "Q::Identifier") (proplist
                 (property "name" (str "agent")))))
               (property "expr" (str "James Bond")))))
-          (stexpr (postfix:<()> (ident "melt") (arglist (ident "q")))))
+          (stexpr (postfix:<()> (identifier "melt") (arglist (identifier "q")))))
         .
 
     is-error
@@ -287,8 +287,8 @@ use _007::Test;
         }
 
         my lookup = "unhygienic";
-        my ident = foo();
-        say(melt(ident));
+        my identifier = foo();
+        say(melt(identifier));
         .
 
     outputs
@@ -300,8 +300,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n"))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "n")))))))
+          (my (identifier "n"))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "n")))))))
         .
 
     is-result $ast, "<type None>\n", "none type() works";
@@ -310,8 +310,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n") (int 7))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "n")))))))
+          (my (identifier "n") (int 7))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "n")))))))
         .
 
     is-result $ast, "<type Int>\n", "int type() works";
@@ -320,8 +320,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "s") (str "Bond"))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "s")))))))
+          (my (identifier "s") (str "Bond"))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "s")))))))
         .
 
     is-result $ast, "<type Str>\n", "str type() works";
@@ -330,8 +330,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "a") (array (int 1) (int 2)))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "a")))))))
+          (my (identifier "a") (array (int 1) (int 2)))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "a")))))))
         .
 
     is-result $ast, "<type Array>\n", "array type() works";
@@ -340,8 +340,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist) (stmtlist)))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "f")))))))
+          (sub (identifier "f") (block (paramlist) (stmtlist)))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "f")))))))
         .
 
     is-result $ast, "<type Sub>\n", "sub type() works";
@@ -350,7 +350,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<()> (ident "type") (arglist (ident "say")))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<()> (identifier "type") (arglist (identifier "say")))))))
         .
 
     is-result $ast, "<type Sub>\n", "builtin sub type() returns the same as ordinary sub";

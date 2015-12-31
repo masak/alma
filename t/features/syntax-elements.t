@@ -9,7 +9,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n") (none)))
+          (my (identifier "n") (none)))
         .
 
     parses-to $program, $ast, "assigning a none";
@@ -22,7 +22,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "n") (int 7)))
+          (my (identifier "n") (int 7)))
         .
 
     parses-to $program, $ast, "assigning an int";
@@ -35,7 +35,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "s") (str "Bond")))
+          (my (identifier "s") (str "Bond")))
         .
 
     parses-to $program, $ast, "assigning a str";
@@ -48,7 +48,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "a") (array (int 1) (int 2))))
+          (my (identifier "a") (array (int 1) (int 2))))
         .
 
     parses-to $program, $ast, "assigning an array";
@@ -74,7 +74,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "u")))
+          (my (identifier "u")))
         .
 
     parses-to $program, $ast, "declaring without assigning";
@@ -87,7 +87,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (infix:<+> (int 38) (int 4))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<+> (int 38) (int 4))))))
         .
 
     parses-to $program, $ast, "addition";
@@ -101,8 +101,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "u") (int 0))
-          (stexpr (infix:<=> (ident "u") (infix:<+> (ident "u") (int 1)))))
+          (my (identifier "u") (int 0))
+          (stexpr (infix:<=> (identifier "u") (infix:<+> (identifier "u") (int 1)))))
         .
 
     parses-to $program, $ast, "assignment and addition";
@@ -115,7 +115,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 
     parses-to $program, $ast, "string concatenation";
@@ -129,8 +129,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:<()> (ident "say") (arglist (postfix:<[]> (ident "ns") (int 1))))))
+          (my (identifier "ns") (array (str "Jim") (str "Bond")))
+          (stexpr (postfix:<()> (identifier "say") (arglist (postfix:<[]> (identifier "ns") (int 1))))))
         .
 
     parses-to $program, $ast, "array indexing";
@@ -144,8 +144,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "x") (int 1))
-          (stexpr (infix:<=> (ident "x") (int 2))))
+          (my (identifier "x") (int 1))
+          (stexpr (infix:<=> (identifier "x") (int 2))))
         .
 
     parses-to $program, $ast, "assignment (outside of a declaration)";
@@ -160,10 +160,10 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "i1") (int 10))
-          (my (ident "i2") (int 11))
+          (my (identifier "i1") (int 10))
+          (my (identifier "i2") (int 11))
 
-          (stexpr (postfix:<()> (ident "say") (arglist (infix:<==> (ident "i1") (ident "i2"))))))
+          (stexpr (postfix:<()> (identifier "say") (arglist (infix:<==> (identifier "i1") (identifier "i2"))))))
         .
 
     parses-to $program, $ast, "equality";
@@ -179,7 +179,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (stblock (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "immediate block"))))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "immediate block"))))))))
         .
 
     parses-to $program, $ast, "immediate block";
@@ -194,8 +194,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "sub"))))))))
+          (sub (identifier "f") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "sub"))))))))
         .
 
     parses-to $program, $ast, "sub";
@@ -210,8 +210,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (param (ident "name"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (str "Mr ") (ident "name")))))))))
+          (sub (identifier "f") (block (paramlist (param (identifier "name"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (str "Mr ") (identifier "name")))))))))
         .
 
     parses-to $program, $ast, "sub with parameter";
@@ -226,8 +226,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist (param (ident "X")) (param (ident "Y"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (infix:<~> (ident "X") (ident "Y")))))))))
+          (sub (identifier "f") (block (paramlist (param (identifier "X")) (param (identifier "Y"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (infix:<~> (identifier "X") (identifier "Y")))))))))
         .
 
     parses-to $program, $ast, "sub with two parameters";
@@ -242,7 +242,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (paramlist) (stmtlist
             (return (int 7))))))
         .
 
@@ -258,7 +258,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist) (stmtlist
+          (sub (identifier "f") (block (paramlist) (stmtlist
             (return)))))
         .
 
@@ -279,13 +279,13 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (sub (ident "f") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "OH HAI")))))))
-          (sub (ident "g") (block (paramlist) (stmtlist
-            (sub (ident "h") (block (paramlist) (stmtlist
-              (stexpr (postfix:<()> (ident "f") (arglist))))))
-            (return (ident "h")))))
-          (stexpr (postfix:<()> (postfix:<()> (ident "g") (arglist)) (arglist))))
+          (sub (identifier "f") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "OH HAI")))))))
+          (sub (identifier "g") (block (paramlist) (stmtlist
+            (sub (identifier "h") (block (paramlist) (stmtlist
+              (stexpr (postfix:<()> (identifier "f") (arglist))))))
+            (return (identifier "h")))))
+          (stexpr (postfix:<()> (postfix:<()> (identifier "g") (arglist)) (arglist))))
         .
 
     parses-to $program, $ast, "call to non-identifier";
@@ -301,7 +301,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (if (str "James") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "oh wow, if statement"))))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "oh wow, if statement"))))))))
         .
 
     parses-to $program, $ast, "if statement";
@@ -317,7 +317,7 @@ use _007::Test;
     my $ast = q:to/./;
         (stmtlist
           (for (array (int 1) (int 2)) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "i"))))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "i"))))))))
         .
 
     parses-to $program, $ast, "for statement";
@@ -332,8 +332,8 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (for (array (int 1) (int 2)) (block (paramlist (param (ident "i"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "i"))))))))
+          (for (array (int 1) (int 2)) (block (paramlist (param (identifier "i"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "i"))))))))
         .
 
     parses-to $program, $ast, "for statement with one parameter";
@@ -349,9 +349,9 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (for (array (int 1) (int 2) (int 3) (int 4)) (block (paramlist (param (ident "i")) (param (ident "j"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "i"))))
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "j"))))))))
+          (for (array (int 1) (int 2) (int 3) (int 4)) (block (paramlist (param (identifier "i")) (param (identifier "j"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "i"))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "j"))))))))
         .
 
     parses-to $program, $ast, "for statement with two parameters";
@@ -367,9 +367,9 @@ use _007::Test;
 
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "u"))
-          (while (ident "u") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "u"))))))))
+          (my (identifier "u"))
+          (while (identifier "u") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "u"))))))))
         .
 
     parses-to $program, $ast, "while statement";

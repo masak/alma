@@ -253,7 +253,7 @@ All the different Q types can be created by specifying the type before an
 object term:
 
     my q = Q::Statement::My {
-        ident: Q::Identifier { name: "name" },
+        identifier: Q::Identifier { name: "name" },
         expr: Q::Literal::Str { value: "Bond" }
     };
 

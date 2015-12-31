@@ -41,7 +41,7 @@ class _007::Runtime {
         }
         for $block.statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
-                my $name = .ident.name;
+                my $name = .identifier.name;
                 my $parameterlist = .block.parameterlist;
                 my $statementlist = .block.statementlist;
                 my %static-lexpad = .block.static-lexpad;
@@ -141,7 +141,7 @@ class _007::Runtime {
             unless $paramcount == $argcount;
         self.enter($c);
         for @($c.parameterlist.parameters.elements) Z @args -> ($param, $arg) {
-            my $name = $param.ident.name.value;
+            my $name = $param.identifier.name.value;
             self.declare-var($name, $arg);
         }
     }

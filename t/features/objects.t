@@ -4,21 +4,21 @@ use _007::Test;
 
 {
     my @exprs = «
-        '{}'  '(object (ident "Object") (proplist))'
-        '{"a": 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
-        '{a}' '(object (ident "Object") (proplist (property "a" (ident "a"))))'
-        '{a : 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
-        '{ a: 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
-        '{a: 1 }' '(object (ident "Object") (proplist (property "a" (int 1))))'
-        '{a: 1}' '(object (ident "Object") (proplist (property "a" (int 1))))'
-        '{a() {}}' '(object (ident "Object") (proplist
+        '{}'  '(object (identifier "Object") (proplist))'
+        '{"a": 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
+        '{a}' '(object (identifier "Object") (proplist (property "a" (identifier "a"))))'
+        '{a : 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
+        '{ a: 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
+        '{a: 1 }' '(object (identifier "Object") (proplist (property "a" (int 1))))'
+        '{a: 1}' '(object (identifier "Object") (proplist (property "a" (int 1))))'
+        '{a() {}}' '(object (identifier "Object") (proplist
           (property "a" (block (paramlist) (stmtlist)))))'
-        '{a(a, b) {}}' '(object (ident "Object") (proplist (property "a" (block
-          (paramlist (param (ident "a")) (param (ident "b"))) (stmtlist)))))'
+        '{a(a, b) {}}' '(object (identifier "Object") (proplist (property "a" (block
+          (paramlist (param (identifier "a")) (param (identifier "b"))) (stmtlist)))))'
     »;
 
     for @exprs -> $expr, $frag {
-        my $ast = qq[(stmtlist (my (ident "a")) (stexpr {$frag}))];
+        my $ast = qq[(stmtlist (my (identifier "a")) (stexpr {$frag}))];
 
         parses-to "my a; ($expr)", $ast, $expr;
     }
@@ -27,10 +27,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "o")
-            (object (ident "Object") (proplist (property "a" (int 1)))))
-          (stexpr (postfix:<()> (ident "say") (arglist
-            (postfix:<.> (ident "o") (ident "a"))))))
+          (my (identifier "o")
+            (object (identifier "Object") (proplist (property "a" (int 1)))))
+          (stexpr (postfix:<()> (identifier "say") (arglist
+            (postfix:<.> (identifier "o") (identifier "a"))))))
         .
 
     is-result $ast, "1\n", "can access an object's property (dot syntax)";
@@ -39,10 +39,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "o")
-            (object (ident "Object") (proplist (property "b" (int 7)))))
-          (stexpr (postfix:<()> (ident "say") (arglist
-            (postfix:<[]> (ident "o") (str "b"))))))
+          (my (identifier "o")
+            (object (identifier "Object") (proplist (property "b" (int 7)))))
+          (stexpr (postfix:<()> (identifier "say") (arglist
+            (postfix:<[]> (identifier "o") (str "b"))))))
         .
 
     is-result $ast, "7\n", "can access an object's property (brackets syntax)";
@@ -51,8 +51,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-            (my (ident "o") (object (ident "Object") (proplist)))
-            (stexpr (postfix:<.> (ident "o") (ident "a"))))
+            (my (identifier "o") (object (identifier "Object") (proplist)))
+            (stexpr (postfix:<.> (identifier "o") (identifier "a"))))
         .
 
     is-error $ast, X::PropertyNotFound, "can't access non-existing property (dot syntax)";
@@ -61,7 +61,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-           (stexpr (postfix:<.> (int 42) (ident "a"))))
+           (stexpr (postfix:<.> (int 42) (identifier "a"))))
         .
 
     is-error $ast, X::PropertyNotFound, "can't access property on Val::Int (dot syntax)";
@@ -70,7 +70,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-            (my (ident "o") (object (ident "Object") (proplist
+            (my (identifier "o") (object (identifier "Object") (proplist
               (property "foo" (int 1))
               (property "foo" (int 2))))))
         .
@@ -95,8 +95,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (stmtlist
-            (my (ident "o") (object (ident "Object") (proplist)))
-            (stexpr (postfix:<[]> (ident "o") (str "b"))))
+            (my (identifier "o") (object (identifier "Object") (proplist)))
+            (stexpr (postfix:<[]> (identifier "o") (str "b"))))
         .
 
     is-error $ast, X::PropertyNotFound, "can't access non-existing property (brackets syntax)";

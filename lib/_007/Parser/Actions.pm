@@ -22,7 +22,7 @@ class _007::Parser::Actions {
 
     method statement:my ($/) {
         make Q::Statement::My.new(
-            :ident($<identifier>.ast),
+            :identifier($<identifier>.ast),
             :expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
     }
 
@@ -31,7 +31,7 @@ class _007::Parser::Actions {
             unless $<EXPR>;
 
         make Q::Statement::Constant.new(
-            :ident($<identifier>.ast),
+            :identifier($<identifier>.ast),
             :expr($<EXPR>.ast));
 
         my $name = $<identifier>.ast.name.value;
@@ -111,7 +111,7 @@ class _007::Parser::Actions {
     }
 
     method statement:sub-or-macro ($/) {
-        my $ident = $<identifier>.ast;
+        my $identifier = $<identifier>.ast;
         my $name = ~$<identifier>;
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
@@ -124,11 +124,11 @@ class _007::Parser::Actions {
         my $outer-frame = $*runtime.current-frame;
         my $val;
         if $<routine> eq "sub" {
-            make Q::Statement::Sub.new(:$ident, :$traitlist, :$block);
+            make Q::Statement::Sub.new(:$identifier, :$traitlist, :$block);
             $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         }
         elsif $<routine> eq "macro" {
-            make Q::Statement::Macro.new(:$ident, :$traitlist, :$block);
+            make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
             $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
         }
         else {
@@ -169,14 +169,14 @@ class _007::Parser::Actions {
 
     method traitlist($/) {
         my @traits = $<trait>».ast;
-        if bag( @traits.map: *.ident.name.value ).grep( *.value > 1 )[0] -> $p {
+        if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
         make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
     }
     method trait($/) {
-        make Q::Trait.new(:ident($<identifier>.ast), :expr($<EXPR>.ast));
+        make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
     }
 
     method blockoid ($/) {
@@ -207,7 +207,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+            $op.identifier.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
         }
 
         sub tighter($op1, $op2, $_ = $*parser.oplevel.infixprec) {
@@ -233,12 +233,12 @@ class _007::Parser::Actions {
             my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
-            my $c = $*runtime.maybe-get-var($infix.ident.name.value);
+            my $c = $*runtime.maybe-get-var($infix.identifier.name.value);
             if $c ~~ Val::Macro {
                 @termstack.push($*runtime.call($c, [$t1, $t2]));
             }
             else {
-                @termstack.push($infix.new(:lhs($t1), :rhs($t2), :ident($infix.ident)));
+                @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
 
                 if $infix ~~ Q::Infix::Assignment {
                     die X::Immutable.new(:method<assignment>, :typename($t1.^name))
@@ -261,7 +261,7 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1].ident.name.value), :op2($infix.ident.name.value))
+            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.value), :op2($infix.identifier.name.value))
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -275,7 +275,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.ident.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+            $op.identifier.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
         }
 
         sub tighter($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
@@ -301,18 +301,18 @@ class _007::Parser::Actions {
 
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
-            my $c = $*runtime.maybe-get-var($prefix.ident.name.value);
+            my $c = $*runtime.maybe-get-var($prefix.identifier.name.value);
             if $c ~~ Val::Macro {
                 make $*runtime.call($c, [$/.ast]);
             }
             else {
-                make $prefix.new(:expr($/.ast), :ident($prefix.ident));
+                make $prefix.new(:expr($/.ast), :identifier($prefix.identifier));
             }
         }
 
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
-            my $ident = $postfix.ident;
+            my $identifier = $postfix.identifier;
             # XXX: factor the logic that checks for macro call out into its own helper sub
             if $postfix ~~ Q::Postfix::Call
             && $/.ast ~~ Q::Identifier
@@ -322,21 +322,21 @@ class _007::Parser::Actions {
                 make $qtree;
             }
             elsif $postfix ~~ Q::Postfix::Index {
-                make $postfix.new(:$ident, :expr($/.ast), :index($postfix.index));
+                make $postfix.new(:$identifier, :expr($/.ast), :index($postfix.index));
             }
             elsif $postfix ~~ Q::Postfix::Call {
-                make $postfix.new(:$ident, :expr($/.ast), :argumentlist($postfix.argumentlist));
+                make $postfix.new(:$identifier, :expr($/.ast), :argumentlist($postfix.argumentlist));
             }
             elsif $postfix ~~ Q::Postfix::Property {
-                make $postfix.new(:$ident, :expr($/.ast), :property($postfix.property));
+                make $postfix.new(:$identifier, :expr($/.ast), :property($postfix.property));
             }
             else {
-                my $c = $*runtime.maybe-get-var($postfix.ident.name.value);
+                my $c = $*runtime.maybe-get-var($postfix.identifier.name.value);
                 if $c ~~ Val::Macro {
                     make $*runtime.call($c, [$/.ast]);
                 }
                 else {
-                    make $postfix.new(:$ident, :expr($/.ast));
+                    make $postfix.new(:$identifier, :expr($/.ast));
                 }
             }
         }
@@ -351,7 +351,7 @@ class _007::Parser::Actions {
             else {
                 my $prefix = @prefixes[0].ast;
                 my $postfix = @postfixes[0].ast;
-                die X::Op::Nonassociative.new(:op1($prefix.ident.name.value), :op2($postfix.ident.name.value))
+                die X::Op::Nonassociative.new(:op1($prefix.identifier.name.value), :op2($postfix.identifier.name.value))
                     if equal($prefix, $postfix) && non-associative($prefix);
                 if tighter($prefix, $postfix)
                     || equal($prefix, $postfix) && left-associative($prefix) {
@@ -367,11 +367,11 @@ class _007::Parser::Actions {
 
     method prefix($/) {
         my $op = ~$/;
-        my $ident = Q::Identifier.new(
+        my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value("prefix:<$op>"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<prefix>{$op}.new(:$ident, :expr(Val::None));
+        make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :expr(Val::None));
     }
 
     method str($/) {
@@ -479,11 +479,11 @@ class _007::Parser::Actions {
         make Q::Property.new(:key($<str>.ast.value), :value($<value>.ast));
     }
 
-    method property:ident-expr ($/) {
+    method property:identifier-expr ($/) {
         make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value($<value>.ast));
     }
 
-    method property:ident ($/) {
+    method property:identifier ($/) {
         make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value($<identifier>.ast));
     }
 
@@ -495,11 +495,11 @@ class _007::Parser::Actions {
 
     method infix($/) {
         my $op = ~$/;
-        my $ident = Q::Identifier.new(
+        my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value("infix:<$op>"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<infix>{$op}.new(:$ident, :lhs(Val::None.new), :rhs(Val::None.new));
+        make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(Val::None.new), :rhs(Val::None.new));
     }
 
     method postfix($/) {
@@ -513,23 +513,23 @@ class _007::Parser::Actions {
         elsif $<prop> {
             $op = ".";
         }
-        my $ident = Q::Identifier.new(
+        my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value("postfix:<$op>"))),
             :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$ident, :expr(Val::None.new));
+            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :expr(Val::None.new));
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$ident, :expr(Val::None.new));
+            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :expr(Val::None.new));
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$ident, :expr(Val::None.new));
+            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :expr(Val::None.new));
         }
         else {
-            make $*parser.oplevel.ops<postfix>{$op}.new(:$ident, :expr(Val::None.new));
+            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :expr(Val::None.new));
         }
     }
 
@@ -546,6 +546,6 @@ class _007::Parser::Actions {
     }
 
     method parameter($/) {
-        make Q::Parameter.new(:ident($<identifier>.ast));
+        make Q::Parameter.new(:identifier($<identifier>.ast));
     }
 }

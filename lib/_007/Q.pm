@@ -163,14 +163,14 @@ class Q::Block does Q {
 }
 
 class Q::Prefix does Q::Expr {
-    has $.ident;
+    has $.identifier;
     has $.expr;
 
-    method attribute-order { <ident expr> }
+    method attribute-order { <identifier expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
-        my $c = $.ident.eval($runtime);
+        my $c = $.identifier.eval($runtime);
         return $runtime.call($c, [$e]);
     }
 }
@@ -178,16 +178,16 @@ class Q::Prefix does Q::Expr {
 class Q::Prefix::Minus is Q::Prefix {}
 
 class Q::Infix does Q::Expr {
-    has $.ident;
+    has $.identifier;
     has $.lhs;
     has $.rhs;
 
-    method attribute-order { <ident lhs rhs> }
+    method attribute-order { <identifier lhs rhs> }
 
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
-        my $c = $.ident.eval($runtime);
+        my $c = $.identifier.eval($runtime);
         return $runtime.call($c, [$l, $r]);
     }
 }
@@ -249,14 +249,14 @@ class Q::Infix::And is Q::Infix {
 class Q::Prefix::Not is Q::Prefix {}
 
 class Q::Postfix does Q::Expr {
-    has $.ident;
+    has $.identifier;
     has $.expr;
 
-    method attribute-order { <ident expr> }
+    method attribute-order { <identifier expr> }
 
     method eval($runtime) {
         my $e = $.expr.eval($runtime);
-        my $c = $.ident.eval($runtime);
+        my $c = $.identifier.eval($runtime);
         return $runtime.call($c, [$e]);
     }
 }
@@ -264,7 +264,7 @@ class Q::Postfix does Q::Expr {
 class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
-    method attribute-order { <ident expr index> }
+    method attribute-order { <identifier expr index> }
 
     method eval($runtime) {
         given $.expr.eval($runtime) {
@@ -293,7 +293,7 @@ class Q::Postfix::Index is Q::Postfix {
 class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
-    method attribute-order { <ident expr argumentlist> }
+    method attribute-order { <identifier expr argumentlist> }
 
     method eval($runtime) {
         my $c = $.expr.eval($runtime);
@@ -309,7 +309,7 @@ class Q::Postfix::Call is Q::Postfix {
 class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
-    method attribute-order { <ident expr property> }
+    method attribute-order { <identifier expr property> }
 
     method eval($runtime) {
         my $obj = $.expr.eval($runtime);
@@ -363,7 +363,7 @@ class Q::ParameterList does Q {
 }
 
 class Q::Parameter does Q does Q::Declaration {
-    has $.ident;
+    has $.identifier;
 
     method is-assignable { True }
 }
@@ -377,10 +377,10 @@ role Q::Statement does Q {
 }
 
 class Q::Statement::My does Q::Statement does Q::Declaration {
-    has $.ident;
+    has $.identifier;
     has $.expr = Val::None.new;
 
-    method attribute-order { <expr ident> }
+    method attribute-order { <expr identifier> }
 
     method is-assignable { True }
 
@@ -388,15 +388,15 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
         return
             unless $.expr !~~ Val::None;
         my $value = $.expr.eval($runtime);
-        $runtime.put-var($.ident.name.value, $value);
+        $runtime.put-var($.identifier.name.value, $value);
     }
 }
 
 class Q::Statement::Constant does Q::Statement does Q::Declaration {
-    has $.ident;
+    has $.identifier;
     has $.expr;
 
-    method attribute-order { <expr ident> }
+    method attribute-order { <expr identifier> }
 
     method run($runtime) {
         # value has already been assigned
@@ -428,7 +428,7 @@ class Q::Statement::If does Q::Statement {
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.ident.name.value, $arg);
+                $runtime.declare-var($param.identifier.name.value, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -502,7 +502,7 @@ class Q::Statement::For does Q::Statement {
             for split_elements($array.elements, $count) -> $arg {
                 $runtime.enter($c);
                 for @($c.parameterlist.parameters.elements) Z $arg.list -> ($param, $real_arg) {
-                    $runtime.declare-var($param.ident.name.value, $real_arg);
+                    $runtime.declare-var($param.identifier.name.value, $real_arg);
                 }
                 $.block.statementlist.run($runtime);
                 $runtime.leave;
@@ -526,7 +526,7 @@ class Q::Statement::While does Q::Statement {
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.ident.name.value, $arg);
+                $runtime.declare-var($param.identifier.name.value, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -545,10 +545,10 @@ class Q::Statement::Return does Q::Statement {
 }
 
 class Q::Trait does Q {
-    has $.ident;
+    has $.identifier;
     has $.expr;
 
-    method attribute-order { <ident expr> }
+    method attribute-order { <identifier expr> }
 }
 
 class Q::TraitList does Q {
@@ -563,22 +563,22 @@ class Q::TraitList does Q {
 }
 
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
-    has $.ident;
+    has $.identifier;
     has $.traitlist = Q::TraitList.new;
     has $.block;
 
-    method attribute-order { <ident traitlist block> }
+    method attribute-order { <identifier traitlist block> }
 
     method run($runtime) {
     }
 }
 
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
-    has $.ident;
+    has $.identifier;
     has $.traitlist = Q::TraitList.new;
     has $.block;
 
-    method attribute-order { <ident traitlist block> }
+    method attribute-order { <identifier traitlist block> }
 
     method run($runtime) {
     }

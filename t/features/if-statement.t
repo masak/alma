@@ -5,31 +5,31 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (my (ident "u"))
-          (if (ident "u") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "falsy none")))))))
+          (my (identifier "u"))
+          (if (identifier "u") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy none")))))))
           (if (int 0) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "falsy int")))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy int")))))))
           (if (int 7) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy int")))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy int")))))))
           (if (str "") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "falsy str")))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy str")))))))
           (if (str "James") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy str")))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy str")))))))
           (if (array) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "falsy array")))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy array")))))))
           (if (array (str "")) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy array")))))))
-          (sub (ident "foo") (block (paramlist) (stmtlist)))
-          (if (ident "foo") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy sub")))))))
-          (macro (ident "bar") (block (paramlist) (stmtlist)))
-          (if (ident "bar") (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy macro")))))))
-          (if (object (ident "Object") (proplist)) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "falsy object")))))))
-          (if (object (ident "Object") (proplist (property "a" (int 3)))) (block (paramlist) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (str "truthy object"))))))))
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy array")))))))
+          (sub (identifier "foo") (block (paramlist) (stmtlist)))
+          (if (identifier "foo") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy sub")))))))
+          (macro (identifier "bar") (block (paramlist) (stmtlist)))
+          (if (identifier "bar") (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy macro")))))))
+          (if (object (identifier "Object") (proplist)) (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "falsy object")))))))
+          (if (object (identifier "Object") (proplist (property "a" (int 3)))) (block (paramlist) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (str "truthy object"))))))))
         .
 
     is-result $ast,
@@ -40,8 +40,8 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (stmtlist
-          (if (int 7) (block (paramlist (param (ident "a"))) (stmtlist
-            (stexpr (postfix:<()> (ident "say") (arglist (ident "a"))))))))
+          (if (int 7) (block (paramlist (param (identifier "a"))) (stmtlist
+            (stexpr (postfix:<()> (identifier "say") (arglist (identifier "a"))))))))
         .
 
     is-result $ast, "7\n", "if statements with parameters work as they should";
@@ -54,10 +54,10 @@ use _007::Test;
          (if (int 1)
            (block (paramlist)
              (stmtlist
-              (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+              (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (block (paramlist)
              (stmtlist
-              (stexpr (postfix:<()> (ident "say") (arglist (str "else"))))))))
+              (stexpr (postfix:<()> (identifier "say") (arglist (str "else"))))))))
         .
     is-result $ast, "if\n", "if-else statements run if-clause";
 }
@@ -68,10 +68,10 @@ use _007::Test;
          (if (int 0)
            (block (paramlist)
              (stmtlist
-              (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+              (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (block (paramlist)
              (stmtlist
-              (stexpr (postfix:<()> (ident "say") (arglist (str "else"))))))))
+              (stexpr (postfix:<()> (identifier "say") (arglist (str "else"))))))))
         .
 
     is-result $ast, "else\n", "if-else statements run else-clause";
@@ -83,14 +83,14 @@ use _007::Test;
          (if (int 0)
              (block (paramlist)
                (stmtlist
-                (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+                (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (if (int 0)
                (block (paramlist)
                  (stmtlist
-                  (stexpr (postfix:<()> (ident "say") (arglist (str "else-if"))))))
+                  (stexpr (postfix:<()> (identifier "say") (arglist (str "else-if"))))))
              (block (paramlist)
                (stmtlist
-                (stexpr (postfix:<()> (ident "say") (arglist (str "else")))))))))
+                (stexpr (postfix:<()> (identifier "say") (arglist (str "else")))))))))
         .
 
     is-result $ast, "else\n", "if-else-if-else statements run else-clause";
@@ -102,14 +102,14 @@ use _007::Test;
          (if (int 0)
              (block (paramlist)
                (stmtlist
-                (stexpr (postfix:<()> (ident "say") (arglist (str "if"))))))
+                (stexpr (postfix:<()> (identifier "say") (arglist (str "if"))))))
            (if (int 1)
                (block (paramlist)
                  (stmtlist
-                  (stexpr (postfix:<()> (ident "say") (arglist (str "else-if"))))))
+                  (stexpr (postfix:<()> (identifier "say") (arglist (str "else-if"))))))
              (block (paramlist)
                (stmtlist
-                (stexpr (postfix:<()> (ident "say") (arglist (str "else")))))))))
+                (stexpr (postfix:<()> (identifier "say") (arglist (str "else")))))))))
         .
 
     is-result $ast, "else-if\n", "if-else-if-else statements run else-if-clause";

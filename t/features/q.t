@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::My { ident: Q::Identifier { name: "foo" } };
+        my q = Q::Statement::My { identifier: Q::Identifier { name: "foo" } };
         say(q.expr);
         .
 
@@ -51,7 +51,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = Q::Statement::Sub {
-            ident: Q::Identifier { name: "foo" },
+            identifier: Q::Identifier { name: "foo" },
             block: Q::Block {
                 parameterlist: Q::ParameterList { parameters: [] },
                 statementlist: Q::StatementList { statements: [] }
@@ -69,7 +69,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = Q::Statement::Macro {
-            ident: Q::Identifier { name: "moo" },
+            identifier: Q::Identifier { name: "moo" },
             block: Q::Block {
                 parameterlist: Q::ParameterList { parameters: [] },
                 statementlist: Q::StatementList { statements: [] }

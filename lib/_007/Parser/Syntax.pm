@@ -201,7 +201,7 @@ grammar _007::Parser::Syntax {
 
     proto token property {*}
     rule property:str-expr { <key=str> ':' <value=term> }
-    rule property:ident-expr { <identifier> ':' <value=term> }
+    rule property:identifier-expr { <identifier> ':' <value=term> }
     rule property:method {
         <identifier>
         <.newpad>
@@ -210,7 +210,7 @@ grammar _007::Parser::Syntax {
         <blockoid>:!s
         <.finishpad>
     }
-    token property:ident { <identifier> }
+    token property:identifier { <identifier> }
 
     method infix {
         my @ops = $*parser.oplevel.ops<infix>.keys;
