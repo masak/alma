@@ -29,8 +29,8 @@ sub read(Str $ast) is export {
 
         'infix:<<=>'   => -> $lhs, $rhs { Q::Infix::Le.new(:$lhs, :$rhs, :identifier(n("infix", "<="))) },
         'infix:<>=>'   => -> $lhs, $rhs { Q::Infix::Ge.new(:$lhs, :$rhs, :identifier(n("infix", ">="))) },
-        'infix:<<>'   => -> $lhs, $rhs { Q::Infix::Lt.new(:$lhs, :$rhs, :identifier(n("infix", "<"))) },
-        'infix:<>>'   => -> $lhs, $rhs { Q::Infix::Gt.new(:$lhs, :$rhs, :identifier(n("infix", ">"))) },
+        'infix:<<>'    => -> $lhs, $rhs { Q::Infix::Lt.new(:$lhs, :$rhs, :identifier(n("infix", "<"))) },
+        'infix:<>>'    => -> $lhs, $rhs { Q::Infix::Gt.new(:$lhs, :$rhs, :identifier(n("infix", ">"))) },
 
         'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist, :identifier(n("postfix", "()"))) },
         'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index, :identifier(n("postfix", "[]"))) },
@@ -52,10 +52,10 @@ sub read(Str $ast) is export {
         param          => -> $identifier { Q::Parameter.new(:$identifier) },
         property       => -> $key, $value { Q::Property.new(:$key, :$value) },
 
-        statementlist       => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },
-        parameterlist      => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
-        argumentlist        => -> *@arguments { Q::ArgumentList.new(:arguments(Val::Array.new(:elements(@arguments)))) },
-        propertylist       => -> *@properties { Q::PropertyList.new(:properties(Val::Array.new(:elements(@properties)))) },
+        statementlist  => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },
+        parameterlist  => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
+        argumentlist   => -> *@arguments { Q::ArgumentList.new(:arguments(Val::Array.new(:elements(@arguments)))) },
+        propertylist   => -> *@properties { Q::PropertyList.new(:properties(Val::Array.new(:elements(@properties)))) },
     ;
 
     my grammar AST::Syntax {
