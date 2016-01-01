@@ -419,7 +419,7 @@ class _007::Parser::Actions {
     method term:quasi ($/) {
         for <argumentlist block compunit EXPR infix parameter parameterlist
             postfix prefix property propertylist statement statementlist
-            term trait traitlist> -> $subrule {
+            term trait traitlist unquote> -> $subrule {
 
             if $/{$subrule} -> $submatch {
                 make Q::Term::Quasi.new(:contents($submatch.ast));

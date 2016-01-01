@@ -190,6 +190,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Parameter" <.ws> '{' <.ws> <parameter> <.ws> '}'
             || "@" <.ws> "Q::ParameterList" <.ws> '{' <.ws> <parameterlist> <.ws> '}'
             || "@" <.ws> "Q::ArgumentList" <.ws> '{' <.ws> <argumentlist> <.ws> '}'
+            || "@" <.ws> "Q::Unquote" <.ws> '{' <.ws> <unquote> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>

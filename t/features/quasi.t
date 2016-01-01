@@ -335,4 +335,13 @@ use _007::Test;
     outputs $program, "<type Q::ArgumentList>\n", "quasi @ Q::ArgumentList";
 }
 
+{
+    my $program = q:to/./;
+        my q = quasi { say("oh, james") };
+        say(type(quasi @ Q::Unquote { {{{q}}} }));
+        .
+
+    outputs $program, "<type Q::Unquote>\n", "quasi @ Q::Unquote";
+}
+
 done-testing;
