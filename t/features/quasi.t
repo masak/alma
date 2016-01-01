@@ -285,4 +285,12 @@ use _007::Test;
     outputs $program, "<type Q::Trait>\n", "quasi @ Q::Trait";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::TraitList { is equal(infix:<+>) is assoc("right") }));
+        .
+
+    outputs $program, "<type Q::TraitList>\n", "quasi @ Q::TraitList";
+}
+
 done-testing;

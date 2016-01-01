@@ -447,6 +447,9 @@ class _007::Parser::Actions {
         elsif $<trait> {
             make Q::Term::Quasi.new(:contents($<trait>.ast));
         }
+        elsif $<traitlist> {
+            make Q::Term::Quasi.new(:contents($<traitlist>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
