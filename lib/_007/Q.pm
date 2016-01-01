@@ -71,7 +71,10 @@ role Q {
 role Q::Expr does Q {
 }
 
-role Q::Literal does Q::Expr {
+role Q::Term does Q::Expr {
+}
+
+role Q::Literal does Q::Term {
 }
 
 class Q::Literal::None does Q::Literal {
@@ -90,7 +93,7 @@ class Q::Literal::Str does Q::Literal {
     method eval($) { $.value }
 }
 
-class Q::Identifier does Q::Expr {
+class Q::Identifier does Q::Term {
     has Val::Str $.name;
     has $.frame = Val::None.new;
 
@@ -104,22 +107,11 @@ class Q::Identifier does Q::Expr {
     }
 }
 
-role Q::Term does Q::Expr {
-}
-
 class Q::Term::Array does Q::Term {
     has Val::Array $.elements;
 
     method eval($runtime) {
         Val::Array.new(:elements($.elements.elements».eval($runtime)));
-    }
-}
-
-class Q::Unquote does Q {
-    has $.expr;
-
-    method eval($runtime) {
-        die "Should never hit an unquote at runtime"; # XXX: turn into X::
     }
 }
 
@@ -315,6 +307,14 @@ class Q::Postfix::Property is Q::Postfix {
         my $obj = $.expr.eval($runtime);
         my $propname = $.property.name.value;
         $runtime.property($obj, $propname);
+    }
+}
+
+class Q::Unquote does Q {
+    has $.expr;
+
+    method eval($runtime) {
+        die "Should never hit an unquote at runtime"; # XXX: turn into X::
     }
 }
 
