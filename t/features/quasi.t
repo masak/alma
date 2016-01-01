@@ -169,4 +169,40 @@ use _007::Test;
     outputs $program, "<type Q::CompUnit>\n", "quasi @ Q::CompUnit";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Literal { 7 }));
+        say(type(quasi @ Q::Literal { None }));
+        say(type(quasi @ Q::Literal { "James Bond" }));
+        .
+
+    outputs $program,
+        "<type Q::Literal::Int>\n<type Q::Literal::None>\n<type Q::Literal::Str>\n",
+        "quasi @ Q::Literal";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Literal::Int { 7 }));
+        .
+
+    outputs $program, "<type Q::Literal::Int>\n", "quasi @ Q::Literal::Int";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Literal::None { None }));
+        .
+
+    outputs $program, "<type Q::Literal::None>\n", "quasi @ Q::Literal::None";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Literal::Str { "James Bond" }));
+        .
+
+    outputs $program, "<type Q::Literal::Str>\n", "quasi @ Q::Literal::Str";
+}
+
 done-testing;

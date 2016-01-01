@@ -173,6 +173,10 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Identifier" <.ws> '{' <.ws> <term:identifier> <.ws> '}'
             || "@" <.ws> "Q::Block" <.ws> '{' <.ws> <block> <.ws> '}'
             || "@" <.ws> "Q::CompUnit" <.ws> '{' <.ws> <compunit> <.ws> '}'
+            || "@" <.ws> "Q::Literal" <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
+            || "@" <.ws> "Q::Literal::Int" <.ws> '{' <.ws> <term:int> <.ws> '}'
+            || "@" <.ws> "Q::Literal::None" <.ws> '{' <.ws> <term:none> <.ws> '}'
+            || "@" <.ws> "Q::Literal::Str" <.ws> '{' <.ws> <term:str> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>
