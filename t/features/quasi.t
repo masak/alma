@@ -302,4 +302,13 @@ use _007::Test;
     outputs $program, "<type Q::Statement::Expr>\n" x 2, "quasi @ Q::Statement";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::StatementList { say("james"); say("bond") }));
+        say(type(quasi @ Q::StatementList { say("james"); say("bond"); }));
+        .
+
+    outputs $program, "<type Q::StatementList>\n" x 2, "quasi @ Q::StatementList";
+}
+
 done-testing;
