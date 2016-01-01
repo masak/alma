@@ -234,4 +234,23 @@ use _007::Test;
     outputs $program, "<type Q::PropertyList>\n4\n", "quasi @ Q::PropertyList";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Term { 7 }));
+        say(type(quasi @ Q::Term { None }));
+        say(type(quasi @ Q::Term { "James Bond" }));
+        say(type(quasi @ Q::Term { [0, 0, 7] }));
+        say(type(quasi @ Q::Term { Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term { quasi { say("oh, james!") } }));
+        say(type(quasi @ Q::Term { (0 + 0 + 7) }));
+        .
+
+    outputs $program,
+        <Literal::Int Literal::None Literal::Str
+            Term::Array Term::Object Term::Quasi
+            Infix::Addition>\
+            .map({ "<type Q::$_>\n" }).join,
+        "quasi @ Q::Term";
+}
+
 done-testing;
