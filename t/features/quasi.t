@@ -217,4 +217,21 @@ use _007::Test;
     outputs $program, "<type Q::Property>\n" x 4, "quasi @ Q::Property";
 }
 
+{
+    my $program = q:to/./;
+        my prop;
+        my q = quasi @ Q::PropertyList {
+            key1: "value",
+            "key2": "value",
+            fn() {},
+            prop
+        };
+
+        say(type(q));
+        say(elems(q.properties));
+        .
+
+    outputs $program, "<type Q::PropertyList>\n4\n", "quasi @ Q::PropertyList";
+}
+
 done-testing;

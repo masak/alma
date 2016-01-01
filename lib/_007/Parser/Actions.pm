@@ -441,6 +441,9 @@ class _007::Parser::Actions {
         elsif $<property> {
             make Q::Term::Quasi.new(:contents($<property>.ast));
         }
+        elsif $<propertylist> {
+            make Q::Term::Quasi.new(:contents($<propertylist>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
