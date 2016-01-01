@@ -435,6 +435,9 @@ class _007::Parser::Actions {
         elsif $<block> {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
+        elsif $<compunit> {
+            make Q::Term::Quasi.new(:contents($<compunit>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }

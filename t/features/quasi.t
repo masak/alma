@@ -161,4 +161,12 @@ use _007::Test;
     outputs $program, "<type Q::Block>\n", "quasi @ Q::Block";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::CompUnit { say("James"); }));
+        .
+
+    outputs $program, "<type Q::CompUnit>\n", "quasi @ Q::CompUnit";
+}
+
 done-testing;
