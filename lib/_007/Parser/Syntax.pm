@@ -279,4 +279,8 @@ grammar _007::Parser::Syntax {
     rule parameter {
         <identifier>
     }
+
+    token ws {
+        [ \s+ | '#' \N* ]*
+    }
 }
