@@ -311,4 +311,12 @@ use _007::Test;
     outputs $program, "<type Q::StatementList>\n" x 2, "quasi @ Q::StatementList";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Parameter { foo }));
+        .
+
+    outputs $program, "<type Q::Parameter>\n", "quasi @ Q::Parameter";
+}
+
 done-testing;

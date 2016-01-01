@@ -456,6 +456,9 @@ class _007::Parser::Actions {
         elsif $<statementlist> {
             make Q::Term::Quasi.new(:contents($<statementlist>.ast));
         }
+        elsif $<parameter> {
+            make Q::Term::Quasi.new(:contents($<parameter>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
