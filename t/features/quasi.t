@@ -277,4 +277,12 @@ use _007::Test;
     outputs $program, "<type Q::Term::Quasi>\n", "quasi @ Q::Term::Quasi";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Trait { is equal(infix:<+>) }));
+        .
+
+    outputs $program, "<type Q::Trait>\n", "quasi @ Q::Trait";
+}
+
 done-testing;
