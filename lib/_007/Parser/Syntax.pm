@@ -3,7 +3,9 @@ use _007::Q;
 use _007::Parser::Exceptions;
 
 grammar _007::Parser::Syntax {
-    token TOP {
+    token TOP { <compunit> }
+
+    token compunit {
         <.newpad>
         <statementlist>
         <.finishpad>

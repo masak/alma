@@ -8,6 +8,10 @@ class _007::Parser::Actions {
     }
 
     method TOP($/) {
+        make $<compunit>.ast;
+    }
+
+    method compunit($/) {
         my $cu = Q::CompUnit.new(:block(Q::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist($<statementlist>.ast)
