@@ -64,6 +64,6 @@ class X::Property::Required is Exception {
 class X::Property::Duplicate is Exception {
     has Str $.property;
 
-    method message { "The property '$.property' may not be declared more than once in an object term" }
+    method message { "The property '$.property' was declared more than once in a property list" }
 }
 
