@@ -304,7 +304,7 @@ class _007::Runtime::Builtins {
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
                         unless $rhs ~~ Val::Array;
-                    return wrap([$lhs.value, | $rhs.elements]);
+                    return wrap([$lhs, |$rhs.elements]);
                 },
                 :qtype(Q::Infix::Cons),
                 :assoc<right>,

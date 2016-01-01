@@ -69,6 +69,17 @@ use _007::Test;
     is-result $ast, "[0, 0, 7]\n", "cons works";
 }
 
+{
+    my $ast = q:to/./;
+    (statementlist
+     (stexpr (postfix:<()> (identifier "say")
+       (argumentlist
+        (infix:<::> (array (int 0) (int 0))
+        (array (int 7)))))))
+    .
+
+    is-result $ast, "[[0, 0], 7]\n", "cons works even on non-scalar values";
+}
 
 {
     my $ast = q:to/./;
