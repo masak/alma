@@ -417,57 +417,17 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        if $<infix> {
-            make Q::Term::Quasi.new(:contents($<infix>.ast));
+        for <argumentlist block compunit EXPR infix parameter parameterlist
+            postfix prefix property propertylist statement statementlist
+            term trait traitlist> -> $subrule {
+
+            if $/{$subrule} -> $submatch {
+                make Q::Term::Quasi.new(:contents($submatch.ast));
+                return;
+            }
         }
-        elsif $<prefix> {
-            make Q::Term::Quasi.new(:contents($<prefix>.ast));
-        }
-        elsif $<postfix> {
-            make Q::Term::Quasi.new(:contents($<postfix>.ast));
-        }
-        elsif $<EXPR> {
-            make Q::Term::Quasi.new(:contents($<EXPR>.ast));
-        }
-        elsif $<term> {
-            make Q::Term::Quasi.new(:contents($<term>.ast));
-        }
-        elsif $<block> {
-            make Q::Term::Quasi.new(:contents($<block>.ast));
-        }
-        elsif $<compunit> {
-            make Q::Term::Quasi.new(:contents($<compunit>.ast));
-        }
-        elsif $<property> {
-            make Q::Term::Quasi.new(:contents($<property>.ast));
-        }
-        elsif $<propertylist> {
-            make Q::Term::Quasi.new(:contents($<propertylist>.ast));
-        }
-        elsif $<trait> {
-            make Q::Term::Quasi.new(:contents($<trait>.ast));
-        }
-        elsif $<traitlist> {
-            make Q::Term::Quasi.new(:contents($<traitlist>.ast));
-        }
-        elsif $<statement> {
-            make Q::Term::Quasi.new(:contents($<statement>.ast));
-        }
-        elsif $<statementlist> {
-            make Q::Term::Quasi.new(:contents($<statementlist>.ast));
-        }
-        elsif $<parameter> {
-            make Q::Term::Quasi.new(:contents($<parameter>.ast));
-        }
-        elsif $<parameterlist> {
-            make Q::Term::Quasi.new(:contents($<parameterlist>.ast));
-        }
-        elsif $<argumentlist> {
-            make Q::Term::Quasi.new(:contents($<argumentlist>.ast));
-        }
-        else {
-            make Q::Term::Quasi.new(:contents($<block>.ast));
-        }
+
+        die "Got something in a quasi that we didn't expect: {$/.keys}";   # should never happen
     }
 
     method unquote ($/) {
