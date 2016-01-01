@@ -169,6 +169,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Postfix" <.ws> '{' <.ws> <postfix> <.ws> '}'
             || "@" <.ws> "Q::Expr" <.ws> '{' <.ws> <EXPR> <.ws> '}'
             || "@" <.ws> "Q::Identifier" <.ws> '{' <.ws> <term:identifier> <.ws> '}'
+            || "@" <.ws> "Q::Block" <.ws> '{' <.ws> <block> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>

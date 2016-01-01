@@ -153,4 +153,12 @@ use _007::Test;
     outputs $program, "<type Q::Identifier>\n", "quasi @ Q::Identifier";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Block { { say("Bond") } }));
+        .
+
+    outputs $program, "<type Q::Block>\n", "quasi @ Q::Block";
+}
+
 done-testing;
