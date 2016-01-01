@@ -205,4 +205,16 @@ use _007::Test;
     outputs $program, "<type Q::Literal::Str>\n", "quasi @ Q::Literal::Str";
 }
 
+{
+    my $program = q:to/./;
+        my prop;
+        say(type(quasi @ Q::Property { key: "value" }));
+        say(type(quasi @ Q::Property { "key": "value" }));
+        say(type(quasi @ Q::Property { fn() {} }));
+        say(type(quasi @ Q::Property { prop }));
+        .
+
+    outputs $program, "<type Q::Property>\n" x 4, "quasi @ Q::Property";
+}
+
 done-testing;
