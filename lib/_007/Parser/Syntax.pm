@@ -188,6 +188,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Statement" <.ws> '{' <.ws> <statement><.eat_terminator> <.ws> '}'
             || "@" <.ws> "Q::StatementList" <.ws> '{' <.ws> <statementlist> <.ws> '}'
             || "@" <.ws> "Q::Parameter" <.ws> '{' <.ws> <parameter> <.ws> '}'
+            || "@" <.ws> "Q::ParameterList" <.ws> '{' <.ws> <parameterlist> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>
