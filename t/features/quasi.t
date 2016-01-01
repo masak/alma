@@ -293,4 +293,13 @@ use _007::Test;
     outputs $program, "<type Q::TraitList>\n", "quasi @ Q::TraitList";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Statement { say("james") }));
+        say(type(quasi @ Q::Statement { say("bond"); }));
+        .
+
+    outputs $program, "<type Q::Statement::Expr>\n" x 2, "quasi @ Q::Statement";
+}
+
 done-testing;

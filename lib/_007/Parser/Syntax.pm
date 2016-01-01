@@ -185,6 +185,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> "Q::Term::Quasi" <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "@" <.ws> "Q::Trait" <.ws> '{' <.ws> <trait> <.ws> '}'
             || "@" <.ws> "Q::TraitList" <.ws> '{' <.ws> <traitlist> <.ws> '}'
+            || "@" <.ws> "Q::Statement" <.ws> '{' <.ws> <statement><.eat_terminator> <.ws> '}'
             || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>

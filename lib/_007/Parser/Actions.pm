@@ -450,6 +450,9 @@ class _007::Parser::Actions {
         elsif $<traitlist> {
             make Q::Term::Quasi.new(:contents($<traitlist>.ast));
         }
+        elsif $<statement> {
+            make Q::Term::Quasi.new(:contents($<statement>.ast));
+        }
         else {
             make Q::Term::Quasi.new(:contents($<block>.ast));
         }
