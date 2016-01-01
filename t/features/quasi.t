@@ -253,4 +253,28 @@ use _007::Test;
         "quasi @ Q::Term";
 }
 
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Term::Array { [0, 0, 7] }));
+        .
+
+    outputs $program, "<type Q::Term::Array>\n", "quasi @ Q::Term::Array";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Term::Object { Object { james: "Bond" } }));
+        .
+
+    outputs $program, "<type Q::Term::Object>\n", "quasi @ Q::Term::Object";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Term::Quasi { quasi { say("oh, james!") } }));
+        .
+
+    outputs $program, "<type Q::Term::Quasi>\n", "quasi @ Q::Term::Quasi";
+}
+
 done-testing;
