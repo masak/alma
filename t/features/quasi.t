@@ -372,4 +372,34 @@ use _007::Test;
         "can't put a non-infix in a Q::Infix unquote";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Infix { + };
+            return quasi { say(2 {{{q @ Q::Term}}} 2) };
+        }
+
+        moo();
+        .
+
+    parse-error $program,
+        X::TypeCheck,
+        "can't put a non-infix unquote in infix operator position (explicit)";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Infix { + };
+            return quasi { say(2 {{{q}}} 2) };
+        }
+
+        moo();
+        .
+
+    parse-error $program,
+        X::TypeCheck,
+        "can't put a non-infix unquote in infix operator position (implicit)";
+}
+
 done-testing;

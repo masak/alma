@@ -144,7 +144,7 @@ grammar _007::Parser::Syntax {
         || <.ws> $
     }
 
-    rule EXPR { <termish> +% [<infix>|<infix=unquote>] }
+    rule EXPR { <termish> +% [<infix> | <infix=infix-unquote>] }
 
     token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
 
@@ -240,6 +240,10 @@ grammar _007::Parser::Syntax {
             return $cur."!reduce"("infix");
         }
         return /<!>/(self);
+    }
+
+    rule infix-unquote {
+        <unquote>
     }
 
     method postfix {

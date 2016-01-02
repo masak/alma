@@ -504,6 +504,15 @@ class _007::Parser::Actions {
         make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(Val::None.new), :rhs(Val::None.new));
     }
 
+    method infix-unquote($/) {
+        my $got = ~($<unquote><identifier> // "Q::Term");
+        my $expected = Q::Infix;
+        die X::TypeCheck.new(:operation<parsing>, :$got, :$expected)
+            unless $got eq "Q::Infix";
+
+        make $<unquote>.ast;
+    }
+
     method postfix($/) {
         my $op = (~$/).trim;
         if $<index> {  # XXX: more hardcoding :(
