@@ -342,7 +342,7 @@ class Q::Term::Quasi does Q::Term {
 
             if $thing ~~ Q::Unquote::Infix {
                 my $infix = $thing.expr.eval($runtime);
-                die X::TypeCheck.new(:operation("interpolating an unquote", :got($infix), :expected(Q::Infix)))
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(Q::Infix))
                     unless $infix ~~ Q::Infix;
                 return $infix.new(:identifier($infix.identifier), :lhs($thing.lhs), :rhs($thing.rhs));
             }
