@@ -237,6 +237,11 @@ class _007::Parser::Actions {
             my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
+            if $infix ~~ Q::Unquote {
+                @termstack.push(Q::Unquote::Infix.new(:expr($infix.expr), :lhs($t1), :rhs($t2)));
+                return;
+            }
+
             my $c = $*runtime.maybe-get-var($infix.identifier.name.value);
             if $c ~~ Val::Macro {
                 @termstack.push($*runtime.call($c, [$t1, $t2]));

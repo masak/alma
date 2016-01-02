@@ -318,6 +318,11 @@ class Q::Unquote does Q {
     }
 }
 
+class Q::Unquote::Infix is Q::Unquote {
+    has $.lhs;
+    has $.rhs;
+}
+
 class Q::Term::Quasi does Q::Term {
     has $.contents;
 
@@ -334,6 +339,11 @@ class Q::Term::Quasi does Q::Term {
 
             return $thing.new(:name($thing.name), :frame($runtime.current-frame))
                 if $thing ~~ Q::Identifier;
+
+            if $thing ~~ Q::Unquote::Infix {
+                my $infix = $thing.expr.eval($runtime);
+                return $infix.new(:identifier($infix.identifier), :lhs($thing.lhs), :rhs($thing.rhs));
+            }
 
             if $thing ~~ Q::Unquote {
                 my $ast = $thing.expr.eval($runtime);

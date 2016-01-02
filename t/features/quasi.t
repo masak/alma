@@ -344,4 +344,17 @@ use _007::Test;
     outputs $program, "<type Q::Unquote>\n", "quasi @ Q::Unquote";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Infix { + };
+            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
+        }
+
+        moo();
+        .
+
+    outputs $program, "4\n", "unquote @ Q::Infix";
+}
+
 done-testing;

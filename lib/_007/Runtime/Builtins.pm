@@ -402,6 +402,7 @@ class _007::Runtime::Builtins {
             Q::Trait,
             Q::TraitList,
             Q::Unquote,
+            Q::Unquote::Infix,
         ;
 
         for @q-types -> $type {

@@ -144,7 +144,7 @@ grammar _007::Parser::Syntax {
         || <.ws> $
     }
 
-    rule EXPR { <termish> +% <infix> }
+    rule EXPR { <termish> +% [<infix>|<infix=unquote>] }
 
     token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
 
@@ -219,7 +219,7 @@ grammar _007::Parser::Syntax {
 
     token propertylist { [<.ws> <property>]* % [\h* ','] <.ws> }
 
-    token unquote { '{{{' <EXPR> '}}}' }
+    token unquote { '{{{' <EXPR> [:s "@" <identifier> ]? '}}}' }
 
     proto token property {*}
     rule property:str-expr { <key=str> ':' <value=term> }
