@@ -357,4 +357,19 @@ use _007::Test;
     outputs $program, "4\n", "unquote @ Q::Infix";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Term { "foo" };
+            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
+        }
+
+        moo();
+        .
+
+    parse-error $program,
+        X::TypeCheck,
+        "can't put a non-infix in a Q::Infix unquote";
+}
+
 done-testing;
