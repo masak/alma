@@ -169,6 +169,8 @@ class Q::Prefix does Q::Expr {
 
 class Q::Prefix::Minus is Q::Prefix {}
 
+class Q::Prefix::Not is Q::Prefix {}
+
 class Q::Infix does Q::Expr {
     has $.identifier;
     has $.lhs;
@@ -237,8 +239,6 @@ class Q::Infix::And is Q::Infix {
             !! $.rhs.eval($runtime);
     }
 }
-
-class Q::Prefix::Not is Q::Prefix {}
 
 class Q::Postfix does Q::Expr {
     has $.identifier;
