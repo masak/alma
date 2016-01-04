@@ -49,7 +49,7 @@ class _007::Parser::Actions {
         #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :expr($<EXPR>.ast),
+                :operand($<EXPR>.ast),
                 :argumentlist(Q::ArgumentList.new)
             )));
         }
@@ -315,7 +315,7 @@ class _007::Parser::Actions {
                 make $*runtime.call($c, [$/.ast]);
             }
             else {
-                make $prefix.new(:expr($/.ast), :identifier($prefix.identifier));
+                make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
             }
         }
 
@@ -331,13 +331,13 @@ class _007::Parser::Actions {
                 make $qtree;
             }
             elsif $postfix ~~ Q::Postfix::Index {
-                make $postfix.new(:$identifier, :expr($/.ast), :index($postfix.index));
+                make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));
             }
             elsif $postfix ~~ Q::Postfix::Call {
-                make $postfix.new(:$identifier, :expr($/.ast), :argumentlist($postfix.argumentlist));
+                make $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist));
             }
             elsif $postfix ~~ Q::Postfix::Property {
-                make $postfix.new(:$identifier, :expr($/.ast), :property($postfix.property));
+                make $postfix.new(:$identifier, :operand($/.ast), :property($postfix.property));
             }
             else {
                 my $c = $*runtime.maybe-get-var($postfix.identifier.name.value);
@@ -345,7 +345,7 @@ class _007::Parser::Actions {
                     make $*runtime.call($c, [$/.ast]);
                 }
                 else {
-                    make $postfix.new(:$identifier, :expr($/.ast));
+                    make $postfix.new(:$identifier, :operand($/.ast));
                 }
             }
         }
@@ -380,7 +380,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("prefix:<$op>"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :expr(Val::None));
+        make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
     }
 
     method str($/) {
@@ -530,16 +530,16 @@ class _007::Parser::Actions {
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :expr(Val::None.new));
+            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :operand(Val::None.new));
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :expr(Val::None.new));
+            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :operand(Val::None.new));
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :expr(Val::None.new));
+            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(Val::None.new));
         }
         else {
-            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :expr(Val::None.new));
+            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :operand(Val::None.new));
         }
     }
 

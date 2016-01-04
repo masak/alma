@@ -80,7 +80,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::Postfix::Call $call) {
-                traverse($call.expr);
+                traverse($call.operand);
                 traverse($call.argumentlist);
             }
 

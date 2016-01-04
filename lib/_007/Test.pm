@@ -14,7 +14,7 @@ sub read(Str $ast) is export {
         array          => -> *@elements { Q::Term::Array.new(:elements(Val::Array.new(:@elements))) },
         object         => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
 
-        'prefix:<->'   => -> $expr { Q::Prefix::Minus.new(:$expr, :identifier(n("prefix", "-"))) },
+        'prefix:<->'   => -> $operand { Q::Prefix::Minus.new(:$operand, :identifier(n("prefix", "-"))) },
 
         'infix:<+>'    => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs, :identifier(n("infix", "+"))) },
         'infix:<->'    => -> $lhs, $rhs { Q::Infix::Subtraction.new(:$lhs, :$rhs, :identifier(n("infix", "-"))) },
@@ -32,9 +32,9 @@ sub read(Str $ast) is export {
         'infix:<<>'    => -> $lhs, $rhs { Q::Infix::Lt.new(:$lhs, :$rhs, :identifier(n("infix", "<"))) },
         'infix:<>>'    => -> $lhs, $rhs { Q::Infix::Gt.new(:$lhs, :$rhs, :identifier(n("infix", ">"))) },
 
-        'postfix:<()>' => -> $expr, $argumentlist { Q::Postfix::Call.new(:$expr, :$argumentlist, :identifier(n("postfix", "()"))) },
-        'postfix:<[]>' => -> $expr, $index { Q::Postfix::Index.new(:$expr, :$index, :identifier(n("postfix", "[]"))) },
-        'postfix:<.>'  => -> $expr, $property { Q::Postfix::Property.new(:$expr, :$property, :identifier(n("postfix", "."))) },
+        'postfix:<()>' => -> $operand, $argumentlist { Q::Postfix::Call.new(:$operand, :$argumentlist, :identifier(n("postfix", "()"))) },
+        'postfix:<[]>' => -> $operand, $index { Q::Postfix::Index.new(:$operand, :$index, :identifier(n("postfix", "[]"))) },
+        'postfix:<.>'  => -> $operand, $property { Q::Postfix::Property.new(:$operand, :$property, :identifier(n("postfix", "."))) },
 
         my             => -> $identifier, $expr = Val::None.new { Q::Statement::My.new(:$identifier, :$expr) },
         stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },

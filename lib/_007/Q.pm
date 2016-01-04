@@ -156,12 +156,12 @@ class Q::Block does Q {
 
 class Q::Prefix does Q::Expr {
     has $.identifier;
-    has $.expr;
+    has $.operand;
 
-    method attribute-order { <identifier expr> }
+    method attribute-order { <identifier operand> }
 
     method eval($runtime) {
-        my $e = $.expr.eval($runtime);
+        my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
         return $runtime.call($c, [$e]);
     }
@@ -242,12 +242,12 @@ class Q::Infix::And is Q::Infix {
 
 class Q::Postfix does Q::Expr {
     has $.identifier;
-    has $.expr;
+    has $.operand;
 
-    method attribute-order { <identifier expr> }
+    method attribute-order { <identifier operand> }
 
     method eval($runtime) {
-        my $e = $.expr.eval($runtime);
+        my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
         return $runtime.call($c, [$e]);
     }
@@ -256,10 +256,10 @@ class Q::Postfix does Q::Expr {
 class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
-    method attribute-order { <identifier expr index> }
+    method attribute-order { <identifier operand index> }
 
     method eval($runtime) {
-        given $.expr.eval($runtime) {
+        given $.operand.eval($runtime) {
             when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
@@ -285,10 +285,10 @@ class Q::Postfix::Index is Q::Postfix {
 class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
-    method attribute-order { <identifier expr argumentlist> }
+    method attribute-order { <identifier operand argumentlist> }
 
     method eval($runtime) {
-        my $c = $.expr.eval($runtime);
+        my $c = $.operand.eval($runtime);
         die "macro is called at runtime"
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
@@ -301,10 +301,10 @@ class Q::Postfix::Call is Q::Postfix {
 class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
-    method attribute-order { <identifier expr property> }
+    method attribute-order { <identifier operand property> }
 
     method eval($runtime) {
-        my $obj = $.expr.eval($runtime);
+        my $obj = $.operand.eval($runtime);
         my $propname = $.property.name.value;
         $runtime.property($obj, $propname);
     }

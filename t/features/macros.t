@@ -29,7 +29,7 @@ use _007::Test;
         macro foo() {
             return Q::Postfix::Call {
                 identifier: Q::Identifier { name: "postfix:<()>" },
-                expr: Q::Identifier { name: "say" },
+                operand: Q::Identifier { name: "say" },
                 argumentlist: Q::ArgumentList {
                     arguments: [Q::Literal::Str { value: "OH HAI" }]
                 }
