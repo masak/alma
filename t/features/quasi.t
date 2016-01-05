@@ -402,4 +402,32 @@ use _007::Test;
         "can't put a non-infix unquote in infix operator position (implicit)";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Prefix { - };
+            return quasi { say({{{q @ Q::Prefix}}} 17) };
+        }
+
+        moo();
+        .
+
+    outputs $program, "-17\n", "unquote @ Q::Prefix";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            my q = quasi @ Q::Term { "foo" };
+            return quasi { say({{{q @ Q::Prefix}}} 17) };
+        }
+
+        moo();
+        .
+
+    parse-error $program,
+        X::TypeCheck,
+        "can't put a non-prefix in a Q::Prefix unquote";
+}
+
 done-testing;

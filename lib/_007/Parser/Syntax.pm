@@ -146,7 +146,7 @@ grammar _007::Parser::Syntax {
 
     rule EXPR { <termish> +% [<infix> | <infix=infix-unquote>] }
 
-    token termish { <prefix>* [<term>|<term=unquote>] <postfix>* }
+    token termish { [<prefix> | <prefix=prefix-unquote>]* [<term>|<term=unquote>] <postfix>* }
 
     method prefix {
         my @ops = $*parser.oplevel.ops<prefix>.keys;
@@ -244,6 +244,10 @@ grammar _007::Parser::Syntax {
 
     rule infix-unquote {
         <unquote>
+    }
+
+    rule prefix-unquote {
+        <unquote> <?{ ($<unquote><identifier> // "") eq "Q::Prefix" }>
     }
 
     method postfix {

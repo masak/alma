@@ -310,6 +310,12 @@ class _007::Parser::Actions {
 
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
+
+            if $prefix ~~ Q::Unquote {
+                make Q::Unquote::Prefix.new(:expr($prefix.expr), :operand($/.ast));
+                return;
+            }
+
             my $c = $*runtime.maybe-get-var($prefix.identifier.name.value);
             if $c ~~ Val::Macro {
                 make $*runtime.call($c, [$/.ast]);
@@ -381,6 +387,10 @@ class _007::Parser::Actions {
             :frame($*runtime.current-frame),
         );
         make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
+    }
+
+    method prefix-unquote($/) {
+        make $<unquote>.ast;
     }
 
     method str($/) {

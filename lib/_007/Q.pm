@@ -318,6 +318,10 @@ class Q::Unquote does Q {
     }
 }
 
+class Q::Unquote::Prefix is Q::Unquote {
+    has $.operand;
+}
+
 class Q::Unquote::Infix is Q::Unquote {
     has $.lhs;
     has $.rhs;
@@ -340,7 +344,13 @@ class Q::Term::Quasi does Q::Term {
             return $thing.new(:name($thing.name), :frame($runtime.current-frame))
                 if $thing ~~ Q::Identifier;
 
-            if $thing ~~ Q::Unquote::Infix {
+            if $thing ~~ Q::Unquote::Prefix {
+                my $prefix = $thing.expr.eval($runtime);
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(Q::Prefix))
+                    unless $prefix ~~ Q::Prefix;
+                return $prefix.new(:identifier($prefix.identifier), :operand($thing.operand));
+            }
+            elsif $thing ~~ Q::Unquote::Infix {
                 my $infix = $thing.expr.eval($runtime);
                 die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(Q::Infix))
                     unless $infix ~~ Q::Infix;
