@@ -47,7 +47,7 @@ sub read(Str $ast) is export {
         while          => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
         begin          => -> $block { Q::Statement::BEGIN.new(:$block) },
 
-        identifier          => -> $name { Q::Identifier.new(:$name) },
+        identifier     => -> $name { Q::Identifier.new(:$name) },
         block          => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
         param          => -> $identifier { Q::Parameter.new(:$identifier) },
         property       => -> $key, $value { Q::Property.new(:$key, :$value) },
