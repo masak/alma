@@ -8,54 +8,54 @@ sub read(Str $ast) is export {
     }
 
     my %q_lookup =
-        none           => -> { Q::Literal::None.new },
-        int            => -> $value { Q::Literal::Int.new(:$value) },
-        str            => -> $value { Q::Literal::Str.new(:$value) },
-        array          => -> *@elements { Q::Term::Array.new(:elements(Val::Array.new(:@elements))) },
-        object         => -> $type, $propertylist { Q::Term::Object.new(:$type, :$propertylist) },
+        none           => Q::Literal::None,
+        int            => Q::Literal::Int,
+        str            => Q::Literal::Str,
+        array          => Q::Term::Array,
+        object         => Q::Term::Object,
 
-        'prefix:<->'   => -> $operand { Q::Prefix::Minus.new(:$operand, :identifier(n("prefix", "-"))) },
+        'prefix:<->'   => Q::Prefix::Minus,
 
-        'infix:<+>'    => -> $lhs, $rhs { Q::Infix::Addition.new(:$lhs, :$rhs, :identifier(n("infix", "+"))) },
-        'infix:<->'    => -> $lhs, $rhs { Q::Infix::Subtraction.new(:$lhs, :$rhs, :identifier(n("infix", "-"))) },
-        'infix:<*>'    => -> $lhs, $rhs { Q::Infix::Multiplication.new(:$lhs, :$rhs, :identifier(n("infix", "*"))) },
-        'infix:<~>'    => -> $lhs, $rhs { Q::Infix::Concat.new(:$lhs, :$rhs, :identifier(n("infix", "~"))) },
-        'infix:<x>'    => -> $lhs, $rhs { Q::Infix::Replicate.new(:$lhs, :$rhs, :identifier(n("infix", "x"))) },
-        'infix:<xx>'   => -> $lhs, $rhs { Q::Infix::ArrayReplicate.new(:$lhs, :$rhs, :identifier(n("infix", "xx"))) },
-        'infix:<::>'   => -> $lhs, $rhs { Q::Infix::Cons.new(:$lhs, :$rhs, :identifier(n("infix", "::"))) },
-        'infix:<=>'    => -> $lhs, $rhs { Q::Infix::Assignment.new(:$lhs, :$rhs, :identifier(n("infix", "="))) },
-        'infix:<==>'   => -> $lhs, $rhs { Q::Infix::Eq.new(:$lhs, :$rhs, :identifier(n("infix", "=="))) },
-        'infix:<!=>'   => -> $lhs, $rhs { Q::Infix::Ne.new(:$lhs, :$rhs, :identifier(n("infix", "!="))) },
+        'infix:<+>'    => Q::Infix::Addition,
+        'infix:<->'    => Q::Infix::Subtraction,
+        'infix:<*>'    => Q::Infix::Multiplication,
+        'infix:<~>'    => Q::Infix::Concat,
+        'infix:<x>'    => Q::Infix::Replicate,
+        'infix:<xx>'   => Q::Infix::ArrayReplicate,
+        'infix:<::>'   => Q::Infix::Cons,
+        'infix:<=>'    => Q::Infix::Assignment,
+        'infix:<==>'   => Q::Infix::Eq,
+        'infix:<!=>'   => Q::Infix::Ne,
 
-        'infix:<<=>'   => -> $lhs, $rhs { Q::Infix::Le.new(:$lhs, :$rhs, :identifier(n("infix", "<="))) },
-        'infix:<>=>'   => -> $lhs, $rhs { Q::Infix::Ge.new(:$lhs, :$rhs, :identifier(n("infix", ">="))) },
-        'infix:<<>'    => -> $lhs, $rhs { Q::Infix::Lt.new(:$lhs, :$rhs, :identifier(n("infix", "<"))) },
-        'infix:<>>'    => -> $lhs, $rhs { Q::Infix::Gt.new(:$lhs, :$rhs, :identifier(n("infix", ">"))) },
+        'infix:<<=>'   => Q::Infix::Le,
+        'infix:<>=>'   => Q::Infix::Ge,
+        'infix:<<>'    => Q::Infix::Lt,
+        'infix:<>>'    => Q::Infix::Gt,
 
-        'postfix:<()>' => -> $operand, $argumentlist { Q::Postfix::Call.new(:$operand, :$argumentlist, :identifier(n("postfix", "()"))) },
-        'postfix:<[]>' => -> $operand, $index { Q::Postfix::Index.new(:$operand, :$index, :identifier(n("postfix", "[]"))) },
-        'postfix:<.>'  => -> $operand, $property { Q::Postfix::Property.new(:$operand, :$property, :identifier(n("postfix", "."))) },
+        'postfix:<()>' => Q::Postfix::Call,
+        'postfix:<[]>' => Q::Postfix::Index,
+        'postfix:<.>'  => Q::Postfix::Property,
 
-        my             => -> $identifier, $expr = Val::None.new { Q::Statement::My.new(:$identifier, :$expr) },
-        stexpr         => -> $expr { Q::Statement::Expr.new(:$expr) },
-        if             => -> $expr, $block, $else = Val::None.new { Q::Statement::If.new(:$expr, :$block, :$else) },
-        stblock        => -> $block { Q::Statement::Block.new(:$block) },
-        sub            => -> $identifier, $block, $traitlist = Q::TraitList.new { Q::Statement::Sub.new(:$identifier, :$block, :$traitlist) },
-        macro          => -> $identifier, $block, $traitlist = Q::TraitList.new { Q::Statement::Macro.new(:$identifier, :$block, :$traitlist) },
-        return         => -> $expr = Val::None.new { Q::Statement::Return.new(:$expr) },
-        for            => -> $expr, $block { Q::Statement::For.new(:$expr, :$block) },
-        while          => -> $expr, $block { Q::Statement::While.new(:$expr, :$block) },
-        begin          => -> $block { Q::Statement::BEGIN.new(:$block) },
+        my             => Q::Statement::My,
+        stexpr         => Q::Statement::Expr,
+        if             => Q::Statement::If,
+        stblock        => Q::Statement::Block,
+        sub            => Q::Statement::Sub,
+        macro          => Q::Statement::Macro,
+        return         => Q::Statement::Return,
+        for            => Q::Statement::For,
+        while          => Q::Statement::While,
+        begin          => Q::Statement::BEGIN,
 
-        identifier     => -> $name { Q::Identifier.new(:$name) },
-        block          => -> $parameterlist, $statementlist { Q::Block.new(:$parameterlist, :$statementlist) },
-        param          => -> $identifier { Q::Parameter.new(:$identifier) },
-        property       => -> $key, $value { Q::Property.new(:$key, :$value) },
+        identifier     => Q::Identifier,
+        block          => Q::Block,
+        param          => Q::Parameter,
+        property       => Q::Property,
 
-        statementlist  => -> *@statements { Q::StatementList.new(:statements(Val::Array.new(:elements(@statements)))) },
-        parameterlist  => -> *@parameters { Q::ParameterList.new(:parameters(Val::Array.new(:elements(@parameters)))) },
-        argumentlist   => -> *@arguments { Q::ArgumentList.new(:arguments(Val::Array.new(:elements(@arguments)))) },
-        propertylist   => -> *@properties { Q::PropertyList.new(:properties(Val::Array.new(:elements(@properties)))) },
+        statementlist  => Q::StatementList,
+        parameterlist  => Q::ParameterList,
+        argumentlist   => Q::ArgumentList,
+        propertylist   => Q::PropertyList,
     ;
 
     my grammar AST::Syntax {
@@ -76,7 +76,36 @@ sub read(Str $ast) is export {
             die "Unknown name: $qname"
                 unless %q_lookup{$qname} :exists;
             my @rest = $<expr>».ast[1..*];
-            make %q_lookup{$qname}(|@rest);
+            my $qtype = %q_lookup{$qname};
+            my %arguments;
+            my @attributes = $qtype.attributes;
+            sub check-if-operator() {
+                if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
+                    # XXX: it stinks that we have to do this
+                    %arguments<identifier> = Q::Identifier.new(:name(Val::Str.new(:value($qname))));
+                    shift @attributes;  # $.identifier
+                }
+            }();
+            sub aname($attr) { $attr.name.substr(2) }
+
+            if @attributes == 1 && @attributes[0].type ~~ Val::Array {
+                my $aname = aname(@attributes[0]);
+                %arguments{$aname} = Val::Array.new(:elements(@rest));
+            }
+            else {
+                die "{+@rest} arguments passed, only {+@attributes} parameters expected for {$qtype.^name}"
+                    if @rest > @attributes;
+
+                for @attributes.kv -> $i, $attr {
+                    if $attr.build && @rest < @attributes {
+                        @rest.splice($i, 0, "dummy value to make the indices add up");
+                        next;
+                    }
+                    my $aname = aname($attr);
+                    %arguments{$aname} = @rest[$i] // last;
+                }
+            }
+            make $qtype.new(|%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
         method expr:int ($/) { make Val::Int.new(:value(+$/)) }
