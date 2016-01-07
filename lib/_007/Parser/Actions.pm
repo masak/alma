@@ -445,6 +445,21 @@ class _007::Parser::Actions {
         die "Got something in a quasi that we didn't expect: {$/.keys}";   # should never happen
     }
 
+    method term:sub ($/) {
+        my $parameterlist = $<parameterlist>.ast;
+        my $traitlist = $<traitlist>.ast;
+        my $statementlist = $<blockoid>.ast;
+
+        my $block = Q::Block.new(:$parameterlist, :$statementlist);
+        my %static-lexpad = $*runtime.current-frame.pad;
+        self.finish-block($block);
+
+        my $outer-frame = $*runtime.current-frame;
+        my $val;
+        make Q::Term::Sub.new(:$traitlist, :$block);
+        $val = Val::Sub.new(:name("(anon)"), :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+    }
+
     method unquote ($/) {
         make Q::Unquote.new(:expr($<EXPR>.ast));
     }

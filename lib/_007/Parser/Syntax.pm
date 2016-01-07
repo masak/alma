@@ -216,6 +216,15 @@ grammar _007::Parser::Syntax {
             }
         }
     }
+    token term:sub {
+        sub <.ws>
+        :my $*insub = True;
+        <.newpad>
+        '(' ~ ')' <parameterlist>
+        <traitlist>
+        <blockoid>:!s
+        <.finishpad>
+    }
 
     token propertylist { [<.ws> <property>]* % [\h* ','] <.ws> }
 

@@ -136,6 +136,22 @@ class Q::PropertyList does Q {
     has Val::Array $.properties = Val::Array.new;
 }
 
+class Q::Term::Sub does Q::Term {
+    has $.traitlist = Q::TraitList.new;
+    has $.block;
+
+    method attribute-order { <traitlist block> }
+
+    method eval($runtime) {
+        return Val::Sub.new(
+            :name("(anon)"),
+            :parameterlist($.block.parameterlist),
+            :statementlist($.block.statementlist),
+            :outer-frame($runtime.current-frame),
+        );
+    }
+}
+
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;

@@ -399,6 +399,7 @@ class _007::Runtime::Builtins {
             Q::Term::Array,
             Q::Term::Object,
             Q::Term::Quasi,
+            Q::Term::Sub,
             Q::Trait,
             Q::TraitList,
             Q::Unquote,

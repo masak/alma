@@ -152,4 +152,15 @@ use _007::Test;
         "can assign to a parameter which hides a subroutine";
 }
 
+{
+    my $program = q:to/./;
+        my f = sub (x) { say(x) };
+        f("Mr Bond");
+        .
+
+    outputs $program,
+        "Mr Bond\n",
+        "expression subs work";
+}
+
 done-testing;
