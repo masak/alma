@@ -477,4 +477,13 @@ use _007::Test;
         "all of the comparison operators evaluate from left to right";
 }
 
+{
+    my $program = q:to/./;
+        say(0 == 0 && 1);
+        say(2 == 2 && 3 == 3);
+        .
+
+    outputs $program, "1\n1\n", "&& binds looser than ==";
+}
+
 done-testing;
