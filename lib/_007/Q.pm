@@ -141,15 +141,18 @@ role Q::Declaration {
 }
 
 class Q::Term::Sub does Q::Term does Q::Declaration {
-    has Val::Str $.name;
+    has $.identifier;
     has $.traitlist = Q::TraitList.new;
     has $.block;
 
-    method attribute-order { <traitlist block> }
+    method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
+        my $name = $.identifier ~~ Val::None
+            ?? "(anon)"
+            !! $.identifier.name.value;
         return Val::Sub.new(
-            :name($.name.value),
+            :$name,
             :parameterlist($.block.parameterlist),
             :statementlist($.block.statementlist),
             :outer-frame($runtime.current-frame),
