@@ -20,7 +20,7 @@ use _007::Test;
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "falsy array")))))))
           (if (array (str "")) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy array")))))))
-          (sub (identifier "foo") (block (parameterlist) (statementlist)))
+          (stsub (identifier "foo") (block (parameterlist) (statementlist)))
           (if (identifier "foo") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy sub")))))))
           (macro (identifier "bar") (block (parameterlist) (statementlist)))

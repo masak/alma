@@ -13,6 +13,7 @@ sub read(Str $ast) is export {
         str            => Q::Literal::Str,
         array          => Q::Term::Array,
         object         => Q::Term::Object,
+        sub            => Q::Term::Sub,
 
         'prefix:<->'   => Q::Prefix::Minus,
 
@@ -40,7 +41,7 @@ sub read(Str $ast) is export {
         stexpr         => Q::Statement::Expr,
         if             => Q::Statement::If,
         stblock        => Q::Statement::Block,
-        sub            => Q::Statement::Sub,
+        stsub          => Q::Statement::Sub,
         macro          => Q::Statement::Macro,
         return         => Q::Statement::Return,
         for            => Q::Statement::For,

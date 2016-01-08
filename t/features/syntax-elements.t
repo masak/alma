@@ -194,7 +194,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist) (statementlist
+          (stsub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "sub"))))))))
         .
 
@@ -210,7 +210,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
+          (stsub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Mr ") (identifier "name")))))))))
         .
 
@@ -226,7 +226,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
+          (stsub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (identifier "X") (identifier "Y")))))))))
         .
 
@@ -242,7 +242,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist) (statementlist
+          (stsub (identifier "f") (block (parameterlist) (statementlist
             (return (int 7))))))
         .
 
@@ -258,7 +258,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist) (statementlist
+          (stsub (identifier "f") (block (parameterlist) (statementlist
             (return)))))
         .
 
@@ -279,10 +279,10 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (sub (identifier "f") (block (parameterlist) (statementlist
+          (stsub (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI")))))))
-          (sub (identifier "g") (block (parameterlist) (statementlist
-            (sub (identifier "h") (block (parameterlist) (statementlist
+          (stsub (identifier "g") (block (parameterlist) (statementlist
+            (stsub (identifier "h") (block (parameterlist) (statementlist
               (stexpr (postfix:<()> (identifier "f") (argumentlist))))))
             (return (identifier "h")))))
           (stexpr (postfix:<()> (postfix:<()> (identifier "g") (argumentlist)) (argumentlist))))
