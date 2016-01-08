@@ -379,4 +379,80 @@ use _007::Test;
     is-error $ast, X::TypeCheck, "indexing a non-array is an error";
 }
 
+{
+    my $program = q:to/./;
+        my a = [1, 2, 3];
+        sub f() { return 7 };
+        my o = { foo: 12 };
+
+        say(-a[1]);
+        say(-f());
+        say(-o.foo);
+
+        say(!a[2]);
+        say(!f());
+        say(!o.foo);
+        .
+
+    outputs $program, "-2\n-7\n-12\n0\n0\n0\n", "all postfixes are tighter than both prefixes";
+}
+
+{
+    my $program = q:to/./;
+        say(!0 * 7);
+        .
+
+    outputs $program, "7\n", "boolean negation is tighter than multiplication";
+}
+
+{
+    my $program = q:to/./;
+        -1 * 2;
+        .
+
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (infix:<*> (prefix:<-> (int 1)) (int 2))))
+        .
+
+    parses-to $program, $ast, "numeric negation is tighter than multiplication";
+}
+
+{
+    my $program = q:to/./;
+        say(1 + 2 * 3);
+        say(2 * 3 + 4);
+
+        say(1 - 2 * 3);
+        say(2 * 3 - 4);
+        .
+
+    outputs $program, "7\n10\n-5\n2\n", "multiplication is tighter than addition/subtraction";
+}
+
+{
+    my $program = q:to/./;
+        say("Jim" x 2 ~ " Bond");
+        say("Jim " ~ "Bond" x 2);
+        .
+
+    outputs $program, "JimJim Bond\nJim BondBond\n", "string repetition is tighter than concatenation";
+}
+
+{
+    my $program = q:to/./;
+        say(!0 :: []);
+        say(-1 :: []);
+        say(1+2 :: []);
+        say(3-4 :: []);
+        say(5*6 :: []);
+        say("B" x 2 :: []);
+        say("Bo" ~ "nd" :: []);
+        say([0] xx 2 :: [7]);
+        .
+
+    outputs $program, qq![1]\n[-1]\n[3]\n[-1]\n[30]\n["BB"]\n["Bond"]\n[[0, 0], 7]\n!,
+        "cons is looser than even the additive infixes (+ - ~)";
+}
+
 done-testing;
