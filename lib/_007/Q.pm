@@ -140,6 +140,24 @@ role Q::Declaration {
     method is-assignable { False }
 }
 
+class Q::Trait does Q {
+    has $.identifier;
+    has $.expr;
+
+    method attribute-order { <identifier expr> }
+}
+
+class Q::TraitList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
+    has Val::Array $.traits = Val::Array.new;
+
+    method attribute-order { <traits> }
+
+    method interpolate($runtime) {
+        self.new(:traits(Val::Array.new(:elements($.traits.elements».interpolate($runtime)))));
+    }
+}
+
 class Q::Term::Sub does Q::Term does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
@@ -586,24 +604,6 @@ class Q::Statement::Return does Q::Statement {
         my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
-    }
-}
-
-class Q::Trait does Q {
-    has $.identifier;
-    has $.expr;
-
-    method attribute-order { <identifier expr> }
-}
-
-class Q::TraitList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.traits = Val::Array.new;
-
-    method attribute-order { <traits> }
-
-    method interpolate($runtime) {
-        self.new(:traits(Val::Array.new(:elements($.traits.elements».interpolate($runtime)))));
     }
 }
 
