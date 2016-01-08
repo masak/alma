@@ -495,4 +495,21 @@ use _007::Test;
     outputs $program, "1\n1\n", "&& binds tighter than ||";
 }
 
+{
+    my $program = q:to/./;
+        my x;
+
+        x = 1 == 2;
+        say(x);
+
+        x = 0 || "foo";
+        say(x);
+
+        x = 1 && "bar";
+        say(x);
+        .
+
+    outputs $program, "0\nfoo\nbar\n", "assignment binds looser than all the other operators";
+}
+
 done-testing;
