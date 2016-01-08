@@ -232,7 +232,15 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Prefix::Not),
                 :assoc<left>,
             ),
-
+            'infix:<::>' => Val::Sub::Builtin.new('infix:<::>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
+                        unless $rhs ~~ Val::Array;
+                    return wrap([$lhs, |$rhs.elements]);
+                },
+                :qtype(Q::Infix::Cons),
+                :assoc<right>,
+            ),
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
@@ -298,16 +306,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
-            ),
-
-            'infix:<::>' => Val::Sub::Builtin.new('infix:<::>',
-                sub ($lhs, $rhs) {
-                    die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
-                        unless $rhs ~~ Val::Array;
-                    return wrap([$lhs, |$rhs.elements]);
-                },
-                :qtype(Q::Infix::Cons),
-                :assoc<right>,
             ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
