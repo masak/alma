@@ -486,4 +486,13 @@ use _007::Test;
     outputs $program, "1\n1\n", "&& binds looser than ==";
 }
 
+{
+    my $program = q:to/./;
+        say(0 && 1 || 1);
+        say(1 || 0 && 0);
+        .
+
+    outputs $program, "1\n1\n", "&& binds tighter than ||";
+}
+
 done-testing;

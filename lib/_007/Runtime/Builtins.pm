@@ -169,6 +169,13 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
+            'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
+                sub ($lhs, $rhs) {
+                    # implemented in Q.pm as .eval method
+                },
+                :qtype(Q::Infix::Or),
+                :assoc<left>,
+            ),
             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
                 sub ($lhs, $rhs) {
                     # implemented in Q.pm as .eval method
@@ -221,13 +228,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Ge),
                 :precedence{ equal => "==" },
-                :assoc<left>,
-            ),
-            'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
-                sub ($lhs, $rhs) {
-                    # implemented in Q.pm as .eval method
-                },
-                :qtype(Q::Infix::Or),
                 :assoc<left>,
             ),
             'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
