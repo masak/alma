@@ -152,6 +152,10 @@ class _007::Runtime::Builtins {
                     unless $b ~~ Val::Array;
                 return wrap([|$a.elements , |$b.elements]);
             },
+
+            # OPERATORS
+
+            # assignment precedence
             'infix:<=>' => Val::Sub::Builtin.new('infix:<=>',
                 sub ($lhs, $rhs) {
                     # can't express this one as a built-in sub -- because the lhs is an lvalue
@@ -160,6 +164,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
+
+            # disjunctive precedence
             'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
                 sub ($lhs, $rhs) {
                     # implemented in Q.pm as .eval method
@@ -167,6 +173,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Or),
                 :assoc<left>,
             ),
+
+            # conjunctive precedence
             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
                 sub ($lhs, $rhs) {
                     # implemented in Q.pm as .eval method
@@ -174,6 +182,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::And),
                 :assoc<left>,
             ),
+
+            # comparison precedence
             'infix:<==>' => Val::Sub::Builtin.new('infix:<==>',
                 sub ($lhs, $rhs) {
                     return wrap(equal-value($lhs, $rhs));
@@ -221,6 +231,8 @@ class _007::Runtime::Builtins {
                 :precedence{ equal => "==" },
                 :assoc<left>,
             ),
+
+            # cons precedence
             'infix:<::>' => Val::Sub::Builtin.new('infix:<::>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
@@ -230,6 +242,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Cons),
                 :assoc<right>,
             ),
+
+            # additive precedence
             'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
@@ -263,6 +277,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Subtraction),
                 :assoc<left>,
             ),
+
+            # multiplicative precedence
             'infix:<*>' => Val::Sub::Builtin.new('infix:<*>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
@@ -296,6 +312,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
             ),
+
+            # prefixes
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
@@ -312,6 +330,8 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Prefix::Not),
                 :assoc<left>,
             ),
+
+            # postfixes
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
                     # can't express this one as a built-in sub
