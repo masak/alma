@@ -324,21 +324,18 @@ class _007::Runtime::Builtins {
                     # can't express this one as a built-in sub
                 },
                 :qtype(Q::Postfix::Index),
-                :assoc<right>,
             ),
             'postfix:<()>' => Val::Sub::Builtin.new('postfix:<()>',
                 sub ($expr, $arguments) {
                     # can't express this one as a built-in sub
                 },
                 :qtype(Q::Postfix::Call),
-                :assoc<right>,
             ),
             'postfix:<.>' => Val::Sub::Builtin.new('postfix:<.>',
                 sub ($expr, $property) {
                     # can't express this one as a built-in sub
                 },
                 :qtype(Q::Postfix::Property),
-                :assoc<right>,
             ),
         ;
 
