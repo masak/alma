@@ -139,7 +139,7 @@ class Val::Block does Val {
 }
 
 class Val::Sub is Val::Block {
-    has $.name;
+    has Str $.name;
 
     method quoted-Str {
         self.Str
