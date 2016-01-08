@@ -63,13 +63,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
       so that they can see e.g. macros in their unexpanded form.
     * masak would also like to take this opportunity to tie together some kind
       of doc-comments, automated tests, and documentation on the web page.
-* We probably want [sub expressions](https://github.com/masak/007/issues/66) to
-  land before v1.0.0, because it's a small but valuable thing.
-    * And as a followup, the method declarations in blocks [should then be sub
-      expressions](https://github.com/masak/007/issues/90).
-* Provide [`Q::TraitList`](https://github.com/masak/007/issues/77). (Right now
-  traits don't show up in the Qtree, they only cause semantic changes in
-  operator declarations.)
 
 ### General cleanup that should happen before v1.0.0
 
