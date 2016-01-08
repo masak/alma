@@ -56,6 +56,9 @@ class _007::Runtime {
                 self.declare-var($name, $val);
             }
         }
+        if $block ~~ Val::Sub {
+            self.declare-var($block.name, $block);
+        }
     }
 
     method leave {

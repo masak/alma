@@ -446,15 +446,21 @@ class _007::Parser::Actions {
     }
 
     method term:sub ($/) {
-        my $name = Val::Str.new(:value(~($<identifier> // "(anon)")));
+        my $name = ~($<identifier> // "(anon)");
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
+        if $<identifier> {
+            my $outer-frame = $*runtime.current-frame;  # XXX: this is not really the outer frame, is it?
+            my %static-lexpad = $*runtime.current-frame.pad;
+            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+            $*runtime.put-var($name, $val);
+        }
         self.finish-block($block);
 
-        make Q::Term::Sub.new(:$name, :$traitlist, :$block);
+        make Q::Term::Sub.new(:name(Val::Str.new(:value($name))), :$traitlist, :$block);
     }
 
     method unquote ($/) {

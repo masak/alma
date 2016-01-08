@@ -185,4 +185,26 @@ use _007::Test;
         "...and they know their own name";
 }
 
+{
+    my $program = q:to/./;
+        my f = sub g() { say(g) };
+        f();
+        .
+
+    outputs $program,
+        "<sub g()>\n",
+        "the name of a sub is visible inside the sub...";
+}
+
+{
+    my $program = q:to/./;
+        my f = sub g() {};
+        g();
+        .
+
+    parse-error $program,
+        X::Undeclared,
+        "...but not outside of the sub";
+}
+
 done-testing;

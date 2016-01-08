@@ -220,6 +220,11 @@ grammar _007::Parser::Syntax {
         sub <.ws> <identifier>?
         :my $*insub = True;
         <.newpad>
+        {
+            if $<identifier> {
+                declare(Q::Term::Sub, $<identifier>.Str);
+            }
+        }
         '(' ~ ')' <parameterlist>
         <traitlist>
         <blockoid>:!s

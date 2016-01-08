@@ -136,7 +136,11 @@ class Q::PropertyList does Q {
     has Val::Array $.properties = Val::Array.new;
 }
 
-class Q::Term::Sub does Q::Term {
+role Q::Declaration {
+    method is-assignable { False }
+}
+
+class Q::Term::Sub does Q::Term does Q::Declaration {
     has Val::Str $.name;
     has $.traitlist = Q::TraitList.new;
     has $.block;
@@ -393,10 +397,6 @@ class Q::Term::Quasi does Q::Term {
         }
         return interpolate($.contents);
     }
-}
-
-role Q::Declaration {
-    method is-assignable { False }
 }
 
 class Q::ParameterList does Q {
