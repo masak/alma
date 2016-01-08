@@ -171,7 +171,6 @@ class _007::Runtime::Builtins {
                     # implemented in Q.pm as .eval method
                 },
                 :qtype(Q::Infix::Or),
-                :assoc<left>,
             ),
 
             # conjunctive precedence
@@ -180,7 +179,6 @@ class _007::Runtime::Builtins {
                     # implemented in Q.pm as .eval method
                 },
                 :qtype(Q::Infix::And),
-                :assoc<left>,
             ),
 
             # comparison precedence
@@ -189,7 +187,6 @@ class _007::Runtime::Builtins {
                     return wrap(equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
-                :assoc<left>,
             ),
             'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
                 sub ($lhs, $rhs) {
@@ -197,7 +194,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Ne),
                 :precedence{ equal => "==" },
-                :assoc<left>,
             ),
             'infix:<<>' => Val::Sub::Builtin.new('infix:<<=>',
                 sub ($lhs, $rhs) {
@@ -205,7 +201,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Lt),
                 :precedence{ equal => "==" },
-                :assoc<left>,
             ),
             'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
                 sub ($lhs, $rhs) {
@@ -213,7 +208,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Le),
                 :precedence{ equal => "==" },
-                :assoc<left>,
             ),
             'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
                 sub ($lhs, $rhs) {
@@ -221,7 +215,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Gt),
                 :precedence{ equal => "==" },
-                :assoc<left>,
             ),
             'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
                 sub ($lhs, $rhs) {
@@ -229,7 +222,6 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Ge),
                 :precedence{ equal => "==" },
-                :assoc<left>,
             ),
 
             # cons precedence
@@ -253,7 +245,6 @@ class _007::Runtime::Builtins {
                     return wrap($lhs.value + $rhs.value);
                 },
                 :qtype(Q::Infix::Addition),
-                :assoc<left>,
             ),
             'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
                 sub ($lhs, $rhs) {
@@ -275,7 +266,6 @@ class _007::Runtime::Builtins {
                     return wrap($lhs.value - $rhs.value);
                 },
                 :qtype(Q::Infix::Subtraction),
-                :assoc<left>,
             ),
 
             # multiplicative precedence
@@ -288,7 +278,6 @@ class _007::Runtime::Builtins {
                     return wrap($lhs.value * $rhs.value);
                 },
                 :qtype(Q::Infix::Multiplication),
-                :assoc<left>,
             ),
             'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
                 sub ($lhs, $rhs) {
@@ -321,14 +310,12 @@ class _007::Runtime::Builtins {
                     return wrap(-$expr.value);
                 },
                 :qtype(Q::Prefix::Minus),
-                :assoc<left>,
             ),
             'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
                 sub ($a) {
                     return wrap(!$a.truthy)
                 },
                 :qtype(Q::Prefix::Not),
-                :assoc<left>,
             ),
 
             # postfixes
