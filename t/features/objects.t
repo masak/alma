@@ -12,9 +12,9 @@ use _007::Test;
         '{a: 1 }' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a() {}}' '(object (identifier "Object") (propertylist
-          (property "a" (block (parameterlist) (statementlist)))))'
-        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (block
-          (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist)))))'
+          (property "a" (sub (identifier "a") (block (parameterlist) (statementlist))))))'
+        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (sub (identifier "a") (block
+          (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist))))))'
     »;
 
     for @exprs -> $expr, $frag {
