@@ -152,15 +152,6 @@ class _007::Runtime::Builtins {
                     unless $b ~~ Val::Array;
                 return wrap([|$a.elements , |$b.elements]);
             },
-            'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
-                sub ($expr) {
-                    die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
-                        unless $expr ~~ Val::Int;
-                    return wrap(-$expr.value);
-                },
-                :qtype(Q::Prefix::Minus),
-                :assoc<left>,
-            ),
             'infix:<=>' => Val::Sub::Builtin.new('infix:<=>',
                 sub ($lhs, $rhs) {
                     # can't express this one as a built-in sub -- because the lhs is an lvalue
@@ -230,13 +221,6 @@ class _007::Runtime::Builtins {
                 :precedence{ equal => "==" },
                 :assoc<left>,
             ),
-            'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
-                sub ($a) {
-                    return wrap(!$a.truthy)
-                },
-                :qtype(Q::Prefix::Not),
-                :assoc<left>,
-            ),
             'infix:<::>' => Val::Sub::Builtin.new('infix:<::>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
@@ -256,6 +240,17 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Addition),
                 :assoc<left>,
+            ),
+            'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
+                        unless $lhs ~~ Val::Str;
+                    die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
+                        unless $rhs ~~ Val::Str;
+                    return wrap($lhs.value ~ $rhs.value);
+                },
+                :qtype(Q::Infix::Concat),
+                :precedence{ equal => "+" },
             ),
             'infix:<->' => Val::Sub::Builtin.new('infix:<->',
                 sub ($lhs, $rhs) {
@@ -279,17 +274,6 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Multiplication),
                 :assoc<left>,
             ),
-            'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
-                sub ($lhs, $rhs) {
-                    die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
-                        unless $lhs ~~ Val::Str;
-                    die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
-                        unless $rhs ~~ Val::Str;
-                    return wrap($lhs.value ~ $rhs.value);
-                },
-                :qtype(Q::Infix::Concat),
-                :precedence{ equal => "+" },
-            ),
             'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
@@ -311,6 +295,22 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
+            ),
+            'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
+                sub ($expr) {
+                    die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
+                        unless $expr ~~ Val::Int;
+                    return wrap(-$expr.value);
+                },
+                :qtype(Q::Prefix::Minus),
+                :assoc<left>,
+            ),
+            'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
+                sub ($a) {
+                    return wrap(!$a.truthy)
+                },
+                :qtype(Q::Prefix::Not),
+                :assoc<left>,
             ),
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
                 sub ($expr, $index) {
