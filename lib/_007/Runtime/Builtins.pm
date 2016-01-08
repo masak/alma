@@ -181,6 +181,7 @@ class _007::Runtime::Builtins {
                     return wrap(!equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ne),
+                :precedence{ equal => "==" },
                 :assoc<left>,
             ),
             'infix:<<>' => Val::Sub::Builtin.new('infix:<<=>',
@@ -188,6 +189,7 @@ class _007::Runtime::Builtins {
                     return wrap(less-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Lt),
+                :precedence{ equal => "==" },
                 :assoc<left>,
             ),
             'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
@@ -195,6 +197,7 @@ class _007::Runtime::Builtins {
                     return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Le),
+                :precedence{ equal => "==" },
                 :assoc<left>,
             ),
             'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
@@ -202,6 +205,7 @@ class _007::Runtime::Builtins {
                     return wrap(more-value($lhs, $rhs) )
                 },
                 :qtype(Q::Infix::Gt),
+                :precedence{ equal => "==" },
                 :assoc<left>,
             ),
             'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
@@ -209,6 +213,7 @@ class _007::Runtime::Builtins {
                     return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ge),
+                :precedence{ equal => "==" },
                 :assoc<left>,
             ),
             'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',

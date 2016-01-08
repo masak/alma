@@ -455,4 +455,26 @@ use _007::Test;
         "cons is looser than even the additive infixes (+ - ~)";
 }
 
+{
+    my $program = q:to/./;
+        say(1 == 2 != 3);
+        say(4 != 5 == 6);
+
+        say(0 == 1 < 1);
+        say(0 < 2 == 1);
+
+        say(1 < 2 <= 1);
+        say(0 <= 0 < 1);
+
+        say(1 <= 2 >= 2);
+        say(2 >= 2 <= 1);
+
+        say(1 >= 2 > 2);
+        say(2 > 2 >= 1);
+        .
+
+    outputs $program, "1\n0\n1\n1\n1\n0\n0\n1\n0\n0\n",
+        "all of the comparison operators evaluate from left to right";
+}
+
 done-testing;
