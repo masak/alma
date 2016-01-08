@@ -217,7 +217,7 @@ grammar _007::Parser::Syntax {
         }
     }
     token term:sub {
-        sub <.ws>
+        sub <.ws> <identifier>?
         :my $*insub = True;
         <.newpad>
         '(' ~ ')' <parameterlist>

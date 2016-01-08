@@ -446,18 +446,15 @@ class _007::Parser::Actions {
     }
 
     method term:sub ($/) {
+        my $name = Val::Str.new(:value(~($<identifier> // "(anon)")));
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my %static-lexpad = $*runtime.current-frame.pad;
         self.finish-block($block);
 
-        my $outer-frame = $*runtime.current-frame;
-        my $val;
-        make Q::Term::Sub.new(:$traitlist, :$block);
-        $val = Val::Sub.new(:name("(anon)"), :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+        make Q::Term::Sub.new(:$name, :$traitlist, :$block);
     }
 
     method unquote ($/) {

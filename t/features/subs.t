@@ -163,4 +163,26 @@ use _007::Test;
         "expression subs work";
 }
 
+{
+    my $program = q:to/./;
+        my f = sub g(x) { say(x) };
+        f("Mr Bond");
+        .
+
+    outputs $program,
+        "Mr Bond\n",
+        "expression subs can be named, too";
+}
+
+{
+    my $program = q:to/./;
+        my f = sub g(x) {};
+        say(f);
+        .
+
+    outputs $program,
+        "<sub g(x)>\n",
+        "...and they know their own name";
+}
+
 done-testing;

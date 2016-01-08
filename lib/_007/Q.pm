@@ -137,6 +137,7 @@ class Q::PropertyList does Q {
 }
 
 class Q::Term::Sub does Q::Term {
+    has Val::Str $.name;
     has $.traitlist = Q::TraitList.new;
     has $.block;
 
@@ -144,7 +145,7 @@ class Q::Term::Sub does Q::Term {
 
     method eval($runtime) {
         return Val::Sub.new(
-            :name("(anon)"),
+            :name($.name.value),
             :parameterlist($.block.parameterlist),
             :statementlist($.block.statementlist),
             :outer-frame($runtime.current-frame),
