@@ -512,4 +512,36 @@ use _007::Test;
     outputs $program, "0\nfoo\nbar\n", "assignment binds looser than all the other operators";
 }
 
+{
+    my $program = q:to/./;
+        for ^3 -> n {
+            say(n);
+        }
+        .
+
+    outputs $program, "0\n1\n2\n", "upto operator works";
+}
+
+{
+    my $program = q:to/./;
+        for ^0 -> n {
+            say(n);
+        }
+        for ^-3 -> n {
+            say(n);
+        }
+        .
+
+    outputs $program, "", "zero or negative numbers give an empty list for the upto operator";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (prefix:<^> (str "Mr Bond"))))
+        .
+
+    is-error $ast, X::TypeCheck, "can't upto a string (or other non-integer types)";
+}
+
 done-testing;

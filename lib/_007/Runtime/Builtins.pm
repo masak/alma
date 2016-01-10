@@ -317,6 +317,14 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Prefix::Not),
             ),
+            'prefix:<^>' => Val::Sub::Builtin.new('prefix:<^>',
+                sub ($n) {
+                    die X::TypeCheck.new(:operation<^>, :got($n), :expected(Val::Int))
+                        unless $n ~~ Val::Int;
+                    return wrap([^$n.value]);
+                },
+                :qtype(Q::Prefix::Upto),
+            ),
 
             # postfixes
             'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
@@ -375,6 +383,7 @@ class _007::Runtime::Builtins {
             Q::Infix::And,
             Q::Infix::Or,
             Q::Prefix::Not,
+            Q::Prefix::Upto,
             Q::Infix::Replicate,
             Q::Infix::ArrayReplicate,
             Q::Infix::Cons,

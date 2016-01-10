@@ -16,6 +16,7 @@ sub read(Str $ast) is export {
         sub            => Q::Term::Sub,
 
         'prefix:<->'   => Q::Prefix::Minus,
+        'prefix:<^>'   => Q::Prefix::Upto,
 
         'infix:<+>'    => Q::Infix::Addition,
         'infix:<->'    => Q::Infix::Subtraction,

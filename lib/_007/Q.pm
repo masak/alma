@@ -213,6 +213,8 @@ class Q::Prefix::Minus is Q::Prefix {}
 
 class Q::Prefix::Not is Q::Prefix {}
 
+class Q::Prefix::Upto is Q::Prefix {}
+
 class Q::Infix does Q::Expr {
     has $.identifier;
     has $.lhs;
