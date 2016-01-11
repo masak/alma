@@ -301,6 +301,14 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
             ),
+            'infix:<~~>' => Val::Sub::Builtin.new('infix:<~~>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
+                        unless $rhs ~~ Val::Type;
+
+                    return wrap($lhs ~~ $rhs.type);
+                }
+            ),
 
             # prefixes
             'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
@@ -382,6 +390,7 @@ class _007::Runtime::Builtins {
             Q::Infix::Le,
             Q::Infix::And,
             Q::Infix::Or,
+            Q::Infix::TypeEq,
             Q::Prefix::Not,
             Q::Prefix::Upto,
             Q::Infix::Replicate,
