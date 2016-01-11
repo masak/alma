@@ -544,4 +544,44 @@ use _007::Test;
     is-error $ast, X::TypeCheck, "can't upto a string (or other non-integer types)";
 }
 
+{
+    my $program = q:to/./;
+        my q = quasi @ Q::Infix { + }; say(q ~~ Q::Infix)
+        .
+
+    outputs $program, "1\n", "typecheck returns 1 on success";
+}
+
+{
+    my $program = q:to/./;
+        my q = quasi @ Q::Infix { + }; say(q ~~ Q::Prefix)
+        .
+
+    outputs $program, "0\n", "typecheck returns 0 on failure";
+}
+
+{
+    my $program = q:to/./;
+        my q = 42; say(q ~~ Int)
+        .
+
+    outputs $program, "1\n", "typecheck works for Val::Int";
+}
+
+{
+    my $program = q:to/./;
+        my q = [4, 2]; say(q ~~ Array)
+        .
+
+    outputs $program, "1\n", "typecheck works for Val::Array";
+}
+
+{
+    my $program = q:to/./;
+        my q = {}; say(q ~~ Object)
+        .
+
+    outputs $program, "1\n", "typecheck works for Val::Object";
+}
+
 done-testing;
