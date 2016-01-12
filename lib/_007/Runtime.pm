@@ -294,7 +294,7 @@ class _007::Runtime {
                 return Val::Array.new(:@elements);
             });
         }
-        elsif $obj.?properties{$propname} :exists {
+        elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
         elsif $propname eq "get" {
