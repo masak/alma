@@ -230,13 +230,13 @@ class _007::Runtime {
                 return Val::Int.new(:value($obj.elements.elems));
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "reversed" {
-            return Val::Sub::Builtin.new("reversed", sub () {
+        elsif $obj ~~ Val::Array && $propname eq "reverse" {
+            return Val::Sub::Builtin.new("reverse", sub () {
                 return Val::Array.new(:elements($obj.elements.reverse));
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "sorted" {
-            return Val::Sub::Builtin.new("sorted", sub () {
+        elsif $obj ~~ Val::Array && $propname eq "sort" {
+            return Val::Sub::Builtin.new("sort", sub () {
                 return Val::Array.new(:elements($obj.elements.sort));
             });
         }

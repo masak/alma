@@ -78,19 +78,19 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (array (int 1) (int 2)) (identifier "reversed")) (argumentlist))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (array (int 1) (int 2)) (identifier "reverse")) (argumentlist))))))
         .
 
-    is-result $ast, "[2, 1]\n", "reversed() works";
+    is-result $ast, "[2, 1]\n", "reverse() works";
 }
 
 {
     my $ast = q:to/./;
         (statementlist
-          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (array (int 2) (int 1)) (identifier "sorted")) (argumentlist))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (array (int 2) (int 1)) (identifier "sort")) (argumentlist))))))
         .
 
-    is-result $ast, "[1, 2]\n", "sorted() works";
+    is-result $ast, "[1, 2]\n", "sort() works";
 }
 
 {
