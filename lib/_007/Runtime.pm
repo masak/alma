@@ -190,6 +190,110 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
+        elsif $obj ~~ Val::Int && $propname eq "abs" {
+            return Val::Sub::Builtin.new("abs", sub () {
+                return Val::Int.new(:value($obj.value.abs));
+            });
+        }
+        elsif $obj ~~ Val::Int && $propname eq "chr" {
+            return Val::Sub::Builtin.new("chr", sub () {
+                return Val::Str.new(:value($obj.value.chr));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "ord" {
+            return Val::Sub::Builtin.new("ord", sub () {
+                return Val::Int.new(:value($obj.value.ord));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "chars" {
+            return Val::Sub::Builtin.new("chars", sub () {
+                return Val::Int.new(:value($obj.value.chars));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "uc" {
+            return Val::Sub::Builtin.new("uc", sub () {
+                return Val::Str.new(:value($obj.value.uc));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "lc" {
+            return Val::Sub::Builtin.new("lc", sub () {
+                return Val::Str.new(:value($obj.value.lc));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "trim" {
+            return Val::Sub::Builtin.new("trim", sub () {
+                return Val::Str.new(:value($obj.value.trim));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "elems" {
+            return Val::Sub::Builtin.new("elems", sub () {
+                return Val::Int.new(:value($obj.elements.elems));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "reversed" {
+            return Val::Sub::Builtin.new("reversed", sub () {
+                return Val::Array.new(:elements($obj.elements.reverse));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "sorted" {
+            return Val::Sub::Builtin.new("sorted", sub () {
+                return Val::Array.new(:elements($obj.elements.sort));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "concat" {
+            return Val::Sub::Builtin.new("concat", sub ($array) {
+                die X::TypeCheck.new(:operation<concat>, :got($array), :expected(Val::Array))
+                    unless $array ~~ Val::Array;
+                return Val::Array.new(:elements([|$obj.elements , |$array.elements]));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "join" {
+            return Val::Sub::Builtin.new("join", sub ($sep) {
+                return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "split" {
+            return Val::Sub::Builtin.new("split", sub ($sep) {
+                my @elements = (Val::Str.new(:value($_)) for $obj.value.split($sep.value));
+                return Val::Array.new(:@elements);
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "index" {
+            return Val::Sub::Builtin.new("index", sub ($substr) {
+                return Val::Int.new(:value($obj.value.index($substr.value) // -1));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "substr" {
+            return Val::Sub::Builtin.new("substr", sub ($pos, $chars?) {
+                return Val::Str.new(:value($obj.value.substr(
+                    $pos.value,
+                    $chars.defined
+                        ?? $chars.value
+                        !! $obj.value.chars)));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "charat" {
+            return Val::Sub::Builtin.new("charat", sub ($pos) {
+                my $s = $obj.value;
+
+                die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
+                    if $pos.value >= $s.chars;
+
+                return Val::Str.new(:value($s.substr($pos.value, 1)));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "filter" {
+            return Val::Sub::Builtin.new("filter", sub ($fn) {
+                my @elements = $obj.elements.grep({ self.call($fn, [$_]).truthy });
+                return Val::Array.new(:@elements);
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "map" {
+            return Val::Sub::Builtin.new("map", sub ($fn) {
+                my @elements = $obj.elements.map({ self.call($fn, [$_]) });
+                return Val::Array.new(:@elements);
+            });
+        }
         elsif $obj.?properties{$propname} :exists {
             return $obj.properties{$propname};
         }

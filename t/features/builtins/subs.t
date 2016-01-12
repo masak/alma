@@ -152,4 +152,23 @@ use _007::Test;
     is-result $ast, "<type Sub>\n", "builtin sub type() returns the same as ordinary sub";
 }
 
+ {
+     my $ast = q:to/./;
+         (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (identifier "type") (argumentlist (postfix:<()> (identifier "int") (argumentlist (str "6"))))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (identifier "type") (argumentlist (postfix:<()> (identifier "int") (argumentlist (str "-6")))))))))
+        .
+
+    is-result $ast, "<type Int>\n<type Int>\n", "int() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (identifier "type") (argumentlist (postfix:<()> (identifier "str") (argumentlist (int 6)))))))))
+        .
+
+    is-result $ast, "<type Str>\n", "str() works";
+}
+
 done-testing;

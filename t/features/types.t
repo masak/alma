@@ -24,9 +24,9 @@ use _007::Test;
 
 {
     outputs 'say("Mr \"Bond")', qq[Mr "Bond\n], qq[\\" gets unescaped correctly to "];
-    outputs 'say(chars("Mr \"Bond"))', qq[8\n], qq[...and counts as one character];
+    outputs 'say("Mr \"Bond".chars())', qq[8\n], qq[...and counts as one character];
     outputs 'say("Mr \\\\Bond")', qq[Mr \\Bond\n], qq[\\\\ gets unescaped correctly to \\];
-    outputs 'say(chars("Mr \\Bond"))', qq[8\n], qq[...and counts as one character];
+    outputs 'say("Mr \\Bond".chars())', qq[8\n], qq[...and counts as one character];
 }
 
 {

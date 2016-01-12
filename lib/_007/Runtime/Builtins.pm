@@ -121,36 +121,12 @@ class _007::Runtime::Builtins {
                     :got($_),
                     :expected("something that can be converted to an int"));
             },
-            abs      => -> $arg { $arg.value.abs },
             min      => -> $a, $b { min($a.value, $b.value) },
             max      => -> $a, $b { max($a.value, $b.value) },
-            chr      => -> $arg { $arg.value.chr },
-            ord      => -> $arg { $arg.value.ord },
-            chars    => -> $arg { $arg.value.Str.chars },
-            uc       => -> $arg { $arg.value.uc },
-            lc       => -> $arg { $arg.value.lc },
-            trim     => -> $arg { $arg.value.trim },
-            elems    => -> $arg { $arg.elements.elems },
-            reversed => -> $arg { $arg.elements.reverse },
-            sorted   => -> $arg { $arg.elements>>.value.sort },
-            join     => -> $a, $sep { $a.elements.join($sep.value.Str) },
-            split    => -> $s, $sep { $s.value.split($sep.value) },
-            index    => -> $s, $substr { $s.value.index($substr.value) // -1 },
-            substr   => sub ($s, $pos, $chars?) { $s.value.substr($pos.value, $chars.defined ?? $chars.value !! $s.value.chars) },
-            charat   => -> $s, $pos { $s.value.comb[$pos.value] // die X::Subscript::TooLarge.new(:value($pos.value), :length($s.value.elems)) },
-            filter   => -> $fn, $a { $a.elements.grep({ $.runtime.call($fn, [$_]).truthy }) },
-            map      => -> $fn, $a { $a.elements.map({ $.runtime.call($fn, [$_]) }) },
             melt     => sub ($q) {
                 die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Expr))
                     unless $q ~~ Q::Expr;
                 return $q.eval($.runtime);
-            },
-            concat   => sub ($a, $b) {
-                die X::TypeCheck.new(:operation<concat>, :got($a), :expected(Val::Array))
-                    unless $a ~~ Val::Array;
-                die X::TypeCheck.new(:operation<concat>, :got($b), :expected(Val::Array))
-                    unless $b ~~ Val::Array;
-                return wrap([|$a.elements , |$b.elements]);
             },
 
             # OPERATORS
