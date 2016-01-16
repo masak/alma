@@ -49,9 +49,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
       example](https://github.com/masak/007/issues/54#issuecomment-151440144)
       requires macros to be ready enough, which they sort of are (synthetic
       macros now work) and sort of are not (still waiting for quasi unquotes).
-    * Largely, for the examples it would really help if we had a big swath of
-      [useful operators](https://github.com/masak/007/issues/57). The champion
-      for this one is **sergot**.
     * As part of this, we should also add the [man or boy
       test](https://github.com/masak/007/issues/22), to show that 007 is no
       worse than Algol.
