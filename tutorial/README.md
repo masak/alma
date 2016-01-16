@@ -158,19 +158,6 @@ Subroutines can return values.
 
     return 42;          Q::Statement::Return
 
-A return statement finds the lexically surrounding subroutine, and
-returns from it. Blocks are transparent to this process; a `return`
-simply doesn't see blocks.
-
-    sub outer() {
-        my inner = {
-            return 42;
-        }
-        inner();
-        say("not printed");
-    }
-    say(outer());
-
 ## `BEGIN` and constants
 
 `BEGIN` blocks are blocks of code that run as soon as the parser has
