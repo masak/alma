@@ -1,6 +1,17 @@
 use v6;
 use Test;
 
+sub find($dir, Regex $pattern) {
+    my @targets = dir($dir);
+    gather while @targets {
+        my $file = @targets.shift;
+        take $file if $file ~~ $pattern;
+        if $file.IO ~~ :d {
+            @targets.append: dir($file);
+        }
+    }
+}
+
 my @taboo-words = <
     ident
     paramlist
@@ -9,17 +20,16 @@ my @taboo-words = <
     arglist
     args
     proplist
+    qx[find
 >;
 
-my $files =
-    qx[find -name \*.pm -or -name \*.t]\
-        .lines\
+my $files = find(".", /[".pm" | ".t"] $/)\
         .grep({ $_ !~~ / "taboo-words.t" / })\
         .join(" ");
 
 for @taboo-words -> $WORD {
     my @lines-with-taboo-words =
-        qqx[grep -wrin $WORD $files].lines\
+        qqx[grep -Fwrin $WORD $files].lines\
             # exception: `signature.params` happens in two places;
             # that's the Perl 6 Signature class
             .grep({ $_ !~~ / "signature.params" / });

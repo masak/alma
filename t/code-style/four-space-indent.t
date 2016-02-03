@@ -1,25 +1,38 @@
 use v6;
 use Test;
 
-my @lines-with-unorthodox-indent =
-    qx[find lib/ -name \*.pm | xargs -n1 perl6 -e'
-        sub MAIN($file) {
-            for $file.IO.lines.kv -> $i, $line {
-                next unless $line ~~ /^ \h+/;
+sub find($dir, Regex $pattern) {
+    my @targets = dir($dir);
+    gather while @targets {
+        my $file = @targets.shift;
+        take $file if $file ~~ $pattern;
+        if $file.IO ~~ :d {
+            @targets.append: dir($file);
+        }
+    }
+}
 
-                my $indent = ~$/;
-                my $loc = "$file {$i + 1}";
-                if $indent ~~ /\t/ {
-                    say "$loc: TAB character in indent";
-                }
-                elsif $indent !~~ /^ " "* $/ {
-                    say "$loc: non-space character in indent";
-                }
-                elsif (my $k = $indent.chars) !%% 4 {
-                    say "$loc: {$k}-space indent";
-                }
-            }
-        }'].lines;
+my @lines-with-unorthodox-indent;
+for find("lib/", /".pm" $/) -> $file {
+    for $file.IO.lines.kv -> $i, $line {
+        next unless $line ~~ /^ \h+/;
+
+        my $indent = ~$/;
+        my $loc = "$file {$i + 1}";
+        if $indent ~~ /\t/ {
+            push @lines-with-unorthodox-indent,
+                "$loc: TAB character in indent";
+        }
+        elsif $indent !~~ /^ " "* $/ {
+            push @lines-with-unorthodox-indent,
+                "$loc: non-space character in indent";
+        }
+        elsif (my $k = $indent.chars) !%% 4 {
+            push @lines-with-unorthodox-indent,
+                "$loc: {$k}-space indent";
+        }
+    }
+}
 
 is @lines-with-unorthodox-indent.join("\n"), "", "all lines have four-space indents";
 
