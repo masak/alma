@@ -21,6 +21,7 @@ my @taboo-words = <
     args
     proplist
     qx[find
+    qx!find
 >;
 
 my $files = find(".", /[".pm" | ".t"] $/)\
