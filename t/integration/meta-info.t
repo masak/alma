@@ -1,8 +1,18 @@
 use v6;
 use Test;
 
-my @lib-pms =
-    qx!find lib/ -name \*.pm!.lines;
+sub find($dir, Regex $pattern) {
+    my @targets = dir($dir);
+    gather while @targets {
+        my $file = @targets.shift;
+        take $file if $file ~~ $pattern;
+        if $file.IO ~~ :d {
+            @targets.append: dir($file);
+        }
+    }
+}
+
+my @lib-pms = find("lib", / ".pm" $/)».Str;
 
 my @meta-info-pms =
     qx!perl6 -ne'if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ { say ~$0 }' META.info!.lines;
