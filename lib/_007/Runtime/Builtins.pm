@@ -351,6 +351,7 @@ class _007::Runtime::Builtins {
             Q::ArgumentList,
             Q::Block,
             Q::CompUnit,
+            Q::Expr::StatementListAdapter,
             Q::Identifier,
             Q::Infix,
             Q::Infix::Addition,

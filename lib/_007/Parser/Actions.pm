@@ -334,7 +334,17 @@ class _007::Parser::Actions {
             && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
                 my @arguments = $postfix.argumentlist.arguments.elements;
                 my $qtree = $*runtime.call($macro, @arguments);
-                make $qtree;
+
+                if $qtree ~~ Q::Statement {
+                    make Q::Expr::StatementListAdapter.new(
+                        :statementlist(Q::StatementList.new(
+                            :statements(Val::Array.new(:elements([$qtree])))
+                        ))
+                    );
+                }
+                else {
+                    make $qtree;
+                }
             }
             elsif $postfix ~~ Q::Postfix::Index {
                 make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));

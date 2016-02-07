@@ -651,3 +651,12 @@ class Q::StatementList does Q {
         }
     }
 }
+
+class Q::Expr::StatementListAdapter does Q {
+    has $.statementlist;
+
+    method eval($runtime) {
+        $.statementlist.run($runtime);
+        return Val::None.new;
+    }
+}
