@@ -182,6 +182,38 @@ class _007::Runtime {
 
     method property($obj, Str $propname) {
         if $obj ~~ Q {
+            if $propname eq "detach" {
+                sub aname($attr) { $attr.name.substr(2) }
+                sub avalue($attr, $obj) { $attr.get_value($obj) }
+
+                sub interpolate($thing) {
+                    return $thing.new(:elements($thing.elements.map(&interpolate)))
+                        if $thing ~~ Val::Array;
+
+                    return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
+                        if $thing ~~ Val::Object;
+
+                    return $thing
+                        if $thing ~~ Val;
+
+                    return $thing.new(:name($thing.name), :frame(Val::None.new))
+                        if $thing ~~ Q::Identifier;
+
+                    return $thing
+                        if $thing ~~ Q::Unquote;
+
+                    my %attributes = $thing.attributes.map: -> $attr {
+                        aname($attr) => interpolate(avalue($attr, $thing))
+                    };
+
+                    $thing.new(|%attributes);
+                }
+
+                return Val::Sub::Builtin.new("detach", sub () {
+                    return interpolate($obj);
+                });
+            }
+
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
 

@@ -190,5 +190,30 @@ use _007::Test;
     is-result $ast, "[2, 3, 4]\n[1, 2, 3]\n", "map() works";
 }
 
+{
+    my $program = q:to/./;
+        macro so_hygienic() {
+            my x = "yay, clean!";
+            return quasi {
+                say(x);
+            };
+        }
+
+        macro so_unhygienic() {
+            my x = "something is implemented wrong";
+            return quasi {
+                say(x)
+            }.detach();
+        }
+
+        my x = "that's gross!";
+        so_hygienic();    # yay, clean!
+        so_unhygienic();  # that's gross!
+        .
+
+    outputs $program, "yay, clean!\nthat's gross!\n",
+        "detaching a qtree makes its identifiers unhygienic";
+}
+
 done-testing;
 
