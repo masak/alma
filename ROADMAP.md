@@ -31,8 +31,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
-* We want [a `.detach()` operation on
-  Qtrees](https://github.com/masak/007/issues/62).
 * Also want to close [a philosophical
   issue](https://github.com/masak/007/issues/7) about the statement/expression
   discrepancy that's exhibited in quasi blocks.
