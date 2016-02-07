@@ -424,15 +424,15 @@ class Q::Term::Quasi does Q::Term {
     }
 }
 
-class Q::ParameterList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.parameters = Val::Array.new;
-}
-
 class Q::Parameter does Q does Q::Declaration {
     has $.identifier;
 
     method is-assignable { True }
+}
+
+class Q::ParameterList does Q {
+    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
+    has Val::Array $.parameters = Val::Array.new;
 }
 
 class Q::ArgumentList does Q {
