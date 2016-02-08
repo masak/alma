@@ -20,11 +20,12 @@ use _007::Test;
             moo();
             say(agent_name);
         }
+        say(agent_name);
         .
 
     outputs
         $program,
-        "James Bond\n",
+        "James Bond\nPink Panther!\n",
         "injecting a `my` with an unhygienic identifier causes a declaration";
 }
 

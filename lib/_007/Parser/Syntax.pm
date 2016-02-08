@@ -34,7 +34,7 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    sub declare(Q::Declaration $decltype, $symbol) {
+    our sub declare(Q::Declaration $decltype, $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $block = $*runtime.current-frame();

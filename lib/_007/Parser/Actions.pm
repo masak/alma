@@ -1,4 +1,5 @@
 use _007::Q;
+use _007::Parser::Syntax;
 use _007::Parser::Exceptions;
 
 class _007::Parser::Actions {
@@ -334,6 +335,10 @@ class _007::Parser::Actions {
             && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
                 my @arguments = $postfix.argumentlist.arguments.elements;
                 my $qtree = $*runtime.call($macro, @arguments);
+
+                if $qtree ~~ Q::Statement::My {
+                    _007::Parser::Syntax::declare(Q::Statement::My, ~$qtree.identifier.name);
+                }
 
                 if $qtree ~~ Q::Statement {
                     make Q::Expr::StatementListAdapter.new(
