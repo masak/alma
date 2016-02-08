@@ -39,9 +39,8 @@ class _007::Parser::Actions {
             :identifier($<identifier>.ast),
             :expr($<EXPR>.ast));
 
-        my $name = $<identifier>.ast.name.value;
         my $value = $<EXPR>.ast.eval($*runtime);
-        $*runtime.put-var($name, $value);
+        $*runtime.put-var($<identifier>.ast, $value);
     }
 
     method statement:expr ($/) {
@@ -140,7 +139,7 @@ class _007::Parser::Actions {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
         }
 
-        $*runtime.put-var($name, $val);
+        $*runtime.put-var($identifier, $val);
 
         maybe-install-operator($name, $<traitlist><trait>);
     }
@@ -471,7 +470,7 @@ class _007::Parser::Actions {
             my $outer-frame = $*runtime.current-frame;  # XXX: this is not really the outer frame, is it?
             my %static-lexpad = $*runtime.current-frame.pad;
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
-            $*runtime.put-var($name, $val);
+            $*runtime.put-var($<identifier>.ast, $val);
         }
         self.finish-block($block);
 

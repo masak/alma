@@ -7,7 +7,9 @@ class Frame {
 }
 
 constant NO_OUTER = {};
-constant RETURN_TO = "--RETURN-TO--";
+constant RETURN_TO = Q::Identifier.new(
+    :name(Val::Str.new(:value("--RETURN-TO--"))),
+    :frame(Val::None.new));
 
 class _007::Runtime {
     has $.output;
@@ -37,7 +39,10 @@ class _007::Runtime {
         my $frame = Frame.new(:$block);
         @!frames.push($frame);
         for $block.static-lexpad.kv -> $name, $value {
-            self.declare-var($name, $value);
+            my $identifier = Q::Identifier.new(
+                :name(Val::Str.new(:value($name))),
+                :frame(Val::None.new));
+            self.declare-var($identifier, $value);
         }
         for $block.statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
@@ -53,11 +58,14 @@ class _007::Runtime {
                     :%static-lexpad,
                     :$outer-frame
                 );
-                self.declare-var($name, $val);
+                self.declare-var(.identifier, $val);
             }
         }
         if $block ~~ Val::Sub {
-            self.declare-var($block.name, $block);
+            my $identifier = Q::Identifier.new(
+                :name(Val::Str.new(:value($block.name))),
+                :$frame);
+            self.declare-var($identifier, $block);
         }
     }
 
@@ -90,8 +98,12 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
-    method put-var(Str $name, $value) {
-        my %pad := self!find($name, self.current-frame);
+    method put-var(Q::Identifier $identifier, $value) {
+        my $name = $identifier.name.value;
+        my $frame = $identifier.frame ~~ Val::None
+            ?? self.current-frame
+            !! $identifier.frame;
+        my %pad := self!find($name, $frame);
         %pad{$name} = $value;
     }
 
@@ -106,11 +118,12 @@ class _007::Runtime {
         }
     }
 
-    method declare-var(Str $name, $value?) {
-        self.current-frame.pad{$name} = Val::None.new;
-        if defined $value {
-            self.put-var($name, $value);
-        }
+    method declare-var(Q::Identifier $identifier, $value?) {
+        my $name = $identifier.name.value;
+        my $frame = $identifier.frame ~~ Val::None
+            ?? self.current-frame
+            !! $identifier.frame;
+        $frame.pad{$name} = $value // Val::None.new;
     }
 
     method declared($name) {
@@ -129,7 +142,10 @@ class _007::Runtime {
 
     method load-builtins {
         for $!builtins.get-builtins -> Pair (:key($name), :value($subval)) {
-            self.declare-var($name, $subval);
+            my $identifier = Q::Identifier.new(
+                :name(Val::Str.new(:value($name))),
+                :frame(Val::None.new));
+            self.declare-var($identifier, $subval);
         }
     }
 
@@ -144,8 +160,7 @@ class _007::Runtime {
             unless $paramcount == $argcount;
         self.enter($c);
         for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
-            my $name = $param.identifier.name.value;
-            self.declare-var($name, $arg);
+            self.declare-var($param.identifier, $arg);
         }
     }
 

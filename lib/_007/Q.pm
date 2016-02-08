@@ -249,7 +249,7 @@ class Q::Infix::Assignment is Q::Infix {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
         my $value = $.rhs.eval($runtime);
-        $runtime.put-var($.lhs.name.value, $value);
+        $runtime.put-var($.lhs, $value);
         return $value;
     }
 }
@@ -455,7 +455,7 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
         return
             unless $.expr !~~ Val::None;
         my $value = $.expr.eval($runtime);
-        $runtime.put-var($.identifier.name.value, $value);
+        $runtime.put-var($.identifier, $value);
     }
 }
 
@@ -495,7 +495,7 @@ class Q::Statement::If does Q::Statement {
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.identifier.name.value, $arg);
+                $runtime.declare-var($param.identifier, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -569,7 +569,7 @@ class Q::Statement::For does Q::Statement {
             for split_elements($array.elements, $count) -> $arg {
                 $runtime.enter($c);
                 for @($c.parameterlist.parameters.elements) Z $arg.list -> ($param, $real_arg) {
-                    $runtime.declare-var($param.identifier.name.value, $real_arg);
+                    $runtime.declare-var($param.identifier, $real_arg);
                 }
                 $.block.statementlist.run($runtime);
                 $runtime.leave;
@@ -593,7 +593,7 @@ class Q::Statement::While does Q::Statement {
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             for @($c.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.identifier.name.value, $arg);
+                $runtime.declare-var($param.identifier, $arg);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;

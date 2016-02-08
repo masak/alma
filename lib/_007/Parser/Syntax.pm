@@ -37,10 +37,13 @@ grammar _007::Parser::Syntax {
     our sub declare(Q::Declaration $decltype, $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
-        my $block = $*runtime.current-frame();
+        my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $*runtime.declare-var($symbol);
+            if %*assigned{$frame ~ $symbol};
+        my $identifier = Q::Identifier.new(
+            :name(Val::Str.new(:value($symbol))),
+            :$frame);
+        $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
 

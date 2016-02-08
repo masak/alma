@@ -29,4 +29,25 @@ use _007::Test;
         "injecting a `my` with an unhygienic identifier causes a declaration";
 }
 
+{
+    my $program = q:to/./;
+        macro mar() {
+            return quasi {
+                my agent_name = "ninja, cus I'm invisible!";
+            }
+        }
+
+        my agent_name = "Bond. James Bond.";
+        {
+            mar();
+            say(agent_name);
+        }
+        .
+
+    outputs
+        $program,
+        "Bond. James Bond.\n",
+        "injecting a `my` from a quasi remains hygienic";
+}
+
 done-testing;

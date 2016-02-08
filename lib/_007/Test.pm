@@ -159,7 +159,7 @@ sub check(Q::CompUnit $ast, $runtime) {
             if $runtime.declared-locally($symbol);
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($symbol);
+        $runtime.declare-var($my.identifier);
 
         if $my.expr !~~ Val::None {
             handle($my.expr);
@@ -197,7 +197,7 @@ sub check(Q::CompUnit $ast, $runtime) {
         handle($sub.block);
         $runtime.leave();
 
-        $runtime.declare-var($name, $val);
+        $runtime.declare-var($sub.identifier, $val);
     }
 
     multi handle(Q::Statement::Macro $macro) {
@@ -212,7 +212,7 @@ sub check(Q::CompUnit $ast, $runtime) {
         handle($macro.block);
         $runtime.leave();
 
-        $runtime.declare-var($name, $val);
+        $runtime.declare-var($macro.identifier, $val);
     }
 
     multi handle(Q::Statement::If $if) {
