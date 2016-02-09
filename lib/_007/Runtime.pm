@@ -83,12 +83,12 @@ class _007::Runtime {
         @!frames[*-1];
     }
 
-    method !find(Str $symbol, $frame is copy) {
-        self!maybe-find($symbol, $frame)
+    method !find-pad(Str $symbol, $frame is copy) {
+        self!maybe-find-pad($symbol, $frame)
             // die X::Undeclared.new(:$symbol);
     }
 
-    method !maybe-find(Str $symbol, $frame is copy) {
+    method !maybe-find-pad(Str $symbol, $frame is copy) {
         repeat until $frame === NO_OUTER {
             return $frame.pad
                 if $frame.pad{$symbol} :exists;
@@ -103,17 +103,17 @@ class _007::Runtime {
         my $frame = $identifier.frame ~~ Val::None
             ?? self.current-frame
             !! $identifier.frame;
-        my %pad := self!find($name, $frame);
+        my %pad := self!find-pad($name, $frame);
         %pad{$name} = $value;
     }
 
     method get-var(Str $name, $frame = self.current-frame) {
-        my %pad := self!find($name, $frame);
+        my %pad := self!find-pad($name, $frame);
         return %pad{$name};
     }
 
     method maybe-get-var(Str $name) {
-        if self!maybe-find($name, self.current-frame) -> %pad {
+        if self!maybe-find-pad($name, self.current-frame) -> %pad {
             return %pad{$name};
         }
     }
@@ -127,7 +127,7 @@ class _007::Runtime {
     }
 
     method declared($name) {
-        so self!maybe-find($name, self.current-frame);
+        so self!maybe-find-pad($name, self.current-frame);
     }
 
     method declared-locally($name) {
