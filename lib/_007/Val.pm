@@ -62,7 +62,7 @@ class Val::Array does Val {
             return "[...]";
         }
         %*stringification-seen{self.WHICH}++;
-        "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]"
+        return "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]";
     }
 
     method Str {
