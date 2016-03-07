@@ -293,6 +293,7 @@ sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     my $actual-ast = $parser.parse($program);
+    my %*stringification-seen;
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
 }

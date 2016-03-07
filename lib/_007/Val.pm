@@ -58,6 +58,10 @@ class Val::Array does Val {
     has @.elements;
 
     method quoted-Str {
+        if %*stringification-seen{self.WHICH} {
+            return "[...]";
+        }
+        %*stringification-seen{self.WHICH}++;
         "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]"
     }
 

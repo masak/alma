@@ -11,4 +11,8 @@ use _007::Test;
     outputs 'macro mc(x, y, z) {}; say(mc)', "<macro mc(x, y, z)>\n", "macro with three parameters";
 }
 
+{
+    outputs 'my foo = [0, 0, 7]; foo[2] = foo; say(foo)', "[0, 0, [...]]\n", "array with reference to itself";
+}
+
 done-testing;
