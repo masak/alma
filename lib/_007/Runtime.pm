@@ -406,4 +406,16 @@ class _007::Runtime {
             die X::PropertyNotFound.new(:$propname);
         }
     }
+
+    method put-property($obj, Str $propname, $newvalue) {
+        if $obj ~~ Q {
+            die "We don't handle assigning to Q object properties yet";
+        }
+        elsif $obj !~~ Val::Object {
+            die "We don't handle assigning to non-Val::Object types yet";
+        }
+        else {
+            $obj.properties{$propname} = $newvalue;
+        }
+    }
 }

@@ -346,7 +346,6 @@ class Q::Postfix::Index is Q::Postfix {
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
                 my $propname = $property.value;
-                die "Better to die here for now until we have tests for this";
                 $runtime.put-property($_, $propname, $value);
             }
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
@@ -379,6 +378,16 @@ class Q::Postfix::Property is Q::Postfix {
         my $obj = $.operand.eval($runtime);
         my $propname = $.property.name.value;
         $runtime.property($obj, $propname);
+    }
+
+    method put-value($value, $runtime) {
+        given $.operand.eval($runtime) {
+            when Val::Object | Q {
+                my $propname = $.property.name.value;
+                $runtime.put-property($_, $propname, $value);
+            }
+            die "We don't handle this case yet"; # XXX: think more about this case
+        }
     }
 }
 
