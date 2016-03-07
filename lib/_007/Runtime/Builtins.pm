@@ -51,6 +51,12 @@ class _007::Runtime::Builtins {
         multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
         multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
         multi equal-value(Val::Array $l, Val::Array $r) {
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
+
             sub equal-at-index($i) {
                 equal-value($l.elements[$i], $r.elements[$i]);
             }
@@ -59,6 +65,8 @@ class _007::Runtime::Builtins {
                 |(^$l.elements).map(&equal-at-index);
         }
         multi equal-value(Val::Object $l, Val::Object $r) {
+            # XXX: also need to plug %*equality-seen into this one
+
             sub equal-at-key(Str $key) {
                 equal-value($l.properties{$key}, $r.properties{$key});
             }
@@ -161,12 +169,14 @@ class _007::Runtime::Builtins {
             # comparison precedence
             'infix:<==>' => Val::Sub::Builtin.new('infix:<==>',
                 sub ($lhs, $rhs) {
+                    my %*equality-seen;
                     return wrap(equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
             ),
             'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
                 sub ($lhs, $rhs) {
+                    my %*equality-seen;
                     return wrap(!equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ne),
@@ -181,6 +191,7 @@ class _007::Runtime::Builtins {
             ),
             'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
                 sub ($lhs, $rhs) {
+                    my %*equality-seen;
                     return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Le),
@@ -195,6 +206,7 @@ class _007::Runtime::Builtins {
             ),
             'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
                 sub ($lhs, $rhs) {
+                    my %*equality-seen;
                     return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Ge),
