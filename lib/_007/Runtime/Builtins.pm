@@ -65,7 +65,11 @@ class _007::Runtime::Builtins {
                 |(^$l.elements).map(&equal-at-index);
         }
         multi equal-value(Val::Object $l, Val::Object $r) {
-            # XXX: also need to plug %*equality-seen into this one
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
 
             sub equal-at-key(Str $key) {
                 equal-value($l.properties{$key}, $r.properties{$key});

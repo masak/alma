@@ -232,6 +232,18 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
+          (my (identifier "o3") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+
+          (stexpr (infix:<=> (postfix:<.> (identifier "o3") (identifier "y")) (identifier "o3")))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "o3") (identifier "o3"))))))
+        .
+
+    is-result $ast, "1\n", "nested object equality";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "Int") (identifier "Int")))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<==> (identifier "Int") (identifier "Str"))))))
         .
