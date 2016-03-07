@@ -376,25 +376,19 @@ class _007::Runtime {
         }
         elsif $propname eq "update" {
             return Val::Sub::Builtin.new("update", sub ($newprops) {
-                    my @properties = $obj.properties.keys;
-                    sub updated($key) {
-                        $newprops.properties{$key} // $obj.properties{$key}
+                    for $obj.properties.keys {
+                        $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
                     }
-                    return Val::Object.new(:properties(@properties.map({
-                        $_ => updated($_)
-                    })));
+                    return $obj;
                 }
             );
         }
         elsif $propname eq "extend" {
             return Val::Sub::Builtin.new("extend", sub ($newprops) {
-                    my @properties = $obj.properties.keys;
-                    my @newproperties = $newprops.properties.keys;
-                    return Val::Object.new(:properties(|@properties.map({
-                        $_ => $obj.properties{$_}
-                    }), |@newproperties.map({
-                        $_ => $newprops.properties{$_}
-                    })));
+                    for $newprops.properties.keys {
+                        $obj.properties{$_} = $newprops.properties{$_};
+                    }
+                    return $obj;
                 }
             );
         }
