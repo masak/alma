@@ -106,7 +106,7 @@ class Q::Identifier does Q::Term {
         );
     }
 
-    method put($value, $runtime) {
+    method put-value($value, $runtime) {
         $runtime.put-var(self, $value);
     }
 }
@@ -253,7 +253,7 @@ class Q::Infix::Assignment is Q::Infix {
         die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
             unless $.lhs ~~ Q::Identifier;
         my $value = $.rhs.eval($runtime);
-        $.lhs.put($value, $runtime);
+        $.lhs.put-value($value, $runtime);
         return $value;
     }
 }
@@ -459,7 +459,7 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
         return
             unless $.expr !~~ Val::None;
         my $value = $.expr.eval($runtime);
-        $.identifier.put($value, $runtime);
+        $.identifier.put-value($value, $runtime);
     }
 }
 
