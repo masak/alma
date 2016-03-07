@@ -249,9 +249,7 @@ class _007::Parser::Actions {
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
 
-                if $infix ~~ Q::Infix::Assignment {
-                    die X::Immutable.new(:method<assignment>, :typename($t1.^name))
-                        unless $t1 ~~ Q::Identifier;
+                if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
                     my $block = $*runtime.current-frame();
                     my $symbol = $t1.name.value;
                     die X::Undeclared.new(:$symbol)

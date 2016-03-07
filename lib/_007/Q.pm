@@ -250,8 +250,6 @@ class Q::Infix::Cons is Q::Infix {}
 
 class Q::Infix::Assignment is Q::Infix {
     method eval($runtime) {
-        die "Needs to be an identifier on the left"     # XXX: Turn this into an X::
-            unless $.lhs ~~ Q::Identifier;
         my $value = $.rhs.eval($runtime);
         $.lhs.put-value($value, $runtime);
         return $value;
@@ -326,6 +324,30 @@ class Q::Postfix::Index is Q::Postfix {
                     if $property !~~ Val::Str;
                 my $propname = $property.value;
                 return $runtime.property($_, $propname);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+        }
+    }
+
+    method put-value($value, $runtime) {
+        given $.operand.eval($runtime) {
+            when Val::Array {
+                my $index = $.index.eval($runtime);
+                die X::Subscript::NonInteger.new
+                    if $index !~~ Val::Int;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
+                    if $index.value >= .elements;
+                die X::Subscript::Negative.new(:$index, :type([]))
+                    if $index.value < 0;
+                .elements[$index.value] = $value;
+            }
+            when Val::Object | Q {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                die "Better to die here for now until we have tests for this";
+                $runtime.put-property($_, $propname, $value);
             }
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
         }
