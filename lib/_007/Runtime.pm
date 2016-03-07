@@ -341,6 +341,19 @@ class _007::Runtime {
                 return Val::Array.new(:@elements);
             });
         }
+        elsif $obj ~~ Val::Array && $propname eq "push" {
+            return Val::Sub::Builtin.new("push", sub ($newelem) {
+                $obj.elements.push($newelem);
+                return Val::None.new;
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "pop" {
+            return Val::Sub::Builtin.new("pop", sub () {
+                die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
+                    if $obj.elements.elems == 0;
+                return $obj.elements.pop();
+            });
+        }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }

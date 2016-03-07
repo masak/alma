@@ -215,5 +215,38 @@ use _007::Test;
         "detaching a qtree makes its identifiers unhygienic";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array (int 1) (int 2)))
+          (stexpr (postfix:<()> (postfix:<.> (identifier "a") (identifier "push")) (argumentlist (int 3))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "a")))))
+        .
+
+    is-result $ast, "[1, 2, 3]\n", "Array.push() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array (int 1) (int 2) (int 5)))
+          (my (identifier "x") (postfix:<()> (postfix:<.> (identifier "a") (identifier "pop")) (argumentlist)))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "a")))))
+        .
+
+    is-result $ast, "5\n[1, 2]\n", "Array.pop() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array))
+          (stexpr (postfix:<()> (postfix:<.> (identifier "a") (identifier "pop")) (argumentlist))))
+        .
+
+    is-error $ast, X::Cannot::Empty, "cannot Array.pop() an empty array";
+}
+
 done-testing;
 
