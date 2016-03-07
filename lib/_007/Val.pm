@@ -81,12 +81,16 @@ class Val::Object does Val {
     has $.id = $global-object-id++;
 
     method Str {
-        '{' ~ %.properties.map({
+        if %*stringification-seen{self.WHICH} {
+            return "\{...\}";
+        }
+        %*stringification-seen{self.WHICH}++;
+        return '{' ~ %.properties.map({
             my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                 ?? .key
                 !! Val::Str.new(value => .key).quoted-Str;
             "{$key}: {.value.quoted-Str}"
-        }).sort.join(', ') ~ '}'
+        }).sort.join(', ') ~ '}';
     }
 
     method quoted-Str {
