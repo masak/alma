@@ -354,6 +354,19 @@ class _007::Runtime {
                 return $obj.elements.pop();
             });
         }
+        elsif $obj ~~ Val::Array && $propname eq "shift" {
+            return Val::Sub::Builtin.new("shift", sub () {
+                die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
+                    if $obj.elements.elems == 0;
+                return $obj.elements.shift();
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "unshift" {
+            return Val::Sub::Builtin.new("unshift", sub ($newelem) {
+                $obj.elements.unshift($newelem);
+                return Val::None.new;
+            });
+        }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }

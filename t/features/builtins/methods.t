@@ -248,5 +248,38 @@ use _007::Test;
     is-error $ast, X::Cannot::Empty, "cannot Array.pop() an empty array";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array (int 1) (int 2)))
+          (stexpr (postfix:<()> (postfix:<.> (identifier "a") (identifier "unshift")) (argumentlist (int 3))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "a")))))
+        .
+
+    is-result $ast, "[3, 1, 2]\n", "Array.unshift() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array (int 1) (int 2) (int 5)))
+          (my (identifier "x") (postfix:<()> (postfix:<.> (identifier "a") (identifier "shift")) (argumentlist)))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "x"))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "a")))))
+        .
+
+    is-result $ast, "1\n[2, 5]\n", "Array.shift() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (array))
+          (stexpr (postfix:<()> (postfix:<.> (identifier "a") (identifier "shift")) (argumentlist))))
+        .
+
+    is-error $ast, X::Cannot::Empty, "cannot Array.shift() an empty array";
+}
+
 done-testing;
 
