@@ -69,10 +69,11 @@ strict, in the sense that `7` and `"7"` are not considered equal under
 `==`, and an array is never equal to an int, not even the length of the
 array.
 
-The only thing that can be assigned to is variables. Arrays are
-immutable values, and you can't assign to `ar[3]`, for example.
-
-    ar[3] = "hammer";   # error; can't touch this
+You can assign to individual variables, like `name`, or long strings
+of postfix operators, like `employee[n - 1].boss.name`. There's no
+autovivification like in Perl &mdash; in the previous example,
+`employee[n - 1].boss` needs to already exist (though its `.name`
+property doesn't need to exist).
 
 Operands don't need to be simple values. Arbitrarily large expressions
 can be built. Parentheses can be used to explicitly show evaluation
