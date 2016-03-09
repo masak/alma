@@ -311,12 +311,23 @@ class _007::Runtime {
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "substr" {
-            return Val::Sub::Builtin.new("substr", sub ($pos, $chars?) {
+            return Val::Sub::Builtin.new("substr", sub ($pos, $chars) {
                 return Val::Str.new(:value($obj.value.substr(
                     $pos.value,
-                    $chars.defined
-                        ?? $chars.value
-                        !! $obj.value.chars)));
+                    $chars.value)));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "prefix" {
+            return Val::Sub::Builtin.new("prefix", sub ($pos) {
+                return Val::Str.new(:value($obj.value.substr(
+                    0,
+                    $pos.value + 1)));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "suffix" {
+            return Val::Sub::Builtin.new("suffix", sub ($pos) {
+                return Val::Str.new(:value($obj.value.substr(
+                    $pos.value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "charat" {

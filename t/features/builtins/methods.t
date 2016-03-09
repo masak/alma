@@ -141,11 +141,28 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "substr")) (argumentlist (int 0) (int 1))))))
-          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "substr")) (argumentlist (int 1))))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "substr")) (argumentlist (int 0) (int 5)))))))
         .
 
-    is-result $ast, "a\nbc\nabc\n", "substr() works";
+    is-result $ast, "a\nabc\n", "substr() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "prefix")) (argumentlist (int 1)))))))
+        .
+
+    is-result $ast, "ab\n", "prefix() works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "suffix")) (argumentlist (int 1)))))))
+        .
+
+    is-result $ast, "bc\n", "suffix() works";
 }
 
 {
