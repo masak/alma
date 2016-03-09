@@ -153,7 +153,7 @@ use _007::Test;
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (str "abc") (identifier "prefix")) (argumentlist (int 1)))))))
         .
 
-    is-result $ast, "ab\n", "prefix() works";
+    is-result $ast, "a\n", "prefix() works";
 }
 
 {

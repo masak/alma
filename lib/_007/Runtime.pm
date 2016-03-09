@@ -321,7 +321,7 @@ class _007::Runtime {
             return Val::Sub::Builtin.new("prefix", sub ($pos) {
                 return Val::Str.new(:value($obj.value.substr(
                     0,
-                    $pos.value + 1)));
+                    $pos.value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "suffix" {
