@@ -207,4 +207,24 @@ use _007::Test;
         "...but not outside of the sub";
 }
 
+{
+    my $program = q:to/./;
+        sub f(x,) { }
+        sub g(x,y,) { }
+        .
+
+    outputs $program, "", "trailing commas are allowed in parameterlist";
+}
+
+{
+    my $program = q:to/./;
+        sub f(x)   { say(1) }
+        sub g(x,y) { say(2) }
+        f(4,);
+        g(4,5,);
+        .
+
+    outputs $program, "1\n2\n", "...and in argumentlist";
+}
+
 done-testing;
