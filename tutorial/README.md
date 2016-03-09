@@ -234,7 +234,9 @@ The following built-in types have methods associated with them:
     .split(sep)
     .index(substr)
     .charat(pos)
-    .substr(pos, chars?)
+    .substr(pos, chars)
+    .prefix(pos)
+    .suffix(pos)
 
 ### `Array`
 
