@@ -234,7 +234,7 @@ grammar _007::Parser::Syntax {
         <.finishpad>
     }
 
-    token propertylist { [<.ws> <property>]* % [\h* ','] <.ws> }
+    token propertylist { [<.ws> <property>]* %% [\h* ','] <.ws> }
 
     token unquote { '{{{' <EXPR> [:s "@" <identifier> ]? '}}}' }
 
@@ -292,13 +292,13 @@ grammar _007::Parser::Syntax {
     }
 
     rule argumentlist {
-        <EXPR> *% ','
+        <EXPR> *%% ','
     }
 
     rule parameterlist {
         [<parameter>
         { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
-        ]* % ','
+        ]* %% ','
     }
 
     rule parameter {

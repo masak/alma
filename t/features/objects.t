@@ -6,6 +6,7 @@ use _007::Test;
     my @exprs = «
         '{}'  '(object (identifier "Object") (propertylist))'
         '{"a": 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{"a": 1,}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a}' '(object (identifier "Object") (propertylist (property "a" (identifier "a"))))'
         '{a : 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{ a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
