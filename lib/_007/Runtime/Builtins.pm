@@ -132,7 +132,7 @@ class _007::Runtime::Builtins {
                 die X::TypeCheck.new(
                     :operation<int()>,
                     :got($_),
-                    :expected("something that can be converted to an int"));
+                    :expected(Val::Int));
             },
             min      => -> $a, $b { min($a.value, $b.value) },
             max      => -> $a, $b { max($a.value, $b.value) },
