@@ -89,9 +89,9 @@ grammar _007::Parser::Syntax {
                 unless $*insub;
         }
     }
-    token statement:if {
-        if <.ws> <xblock>
-        [  <.ws> else <.ws>
+    rule statement:if {
+        if <xblock>
+        [  else
             [
                 | <else=block>
                 | <else=statement:if>
