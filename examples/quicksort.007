@@ -1,0 +1,29 @@
+sub quicksort(array) {
+    if array.elems() > 1 {
+        my pivot = array[0];
+        my less = [];
+        my equal = [];
+        my greater = [];
+        for array -> x {
+            if x < pivot {
+                less.push(x);
+            }
+            if x == pivot {
+                equal.push(x);
+            }
+            if x > pivot {
+                greater.push(x);
+            }
+        }
+        less = quicksort(less);
+        greater = quicksort(greater);
+        array = less.concat(equal.concat(greater));
+    }
+    return array;
+}
+
+my unsorted = (^20).shuffle();
+say("Unsorted: " ~ str(unsorted));
+say("Sorting...");
+my sorted = quicksort(unsorted);
+say("Sorted: " ~ str(sorted));
