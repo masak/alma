@@ -120,7 +120,7 @@ class _007::Runtime::Builtins {
             },
             prompt => sub ($arg) {
                 return wrap(prompt($arg));
-            }
+            },
             type => -> $arg { Val::Type.of($arg.WHAT) },
             str => &str,
             int => sub ($_) {
