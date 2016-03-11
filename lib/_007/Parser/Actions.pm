@@ -445,6 +445,30 @@ class _007::Parser::Actions {
 
     method term:quasi ($/) {
         my $qtype = Val::Str.new(:value(~($<qtype> // "")));
+
+        if $<block> -> $block {
+
+            # If the quasi consists of a block with a single expression statement, it's very
+            # likely that what we want to inject is the expression, not the block.
+            #
+            # The exception to that heuristic is when we've explicitly specified `@ Q::Block`
+            # on the quasi.
+            #
+            # This is not a "nice" solution, nor a comprehensive one. In the end it's connected
+            # to the troubled musings in <https://github.com/masak/007/issues/7>, which aren't
+            # completely solved yet.
+
+            if $qtype.value ne "Q::Block"
+                && $block.ast ~~ Q::Block
+                && $block.ast.statementlist.statements.elements.elems == 1
+                && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
+
+                my $contents = $block.ast.statementlist.statements.elements[0].expr;
+                make Q::Term::Quasi.new(:$contents, :$qtype);
+                return;
+            }
+        }
+
         for <argumentlist block compunit EXPR infix parameter parameterlist
             postfix prefix property propertylist statement statementlist
             term trait traitlist unquote> -> $subrule {
