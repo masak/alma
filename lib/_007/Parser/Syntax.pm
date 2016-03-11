@@ -89,6 +89,11 @@ grammar _007::Parser::Syntax {
                 unless $*insub;
         }
     }
+
+    token statement:throw {
+        throw [<.ws> <EXPR>]?
+    }
+
     token statement:if {
         if <.ws> <xblock>
         [  <.ws> else <.ws>

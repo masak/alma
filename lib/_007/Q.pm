@@ -649,6 +649,20 @@ class Q::Statement::Return does Q::Statement {
     }
 }
 
+class Q::Statement::Throw does Q::Statement {
+    has $.expr = Val::None.new;
+
+    method run($runtime) {
+        my $value = $.expr ~~ Val::None
+            ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
+            !! $.expr.eval($runtime);
+        die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
+            if $value !~~ Val::Exception;
+
+        die $value.message.value;
+    }
+}
+
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;

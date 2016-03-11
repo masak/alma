@@ -358,6 +358,7 @@ class _007::Runtime::Builtins {
             Val::Str,
             Val::Sub,
             Val::Type,
+            Val::Exception,
         ;
 
         for @val-types -> $type {
@@ -413,6 +414,7 @@ class _007::Runtime::Builtins {
             Q::Statement::My,
             Q::Statement::Return,
             Q::Statement::Sub,
+            Q::Statement::Throw,
             Q::Statement::While,
             Q::StatementList,
             Q::Term::Array,

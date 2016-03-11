@@ -148,6 +148,10 @@ class _007::Parser::Actions {
         make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
     }
 
+    method statement:throw ($/) {
+        make Q::Statement::Throw.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
+    }
+
     method statement:if ($/) {
         my %parameters = $<xblock>.ast;
         %parameters<else> = $<else> :exists

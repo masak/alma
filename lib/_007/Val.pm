@@ -163,3 +163,19 @@ class Val::Macro is Val::Sub {
 
     method Str { "<macro {$.name}{$.pretty-parameters}>" }
 }
+
+class Val::Exception does Val {
+    has Val::Str $.message;
+
+    method Str {
+        return "Exception \{message: {$.message.quoted-Str}\}";
+    }
+
+    method quoted-Str {
+        self.Str
+    }
+
+    method truthy {
+        ?%.properties
+    }
+}
