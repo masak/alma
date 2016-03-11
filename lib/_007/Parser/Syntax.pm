@@ -68,7 +68,7 @@ grammar _007::Parser::Syntax {
     }
     token statement:block { <pblock> }
     rule statement:sub-or-macro {
-        $<routine>=(sub|macro) [<identifier> || <.panic("identifier")>]
+        $<routine>=(sub|macro)» [<identifier> || <.panic("identifier")>]
         :my $*insub = True;
         {
             declare($<routine> eq "sub"
