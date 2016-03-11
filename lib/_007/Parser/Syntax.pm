@@ -122,7 +122,7 @@ grammar _007::Parser::Syntax {
         '{' ~ '}' <statementlist>
     }
     token block {
-        <?[{]> <.newpad> <blockoid> <.finishpad>    # }], vim
+        <!before '{{{'> <?[{]> <.newpad> <blockoid> <.finishpad>    # } }}}, vim
     }
 
     # "pointy block"
