@@ -322,6 +322,16 @@ class _007::Runtime {
                     $chars.value)));
             });
         }
+        elsif $obj ~~ Val::Str && $propname eq "contains" {
+            return Val::Sub::Builtin.new("contains", sub ($substr) {
+                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
+                    unless $substr ~~ Val::Str;
+
+                return Val::Int.new(:value(
+                        $obj.value.contains($substr.value) ?? 1 !! 0;
+                ));
+            });
+        }
         elsif $obj ~~ Val::Str && $propname eq "prefix" {
             return Val::Sub::Builtin.new("prefix", sub ($pos) {
                 return Val::Str.new(:value($obj.value.substr(
