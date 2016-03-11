@@ -287,6 +287,11 @@ class _007::Runtime {
                 return Val::Array.new(:elements($obj.elements.sort));
             });
         }
+        elsif $obj ~~ Val::Array && $propname eq "shuffle" {
+            return Val::Sub::Builtin.new("shuffle", sub () {
+                return Val::Array.new(:elements($obj.elements.pick(*)));
+            });
+        }
         elsif $obj ~~ Val::Array && $propname eq "concat" {
             return Val::Sub::Builtin.new("concat", sub ($array) {
                 die X::TypeCheck.new(:operation<concat>, :got($array), :expected(Val::Array))
