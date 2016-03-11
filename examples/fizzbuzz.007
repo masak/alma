@@ -1,0 +1,29 @@
+sub infix:<%%>(l, r) {
+    (sub remove(d) {
+        if d * r * 2 <= l {
+            remove(d * 2);
+        }
+        if d * r <= l {
+            l = l - d * r;
+        }
+    })(1);
+
+    return l == 0;
+}
+
+my n = 1;
+while n <= 100 {
+    if n %% 15 {
+        say("fizzbuzz");
+    }
+    else if n %% 3 {
+        say("fizz");
+    }
+    else if n %% 5 {
+        say("buzz");
+    }
+    else {
+        say(n);
+    }
+    n = n + 1;
+}
