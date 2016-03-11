@@ -6,12 +6,14 @@ use _007::Test;
     my @exprs = «
         '{}'  '(object (identifier "Object") (propertylist))'
         '{"a": 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{"a": 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:<+> (int 1) (int 2)))))'
         '{"a": 1,}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a}' '(object (identifier "Object") (propertylist (property "a" (identifier "a"))))'
         '{a : 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{ a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1 }' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
+        '{a: 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:<+> (int 1) (int 2)))))'
         '{a() {}}' '(object (identifier "Object") (propertylist
           (property "a" (sub (identifier "a") (block (parameterlist) (statementlist))))))'
         '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (sub (identifier "a") (block

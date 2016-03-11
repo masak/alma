@@ -239,8 +239,8 @@ grammar _007::Parser::Syntax {
     token unquote { '{{{' <EXPR> [:s "@" <identifier> ]? '}}}' }
 
     proto token property {*}
-    rule property:str-expr { <key=str> ':' <value=term> }
-    rule property:identifier-expr { <identifier> ':' <value=term> }
+    rule property:str-expr { <key=str> ':' <value=EXPR> }
+    rule property:identifier-expr { <identifier> ':' <value=EXPR> }
     rule property:method {
         <identifier>
         <.newpad>
