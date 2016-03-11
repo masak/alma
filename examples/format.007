@@ -1,13 +1,13 @@
 macro format(fmt, args) {
     sub replaceAll(input, output, transform) {
+        if !input.contains("{") {
+            return output ~ input;
+        }
         my openBracePos = input.index("{");
-        if openBracePos == -1 {
+        if !input.suffix(openBracePos).contains("}") {
             return output ~ input;
         }
         my closeBracePos = input.suffix(openBracePos).index("}");
-        if closeBracePos == -1 {
-            return output ~ input;
-        }
         return replaceAll(
             input.suffix(openBracePos + closeBracePos + 1),
             output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)),
