@@ -1,0 +1,16 @@
+# Inspired by http://www.atariarchives.org/basicgames/showpage.php?page=117
+
+say("Please think of a number between 1 and 100.");
+say("");
+
+my m3 = int(prompt("Your number divided by 3 has a remainder of: "));
+my m5 = int(prompt("Your number divided by 5 has a remainder of: "));
+my m7 = int(prompt("Your number divided by 7 has a remainder of: "));
+say("");
+
+my solution = 70*m3 + 21*m5 + 15*m7;
+while solution >= 105 {
+    solution = solution - 105;
+}
+
+say("Your number was " ~ str(solution) ~ ".");
