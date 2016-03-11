@@ -55,8 +55,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 ### General cleanup that should happen before v1.0.0
 
 * [More Q node test coverage](https://github.com/masak/007/issues/52).
-* Looking through Q names and similar names, [maximizing for
-  consistency](https://github.com/masak/007/issues/81).
 * Various things to make the parser give better errors, like [this
   issue](https://github.com/masak/007/issues/10) and [this
   issue](https://github.com/masak/007/issues/48) and [this
