@@ -11,3 +11,4 @@ use _007::Test;
     throws-exception $program, $msg, "throwing an exception";
 }
 
+done-testing;
