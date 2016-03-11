@@ -409,7 +409,10 @@ class Q::Unquote::Infix is Q::Unquote {
 }
 
 class Q::Term::Quasi does Q::Term {
+    has $.qtype;
     has $.contents;
+
+    method attribute-order { <qtype contents> }
 
     method eval($runtime) {
         sub interpolate($thing) {

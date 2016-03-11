@@ -444,12 +444,13 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
+        my $qtype = Val::Str.new(:value(~($<qtype> // "")));
         for <argumentlist block compunit EXPR infix parameter parameterlist
             postfix prefix property propertylist statement statementlist
             term trait traitlist unquote> -> $subrule {
 
             if $/{$subrule} -> $submatch {
-                make Q::Term::Quasi.new(:contents($submatch.ast));
+                make Q::Term::Quasi.new(:contents($submatch.ast), :$qtype);
                 return;
             }
         }
