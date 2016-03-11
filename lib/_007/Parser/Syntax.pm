@@ -105,6 +105,17 @@ grammar _007::Parser::Syntax {
         ] ?
     }
 
+    token statement:try {
+        try <.ws> <try=.block>
+        [<.ws> <catch>]?
+    }
+
+    token catch {
+        catch <.ws> <identifier>
+        { declare(Q::Parameter, $<identifier>.ast.name.value); }
+        <.ws> <block>
+    }
+
     token statement:for {
         for <.ws> <xblock>
     }

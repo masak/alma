@@ -572,6 +572,49 @@ class Q::Statement::If does Q::Statement {
     }
 }
 
+class Q::Statement::Try does Q::Statement {
+    has $.block;
+    has $.catch = NONE;
+
+    method attribute-order { <block catch> }
+
+    method run($runtime) {
+        my $c = $.block.reify($runtime);
+        $runtime.enter($c);
+
+        my $exception;
+        {
+            $.block.statementlist.run($runtime);
+            CATCH {
+                $exception = $_;
+                if $exception ~~ X::Control::Return {
+                    .throw();
+                }
+
+                if $.catch !~~ Val::None {
+                    my $b = $.catch.block.reify($runtime);
+                    $runtime.enter($b);
+                    my $message = Val::Str.new(:value($exception.msg));
+                    $runtime.declare-var($.catch.identifier, Val::Exception.new(:$message));
+                    $.catch.block.statementlist.run($runtime);
+                    $runtime.leave;
+                }
+
+                default {} # to mark the Perl 6 exception as handled
+            }
+        }
+
+        $runtime.leave;
+    }
+}
+
+class Q::Statement::Catch does Q::Statement {
+    has $.identifier;
+    has $.block;
+
+    method attribute-order { <identifier block> }
+}
+
 class Q::Statement::Block does Q::Statement {
     has $.block;
 

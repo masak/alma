@@ -232,6 +232,22 @@ class _007::Parser::Actions {
         make Q::Statement::If.new(|%parameters);
     }
 
+    method statement:try ($/) {
+        my $block = $<try>.ast;
+        my $catch = $<catch> :exists
+            ?? make $<catch>.ast
+            !! NONE;
+
+        make Q::Statement::Try.new(:$block, :$catch);
+    }
+
+    method catch ($/) {
+        my $identifier = $<identifier>.ast;
+        my $block = $<block>.ast;
+
+        make Q::Statement::Catch.new(:$identifier, :$block);
+    }
+
     method statement:for ($/) {
         make Q::Statement::For.new(|$<xblock>.ast);
     }

@@ -386,6 +386,9 @@ class _007::Runtime {
                 return NONE;
             });
         }
+        elsif $obj ~~ Val::Exception && $propname eq "message" {
+            return $obj.message;
+        }
         elsif $obj ~~ Val::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
         }
