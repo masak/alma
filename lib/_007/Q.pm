@@ -41,6 +41,14 @@ class X::Associativity::Conflict is Exception {
     method message { "The operator already has a defined associativity" }
 }
 
+class X::_007::RuntimeException is Exception {
+    has $.msg;
+
+    method message {
+        $.msg.Str;
+    }
+}
+
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
@@ -659,7 +667,7 @@ class Q::Statement::Throw does Q::Statement {
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die $value.message.value;
+        die X::_007::RuntimeException.new(:msg($value.message.value));
     }
 }
 
