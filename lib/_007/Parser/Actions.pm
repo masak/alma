@@ -161,6 +161,15 @@ class _007::Parser::Actions {
         make Q::Statement::If.new(|%parameters);
     }
 
+    method statement:try ($/) {
+        my $block = $<block>.ast;
+        my $finally = $<finally> :exists
+            ?? $<finally>.ast
+            !! Val::None.new();
+
+        make Q::Statement::Try.new(:$block, :$finally);
+    }
+
     method statement:for ($/) {
         make Q::Statement::For.new(|$<xblock>.ast);
     }

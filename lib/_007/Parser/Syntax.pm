@@ -104,6 +104,13 @@ grammar _007::Parser::Syntax {
         ] ?
     }
 
+    token statement:try {
+        try <.ws> <block>
+        [   <.ws> finally <.ws>
+            <finally=.block>
+        ] ?
+    }
+
     token statement:for {
         for <.ws> <xblock>
     }

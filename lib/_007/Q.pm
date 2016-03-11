@@ -555,6 +555,22 @@ class Q::Statement::If does Q::Statement {
     }
 }
 
+class Q::Statement::Try does Q::Statement {
+    has $.block;
+    has $.finally = Val::None.new;
+
+    method attribute-order { <block finally> }
+
+    method run($runtime) {
+        my $c = $.block.eval($runtime);
+        $runtime.enter($c);
+        $.block.statementlist.run($runtime);
+
+        $.finally.statementlist.run($runtime);
+        $runtime.leave;
+    }
+}
+
 class Q::Statement::Block does Q::Statement {
     has $.block;
 
