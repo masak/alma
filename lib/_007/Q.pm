@@ -455,7 +455,7 @@ class Q::Term::Quasi does Q::Term {
             $thing.new(|%attributes);
         }
 
-        if $.contents ~~ Q::Unquote {   # special exception: `quasi @ Q::Unquote`
+        if $.qtype.value eq "Q::Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
         return interpolate($.contents);
