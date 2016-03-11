@@ -334,7 +334,7 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     $runtime.run($ast);
 
     CATCH {
-        when X::AdHoc {
+        when X::_007::RuntimeException {
             is .message, $message, "passing the right Exception's message";
             pass $desc;
         }
