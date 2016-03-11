@@ -325,3 +325,20 @@ sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
 
     is $output.result, $expected, $desc;
 }
+
+sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $output = StrOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $parser = _007.parser(:$runtime);
+    my $ast = $parser.parse($program);
+    $runtime.run($ast);
+
+    CATCH {
+        when X::AdHoc {
+            is .message, $message, "passing the right Exception's message";
+            pass $desc;
+        }
+    }
+
+    flunk $desc;
+}
