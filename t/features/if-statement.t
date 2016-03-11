@@ -115,5 +115,17 @@ use _007::Test;
     is-result $ast, "else-if\n", "if-else-if-else statements run else-if-clause";
 }
 
+{
+    my $program = q:to/./;
+        if 0 {
+        }
+        say("no parsefail");
+        .
+
+    outputs
+        $program,
+        "no parsefail\n",
+        "regression test -- newline after an if block is enough, no semicolon needed";
+}
 
 done-testing;
