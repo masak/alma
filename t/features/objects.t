@@ -58,7 +58,7 @@ use _007::Test;
             (stexpr (postfix:<.> (identifier "o") (identifier "a"))))
         .
 
-    is-error $ast, X::PropertyNotFound, "can't access non-existing property (dot syntax)";
+    is-error $ast, X::Property::NotFound, "can't access non-existing property (dot syntax)";
 }
 
 {
@@ -67,7 +67,7 @@ use _007::Test;
            (stexpr (postfix:<.> (int 42) (identifier "a"))))
         .
 
-    is-error $ast, X::PropertyNotFound, "can't access property on Val::Int (dot syntax)";
+    is-error $ast, X::Property::NotFound, "can't access property on Val::Int (dot syntax)";
 }
 
 {
@@ -102,7 +102,7 @@ use _007::Test;
             (stexpr (postfix:<[]> (identifier "o") (str "b"))))
         .
 
-    is-error $ast, X::PropertyNotFound, "can't access non-existing property (brackets syntax)";
+    is-error $ast, X::Property::NotFound, "can't access non-existing property (brackets syntax)";
 }
 
 {

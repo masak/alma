@@ -28,8 +28,7 @@ class X::ParameterMismatch is Exception {
     }
 }
 
-# RAKUDO: rename to X::Property::NotFound once [RT #126827] has been fixed
-class X::PropertyNotFound is Exception {
+class X::Property::NotFound is Exception {
     has $.propname;
 
     method message {

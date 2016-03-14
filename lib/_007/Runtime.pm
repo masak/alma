@@ -232,7 +232,7 @@ class _007::Runtime {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
 
-            die X::PropertyNotFound.new(:$propname)
+            die X::Property::NotFound.new(:$propname)
                 unless %known-properties{$propname};
 
             return $obj."$propname"();
@@ -436,7 +436,7 @@ class _007::Runtime {
             return $obj.id;
         }
         else {
-            die X::PropertyNotFound.new(:$propname);
+            die X::Property::NotFound.new(:$propname);
         }
     }
 
