@@ -45,4 +45,38 @@ use _007::Test;
     outputs $program, "42\n", "finally returns value before try";
 }
 
+{
+    my $program = q:to/./;
+        sub shoot() {
+            try {
+                return 41;
+            }
+            catch e {
+                return 7;
+            }
+        }
+        say(shoot());
+        .
+
+    outputs $program, "7\n", "single catch";
+}
+
+{
+    my $program = q:to/./;
+        sub shoot() {
+            try {
+                return 41;
+            }
+            catch e {
+            }
+            catch e {
+                return 7;
+            }
+        }
+        say(shoot());
+        .
+
+    outputs $program, "7\n", "multiple catches";
+}
+
 done-testing;

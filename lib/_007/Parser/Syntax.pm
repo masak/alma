@@ -105,7 +105,10 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:try {
-        try <.ws> <block>
+        try <.ws> <try=block>
+        [   <.ws> catch <.ws> <identifier> <.ws>
+            <catch=block>
+        ] *
         [   <.ws> finally <.ws>
             <finally=.block>
         ] ?

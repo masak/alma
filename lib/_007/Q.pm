@@ -557,6 +557,7 @@ class Q::Statement::If does Q::Statement {
 
 class Q::Statement::Try does Q::Statement {
     has $.block;
+    has $.catches = Val::None.new;
     has $.finally = Val::None.new;
 
     method attribute-order { <block finally> }
@@ -565,6 +566,7 @@ class Q::Statement::Try does Q::Statement {
         my $c = $.block.eval($runtime);
         $runtime.enter($c);
 
+        # XXX: store more exceptions ?
         my $exception;
         {
             $.block.statementlist.run($runtime);
@@ -574,11 +576,15 @@ class Q::Statement::Try does Q::Statement {
             }
         }
 
+        if $exception.defined && $.catches !~~ Val::None {
+            for $.catches.elements -> $catch {
+                $catch.statementlist.run($runtime);
+            }
+        }
+
         $.finally.statementlist.run($runtime)
             unless $.finally ~~ Val::None;
 
-        # XXX: check what exception is this and handle it
-        # move it up
         $exception.throw if $exception.defined;
 
         $runtime.leave;
