@@ -199,9 +199,11 @@ class _007::Parser::Actions {
     }
     method pblock ($/) {
         if $<parameterlist> {
-            make Q::Block.new(
+            my $block = Q::Block.new(
                 :parameterlist($<parameterlist>.ast),
                 :statementlist($<blockoid>.ast));
+            make $block;
+            self.finish-block($block);
         } else {
             make $<block>.ast;
         }
