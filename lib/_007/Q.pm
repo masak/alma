@@ -564,9 +564,22 @@ class Q::Statement::Try does Q::Statement {
     method run($runtime) {
         my $c = $.block.eval($runtime);
         $runtime.enter($c);
-        $.block.statementlist.run($runtime);
 
-        $.finally.statementlist.run($runtime);
+        my $return;
+        {
+            $.block.statementlist.run($runtime);
+            $.finally.statementlist.run($runtime)
+                unless $.finally ~~ Val::None;
+
+            CATCH {
+                when X::Control::Return {
+                    $return = $_;
+                    .resume;
+                }
+            }
+        }
+        $return.throw if $return.defined;
+
         $runtime.leave;
     }
 }
