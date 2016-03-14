@@ -564,11 +564,13 @@ class _007::Parser::Actions {
     }
 
     method property:method ($/) {
+        my $block = Q::Block.new(
+            :parameterlist($<parameterlist>.ast),
+            :statementlist($<blockoid>.ast));
         make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value(Q::Term::Sub.new(
             :identifier(Q::Identifier.new(:name(Val::Str.new(:value(~$<identifier>))))),
-            :block(Q::Block.new(
-                :parameterlist($<parameterlist>.ast),
-                :statementlist($<blockoid>.ast))))));
+            :$block)));
+        self.finish-block($block);
     }
 
     method infix($/) {
