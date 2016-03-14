@@ -565,20 +565,21 @@ class Q::Statement::Try does Q::Statement {
         my $c = $.block.eval($runtime);
         $runtime.enter($c);
 
-        my $return;
+        my $exception;
         {
             $.block.statementlist.run($runtime);
-            $.finally.statementlist.run($runtime)
-                unless $.finally ~~ Val::None;
-
             CATCH {
-                when X::Control::Return {
-                    $return = $_;
-                    .resume;
-                }
+                $exception = $_;
+                .resume;
             }
         }
-        $return.throw if $return.defined;
+
+        $.finally.statementlist.run($runtime)
+            unless $.finally ~~ Val::None;
+
+        # XXX: check what exception is this and handle it
+        # move it up
+        $exception.throw if $exception.defined;
 
         $runtime.leave;
     }
