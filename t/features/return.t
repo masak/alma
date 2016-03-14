@@ -53,22 +53,6 @@ use _007::Test;
           (stsub (identifier "f") (block (parameterlist) (statementlist
             (my (identifier "b") (block (parameterlist) (statementlist
               (return (int 5)))))
-            (stsub (identifier "g") (block (parameterlist) (statementlist
-              (stexpr (postfix:<()> (identifier "b") (argumentlist))))))
-            (stexpr (postfix:<()> (identifier "g") (argumentlist)))
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "Dead code. Should have returned from f.")))))))
-          (stexpr (postfix:<()> (identifier "f") (argumentlist))))
-        .
-
-    is-result $ast, "", "return statements bind lexically to their surrounding subroutine";
-}
-
-{
-    my $ast = q:to/./;
-        (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
-            (my (identifier "b") (block (parameterlist) (statementlist
-              (return (int 5)))))
             (return (identifier "b")))))
           (my (identifier "c") (postfix:<()> (identifier "f") (argumentlist)))
           (stexpr (postfix:<()> (identifier "c") (argumentlist))))
