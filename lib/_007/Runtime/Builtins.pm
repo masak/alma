@@ -371,6 +371,7 @@ class _007::Runtime::Builtins {
         my @q-types =
             Q::ArgumentList,
             Q::Block,
+            Q::Catch,
             Q::CompUnit,
             Q::Expr::StatementListAdapter,
             Q::Identifier,
@@ -418,6 +419,7 @@ class _007::Runtime::Builtins {
             Q::Statement::Return,
             Q::Statement::Sub,
             Q::Statement::Throw,
+            Q::Statement::Try,
             Q::Statement::While,
             Q::StatementList,
             Q::Term::Array,

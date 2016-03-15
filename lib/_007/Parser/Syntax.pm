@@ -114,7 +114,7 @@ grammar _007::Parser::Syntax {
     token catch {
         catch <.ws> <identifier> <.ws>
         { declare(Q::Catch, $<identifier>.Str); }
-              <block>
+            <block>
     }
 
     token statement:for {
