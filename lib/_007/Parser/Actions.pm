@@ -163,14 +163,20 @@ class _007::Parser::Actions {
 
     method statement:try ($/) {
         my $block = $<try>.ast;
-        my $catches = $<catch>.elems
-            ?? Val::Array.new(:elements($<catch>».ast))
+        my $catch = $<catch> :exists
+            ?? make $<catch>.ast
             !! Val::None.new();
         my $finally = $<finally> :exists
             ?? $<finally>.ast
             !! Val::None.new();
 
-        make Q::Statement::Try.new(:$block, :$catches, :$finally);
+        make Q::Statement::Try.new(:$block, :$catch, :$finally);
+    }
+    method catch ($/) {
+        my $identifier = $<identifier>.ast;
+        my $block = $<block>.ast;
+
+        make Q::Statement::Catch.new(:$identifier, :$block);
     }
 
     method statement:for ($/) {

@@ -557,38 +557,51 @@ class Q::Statement::If does Q::Statement {
 
 class Q::Statement::Try does Q::Statement {
     has $.block;
-    has $.catches = Val::None.new;
-    has $.finally = Val::None.new;
+    # XXX: more catches (post-1.0)
+    has $.catch = Val::None.new();
+    has $.finally = Val::None.new();
 
-    method attribute-order { <block finally> }
+    method attribute-order { <block catch finally> }
 
     method run($runtime) {
         my $c = $.block.eval($runtime);
         $runtime.enter($c);
 
-        # XXX: store more exceptions ?
-        my $exception;
+        my $return;
         {
             $.block.statementlist.run($runtime);
             CATCH {
-                $exception = $_;
-                .resume;
-            }
-        }
+#                when X::Control::Return {
+                    $return = $_;
+#                }
 
-        if $exception.defined && $.catches !~~ Val::None {
-            for $.catches.elements -> $catch {
-                $catch.statementlist.run($runtime);
+                if $.catch !~~ Val::None { # XXX: support checking Exception's type (post-1.0)
+                    my $b = $.catch.block.eval($runtime);
+                    $runtime.enter($b);
+                    $runtime.declare-var($.catch.identifier, Val::Str.new(:value("LOL")));
+                    say "GET VAR: ", $runtime.get-var($.catch.identifier.name.value).perl;
+                    $.catch.block.statementlist.run($runtime);
+                    $runtime.leave;
+                }
+
+                .resume();
             }
         }
 
         $.finally.statementlist.run($runtime)
             unless $.finally ~~ Val::None;
 
-        $exception.throw if $exception.defined;
+        $return.throw if $return.defined;
 
         $runtime.leave;
     }
+}
+
+class Q::Statement::Catch does Q::Statement {
+    has $.identifier;
+    has $.block;
+
+    method attribute-order { <identifier block> }
 }
 
 class Q::Statement::Block does Q::Statement {

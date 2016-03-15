@@ -58,7 +58,23 @@ use _007::Test;
         say(shoot());
         .
 
-    outputs $program, "7\n", "single catch";
+    outputs $program, "7\n", "catch returns after try";
+}
+
+{
+    my $program = q:to/./;
+        sub shoot() {
+            try {
+                throw Exception { message: "Mr. Bond" };
+            }
+            catch e {
+                return e.message;
+            }
+        }
+        say(shoot());
+        .
+
+    outputs $program, "Mr. Bond\n", "single throw-catch";
 }
 
 {
@@ -68,6 +84,7 @@ use _007::Test;
                 return 41;
             }
             catch e {
+                return 6;
             }
             catch e {
                 return 7;
@@ -76,7 +93,7 @@ use _007::Test;
         say(shoot());
         .
 
-    outputs $program, "7\n", "multiple catches";
+    parse-error $program, X::Syntax::Missing, "multiple catches NYI";
 }
 
 done-testing;
