@@ -247,6 +247,8 @@ class Q::Infix::Subtraction is Q::Infix {}
 
 class Q::Infix::Multiplication is Q::Infix {}
 
+class Q::Infix::Modulo is Q::Infix {}
+
 class Q::Infix::Concat is Q::Infix {}
 
 class Q::Infix::Replicate is Q::Infix {}

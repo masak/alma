@@ -21,6 +21,7 @@ sub read(Str $ast) is export {
         'infix:<+>'    => Q::Infix::Addition,
         'infix:<->'    => Q::Infix::Subtraction,
         'infix:<*>'    => Q::Infix::Multiplication,
+        'infix:<%>'    => Q::Infix::Modulo,
         'infix:<~>'    => Q::Infix::Concat,
         'infix:<x>'    => Q::Infix::Replicate,
         'infix:<xx>'   => Q::Infix::ArrayReplicate,
