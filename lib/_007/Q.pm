@@ -41,10 +41,10 @@ class X::Associativity::Conflict is Exception {
 }
 
 class X::_007::RuntimeException is Exception {
-    has $.msg;
+    has $.payload;
 
     method message {
-        $.msg.Str;
+        $.payload.message.Str;
     }
 }
 
@@ -578,19 +578,18 @@ class Q::Statement::Try does Q::Statement {
         {
             $.block.statementlist.run($runtime);
             CATCH {
-#                when X::Control::Return {
+                when X::Control::Return {
                     $return = $_;
-#                }
+                    .resume();
+                }
 
-                if $.catch !~~ Val::None { # XXX: support checking Exception's type (post-1.0)
+                if $.catch !~~ Val::None && $_ !~~ X::Control::Return {
                     my $b = $.catch.block.eval($runtime);
                     $runtime.enter($b);
-                    $runtime.declare-var($.catch.identifier, Val::Exception.new(:value("LOL")));
+                    $runtime.declare-var($.catch.identifier, .payload);
                     $.catch.block.statementlist.run($runtime);
                     $runtime.leave;
                 }
-
-                .resume();
             }
         }
 
@@ -714,7 +713,7 @@ class Q::Statement::Throw does Q::Statement {
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die X::_007::RuntimeException.new(:msg($value.message.value));
+        die X::_007::RuntimeException.new(:payload($value));
     }
 }
 

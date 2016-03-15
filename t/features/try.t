@@ -58,7 +58,7 @@ use _007::Test;
         say(shoot());
         .
 
-    outputs $program, "7\n", "catch returns after try";
+    outputs $program, "41\n", "catch doesn't run after try returns something";
 }
 
 {
@@ -68,7 +68,7 @@ use _007::Test;
                 throw Exception { message: "Mr. Bond" };
             }
             catch e {
-                return e;
+                return e.message;
             }
         }
         say(shoot());
