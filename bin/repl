@@ -1,0 +1,16 @@
+#! /bin/sh
+
+rlwrap perl6 -e '
+    use _007;
+    my $runtime = _007.runtime;
+
+    while defined my $program = prompt "> " {
+        my $ast = _007.parser(:$runtime).parse($program);
+        $runtime.run($ast);
+        CATCH {
+            default {
+                .say;
+            }
+        }
+    }
+'

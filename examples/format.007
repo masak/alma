@@ -1,0 +1,51 @@
+macro format(fmt, args) {
+    sub replaceAll(input, output, transform) {
+        if !input.contains("{") {
+            return output ~ input;
+        }
+        my openBracePos = input.index("{");
+        if !input.suffix(openBracePos).contains("}") {
+            return output ~ input;
+        }
+        my closeBracePos = input.suffix(openBracePos).index("}");
+        return replaceAll(
+            input.suffix(openBracePos + closeBracePos + 1),
+            output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)),
+            transform);
+    }
+
+    sub findHighestIndex(input) {
+        my openBracePos = input.index("{");
+        if openBracePos == -1 {
+            return -1;
+        }
+        my closeBracePos = input.suffix(openBracePos).index("}");
+        if closeBracePos == -1 {
+            return -1;
+        }
+
+        my index = int(input.substr(openBracePos + 1, closeBracePos - 1));
+
+        return max(index, findHighestIndex(
+            input.suffix(openBracePos + closeBracePos + 1)));
+    }
+
+    if fmt ~~ Q::Literal::Str && args ~~ Q::Term::Array {
+        my highestUsedIndex = findHighestIndex(fmt.value);
+        my argCount = args.elements.elems();
+        if argCount <= highestUsedIndex {
+            throw Exception { message: "Highest index was " ~ str(highestUsedIndex)
+                ~ " but got only " ~ str(argCount) ~ " arguments." };
+        }
+    }
+
+    return quasi {
+        replaceAll({{{fmt}}}, "", sub transform(arg) {
+            return {{{args}}}[int(arg)];
+        });
+    }
+}
+
+say( format("{0}{1}{0}", ["abra", "cad"]) );        # abracadabra
+say( format("foo{0}bar", ["{1}"]) );                # foo{1}bar ({} things can occur in the arguments)
+say( format("foo{1}bar", ["foo"]) );                # throws an exception at compile time

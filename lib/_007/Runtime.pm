@@ -232,7 +232,7 @@ class _007::Runtime {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
 
-            die X::PropertyNotFound.new(:$propname)
+            die X::Property::NotFound.new(:$propname)
                 unless %known-properties{$propname};
 
             return $obj."$propname"();
@@ -287,6 +287,11 @@ class _007::Runtime {
                 return Val::Array.new(:elements($obj.elements.sort));
             });
         }
+        elsif $obj ~~ Val::Array && $propname eq "shuffle" {
+            return Val::Sub::Builtin.new("shuffle", sub () {
+                return Val::Array.new(:elements($obj.elements.pick(*)));
+            });
+        }
         elsif $obj ~~ Val::Array && $propname eq "concat" {
             return Val::Sub::Builtin.new("concat", sub ($array) {
                 die X::TypeCheck.new(:operation<concat>, :got($array), :expected(Val::Array))
@@ -315,6 +320,16 @@ class _007::Runtime {
                 return Val::Str.new(:value($obj.value.substr(
                     $pos.value,
                     $chars.value)));
+            });
+        }
+        elsif $obj ~~ Val::Str && $propname eq "contains" {
+            return Val::Sub::Builtin.new("contains", sub ($substr) {
+                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
+                    unless $substr ~~ Val::Str;
+
+                return Val::Int.new(:value(
+                        $obj.value.contains($substr.value) ?? 1 !! 0;
+                ));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "prefix" {
@@ -421,7 +436,7 @@ class _007::Runtime {
             return $obj.id;
         }
         else {
-            die X::PropertyNotFound.new(:$propname);
+            die X::Property::NotFound.new(:$propname);
         }
     }
 

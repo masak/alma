@@ -1,0 +1,25 @@
+sub verse(n) {
+    sub plural(n, thing) {
+        if n == 1 {
+            return str(n) ~ " " ~ thing;
+        }
+        else {
+            return str(n) ~ " " ~ thing ~ "s";
+        }
+    }
+
+    say(plural(n, "bottle") ~ " of beer on the wall,");
+    say(plural(n, "bottle") ~ " of beer.");
+    say("Take one down, pass it around,");
+    say(plural(n - 1, "bottle") ~ " of beer on the wall...");
+}
+
+my beerCount = 99;
+while beerCount {
+    verse(beerCount);
+    if beerCount != 1 {
+        say("");
+    }
+
+    beerCount = beerCount - 1;
+}

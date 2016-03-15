@@ -217,9 +217,11 @@ class _007::Parser::Actions {
     }
     method pblock ($/) {
         if $<parameterlist> {
-            make Q::Block.new(
+            my $block = Q::Block.new(
                 :parameterlist($<parameterlist>.ast),
                 :statementlist($<blockoid>.ast));
+            make $block;
+            self.finish-block($block);
         } else {
             make $<block>.ast;
         }
@@ -580,11 +582,14 @@ class _007::Parser::Actions {
     }
 
     method property:method ($/) {
-        make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value(Q::Term::Sub.new(
-            :identifier(Q::Identifier.new(:name(Val::Str.new(:value(~$<identifier>))))),
-            :block(Q::Block.new(
-                :parameterlist($<parameterlist>.ast),
-                :statementlist($<blockoid>.ast))))));
+        my $block = Q::Block.new(
+            :parameterlist($<parameterlist>.ast),
+            :statementlist($<blockoid>.ast));
+        my $name = Val::Str.new(:value(~$<identifier>));
+        my $identifier = Q::Identifier.new(:$name);
+        make Q::Property.new(:key($name), :value(
+            Q::Term::Sub.new(:$identifier, :$block)));
+        self.finish-block($block);
     }
 
     method infix($/) {

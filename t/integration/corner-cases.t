@@ -315,4 +315,20 @@ use _007::Test;
     parses-to $program, $ast, "assigning an array - space at the start of an array";
 }
 
+{
+    my $program = q:to/./;
+        sub j(t) { for t -> x {} }
+        my t;
+        .
+
+    my $ast = q:to/./;
+        (statementlist
+          (stsub (identifier "j") (block (parameterlist (param (identifier "t"))) (statementlist
+            (for (identifier "t") (block (parameterlist (param (identifier "x"))) (statementlist))))))
+          (my (identifier "t")))
+        .
+
+    parses-to $program, $ast, "a var outside a sub does not collide with a param inside used in a for loop";
+}
+
 done-testing;

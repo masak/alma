@@ -298,5 +298,16 @@ use _007::Test;
     is-error $ast, X::Cannot::Empty, "cannot Array.shift() an empty array";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "a") (str "007"))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (identifier "a") (identifier "contains")) (argumentlist (str "07"))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (postfix:<.> (identifier "a") (identifier "contains")) (argumentlist (str "8")))))))
+        .
+
+    is-result $ast, "1\n0\n", "String.contains() works";
+}
+
 done-testing;
 

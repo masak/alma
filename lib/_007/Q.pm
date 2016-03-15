@@ -28,8 +28,7 @@ class X::ParameterMismatch is Exception {
     }
 }
 
-# RAKUDO: rename to X::Property::NotFound once [RT #126827] has been fixed
-class X::PropertyNotFound is Exception {
+class X::Property::NotFound is Exception {
     has $.propname;
 
     method message {
@@ -39,6 +38,14 @@ class X::PropertyNotFound is Exception {
 
 class X::Associativity::Conflict is Exception {
     method message { "The operator already has a defined associativity" }
+}
+
+class X::_007::RuntimeException is Exception {
+    has $.msg;
+
+    method message {
+        $.msg.Str;
+    }
 }
 
 sub aname($attr) { $attr.name.substr(2) }
@@ -707,7 +714,7 @@ class Q::Statement::Throw does Q::Statement {
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die $value.message.value;
+        die X::_007::RuntimeException.new(:msg($value.message.value));
     }
 }
 

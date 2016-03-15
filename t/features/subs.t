@@ -227,4 +227,10 @@ use _007::Test;
     outputs $program, "1\n2\n", "...and in argumentlist";
 }
 
+{
+    my $program = 'sub subtract(x) { say(x) }; subtract("Mr Bond")';
+
+    outputs $program, "Mr Bond\n", "it's OK to call your sub 'subtract'";
+}
+
 done-testing;
