@@ -396,7 +396,7 @@ class _007::Runtime {
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
-        elsif $obj ~~ Val::Exception {
+        elsif $obj ~~ Val::Exception && $propname eq "message" {
             return $obj.message;
         }
         elsif $propname eq "get" {

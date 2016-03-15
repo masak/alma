@@ -164,7 +164,7 @@ class _007::Parser::Actions {
     method statement:try ($/) {
         my $block = $<try>.ast;
         my $catch = $<catch> :exists
-            ?? make $<catch>.ast
+            ?? $<catch>.ast
             !! Val::None.new();
         my $finally = $<finally> :exists
             ?? $<finally>.ast
@@ -177,6 +177,11 @@ class _007::Parser::Actions {
         my $block = $<block>.ast;
 
         make Q::Catch.new(:$identifier, :$block);
+    }
+    method finally ($/) {
+        my $block = $<block>.ast;
+
+        make Q::Finally.new(:$block);
     }
 
     method statement:for ($/) {

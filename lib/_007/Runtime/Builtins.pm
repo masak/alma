@@ -374,6 +374,7 @@ class _007::Runtime::Builtins {
             Q::Catch,
             Q::CompUnit,
             Q::Expr::StatementListAdapter,
+            Q::Finally,
             Q::Identifier,
             Q::Infix,
             Q::Infix::Addition,

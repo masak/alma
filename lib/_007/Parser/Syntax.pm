@@ -106,14 +106,17 @@ grammar _007::Parser::Syntax {
 
     token statement:try {
         try <.ws> <try=.block>
-        [   <.ws> <catch> ] ?
-        [   <.ws> finally <.ws>
-            <finally=.block>
-        ] ?
+        [ <.ws> <catch> ] ?
+        [ <.ws> <finally> ] ?
     }
     token catch {
         catch <.ws> <identifier> <.ws>
+        # XXX:
         { declare(Q::Catch, $<identifier>.Str); }
+            <block>
+    }
+    token finally {
+        finally <.ws>
             <block>
     }
 

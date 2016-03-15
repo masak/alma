@@ -41,7 +41,7 @@ class X::Associativity::Conflict is Exception {
 }
 
 class X::_007::RuntimeException is Exception {
-    has $.payload;
+    has Val::Exception $.payload;
 
     method message {
         $.payload.message.Str;
@@ -564,9 +564,8 @@ class Q::Statement::If does Q::Statement {
 
 class Q::Statement::Try does Q::Statement {
     has $.block;
-    # XXX: more catches (post-1.0)
-    has $.catch = Val::None.new();
-    has $.finally = Val::None.new();
+    has $.catch = Val::None.new;
+    has $.finally = Val::None.new;
 
     method attribute-order { <block catch finally> }
 
@@ -593,9 +592,12 @@ class Q::Statement::Try does Q::Statement {
             }
         }
 
-        $.finally.statementlist.run($runtime)
-            unless $.finally ~~ Val::None;
+        if $.finally !~~ Val::None {
+            $.finally.block.statementlist.run($runtime)
+        }
 
+        # throws X::Control::Return if one was found in `try { }`
+        # and another wasn't thrown by `finally { }`
         $return.throw if $return.defined;
 
         $runtime.leave;
@@ -607,6 +609,12 @@ class Q::Catch does Q::Statement does Q::Declaration {
     has $.block;
 
     method attribute-order { <identifier block> }
+}
+
+class Q::Finally does Q::Statement {
+    has $.block;
+
+    method attribute-order { <block> }
 }
 
 class Q::Statement::Block does Q::Statement {
