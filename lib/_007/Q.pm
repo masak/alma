@@ -578,8 +578,7 @@ class Q::Statement::Try does Q::Statement {
                 if $.catch !~~ Val::None { # XXX: support checking Exception's type (post-1.0)
                     my $b = $.catch.block.eval($runtime);
                     $runtime.enter($b);
-                    $runtime.declare-var($.catch.identifier, Val::Str.new(:value("LOL")));
-                    say "GET VAR: ", $runtime.get-var($.catch.identifier.name.value).perl;
+                    $runtime.declare-var($.catch.identifier, Val::Exception.new(:value("LOL")));
                     $.catch.block.statementlist.run($runtime);
                     $runtime.leave;
                 }
@@ -597,7 +596,7 @@ class Q::Statement::Try does Q::Statement {
     }
 }
 
-class Q::Statement::Catch does Q::Statement {
+class Q::Catch does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.block;
 

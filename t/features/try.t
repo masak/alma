@@ -68,7 +68,7 @@ use _007::Test;
                 throw Exception { message: "Mr. Bond" };
             }
             catch e {
-                return e.message;
+                return e;
             }
         }
         say(shoot());

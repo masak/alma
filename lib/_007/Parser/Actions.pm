@@ -176,7 +176,7 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
 
-        make Q::Statement::Catch.new(:$identifier, :$block);
+        make Q::Catch.new(:$identifier, :$block);
     }
 
     method statement:for ($/) {
