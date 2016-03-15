@@ -59,6 +59,27 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<%%> (int 5) (int 2)))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<%%> (int 6) (int 2)))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<%%> (int 5) (prefix:<-> (int 2))))))
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<%%> (int 6) (prefix:<-> (int 2)))))))
+        .
+
+    is-result $ast, "0\n1\n0\n1\n", "numeric divisibility works";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<%%> (int 5) (int 0))))))
+        .
+
+    is-error $ast, X::Numeric::DivideByZero, "checking divisibility by 0 is an error";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<~> (str "Jame") (str "s Bond"))))))
         .
 

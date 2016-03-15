@@ -287,6 +287,18 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Modulo),
             ),
+            'infix:<%%>' => Val::Sub::Builtin.new('infix:<%%>',
+                sub ($lhs, $rhs) {
+                    die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(Val::Int))
+                        unless $lhs ~~ Val::Int;
+                    die X::TypeCheck.new(:operation<%%>, :got($rhs), :expected(Val::Int))
+                        unless $rhs ~~ Val::Int;
+                    die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
+                        if $rhs.value == 0;
+                    return wrap($lhs.value %% $rhs.value);
+                },
+                :qtype(Q::Infix::Divisibility),
+            ),
             'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
@@ -390,6 +402,7 @@ class _007::Runtime::Builtins {
             Q::Infix::Addition,
             Q::Infix::Subtraction,
             Q::Infix::Modulo,
+            Q::Infix::Divisibility,
             Q::Infix::Multiplication,
             Q::Infix::Concat,
             Q::Infix::Assignment,
