@@ -396,6 +396,9 @@ class _007::Runtime {
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
+        elsif $obj ~~ Val::Exception {
+            return $obj.message;
+        }
         elsif $propname eq "get" {
             return Val::Sub::Builtin.new("get", sub ($prop) {
                     return self.property($obj, $prop.value);
