@@ -8,9 +8,6 @@ my m5 = int(prompt("Your number divided by 5 has a remainder of: "));
 my m7 = int(prompt("Your number divided by 7 has a remainder of: "));
 say("");
 
-my solution = 70*m3 + 21*m5 + 15*m7;
-while solution >= 105 {
-    solution = solution - 105;
-}
+my solution = (70*m3 + 21*m5 + 15*m7) % 105;
 
 say("Your number was " ~ str(solution) ~ ".");
