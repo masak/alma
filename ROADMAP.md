@@ -40,10 +40,7 @@ The first track is still the *raison d'être* for 007. The second track rounds
 
 ### Language track
 
-* The first big thing to fix here is [an `examples/`
-  directory](https://github.com/masak/007/issues/54). The champion for this one
-  is **masak**.
-* The second big thing is to [give the web page a big
+* We're planning to [give the web page a big
   facelift](https://github.com/masak/007/issues/67), including more examples
   and interactive Qtrees. The champion on this one is **masak**.
     * This will require another parsing-related change: [generating a version
