@@ -1,7 +1,8 @@
 {
     "name"      : "007",
+    "perl"      : "6.c",
     "version"   : "*",
-    "author"   : "github:masak",
+    "authors"   : [ "github:masak" ],
     "description"   : "Small experimental language with a license to macro",
     "depends"   : [],
     "provides" : {
@@ -18,5 +19,5 @@
         "_007::Test" : "lib/_007/Test.pm",
         "_007::Val" : "lib/_007/Val.pm"
     },
-    "source-url"    : "git://github.com/masak/007.git"
+    "support" : { "source"    : "git://github.com/masak/007.git" }
 }
