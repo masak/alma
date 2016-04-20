@@ -250,7 +250,13 @@ class _007::Parser::Actions {
 
             my $c = $*runtime.maybe-get-var($infix.identifier.name.value);
             if $c ~~ Val::Macro {
-                @termstack.push($*runtime.call($c, [$t1, $t2]));
+                my $expansion = $*runtime.call($c, [$t1, $t2]);
+                if $*unexpanded {
+                    @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
+                }
+                else {
+                    @termstack.push($expansion);
+                }
             }
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
@@ -322,7 +328,13 @@ class _007::Parser::Actions {
 
             my $c = $*runtime.maybe-get-var($prefix.identifier.name.value);
             if $c ~~ Val::Macro {
-                make $*runtime.call($c, [$/.ast]);
+                my $expansion = $*runtime.call($c, [$/.ast]);
+                if $*unexpanded {
+                    make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
+                }
+                else {
+                    make $expansion;
+                }
             }
             else {
                 make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
@@ -337,21 +349,24 @@ class _007::Parser::Actions {
             && $/.ast ~~ Q::Identifier
             && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
                 my @arguments = $postfix.argumentlist.arguments.elements;
-                my $qtree = $*runtime.call($macro, @arguments);
+                my $expansion = $*runtime.call($macro, @arguments);
 
-                if $qtree ~~ Q::Statement::My {
-                    _007::Parser::Syntax::declare(Q::Statement::My, ~$qtree.identifier.name);
+                if $expansion ~~ Q::Statement::My {
+                    _007::Parser::Syntax::declare(Q::Statement::My, ~$expansion.identifier.name);
                 }
 
-                if $qtree ~~ Q::Statement {
+                if $*unexpanded {
+                    make $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist));
+                }
+                elsif $expansion ~~ Q::Statement {
                     make Q::Expr::StatementListAdapter.new(
                         :statementlist(Q::StatementList.new(
-                            :statements(Val::Array.new(:elements([$qtree])))
+                            :statements(Val::Array.new(:elements([$expansion])))
                         ))
                     );
                 }
                 else {
-                    make $qtree;
+                    make $expansion;
                 }
             }
             elsif $postfix ~~ Q::Postfix::Index {
@@ -366,7 +381,13 @@ class _007::Parser::Actions {
             else {
                 my $c = $*runtime.maybe-get-var($postfix.identifier.name.value);
                 if $c ~~ Val::Macro {
-                    make $*runtime.call($c, [$/.ast]);
+                    my $expansion = $*runtime.call($c, [$/.ast]);
+                    if $*unexpanded {
+                        make $postfix.new(:$identifier, :operand($/.ast));
+                    }
+                    else {
+                        make $expansion;
+                    }
                 }
                 else {
                     make $postfix.new(:$identifier, :operand($/.ast));

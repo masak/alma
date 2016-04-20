@@ -12,7 +12,7 @@ class _007::Parser {
 
     method postpone(&check:()) { @!checks.push: &check }
 
-    method parse($program) {
+    method parse($program, Bool :$*unexpanded) {
         my %*assigned;
         my @*declstack;
         my $*insub = False;

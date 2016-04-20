@@ -14,6 +14,7 @@ sub read(Str $ast) is export {
         array          => Q::Term::Array,
         object         => Q::Term::Object,
         sub            => Q::Term::Sub,
+        quasi          => Q::Term::Quasi,
 
         'prefix:<->'   => Q::Prefix::Minus,
         'prefix:<^>'   => Q::Prefix::Upto,
@@ -289,12 +290,12 @@ sub empty-diff($text1 is copy, $text2 is copy, $desc) {
     is $diff, "", $desc;
 }
 
-sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION", Bool :$unexpanded) is export {
     my $expected-ast = read($expected);
     my $output = UnwantedOutput.new;
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
-    my $actual-ast = $parser.parse($program);
+    my $actual-ast = $parser.parse($program, :$unexpanded);
     my %*stringification-seen;
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
