@@ -240,6 +240,19 @@ use _007::Test;
         my f;
         {
             f = 3;
+            sub f() {
+            }
+        }
+        .
+
+    parse-error $program, X::Redeclaration::Outer, "cannot first use outer and then declare inner sub";
+}
+
+{
+    my $program = q:to/./;
+        my f;
+        {
+            f = 3;
             macro f() {
             }
         }
