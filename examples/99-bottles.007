@@ -8,18 +8,15 @@ sub verse(n) {
         }
     }
 
-    say(plural(n, "bottle") ~ " of beer on the wall,");
-    say(plural(n, "bottle") ~ " of beer.");
+    say(plural(n + 1, "bottle") ~ " of beer on the wall,");
+    say(plural(n + 1, "bottle") ~ " of beer.");
     say("Take one down, pass it around,");
-    say(plural(n - 1, "bottle") ~ " of beer on the wall...");
+    say(plural(n, "bottle") ~ " of beer on the wall...");
 }
 
-my beerCount = 99;
-while beerCount {
+for (^99).reverse() -> beerCount {
     verse(beerCount);
-    if beerCount != 1 {
+    if beerCount > 0 {
         say("");
     }
-
-    beerCount = beerCount - 1;
 }
