@@ -19,14 +19,26 @@ multi MAIN(Str :e($program)!) {
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
-my %*stringification-seen;
+sub arrow() { qq[<span class="arrow">&#25BC;</span>] }
+sub qtype-color($text) { qq[<span class="qtype">{$text}</span>] }
+sub attr-color($text) { qq[<span class="attr">{$text}</span>] }
+sub val-type-color($text) { qq[<span class="val-type">{$text}</span>] }
 
-sub htmlify($node) {
-    my @attrs = $node.attributes;
-    if @attrs == 1 {
-        return "{$node.^name} { avalue(@attrs[0], $node).quoted-Str }";
-    }
-    sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $node).quoted-Str }
-    my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-    return "{$node.^name} \{\n$contents\n\}";
+multi htmlify(Q $node) {
+    sub keyvalue($attr) { "<div>" ~ attr-color(aname($attr)) ~ ": " ~ htmlify(avalue($attr, $node)) ~ "</div>" }
+    my $contents = $node.attributes.map(&keyvalue).join("\n").indent(4);
+    return "{arrow()} {qtype-color($node.^name)}\n$contents\n";
+}
+
+multi htmlify(Val::Array $array) {
+    return "[]" unless $array.elements;
+    return "[\n" ~ $array.elements.map(&htmlify).map({ "<div>{$_}</div>" }).join("\n").indent(4) ~ "\n]";
+}
+
+multi htmlify(Val::Str $str) {
+    return val-type-color($str.quoted-Str);
+}
+
+multi htmlify(Val::Int $int) {
+    return val-type-color(~$int.value);
 }
