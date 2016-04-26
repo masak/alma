@@ -5,7 +5,7 @@ use _007;
 sub parse_007($program) {
     my $runtime = _007.runtime;
     my $ast = _007.parser(:$runtime).parse($program, :unexpanded);
-    spurt 'qast.html', htmlify($ast);
+    say htmlify($ast);
 }
 
 multi MAIN($path) {
@@ -16,10 +16,17 @@ multi MAIN(Str :e($program)!) {
     parse_007($program);
 }
 
-multi sub htmlify(Q::CompUnit $node) {
-    $node.^name ~ " -> " ~ htmlify($node.block);
-}
+sub aname($attr) { $attr.name.substr(2) }
+sub avalue($attr, $obj) { $attr.get_value($obj) }
 
-multi sub htmlify($node) {
-    "TBD";
+my %*stringification-seen;
+
+sub htmlify($node) {
+    my @attrs = $node.attributes;
+    if @attrs == 1 {
+        return "{$node.^name} { avalue(@attrs[0], $node).quoted-Str }";
+    }
+    sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $node).quoted-Str }
+    my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
+    return "{$node.^name} \{\n$contents\n\}";
 }
