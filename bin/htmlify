@@ -1,0 +1,25 @@
+#!/usr/bin/env perl6
+use v6;
+use _007;
+
+sub parse_007($program) {
+    my $runtime = _007.runtime;
+    my $ast = _007.parser(:$runtime).parse($program, :unexpanded);
+    spurt 'qast.html', htmlify($ast);
+}
+
+multi MAIN($path) {
+    parse_007(slurp($path));
+}
+
+multi MAIN(Str :e($program)!) {
+    parse_007($program);
+}
+
+multi sub htmlify(Q::CompUnit $node) {
+    $node.^name ~ " -> " ~ htmlify($node.block);
+}
+
+multi sub htmlify($node) {
+    "TBD";
+}
