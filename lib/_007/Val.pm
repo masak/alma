@@ -174,8 +174,4 @@ class Val::Exception does Val {
     method quoted-Str {
         self.Str
     }
-
-    method truthy {
-        ?%.properties
-    }
 }
