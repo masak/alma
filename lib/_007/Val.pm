@@ -6,13 +6,13 @@ role Val {
     method attributes {
         self.^attributes
     }
-}
 
-class Val::None does Val {
     method quoted-Str {
         self.Str
     }
+}
 
+class Val::None does Val {
     method Str {
         "None"
     }
@@ -24,10 +24,6 @@ class Val::None does Val {
 
 class Val::Int does Val {
     has Int $.value;
-
-    method quoted-Str {
-        self.Str
-    }
 
     method Str {
         $.value.Str
@@ -93,10 +89,6 @@ class Val::Object does Val {
         }).sort.join(', ') ~ '}';
     }
 
-    method quoted-Str {
-        self.Str
-    }
-
     method truthy {
         ?%.properties
     }
@@ -136,10 +128,6 @@ class Val::Block does Val {
     has %.static-lexpad;
     has $.outer-frame;
 
-    method quoted-Str {
-        self.Str
-    }
-
     method pretty-parameters {
         sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
@@ -149,18 +137,10 @@ class Val::Block does Val {
 class Val::Sub is Val::Block {
     has Str $.name;
 
-    method quoted-Str {
-        self.Str
-    }
-
     method Str { "<sub {$.name}{$.pretty-parameters}>" }
 }
 
 class Val::Macro is Val::Sub {
-    method quoted-Str {
-        self.Str
-    }
-
     method Str { "<macro {$.name}{$.pretty-parameters}>" }
 }
 
@@ -169,9 +149,5 @@ class Val::Exception does Val {
 
     method Str {
         return "Exception \{message: {$.message.quoted-Str}\}";
-    }
-
-    method quoted-Str {
-        self.Str
     }
 }
