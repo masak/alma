@@ -296,7 +296,6 @@ sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION", Bool :$un
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     my $actual-ast = $parser.parse($program, :$unexpanded);
-    my %*stringification-seen;
 
     empty-diff ~$expected-ast, ~$actual-ast, $desc;
 }

@@ -1,22 +1,17 @@
+class Helper { ... }
+
 role Val {
-    method truthy {
-        True
-    }
+    method truthy { True }
+    method attributes { self.^attributes }
+    method quoted-Str { self.Str }
 
-    method attributes {
-        self.^attributes
-    }
-
-    method quoted-Str {
-        self.Str
+    method Str {
+        my %*stringification-seen;
+        Helper::Str(self);
     }
 }
 
 class Val::None does Val {
-    method Str {
-        "None"
-    }
-
     method truthy {
         False
     }
@@ -24,10 +19,6 @@ class Val::None does Val {
 
 class Val::Int does Val {
     has Int $.value;
-
-    method Str {
-        $.value.Str
-    }
 
     method truthy {
         ?$.value;
@@ -39,10 +30,6 @@ class Val::Str does Val {
 
     method quoted-Str {
         q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]
-    }
-
-    method Str {
-        $.value
     }
 
     method truthy {
@@ -61,10 +48,6 @@ class Val::Array does Val {
         return "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]";
     }
 
-    method Str {
-        self.quoted-Str
-    }
-
     method truthy {
         ?$.elements
     }
@@ -76,7 +59,7 @@ class Val::Object does Val {
     has %.properties{Str};
     has $.id = $global-object-id++;
 
-    method Str {
+    method quoted-Str {
         if %*stringification-seen{self.WHICH} {
             return "\{...\}";
         }
@@ -118,8 +101,6 @@ class Val::Type does Val {
             return $.type.new(|%(@properties));
         }
     }
-
-    method Str { "<type {$.type.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "")}>" }
 }
 
 class Val::Block does Val {
@@ -131,7 +112,6 @@ class Val::Block does Val {
     method pretty-parameters {
         sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
-    method Str { "<block {$.pretty-parameters}>" }
 }
 
 class Val::Sub is Val::Block {
@@ -146,8 +126,35 @@ class Val::Macro is Val::Sub {
 
 class Val::Exception does Val {
     has Val::Str $.message;
+}
 
-    method Str {
-        return "Exception \{message: {$.message.quoted-Str}\}";
+class Helper {
+    our sub Str($_) {
+        when Val::None { "None" }
+        when Val::Int { .value.Str }
+        when Val::Str { .value }
+        when Val::Array { .quoted-Str }
+        when Val::Object { .quoted-Str }
+        when Val::Type { "<type {.type.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "")}>" }
+        when Val::Macro { "<macro {.name}{.pretty-parameters}>" }
+        when Val::Sub { "<sub {.name}{.pretty-parameters}>" }
+        when Val::Block { "<block {.pretty-parameters}>" }
+        when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
+        default {
+            my $self = $_;
+            die "Unexpected type -- some invariant must be broken"
+                unless $self.^name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
+
+            sub aname($attr) { $attr.name.substr(2) }
+            sub avalue($attr, $obj) { $attr.get_value($obj) }
+
+            my @attrs = $self.attributes;
+            if @attrs == 1 {
+                return "{.^name} { avalue(@attrs[0], $self).quoted-Str }";
+            }
+            sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $self).quoted-Str }
+            my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
+            return "{$self.^name} \{\n$contents\n\}";
+        }
     }
 }

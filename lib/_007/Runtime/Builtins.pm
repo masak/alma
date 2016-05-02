@@ -28,7 +28,7 @@ class _007::Runtime::Builtins {
 
     method get-builtins {
         my &str = sub ($_) {
-            when Val { my %*stringification-seen; return .Str }
+            when Val { return .Str }
             die X::TypeCheck.new(
                 :operation<str()>,
                 :got($_),

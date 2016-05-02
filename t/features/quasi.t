@@ -7,7 +7,6 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    my %*stringification-seen;
     my $expected = read(
         "(statementlist (stexpr (infix:<+> (int 1) (int 1))))"
     ).block.statementlist.statements.elements[0].expr.Str;
