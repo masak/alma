@@ -179,6 +179,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
             :$name,
             :parameterlist($.block.parameterlist),
             :statementlist($.block.statementlist),
+            :static-lexpad($.block.static-lexpad),
             :outer-frame($runtime.current-frame),
         );
     }

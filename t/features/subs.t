@@ -209,6 +209,21 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        my f = sub () {
+            my c = "Goldfinger";
+            say(c);
+        };
+
+        f();
+        .
+
+    outputs $program,
+        "Goldfinger\n",
+        "can declare and use a variable in a term sub";
+}
+
+{
+    my $program = q:to/./;
         sub f(x,) { }
         sub g(x,y,) { }
         .
