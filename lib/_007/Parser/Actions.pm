@@ -517,7 +517,7 @@ class _007::Parser::Actions {
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
             my $name = ~$<identifier>;
-            my $outer-frame = $*runtime.current-frame;  # XXX: this is not really the outer frame, is it?
+            my $outer-frame = $*runtime.current-frame.block.outer-frame;
             my %static-lexpad = $*runtime.current-frame.pad;
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
