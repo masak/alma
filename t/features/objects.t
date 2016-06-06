@@ -208,4 +208,23 @@ use _007::Test;
         "need to specify required properties on objects";
 }
 
+{
+    my $program = q:to/./;
+        my obj = {
+            meth() {
+                return 007;
+            }
+        };
+        .
+
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "obj") (object (identifier "Object") (propertylist
+            (property "meth" (sub (identifier "meth") (block (parameterlist) (statementlist
+              (return (int 7))))))))))
+        .
+
+    parses-to $program, $ast, "a `return` inside of a (short-form) method is fine";
+}
+
 done-testing;
