@@ -1,0 +1,71 @@
+my ast = Q::CompUnit {
+    block: Q::Block {
+        parameterlist: Q::ParameterList {},
+        statementlist: Q::StatementList {
+            statements: []
+        }
+    }
+};
+
+my RealOutput = {
+    new() { return { say }; }
+};
+
+my Runtime = {
+    new(config) {
+        my out = config.output;
+        my runtime = {
+            run,
+            get_var,
+            put_var,
+        };
+        my pad = {};
+
+        my eval_of_type = {
+            Q::Identifier: sub (ident) {
+                return get_var(ident.name);
+            },
+            Q::Literal::Int: sub (lit_int) {
+                return lit_int.value;
+            },
+            Q::Literal::Str: sub (lit_str) {
+                return lit_str.value;
+            },
+            Q::Postfix::Call: sub (call) {
+                # cheating here for now because we're only using `say`
+                return out.say(eval(call.argumentlist.arguments[0]));
+            },
+        };
+        sub eval(q) { return eval_of_type[type(q).name](q); }
+
+        my run_of_type = {
+            Q::CompUnit: sub (compunit) {
+                for compunit.block.statementlist.statements -> statement {
+                    run(statement);
+                }
+            },
+            Q::Statement::Expr: sub (q) {
+                eval(q.expr);
+            },
+            Q::Statement::My: sub (q) {
+                my value = eval(q.expr);
+                runtime.put_var(q.identifier.name, value);
+            },
+        };
+        sub run(q) { run_of_type[type(q).name](q); }
+
+        sub get_var(name) {
+            return pad[name];
+        }
+
+        sub put_var(name, value) {
+            pad[name] = value;
+        }
+
+        return runtime;
+    }
+};
+
+my output = RealOutput.new();
+my runtime = Runtime.new({ output });
+runtime.run(ast);
