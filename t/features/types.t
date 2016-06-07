@@ -53,4 +53,12 @@ use _007::Test;
         "still does the right thing one level down";
 }
 
+{
+    outputs 'say(type(7).name)', "Int\n",
+        "type(7).name is 'Int'";
+
+    outputs 'say(type(type(7)).name)', "Type\n",
+        "type(type(7)).name is 'Type'";
+}
+
 done-testing;

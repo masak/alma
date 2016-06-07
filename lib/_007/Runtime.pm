@@ -391,6 +391,9 @@ class _007::Runtime {
                 return Val::None.new;
             });
         }
+        elsif $obj ~~ Val::Type && $propname eq "name" {
+            return Val::Str.new(:value($obj.name));
+        }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
