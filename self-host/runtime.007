@@ -22,6 +22,9 @@ my Runtime = {
             Q::Identifier(ident) {
                 return get_var(ident.name);
             },
+            Q::Infix::Addition(op) {
+                return eval(op.lhs) + eval(op.rhs);
+            },
             Q::Literal::Int(lit_int) {
                 return lit_int.value;
             },
