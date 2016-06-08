@@ -54,6 +54,9 @@ my Runtime = {
                 eval(e.expr);
             },
             Q::Statement::My(my) {
+                if !my.expr {
+                    return;
+                }
                 my value = eval(my.expr);
                 put_var(my.identifier.name, value);
             },

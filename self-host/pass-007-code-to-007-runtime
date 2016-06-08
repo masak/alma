@@ -12,6 +12,10 @@ multi dump(Val::Int $int) {
     ~$int;
 }
 
+multi dump(Val::None $) {
+    "None";
+}
+
 multi dump(Q $q) {
     sub aname($attr) { $attr.name.substr(2) }
     sub avalue($attr, $obj) { $attr.get_value($obj) }
