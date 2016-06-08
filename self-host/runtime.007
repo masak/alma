@@ -25,6 +25,11 @@ my Runtime = {
             Q::Infix::Addition(op) {
                 return eval(op.lhs) + eval(op.rhs);
             },
+            Q::Infix::Assignment(op) {
+                my value = eval(op.rhs);
+                put_var(op.lhs.name, value);    # XXX: assumption that lhs is a Q::Identifier
+                return value;
+            },
             Q::Infix::Concat(op) {
                 return eval(op.lhs) ~ eval(op.rhs);
             },
