@@ -25,6 +25,9 @@ my Runtime = {
             Q::Infix::Addition(op) {
                 return eval(op.lhs) + eval(op.rhs);
             },
+            Q::Infix::Concat(op) {
+                return eval(op.lhs) ~ eval(op.rhs);
+            },
             Q::Literal::Int(lit_int) {
                 return lit_int.value;
             },
