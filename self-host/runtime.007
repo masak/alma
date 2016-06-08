@@ -17,7 +17,6 @@ my Runtime = {
         my pad = {};
         sub get_var(name) { return pad[name] }
         sub put_var(name, value) { pad[name] = value }
-        my runtime = { run, get_var, put_var };
 
         my eval_of_type = {
             Q::Identifier(ident) {
@@ -47,12 +46,12 @@ my Runtime = {
             },
             Q::Statement::My(q) {
                 my value = eval(q.expr);
-                runtime.put_var(q.identifier.name, value);
+                put_var(q.identifier.name, value);
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
 
-        return runtime;
+        return { run, get_var, put_var };
     }
 };
 
