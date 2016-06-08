@@ -32,6 +32,9 @@ my Runtime = {
                 # cheating here for now because we're only using `say`
                 return out.say(eval(call.argumentlist.arguments[0]));
             },
+            Q::Term::Array(array) {
+                return array.elements.map(eval);
+            },
         };
         sub eval(q) { return eval_of_type[type(q).name](q); }
 
