@@ -41,12 +41,12 @@ my Runtime = {
                     run(statement);
                 }
             },
-            Q::Statement::Expr(q) {
-                eval(q.expr);
+            Q::Statement::Expr(e) {
+                eval(e.expr);
             },
-            Q::Statement::My(q) {
-                my value = eval(q.expr);
-                put_var(q.identifier.name, value);
+            Q::Statement::My(my) {
+                my value = eval(my.expr);
+                put_var(my.identifier.name, value);
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
