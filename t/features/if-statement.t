@@ -29,11 +29,14 @@ use _007::Test;
           (if (object (identifier "Object") (propertylist)) (block (parameterlist) (statementlist
             (stexpr (postfix:<()> (identifier "say") (argumentlist (str "falsy object")))))))
           (if (object (identifier "Object") (propertylist (property "a" (int 3)))) (block (parameterlist) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy object"))))))))
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy object")))))))
+          (if (object (identifier "Q::Literal::Int") (propertylist (property "value" (int 0))))
+            (block (parameterlist) (statementlist
+            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "truthy qnode"))))))))
         .
 
     is-result $ast,
-        <int str array sub macro object>.map({"truthy $_\n"}).join,
+        <int str array sub macro object qnode>.map({"truthy $_\n"}).join,
         "if statements run truthy things";
 }
 

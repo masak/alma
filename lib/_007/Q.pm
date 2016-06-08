@@ -61,6 +61,10 @@ role Q {
         self.Str
     }
 
+    method truthy {
+        True
+    }
+
     method attributes {
         sub find($aname) { self.^attributes.first({ $aname eq aname($_) }) }
 
