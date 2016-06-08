@@ -22,16 +22,16 @@ my Runtime = {
         my pad = {};
 
         my eval_of_type = {
-            Q::Identifier: sub (ident) {
+            Q::Identifier(ident) {
                 return get_var(ident.name);
             },
-            Q::Literal::Int: sub (lit_int) {
+            Q::Literal::Int(lit_int) {
                 return lit_int.value;
             },
-            Q::Literal::Str: sub (lit_str) {
+            Q::Literal::Str(lit_str) {
                 return lit_str.value;
             },
-            Q::Postfix::Call: sub (call) {
+            Q::Postfix::Call(call) {
                 # cheating here for now because we're only using `say`
                 return out.say(eval(call.argumentlist.arguments[0]));
             },
@@ -39,15 +39,15 @@ my Runtime = {
         sub eval(q) { return eval_of_type[type(q).name](q); }
 
         my run_of_type = {
-            Q::CompUnit: sub (compunit) {
+            Q::CompUnit(compunit) {
                 for compunit.block.statementlist.statements -> statement {
                     run(statement);
                 }
             },
-            Q::Statement::Expr: sub (q) {
+            Q::Statement::Expr(q) {
                 eval(q.expr);
             },
-            Q::Statement::My: sub (q) {
+            Q::Statement::My(q) {
                 my value = eval(q.expr);
                 runtime.put_var(q.identifier.name, value);
             },
