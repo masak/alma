@@ -14,9 +14,29 @@ my RealOutput = {
 my Runtime = {
     new(config) {
         my out = config.output;
-        my pad = {};
-        sub get_var(name) { return pad[name] }
-        sub put_var(name, value) { pad[name] = value }
+        my pads = [];
+        sub enter() { pads.push({}) }
+        sub leave() { pads.pop() }
+
+        sub declare_var(name) {
+            pads[pads.elems() - 1][name] = None;
+        }
+        sub find(name) {
+            for pads.reverse() -> pad {
+                if pad.has(name) {
+                    return pad;
+                }
+            }
+            throw Exception { message: "Cannot find variable " ~ name };
+        }
+        sub get_var(name) {
+            my pad = find(name);
+            return pad[name];
+        }
+        sub put_var(name, value) {
+            my pad = find(name);
+            pad[name] = value;
+        }
 
         my eval_of_type = {
             Q::Identifier(ident) {
@@ -54,20 +74,24 @@ my Runtime = {
 
         my run_of_type = {
             Q::CompUnit(compunit) {
+                enter();
                 run(compunit.block.statementlist);
+                leave();
             },
             Q::Statement::Block(stmt) {
+                enter();
                 run(stmt.block.statementlist);
+                leave();
             },
             Q::Statement::Expr(stmt) {
                 eval(stmt.expr);
             },
             Q::Statement::My(stmt) {
-                if !stmt.expr {
-                    return;
+                my name = stmt.identifier.name;
+                declare_var(name);
+                if stmt.expr {
+                    put_var(name, eval(stmt.expr));
                 }
-                my value = eval(stmt.expr);
-                put_var(stmt.identifier.name, value);
             },
             Q::StatementList(stmtlist) {
                 for stmtlist.statements -> statement {
