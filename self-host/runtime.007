@@ -28,9 +28,9 @@ my Runtime = {
             Q::Literal::Str(lit_str) {
                 return lit_str.value;
             },
-            Q::Postfix::Call(call) {
+            Q::Postfix::Call(op) {
                 # cheating here for now because we're only using `say`
-                return out.say(eval(call.argumentlist.arguments[0]));
+                return out.say(eval(op.argumentlist.arguments[0]));
             },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
