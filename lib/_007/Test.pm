@@ -344,3 +344,20 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
 
     flunk $desc;
 }
+
+our sub EXPORT(*@things) {
+    my %exports;
+    for @things -> $thing {
+        my $routine = {
+            '&read' => &read,
+            '&is-result' => &is-result,
+            '&is-error' => &is-error,
+            '&parses-to' => &parses-to,
+            '&parse-error' => &parse-error,
+            '&outputs' => &outputs,
+            '&throws-exception' => &throws-exception,
+        }{$thing} // die "Didn't find '$thing'";
+        %exports{$thing} = $routine;
+    }
+    return %exports;
+}
