@@ -59,15 +59,15 @@ my Runtime = {
             Q::Statement::Block(stmt) {
                 run(stmt.block.statementlist);
             },
-            Q::Statement::Expr(e) {
-                eval(e.expr);
+            Q::Statement::Expr(stmt) {
+                eval(stmt.expr);
             },
-            Q::Statement::My(my) {
-                if !my.expr {
+            Q::Statement::My(stmt) {
+                if !stmt.expr {
                     return;
                 }
-                my value = eval(my.expr);
-                put_var(my.identifier.name, value);
+                my value = eval(stmt.expr);
+                put_var(stmt.identifier.name, value);
             },
             Q::StatementList(stmtlist) {
                 for stmtlist.statements -> statement {
