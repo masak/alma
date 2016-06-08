@@ -54,9 +54,10 @@ my Runtime = {
 
         my run_of_type = {
             Q::CompUnit(compunit) {
-                for compunit.block.statementlist.statements -> statement {
-                    run(statement);
-                }
+                run(compunit.block.statementlist);
+            },
+            Q::Statement::Block(stmt) {
+                run(stmt.block.statementlist);
             },
             Q::Statement::Expr(e) {
                 eval(e.expr);
@@ -67,6 +68,11 @@ my Runtime = {
                 }
                 my value = eval(my.expr);
                 put_var(my.identifier.name, value);
+            },
+            Q::StatementList(stmtlist) {
+                for stmtlist.statements -> statement {
+                    run(statement);
+                }
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
