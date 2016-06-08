@@ -162,10 +162,6 @@ class Q::TraitList does Q {
     has Val::Array $.traits = Val::Array.new;
 
     method attribute-order { <traits> }
-
-    method interpolate($runtime) {
-        self.new(:traits(Val::Array.new(:elements($.traits.elements».interpolate($runtime)))));
-    }
 }
 
 class Q::Term::Sub does Q::Term does Q::Declaration {
