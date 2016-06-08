@@ -63,8 +63,10 @@ my Runtime = {
                 return lit_str.value;
             },
             Q::Postfix::Call(op) {
-                # cheating here for now because we're only using `say`
-                return out.say(eval(op.argumentlist.arguments[0]));
+                if op.operand ~~ Q::Identifier && op.operand.name == "say" {
+                    return out.say(eval(op.argumentlist.arguments[0]));
+                }
+                # else do nothing for now -- which is wrong, but makes test fail instead of blow up
             },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
