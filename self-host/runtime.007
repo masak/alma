@@ -66,7 +66,7 @@ my Runtime = {
                 if op.operand ~~ Q::Identifier && op.operand.name == "say" {
                     return out.say(eval(op.argumentlist.arguments[0]));
                 }
-                # else do nothing for now -- which is wrong, but makes test fail instead of blow up
+                # else do nothing for now -- which is wrong, but makes tests fail instead of blow up
             },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
