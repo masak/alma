@@ -68,6 +68,9 @@ my Runtime = {
                 }
                 # else do nothing for now -- which is wrong, but makes tests fail instead of blow up
             },
+            Q::Postfix::Index(op) {
+                return eval(op.operand)[eval(op.index)];
+            },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
             },
