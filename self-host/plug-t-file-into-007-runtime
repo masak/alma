@@ -70,7 +70,7 @@ sub MAIN($file) {
         }
 
         sub parse-error($program, $expected-error, $desc = $expected-error.^name) {
-            pass "(inapplicable) -- $desc";
+            skip("test is parser-only and we're testing runtime.007");
         }
         REPLACEMENT
 
