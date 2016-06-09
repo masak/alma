@@ -30,9 +30,10 @@ class X::ParameterMismatch is Exception {
 
 class X::Property::NotFound is Exception {
     has $.propname;
+    has $.type;
 
     method message {
-        "Property '$.propname' not found"
+        "Property '$.propname' not found on object of type $.type"
     }
 }
 

@@ -194,6 +194,7 @@ class _007::Runtime {
     }
 
     method property($obj, Str $propname) {
+        my $type = Val::Type.of($obj.WHAT).name;
         if $obj ~~ Q {
             if $propname eq "detach" {
                 sub aname($attr) { $attr.name.substr(2) }
@@ -230,7 +231,7 @@ class _007::Runtime {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
 
-            die X::Property::NotFound.new(:$propname)
+            die X::Property::NotFound.new(:$propname, :$type)
                 unless %known-properties{$propname};
 
             return $obj."$propname"();
@@ -437,7 +438,7 @@ class _007::Runtime {
             return $obj.id;
         }
         else {
-            die X::Property::NotFound.new(:$propname);
+            die X::Property::NotFound.new(:$propname, :$type);
         }
     }
 
