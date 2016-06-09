@@ -167,7 +167,7 @@ grammar _007::Parser::Syntax {
     token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
 
     proto token term {*}
-    token term:none { None >> <!before <.ws> '{'> }
+    token term:none { None» }
     token term:int { \d+ }
     token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
     token term:str { <str> }
@@ -205,7 +205,7 @@ grammar _007::Parser::Syntax {
         ]
     }
     token term:object {
-        [<identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>]?
+        [<!before "None"> <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>]?
         '{' ~ '}' <propertylist>
     }
     token term:identifier {
