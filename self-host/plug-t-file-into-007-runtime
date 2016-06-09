@@ -68,6 +68,10 @@ sub MAIN($file) {
         
             is $output.result, $expected, $desc;
         }
+
+        sub parse-error($program, $expected-error, $desc = $expected-error.^name) {
+            pass "(inapplicable) -- $desc";
+        }
         REPLACEMENT
 
     my $failures = shell("perl6 $tempfile-name");
