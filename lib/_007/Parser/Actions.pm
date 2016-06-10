@@ -4,7 +4,7 @@ use _007::Parser::Exceptions;
 
 class _007::Parser::Actions {
     method finish-block($block) {
-        $block.static-lexpad = $*runtime.current-frame.pad;
+        $block.static-lexpad = $*runtime.current-frame.properties<pad>;
         $*runtime.leave;
     }
 
@@ -122,18 +122,18 @@ class _007::Parser::Actions {
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my %static-lexpad = $*runtime.current-frame.pad;
+        my $static-lexpad = $*runtime.current-frame.properties<pad>;
         self.finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val;
         if $<routine> eq "sub" {
             make Q::Statement::Sub.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         elsif $<routine> eq "macro" {
             make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         else {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
@@ -262,7 +262,7 @@ class _007::Parser::Actions {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
 
                 if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
-                    my $block = $*runtime.current-frame();
+                    my $frame = $*runtime.current-frame;
                     my $symbol = $t1.name.value;
                     die X::Undeclared.new(:$symbol)
                         unless @*declstack[*-1]{$symbol} :exists;
@@ -270,7 +270,7 @@ class _007::Parser::Actions {
                     my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
                     die X::Assignment::RO.new(:typename("$declname '$symbol'"))
                         unless $decltype.is-assignable;
-                    %*assigned{$block ~ $symbol}++;
+                    %*assigned{$frame.id ~ $symbol}++;
                 }
             }
         }
@@ -517,9 +517,9 @@ class _007::Parser::Actions {
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
             my $name = ~$<identifier>;
-            my $outer-frame = $*runtime.current-frame.block.outer-frame;
-            my %static-lexpad = $*runtime.current-frame.pad;
-            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :%static-lexpad);
+            my $outer-frame = $*runtime.current-frame.properties<block>.outer-frame;
+            my $static-lexpad = $*runtime.current-frame.properties<pad>;
+            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
         }
         self.finish-block($block);

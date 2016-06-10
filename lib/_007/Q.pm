@@ -189,16 +189,16 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
-    has %.static-lexpad;
+    has Val::Object $.static-lexpad is rw = Val::Object.new;
 
     method attribute-order { <parameterlist statementlist> }
 
     method eval($runtime) {
-        my $outer-frame = $runtime.current-frame;
+        my Val::Object $outer-frame = $runtime.current-frame;
         Val::Block.new(
             :$.parameterlist,
             :$.statementlist,
-            :%.static-lexpad,
+            :$.static-lexpad,
             :$outer-frame
         );
     }

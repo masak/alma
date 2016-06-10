@@ -39,7 +39,7 @@ grammar _007::Parser::Syntax {
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$frame ~ $symbol};
+            if %*assigned{$frame.id ~ $symbol};
         my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value($symbol))),
             :$frame);

@@ -110,8 +110,8 @@ class Val::Type does Val {
 class Val::Block does Val {
     has $.parameterlist is rw;
     has $.statementlist;
-    has %.static-lexpad;
-    has $.outer-frame;
+    has Val::Object $.static-lexpad is rw = Val::Object.new;
+    has Val::Object $.outer-frame;
 
     method pretty-parameters {
         sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");

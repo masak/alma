@@ -1,12 +1,7 @@
 use _007::Q;
 use _007::Runtime::Builtins;
 
-class Frame {
-    has $.block;
-    has %.pad;
-}
-
-constant NO_OUTER = {};
+constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
     :frame(Val::None.new));
@@ -20,6 +15,7 @@ class _007::Runtime {
         my $setting = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist(Q::StatementList.new),
+            :static-lexpad(Val::Object.new),
             :outer-frame(NO_OUTER));
         self.enter($setting);
         $!builtins = _007::Runtime::Builtins.new(:runtime(self));
@@ -36,9 +32,9 @@ class _007::Runtime {
     }
 
     method enter(Val::Block $block) {
-        my $frame = Frame.new(:$block);
+        my $frame = Val::Object.new(:properties(:$block, :pad(Val::Object.new)));
         @!frames.push($frame);
-        for $block.static-lexpad.kv -> $name, $value {
+        for $block.static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(Val::None.new));
@@ -49,13 +45,13 @@ class _007::Runtime {
                 my $name = .identifier.name.value;
                 my $parameterlist = .block.parameterlist;
                 my $statementlist = .block.statementlist;
-                my %static-lexpad = .block.static-lexpad;
+                my $static-lexpad = .block.static-lexpad;
                 my $outer-frame = $frame;
                 my $val = Val::Sub.new(
                     :$name,
                     :$parameterlist,
                     :$statementlist,
-                    :%static-lexpad,
+                    :$static-lexpad,
                     :$outer-frame
                 );
                 self.declare-var(.identifier, $val);
@@ -90,9 +86,9 @@ class _007::Runtime {
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
         repeat until $frame === NO_OUTER {
-            return $frame.pad
-                if $frame.pad{$symbol} :exists;
-            $frame = $frame.block.outer-frame;
+            return $frame.properties<pad>
+                if $frame.properties<pad>.properties{$symbol} :exists;
+            $frame = $frame.properties<block>.outer-frame;
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;
@@ -103,27 +99,27 @@ class _007::Runtime {
         my $frame = $identifier.frame ~~ Val::None
             ?? self.current-frame
             !! $identifier.frame;
-        my %pad := self!find-pad($name, $frame);
-        %pad{$name} = $value;
+        my $pad = self!find-pad($name, $frame);
+        $pad.properties{$name} = $value;
     }
 
     method get-var(Str $name, $frame = self.current-frame) {
-        my %pad := self!find-pad($name, $frame);
-        return %pad{$name};
+        my $pad = self!find-pad($name, $frame);
+        return $pad.properties{$name};
     }
 
     method maybe-get-var(Str $name) {
-        if self!maybe-find-pad($name, self.current-frame) -> %pad {
-            return %pad{$name};
+        if self!maybe-find-pad($name, self.current-frame) -> $pad {
+            return $pad.properties{$name};
         }
     }
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ Val::None
+        my Val::Object $frame = $identifier.frame ~~ Val::None
             ?? self.current-frame
             !! $identifier.frame;
-        $frame.pad{$name} = $value // Val::None.new;
+        $frame.properties<pad>.properties{$name} = $value // Val::None.new;
     }
 
     method declared($name) {
@@ -133,7 +129,7 @@ class _007::Runtime {
     method declared-locally($name) {
         my $frame = self.current-frame;
         return True
-            if $frame.pad{$name} :exists;
+            if $frame.properties<pad>.properties{$name} :exists;
     }
 
     method register-subhandler {

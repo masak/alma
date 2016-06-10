@@ -184,7 +184,7 @@ sub check(Q::CompUnit $ast, $runtime) {
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($block.block.eval($runtime));
         handle($block.block.statementlist);
-        $block.block.static-lexpad = $runtime.current-frame.pad;
+        $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();
     }
 
@@ -234,11 +234,12 @@ sub check(Q::CompUnit $ast, $runtime) {
         my $valblock = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist(Q::StatementList.new),
+            :static-lexpad(Val::Object.new()),
             :outer-frame($runtime.current-frame));
         $runtime.enter($valblock);
         handle($block.parameterlist);
         handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.pad;
+        $block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();
     }
 
