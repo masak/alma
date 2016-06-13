@@ -18,6 +18,7 @@ constant TOTAL = 454;
 
 sub MAIN() {
     my $score = 0;
+    my %stats;
 
     for |find("t/features", /".t" $/), |find("t/integration", /".t" $/) -> $file {
         say "== $file";
@@ -114,15 +115,31 @@ sub MAIN() {
             REPLACEMENT
 
         my $proc = run("perl6", $tempfile-name, :out);
+        my $results = "";
         for $proc.out.lines -> $line {
             if $line ~~ /^ "ok "/ {
                 $score++;
             }
+            if $line ~~ /^ ("not ")? "ok "/ {
+                $results ~= $0 ?? "x" !! ".";
+            }
+            if $line ~~ /^ "1.."/ {
+                $results ~= "#";
+            }
             say $line;
         }
         my $failures = $proc.out.close;
+        %stats{$file.path} = $results;
     }
 
     say "";
     say "Your score is {$score} ({($score/TOTAL*100).fmt("%d%%")}) out of a {TOTAL} possible points.";
+
+    given open("self-host/.latest-test-run", :w) -> $fh {
+        for %stats.keys.sort -> $key {
+            my $value = %stats{$key};
+            $fh.say: "$key: $value";
+        }
+        $fh.close;
+    }
 }
