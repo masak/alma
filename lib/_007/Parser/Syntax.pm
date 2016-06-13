@@ -169,7 +169,7 @@ grammar _007::Parser::Syntax {
     proto token term {*}
     token term:none { None» }
     token term:int { \d+ }
-    token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
+    token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
     token term:quasi { quasi <.ws>

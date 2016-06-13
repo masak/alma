@@ -69,6 +69,32 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        [1, 2, 3, ];
+        .
+
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (array (int 1) (int 2) (int 3))))
+        .
+
+    parses-to $program, $ast, "whitespace after trailing comma in array is fine";
+}
+
+{
+    my $program = q:to/./;
+        [ ];
+        .
+
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (array)))
+        .
+
+    parses-to $program, $ast, "(only) whitespace inside array is fine";
+}
+
+{
+    my $program = q:to/./;
         my u;
         .
 
