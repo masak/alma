@@ -74,6 +74,61 @@ my Runtime = {
             Q::Term::Array(array) {
                 return array.elements.map(eval);
             },
+
+            # these were added to be able to run more tests
+            # please move and implement as necessary
+            Q::Block(block) {
+            },
+            Q::Infix(op) {
+            },
+            Q::Infix::Subtraction(op) {
+            },
+            Q::Infix::Multiplication(op) {
+            },
+            Q::Infix::Modulo(op) {
+            },
+            Q::Infix::Divisibility(op) {
+            },
+            Q::Infix::Replicate(op) {
+            },
+            Q::Infix::ArrayReplicate(op) {
+            },
+            Q::Infix::Cons(op) {
+            },
+            Q::Infix::Ne(op) {
+            },
+            Q::Infix::Gt(op) {
+            },
+            Q::Infix::Lt(op) {
+            },
+            Q::Infix::Ge(op) {
+            },
+            Q::Infix::Le(op) {
+            },
+            Q::Infix::Or(op) {
+            },
+            Q::Infix::And(op) {
+            },
+            Q::Infix::TypeEq(op) {
+            },
+            Q::Postfix(op) {
+            },
+            Q::Postfix::Property(op) {
+            },
+            Q::Prefix(op) {
+            },
+            Q::Prefix::Minus(op) {
+            },
+            Q::Prefix::Not(op) {
+            },
+            Q::Prefix::Upto(op) {
+            },
+            Q::Term::Object(term) {
+            },
+            Q::Term::Quasi(term) {
+            },
+            Q::Expr::StatementListAdapter(adapter) {
+            },
         };
         sub eval(q) { return eval_of_type[type(q).name](q); }
 
@@ -102,6 +157,23 @@ my Runtime = {
                 for stmtlist.statements -> statement {
                     run(statement);
                 }
+            },
+
+            # these were added to be able to run more tests
+            # please move and implement as necessary
+            Q::Statement::BEGIN(stmt) {
+            },
+            Q::Statement::Constant(stmt) {
+            },
+            Q::Statement::For(stmt) {
+            },
+            Q::Statement::If(stmt) {
+            },
+            Q::Statement::Macro(stmt) {
+            },
+            Q::Statement::Sub(stmt) {
+            },
+            Q::Statement::While(stmt) {
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
