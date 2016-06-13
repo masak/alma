@@ -92,7 +92,7 @@ use _007::Test;
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<x> (str "hi ") (int 3))))))
         .
 
-    is-result $ast, "hi hi hi \n", "string repeatition works";
+    is-result $ast, "hi hi hi \n", "string repetition works";
 }
 
 {
@@ -101,7 +101,7 @@ use _007::Test;
           (stexpr (postfix:<()> (identifier "say") (argumentlist (infix:<xx> (array (int 1) (int 2)) (int 3))))))
         .
 
-    is-result $ast, "[1, 2, 1, 2, 1, 2]\n", "array repeatition works";
+    is-result $ast, "[1, 2, 1, 2, 1, 2]\n", "array repetition works";
 }
 
 {
