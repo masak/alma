@@ -23,7 +23,7 @@ multi dump(Q $q) {
 
     my @attrs = $q.attributes;
     my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-    return "{$q.^name} \{\n$contents\n\}";
+    return "new {$q.^name} \{\n$contents\n\}";
 }
 
 sub run_007_on_007($program) {

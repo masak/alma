@@ -5,11 +5,11 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            return Q::Statement::My {
-                identifier: Q::Identifier {
+            return new Q::Statement::My {
+                identifier: new Q::Identifier {
                     name: "agent_name"
                 },
-                expr: Q::Literal::Str {
+                expr: new Q::Literal::Str {
                     value: "James Bond"
                 }
             };

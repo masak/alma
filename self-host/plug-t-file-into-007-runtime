@@ -29,7 +29,7 @@ sub MAIN($file) {
         
             my @attrs = $q.attributes;
             my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-            return "{$q.^name} \{\n$contents\n\}";
+            return "new {$q.^name} \{\n$contents\n\}";
         }
         
         sub is-result($input, $expected, $desc) {

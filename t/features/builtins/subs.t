@@ -33,7 +33,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Literal::Int { value: 7 };
+        my q = new Q::Literal::Int { value: 7 };
 
         say(melt(q));
         .
@@ -64,7 +64,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my x = "Bond";
-        my q = Q::Identifier { name: "x" };
+        my q = new Q::Identifier { name: "x" };
 
         say(melt(q));
         .
@@ -79,7 +79,7 @@ use _007::Test;
     my $program = q:to/./;
         sub foo() {
             my lookup = "hygienic";
-            return Q::Identifier { name: "lookup" };
+            return new Q::Identifier { name: "lookup" };
         }
 
         my lookup = "unhygienic";
@@ -152,7 +152,7 @@ use _007::Test;
     is-result $ast, "<type Sub>\n", "builtin sub type() returns the same as ordinary sub";
 }
 
- {
+{
      my $ast = q:to/./;
          (statementlist
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (identifier "type") (argumentlist (postfix:<()> (identifier "int") (argumentlist (str "6"))))))))

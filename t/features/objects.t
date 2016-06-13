@@ -130,7 +130,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Identifier { name: "foo" };
+        my q = new Q::Identifier { name: "foo" };
 
         say(q.name);
         .
@@ -143,7 +143,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Identifier { dunnexist: "foo" };
+        my q = new Q::Identifier { dunnexist: "foo" };
         .
 
     parse-error
@@ -154,7 +154,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Identifier { name: "foo" };
+        my q = new Q::Identifier { name: "foo" };
 
         say(type(q));
         .
@@ -167,7 +167,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Object { foo: 42 };
+        my q = new Object { foo: 42 };
 
         say(q.foo);
         .
@@ -180,9 +180,9 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my i = Int { value: 7 };
-        my s = Str { value: "Bond" };
-        my a = Array { elements: [0, 0, 7] };
+        my i = new Int { value: 7 };
+        my s = new Str { value: "Bond" };
+        my a = new Array { elements: [0, 0, 7] };
 
         say(i == 7);
         say(s == "Bond");
@@ -197,18 +197,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my n = None {};
-        .
-
-    parse-error
-        $program,
-        X::AdHoc,   # XXX: maybe expect something more specific?
-        'writing `None {}` is a syntax error';
-}
-
-{
-    my $program = q:to/./;
-        my q = Q::Identifier {};
+        my q = new Q::Identifier {};
         .
 
     parse-error
@@ -234,6 +223,20 @@ use _007::Test;
         .
 
     parses-to $program, $ast, "a `return` inside of a (short-form) method is fine";
+}
+
+{
+    my $program = q:to/./;
+        my o1 = { name: "James" };
+        my o2 = new { name: "James" };
+
+        say(o1 == o2);
+        .
+
+    outputs
+        $program,
+        qq[1\n],
+        "`new` on object literals without the type is allowed but optional";
 }
 
 done-testing;

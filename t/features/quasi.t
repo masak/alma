@@ -29,7 +29,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        constant greeting_ast = Q::Literal::Str { value: "Mr Bond!" };
+        constant greeting_ast = new Q::Literal::Str { value: "Mr Bond!" };
 
         macro foo() {
             return quasi {
@@ -240,7 +240,7 @@ use _007::Test;
         say(type(quasi @ Q::Term { None }));
         say(type(quasi @ Q::Term { "James Bond" }));
         say(type(quasi @ Q::Term { [0, 0, 7] }));
-        say(type(quasi @ Q::Term { Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term { new Object { james: "Bond" } }));
         say(type(quasi @ Q::Term { quasi { say("oh, james!") } }));
         say(type(quasi @ Q::Term { (0 + 0 + 7) }));
         .
@@ -263,7 +263,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Object { Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term::Object { new Object { james: "Bond" } }));
         .
 
     outputs $program, "<type Q::Term::Object>\n", "quasi @ Q::Term::Object";

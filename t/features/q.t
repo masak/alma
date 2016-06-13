@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::My { identifier: Q::Identifier { name: "foo" } };
+        my q = new Q::Statement::My { identifier: new Q::Identifier { name: "foo" } };
         say(q.expr);
         .
 
@@ -16,7 +16,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::Return {};
+        my q = new Q::Statement::Return {};
         say(q.expr);
         .
 
@@ -28,13 +28,13 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::If {
-            expr: Q::Literal::None {},
-            block: Q::Block {
-                parameterlist: Q::ParameterList {
+        my q = new Q::Statement::If {
+            expr: new Q::Literal::None {},
+            block: new Q::Block {
+                parameterlist: new Q::ParameterList {
                     parameters: []
                 },
-                statementlist: Q::StatementList {
+                statementlist: new Q::StatementList {
                     statements: []
                 }
             }
@@ -50,11 +50,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::Sub {
-            identifier: Q::Identifier { name: "foo" },
-            block: Q::Block {
-                parameterlist: Q::ParameterList { parameters: [] },
-                statementlist: Q::StatementList { statements: [] }
+        my q = new Q::Statement::Sub {
+            identifier: new Q::Identifier { name: "foo" },
+            block: new Q::Block {
+                parameterlist: new Q::ParameterList { parameters: [] },
+                statementlist: new Q::StatementList { statements: [] }
             }
         };
         say(q.traitlist);
@@ -68,11 +68,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = Q::Statement::Macro {
-            identifier: Q::Identifier { name: "moo" },
-            block: Q::Block {
-                parameterlist: Q::ParameterList { parameters: [] },
-                statementlist: Q::StatementList { statements: [] }
+        my q = new Q::Statement::Macro {
+            identifier: new Q::Identifier { name: "moo" },
+            block: new Q::Block {
+                parameterlist: new Q::ParameterList { parameters: [] },
+                statementlist: new Q::StatementList { statements: [] }
             }
         };
         say(q.traitlist);

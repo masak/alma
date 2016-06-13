@@ -1,7 +1,7 @@
-my ast = Q::CompUnit {
-    block: Q::Block {
-        parameterlist: Q::ParameterList {},
-        statementlist: Q::StatementList {
+my ast = new Q::CompUnit {
+    block: new Q::Block {
+        parameterlist: new Q::ParameterList {},
+        statementlist: new Q::StatementList {
             statements: []
         }
     }
@@ -27,7 +27,7 @@ my Runtime = {
                     return pad;
                 }
             }
-            throw Exception { message: "Cannot find variable " ~ name };
+            throw new Exception { message: "Cannot find variable " ~ name };
         }
         sub get_var(name) {
             my pad = find(name);
