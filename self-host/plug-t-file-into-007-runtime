@@ -2,7 +2,8 @@ sub MAIN($file) {
     my $contents = slurp($file);
     my $basename = $file.IO.basename.subst(/".t" $/, "");
     my $tempfile-name = "$basename-$*PID.t";
-    LEAVE { unlink $tempfile-name }
+    LEAVE { unlink $tempfile-name if $tempfile-name }
+    signal(SIGINT).act: { unlink $tempfile-name if $tempfile-name; exit 1 }
     spurt($tempfile-name, $contents.subst(/^^ \h* "use _007::Test;" \h* $$/, q:to/REPLACEMENT/));
         use _007::Test <&read>;
         
