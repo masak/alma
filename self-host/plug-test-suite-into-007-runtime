@@ -9,7 +9,16 @@ sub find($dir, Regex $pattern) {
     }
 }
 
+# Run the following script to re-calculate this constant:
+#
+# $ (for file in `find t/features t/integration -name \*.t`; do perl6 $file | grep '1\.\.'; done) |
+#       perl6 -ne'/\.\.(\d+)/; our $n += $0; END { say $n }'
+
+constant TOTAL = 454;
+
 sub MAIN() {
+    my $score = 0;
+
     for |find("t/features", /".t" $/), |find("t/integration", /".t" $/) -> $file {
         say "== $file";
         my $contents = slurp($file);
@@ -103,7 +112,16 @@ sub MAIN() {
             }
             REPLACEMENT
 
-        my $failures = shell("perl6 $tempfile-name");
-        $failures.exitcode; # to get rid of complaint when test file has failures
+        my $proc = run("perl6", $tempfile-name, :out);
+        for $proc.out.lines -> $line {
+            if $line ~~ /^ "ok "/ {
+                $score++;
+            }
+            say $line;
+        }
+        my $failures = $proc.out.close;
     }
+
+    say "";
+    say "Your score is {$score} ({($score/TOTAL*100).fmt("%d%%")}) out of a {TOTAL} possible points.";
 }
