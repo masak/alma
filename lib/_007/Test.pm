@@ -126,13 +126,13 @@ sub read(Str $ast) is export {
     )));
 }
 
-class StrOutput {
+my class StrOutput {
     has $.result = "";
 
     method say($s) { $!result ~= $s.gist ~ "\n" }
 }
 
-class UnwantedOutput {
+my class UnwantedOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
@@ -344,6 +344,16 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     }
 
     flunk $desc;
+}
+
+sub run-and-collect-output($filepath) is export {
+    my $program = slurp($filepath);
+    my $output = StrOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $ast = _007.parser(:$runtime).parse($program);
+    $runtime.run($ast);
+
+    return $output.result.lines;
 }
 
 our sub EXPORT(*@things) {

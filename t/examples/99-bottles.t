@@ -1,7 +1,7 @@
 use Test;
+use _007::Test;
 
-my $output = qx[perl6 bin/007 examples/99-bottles.007];
-my @lines = lines($output);
+my @lines = run-and-collect-output("examples/99-bottles.007");
 
 is +@lines, 4 * 99 + 98, "correct number of lines";
 

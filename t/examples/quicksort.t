@@ -1,6 +1,7 @@
 use Test;
+use _007::Test;
 
-my @lines = qx[perl6 bin/007 examples/quicksort.007].lines;
+my @lines = run-and-collect-output("examples/quicksort.007");
 
 is +@lines, 3, "correct number of lines of output";
 
