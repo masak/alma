@@ -79,7 +79,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         '(' ~ ')' <parameterlist>
         <traitlist>
-        <blockoid>:!s
+        [<blockoid>|| <.panic("block")>]:!s
         <.finishpad>
     }
     token statement:return {

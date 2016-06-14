@@ -248,4 +248,19 @@ use _007::Test;
     outputs $program, "Mr Bond\n", "it's OK to call your sub 'subtract'";
 }
 
+{
+    my $program = q:to/./;
+        sub fn()
+        .
+
+    my subset missing-block of X::Syntax::Missing where {
+        is(.what, "block", "got the right missing thing");
+        .what eq "block";
+    };
+
+    parse-error $program,
+        missing-block,
+        "parse error 'missing block' on missing block";
+}
+
 done-testing;
