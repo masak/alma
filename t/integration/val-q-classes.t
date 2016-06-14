@@ -2,11 +2,12 @@ use v6;
 use Test;
 
 my @p6types = flat
-    qx[perl6 -ne 'say ~$0 if /^class \h+ ("Q::" \S+)/' lib/_007/Q.pm].lines,
-    qx[perl6 -ne 'say ~$0 if /^role \h+ ("Q::" \S+)/' lib/_007/Q.pm].lines,
-    qx[perl6 -ne 'say ~$0 if /^class \h+ ("Val::" \S+)/' lib/_007/Val.pm].lines;
+    "lib/_007/Q.pm".IO.lines.map({ ~$0 if /^ < class role > \h+ ("Q::" \S+)/ }),
+    "lib/_007/Val.pm".IO.lines.map({ ~$0 if /^ class \h+ ("Val::" \S+)/ });
 
-my @builtins = qx!perl6 -ne 'say ~$0 if /^ \h+ ([Val|Q] "::" <-[,]>+) "," \h* $/' lib/_007/Runtime/Builtins.pm!.lines;
+my @builtins = "lib/_007/Runtime/Builtins.pm".IO.lines.map({
+    ~$0 if /^ \h+ ([Val|Q] "::" <-[,]>+) "," \h* $/
+});
 
 {
     my $missing-p6types = (@builtins (-) @p6types).keys.map({ "- $_" }).join("\n");

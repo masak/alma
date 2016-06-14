@@ -14,8 +14,7 @@ sub find($dir, Regex $pattern) {
 
 my @lib-pms = find("lib", / ".pm" $/)».Str;
 
-my @meta-info-pms =
-    qx!perl6 -ne'if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ { say ~$0 }' META.info!.lines;
+my @meta-info-pms = "META.info".IO.lines.map({ ~$0 if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ });
 
 {
     my $missing-meta-info-lines = (@lib-pms (-) @meta-info-pms).keys.map({ "- $_" }).join("\n");
