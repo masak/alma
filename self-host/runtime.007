@@ -58,6 +58,9 @@ my Runtime = {
             Q::Infix::Eq(op) {
                 return eval(op.lhs) == eval(op.rhs);
             },
+            Q::Infix::Subtraction(op) {
+                return eval(op.lhs) - eval(op.rhs);
+            },
             Q::Literal::Int(lit_int) {
                 return lit_int.value;
             },
@@ -82,8 +85,6 @@ my Runtime = {
             Q::Block(block) {
             },
             Q::Infix(op) {
-            },
-            Q::Infix::Subtraction(op) {
             },
             Q::Infix::Multiplication(op) {
             },
