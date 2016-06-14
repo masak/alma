@@ -139,11 +139,6 @@ class _007::Runtime::Builtins {
             },
             min      => -> $a, $b { min($a.value, $b.value) },
             max      => -> $a, $b { max($a.value, $b.value) },
-            melt     => sub ($q) {
-                die X::TypeCheck.new(:operation<melt>, :got($q), :expected(Q::Expr))
-                    unless $q ~~ Q::Expr;
-                return $q.eval($.runtime);
-            },
 
             # OPERATORS
 

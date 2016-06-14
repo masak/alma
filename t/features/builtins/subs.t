@@ -32,68 +32,6 @@ use _007::Test;
 }
 
 {
-    my $program = q:to/./;
-        my q = new Q::Literal::Int { value: 7 };
-
-        say(melt(q));
-        .
-
-    outputs
-        $program,
-        qq[7\n],
-        "melt() on literal int";
-}
-
-{
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "q")
-            (object (identifier "Q::Statement::My") (propertylist
-              (property "identifier" (object (identifier "Q::Identifier") (propertylist
-                (property "name" (str "agent")))))
-              (property "expr" (str "James Bond")))))
-          (stexpr (postfix:<()> (identifier "melt") (argumentlist (identifier "q")))))
-        .
-
-    is-error
-        $ast,
-        X::TypeCheck,
-        "cannot melt() a statement";
-}
-
-{
-    my $program = q:to/./;
-        my x = "Bond";
-        my q = new Q::Identifier { name: "x" };
-
-        say(melt(q));
-        .
-
-    outputs
-        $program,
-        qq[Bond\n],
-        "melt() on a variable";
-}
-
-{
-    my $program = q:to/./;
-        sub foo() {
-            my lookup = "hygienic";
-            return new Q::Identifier { name: "lookup" };
-        }
-
-        my lookup = "unhygienic";
-        my identifier = foo();
-        say(melt(identifier));
-        .
-
-    outputs
-        $program,
-        qq[unhygienic\n],
-        "melted identifier lookup is unhygienic";
-}
-
-{
     my $ast = q:to/./;
         (statementlist
           (my (identifier "n"))
