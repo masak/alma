@@ -2,15 +2,14 @@ use v6;
 use Test;
 use _007;
 
-sub tree-walk(Stash $package, @accum) {
-    for $package.keys -> $key {
-        my $name = "{$package}::{$key}";
+sub tree-walk(%package, @accum) {
+    for %package.keys.map({ %package ~ "::$_" }) -> $name {
         # make a little exception for Val::Sub::Builtin, which is just an
         # implementation detail and doesn't have a corresponding builtin
         # (because it tries to pass itself off as a Val::Sub)
         next if $name eq "Val::Sub::Builtin";
         push @accum, $name;
-        tree-walk(::($name).WHO , @accum)
+        tree-walk(::($name).WHO , @accum);
     }
 }
 
