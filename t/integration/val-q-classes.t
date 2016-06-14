@@ -1,9 +1,23 @@
 use v6;
+use MONKEY-SEE-NO-EVAL;
 use Test;
+use _007;
 
-my @p6types = flat
-    "lib/_007/Q.pm".IO.lines.map({ ~$0 if /^ < class role > \h+ ("Q::" \S+)/ }),
-    "lib/_007/Val.pm".IO.lines.map({ ~$0 if /^ class \h+ ("Val::" \S+)/ });
+sub tree-walk($package, @accum) {
+    for $package.keys -> $key {
+        my $name = "{$package}::{$key}";
+        # make a little exception for Val::Sub::Builtin, which is just an
+        # implementation detail and doesn't have a corresponding builtin
+        # (because it tries to pass itself off as a Val::Sub)
+        next if $name eq "Val::Sub::Builtin";
+        push @accum, $name;
+        tree-walk(EVAL("{$name}::"), @accum)
+    }
+}
+
+my @p6types;
+tree-walk(Q::, @p6types);
+tree-walk(Val::, @p6types);
 
 my @builtins = "lib/_007/Runtime/Builtins.pm".IO.lines.map({
     ~$0 if /^ \h+ ([Val|Q] "::" <-[,]>+) "," \h* $/
