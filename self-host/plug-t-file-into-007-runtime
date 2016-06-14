@@ -33,6 +33,12 @@ sub MAIN($file) {
             return "new {$q.^name} \{\n$contents\n\}";
         }
         
+        my class StrOutput {
+            has $.result = "";
+
+            method say($s) { $!result ~= $s.gist ~ "\n" }
+        }
+
         sub is-result($input, $expected, $desc) {
             my $compunit = read($input);
             my $statements = $compunit.block.statementlist.statements;
