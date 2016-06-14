@@ -61,4 +61,13 @@ use _007::Test;
         "type(type(7)).name is 'Type'";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (object (identifier "Q::Literal") (propertylist))))
+        .
+
+    is-error $ast, X::Uninstantiable, "abstract Q types are uninstantiable";
+}
+
 done-testing;

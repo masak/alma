@@ -1,3 +1,9 @@
+class X::Uninstantiable is Exception {
+    has Str $.name;
+
+    method message() { "<type {$.name}> is abstract and uninstantiable"; }
+}
+
 class Helper { ... }
 
 role Val {
@@ -98,6 +104,9 @@ class Val::Type does Val {
             return $.type.new(:type(@properties[0].value.type));
         }
         else {
+            my role R {};
+            die X::Uninstantiable.new(:$.name)
+                if $.type.HOW ~~ R.HOW.WHAT;
             return $.type.new(|%(@properties));
         }
     }
