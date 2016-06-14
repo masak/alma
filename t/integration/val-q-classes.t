@@ -1,9 +1,8 @@
 use v6;
-use MONKEY-SEE-NO-EVAL;
 use Test;
 use _007;
 
-sub tree-walk($package, @accum) {
+sub tree-walk(Stash $package, @accum) {
     for $package.keys -> $key {
         my $name = "{$package}::{$key}";
         # make a little exception for Val::Sub::Builtin, which is just an
@@ -11,7 +10,7 @@ sub tree-walk($package, @accum) {
         # (because it tries to pass itself off as a Val::Sub)
         next if $name eq "Val::Sub::Builtin";
         push @accum, $name;
-        tree-walk(EVAL("{$name}::"), @accum)
+        tree-walk(::($name).WHO , @accum)
     }
 }
 
