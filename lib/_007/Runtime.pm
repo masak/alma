@@ -160,13 +160,6 @@ class _007::Runtime {
         }
     }
 
-    multi method call(Val::Block $c, @arguments) {
-        self.sigbind("Block", $c, @arguments);
-        $c.statementlist.run(self);
-        self.leave;
-        return Val::None.new;
-    }
-
     multi method call(Val::Sub $c, @arguments) {
         self.sigbind("Sub", $c, @arguments);
         self.register-subhandler;
