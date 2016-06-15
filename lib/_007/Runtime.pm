@@ -389,38 +389,34 @@ class _007::Runtime {
         }
         elsif $propname eq "get" {
             return Val::Sub::Builtin.new("get", sub ($prop) {
-                    return self.property($obj, $prop.value);
-                }
-            );
+                return self.property($obj, $prop.value);
+            });
         }
         elsif $propname eq "has" {
             return Val::Sub::Builtin.new("has", sub ($prop) {
-                    # XXX: problem: we're not lying hard enough here. we're missing
-                    #      both Q objects, which are still hard-coded into the
-                    #      substrate, and the special-cased properties
-                    #      <get has extend update id>
-                    my $exists = $obj.properties{$prop.value} :exists ?? 1 !! 0;
-                    return Val::Int.new(:value($exists));
-                }
-            );
+                # XXX: problem: we're not lying hard enough here. we're missing
+                #      both Q objects, which are still hard-coded into the
+                #      substrate, and the special-cased properties
+                #      <get has extend update id>
+                my $exists = $obj.properties{$prop.value} :exists ?? 1 !! 0;
+                return Val::Int.new(:value($exists));
+            });
         }
         elsif $propname eq "update" {
             return Val::Sub::Builtin.new("update", sub ($newprops) {
-                    for $obj.properties.keys {
-                        $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
-                    }
-                    return $obj;
+                for $obj.properties.keys {
+                    $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
                 }
-            );
+                return $obj;
+            });
         }
         elsif $propname eq "extend" {
             return Val::Sub::Builtin.new("extend", sub ($newprops) {
-                    for $newprops.properties.keys {
-                        $obj.properties{$_} = $newprops.properties{$_};
-                    }
-                    return $obj;
+                for $newprops.properties.keys {
+                    $obj.properties{$_} = $newprops.properties{$_};
                 }
-            );
+                return $obj;
+            });
         }
         elsif $propname eq "id" {
             # XXX: Make this work for Q-type objects, too.
