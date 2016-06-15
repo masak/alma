@@ -51,17 +51,16 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stsub (identifier "f") (block (parameterlist (param (identifier "callback"))) (statementlist
-            (my (identifier "scoping") (str "dynamic"))
-            (stexpr (postfix:<()> (identifier "callback") (argumentlist))))))
-          (my (identifier "scoping") (str "lexical"))
-          (stexpr (postfix:<()> (identifier "f") (argumentlist (block (parameterlist) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "scoping"))))))))))
+    my $program = q:to/./;
+        sub f(callback) {
+            my scoping = "dynamic";
+            callback();
+        }
+        my scoping = "lexical";
+        f(sub() { say(scoping) });
         .
 
-    is-result $ast, "lexical\n", "scoping is lexical";
+    outputs $program, "lexical\n", "scoping is lexical";
 }
 
 {
@@ -88,17 +87,14 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI")))))))
-          (stsub (identifier "g") (block (parameterlist) (statementlist
-            (return (block (parameterlist) (statementlist
-              (stexpr (postfix:<()> (identifier "f") (argumentlist)))))))))
-          (stexpr (postfix:<()> (postfix:<()> (identifier "g") (argumentlist)) (argumentlist))))
+    my $program = q:to/./;
+        sub f() { say("OH HAI") }
+        sub g() { return f };
+        g()();
         .
 
-    is-result $ast, "OH HAI\n", "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
+    outputs $program, "OH HAI\n",
+        "left hand of a call doesn't have to be an identifier, just has to resolve to a callable";
 }
 
 {
@@ -261,6 +257,20 @@ use _007::Test;
     parse-error $program,
         missing-block,
         "parse error 'missing block' on missing block";
+}
+
+{
+    my $program = q:to/./;
+        sub b(count) {
+            if count {
+                b(count - 1);
+                say(count);
+            }
+        }
+        b(4);
+        .
+
+    outputs $program, "1\n2\n3\n4\n", "each sub invocation gets its own callframe/scope";
 }
 
 done-testing;

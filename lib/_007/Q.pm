@@ -193,7 +193,7 @@ class Q::Block does Q {
 
     method attribute-order { <parameterlist statementlist> }
 
-    method eval($runtime) {
+    method reify($runtime) {
         my Val::Object $outer-frame = $runtime.current-frame;
         Val::Block.new(
             :$.parameterlist,
@@ -534,7 +534,7 @@ class Q::Statement::If does Q::Statement {
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
         if $expr.truthy {
-            my $c = $.block.eval($runtime);
+            my $c = $.block.reify($runtime);
             $runtime.enter($c);
             my $paramcount = $c.parameterlist.elems;
             die X::ParameterMismatch.new(
@@ -553,7 +553,7 @@ class Q::Statement::If does Q::Statement {
                     $.else.run($runtime)
                 }
                 when Q::Block {
-                    my $c = $.else.eval($runtime);
+                    my $c = $.else.reify($runtime);
                     $runtime.enter($c);
                     $.else.statementlist.run($runtime);
                     $runtime.leave;
@@ -567,7 +567,7 @@ class Q::Statement::Block does Q::Statement {
     has $.block;
 
     method run($runtime) {
-        $runtime.enter($.block.eval($runtime));
+        $runtime.enter($.block.reify($runtime));
         $.block.statementlist.run($runtime);
         $runtime.leave;
     }
@@ -597,7 +597,7 @@ class Q::Statement::For does Q::Statement {
             @split;
         }
 
-        my $c = $.block.eval($runtime);
+        my $c = $.block.reify($runtime);
         my $count = $c.parameterlist.parameters.elements.elems;
 
         my $array = $.expr.eval($runtime);
@@ -632,7 +632,7 @@ class Q::Statement::While does Q::Statement {
 
     method run($runtime) {
         while (my $expr = $.expr.eval($runtime)).truthy {
-            my $c = $.block.eval($runtime);
+            my $c = $.block.reify($runtime);
             $runtime.enter($c);
             my $paramcount = $c.parameterlist.parameters.elements.elems;
             die X::ParameterMismatch.new(

@@ -182,7 +182,7 @@ sub check(Q::CompUnit $ast, $runtime) {
     }
 
     multi handle(Q::Statement::Block $block) {
-        $runtime.enter($block.block.eval($runtime));
+        $runtime.enter($block.block.reify($runtime));
         handle($block.block.statementlist);
         $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();

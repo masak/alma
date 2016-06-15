@@ -51,20 +51,6 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (stsub (identifier "f") (block (parameterlist) (statementlist
-            (my (identifier "b") (block (parameterlist) (statementlist
-              (return (int 5)))))
-            (return (identifier "b")))))
-          (my (identifier "c") (postfix:<()> (identifier "f") (argumentlist)))
-          (stexpr (postfix:<()> (identifier "c") (argumentlist))))
-        .
-
-    is-error $ast, X::ControlFlow::Return, "cannot run a return statement of a subroutine that already exited";
-}
-
-{
-    my $ast = q:to/./;
-        (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
             (return))))
           (stexpr (postfix:<()> (identifier "say") (argumentlist (postfix:<()> (identifier "f") (argumentlist))))))
         .
