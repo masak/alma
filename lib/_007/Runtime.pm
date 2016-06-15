@@ -392,6 +392,13 @@ class _007::Runtime {
                 return self.property($obj, $prop.value);
             });
         }
+        elsif $propname eq "keys" {
+            return Val::Sub::Builtin.new("keys", sub () {
+                return Val::Array.new(:elements($obj.properties.keys.map({
+                    Val::Str.new(:$^value)
+                })));
+            });
+        }
         elsif $propname eq "has" {
             return Val::Sub::Builtin.new("has", sub ($prop) {
                 # XXX: problem: we're not lying hard enough here. we're missing
