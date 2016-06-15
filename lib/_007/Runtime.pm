@@ -427,7 +427,7 @@ class _007::Runtime {
         }
         elsif $propname eq "id" {
             # XXX: Make this work for Q-type objects, too.
-            return $obj.id;
+            return Val::Int.new(:value($obj.id));
         }
         else {
             die X::Property::NotFound.new(:$propname, :$type);
