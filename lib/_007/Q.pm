@@ -326,7 +326,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
-            when Val::Object | Q {
+            when Val::Object | Val::Block | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;

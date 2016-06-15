@@ -219,6 +219,10 @@ class _007::Runtime {
 
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
+            # XXX: hack
+            if $obj ~~ Q::Block {
+                %known-properties<static-lexpad> = 1;
+            }
 
             die X::Property::NotFound.new(:$propname, :$type)
                 unless %known-properties{$propname};
@@ -383,6 +387,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
+        }
+        elsif $obj ~~ Val::Block && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+            return $obj."$propname"();
         }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};

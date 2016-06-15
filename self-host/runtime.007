@@ -14,31 +14,88 @@ my RealOutput = {
     new() { return { say }; }
 };
 
+constant NO_OUTER = {};
+
 my Runtime = {
     new(config) {
         my out = config.output;
-        my pads = [];
-        sub enter() { pads.push({}) }
-        sub leave() { pads.pop() }
-
-        sub declare_var(name) {
-            pads[pads.elems() - 1][name] = None;
-        }
-        sub find(name) {
-            for pads.reverse() -> pad {
-                if pad.has(name) {
-                    return pad;
-                }
+        my frames = [];
+        sub enter(block) {
+            my frame = { block, pad: {} };
+            frames.push(frame);
+            for block["static-lexpad"].keys() -> name {
+                my value = block["static-lexpad"][name];
+                my identifier = new Q::Identifier { name };
+                declare_var(identifier, value);
             }
-            throw new Exception { message: "Cannot find variable " ~ name };
+        }
+        sub leave() {
+            frames.pop();
+        }
+        sub current_frame() {
+            if !frames {
+                return NO_OUTER;
+            }
+            return frames[frames.elems() - 1];
+        }
+
+        sub find_pad(symbol) {
+            my frame = current_frame();
+            # The below check didn't work
+            # while frame.id != NO_OUTER.id {
+            # So trying this instead:
+            while frame.has("pad") {
+                if frame.pad.has(symbol) {
+                    return frame.pad;
+                }
+                frame = frame.block["outer-frame"];
+            }
+            throw new Exception { message: "Cannot find variable '" ~ symbol ~ "'" };
         }
         sub get_var(name) {
-            my pad = find(name);
+            my pad = find_pad(name);
             return pad[name];
         }
         sub put_var(name, value) {
-            my pad = find(name);
+            my pad = find_pad(name);
             pad[name] = value;
+        }
+        sub declare_var(identifier, value) {
+            my name = identifier.name;
+            # XXX: don't know if we should expose identifier.frame in 007
+            # my frame = identifier.frame || current_frame();
+            my frame = current_frame();
+            frame.pad[name] = value;
+        }
+
+        sub reify(block) {
+            return new Block {
+                parameterlist: block.parameterlist,
+                statementlist: block.statementlist,
+                "static-lexpad": block["static-lexpad"],
+                "outer-frame": current_frame(),
+            };
+        }
+
+        sub sigbind(c, arguments) {
+            my paramcount = c.parameterlist.parameters.elems();
+            my argcount = arguments.elems();
+            if paramcount != argcount {
+                throw new Exception { message: "parameter mismatch" };
+            }
+            enter(c);
+            for ^argcount -> i {
+                my param = c.parameterlist.parameters[i];
+                my arg = arguments[i];
+                declare_var(param.identifier, arg);
+            }
+        }
+
+        sub call(c, arguments) {
+            sigbind(c, arguments);
+            my frame = current_frame();
+            run(c.statementlist);
+            leave();
         }
 
         my eval_of_type = {
@@ -71,16 +128,35 @@ my Runtime = {
                 return lit_str.value;
             },
             Q::Postfix::Call(op) {
+                # XXX: short-term hack to get `say` early; needs to go away
                 if op.operand ~~ Q::Identifier && op.operand.name == "say" {
                     return out.say(eval(op.argumentlist.arguments[0]));
                 }
-                # else do nothing for now -- which is wrong, but makes tests fail instead of blow up
+                my c = eval(op.operand);
+                if c ~~ Macro {
+                    throw new Exception { message: "macro is called at runtime" };
+                }
+                if !(c ~~ Block) {
+                    throw new Exception { message: "Trying to invoke a " ~ type(c).name };
+                }
+                my arguments = op.argumentlist.arguments.map(eval);
+                return call(c, arguments);
             },
             Q::Postfix::Index(op) {
                 return eval(op.operand)[eval(op.index)];
             },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
+            },
+            Q::Term::Sub(term) {
+                my name = term.identifier && term.identifier.name || "(anon)";
+                return new Block {
+#                     name,
+                    parameterlist: term.block.parameterlist,
+                    statementlist: term.block.statementlist,
+                    "static-lexpad": term.block["static-lexpad"],
+                    "outer-frame": current_frame(),
+                };
             },
 
             # these were added to be able to run more tests
@@ -140,12 +216,12 @@ my Runtime = {
 
         my run_of_type = {
             Q::CompUnit(compunit) {
-                enter();
+                enter(reify(compunit.block));
                 run(compunit.block.statementlist);
                 leave();
             },
             Q::Statement::Block(stmt) {
-                enter();
+                enter(reify(stmt.block));
                 run(stmt.block.statementlist);
                 leave();
             },
@@ -154,7 +230,6 @@ my Runtime = {
             },
             Q::Statement::My(stmt) {
                 my name = stmt.identifier.name;
-                declare_var(name);
                 if stmt.expr {
                     put_var(name, eval(stmt.expr));
                 }
@@ -176,6 +251,8 @@ my Runtime = {
             Q::Statement::If(stmt) {
             },
             Q::Statement::Macro(stmt) {
+            },
+            Q::Statement::Return(stmt) {
             },
             Q::Statement::Sub(stmt) {
             },
