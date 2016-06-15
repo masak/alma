@@ -1,11 +1,14 @@
-my ast = new Q::CompUnit {
-    block: new Q::Block {
-        parameterlist: new Q::ParameterList {},
-        statementlist: new Q::StatementList {
-            statements: []
+my ast;
+if !ast {
+    ast = new Q::CompUnit {
+        block: new Q::Block {
+            parameterlist: new Q::ParameterList {},
+            statementlist: new Q::StatementList {
+                statements: []
+            }
         }
-    }
-};
+    };
+}
 
 my RealOutput = {
     new() { return { say }; }

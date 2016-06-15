@@ -1,42 +1,11 @@
 use _007;
 
-multi dump(Val::Array $things) {
-    "[" ~ $things.elements.map(&dump).join(", ") ~ "]";
-}
-
-multi dump(Val::Str $str) {
-    $str.quoted-Str;
-}
-
-multi dump(Val::Int $int) {
-    ~$int;
-}
-
-multi dump(Val::None $) {
-    "None";
-}
-
-multi dump(Q $q) {
-    sub aname($attr) { $attr.name.substr(2) }
-    sub avalue($attr, $obj) { $attr.get_value($obj) }
-    sub keyvalue($attr) { aname($attr) ~ ": " ~ dump(avalue($attr, $q)) }
-
-    my @attrs = $q.attributes;
-    my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-    return "new {$q.^name} \{\n$contents\n\}";
-}
-
 sub run_007_on_007($program) {
-    my $statements = _007.parser.parse($program).block.statementlist.statements;
-    my $qtree = dump($statements);
-
-    my $original-program = slurp("self-host/runtime.007");
-    my $runtime-program = $original-program.subst(/ ^^ (\h*) 'statements: []' \h* $$/, -> $/ {
-        "statements: $qtree".indent($0.chars)
-    });
-
+    my $compunit = _007.parser.parse($program);
+    my $runtime-program = slurp("self-host/runtime.007");
     my $runtime = _007.runtime;
     my $ast = _007.parser(:$runtime).parse($runtime-program);
+    $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);
 }
 
