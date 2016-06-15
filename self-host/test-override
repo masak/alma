@@ -1,4 +1,4 @@
-use _007::Test <&read>;
+use _007::Test <&read &check>;
 
 my class StrOutput {
     has $.result = "";
@@ -11,6 +11,7 @@ sub is-result($input, $expected, $desc) {
     my $runtime-program = slurp("self-host/runtime.007");
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
+    check($compunit, $runtime);
     my $ast = _007.parser(:$runtime).parse($runtime-program);
     $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);

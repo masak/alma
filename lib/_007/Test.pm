@@ -136,7 +136,7 @@ my class UnwantedOutput {
     method say($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
-sub check(Q::CompUnit $ast, $runtime) {
+sub check(Q::CompUnit $ast, $runtime) is export {
     my %*assigned;
     handle($ast);
 
