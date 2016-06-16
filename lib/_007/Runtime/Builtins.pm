@@ -114,7 +114,6 @@ class _007::Runtime::Builtins {
 
         my @builtins =
             say      => -> $arg {
-                my %*stringification-seen;
                 $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
                 Nil;
             },
