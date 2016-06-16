@@ -583,43 +583,23 @@ class Q::Statement::For does Q::Statement {
     method attribute-order { <expr block> }
 
     method run($runtime) {
-        multi split_elements(@array, 1) { return @array }
-        multi split_elements(@array, Int $n) {
-            my $list = @array.list;
-            my @split;
-
-            while True {
-                my @new = $list.splice(0, $n);
-                last unless @new;
-                @split.push: @new.item;
-            }
-
-            @split;
-        }
-
         my $c = $.block.reify($runtime);
         my $count = $c.parameterlist.parameters.elements.elems;
+        die X::ParameterMismatch.new(
+            :type("For loop"), :paramcount($count), :argcount("0 or 1"))
+            if $count > 1;
 
         my $array = $.expr.eval($runtime);
         die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(Val::Array))
             unless $array ~~ Val::Array;
 
-        if $count == 0 {
-            for $array.elements {
-                $runtime.enter($c);
-                $.block.statementlist.run($runtime);
-                $runtime.leave;
+        for $array.elements -> $arg {
+            $runtime.enter($c);
+            if $count == 1 {
+                $runtime.declare-var($c.parameterlist.parameters.elements[0].identifier, $arg.list[0]);
             }
-        }
-        else {
-            for split_elements($array.elements, $count) -> $arg {
-                $runtime.enter($c);
-                for @($c.parameterlist.parameters.elements) Z $arg.list -> ($param, $real_arg) {
-                    $runtime.declare-var($param.identifier, $real_arg);
-                }
-                $.block.statementlist.run($runtime);
-                $runtime.leave;
-            }
+            $.block.statementlist.run($runtime);
+            $runtime.leave;
         }
     }
 }

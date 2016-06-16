@@ -367,24 +367,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        for [1, 2, 3, 4] -> i, j {
-            say(i);
-            say(j);
-        }
-        .
-
-    my $ast = q:to/./;
-        (statementlist
-          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "i"))))
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "j"))))))))
-        .
-
-    parses-to $program, $ast, "for statement with two parameters";
-}
-
-{
-    my $program = q:to/./;
         my u;
         while u {
             say(u);

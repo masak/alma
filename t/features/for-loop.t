@@ -30,7 +30,7 @@ use _007::Test;
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "j"))))))))
         .
 
-    is-result $ast, "1\n2\n3\n4\n", "for-loops with more parameters iterate over an array";
+    is-error $ast, X::ParameterMismatch, "for-loops with more parameters are not supported";
 }
 
 {
