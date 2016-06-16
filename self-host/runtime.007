@@ -150,8 +150,8 @@ my Runtime = {
             },
             Q::Term::Sub(term) {
                 my name = term.identifier && term.identifier.name || "(anon)";
-                return new Block {
-#                     name,
+                return new Sub {
+                    name: name,     # XXX: it's weird that just `name` doesn't work here
                     parameterlist: term.block.parameterlist,
                     statementlist: term.block.statementlist,
                     "static-lexpad": term.block["static-lexpad"],
