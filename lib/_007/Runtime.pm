@@ -42,7 +42,7 @@ class _007::Runtime {
         }
         for $block.statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
-                my $name = .identifier.name.value;
+                my $name = .identifier.name;
                 my $parameterlist = .block.parameterlist;
                 my $statementlist = .block.statementlist;
                 my $static-lexpad = .block.static-lexpad;
@@ -58,9 +58,8 @@ class _007::Runtime {
             }
         }
         if $block ~~ Val::Sub {
-            my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($block.name))),
-                :$frame);
+            my $name = $block.name;
+            my $identifier = Q::Identifier.new(:$name, :$frame);
             self.declare-var($identifier, $block);
         }
     }

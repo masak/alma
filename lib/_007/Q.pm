@@ -174,8 +174,8 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 
     method eval($runtime) {
         my $name = $.identifier ~~ Val::None
-            ?? "(anon)"
-            !! $.identifier.name.value;
+            ?? Val::Str.new(:value("(anon)"))
+            !! $.identifier.name;
         return Val::Sub.new(
             :$name,
             :parameterlist($.block.parameterlist),

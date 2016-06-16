@@ -126,13 +126,13 @@ class Val::Block does Val {
 }
 
 class Val::Sub is Val::Block {
-    has Str $.name;
+    has Val::Str $.name;
 
-    method Str { "<sub {$.name}{$.pretty-parameters}>" }
+    method Str { "<sub {$.name.value}{$.pretty-parameters}>" }
 }
 
 class Val::Macro is Val::Sub {
-    method Str { "<macro {$.name}{$.pretty-parameters}>" }
+    method Str { "<macro {$.name.value}{$.pretty-parameters}>" }
 }
 
 class Val::Exception does Val {

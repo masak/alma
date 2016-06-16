@@ -190,7 +190,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
 
     multi handle(Q::Statement::Sub $sub) {
         my $outer-frame = $runtime.current-frame;
-        my $name = $sub.identifier.name.value;
+        my $name = $sub.identifier.name;
         my $val = Val::Sub.new(:$name,
             :parameterlist($sub.block.parameterlist),
             :statementlist($sub.block.statementlist),
@@ -205,7 +205,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
 
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
-        my $name = $macro.identifier.name.value;
+        my $name = $macro.identifier.name;
         my $val = Val::Macro.new(:$name,
             :parameterlist($macro.block.parameterlist),
             :statementlist($macro.block.statementlist),

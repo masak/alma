@@ -117,7 +117,7 @@ class _007::Parser::Actions {
 
     method statement:sub-or-macro ($/) {
         my $identifier = $<identifier>.ast;
-        my $name = ~$<identifier>;
+        my $name = Val::Str.new(:value(~$<identifier>));
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
@@ -517,7 +517,7 @@ class _007::Parser::Actions {
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
-            my $name = ~$<identifier>;
+            my $name = $<identifier>.ast.name;
             my $outer-frame = $*runtime.current-frame.properties<block>.outer-frame;
             my $static-lexpad = $*runtime.current-frame.properties<pad>;
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);

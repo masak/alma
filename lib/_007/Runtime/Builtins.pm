@@ -8,11 +8,11 @@ class Val::Sub::Builtin is Val::Sub {
     has $.assoc;
     has %.precedence;
 
-    method new($name, $code, :$qtype, :$assoc, :%precedence,
+    method new(Str $name, $code, :$qtype, :$assoc, :%precedence,
             :$parameterlist = Q::ParameterList.new,
             :$statementlist = Q::StatementList.new) {
         self.bless(
-            :$name,
+            :name(Val::Str.new(:value($name))),
             :$code,
             :$qtype,
             :$assoc,
