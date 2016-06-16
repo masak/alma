@@ -47,10 +47,9 @@ class Val::Array does Val {
     has @.elements;
 
     method quoted-Str {
-        if %*stringification-seen{self.WHICH} {
+        if %*stringification-seen{self.WHICH}++ {
             return "[...]";
         }
-        %*stringification-seen{self.WHICH}++;
         return "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]";
     }
 
@@ -66,10 +65,9 @@ class Val::Object does Val {
     has $.id = $global-object-id++;
 
     method quoted-Str {
-        if %*stringification-seen{self.WHICH} {
+        if %*stringification-seen{self.WHICH}++ {
             return "\{...\}";
         }
-        %*stringification-seen{self.WHICH}++;
         return '{' ~ %.properties.map({
             my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                 ?? .key
