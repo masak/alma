@@ -239,4 +239,17 @@ use _007::Test;
         "`new` on object literals without the type is allowed but optional";
 }
 
+{
+    my $program = q:to/./;
+        f();
+        my o = { say };
+        sub f() { say("Mr. Bond") }
+        .
+
+    outputs
+        $program,
+        qq[Mr. Bond\n],
+        "using the short-form property syntax doesn't accidentally introduce a scope (#150)";
+}
+
 done-testing;
