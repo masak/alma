@@ -129,7 +129,7 @@ use _007::Test;
     parse-error
         $program,
         X::Assignment::RO,
-        "cannot assign to a subroutine";
+        "cannot assign to a subroutine (#68)";
 }
 
 {
@@ -145,7 +145,7 @@ use _007::Test;
 
     outputs $program,
         "1\n0\n",
-        "can assign to a parameter which hides a subroutine";
+        "can assign to a parameter which hides a subroutine (#68)";
 }
 
 {
@@ -256,7 +256,7 @@ use _007::Test;
 
     parse-error $program,
         missing-block,
-        "parse error 'missing block' on missing block";
+        "parse error 'missing block' on missing block (#48)";
 }
 
 {

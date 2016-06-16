@@ -47,7 +47,7 @@ use _007::Test;
             (stexpr (postfix:<()> (identifier "say") (argumentlist (identifier "a"))))))))
         .
 
-    is-result $ast, "7\n", "if statements with parameters work as they should";
+    is-result $ast, "7\n", "if statements with parameters work as they should (#2)";
 }
 
 

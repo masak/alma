@@ -229,7 +229,7 @@ use _007::Test;
         .
 
     outputs $program, "yay, clean!\nthat's gross!\n",
-        "detaching a qtree makes its identifiers unhygienic";
+        "detaching a qtree makes its identifiers unhygienic (#62)";
 }
 
 {

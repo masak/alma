@@ -81,7 +81,7 @@ use _007::Test;
     is-error
         $ast,
         X::Property::Duplicate,
-        "can't have duplicate properties (I)";
+        "can't have duplicate properties (#85) (I)";
 }
 
 {
@@ -92,7 +92,7 @@ use _007::Test;
     parse-error
         $program,
         X::Property::Duplicate,
-        "can't have duplicate properties (II)";
+        "can't have duplicate properties (#85) (II)";
 }
 
 {
@@ -203,7 +203,7 @@ use _007::Test;
     parse-error
         $program,
         X::Property::Required,
-        "need to specify required properties on objects";
+        "need to specify required properties on objects (#87)";
 }
 
 {

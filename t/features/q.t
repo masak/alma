@@ -11,7 +11,7 @@ use _007::Test;
     outputs
         $program,
         "None\n",
-        "Q::Statement::My can be constructed without an 'expr' property";
+        "Q::Statement::My can be constructed without an 'expr' property (#84)";
 }
 
 {
@@ -23,7 +23,7 @@ use _007::Test;
     outputs
         $program,
         "None\n",
-        "Q::Statement::Return can be constructed without an 'expr' property";
+        "Q::Statement::Return can be constructed without an 'expr' property (#84)";
 }
 
 {
@@ -45,7 +45,7 @@ use _007::Test;
     outputs
         $program,
         "None\n",
-        "Q::Statement::If can be constructed without an 'else' property";
+        "Q::Statement::If can be constructed without an 'else' property (#84)";
 }
 
 {
@@ -63,7 +63,7 @@ use _007::Test;
     outputs
         $program,
         "Q::TraitList []\n",
-        "Q::Statement::Sub can be constructed without a 'traitlist' property";
+        "Q::Statement::Sub can be constructed without a 'traitlist' property (#84)";
 }
 
 {
@@ -81,7 +81,7 @@ use _007::Test;
     outputs
         $program,
         "Q::TraitList []\n",
-        "Q::Statement::Macro can be constructed without a 'traitlist' property";
+        "Q::Statement::Macro can be constructed without a 'traitlist' property (#84)";
 }
 
 done-testing;

@@ -12,7 +12,7 @@ use _007::Test;
           (my (identifier "n") (none)))
         .
 
-    parses-to $program, $ast, "assigning a none";
+    parses-to $program, $ast, "assigning a none (#19)";
 }
 
 {
@@ -64,7 +64,7 @@ use _007::Test;
           (stexpr (array (int 1) (int 2) (int 3))))
         .
 
-    parses-to $program, $ast, "trailing comma in array is fine";
+    parses-to $program, $ast, "trailing comma in array is fine (#36)";
 }
 
 {
@@ -77,7 +77,7 @@ use _007::Test;
           (stexpr (array (int 1) (int 2) (int 3))))
         .
 
-    parses-to $program, $ast, "whitespace after trailing comma in array is fine";
+    parses-to $program, $ast, "whitespace after trailing comma in array is fine (#138)";
 }
 
 {
@@ -90,7 +90,7 @@ use _007::Test;
           (stexpr (array)))
         .
 
-    parses-to $program, $ast, "(only) whitespace inside array is fine";
+    parses-to $program, $ast, "(only) whitespace inside array is fine (#138)";
 }
 
 {

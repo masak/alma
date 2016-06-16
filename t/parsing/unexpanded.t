@@ -26,7 +26,7 @@ use _007::Test;
         .
 
     parses-to $program, $ast, "parsing in default (expanded) mode";
-    parses-to :unexpanded, $program, $unexpanded-ast, "parsing in unexpanded mode";
+    parses-to :unexpanded, $program, $unexpanded-ast, "parsing in unexpanded mode (#64)";
 }
 
 done-testing;

@@ -23,10 +23,10 @@ use _007::Test;
 }
 
 {
-    outputs 'say("Mr \"Bond")', qq[Mr "Bond\n], qq[\\" gets unescaped correctly to "];
-    outputs 'say("Mr \"Bond".chars())', qq[8\n], qq[...and counts as one character];
-    outputs 'say("Mr \\\\Bond")', qq[Mr \\Bond\n], qq[\\\\ gets unescaped correctly to \\];
-    outputs 'say("Mr \\Bond".chars())', qq[8\n], qq[...and counts as one character];
+    outputs 'say("Mr \"Bond")', qq[Mr "Bond\n], qq[\\" gets unescaped correctly to " (#23)];
+    outputs 'say("Mr \"Bond".chars())', qq[8\n], qq[...and counts as one character (#23)];
+    outputs 'say("Mr \\\\Bond")', qq[Mr \\Bond\n], qq[\\\\ gets unescaped correctly to \\ (#23)];
+    outputs 'say("Mr \\Bond".chars())', qq[8\n], qq[...and counts as one character (#23)];
 }
 
 {
@@ -41,16 +41,16 @@ use _007::Test;
 
 {
     outputs 'say(str([1, 2, "foo"]))', qq|[1, 2, "foo"]\n|,
-        "strings inside arrays get quoted";
+        "strings inside arrays get quoted (#6)";
 
     outputs 'say([1, 2, "foo"])', qq|[1, 2, "foo"]\n|,
-        "...and it works even without explicit str() coercion";
+        "...and it works even without explicit str() coercion (#6)";
 
     outputs qq|say(["'\\"\\\\"])|, qq|["'\\"\\\\"]\n|,
-        "double quotes and backslashes are escaped properly in strings in arrays";
+        "double quotes and backslashes are escaped properly in strings in arrays (#6)";
 
     outputs 'say([1, [2, "foo"]])', qq|[1, [2, "foo"]]\n|,
-        "still does the right thing one level down";
+        "still does the right thing one level down (#6)";
 }
 
 {
@@ -67,7 +67,7 @@ use _007::Test;
           (stexpr (object (identifier "Q::Literal") (propertylist))))
         .
 
-    is-error $ast, X::Uninstantiable, "abstract Q types are uninstantiable";
+    is-error $ast, X::Uninstantiable, "abstract Q types are uninstantiable (#140)";
 }
 
 done-testing;
