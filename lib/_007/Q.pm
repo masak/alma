@@ -285,6 +285,15 @@ class Q::Infix::Or is Q::Infix {
     }
 }
 
+class Q::Infix::DefinedOr is Q::Infix {
+    method eval($runtime) {
+        my $l = $.lhs.eval($runtime);
+        return $l !~~ Val::None
+            ?? $l
+            !! $.rhs.eval($runtime);
+    }
+}
+
 class Q::Infix::And is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);

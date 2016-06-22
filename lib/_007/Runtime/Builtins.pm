@@ -158,6 +158,13 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Or),
             ),
+            'infix:<//>' => Val::Sub::Builtin.new('infix:<//>',
+                sub ($lhs, $rhs) {
+                    # implemented in Q.pm as .eval method
+                },
+                :qtype(Q::Infix::DefinedOr),
+                :precedence{ equal => "||" },
+            ),
 
             # conjunctive precedence
             'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
@@ -399,6 +406,7 @@ class _007::Runtime::Builtins {
             Q::Infix::Subtraction,
             Q::Infix::Modulo,
             Q::Infix::Divisibility,
+            Q::Infix::DefinedOr,
             Q::Infix::Multiplication,
             Q::Infix::Concat,
             Q::Infix::Assignment,
