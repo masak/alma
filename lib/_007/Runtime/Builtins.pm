@@ -376,97 +376,19 @@ class _007::Runtime::Builtins {
             ),
         ;
 
-        my @val-types =
-            Val::Array,
-            Val::Block,
-            Val::Int,
-            Val::None,
-            Val::Macro,
-            Val::Object,
-            Val::Str,
-            Val::Sub,
-            Val::Type,
-            Val::Exception,
-        ;
-
-        for @val-types -> $type {
-            push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
+        sub tree-walk(%package) {
+            for %package.keys.map({ %package ~ "::$_" }) -> $name {
+                # make a little exception for Val::Sub::Builtin, which is just an
+                # implementation detail and doesn't have a corresponding builtin
+                # (because it tries to pass itself off as a Val::Sub)
+                next if $name eq "Val::Sub::Builtin";
+                my $type = ::($name);
+                push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
+                tree-walk($type.WHO);
+            }
         }
-
-        my @q-types =
-            Q::ArgumentList,
-            Q::Block,
-            Q::CompUnit,
-            Q::Declaration,
-            Q::Expr,
-            Q::Expr::StatementListAdapter,
-            Q::Identifier,
-            Q::Infix,
-            Q::Infix::Addition,
-            Q::Infix::Subtraction,
-            Q::Infix::Modulo,
-            Q::Infix::Divisibility,
-            Q::Infix::DefinedOr,
-            Q::Infix::Multiplication,
-            Q::Infix::Concat,
-            Q::Infix::Assignment,
-            Q::Infix::Eq,
-            Q::Infix::Ne,
-            Q::Infix::Gt,
-            Q::Infix::Ge,
-            Q::Infix::Lt,
-            Q::Infix::Le,
-            Q::Infix::And,
-            Q::Infix::Or,
-            Q::Infix::TypeEq,
-            Q::Infix::Replicate,
-            Q::Infix::ArrayReplicate,
-            Q::Infix::Cons,
-            Q::Literal,
-            Q::Literal::Int,
-            Q::Literal::None,
-            Q::Literal::Str,
-            Q::Parameter,
-            Q::ParameterList,
-            Q::Postfix,
-            Q::Postfix::Index,
-            Q::Postfix::Call,
-            Q::Postfix::Property,
-            Q::Prefix,
-            Q::Prefix::Minus,
-            Q::Prefix::Not,
-            Q::Prefix::Upto,
-            Q::Property,
-            Q::PropertyList,
-            Q::Statement,
-            Q::Statement::BEGIN,
-            Q::Statement::Block,
-            Q::Statement::Constant,
-            Q::Statement::Expr,
-            Q::Statement::For,
-            Q::Statement::Macro,
-            Q::Statement::If,
-            Q::Statement::My,
-            Q::Statement::Return,
-            Q::Statement::Sub,
-            Q::Statement::Throw,
-            Q::Statement::While,
-            Q::StatementList,
-            Q::Term,
-            Q::Term::Array,
-            Q::Term::Object,
-            Q::Term::Quasi,
-            Q::Term::Sub,
-            Q::Trait,
-            Q::TraitList,
-            Q::Unquote,
-            Q::Unquote::Infix,
-            Q::Unquote::Prefix,
-        ;
-
-        for @q-types -> $type {
-            push @builtins, ($type.^name => Val::Type.of($type));
-        }
+        tree-walk(Val::);
+        tree-walk(Q::);
 
         sub _007ize(&fn) {
             return sub (|c) { wrap &fn(|c) };
