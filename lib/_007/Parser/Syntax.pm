@@ -289,8 +289,9 @@ grammar _007::Parser::Syntax {
     }
 
     rule parameterlist {
-        [<parameter>
-        { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
+        [
+            <parameter>
+            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
         ]* %% ','
     }
 
