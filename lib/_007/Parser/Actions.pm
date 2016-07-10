@@ -146,6 +146,8 @@ class _007::Parser::Actions {
     }
 
     method statement:return ($/) {
+        die X::ControlFlow::Return.new
+            unless $*insub;
         make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
     }
 
@@ -465,6 +467,17 @@ class _007::Parser::Actions {
 
     method term:identifier ($/) {
         make $<identifier>.ast;
+        my $name = $<identifier>.Str;
+        if !$*runtime.declared($name) {
+            my $frame = $*runtime.current-frame;
+            $*parser.postpone: sub checking-postdeclared {
+                my $value = $*runtime.get-var($name, $frame);
+                die X::Macro::Postdeclared.new(:$name)
+                    if $value ~~ Val::Macro;
+                die X::Undeclared.new(:symbol($name))
+                    unless $value ~~ Val::Sub;
+            };
+        }
     }
 
     method term:block ($/) {
