@@ -471,7 +471,7 @@ class _007::Parser::Actions {
         if !$*runtime.declared($name) {
             my $frame = $*runtime.current-frame;
             $*parser.postpone: sub checking-postdeclared {
-                my $value = $*runtime.get-var($name, $frame);
+                my $value = $*runtime.maybe-get-var($name, $frame);
                 die X::Macro::Postdeclared.new(:$name)
                     if $value ~~ Val::Macro;
                 die X::Undeclared.new(:symbol($name))

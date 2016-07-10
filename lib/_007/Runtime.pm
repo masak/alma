@@ -107,8 +107,8 @@ class _007::Runtime {
         return $pad.properties{$name};
     }
 
-    method maybe-get-var(Str $name) {
-        if self!maybe-find-pad($name, self.current-frame) -> $pad {
+    method maybe-get-var(Str $name, $frame = self.current-frame) {
+        if self!maybe-find-pad($name, $frame) -> $pad {
             return $pad.properties{$name};
         }
     }
