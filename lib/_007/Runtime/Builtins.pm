@@ -111,7 +111,7 @@ class _007::Runtime::Builtins {
         }
 
         my @builtins =
-            say      => -> $arg {
+            say => -> $arg {
                 $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
                 Nil;
             },
@@ -134,8 +134,8 @@ class _007::Runtime::Builtins {
                     :got($_),
                     :expected(Val::Int));
             },
-            min      => -> $a, $b { min($a.value, $b.value) },
-            max      => -> $a, $b { max($a.value, $b.value) },
+            min => -> $a, $b { min($a.value, $b.value) },
+            max => -> $a, $b { max($a.value, $b.value) },
 
             # OPERATORS
 
