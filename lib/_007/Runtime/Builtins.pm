@@ -2,33 +2,13 @@ use _007::Val;
 use _007::Q;
 use _007::OpScope;
 
-class Val::Sub::Builtin is Val::Sub {
-    has $.code;
-    has $.qtype;
-    has $.assoc;
-    has %.precedence;
-
-    method new(Str $name, $code, :$qtype, :$assoc, :%precedence,
-            :$parameterlist = Q::ParameterList.new,
-            :$statementlist = Q::StatementList.new) {
-        self.bless(
-            :name(Val::Str.new(:value($name))),
-            :$code,
-            :$qtype,
-            :$assoc,
-            :%precedence,
-            :$parameterlist,
-            :$statementlist,
-        )
-    }
-}
-
 class _007::Runtime::Builtins {
     has $.runtime;
+    has $.opscope = _007::OpScope.new;
 
     method get-builtins {
         my &str = sub ($_) {
-            when Val { return .Str }
+            when Val { return Val::Str.new(:value(.Str)) }
             die X::TypeCheck.new(
                 :operation<str()>,
                 :got($_),
@@ -112,6 +92,24 @@ class _007::Runtime::Builtins {
         multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
         multi more-value(Val::Str $l, Val::Str $r) { $l.value ge $r.value }
 
+        my role Placeholder {
+            has $.qtype;
+            has $.assoc;
+            has %.precedence;
+        }
+        my class Placeholder::MacroOp does Placeholder {
+        }
+        sub macro-op(:$qtype, :$assoc?, :%precedence?) {
+            Placeholder::MacroOp.new(:$qtype, :$assoc, :%precedence);
+        }
+
+        my class Placeholder::Op does Placeholder {
+            has &.fn;
+        }
+        sub op(&fn, :$qtype, :$assoc?, :%precedence?) {
+            Placeholder::Op.new(:&fn, :$qtype, :$assoc, :%precedence);
+        }
+
         my @builtins =
             say      => -> $arg {
                 $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
@@ -142,47 +140,34 @@ class _007::Runtime::Builtins {
             # OPERATORS
 
             # assignment precedence
-            'infix:<=>' => Val::Sub::Builtin.new('infix:<=>',
-                sub ($lhs, $rhs) {
-                    # can't express this one as a built-in sub -- because the lhs is an lvalue
-                    # XXX: investigate expressing it as a built-in macro
-                },
+            'infix:<=>' => macro-op(
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
 
             # disjunctive precedence
-            'infix:<||>' => Val::Sub::Builtin.new('infix:<||>',
-                sub ($lhs, $rhs) {
-                    # implemented in Q.pm as .eval method
-                },
+            'infix:<||>' => macro-op(
                 :qtype(Q::Infix::Or),
             ),
-            'infix:<//>' => Val::Sub::Builtin.new('infix:<//>',
-                sub ($lhs, $rhs) {
-                    # implemented in Q.pm as .eval method
-                },
+            'infix:<//>' => macro-op(
                 :qtype(Q::Infix::DefinedOr),
                 :precedence{ equal => "||" },
             ),
 
             # conjunctive precedence
-            'infix:<&&>' => Val::Sub::Builtin.new('infix:<&&>',
-                sub ($lhs, $rhs) {
-                    # implemented in Q.pm as .eval method
-                },
+            'infix:<&&>' => macro-op(
                 :qtype(Q::Infix::And),
             ),
 
             # comparison precedence
-            'infix:<==>' => Val::Sub::Builtin.new('infix:<==>',
+            'infix:<==>' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
             ),
-            'infix:<!=>' => Val::Sub::Builtin.new('infix:<!=>',
+            'infix:<!=>' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(!equal-value($lhs, $rhs))
@@ -190,14 +175,14 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Ne),
                 :precedence{ equal => "==" },
             ),
-            'infix:<<>' => Val::Sub::Builtin.new('infix:<<=>',
+            'infix:<<>' => op(
                 sub ($lhs, $rhs) {
                     return wrap(less-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Lt),
                 :precedence{ equal => "==" },
             ),
-            'infix:<<=>' => Val::Sub::Builtin.new('infix:<<=>',
+            'infix:<<=>' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
@@ -205,14 +190,14 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Le),
                 :precedence{ equal => "==" },
             ),
-            'infix:<>>' => Val::Sub::Builtin.new('infix:<>>',
+            'infix:<>>' => op(
                 sub ($lhs, $rhs) {
                     return wrap(more-value($lhs, $rhs) )
                 },
                 :qtype(Q::Infix::Gt),
                 :precedence{ equal => "==" },
             ),
-            'infix:<>=>' => Val::Sub::Builtin.new('infix:<>=>',
+            'infix:<>=>' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
@@ -222,7 +207,7 @@ class _007::Runtime::Builtins {
             ),
 
             # cons precedence
-            'infix:<::>' => Val::Sub::Builtin.new('infix:<::>',
+            'infix:<::>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
                         unless $rhs ~~ Val::Array;
@@ -233,7 +218,7 @@ class _007::Runtime::Builtins {
             ),
 
             # additive precedence
-            'infix:<+>' => Val::Sub::Builtin.new('infix:<+>',
+            'infix:<+>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -243,7 +228,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Addition),
             ),
-            'infix:<~>' => Val::Sub::Builtin.new('infix:<~>',
+            'infix:<~>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
                         unless $lhs ~~ Val::Str;
@@ -254,7 +239,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
-            'infix:<->' => Val::Sub::Builtin.new('infix:<->',
+            'infix:<->' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<->, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -266,7 +251,7 @@ class _007::Runtime::Builtins {
             ),
 
             # multiplicative precedence
-            'infix:<*>' => Val::Sub::Builtin.new('infix:<*>',
+            'infix:<*>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -276,7 +261,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Multiplication),
             ),
-            'infix:<%>' => Val::Sub::Builtin.new('infix:<%>',
+            'infix:<%>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -288,7 +273,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Modulo),
             ),
-            'infix:<%%>' => Val::Sub::Builtin.new('infix:<%%>',
+            'infix:<%%>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -300,7 +285,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Divisibility),
             ),
-            'infix:<x>' => Val::Sub::Builtin.new('infix:<x>',
+            'infix:<x>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
                         unless $lhs ~~ Val::Str;
@@ -311,7 +296,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Replicate),
                 :precedence{ equal => "*" },
             ),
-            'infix:<xx>' => Val::Sub::Builtin.new('infix:<xx>',
+            'infix:<xx>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
                         unless $lhs ~~ Val::Array;
@@ -322,7 +307,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
             ),
-            'infix:<~~>' => Val::Sub::Builtin.new('infix:<~~>',
+            'infix:<~~>' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                         unless $rhs ~~ Val::Type;
@@ -332,7 +317,7 @@ class _007::Runtime::Builtins {
             ),
 
             # prefixes
-            'prefix:<->' => Val::Sub::Builtin.new('prefix:<->',
+            'prefix:<->' => op(
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
                         unless $expr ~~ Val::Int;
@@ -340,13 +325,13 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Prefix::Minus),
             ),
-            'prefix:<!>' => Val::Sub::Builtin.new('prefix:<!>',
+            'prefix:<!>' => op(
                 sub ($a) {
                     return wrap(!$a.truthy)
                 },
                 :qtype(Q::Prefix::Not),
             ),
-            'prefix:<^>' => Val::Sub::Builtin.new('prefix:<^>',
+            'prefix:<^>' => op(
                 sub ($n) {
                     die X::TypeCheck.new(:operation<^>, :got($n), :expected(Val::Int))
                         unless $n ~~ Val::Int;
@@ -356,32 +341,19 @@ class _007::Runtime::Builtins {
             ),
 
             # postfixes
-            'postfix:<[]>' => Val::Sub::Builtin.new('postfix:<[]>',
-                sub ($expr, $index) {
-                    # can't express this one as a built-in sub
-                },
+            'postfix:<[]>' => macro-op(
                 :qtype(Q::Postfix::Index),
             ),
-            'postfix:<()>' => Val::Sub::Builtin.new('postfix:<()>',
-                sub ($expr, $arguments) {
-                    # can't express this one as a built-in sub
-                },
+            'postfix:<()>' => macro-op(
                 :qtype(Q::Postfix::Call),
             ),
-            'postfix:<.>' => Val::Sub::Builtin.new('postfix:<.>',
-                sub ($expr, $property) {
-                    # can't express this one as a built-in sub
-                },
+            'postfix:<.>' => macro-op(
                 :qtype(Q::Postfix::Property),
             ),
         ;
 
         sub tree-walk(%package) {
             for %package.keys.map({ %package ~ "::$_" }) -> $name {
-                # make a little exception for Val::Sub::Builtin, which is just an
-                # implementation detail and doesn't have a corresponding builtin
-                # (because it tries to pass itself off as a Val::Sub)
-                next if $name eq "Val::Sub::Builtin";
                 my $type = ::($name);
                 push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
                 tree-walk($type.WHO);
@@ -390,48 +362,48 @@ class _007::Runtime::Builtins {
         tree-walk(Val::);
         tree-walk(Q::);
 
-        sub _007ize(&fn) {
-            return sub (|c) { wrap &fn(|c) };
+        sub install-op($name, $placeholder) {
+            $name ~~ /^ (prefix | infix | postfix) ':<' (.+) '>' $/
+                or die "This shouldn't be an op";
+            my $type = ~$0;
+            my $opname = ~$1;
+            my $qtype = $placeholder.qtype;
+            my $assoc = $placeholder.assoc;
+            my %precedence = $placeholder.precedence;
+            $.opscope.install($type, $opname, $qtype, :$assoc, :%precedence);
         }
 
-        sub create-parameterlist(@parameters) {
-            Q::ParameterList.new(:parameters(
-                Val::Array.new(:elements(@parameters».name».substr(1).map({
-                    Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:value($_))))))
-                })))
-            ));
-        }
+        my &ditch-sigil = { $^str.substr(1) };
+        my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
 
         return @builtins.map: {
             when .value ~~ Val::Type {
                 .key => .value;
             }
-            when .value ~~ Callable {
-                my $parameterlist = create-parameterlist(.value.signature.params);
-                .key => Val::Sub::Builtin.new(.key, _007ize(.value), :parameterlist($parameterlist));
+            when .value ~~ Block {
+                my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
+                my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+                my $statementlist = Q::StatementList.new();
+                .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
             }
-            when .value ~~ Val::Sub::Builtin {
-                .value.parameterlist = create-parameterlist(.value.code.signature.params);
-                $_
+            when .value ~~ Placeholder::MacroOp {
+                my $name = .key;
+                install-op($name, .value);
+                my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
+                my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+                my $statementlist = Q::StatementList.new();
+                .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
+            }
+            when .value ~~ Placeholder::Op {
+                my $name = .key;
+                install-op($name, .value);
+                my &fn = .value.fn;
+                my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
+                my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+                my $statementlist = Q::StatementList.new();
+                .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
             }
             default { die "Unknown type {.value.^name}" }
         };
-    }
-
-    method opscope {
-        my $scope = _007::OpScope.new;
-
-        for self.get-builtins -> Pair (:key($name), :value($subval)) {
-            $name ~~ /^ (prefix | infix | postfix) ':<' (.+) '>' $/
-                or next;
-            my $type = ~$0;
-            my $opname = ~$1;
-            my $qtype = $subval.qtype;
-            my $assoc = $subval.assoc;
-            my %precedence = $subval.precedence;
-            $scope.install($type, $opname, $qtype, :$assoc, :%precedence);
-        }
-
-        return $scope;
     }
 }

@@ -110,12 +110,12 @@ class Val::Type does Val {
     }
 
     method name {
-        $.type.^name.subst(/^ "Val::"/, "").subst(/"::Builtin" $/, "");
+        $.type.^name.subst(/^ "Val::"/, "");
     }
 }
 
 class Val::Block does Val {
-    has $.parameterlist is rw;
+    has $.parameterlist;
     has $.statementlist;
     has Val::Object $.static-lexpad is rw = Val::Object.new;
     has Val::Object $.outer-frame;
@@ -127,6 +127,11 @@ class Val::Block does Val {
 
 class Val::Sub is Val::Block {
     has Val::Str $.name;
+    has &.hook;
+
+    method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
+        self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
+    }
 
     method Str { "<sub {$.name.value}{$.pretty-parameters}>" }
 }
