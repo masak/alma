@@ -148,19 +148,15 @@ class _007::Runtime {
         return $!builtins.opscope;
     }
 
-    method sigbind($type, Val::Block $c, @arguments) {
+    multi method call(Val::Sub $c, @arguments) {
         my $paramcount = $c.parameterlist.parameters.elements.elems;
         my $argcount = @arguments.elems;
-        die X::ParameterMismatch.new(:$type, :$paramcount, :$argcount)
+        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
         self.enter($c);
         for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }
-    }
-
-    multi method call(Val::Sub $c, @arguments) {
-        self.sigbind("Sub", $c, @arguments);
         self.register-subhandler;
         my $frame = self.current-frame;
         $c.statementlist.run(self);
