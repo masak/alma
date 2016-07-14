@@ -658,7 +658,11 @@ class _007::Parser::Actions {
     }
 
     method identifier($/) {
-        make Q::Identifier.new(:name(Val::Str.new(:value(~$/))));
+        my $value = ~$/;
+        sub () {
+            $value ~~ s[':«' (<-[»]>+) '»' $] = ":<{$0}>";
+        }();
+        make Q::Identifier.new(:name(Val::Str.new(:$value)));
     }
 
     method argumentlist($/) {
