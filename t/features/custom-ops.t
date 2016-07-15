@@ -492,4 +492,16 @@ use _007::Test;
     outputs $program, "Mr. Bond\n", "can declare an operator with infix:«...»";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:<\>>(l, r) {
+            return "James";
+        }
+
+        say(0 > 7);
+        .
+
+    outputs $program, "James\n", "can declare an operator with a backslash in the name";
+}
+
 done-testing;

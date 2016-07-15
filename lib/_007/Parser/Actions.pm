@@ -664,6 +664,9 @@ class _007::Parser::Actions {
         my $value = ~$/;
         sub () {
             $value ~~ s[':«' (<-[»]>+) '»' $] = ":<{$0}>";
+            $value ~~ s:g['\\>'] = '>';
+            $value ~~ s:g['\\»'] = '»';
+            $value ~~ s:g['\\\\'] = '\\';
         }();
         make Q::Identifier.new(:name(Val::Str.new(:$value)));
     }
