@@ -117,7 +117,7 @@ class _007::Parser::Actions {
 
     method statement:sub-or-macro ($/) {
         my $identifier = $<identifier>.ast;
-        my $name = Val::Str.new(:value(~$<identifier>));
+        my $name = $<identifier>.ast.name;
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
@@ -355,7 +355,7 @@ class _007::Parser::Actions {
                 my $expansion = $*runtime.call($macro, @arguments);
 
                 if $expansion ~~ Q::Statement::My {
-                    _007::Parser::Syntax::declare(Q::Statement::My, ~$expansion.identifier.name);
+                    _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);
                 }
 
                 if $*unexpanded {
@@ -467,7 +467,7 @@ class _007::Parser::Actions {
 
     method term:identifier ($/) {
         make $<identifier>.ast;
-        my $name = $<identifier>.Str;
+        my $name = $<identifier>.ast.name.value;
         if !$*runtime.declared($name) {
             my $frame = $*runtime.current-frame;
             $*parser.postpone: sub checking-postdeclared {
@@ -538,8 +538,9 @@ class _007::Parser::Actions {
         }
         self.finish-block($block);
 
+        my $name = $<identifier>.ast.name;
         my $identifier = $<identifier>
-            ?? Q::Identifier.new(:name(Val::Str.new(:value(~$<identifier>))))
+            ?? Q::Identifier.new(:$name)
             !! Val::None.new;
         make Q::Term::Sub.new(:$identifier, :$traitlist, :$block);
     }
@@ -591,18 +592,20 @@ class _007::Parser::Actions {
     }
 
     method property:identifier-expr ($/) {
-        make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value($<value>.ast));
+        my $key = $<identifier>.ast.name;
+        make Q::Property.new(:$key, :value($<value>.ast));
     }
 
     method property:identifier ($/) {
-        make Q::Property.new(:key(Val::Str.new(:value(~$<identifier>))), :value($<identifier>.ast));
+        my $key = $<identifier>.ast.name;
+        make Q::Property.new(:$key, :value($<identifier>.ast));
     }
 
     method property:method ($/) {
         my $block = Q::Block.new(
             :parameterlist($<parameterlist>.ast),
             :statementlist($<blockoid>.ast));
-        my $name = Val::Str.new(:value(~$<identifier>));
+        my $name = $<identifier>.ast.name;
         my $identifier = Q::Identifier.new(:$name);
         make Q::Property.new(:key($name), :value(
             Q::Term::Sub.new(:$identifier, :$block)));

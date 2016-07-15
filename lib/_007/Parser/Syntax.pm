@@ -50,13 +50,13 @@ grammar _007::Parser::Syntax {
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        { declare(Q::Statement::My, $<identifier>.Str); }
+        { declare(Q::Statement::My, $<identifier>.ast.name.value); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
         constant <identifier>
         {
-            my $symbol = $<identifier>.Str;
+            my $symbol = $<identifier>.ast.name.value;
             # XXX: a suspicious lack of redeclaration checks here
             declare(Q::Statement::Constant, $symbol);
         }
@@ -74,7 +74,7 @@ grammar _007::Parser::Syntax {
             declare($<routine> eq "sub"
                         ?? Q::Statement::Sub
                         !! Q::Statement::Macro,
-                    $<identifier>.Str);
+                    $<identifier>.ast.name.value);
         }
         <.newpad>
         '(' ~ ')' <parameterlist>
@@ -215,7 +215,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Sub, $<identifier>.Str);
+                declare(Q::Term::Sub, $<identifier>.ast.name.value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -292,7 +292,7 @@ grammar _007::Parser::Syntax {
     rule parameterlist {
         [
             <parameter>
-            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
+            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.value); }
         ]* %% ','
     }
 
