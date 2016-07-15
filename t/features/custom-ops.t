@@ -480,4 +480,16 @@ use _007::Test;
     parse-error $program, X::Precedence::Incompatible, "can't cross the infix/prepostfix prec barrier (II)";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:«!»(l, r) {
+            return "Mr. Bond";
+        }
+
+        say(-13 ! None);
+        .
+
+    outputs $program, "Mr. Bond\n", "can declare an operator with infix:«...»";
+}
+
 done-testing;
