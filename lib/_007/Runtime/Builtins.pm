@@ -140,34 +140,34 @@ class _007::Runtime::Builtins {
             # OPERATORS
 
             # assignment precedence
-            'infix:<=>' => macro-op(
+            'infix:=' => macro-op(
                 :qtype(Q::Infix::Assignment),
                 :assoc<right>,
             ),
 
             # disjunctive precedence
-            'infix:<||>' => macro-op(
+            'infix:||' => macro-op(
                 :qtype(Q::Infix::Or),
             ),
-            'infix:<//>' => macro-op(
+            'infix://' => macro-op(
                 :qtype(Q::Infix::DefinedOr),
                 :precedence{ equal => "||" },
             ),
 
             # conjunctive precedence
-            'infix:<&&>' => macro-op(
+            'infix:&&' => macro-op(
                 :qtype(Q::Infix::And),
             ),
 
             # comparison precedence
-            'infix:<==>' => op(
+            'infix:==' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(equal-value($lhs, $rhs));
                 },
                 :qtype(Q::Infix::Eq),
             ),
-            'infix:<!=>' => op(
+            'infix:!=' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(!equal-value($lhs, $rhs))
@@ -175,14 +175,14 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Ne),
                 :precedence{ equal => "==" },
             ),
-            'infix:<<>' => op(
+            'infix:<' => op(
                 sub ($lhs, $rhs) {
                     return wrap(less-value($lhs, $rhs))
                 },
                 :qtype(Q::Infix::Lt),
                 :precedence{ equal => "==" },
             ),
-            'infix:<<=>' => op(
+            'infix:<=' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
@@ -190,14 +190,14 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Le),
                 :precedence{ equal => "==" },
             ),
-            'infix:<>>' => op(
+            'infix:>' => op(
                 sub ($lhs, $rhs) {
                     return wrap(more-value($lhs, $rhs) )
                 },
                 :qtype(Q::Infix::Gt),
                 :precedence{ equal => "==" },
             ),
-            'infix:<>=>' => op(
+            'infix:>=' => op(
                 sub ($lhs, $rhs) {
                     my %*equality-seen;
                     return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
@@ -207,7 +207,7 @@ class _007::Runtime::Builtins {
             ),
 
             # cons precedence
-            'infix:<::>' => op(
+            'infix:::' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
                         unless $rhs ~~ Val::Array;
@@ -218,7 +218,7 @@ class _007::Runtime::Builtins {
             ),
 
             # additive precedence
-            'infix:<+>' => op(
+            'infix:+' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -228,7 +228,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Addition),
             ),
-            'infix:<~>' => op(
+            'infix:~' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
                         unless $lhs ~~ Val::Str;
@@ -239,7 +239,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Concat),
                 :precedence{ equal => "+" },
             ),
-            'infix:<->' => op(
+            'infix:-' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<->, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -251,7 +251,7 @@ class _007::Runtime::Builtins {
             ),
 
             # multiplicative precedence
-            'infix:<*>' => op(
+            'infix:*' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -261,7 +261,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Multiplication),
             ),
-            'infix:<%>' => op(
+            'infix:%' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -273,7 +273,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Modulo),
             ),
-            'infix:<%%>' => op(
+            'infix:%%' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(Val::Int))
                         unless $lhs ~~ Val::Int;
@@ -285,7 +285,7 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Infix::Divisibility),
             ),
-            'infix:<x>' => op(
+            'infix:x' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
                         unless $lhs ~~ Val::Str;
@@ -296,7 +296,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::Replicate),
                 :precedence{ equal => "*" },
             ),
-            'infix:<xx>' => op(
+            'infix:xx' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
                         unless $lhs ~~ Val::Array;
@@ -307,7 +307,7 @@ class _007::Runtime::Builtins {
                 :qtype(Q::Infix::ArrayReplicate),
                 :precedence{ equal => "*" },
             ),
-            'infix:<~~>' => op(
+            'infix:~~' => op(
                 sub ($lhs, $rhs) {
                     die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                         unless $rhs ~~ Val::Type;
@@ -317,7 +317,7 @@ class _007::Runtime::Builtins {
             ),
 
             # prefixes
-            'prefix:<->' => op(
+            'prefix:-' => op(
                 sub ($expr) {
                     die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
                         unless $expr ~~ Val::Int;
@@ -325,13 +325,13 @@ class _007::Runtime::Builtins {
                 },
                 :qtype(Q::Prefix::Minus),
             ),
-            'prefix:<!>' => op(
+            'prefix:!' => op(
                 sub ($a) {
                     return wrap(!$a.truthy)
                 },
                 :qtype(Q::Prefix::Not),
             ),
-            'prefix:<^>' => op(
+            'prefix:^' => op(
                 sub ($n) {
                     die X::TypeCheck.new(:operation<^>, :got($n), :expected(Val::Int))
                         unless $n ~~ Val::Int;
@@ -341,13 +341,13 @@ class _007::Runtime::Builtins {
             ),
 
             # postfixes
-            'postfix:<[]>' => macro-op(
+            'postfix:[]' => macro-op(
                 :qtype(Q::Postfix::Index),
             ),
-            'postfix:<()>' => macro-op(
+            'postfix:()' => macro-op(
                 :qtype(Q::Postfix::Call),
             ),
-            'postfix:<.>' => macro-op(
+            'postfix:.' => macro-op(
                 :qtype(Q::Postfix::Property),
             ),
         ;
@@ -363,7 +363,7 @@ class _007::Runtime::Builtins {
         tree-walk(Q::);
 
         sub install-op($name, $placeholder) {
-            $name ~~ /^ (prefix | infix | postfix) ':<' (.+) '>' $/
+            $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/
                 or die "This shouldn't be an op";
             my $type = ~$0;
             my $opname = ~$1;

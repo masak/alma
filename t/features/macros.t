@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (macro (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI from inside macro"))))))))
+            (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI from inside macro"))))))))
         .
 
     is-result $ast, "", "macro";
@@ -28,7 +28,7 @@ use _007::Test;
     my $program = q:to/./;
         macro foo() {
             return new Q::Postfix::Call {
-                identifier: new Q::Identifier { name: "postfix:<()>" },
+                identifier: new Q::Identifier { name: "postfix:()" },
                 operand: new Q::Identifier { name: "say" },
                 argumentlist: new Q::ArgumentList {
                     arguments: [new Q::Literal::Str { value: "OH HAI" }]

@@ -14,15 +14,15 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (macro (identifier "moo") (block (parameterlist) (statementlist
-            (return (quasi "" (postfix:<()> (identifier "say") (argumentlist (str "OH HAI"))))))))
-          (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI")))))
+            (return (quasi "" (postfix:() (identifier "say") (argumentlist (str "OH HAI"))))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI")))))
         .
 
     my $unexpanded-ast = q:to/./;
         (statementlist
           (macro (identifier "moo") (block (parameterlist) (statementlist
-            (return (quasi "" (postfix:<()> (identifier "say") (argumentlist (str "OH HAI"))))))))
-          (stexpr (postfix:<()> (identifier "moo") (argumentlist))))
+            (return (quasi "" (postfix:() (identifier "say") (argumentlist (str "OH HAI"))))))))
+          (stexpr (postfix:() (identifier "moo") (argumentlist))))
         .
 
     parses-to $program, $ast, "parsing in default (expanded) mode";

@@ -6,14 +6,14 @@ use _007::Test;
     my @exprs = «
         '{}'  '(object (identifier "Object") (propertylist))'
         '{"a": 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{"a": 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:<+> (int 1) (int 2)))))'
+        '{"a": 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:+ (int 1) (int 2)))))'
         '{"a": 1,}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a}' '(object (identifier "Object") (propertylist (property "a" (identifier "a"))))'
         '{a : 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{ a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1 }' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{a: 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:<+> (int 1) (int 2)))))'
+        '{a: 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:+ (int 1) (int 2)))))'
         '{a() {}}' '(object (identifier "Object") (propertylist
           (property "a" (sub (identifier "a") (block (parameterlist) (statementlist))))))'
         '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (sub (identifier "a") (block
@@ -32,8 +32,8 @@ use _007::Test;
         (statementlist
           (my (identifier "o")
             (object (identifier "Object") (propertylist (property "a" (int 1)))))
-          (stexpr (postfix:<()> (identifier "say") (argumentlist
-            (postfix:<.> (identifier "o") (identifier "a"))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist
+            (postfix:. (identifier "o") (identifier "a"))))))
         .
 
     is-result $ast, "1\n", "can access an object's property (dot syntax)";
@@ -44,8 +44,8 @@ use _007::Test;
         (statementlist
           (my (identifier "o")
             (object (identifier "Object") (propertylist (property "b" (int 7)))))
-          (stexpr (postfix:<()> (identifier "say") (argumentlist
-            (postfix:<[]> (identifier "o") (str "b"))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist
+            (postfix:[] (identifier "o") (str "b"))))))
         .
 
     is-result $ast, "7\n", "can access an object's property (brackets syntax)";
@@ -55,7 +55,7 @@ use _007::Test;
     my $ast = q:to/./;
           (statementlist
             (my (identifier "o") (object (identifier "Object") (propertylist)))
-            (stexpr (postfix:<.> (identifier "o") (identifier "a"))))
+            (stexpr (postfix:. (identifier "o") (identifier "a"))))
         .
 
     is-error $ast, X::Property::NotFound, "can't access non-existing property (dot syntax)";
@@ -64,7 +64,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
           (statementlist
-           (stexpr (postfix:<.> (int 42) (identifier "a"))))
+           (stexpr (postfix:. (int 42) (identifier "a"))))
         .
 
     is-error $ast, X::Property::NotFound, "can't access property on Val::Int (dot syntax)";
@@ -99,7 +99,7 @@ use _007::Test;
     my $ast = q:to/./;
           (statementlist
             (my (identifier "o") (object (identifier "Object") (propertylist)))
-            (stexpr (postfix:<[]> (identifier "o") (str "b"))))
+            (stexpr (postfix:[] (identifier "o") (str "b"))))
         .
 
     is-error $ast, X::Property::NotFound, "can't access non-existing property (brackets syntax)";

@@ -49,7 +49,7 @@ class _007::Parser::Actions {
         #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:<()>"))))),
+                :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
                 :operand(Q::Term::Sub.new(:identifier(Val::None.new), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
@@ -68,7 +68,7 @@ class _007::Parser::Actions {
     sub maybe-install-operator($identname, @trait) {
         return
             unless $identname ~~ / (< prefix infix postfix >)
-                                    ':<' (<-[>]>+) '>' /;
+                                    ':' (<-[>]>+) /;
 
         my $type = ~$0;
         my $op = ~$1;
@@ -85,7 +85,7 @@ class _007::Parser::Actions {
                     unless $identifier ~~ Q::Identifier;
                 sub check-if-op($s) {
                     die "Unknown thing in '$name' trait"
-                        unless $s ~~ /< pre in post > 'fix:<' (<-[>]>+) '>'/;
+                        unless $s ~~ /< pre in post > 'fix:' (<-[>]>+)/;
                     %precedence{$name} = ~$0;
                     die X::Precedence::Incompatible.new
                         if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
@@ -220,7 +220,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.identifier.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+            $op.identifier.name.value.subst(/^ \w+ ":"/, "");
         }
 
         sub tighter($op1, $op2, $_ = $*parser.oplevel.infixprec) {
@@ -297,7 +297,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.identifier.name.value.subst(/^ \w+ ":<"/, "").subst(/">" $/, "");
+            $op.identifier.name.value.subst(/^ \w+ ":"/, "");
         }
 
         sub tighter($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
@@ -425,7 +425,7 @@ class _007::Parser::Actions {
     method prefix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("prefix:<$op>"))),
+            :name(Val::Str.new(:value("prefix:$op"))),
             :frame($*runtime.current-frame),
         );
         make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
@@ -615,7 +615,7 @@ class _007::Parser::Actions {
     method infix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("infix:<$op>"))),
+            :name(Val::Str.new(:value("infix:$op"))),
             :frame($*runtime.current-frame),
         );
         make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(Val::None.new), :rhs(Val::None.new));
@@ -641,7 +641,7 @@ class _007::Parser::Actions {
             $op = ".";
         }
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("postfix:<$op>"))),
+            :name(Val::Str.new(:value("postfix:$op"))),
             :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
@@ -663,7 +663,8 @@ class _007::Parser::Actions {
     method identifier($/) {
         my $value = ~$/;
         sub () {
-            $value ~~ s[':«' (<-[»]>+) '»' $] = ":<{$0}>";
+            $value ~~ s[':<' ([ '\\>' | '\\\\' | <-[>]> ]+) '>' $] = ":{$0}";
+            $value ~~ s[':«' ([ '\\»' | '\\\\' | <-[»]> ]+) '»' $] = ":{$0}";
             $value ~~ s:g['\\>'] = '>';
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';

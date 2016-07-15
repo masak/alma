@@ -10,7 +10,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "infix:<n>") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
+          (stsub (identifier "infix:n") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";
@@ -33,7 +33,7 @@ use _007::Test;
         say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<n> should not be defined unless we define it";
+    parse-error $program, X::AdHoc, "infix:n should not be defined unless we define it";
 }
 
 {
@@ -46,7 +46,7 @@ use _007::Test;
         say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<n> should not be usable outside of its scope";
+    parse-error $program, X::AdHoc, "infix:n should not be usable outside of its scope";
 }
 
 {
