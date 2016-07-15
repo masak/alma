@@ -133,11 +133,27 @@ class Val::Sub is Val::Block {
         self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
     }
 
-    method Str { "<sub {$.name.value}{$.pretty-parameters}>" }
+    method escaped-name {
+        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
+        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
+
+        return $.name.value
+            unless $.name.value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+
+        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
+            if $1.contains(">") && $1.contains("»");
+
+        return "{$0}:«{escape-backslashes $1}»"
+            if $1.contains(">");
+
+        return "{$0}:<{escape-backslashes $1}>";
+    }
+
+    method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
 }
 
 class Val::Macro is Val::Sub {
-    method Str { "<macro {$.name.value}{$.pretty-parameters}>" }
+    method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
 class Val::Exception does Val {
@@ -152,8 +168,8 @@ class Helper {
         when Val::Array { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
-        when Val::Macro { "<macro {.name}{.pretty-parameters}>" }
-        when Val::Sub { "<sub {.name}{.pretty-parameters}>" }
+        when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
+        when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
         when Val::Block { "<block {.pretty-parameters}>" }
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
