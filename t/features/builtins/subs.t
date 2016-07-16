@@ -131,4 +131,15 @@ use _007::Test;
         "int(Val::Str) outputs a Val::Int (regression)";
 }
 
+{
+    my $program = q:to/./;
+        say( max(1, 2) ~~ Int );
+        .
+
+    outputs
+        $program,
+        "1\n",
+        "max(Val::Int, Val::Int) outputs a Val::Int (regression)";
+}
+
 done-testing;
