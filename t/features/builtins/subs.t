@@ -109,4 +109,26 @@ use _007::Test;
     is-result $ast, "<type Str>\n", "str() works";
 }
 
+{
+    my $program = q:to/./;
+        say( int(7) ~~ Int );
+        .
+
+    outputs
+        $program,
+        "1\n",
+        "int(Val::Int) outputs a Val::Int (regression)";
+}
+
+{
+    my $program = q:to/./;
+        say( int("007") ~~ Int );
+        .
+
+    outputs
+        $program,
+        "1\n",
+        "int(Val::Str) outputs a Val::Int (regression)";
+}
+
 done-testing;

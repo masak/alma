@@ -122,12 +122,12 @@ class _007::Runtime::Builtins {
             str => &str,
             int => sub ($_) {
                 when Val::Str {
-                    return .value.Int
+                    return wrap(.value.Int)
                         if .value ~~ /^ '-'? \d+ $/;
                     proceed;
                 }
                 when Val::Int {
-                    return .value;
+                    return $_;
                 }
                 die X::TypeCheck.new(
                     :operation<int()>,
