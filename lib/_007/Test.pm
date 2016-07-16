@@ -356,6 +356,18 @@ sub run-and-collect-output($filepath) is export {
     return $output.result.lines;
 }
 
+sub run-and-collect-error-message($filepath) is export {
+    my $program = slurp($filepath);
+    my $output = UnwantedOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $ast = _007.parser(:$runtime).parse($program);
+    $runtime.run($ast);
+
+    CATCH {
+        return .message;
+    }
+}
+
 our sub EXPORT(*@things) {
     my %exports;
     for @things -> $thing {
