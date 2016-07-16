@@ -7,11 +7,12 @@ constant RETURN_TO = Q::Identifier.new(
     :frame(Val::None.new));
 
 class _007::Runtime {
+    has $.input;
     has $.output;
     has @!frames;
     has $!builtins;
 
-    submethod BUILD(:$!output) {
+    submethod BUILD(:$!input, :$!output) {
         my $setting = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist(Q::StatementList.new),

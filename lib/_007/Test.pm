@@ -129,11 +129,13 @@ sub read(Str $ast) is export {
 my class StrOutput {
     has $.result = "";
 
-    method say($s) { $!result ~= $s.gist ~ "\n" }
+    method flush() {}
+    method print($s) { $!result ~= $s.gist }
 }
 
 my class UnwantedOutput {
-    method say($s) { die "Program printed '$s'; was not expected to print anything" }
+    method flush() { die "Program flushed; was not expected to print anything" }
+    method print($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
 sub check(Q::CompUnit $ast, $runtime) is export {

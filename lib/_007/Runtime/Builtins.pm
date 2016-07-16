@@ -112,11 +112,14 @@ class _007::Runtime::Builtins {
 
         my @builtins =
             say => -> $arg {
-                $.runtime.output.say($arg ~~ Val::Array ?? &str($arg).Str !! ~$arg);
+                my $string = $arg ~~ Val::Array ?? &str($arg).Str !! ~$arg;
+                $.runtime.output.print($string ~ "\n");
                 Nil;
             },
             prompt => sub ($arg) {
-                return wrap(prompt($arg));
+                $.runtime.output.print($arg);
+                $.runtime.output.flush();
+                return wrap($.runtime.input.get());
             },
             type => -> $arg { Val::Type.of($arg.WHAT) },
             str => &str,
