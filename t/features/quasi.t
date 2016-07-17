@@ -430,4 +430,23 @@ use _007::Test;
         "can't put a non-prefix in a Q::Prefix unquote";
 }
 
+{
+    my $program = q:to/./;
+        sub foo(a, b, c) {
+            say(a);
+            say(b);
+            say(c);
+        }
+
+        macro moo() {
+            my q = quasi @ Q::ArgumentList { 1, "foo", [0, 0, 7] };
+            return quasi { foo({{{q @ Q::ArgumentList}}}) };
+        }
+
+        moo();
+        .
+
+    outputs $program, "1\nfoo\n[0, 0, 7]\n", "unquote @ Q::ArgumentList";
+}
+
 done-testing;

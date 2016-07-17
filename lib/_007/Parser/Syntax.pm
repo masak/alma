@@ -226,7 +226,13 @@ grammar _007::Parser::Syntax {
 
     token propertylist { [<.ws> <property>]* %% [\h* ','] <.ws> }
 
-    token unquote { '{{{' <EXPR> [:s "@" <identifier> ]? '}}}' }
+    token unquote($type?) {
+        '{{{'
+        <EXPR>
+        [:s "@" <identifier> ]?
+        <?{ !$type || ($<identifier> // "") eq $type }>
+        '}}}'
+    }
 
     proto token property {*}
     rule property:str-expr { <key=str> ':' <value=EXPR> }
@@ -265,7 +271,7 @@ grammar _007::Parser::Syntax {
         if /$<index>=[ <.ws> '[' ~ ']' [<.ws> <EXPR>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
-        elsif /$<call>=[ <.ws> '(' ~ ')' [<.ws> <argumentlist>] ]/(self) -> $cur {
+        elsif /$<call>=[ <.ws> '(' ~ ')' [<.ws> [<argumentlist=.unquote("Q::ArgumentList")> || <argumentlist>]] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         elsif /$<prop>=[ <.ws> '.' <identifier> ]/(self) -> $cur {
