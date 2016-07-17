@@ -348,10 +348,10 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     flunk $desc;
 }
 
-sub run-and-collect-output($filepath) is export {
+sub run-and-collect-output($filepath, :$input = $*IN) is export {
     my $program = slurp($filepath);
     my $output = StrOutput.new;
-    my $runtime = _007.runtime(:$output);
+    my $runtime = _007.runtime(:$input, :$output);
     my $ast = _007.parser(:$runtime).parse($program);
     $runtime.run($ast);
 
