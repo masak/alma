@@ -139,4 +139,13 @@ use _007::Test;
     outputs $program, "1\nfoo\n[0, 0, 7]\n", "unquote @ Q::ArgumentList";
 }
 
+{
+    my $program = q:to/./;
+        my q = quasi @ Q::CompUnit { say("James"); };
+        say(type(quasi @ Q::CompUnit { {{{q @ Q::CompUnit}}} }));
+        .
+
+    outputs $program, "<type Q::CompUnit>\n", "unquote @ Q::CompUnit";
+}
+
 done-testing;

@@ -176,7 +176,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::Expr"] <.ws> '{' <.ws> <EXPR> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Identifier"] <.ws> '{' <.ws> <term:identifier> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Block"] <.ws> '{' <.ws> <block> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::CompUnit"] <.ws> '{' <.ws> <compunit> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::CompUnit"] <.ws> '{' <.ws> [<compunit=.unquote("Q::CompUnit")> || <compunit>] <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal"] <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal::Int"] <.ws> '{' <.ws> <term:int> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal::None"] <.ws> '{' <.ws> <term:none> <.ws> '}'
