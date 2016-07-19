@@ -690,6 +690,14 @@ class Q::Statement::BEGIN does Q::Statement {
     }
 }
 
+class Q::Statement::Class does Q::Statement {
+    has $.block;
+
+    method run($runtime) {
+        # a class block does not run at runtime
+    }
+}
+
 class Q::StatementList does Q {
     # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
     has Val::Array $.statements = Val::Array.new;

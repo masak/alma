@@ -178,6 +178,11 @@ class _007::Parser::Actions {
         $*runtime.run(Q::CompUnit.new(:$block));
     }
 
+    method statement:class ($/) {
+        my $block = $<block>.ast;
+        make Q::Statement::Class.new(:$block);
+    }
+
     method traitlist($/) {
         my @traits = $<trait>».ast;
         if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {

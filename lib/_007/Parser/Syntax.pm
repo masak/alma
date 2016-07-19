@@ -2,6 +2,12 @@ use _007::Val;
 use _007::Q;
 use _007::Parser::Exceptions;
 
+sub check-feature-flag($feature, $word) {
+    my $flag = "FLAG_007_{$word}";
+    die "{$feature} is experimental and requires \%*ENV<{$flag}> to be set"
+        unless %*ENV{$flag};
+}
+
 grammar _007::Parser::Syntax {
     token TOP { <compunit> }
 
@@ -108,6 +114,11 @@ grammar _007::Parser::Syntax {
     }
     token statement:BEGIN {
         BEGIN <.ws> <block>
+    }
+    token statement:class {
+        class <.ws>
+        { check-feature-flag("'class' keyword", "CLASS"); }
+        <identifier> <.ws> <block>
     }
 
     rule traitlist {
