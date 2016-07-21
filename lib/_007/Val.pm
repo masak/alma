@@ -88,6 +88,11 @@ class Val::Type does Val {
         self.bless(:$type);
     }
 
+    sub is-role($type) {
+        my role R {};
+        return $type.HOW ~~ R.HOW.WHAT;
+    }
+
     method create(@properties) {
         if $.type ~~ Val::Object {
             return $.type.new(:@properties);
@@ -101,10 +106,10 @@ class Val::Type does Val {
         elsif $.type ~~ Val::Type {
             return $.type.new(:type(@properties[0].value.type));
         }
+        elsif is-role($.type) {
+            die X::Uninstantiable.new(:$.name);
+        }
         else {
-            my role R {};
-            die X::Uninstantiable.new(:$.name)
-                if $.type.HOW ~~ R.HOW.WHAT;
             return $.type.new(|%(@properties));
         }
     }
