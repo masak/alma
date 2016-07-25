@@ -132,7 +132,7 @@ class Val::Block does Val {
 
 class Val::Sub is Val::Block {
     has Val::Str $.name;
-    has &.hook;
+    has &.hook = Callable;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
