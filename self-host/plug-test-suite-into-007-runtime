@@ -14,7 +14,7 @@ sub find($dir, Regex $pattern) {
 # $ (for file in `find t/features t/integration -name \*.t`; do perl6 $file | grep '1\.\.'; done) |
 #       perl6 -ne'/\.\.(\d+)/; our $n += $0; END { say $n }'
 
-constant TOTAL = 454;
+constant TOTAL = 463;
 
 sub MAIN() {
     my $score = 0;
