@@ -3,7 +3,8 @@ use _007::Test <&read &check>;
 my class StrOutput {
     has $.result = "";
 
-    method say($s) { $!result ~= $s.gist ~ "\n" }
+    method flush() {}
+    method print($s) { $!result ~= $s.gist }
 }
 
 sub is-result($input, $expected, $desc) {
