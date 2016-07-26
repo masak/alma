@@ -663,7 +663,7 @@ class Q::Statement::Throw does Q::Statement {
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
-    has $.block;
+    has Q::Block $.block;
 
     method attribute-order { <identifier traitlist block> }
 
