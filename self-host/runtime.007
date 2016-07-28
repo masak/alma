@@ -279,6 +279,12 @@ my Runtime = {
                     leave();
                 }
             },
+            Q::Statement::My(stmt) {
+                my name = stmt.identifier.name;
+                if stmt.expr {
+                    put_var(name, eval(stmt.expr));
+                }
+            },
             Q::Statement::While(stmt) {
                 my expr;
                 my block = reify(stmt.block);
@@ -290,12 +296,6 @@ my Runtime = {
                     }
                     run(stmt.block.statementlist);
                     leave();
-                }
-            },
-            Q::Statement::My(stmt) {
-                my name = stmt.identifier.name;
-                if stmt.expr {
-                    put_var(name, eval(stmt.expr));
                 }
             },
             Q::StatementList(stmtlist) {
