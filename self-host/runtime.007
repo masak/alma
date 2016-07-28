@@ -279,6 +279,19 @@ my Runtime = {
                     leave();
                 }
             },
+            Q::Statement::While(stmt) {
+                my expr;
+                my block = reify(stmt.block);
+                while expr = eval(stmt.expr) {
+                    enter(block);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, expr);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
             Q::Statement::My(stmt) {
                 my name = stmt.identifier.name;
                 if stmt.expr {
@@ -298,8 +311,6 @@ my Runtime = {
             Q::Statement::Return(stmt) {
             },
             Q::Statement::Sub(stmt) {
-            },
-            Q::Statement::While(stmt) {
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
