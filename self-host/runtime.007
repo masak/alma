@@ -105,6 +105,12 @@ my Runtime = {
             Q::Infix::Addition(op) {
                 return eval(op.lhs) + eval(op.rhs);
             },
+            Q::Infix::And(op) {
+                return eval(op.lhs) && eval(op.rhs);
+            },
+            Q::Infix::ArrayReplicate(op) {
+                return eval(op.lhs) xx eval(op.rhs);
+            },
             Q::Infix::Assignment(op) {
                 my value = eval(op.rhs);
                 if op.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
@@ -115,11 +121,47 @@ my Runtime = {
             Q::Infix::Concat(op) {
                 return eval(op.lhs) ~ eval(op.rhs);
             },
+            Q::Infix::Cons(op) {
+                return eval(op.lhs) :: eval(op.rhs);
+            },
+            Q::Infix::Divisibility(op) {
+                return eval(op.lhs) %% eval(op.rhs);
+            },
             Q::Infix::Eq(op) {
                 return eval(op.lhs) == eval(op.rhs);
             },
+            Q::Infix::Ge(op) {
+                return eval(op.lhs) >= eval(op.rhs);
+            },
+            Q::Infix::Gt(op) {
+                return eval(op.lhs) > eval(op.rhs);
+            },
+            Q::Infix::Le(op) {
+                return eval(op.lhs) <= eval(op.rhs);
+            },
+            Q::Infix::Lt(op) {
+                return eval(op.lhs) < eval(op.rhs);
+            },
+            Q::Infix::Multiplication(op) {
+                return eval(op.lhs) * eval(op.rhs);
+            },
+            Q::Infix::Modulo(op) {
+                return eval(op.lhs) % eval(op.rhs);
+            },
+            Q::Infix::Ne(op) {
+                return eval(op.lhs) != eval(op.rhs);
+            },
+            Q::Infix::Or(op) {
+                return eval(op.lhs) || eval(op.rhs);
+            },
+            Q::Infix::Replicate(op) {
+                return eval(op.lhs) x eval(op.rhs);
+            },
             Q::Infix::Subtraction(op) {
                 return eval(op.lhs) - eval(op.rhs);
+            },
+            Q::Infix::TypeEq(op) {
+                return eval(op.lhs) ~~ eval(op.rhs);
             },
             Q::Literal::Int(lit_int) {
                 return lit_int.value;
@@ -145,6 +187,18 @@ my Runtime = {
             Q::Postfix::Index(op) {
                 return eval(op.operand)[eval(op.index)];
             },
+            Q::Postfix::Property(op) {
+                return eval(op.operand)[eval(op.property)];
+            },
+            Q::Prefix::Minus(op) {
+                return -eval(op.operand);
+            },
+            Q::Prefix::Not(op) {
+                return !eval(op.operand);
+            },
+            Q::Prefix::Upto(op) {
+                return ^eval(op.operand);
+            },
             Q::Term::Array(array) {
                 return array.elements.map(eval);
             },
@@ -165,45 +219,9 @@ my Runtime = {
             },
             Q::Infix(op) {
             },
-            Q::Infix::Multiplication(op) {
-            },
-            Q::Infix::Modulo(op) {
-            },
-            Q::Infix::Divisibility(op) {
-            },
-            Q::Infix::Replicate(op) {
-            },
-            Q::Infix::ArrayReplicate(op) {
-            },
-            Q::Infix::Cons(op) {
-            },
-            Q::Infix::Ne(op) {
-            },
-            Q::Infix::Gt(op) {
-            },
-            Q::Infix::Lt(op) {
-            },
-            Q::Infix::Ge(op) {
-            },
-            Q::Infix::Le(op) {
-            },
-            Q::Infix::Or(op) {
-            },
-            Q::Infix::And(op) {
-            },
-            Q::Infix::TypeEq(op) {
-            },
             Q::Postfix(op) {
             },
-            Q::Postfix::Property(op) {
-            },
             Q::Prefix(op) {
-            },
-            Q::Prefix::Minus(op) {
-            },
-            Q::Prefix::Not(op) {
-            },
-            Q::Prefix::Upto(op) {
             },
             Q::Term::Object(term) {
             },
