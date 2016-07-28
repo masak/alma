@@ -234,6 +234,20 @@ my Runtime = {
             Q::Statement::Expr(stmt) {
                 eval(stmt.expr);
             },
+            Q::Statement::For(stmt) {
+                my block = reify(stmt.block);
+                my array = eval(stmt.expr);
+
+                for array -> arg {
+                    enter(block);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, arg);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
             Q::Statement::If(stmt) {
                 my expr = eval(stmt.expr);
                 if expr {
@@ -261,8 +275,6 @@ my Runtime = {
 
             # these were added to be able to run more tests
             # please move and implement as necessary
-            Q::Statement::For(stmt) {
-            },
             Q::Statement::Macro(stmt) {
             },
             Q::Statement::Return(stmt) {
