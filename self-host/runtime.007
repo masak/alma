@@ -228,6 +228,19 @@ my Runtime = {
             Q::Statement::Expr(stmt) {
                 eval(stmt.expr);
             },
+            Q::Statement::If(stmt) {
+                my expr = eval(stmt.expr);
+                if expr {
+                    my block = reify(stmt.block);
+                    enter(block);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, expr);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
             Q::Statement::My(stmt) {
                 my name = stmt.identifier.name;
                 if stmt.expr {
@@ -247,8 +260,6 @@ my Runtime = {
             Q::Statement::Constant(stmt) {
             },
             Q::Statement::For(stmt) {
-            },
-            Q::Statement::If(stmt) {
             },
             Q::Statement::Macro(stmt) {
             },
