@@ -215,10 +215,16 @@ my Runtime = {
         sub eval(q) { return eval_of_type[type(q).name](q); }
 
         my run_of_type = {
+            Q::Statement::BEGIN(stmt) {
+                # no runtime behavior
+            },
             Q::CompUnit(compunit) {
                 enter(reify(compunit.block));
                 run(compunit.block.statementlist);
                 leave();
+            },
+            Q::Statement::Constant(stmt) {
+                # no runtime behavior
             },
             Q::Statement::Block(stmt) {
                 enter(reify(stmt.block));
@@ -255,10 +261,6 @@ my Runtime = {
 
             # these were added to be able to run more tests
             # please move and implement as necessary
-            Q::Statement::BEGIN(stmt) {
-            },
-            Q::Statement::Constant(stmt) {
-            },
             Q::Statement::For(stmt) {
             },
             Q::Statement::Macro(stmt) {
