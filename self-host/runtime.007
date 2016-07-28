@@ -279,11 +279,17 @@ my Runtime = {
                     leave();
                 }
             },
+            Q::Statement::Macro(stmt) {
+                # no runtime behavior
+            },
             Q::Statement::My(stmt) {
                 my name = stmt.identifier.name;
                 if stmt.expr {
                     put_var(name, eval(stmt.expr));
                 }
+            },
+            Q::Statement::Sub(stmt) {
+                # no runtime behavior
             },
             Q::Statement::While(stmt) {
                 my expr;
@@ -306,11 +312,7 @@ my Runtime = {
 
             # these were added to be able to run more tests
             # please move and implement as necessary
-            Q::Statement::Macro(stmt) {
-            },
             Q::Statement::Return(stmt) {
-            },
-            Q::Statement::Sub(stmt) {
             },
         };
         sub run(q) { run_of_type[type(q).name](q); }
