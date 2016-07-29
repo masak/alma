@@ -10,15 +10,10 @@ if !ast {
     };
 }
 
-my RealOutput = {
-    new() { return { say }; }
-};
-
 constant NO_OUTER = {};
 
 my Runtime = {
-    new(config) {
-        my out = config.output;
+    new() {
         my frames = [];
         sub enter(block) {
             my frame = { block, pad: {} };
@@ -172,7 +167,7 @@ my Runtime = {
             Q::Postfix::Call(op) {
                 # XXX: short-term hack to get `say` early; needs to go away
                 if op.operand ~~ Q::Identifier && op.operand.name == "say" {
-                    return out.say(eval(op.argumentlist.arguments[0]));
+                    return say(eval(op.argumentlist.arguments[0]));
                 }
                 my c = eval(op.operand);
                 if c ~~ Macro {
@@ -321,6 +316,5 @@ my Runtime = {
     }
 };
 
-my output = RealOutput.new();
-my runtime = Runtime.new({ output });
+my runtime = Runtime.new();
 runtime.run(ast);
