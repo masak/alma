@@ -351,5 +351,53 @@ use _007::Test;
     is-error $ast, X::Regex::InvalidMatchType, "Regex.search() can only match strings";
 }
 
+{
+    my $program = q:to/./;
+        say(Object.create([["foo", 42]]));
+        .
+
+    outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create an Object";
+}
+
+{
+    my $program = q:to/./;
+        say(Int.create([["value", 7]]));
+        .
+
+    outputs $program, qq[7\n], "Type.create() method to create an Int";
+}
+
+{
+    my $program = q:to/./;
+        say(Str.create([["value", "no, Mr Bond, I expect you to die"]]));
+        .
+
+    outputs $program, qq[no, Mr Bond, I expect you to die\n], "Type.create() method to create a Str";
+}
+
+{
+    my $program = q:to/./;
+        say(Array.create([["elements", [0, 0, 7]]]));
+        .
+
+    outputs $program, qq<[0, 0, 7]\n>, "Type.create() method to create an Array";
+}
+
+{
+    my $program = q:to/./;
+        say(Type.create([["name", "MyType"]]));
+        .
+
+    outputs $program, qq[<type MyType>\n], "Type.create() method to create a Type";
+}
+
+{
+    my $program = q:to/./;
+        say(Q::Identifier.create([["name", "Steve"]]));
+        .
+
+    outputs $program, qq[Q::Identifier "Steve"\n], "Type.create() method to create a Q::Identifier";
+}
+
 done-testing;
 

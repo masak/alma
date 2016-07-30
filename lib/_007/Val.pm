@@ -1,3 +1,5 @@
+use MONKEY-SEE-NO-EVAL;
+
 class X::Uninstantiable is Exception {
     has Str $.name;
 
@@ -122,7 +124,11 @@ class Val::Type does Val {
             return $.type.new(:elements(@properties[0].value.elements));
         }
         elsif $.type ~~ Val::Type {
-            return $.type.new(:type(@properties[0].value.type));
+            my $name = @properties[0].value;
+            return $.type.new(:type(EVAL qq[class :: \{
+                method attributes \{ () \}
+                method ^name(\$) \{ "{$name}" \}
+            \}]));
         }
         elsif is-role($.type) {
             die X::Uninstantiable.new(:$.name);

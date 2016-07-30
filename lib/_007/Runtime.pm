@@ -410,6 +410,11 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
         }
+        elsif $obj ~~ Val::Type && $propname eq "create" {
+            return builtin(sub create($properties) {
+                $obj.create($properties.elements.map({ .elements[0].value => .elements[1] }));
+            });
+        }
         elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
