@@ -1,5 +1,6 @@
 use _007::Q;
 use _007::Runtime::Builtins;
+use _007::OpScope;
 
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
@@ -10,7 +11,7 @@ class _007::Runtime {
     has $.input;
     has $.output;
     has @!frames;
-    has $!builtins;
+    has $.builtin-opscope;
 
     submethod BUILD(:$!input, :$!output) {
         my $setting = Val::Block.new(
@@ -19,7 +20,7 @@ class _007::Runtime {
             :static-lexpad(Val::Object.new),
             :outer-frame(NO_OUTER));
         self.enter($setting);
-        $!builtins = _007::Runtime::Builtins.new(:runtime(self));
+        $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
     }
 
@@ -137,16 +138,13 @@ class _007::Runtime {
     }
 
     method load-builtins {
-        for $!builtins.get-builtins -> Pair (:key($name), :value($subval)) {
+        my $opscope = $!builtin-opscope;
+        for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :value($subval)) {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(Val::None.new));
             self.declare-var($identifier, $subval);
         }
-    }
-
-    method builtin-opscope {
-        return $!builtins.opscope;
     }
 
     method call(Val::Sub $c, @arguments) {
