@@ -1,6 +1,5 @@
 use _007::Val;
 use _007::Q;
-use _007::Parser::Exceptions;
 
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
