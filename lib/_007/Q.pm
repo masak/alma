@@ -85,7 +85,7 @@ role Q::Literal does Q::Term {
 }
 
 class Q::Literal::None does Q::Literal {
-    method eval($) { Val::None.new }
+    method eval($) { NONE }
 }
 
 class Q::Literal::Int does Q::Literal {
@@ -102,7 +102,7 @@ class Q::Literal::Str does Q::Literal {
 
 class Q::Identifier does Q::Term {
     has Val::Str $.name;
-    has $.frame = Val::None.new;
+    has $.frame = NONE;
 
     method attribute-order { <name> }
 
@@ -500,7 +500,7 @@ role Q::Statement does Q {
 
 class Q::Statement::My does Q::Statement does Q::Declaration {
     has $.identifier;
-    has $.expr = Val::None.new;
+    has $.expr = NONE;
 
     method attribute-order { <identifier expr> }
 
@@ -536,7 +536,7 @@ class Q::Statement::Expr does Q::Statement {
 class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
-    has $.else = Val::None.new;
+    has $.else = NONE;
 
     method attribute-order { <expr block else> }
 
@@ -637,7 +637,7 @@ class Q::Statement::While does Q::Statement {
 }
 
 class Q::Statement::Return does Q::Statement {
-    has $.expr = Val::None.new;
+    has $.expr = NONE;
 
     method run($runtime) {
         my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
@@ -647,7 +647,7 @@ class Q::Statement::Return does Q::Statement {
 }
 
 class Q::Statement::Throw does Q::Statement {
-    has $.expr = Val::None.new;
+    has $.expr = NONE;
 
     method run($runtime) {
         my $value = $.expr ~~ Val::None
@@ -714,6 +714,6 @@ class Q::Expr::StatementListAdapter does Q {
 
     method eval($runtime) {
         $.statementlist.run($runtime);
-        return Val::None.new;
+        return NONE;
     }
 }

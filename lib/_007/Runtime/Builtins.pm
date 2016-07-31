@@ -12,7 +12,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     sub wrap($_) {
         when Val | Q { $_ }
-        when Nil  { Val::None.new }
+        when Nil  { NONE }
         when Bool { Val::Int.new(:value(+$_)) }
         when Int  { Val::Int.new(:value($_)) }
         when Str  { Val::Str.new(:value($_)) }

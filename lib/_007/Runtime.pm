@@ -5,7 +5,7 @@ use _007::OpScope;
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
-    :frame(Val::None.new));
+    :frame(NONE));
 
 class _007::Runtime {
     has $.input;
@@ -39,7 +39,7 @@ class _007::Runtime {
         for $block.static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
-                :frame(Val::None.new));
+                :frame(NONE));
             self.declare-var($identifier, $value);
         }
         for $block.statementlist.statements.elements.kv -> $i, $_ {
@@ -120,7 +120,7 @@ class _007::Runtime {
         my Val::Object $frame = $identifier.frame ~~ Val::None
             ?? self.current-frame
             !! $identifier.frame;
-        $frame.properties<pad>.properties{$name} = $value // Val::None.new;
+        $frame.properties<pad>.properties{$name} = $value // NONE;
     }
 
     method declared($name) {
@@ -142,7 +142,7 @@ class _007::Runtime {
         for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :value($subval)) {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
-                :frame(Val::None.new));
+                :frame(NONE));
             self.declare-var($identifier, $subval);
         }
     }
@@ -153,7 +153,7 @@ class _007::Runtime {
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
         if $c.hook -> &hook {
-            return &hook(|@arguments) || Val::None.new;
+            return &hook(|@arguments) || NONE;
         }
         self.enter($c);
         for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
@@ -170,7 +170,7 @@ class _007::Runtime {
                 return .value;
             }
         }
-        return Val::None.new;
+        return NONE;
     }
 
     method property($obj, Str $propname) {
@@ -200,7 +200,7 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return $thing.new(:name($thing.name), :frame(Val::None.new))
+                    return $thing.new(:name($thing.name), :frame(NONE))
                         if $thing ~~ Q::Identifier;
 
                     return $thing
@@ -363,7 +363,7 @@ class _007::Runtime {
         elsif $obj ~~ Val::Array && $propname eq "push" {
             return builtin(sub push($newelem) {
                 $obj.elements.push($newelem);
-                return Val::None.new;
+                return NONE;
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "pop" {
@@ -383,7 +383,7 @@ class _007::Runtime {
         elsif $obj ~~ Val::Array && $propname eq "unshift" {
             return builtin(sub unshift($newelem) {
                 $obj.elements.unshift($newelem);
-                return Val::None.new;
+                return NONE;
             });
         }
         elsif $obj ~~ Val::Type && $propname eq "name" {

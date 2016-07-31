@@ -96,7 +96,7 @@ class _007::Parser::Actions {
     method statement:my ($/) {
         make Q::Statement::My.new(
             :identifier($<identifier>.ast),
-            :expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
+            :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
     method statement:constant ($/) {
@@ -118,7 +118,7 @@ class _007::Parser::Actions {
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
                 :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
-                :operand(Q::Term::Sub.new(:identifier(Val::None.new), :block($<EXPR>.ast))),
+                :operand(Q::Term::Sub.new(:identifier(NONE), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
         }
@@ -216,18 +216,18 @@ class _007::Parser::Actions {
     method statement:return ($/) {
         die X::ControlFlow::Return.new
             unless $*insub;
-        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
+        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
     method statement:throw ($/) {
-        make Q::Statement::Throw.new(:expr($<EXPR> ?? $<EXPR>.ast !! Val::None.new));
+        make Q::Statement::Throw.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
     method statement:if ($/) {
         my %parameters = $<xblock>.ast;
         %parameters<else> = $<else> :exists
             ?? $<else>.ast
-            !! Val::None.new;
+            !! NONE;
 
         make Q::Statement::If.new(|%parameters);
     }
@@ -614,7 +614,7 @@ class _007::Parser::Actions {
         my $name = $<identifier>.ast.name;
         my $identifier = $<identifier>
             ?? Q::Identifier.new(:$name)
-            !! Val::None.new;
+            !! NONE;
         make Q::Term::Sub.new(:$identifier, :$traitlist, :$block);
     }
 
@@ -691,7 +691,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("infix:$op"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(Val::None.new), :rhs(Val::None.new));
+        make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
     }
 
     method infix-unquote($/) {
@@ -720,16 +720,16 @@ class _007::Parser::Actions {
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :operand(Val::None.new));
+            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :operand(NONE));
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :operand(Val::None.new));
+            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :operand(NONE));
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(Val::None.new));
+            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(NONE));
         }
         else {
-            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :operand(Val::None.new));
+            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :operand(NONE));
         }
     }
 

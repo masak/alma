@@ -23,6 +23,8 @@ class Val::None does Val {
     }
 }
 
+constant NONE is export = Val::None.new;
+
 class Val::Int does Val {
     has Int $.value;
 
