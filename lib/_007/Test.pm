@@ -104,8 +104,7 @@ sub read(Str $ast) is export {
 
                 for @attributes.kv -> $i, $attr {
                     if $attr.build && @rest < @attributes {
-                        # RAKUDO: @rest.splice($i, 0, "dummy value to make the indices add up"); [RT #128736]
-                        @rest = |@rest[^$i], "dummy value to make the indices add up", |@rest[$i..*];
+                        @rest.splice($i, 0, "dummy value to make the indices add up");
                         next;
                     }
                     my $aname = aname($attr);
