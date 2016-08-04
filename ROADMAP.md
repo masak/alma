@@ -68,10 +68,10 @@ the next major version. However, from this vantage point, these are the
 expected areas of focus after v1.0.0.
 
 * [imports](https://github.com/masak/007/issues/53)
-* [exceptions](https://github.com/masak/007/issues/65)
-* [class declarations](https://github.com/masak/007/issues/32)
+* [exceptions](https://github.com/masak/007/issues/65) (already underway)
+* [class declarations](https://github.com/masak/007/issues/32) (already underway)
 * [ADTs and pattern matching](https://github.com/masak/007/issues/34)
-* [007 runtime in 007](https://github.com/masak/007/issues/51)
+* [007 runtime in 007](https://github.com/masak/007/issues/51) (already underway)
 * [type checking](https://github.com/masak/007/issues/33)
 * [Qtree visitors](https://github.com/masak/007/issues/26)
 * [007 parser in 007](https://github.com/masak/007/issues/38)
