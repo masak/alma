@@ -690,7 +690,7 @@ class Q::Statement::BEGIN does Q::Statement {
     }
 }
 
-class Q::Statement::Class does Q::Statement {
+class Q::Statement::Class does Q::Statement does Q::Declaration {
     has $.block;
 
     method run($runtime) {

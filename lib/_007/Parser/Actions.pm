@@ -247,8 +247,11 @@ class _007::Parser::Actions {
     }
 
     method statement:class ($/) {
+        my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
         make Q::Statement::Class.new(:$block);
+        my $val = Val::Type.of(class :: { method ^name($) { $identifier.name.value } });
+        $identifier.put-value($val, $*runtime);
     }
 
     method traitlist($/) {

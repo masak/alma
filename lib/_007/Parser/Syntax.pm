@@ -117,7 +117,9 @@ grammar _007::Parser::Syntax {
     token statement:class {
         class <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
-        <identifier> <.ws> <block>
+        <identifier> <.ws>
+        { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
+        <block>
     }
 
     rule traitlist {
