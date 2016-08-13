@@ -135,7 +135,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         min => -> $a, $b { wrap(min($a.value, $b.value)) },
         max => -> $a, $b { wrap(max($a.value, $b.value)) },
 
-        # OPERATORS
+        # OPERATORS (from loosest to tightest within each category)
 
         # assignment precedence
         'infix:=' => macro-op(
