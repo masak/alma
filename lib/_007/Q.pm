@@ -305,6 +305,8 @@ class Q::Infix::And is Q::Infix {
 
 class Q::Infix::TypeMatch is Q::Infix {}
 
+class Q::Infix::TypeNonMatch is Q::Infix {}
+
 class Q::Postfix does Q::Expr {
     has $.identifier;
     has $.operand;

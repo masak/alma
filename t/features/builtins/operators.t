@@ -657,6 +657,21 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say(quasi @ Q::Infix { + } !~~ Q::Infix);
+        say(quasi @ Q::Infix { + } !~~ Q::Prefix);
+        say(42 !~~ Int);
+        say([4, 2] !~~ Array);
+        say({} !~~ Object);
+        say(42 !~~ Array);
+        say([4, 2] !~~ Object);
+        say({} !~~ Int);
+        .
+
+    outputs $program, "0\n1\n0\n0\n0\n1\n1\n1\n", "bunch of negative typechecks";
+}
+
+{
+    my $program = q:to/./;
         say(42 // "oh, James");
         .
 

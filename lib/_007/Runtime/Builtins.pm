@@ -213,6 +213,16 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             :qtype(Q::Infix::TypeMatch),
             :precedence{ equal => "==" },
         ),
+        'infix:!~~' => op(
+            sub ($lhs, $rhs) {
+                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
+                    unless $rhs ~~ Val::Type;
+
+                return wrap($lhs !~~ $rhs.type);
+            },
+            :qtype(Q::Infix::TypeNonMatch),
+            :precedence{ equal => "==" },
+        ),
 
         # cons precedence
         'infix:::' => op(
