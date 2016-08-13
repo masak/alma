@@ -692,4 +692,13 @@ use _007::Test;
     outputs $program, "7\n", "short-circuiting: if the lhs is defined, the (thunkish) rhs never runs";
 }
 
+{
+    my $program = q:to/./;
+        say("a" == "a" ~~ Int);
+        say(7 ~~ Int == 1);
+        .
+
+    outputs $program, "1\n1\n", "infix:<~~> has the tightness of a comparison operator";
+}
+
 done-testing;

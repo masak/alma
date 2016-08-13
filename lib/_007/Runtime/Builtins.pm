@@ -203,6 +203,16 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             :qtype(Q::Infix::Ge),
             :precedence{ equal => "==" },
         ),
+        'infix:~~' => op(
+            sub ($lhs, $rhs) {
+                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
+                    unless $rhs ~~ Val::Type;
+
+                return wrap($lhs ~~ $rhs.type);
+            },
+            :qtype(Q::Infix::TypeEq),
+            :precedence{ equal => "==" },
+        ),
 
         # cons precedence
         'infix:::' => op(
@@ -304,14 +314,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             },
             :qtype(Q::Infix::ArrayReplicate),
             :precedence{ equal => "*" },
-        ),
-        'infix:~~' => op(
-            sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                    unless $rhs ~~ Val::Type;
-
-                return wrap($lhs ~~ $rhs.type);
-            }
         ),
 
         # prefixes
