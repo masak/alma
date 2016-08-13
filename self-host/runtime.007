@@ -173,7 +173,7 @@ my Runtime = {
                 if c ~~ Macro {
                     throw new Exception { message: "macro is called at runtime" };
                 }
-                if !(c ~~ Block) {
+                if c !~~ Block {
                     throw new Exception { message: "Trying to invoke a " ~ type(c).name };
                 }
                 my arguments = op.argumentlist.arguments.map(eval);
