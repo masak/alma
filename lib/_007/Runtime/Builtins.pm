@@ -210,7 +210,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
                 return wrap($lhs ~~ $rhs.type);
             },
-            :qtype(Q::Infix::TypeEq),
+            :qtype(Q::Infix::TypeMatch),
             :precedence{ equal => "==" },
         ),
 

@@ -155,7 +155,7 @@ my Runtime = {
             Q::Infix::Subtraction(op) {
                 return eval(op.lhs) - eval(op.rhs);
             },
-            Q::Infix::TypeEq(op) {
+            Q::Infix::TypeMatch(op) {
                 return eval(op.lhs) ~~ eval(op.rhs);
             },
             Q::Literal::Int(lit_int) {

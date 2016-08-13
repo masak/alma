@@ -31,7 +31,7 @@ sub read(Str $ast) is export {
         'infix:='      => Q::Infix::Assignment,
         'infix:=='     => Q::Infix::Eq,
         'infix:!='     => Q::Infix::Ne,
-        'infix:~~'     => Q::Infix::TypeEq,
+        'infix:~~'     => Q::Infix::TypeMatch,
 
         'infix:<='     => Q::Infix::Le,
         'infix:>='     => Q::Infix::Ge,
