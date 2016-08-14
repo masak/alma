@@ -176,6 +176,8 @@ grammar _007::Parser::Syntax {
 
     proto token term {*}
     token term:none { None» }
+    token term:false { False» }
+    token term:true { True» }
     token term:int { \d+ }
     token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }

@@ -25,6 +25,14 @@ class Val::None does Val {
 
 constant NONE is export = Val::None.new;
 
+class Val::Bool does Val {
+    has Bool $.value;
+
+    method truthy {
+        $.value;
+    }
+}
+
 class Val::Int does Val {
     has Int $.value;
 
@@ -170,6 +178,7 @@ class Val::Exception does Val {
 class Helper {
     our sub Str($_) {
         when Val::None { "None" }
+        when Val::Bool { .value.Str }
         when Val::Int { .value.Str }
         when Val::Str { .value }
         when Val::Array { .quoted-Str }

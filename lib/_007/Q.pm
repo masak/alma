@@ -88,6 +88,12 @@ class Q::Literal::None does Q::Literal {
     method eval($) { NONE }
 }
 
+class Q::Literal::Bool does Q::Literal {
+    has Val::Bool $.value;
+
+    method eval($) { $.value }
+}
+
 class Q::Literal::Int does Q::Literal {
     has Val::Int $.value;
 

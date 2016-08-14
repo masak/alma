@@ -65,7 +65,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 6) (prefix:- (int 2)))))))
         .
 
-    is-result $ast, "0\n1\n0\n1\n", "numeric divisibility works";
+    is-result $ast, "False\nTrue\nFalse\nTrue\n", "numeric divisibility works";
 }
 
 {
@@ -170,7 +170,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "i1") (identifier "i2"))))))
         .
 
-    is-result $ast, "1\n0\n", "integer equality";
+    is-result $ast, "True\nFalse\n", "integer equality";
 }
 
 {
@@ -183,7 +183,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "i1") (identifier "i2"))))))
         .
 
-    is-result $ast, "0\n1\n", "integer inequality";
+    is-result $ast, "False\nTrue\n", "integer inequality";
 }
 
 
@@ -197,7 +197,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "s1") (identifier "s2"))))))
         .
 
-    is-result $ast, "1\n0\n", "string equality";
+    is-result $ast, "True\nFalse\n", "string equality";
 }
 
 {
@@ -210,7 +210,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "s1") (identifier "s2"))))))
         .
 
-    is-result $ast, "0\n1\n", "string inequality";
+    is-result $ast, "False\nTrue\n", "string inequality";
 }
 
 {
@@ -223,7 +223,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a1") (identifier "a2"))))))
         .
 
-    is-result $ast, "1\n0\n", "array equality";
+    is-result $ast, "True\nFalse\n", "array equality";
 }
 
 {
@@ -236,7 +236,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "a1") (identifier "a2"))))))
         .
 
-    is-result $ast, "0\n1\n", "array inequality";
+    is-result $ast, "False\nTrue\n", "array inequality";
 }
 
 {
@@ -248,7 +248,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a3") (identifier "a3"))))))
         .
 
-    is-result $ast, "1\n", "nested array equality";
+    is-result $ast, "True\n", "nested array equality";
 }
 
 {
@@ -261,7 +261,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "1\n0\n", "object equality";
+    is-result $ast, "True\nFalse\n", "object equality";
 }
 
 {
@@ -274,7 +274,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "0\n1\n", "object inequality";
+    is-result $ast, "False\nTrue\n", "object inequality";
 }
 
 {
@@ -286,7 +286,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o3") (identifier "o3"))))))
         .
 
-    is-result $ast, "1\n", "nested object equality";
+    is-result $ast, "True\n", "nested object equality";
 }
 
 {
@@ -296,7 +296,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "Int") (identifier "Str"))))))
         .
 
-    is-result $ast, "1\n0\n", "type equality";
+    is-result $ast, "True\nFalse\n", "type equality";
 }
 
 {
@@ -306,7 +306,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "Int") (identifier "Str"))))))
         .
 
-    is-result $ast, "0\n1\n", "type inequality";
+    is-result $ast, "False\nTrue\n", "type inequality";
 }
 
 {
@@ -323,7 +323,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "i1"))))))
         .
 
-    is-result $ast, "0\n0\n0\n0\n", "equality testing across types (always false)";
+    is-result $ast, "False\nFalse\nFalse\nFalse\n", "equality testing across types (always false)";
 }
 
 {
@@ -340,51 +340,52 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "i1"))))))
         .
 
-    is-result $ast, "1\n1\n1\n1\n", "inequality testing across types (always true)";
+    is-result $ast, "True\nTrue\nTrue\nTrue\n", "inequality testing across types (always true)";
 }
 
 {
-    outputs 'sub foo() {}; say(foo == foo)', "1\n", "a sub is equal to itself";
-    outputs 'macro foo() {}; say(foo == foo)', "1\n", "a macro is equal to itself";
-    outputs 'say(say == say)', "1\n", "a built-in sub is equal to itself";
-    outputs 'say(infix:<+> == infix:<+>)', "1\n", "a built-in operator is equal to itself";
-    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "foo" })', "1\n",
+    outputs 'sub foo() {}; say(foo == foo)', "True\n", "a sub is equal to itself";
+    outputs 'macro foo() {}; say(foo == foo)', "True\n", "a macro is equal to itself";
+    outputs 'say(say == say)', "True\n", "a built-in sub is equal to itself";
+    outputs 'say(infix:<+> == infix:<+>)', "True\n", "a built-in operator is equal to itself";
+    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "foo" })', "True\n",
         "two Qtrees with equal content are equal";
     outputs 'my a = []; for [1, 2] { sub fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
-        "1\n", "the same sub from two different frames compares favorably to itself";
-    outputs 'sub foo() {}; my x = foo; { sub foo() {}; say(x == foo) }', "1\n",
+        "True\n", "the same sub from two different frames compares favorably to itself";
+    outputs 'sub foo() {}; my x = foo; { sub foo() {}; say(x == foo) }', "True\n",
         "subs with the same name and bodies are equal (I)";
     outputs 'sub foo() { say("OH HAI") }; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }',
-        "1\n", "subs with the same name and bodies are equal (II)";
+        "True\n", "subs with the same name and bodies are equal (II)";
 
-    outputs 'sub foo() {}; sub bar() {}; say(foo == bar)', "0\n",
+    outputs 'sub foo() {}; sub bar() {}; say(foo == bar)', "False\n",
         "distinct subs are unequal";
-    outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "0\n",
+    outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "False\n",
         "distinct macros are unequal";
-    outputs 'say(say == min)', "0\n", "distinct built-in subs are unequal";
-    outputs 'say(infix:<+> == prefix:<->)', "0\n",
+    outputs 'say(say == min)', "False\n", "distinct built-in subs are unequal";
+    outputs 'say(infix:<+> == prefix:<->)', "False\n",
         "distinct built-in operators are unequal";
-    outputs 'sub foo(y) {}; my x = foo; { sub foo(x) {}; say(x == foo) }', "0\n",
+    outputs 'sub foo(y) {}; my x = foo; { sub foo(x) {}; say(x == foo) }', "False\n",
         "subs with different parameters are unequal";
-    outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "0\n",
+    outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "False\n",
         "subs with different bodies are unequal";
-    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "bar" })', "0\n",
+    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "bar" })', "False\n",
         "two Qtrees with distinct content are unequal";
 }
 
 {
-    outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "1\n1\n1\n0\n",
+    outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "True\nTrue\nTrue\nFalse\n",
         "relational operators work on integers";
-    outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "1\n1\n1\n0\n",
+    outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "True\nTrue\nTrue\nFalse\n",
         "relational operators work on strings";
 }
 
 {
-    outputs 'say(!0); say(!1); say(1 || 0); say(0 || 1); say(0 && 1)', "1\n0\n1\n1\n0\n",
+    outputs 'say(!False); say(!True); say(True || False); say(False || True); say(False && True)',
+        "True\nFalse\nTrue\nTrue\nFalse\n",
         "boolean operators give the values expected";
-    outputs 'say(0 && say("foo")); say(1 || say("bar"))', "0\n1\n",
+    outputs 'say(False && say("foo")); say(True || say("bar"))', "False\nTrue\n",
         "boolean operators short-circuit";
-    outputs 'say(1 && 2); say("" && 3); say(0 || None); say([0, 0, 7] || 0)', "2\n\nNone\n[0, 0, 7]\n",
+    outputs 'say(1 && 2); say("" && 3); say(False || None); say([0, 0, 7] || False)', "2\n\nNone\n[0, 0, 7]\n",
         "boolean operators return one of their operands";
 }
 
@@ -399,7 +400,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (array))))))
         .
 
-    is-result $ast, "1\n0\n0\n0\n", "equality testing with none matches itself but nothing else";
+    is-result $ast, "True\nFalse\nFalse\nFalse\n", "equality testing with none matches itself but nothing else";
 }
 
 {
@@ -465,15 +466,7 @@ use _007::Test;
         say(!o.foo);
         .
 
-    outputs $program, "-2\n-7\n-12\n0\n0\n0\n", "all postfixes are tighter than both prefixes";
-}
-
-{
-    my $program = q:to/./;
-        say(!0 * 7);
-        .
-
-    outputs $program, "7\n", "boolean negation is tighter than multiplication";
+    outputs $program, "-2\n-7\n-12\nFalse\nFalse\nFalse\n", "all postfixes are tighter than both prefixes";
 }
 
 {
@@ -522,7 +515,7 @@ use _007::Test;
         say([0] xx 2 :: [7]);
         .
 
-    outputs $program, qq![1]\n[-1]\n[3]\n[-1]\n[30]\n["BB"]\n["Bond"]\n[[0, 0], 7]\n!,
+    outputs $program, qq![True]\n[-1]\n[3]\n[-1]\n[30]\n["BB"]\n["Bond"]\n[[0, 0], 7]\n!,
         "cons is looser than even the additive infixes (+ - ~)";
 }
 
@@ -530,40 +523,28 @@ use _007::Test;
     my $program = q:to/./;
         say(1 == 2 != 3);
         say(4 != 5 == 6);
-
-        say(0 == 1 < 1);
-        say(0 < 2 == 1);
-
-        say(1 < 2 <= 1);
-        say(0 <= 0 < 1);
-
-        say(1 <= 2 >= 2);
-        say(2 >= 2 <= 1);
-
-        say(1 >= 2 > 2);
-        say(2 > 2 >= 1);
         .
 
-    outputs $program, "1\n0\n1\n1\n1\n0\n0\n1\n0\n0\n",
-        "all of the comparison operators evaluate from left to right";
+    outputs $program, "True\nFalse\n",
+        "comparison operators evaluate from left to right";
 }
 
 {
     my $program = q:to/./;
-        say(0 == 0 && 1);
+        say(0 == 0 && "Bond");
         say(2 == 2 && 3 == 3);
         .
 
-    outputs $program, "1\n1\n", "&& binds looser than ==";
+    outputs $program, "Bond\nTrue\n", "&& binds looser than ==";
 }
 
 {
     my $program = q:to/./;
-        say(0 && 1 || 1);
-        say(1 || 0 && 0);
+        say(0 && 1 || "James");
+        say(True || 0 && 0);
         .
 
-    outputs $program, "1\n1\n", "&& binds tighter than ||";
+    outputs $program, "James\nTrue\n", "&& binds tighter than ||";
 }
 
 {
@@ -580,7 +561,7 @@ use _007::Test;
         say(x);
         .
 
-    outputs $program, "0\nfoo\nbar\n", "assignment binds looser than all the other operators";
+    outputs $program, "False\nfoo\nbar\n", "assignment binds looser than all the other operators";
 }
 
 {
@@ -620,7 +601,7 @@ use _007::Test;
         my q = quasi @ Q::Infix { + }; say(q ~~ Q::Infix)
         .
 
-    outputs $program, "1\n", "typecheck returns 1 on success";
+    outputs $program, "True\n", "typecheck returns 1 on success";
 }
 
 {
@@ -628,7 +609,7 @@ use _007::Test;
         my q = quasi @ Q::Infix { + }; say(q ~~ Q::Prefix)
         .
 
-    outputs $program, "0\n", "typecheck returns 0 on failure";
+    outputs $program, "False\n", "typecheck returns 0 on failure";
 }
 
 {
@@ -636,7 +617,7 @@ use _007::Test;
         my q = 42; say(q ~~ Int)
         .
 
-    outputs $program, "1\n", "typecheck works for Val::Int";
+    outputs $program, "True\n", "typecheck works for Val::Int";
 }
 
 {
@@ -644,7 +625,7 @@ use _007::Test;
         my q = [4, 2]; say(q ~~ Array)
         .
 
-    outputs $program, "1\n", "typecheck works for Val::Array";
+    outputs $program, "True\n", "typecheck works for Val::Array";
 }
 
 {
@@ -652,7 +633,7 @@ use _007::Test;
         my q = {}; say(q ~~ Object)
         .
 
-    outputs $program, "1\n", "typecheck works for Val::Object";
+    outputs $program, "True\n", "typecheck works for Val::Object";
 }
 
 {
@@ -667,7 +648,7 @@ use _007::Test;
         say({} !~~ Int);
         .
 
-    outputs $program, "0\n1\n0\n0\n0\n1\n1\n1\n", "bunch of negative typechecks";
+    outputs $program, "False\nTrue\nFalse\nFalse\nFalse\nTrue\nTrue\nTrue\n", "bunch of negative typechecks";
 }
 
 {
@@ -709,11 +690,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say("a" == "a" ~~ Int);
-        say(7 ~~ Int == 1);
+        say("a" == "a" ~~ Bool);
+        say(7 ~~ Int == True);
         .
 
-    outputs $program, "1\n1\n", "infix:<~~> has the tightness of a comparison operator";
+    outputs $program, "True\nTrue\n", "infix:<~~> has the tightness of a comparison operator";
 }
 
 done-testing;

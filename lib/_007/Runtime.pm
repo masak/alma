@@ -321,7 +321,7 @@ class _007::Runtime {
                     unless $substr ~~ Val::Str;
 
                 return Val::Int.new(:value(
-                        $obj.value.contains($substr.value) ?? 1 !! 0;
+                        $obj.value.contains($substr.value);
                 ));
             });
         }
@@ -413,8 +413,8 @@ class _007::Runtime {
                 #      both Q objects, which are still hard-coded into the
                 #      substrate, and the special-cased properties
                 #      <get has extend update id>
-                my $exists = $obj.properties{$prop.value} :exists ?? 1 !! 0;
-                return Val::Int.new(:value($exists));
+                my $value = $obj.properties{$prop.value} :exists;
+                return Val::Bool.new(:$value);
             });
         }
         elsif $propname eq "update" {

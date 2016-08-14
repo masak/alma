@@ -306,7 +306,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "a") (identifier "contains")) (argumentlist (str "8")))))))
         .
 
-    is-result $ast, "1\n0\n", "String.contains() works";
+    is-result $ast, "True\nFalse\n", "String.contains() works";
 }
 
 done-testing;

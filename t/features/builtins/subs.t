@@ -116,7 +116,7 @@ use _007::Test;
 
     outputs
         $program,
-        "1\n",
+        "True\n",
         "int(Val::Int) outputs a Val::Int (regression)";
 }
 
@@ -127,7 +127,7 @@ use _007::Test;
 
     outputs
         $program,
-        "1\n",
+        "True\n",
         "int(Val::Str) outputs a Val::Int (regression)";
 }
 
@@ -138,7 +138,7 @@ use _007::Test;
 
     outputs
         $program,
-        "1\n",
+        "True\n",
         "max(Val::Int, Val::Int) outputs a Val::Int (regression)";
 }
 
