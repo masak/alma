@@ -37,8 +37,7 @@ class _007::OpScope {
         if %precedence<tighter> || %precedence<looser> -> $other-op {
             my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
-            # RAKUDO: @namespace.splice($pos, 0, Precedence.new); [RT #128736]
-            @namespace = |@namespace[^$pos], Precedence.new, |@namespace[$pos..*];
+            @namespace.splice($pos, 0, Precedence.new);
             if $type eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
                 $!prepostfix-boundary++;
             }
@@ -50,9 +49,7 @@ class _007::OpScope {
             $prec.ops{$op} = $q;
         }
         elsif $type eq 'prefix' {
-            # RAKUDO: @namespace.splice($!prepostfix-boundary++, 0, Precedence.new); [RT #128736]
-            @namespace = |@namespace[^$!prepostfix-boundary], Precedence.new, |@namespace[$!prepostfix-boundary..*];
-            $!prepostfix-boundary++;
+            @namespace.splice($!prepostfix-boundary++, 0, Precedence.new);
         }
         else {
             @namespace.push(Precedence.new);
