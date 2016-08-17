@@ -717,7 +717,7 @@ class Q::StatementList does Q {
     }
 }
 
-class Q::Expr::StatementListAdapter does Q {
+class Q::Expr::StatementListAdapter does Q::Expr {
     has $.statementlist;
 
     method eval($runtime) {
