@@ -250,7 +250,10 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
         make Q::Statement::Class.new(:$block);
-        my $val = Val::Type.of(class :: { method ^name($) { $identifier.name.value } });
+        my $val = Val::Type.of(class :: {
+            method attributes { () }
+            method ^name($) { $identifier.name.value }
+        });
         $identifier.put-value($val, $*runtime);
     }
 
