@@ -1,15 +1,28 @@
 #!/usr/bin/env perl6
 use v6;
 use _007;
+use _007::Backend::JavaScript;
+
+class Ref {
+    has Str $.deref;
+}
+
+sub ref($deref) {
+    Ref.new(:$deref);
+}
 
 constant %BACKENDS = hash
-    "default" => { $^runtime.run($^ast) },
+    "default" => ref("runtime"),
     "runtime" => { $^runtime.run($^ast) },
+    "javascript" => -> $ast, $ { print _007::Backend::JavaScript.new.emit($ast) },
+    "js" => ref("javascript"),
 ;
 
-sub run_007($program, Str $backend) {
+sub run_007($program, Str $backend is copy) {
     die "Unknown backend '$backend'"
         unless %BACKENDS{$backend} :exists;
+    $backend = %BACKENDS{$backend}.deref
+        while %BACKENDS{$backend} ~~ Ref;
 
     my $runtime = _007.runtime;
     my $ast = _007.parser(:$runtime).parse($program);

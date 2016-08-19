@@ -1,6 +1,7 @@
 use v6;
 use _007;
 use Test;
+use _007::Backend::JavaScript;
 
 sub read(Str $ast) is export {
     sub n($type, $op) {
@@ -347,6 +348,21 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     }
 
     flunk $desc;
+}
+
+sub emits-js($program, @expected-builtins, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $output = UnwantedOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $parser = _007.parser(:$runtime);
+    my $ast = $parser.parse($program);
+    my $emitted-js = _007::Backend::JavaScript.new.emit($ast);
+    my $actual = $emitted-js ~~ /^^ '(() => { // main program' \n ([\N+ $$]*)/
+        ?? (~$0).indent(*)
+        !! $emitted-js;
+    my @actual-builtins = $emitted-js.comb(/^^ "function " <(<-[(]>+)>/);
+
+    empty-diff @expected-builtins.sort.join("\n"), @actual-builtins.sort.join("\n"), "$desc (builtins)";
+    empty-diff $expected, $actual, $desc;
 }
 
 sub run-and-collect-output($filepath, :$input = $*IN) is export {
