@@ -43,9 +43,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * We're planning to [give the web page a big
   facelift](https://github.com/masak/007/issues/67), including more examples
   and interactive Qtrees. The champion on this one is **masak**.
-    * This will require another parsing-related change: [generating a version
-      of the Qtree output for tools](https://github.com/masak/007/issues/64),
-      so that they can see e.g. macros in their unexpanded form.
     * masak would also like to take this opportunity to tie together some kind
       of doc-comments, automated tests, and documentation on the web page.
 
