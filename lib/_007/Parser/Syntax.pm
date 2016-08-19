@@ -172,7 +172,7 @@ grammar _007::Parser::Syntax {
         return /<!>/(self);
     }
 
-    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
+    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' } # " you are welcome vim
 
     proto token term {*}
     token term:none { None» }

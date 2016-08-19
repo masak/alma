@@ -356,7 +356,7 @@ class _007::Runtime {
                     unless $str ~~ Val::Str;
 
                 return Val::Bool.new($regex-string eq $str.value);
-            }
+            });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
             return builtin(sub fullmatch($str) {
@@ -366,7 +366,7 @@ class _007::Runtime {
                     unless $str ~~ Val::Str;
 
                 return Val::Bool.new($str.value.contains($regex-string));
-            }
+            });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {
             return builtin(sub filter($fn) {
