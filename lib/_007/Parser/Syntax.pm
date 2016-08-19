@@ -182,6 +182,13 @@ grammar _007::Parser::Syntax {
     token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
+    token term:regex {
+        '/' ~ '/'
+        [
+            { check-feature-flag("regex syntax", "REGEX"); }
+            <contents=term:str>
+        ]
+    }
     token term:quasi { quasi <.ws>
         [
             || "@" <.ws> $<qtype>=["Q::Infix"] <.ws> '{' <.ws> <infix> <.ws> '}'

@@ -41,6 +41,10 @@ class X::Associativity::Conflict is Exception {
     method message { "The operator already has a defined associativity" }
 }
 
+class X::Regex::InvalidMatchType is Exception {
+    method message { "A regex can only match strings" }
+}
+
 class X::_007::RuntimeException is Exception {
     has $.msg;
 
@@ -121,6 +125,14 @@ class Q::Identifier does Q::Term {
 
     method put-value($value, $runtime) {
         $runtime.put-var(self, $value);
+    }
+}
+
+class Q::Term::Regex does Q::Term {
+    has Q::Literal::Str $.contents;
+
+    method eval($runtime) {
+        Val::Regex.new(:contents($<contents>.eval($runtime)));
     }
 }
 
