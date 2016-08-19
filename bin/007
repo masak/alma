@@ -2,16 +2,24 @@
 use v6;
 use _007;
 
-sub run_007($program) {
+constant %BACKENDS = hash
+    "default" => { $^runtime.run($^ast) },
+    "runtime" => { $^runtime.run($^ast) },
+;
+
+sub run_007($program, Str $backend) {
+    die "Unknown backend '$backend'"
+        unless %BACKENDS{$backend} :exists;
+
     my $runtime = _007.runtime;
     my $ast = _007.parser(:$runtime).parse($program);
-    $runtime.run($ast);
+    %BACKENDS{$backend}($ast, $runtime);
 }
 
-multi MAIN($path) {
-    run_007(slurp($path));
+multi MAIN($path, Str :$backend = "default") {
+    run_007(slurp($path), $backend);
 }
 
-multi MAIN(Str :e($program)!) {
-    run_007($program);
+multi MAIN(Str :e($program)!, Str :$backend = "default") {
+    run_007($program, $backend);
 }
