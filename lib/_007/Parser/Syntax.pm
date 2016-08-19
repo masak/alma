@@ -186,7 +186,7 @@ grammar _007::Parser::Syntax {
         '/' ~ '/'
         [
             { check-feature-flag("regex syntax", "REGEX"); }
-            <contents=term:str>
+            <contents=str>
         ]
     }
     token term:quasi { quasi <.ws>

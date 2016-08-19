@@ -553,7 +553,7 @@ class _007::Parser::Actions {
     }
 
     method term:regex ($/) {
-        make Q::Term::Regex.new(:contents($<contents>.made));
+        make Q::Term::Regex.new(:contents($<contents>.ast.value));
     }
 
     method term:identifier ($/) {

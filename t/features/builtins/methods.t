@@ -309,5 +309,47 @@ use _007::Test;
     is-result $ast, "True\nFalse\n", "String.contains() works";
 }
 
+{
+    my $program = q:to/./;
+        (statementlist
+          (my (identifier "r") (regex "hey"))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (str "hey"))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (str "hi")))))))
+        .
+
+    is-result $program, "True\nFalse\n", "Regex.fullmatch() works positively and negatively";
+}
+
+{
+    my $program = q:to/./;
+        (statementlist
+          (my (identifier "r") (regex "hey"))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (str "Oh, hey you!"))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (str "Well, hi there.")))))))
+        .
+
+    is-result $program, "True\nFalse\n", "Regex.search() works positively and negatively";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "r") (regex "word"))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (int 3)))))))
+        .
+
+    is-error $ast, X::Regex::InvalidMatchType, "Regex.fullmatch() can only match strings";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "r") (regex "word"))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (int 3)))))))
+        .
+
+    is-error $ast, X::Regex::InvalidMatchType, "Regex.search() can only match strings";
+}
+
 done-testing;
 

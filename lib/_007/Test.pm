@@ -13,6 +13,7 @@ sub read(Str $ast) is export {
         str            => Q::Literal::Str,
         array          => Q::Term::Array,
         object         => Q::Term::Object,
+        regex          => Q::Term::Regex,
         sub            => Q::Term::Sub,
         quasi          => Q::Term::Quasi,
 

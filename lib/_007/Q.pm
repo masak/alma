@@ -129,10 +129,10 @@ class Q::Identifier does Q::Term {
 }
 
 class Q::Term::Regex does Q::Term {
-    has Q::Literal::Str $.contents;
+    has Val::Str $.contents;
 
     method eval($runtime) {
-        Val::Regex.new(:contents($<contents>.eval($runtime)));
+        Val::Regex.new(:contents($.contents));
     }
 }
 
