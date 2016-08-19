@@ -1,14 +1,14 @@
 # Roadmap
 
-007 is conceptually still a v0.x.x product. That is, we make no particular
-guarantees about backwards compatibility yet, as we're heading towards some
-kind of publicly releasable stable condition.
+007 is still a v0.x.x product. We make no particular guarantees about backwards
+compatibility yet, as we're heading towards some kind of publicly releasable
+stable condition.
 
 Most of the forward-looking and thinking happens in the [issue
 queue](https://github.com/masak/007/issues), and that's still the place to go
 to for all the nitty-gritty details about planning and tradeoffs. But the
-picture given by the issue queue is messy, disjointed, and conveys no sense of
-priorities or ordering. That's what this roadmap is for.
+picture given by the issue queue is conveys no sense of priorities or ordering.
+That's what this roadmap is for.
 
 About versions: we (masak and sergot) are still not convinced that 007 *needs*
 versions. We probably won't do releases of any kind. 007 is not really meant to
@@ -18,7 +18,7 @@ milestones and hang important features off of them.
 
 ## Pre-v1.0.0
 
-Work on 007 will probably always fall into two main tracks:
+Work on 007 falls into two main tracks:
 
 * Features that help explore macro-like things (ultimately for Perl 6)
 * Features for 007 the language (ultimately for 007)
