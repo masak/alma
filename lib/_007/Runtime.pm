@@ -348,6 +348,26 @@ class _007::Runtime {
                 return Val::Str.new(:value($s.substr($pos.value, 1)));
             });
         }
+        elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
+            return builtin(sub fullmatch($str) {
+                my $regex-string = $obj.contents.value;
+
+                die X::Regex::InvalidMatchType.new
+                    unless $str ~~ Val::Str;
+
+                return Val::Bool.new(:value($regex-string eq $str.value));
+            });
+        }
+        elsif $obj ~~ Val::Regex && $propname eq "search" {
+            return builtin(sub fullmatch($str) {
+                my $regex-string = $obj.contents.value;
+
+                die X::Regex::InvalidMatchType.new
+                    unless $str ~~ Val::Str;
+
+                return Val::Bool.new(:value($str.value.contains($regex-string)));
+            });
+        }
         elsif $obj ~~ Val::Array && $propname eq "filter" {
             return builtin(sub filter($fn) {
                 my @elements = $obj.elements.grep({ self.call($fn, [$_]).truthy });

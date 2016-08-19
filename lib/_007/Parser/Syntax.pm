@@ -172,7 +172,7 @@ grammar _007::Parser::Syntax {
         return /<!>/(self);
     }
 
-    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
+    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' } # " you are welcome vim
 
     proto token term {*}
     token term:none { None» }
@@ -182,6 +182,13 @@ grammar _007::Parser::Syntax {
     token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
+    token term:regex {
+        '/' ~ '/'
+        [
+            { check-feature-flag("Regex syntax", "REGEX"); }
+            <contents=str>
+        ]
+    }
     token term:quasi { quasi <.ws>
         [
             || "@" <.ws> $<qtype>=["Q::Infix"] <.ws> '{' <.ws> <infix> <.ws> '}'

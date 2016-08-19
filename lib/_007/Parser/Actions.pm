@@ -552,6 +552,10 @@ class _007::Parser::Actions {
         make $<EXPR>.ast;
     }
 
+    method term:regex ($/) {
+        make Q::Term::Regex.new(:contents($<contents>.ast.value));
+    }
+
     method term:identifier ($/) {
         make $<identifier>.ast;
         my $name = $<identifier>.ast.name.value;

@@ -53,6 +53,14 @@ class Val::Str does Val {
     }
 }
 
+class Val::Regex does Val {
+    has Val::Str $.contents;
+
+    method quoted-Str {
+        "/" ~ $.contents.quoted-Str ~ "/"
+    }
+}
+
 class Val::Array does Val {
     has @.elements;
 
@@ -181,6 +189,7 @@ class Helper {
         when Val::Bool { .value.Str }
         when Val::Int { .value.Str }
         when Val::Str { .value }
+        when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
