@@ -59,10 +59,6 @@ class Val::Regex does Val {
     method quoted-Str {
         "/" ~ $.contents.quoted-Str ~ "/"
     }
-
-    method truthy {
-        True
-    }
 }
 
 class Val::Array does Val {

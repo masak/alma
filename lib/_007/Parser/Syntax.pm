@@ -185,7 +185,7 @@ grammar _007::Parser::Syntax {
     token term:regex {
         '/' ~ '/'
         [
-            { check-feature-flag("regex syntax", "REGEX"); }
+            { check-feature-flag("Regex syntax", "REGEX"); }
             <contents=str>
         ]
     }

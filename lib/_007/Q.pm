@@ -132,7 +132,7 @@ class Q::Term::Regex does Q::Term {
     has Val::Str $.contents;
 
     method eval($runtime) {
-        Val::Regex.new(:contents($.contents));
+        Val::Regex.new(:$.contents);
     }
 }
 

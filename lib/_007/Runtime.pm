@@ -350,7 +350,6 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
-                #dd $obj, $str;
                 my $regex-string = $obj.contents.value;
 
                 die X::Regex::InvalidMatchType.new
