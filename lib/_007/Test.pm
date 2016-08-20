@@ -356,7 +356,7 @@ sub emits-js($program, @expected-builtins, $expected, $desc = "MISSING TEST DESC
     my $parser = _007.parser(:$runtime);
     my $ast = $parser.parse($program);
     my $emitted-js = _007::Backend::JavaScript.new.emit($ast);
-    my $actual = $emitted-js ~~ /^^ '(() => { // main program' \n ([\N+ $$]*)/
+    my $actual = $emitted-js ~~ /^^ '(() => { // main program' \n ([<!before '})();'> \N+ [\n|$$]]*)/
         ?? (~$0).indent(*)
         !! $emitted-js;
     my @actual-builtins = $emitted-js.comb(/^^ "function " <(<-[(]>+)>/);
