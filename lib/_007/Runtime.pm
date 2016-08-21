@@ -359,7 +359,7 @@ class _007::Runtime {
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
-            return builtin(sub fullmatch($str) {
+            return builtin(sub search($str) {
                 my $regex-string = $obj.contents.value;
 
                 die X::Regex::InvalidMatchType.new
