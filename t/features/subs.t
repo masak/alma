@@ -273,4 +273,12 @@ use _007::Test;
     outputs $program, "1\n2\n3\n4\n", "each sub invocation gets its own callframe/scope";
 }
 
+{
+    my $program = q:to/./;
+        say(sub () {});
+        .
+
+    outputs $program, "<sub ()>\n", "an anonymous sub stringifies without a name";
+}
+
 done-testing;

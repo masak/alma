@@ -198,7 +198,7 @@ my Runtime = {
                 return array.elements.map(eval);
             },
             Q::Term::Sub(term) {
-                my name = term.identifier && term.identifier.name || "(anon)";
+                my name = term.identifier && term.identifier.name || "";
                 return new Sub {
                     name,
                     parameterlist: term.block.parameterlist,
