@@ -16,6 +16,7 @@ constant %BACKENDS = hash
     "runtime" => { $^runtime.run($^ast) },
     "javascript" => -> $ast, $ { print _007::Backend::JavaScript.new.emit($ast) },
     "js" => ref("javascript"),
+    "ast" => -> $ast, $ { say ~$ast },
 ;
 
 sub run_007($program, Str $backend is copy) {
