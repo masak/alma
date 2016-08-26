@@ -180,7 +180,7 @@ class _007::Parser::Actions {
                 if %precedence{$trait1} && %precedence{$trait2};
         }
 
-        $*parser.oplevel.install($type, $op, :%precedence, :$assoc);
+        $*parser.opscope.install($type, $op, :%precedence, :$assoc);
     }
 
     method statement:sub-or-macro ($/) {
@@ -302,20 +302,20 @@ class _007::Parser::Actions {
             $op.identifier.name.value.subst(/^ \w+ ":"/, "");
         }
 
-        sub tighter($op1, $op2, $_ = $*parser.oplevel.infixprec) {
+        sub tighter($op1, $op2, $_ = $*parser.opscope.infixprec) {
             .first(*.contains(name($op1)), :k) > .first(*.contains(name($op2)), :k);
         }
 
-        sub equal($op1, $op2, $_ = $*parser.oplevel.infixprec) {
+        sub equal($op1, $op2, $_ = $*parser.opscope.infixprec) {
             .first(*.contains(name($op1)), :k) == .first(*.contains(name($op2)), :k);
         }
 
         sub left-associative($op) {
-            return $*parser.oplevel.infixprec.first(*.contains(name($op))).assoc eq "left";
+            return $*parser.opscope.infixprec.first(*.contains(name($op))).assoc eq "left";
         }
 
         sub non-associative($op) {
-            return $*parser.oplevel.infixprec.first(*.contains(name($op))).assoc eq "non";
+            return $*parser.opscope.infixprec.first(*.contains(name($op))).assoc eq "non";
         }
 
         my @opstack;
@@ -379,20 +379,20 @@ class _007::Parser::Actions {
             $op.identifier.name.value.subst(/^ \w+ ":"/, "");
         }
 
-        sub tighter($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
+        sub tighter($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {
             .first(*.contains(name($op1)), :k) > .first(*.contains(name($op2)), :k);
         }
 
-        sub equal($op1, $op2, $_ = $*parser.oplevel.prepostfixprec) {
+        sub equal($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {
             .first(*.contains(name($op1)), :k) == .first(*.contains(name($op2)), :k);
         }
 
         sub left-associative($op) {
-            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op))).assoc eq "left";
+            return $*parser.opscope.prepostfixprec.first(*.contains(name($op))).assoc eq "left";
         }
 
         sub non-associative($op) {
-            return $*parser.oplevel.prepostfixprec.first(*.contains(name($op))).assoc eq "non";
+            return $*parser.opscope.prepostfixprec.first(*.contains(name($op))).assoc eq "non";
         }
 
         make $<term>.ast;
@@ -507,7 +507,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("prefix:$op"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
+        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
     }
 
     method prefix-unquote($/) {
@@ -709,7 +709,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("infix:$op"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.oplevel.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
+        make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
     }
 
     method infix-unquote($/) {
@@ -747,7 +747,7 @@ class _007::Parser::Actions {
             make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(NONE));
         }
         else {
-            make $*parser.oplevel.ops<postfix>{$op}.new(:$identifier, :operand(NONE));
+            make $*parser.opscope.ops<postfix>{$op}.new(:$identifier, :operand(NONE));
         }
     }
 

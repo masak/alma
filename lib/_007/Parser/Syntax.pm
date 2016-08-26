@@ -17,7 +17,7 @@ grammar _007::Parser::Syntax {
     }
 
     token newpad { <?> {
-        $*parser.push-oplevel;
+        $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
         my $block = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
@@ -28,7 +28,7 @@ grammar _007::Parser::Syntax {
 
     token finishpad { <?> {
         @*declstack.pop;
-        $*parser.pop-oplevel;
+        $*parser.pop-opscope;
     } }
 
     rule statementlist {
@@ -165,7 +165,7 @@ grammar _007::Parser::Syntax {
     token termish { [<prefix> | <prefix=prefix-unquote>]* [<term>|<term=unquote>] <postfix>* }
 
     method prefix {
-        my @ops = $*parser.oplevel.ops<prefix>.keys;
+        my @ops = $*parser.opscope.ops<prefix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("prefix");
         }
@@ -272,7 +272,7 @@ grammar _007::Parser::Syntax {
     token property:identifier { <identifier> }
 
     method infix {
-        my @ops = $*parser.oplevel.ops<infix>.keys;
+        my @ops = $*parser.opscope.ops<infix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("infix");
         }
@@ -299,7 +299,7 @@ grammar _007::Parser::Syntax {
             return $cur."!reduce"("postfix");
         }
 
-        my @ops = $*parser.oplevel.ops<postfix>.keys;
+        my @ops = $*parser.opscope.ops<postfix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
