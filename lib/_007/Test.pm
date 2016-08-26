@@ -169,7 +169,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($my.identifier);
 
-        if $my.expr !~~ Val::None {
+        if $my.expr !~~ Val::NoneType {
             handle($my.expr);
         }
     }

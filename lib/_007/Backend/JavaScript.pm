@@ -52,7 +52,7 @@ class _007::Backend::JavaScript {
 
         multi emit-stmt(Q::Statement::My $stmt) {
             my $name = $stmt.identifier.name.value;
-            if $stmt.expr !=== NONE {
+            if $stmt.expr !~~ NONE {
                 die "Cannot handle non-literal-Int rhs just yet!"
                         unless $stmt.expr ~~ Q::Literal::Int;
                 my $expr = $stmt.expr.value.Str;

@@ -127,7 +127,7 @@ class _007::Linter {
                 my $name = $my.identifier.name;
                 my $ref = "{@blocks[*-1].WHICH.Str}|$name";
                 %declared{$ref} = L::VariableNotUsed;
-                if $my.expr !~~ Val::None {
+                if $my.expr !~~ NONE {
                     traverse($my.expr);
                     %assigned{$ref} = True;
                     if $my.expr ~~ Q::Identifier && $my.expr.name eq $name {

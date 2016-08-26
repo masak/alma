@@ -38,7 +38,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "n")))))))
         .
 
-    is-result $ast, "<type None>\n", "none type() works";
+    is-result $ast, "<type NoneType>\n", "none type() works";
 }
 
 {

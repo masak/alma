@@ -17,13 +17,13 @@ role Val {
     }
 }
 
-class Val::None does Val {
+class Val::NoneType does Val {
     method truthy {
         False
     }
 }
 
-constant NONE is export = Val::None.new;
+constant NONE is export = Val::NoneType.new;
 
 class Val::Bool does Val {
     has Bool $.value;
@@ -185,7 +185,7 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::None { "None" }
+        when Val::NoneType { "None" }
         when Val::Bool { .value.Str }
         when Val::Int { .value.Str }
         when Val::Str { .value }

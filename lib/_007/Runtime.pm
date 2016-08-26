@@ -97,7 +97,7 @@ class _007::Runtime {
 
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ Val::None
+        my $frame = $identifier.frame ~~ Val::NoneType
             ?? self.current-frame
             !! $identifier.frame;
         my $pad = self!find-pad($name, $frame);
@@ -117,7 +117,7 @@ class _007::Runtime {
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my Val::Object $frame = $identifier.frame ~~ Val::None
+        my Val::Object $frame = $identifier.frame ~~ Val::NoneType
             ?? self.current-frame
             !! $identifier.frame;
         $frame.properties<pad>.properties{$name} = $value // NONE;

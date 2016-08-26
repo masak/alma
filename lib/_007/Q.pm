@@ -119,7 +119,7 @@ class Q::Identifier does Q::Term {
     method eval($runtime) {
         return $runtime.get-var(
             $.name.value,
-            $.frame ~~ Val::None ?? $runtime.current-frame !! $.frame
+            $.frame ~~ Val::NoneType ?? $runtime.current-frame !! $.frame
         );
     }
 
@@ -191,7 +191,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
     method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
-        my $name = $.identifier ~~ Val::None
+        my $name = $.identifier ~~ Val::NoneType
             ?? Val::Str.new(:value(""))
             !! $.identifier.name;
         return Val::Sub.new(
@@ -306,7 +306,7 @@ class Q::Infix::Or is Q::Infix {
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return $l !~~ Val::None
+        return $l !~~ Val::NoneType
             ?? $l
             !! $.rhs.eval($runtime);
     }
@@ -528,7 +528,7 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
 
     method run($runtime) {
         return
-            unless $.expr !~~ Val::None;
+            unless $.expr !~~ Val::NoneType;
         my $value = $.expr.eval($runtime);
         $.identifier.put-value($value, $runtime);
     }
@@ -577,7 +577,6 @@ class Q::Statement::If does Q::Statement {
         }
         else {
             given $.else {
-                when Val::None { }
                 when Q::Statement::If {
                     $.else.run($runtime)
                 }
@@ -660,7 +659,7 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
+        my $value = $.expr ~~ Val::NoneType ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -670,7 +669,7 @@ class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::None
+        my $value = $.expr ~~ Val::NoneType
             ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
