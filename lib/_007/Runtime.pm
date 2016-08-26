@@ -139,11 +139,11 @@ class _007::Runtime {
 
     method load-builtins {
         my $opscope = $!builtin-opscope;
-        for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :value($subval)) {
+        for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :$value) {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(NONE));
-            self.declare-var($identifier, $subval);
+            self.declare-var($identifier, $value);
         }
     }
 
