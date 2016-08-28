@@ -17,6 +17,7 @@ constant %BACKENDS = hash
     "javascript" => -> $ast, $ { print _007::Backend::JavaScript.new.emit($ast) },
     "js" => ref("javascript"),
     "ast" => -> $ast, $ { say ~$ast },
+    "unexpanded-ast" => -> $ast, $ { say ~$ast },
 ;
 
 sub run_007($program, Str $backend is copy) {
@@ -26,7 +27,8 @@ sub run_007($program, Str $backend is copy) {
         while %BACKENDS{$backend} ~~ Ref;
 
     my $runtime = _007.runtime;
-    my $ast = _007.parser(:$runtime).parse($program);
+    my $unexpanded = $backend eq "unexpanded-ast";
+    my $ast = _007.parser(:$runtime).parse($program, :$unexpanded);
     %BACKENDS{$backend}($ast, $runtime);
 }
 
