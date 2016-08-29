@@ -1,17 +1,5 @@
 use _007::Q;
-
-class _007::Precedence {
-    has Str $.assoc;
-    has %.ops;
-
-    method contains($op) {
-        %.ops{$op}:exists;
-    }
-
-    method clone {
-        self.new(:$.assoc, :%.ops);
-    }
-}
+use _007::Precedence;
 
 class _007::OpScope {
     has %.ops =

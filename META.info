@@ -13,6 +13,7 @@
         "_007::Parser" : "lib/_007/Parser.pm",
         "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm",
         "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm",
+        "_007::Precedence" : "lib/_007/Precedence.pm",
         "_007::Q" : "lib/_007/Q.pm",
         "_007::Runtime" : "lib/_007/Runtime.pm",
         "_007::Runtime::Builtins" : "lib/_007/Runtime/Builtins.pm",
