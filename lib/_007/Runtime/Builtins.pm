@@ -102,8 +102,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     my @builtins =
         say => -> $arg {
-            my $string = $arg ~~ Val::Array ?? &str($arg).Str !! ~$arg;
-            $output.print($string ~ "\n");
+            $output.print($arg ~ "\n");
             Nil;
         },
         prompt => sub ($arg) {
