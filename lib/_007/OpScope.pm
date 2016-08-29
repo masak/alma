@@ -1,5 +1,18 @@
 use _007::Q;
 
+class _007::Precedence {
+    has Str $.assoc;
+    has %.ops;
+
+    method contains($op) {
+        %.ops{$op}:exists;
+    }
+
+    method clone {
+        self.new(:$.assoc, :%.ops);
+    }
+}
+
 class _007::OpScope {
     has %.ops =
         prefix => {},
@@ -20,24 +33,15 @@ class _007::OpScope {
             postfix => Q::Postfix.new(:$identifier),
         }{$type};
 
-        my class Precedence {
-            has $.assoc = $assoc // "left";
-            has %.ops = $op => $q;
-
-            method contains($op) {
-                %.ops{$op}:exists;
-            }
-
-            method clone {
-                self.new(:$.assoc, :%.ops);
-            }
+        sub prec {
+            _007::Precedence.new(:assoc($assoc // "left"), :ops($op => $q));
         }
 
         my @namespace := $type eq 'infix' ?? @!infixprec !! @!prepostfixprec;
         if %precedence<tighter> || %precedence<looser> -> $other-op {
             my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
-            @namespace.splice($pos, 0, Precedence.new);
+            @namespace.splice($pos, 0, prec);
             if $type eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
                 $!prepostfix-boundary++;
             }
@@ -49,10 +53,10 @@ class _007::OpScope {
             $prec.ops{$op} = $q;
         }
         elsif $type eq 'prefix' {
-            @namespace.splice($!prepostfix-boundary++, 0, Precedence.new);
+            @namespace.splice($!prepostfix-boundary++, 0, prec);
         }
         else {
-            @namespace.push(Precedence.new);
+            @namespace.push(prec);
         }
     }
 
