@@ -70,6 +70,3 @@ class _007::OpScope {
         return $opl;
     }
 }
-
-
-
