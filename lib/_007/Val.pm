@@ -49,6 +49,12 @@ role Val {
 ###     say(str(None));     # --> `"None"`
 ###     say(int(None));     # <ERROR>
 ###
+### Since `None` is often used as a default, there's an operator `infix:<//>`
+### that evaluates its right-hand side if it finds `None` on the left:
+###
+###     say(None // "default");     # --> `default`
+###     say("value" // "default");  # --> `value`
+###
 class Val::NoneType does Val {
     method truthy {
         False
