@@ -56,6 +56,11 @@ class X::_007::RuntimeException is Exception {
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
+### ### Q
+###
+### An program element; anything that forms a node in the syntax tree
+### representing a program.
+###
 role Q {
     method Str {
         my %*stringification-seen;
@@ -79,37 +84,81 @@ role Q {
     }
 }
 
+### ### Q::Expr
+###
+### An expression; something that can be evaluated to a value.
+###
 role Q::Expr does Q {
+    method eval($runtime) { ... }
 }
 
+### ### Q::Term
+###
+### A term; a unit of parsing describing a value or an identifier. Along with
+### operators, what makes up expressions.
+###
 role Q::Term does Q::Expr {
 }
 
+### ### Q::Literal
+###
+### A literal; a constant value written out explicitly in the program, such as
+### `None`, `True`, `5`, or `"James Bond"`.
+###
+### Compound values such as arrays and objects are considered terms but not
+### literals.
+###
 role Q::Literal does Q::Term {
 }
 
+### ### Q::Literal::None
+###
+### The `None` literal.
+###
 class Q::Literal::None does Q::Literal {
     method eval($) { NONE }
 }
 
+### ### Q::Literal::Bool
+###
+### A boolean literal; either `True` or `False`.
+###
 class Q::Literal::Bool does Q::Literal {
     has Val::Bool $.value;
 
     method eval($) { $.value }
 }
 
+### ### Q::Literal::Int
+###
+### An integer literal; a non-negative number.
+###
+### Negative numbers are not themselves considered integer literals: something
+### like `-5` is parsed as a `prefix:<->` containing a literal `5`.
+###
 class Q::Literal::Int does Q::Literal {
     has Val::Int $.value;
 
     method eval($) { $.value }
 }
 
+### ### Q::Literal::Str
+###
+### A string literal.
+###
 class Q::Literal::Str does Q::Literal {
     has Val::Str $.value;
 
     method eval($) { $.value }
 }
 
+### ### Q::Identifier
+###
+### An identifier; a name which identifies a storage location in the program.
+###
+### Identifiers are subject to *scoping*: the same name can point to different
+### storage locations because they belong to different scopes.
+###
 class Q::Identifier does Q::Term {
     has Val::Str $.name;
     has $.frame = NONE;
@@ -125,6 +174,10 @@ class Q::Identifier does Q::Term {
     }
 }
 
+### ### Q::Term::Regex
+###
+### A regular expression (*regex*).
+###
 class Q::Term::Regex does Q::Term {
     has Val::Str $.contents;
 
@@ -133,6 +186,11 @@ class Q::Term::Regex does Q::Term {
     }
 }
 
+### ### Q::Term::Array
+###
+### An array. Array terms consist of zero or more *elements*, each of which
+### can be an arbitrary expression.
+###
 class Q::Term::Array does Q::Term {
     has Val::Array $.elements;
 
@@ -141,6 +199,11 @@ class Q::Term::Array does Q::Term {
     }
 }
 
+### ### Q::Term::Object
+###
+### An object. Object terms consist of an optional *type*, and a property list
+### with zero or more key/value pairs.
+###
 class Q::Term::Object does Q::Term {
     has Q::Identifier $.type;
     has $.propertylist;
@@ -152,19 +215,38 @@ class Q::Term::Object does Q::Term {
     }
 }
 
+### ### Q::Property
+###
+### An object property. Properties have a key and a value.
+###
 class Q::Property does Q {
     has Val::Str $.key;
     has $.value;
 }
 
+### ### Q::PropertyList
+###
+### A property list in an object. Property lists have zero or more key/value
+### pairs. Keys in objects are considered unordered, but a property list has
+### a specified order: the order the properties occur in the program text.
+###
 class Q::PropertyList does Q {
     has Val::Array $.properties .= new;
 }
 
+### ### Q::Declaration
+###
+### A declaration; something that introduces a name.
+###
 role Q::Declaration {
     method is-assignable { False }
 }
 
+### ### Q::Trait
+###
+### A trait; a piece of metadata for a routine. A trait consists of an
+### identifier and an expression.
+###
 class Q::Trait does Q {
     has $.identifier;
     has $.expr;
@@ -172,12 +254,20 @@ class Q::Trait does Q {
     method attribute-order { <identifier expr> }
 }
 
+### ### Q::TraitList
+###
+### A list of zero or more traits. Each routine has a traitlist.
+###
 class Q::TraitList does Q {
     has Val::Array $.traits .= new;
 
     method attribute-order { <traits> }
 }
 
+### ### Q::Term::Sub
+###
+### A subroutine.
+###
 class Q::Term::Sub does Q::Term does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
@@ -199,6 +289,16 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
     }
 }
 
+### ### Q::Block
+###
+### A block. Blocks are used in a number of places: by routines, by
+### block statements, by other compound statements (such as `if` statements)
+### and by `quasi` terms and sub terms. Blocks are not, however, terms
+### in their own regard.
+###
+### A block has a parameter list and a statement list, each of which can
+### be empty.
+###
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
@@ -207,6 +307,11 @@ class Q::Block does Q {
     method attribute-order { <parameterlist statementlist> }
 }
 
+### ### Q::Prefix
+###
+### A prefix operator; an operator that occurs before a term, like the
+### `-` in `-5`.
+###
 class Q::Prefix does Q::Expr {
     has $.identifier;
     has $.operand;
@@ -220,18 +325,48 @@ class Q::Prefix does Q::Expr {
     }
 }
 
+### ### Q::Prefix::Str
+###
+### A stringification operator.
+###
 class Q::Prefix::Str is Q::Prefix {}
 
+### ### Q::Prefix::Plus
+###
+### A numification operator.
+###
 class Q::Prefix::Plus is Q::Prefix {}
 
+### ### Q::Prefix::Minus
+###
+### A numeric negation operator.
+###
 class Q::Prefix::Minus is Q::Prefix {}
 
+### ### Q::Prefix::So
+###
+### A boolification operator.
+###
 class Q::Prefix::So is Q::Prefix {}
 
+### ### Q::Prefix::Not
+###
+### A boolean negation operator.
+###
 class Q::Prefix::Not is Q::Prefix {}
 
+### ### Q::Prefix::Upto
+###
+### An "upto" operator; applied to a number `n` it produces an array
+### of values `[0, 1, ..., n-1]`.
+###
 class Q::Prefix::Upto is Q::Prefix {}
 
+### ### Q::Infix
+###
+### An infix operator; something like the `+` in `2 + 2` that occurs between
+### two terms.
+###
 class Q::Infix does Q::Expr {
     has $.identifier;
     has $.lhs;
@@ -247,24 +382,71 @@ class Q::Infix does Q::Expr {
     }
 }
 
+### ### Q::Infix::Addition
+###
+### A numeric addition operator.
+###
 class Q::Infix::Addition is Q::Infix {}
 
+### ### Q::Infix::Addition
+###
+### A numeric subtraction operator.
+###
 class Q::Infix::Subtraction is Q::Infix {}
 
+### ### Q::Infix::Multiplication
+###
+### A numeric multiplication operator.
+###
 class Q::Infix::Multiplication is Q::Infix {}
 
+### ### Q::Infix::Modulo
+###
+### A numeric modulo operator; produces the *remainder* left from an integer
+### division between two numbers. For example, `456 % 100` is `56` because the
+### remainder from dividing `456` by `100` is `56`.
+###
 class Q::Infix::Modulo is Q::Infix {}
 
+### ### Q::Infix::Divisibility
+###
+### A divisibility test operator. Returns `True` exactly when the remainder
+### operator would return `0`.
+###
 class Q::Infix::Divisibility is Q::Infix {}
 
+### ### Q::Infix::Concat
+###
+### A string concatenation operator. Returns a single string that is the
+### result of sequentially putting two strings together.
+###
 class Q::Infix::Concat is Q::Infix {}
 
+### ### Q::Infix::Replicate
+###
+### A string replication operator. Returns a string which consists of `n`
+### copies of a string.
+###
 class Q::Infix::Replicate is Q::Infix {}
 
+### ### Q::Infix::ArrayReplicate
+###
+### An array replication operator. Returns an array which consists of
+### the original array's elements, repeated `n` times.
+###
 class Q::Infix::ArrayReplicate is Q::Infix {}
 
+### ### Q::Infix::Cons
+###
+### A "cons" operator. Given a value and an array, returns a new
+### array with the value added as the first element.
+###
 class Q::Infix::Cons is Q::Infix {}
 
+### ### Q::Infix::Assignment
+###
+### An assignment operator. Puts a value in a storage location.
+###
 class Q::Infix::Assignment is Q::Infix {
     method eval($runtime) {
         my $value = $.rhs.eval($runtime);
@@ -273,18 +455,47 @@ class Q::Infix::Assignment is Q::Infix {
     }
 }
 
+### ### Q::Infix::Eq
+###
+### An equality test operator.
+###
 class Q::Infix::Eq is Q::Infix {}
 
+### ### Q::Infix::Ne
+###
+### An inequality test operator.
+###
 class Q::Infix::Ne is Q::Infix {}
 
+### ### Q::Infix::Gt
+###
+### A greater-than test operator.
+###
 class Q::Infix::Gt is Q::Infix {}
 
+### ### Q::Infix::Lt
+###
+### A less-than test operator.
+###
 class Q::Infix::Lt is Q::Infix {}
 
+### ### Q::Infix::Ge
+###
+### A greater-than-or-equal test operator.
+###
 class Q::Infix::Ge is Q::Infix {}
 
+### ### Q::Infix::Le
+###
+### A less-than-or-equal test operator.
+###
 class Q::Infix::Le is Q::Infix {}
 
+### ### Q::Infix::Or
+###
+### A short-circuiting disjunction operator; evaluates its right-hand
+### side only if the left-hand side is falsy.
+###
 class Q::Infix::Or is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
@@ -294,6 +505,11 @@ class Q::Infix::Or is Q::Infix {
     }
 }
 
+### ### Q::Infix::DefinedOr
+###
+### A short-circuiting "defined-or" operator. Evaluates its
+### right-hand side only if the left-hand side is `None`.
+###
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
@@ -303,6 +519,11 @@ class Q::Infix::DefinedOr is Q::Infix {
     }
 }
 
+### ### Q::Infix::And
+###
+### A short-circuiting "and" operator. Evaluates its
+### right-hand side only if the left-hand side is truthy.
+###
 class Q::Infix::And is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
@@ -312,10 +533,25 @@ class Q::Infix::And is Q::Infix {
     }
 }
 
+### ### Q::Infix::TypeMatch
+###
+### A type match operator. Checks if a value on the left-hand side has
+### the type on the right-hand side, including subtypes.
+###
 class Q::Infix::TypeMatch is Q::Infix {}
 
+### ### Q::Infix::TypeNonMatch
+###
+### A negative type match operator. Returns `True` exactly in the cases
+### a type match would return `False`.
+###
 class Q::Infix::TypeNonMatch is Q::Infix {}
 
+### ### Q::Postfix
+###
+### A postfix operator; something like the `[0]` in `agents[0]` that occurs
+### after a term.
+###
 class Q::Postfix does Q::Expr {
     has $.identifier;
     has $.operand;
@@ -329,6 +565,11 @@ class Q::Postfix does Q::Expr {
     }
 }
 
+### ### Q::Postfix::Index
+###
+### An indexing operator; returns an array element or object property.
+### Arrays expect integer indices and objects expect string property names.
+###
 class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
@@ -381,6 +622,10 @@ class Q::Postfix::Index is Q::Postfix {
     }
 }
 
+### ### Q::Postfix::Call
+###
+### An invocation operator; calls a routine.
+###
 class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
@@ -397,6 +642,10 @@ class Q::Postfix::Call is Q::Postfix {
     }
 }
 
+### ### Q::Postfix::Property
+###
+### An object property operator; fetches a property out of an object.
+###
 class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
@@ -419,6 +668,10 @@ class Q::Postfix::Property is Q::Postfix {
     }
 }
 
+### ### Q::Unquote
+###
+### An unquote; allows Qtree fragments to be inserted into places in a quasi.
+###
 class Q::Unquote does Q {
     has $.qtype;
     has $.expr;
@@ -428,15 +681,34 @@ class Q::Unquote does Q {
     }
 }
 
+### ### Q::Unquote::Prefix
+###
+### An unquote which is a prefix operator.
+###
 class Q::Unquote::Prefix is Q::Unquote {
     has $.operand;
 }
 
+### ### Q::Unquote::Infix
+###
+### An unquote which is an infix operator.
+###
 class Q::Unquote::Infix is Q::Unquote {
     has $.lhs;
     has $.rhs;
 }
 
+### ### Q::Term::Quasi
+###
+### A quasi; a piece of 007 code which evaluates to that code's Qtree
+### representation. A way to "quote" code in a program instead of running
+### it directly in place. Used together with macros.
+###
+### The term "quasi" comes from the fact that inside the quoted code there
+### can be parametric holes ("unquotes") where Qtree fragments can be
+### inserted. Quasiquotation is the practice of combining literal code
+### fragments with such parametric holes.
+###
 class Q::Term::Quasi does Q::Term {
     has $.qtype;
     has $.contents;
@@ -491,23 +763,44 @@ class Q::Term::Quasi does Q::Term {
     }
 }
 
+### ### Q::Parameter
+###
+### A parameter. Any identifier that's declared as the input to a block
+### is a parameter, including subs, macros, and `if` statements.
+###
 class Q::Parameter does Q does Q::Declaration {
     has $.identifier;
 
     method is-assignable { True }
 }
 
+### ### Q::ParameterList
+###
+### A list of zero or more parameters.
+###
 class Q::ParameterList does Q {
     has Val::Array $.parameters .= new;
 }
 
+### ### Q::ArgumentList
+###
+### A list of zero or more arguments.
+###
 class Q::ArgumentList does Q {
     has Val::Array $.arguments .= new;
 }
 
+### ### Q::Statement
+###
+### A statement.
+###
 role Q::Statement does Q {
 }
 
+### ### Q::Statement::My
+###
+### A `my` variable declaration statement.
+###
 class Q::Statement::My does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.expr = NONE;
@@ -524,6 +817,10 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
     }
 }
 
+### ### Q::Statement::Constant
+###
+### A `constant` declaration statement.
+###
 class Q::Statement::Constant does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.expr;
@@ -535,6 +832,10 @@ class Q::Statement::Constant does Q::Statement does Q::Declaration {
     }
 }
 
+### ### Q::Statement::Expr
+###
+### A statement consisting of an expression.
+###
 class Q::Statement::Expr does Q::Statement {
     has $.expr;
 
@@ -543,6 +844,10 @@ class Q::Statement::Expr does Q::Statement {
     }
 }
 
+### ### Q::Statement::If
+###
+### An `if` statement.
+###
 class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
@@ -579,6 +884,10 @@ class Q::Statement::If does Q::Statement {
     }
 }
 
+### ### Q::Statement::Block
+###
+### A block statement.
+###
 class Q::Statement::Block does Q::Statement {
     has $.block;
 
@@ -589,9 +898,18 @@ class Q::Statement::Block does Q::Statement {
     }
 }
 
+### ### Q::CompUnit
+###
+### A block-level statement representing a whole compilation unit.
+### We can read "compilation unit" here as meaning "file".
+###
 class Q::CompUnit is Q::Statement::Block {
 }
 
+### ### Q::Statement::For
+###
+### A `for` loop statement.
+###
 class Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
@@ -619,6 +937,10 @@ class Q::Statement::For does Q::Statement {
     }
 }
 
+### ### Q::Statement::While
+###
+### A `while` loop statement.
+###
 class Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
@@ -641,6 +963,10 @@ class Q::Statement::While does Q::Statement {
     }
 }
 
+### ### Q::Statement::Return
+###
+### A `return` statement.
+###
 class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
@@ -651,6 +977,10 @@ class Q::Statement::Return does Q::Statement {
     }
 }
 
+### ### Q::Statement::Throw
+###
+### A `throw` statement.
+###
 class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
@@ -665,6 +995,10 @@ class Q::Statement::Throw does Q::Statement {
     }
 }
 
+### ### Q::Statement::Sub
+###
+### A subroutine declaration statement.
+###
 class Q::Statement::Sub does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
@@ -676,6 +1010,10 @@ class Q::Statement::Sub does Q::Statement does Q::Declaration {
     }
 }
 
+### ### Q::Statement::Macro
+###
+### A macro declaration statement.
+###
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
@@ -687,6 +1025,10 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
     }
 }
 
+### ### Q::Statement::BEGIN
+###
+### A `BEGIN` block statement.
+###
 class Q::Statement::BEGIN does Q::Statement {
     has $.block;
 
@@ -695,6 +1037,10 @@ class Q::Statement::BEGIN does Q::Statement {
     }
 }
 
+### ### Q::Statement::Class
+###
+### A class declaration statement.
+###
 class Q::Statement::Class does Q::Statement does Q::Declaration {
     has $.block;
 
@@ -703,6 +1049,13 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
     }
 }
 
+### ### Q::StatementList
+###
+### A list of zero or more statements. Statement lists commonly occur
+### directly inside blocks (or at the top level of the program, on the
+### compunit level). However, it's also possible for a `quasi` to
+### denote a statement list without any surrounding block.
+###
 class Q::StatementList does Q {
     has Val::Array $.statements .= new;
 
@@ -716,6 +1069,20 @@ class Q::StatementList does Q {
     }
 }
 
+### ### Q::Expr::StatementListAdapter
+###
+### An expression which holds a statement list. Surprisingly, this never
+### happens in the source code text itself; because of 007's grammar, an
+### expression can never consist of a list of statements.
+###
+### However, it can happen as a macro call (an expression) expands into
+### a statement list; that's when this Qtype is used.
+###
+### Semantically, the contained statement list is executed normally, and
+### if execution evaluates the last statement and the statement turns out
+### to have a value (because it's an expression statement), then this
+### value is the value of the whole containing expression.
+###
 class Q::Expr::StatementListAdapter does Q::Expr {
     has $.statementlist;
 
