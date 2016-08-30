@@ -10,7 +10,7 @@ class _007::OpScope {
 
     has @.infixprec;
     has @.prepostfixprec;
-    has $!prepostfix-boundary = 0;
+    has $.prepostfix-boundary = 0;
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));

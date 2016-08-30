@@ -504,4 +504,42 @@ use _007::Test;
     outputs $program, "James\n", "can declare an operator with a backslash in the name";
 }
 
+{
+    my $program = q:to/./;
+        sub postfix:<‡>(x) is looser(prefix:<^>) {
+            return [];
+        }
+
+        sub prefix:<$>(x) {
+            return x.elems();
+        }
+
+        say($^5‡);
+        .
+
+    outputs $program, "[]\n", "Prepostfix boundaries are respected";
+}
+
+{
+    my $program = q:to/./;
+        sub prefix:<&>(x) {
+            return x ~ " prefix:<&>";
+        }
+
+        sub postfix:<‡>(x) is looser(prefix:<&>) {
+            return x ~ " postfix:<‡>";
+        }
+
+        {
+            sub prefix:<$>(x) {
+                return x ~ " prefix:<$>";
+            }
+
+            say($&"application order:"‡);
+        }
+        .
+
+    outputs $program, "application order: prefix:<&> prefix:<\$> postfix:<‡>\n", "Prepostfix boundaries are respected, #2";
+}
+
 done-testing;
