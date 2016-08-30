@@ -17,6 +17,38 @@ role Val {
     }
 }
 
+### ### NoneType
+###
+### A type with only one value, indicating the lack of a value where one was
+### expected.
+###
+### It is the value variables have that haven't been assigned to:
+###
+###     my empty;
+###     say(empty);         # --> `None`
+###
+### It is also the value returned from a subroutine that didn't explicitly
+### return a value:
+###
+###     sub noreturn() {
+###     }
+###     say(noreturn());    # --> `None`
+###
+### Finally, it's found in various places in the Q hierarchy to indicate that
+### a certain child element is not present. For example, a `my` declaration
+### can have an assignment attached to it, in which case its `expr` property
+### is a `Q::Expr` &mdash; but if no assignment is present, the `expr`
+### property is the value `None`.
+###
+###     say(type((quasi { my x = 2; }).expr));  # --> `<type Q::Expr>`
+###     say(type((quasi { my x; }).expr));      # --> `<type NoneType>`
+###
+### The value `None` is falsy, stringifies to `"None"`, and doesn't numify.
+###
+###     say(!!None);        # --> `False`
+###     say(str(None));     # --> `"None"`
+###     say(int(None));     # <ERROR>
+###
 class Val::NoneType does Val {
     method truthy {
         False
