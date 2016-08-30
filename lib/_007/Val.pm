@@ -57,6 +57,49 @@ class Val::NoneType does Val {
 
 constant NONE is export = Val::NoneType.new;
 
+### ### Bool
+###
+### A type with two values, `True` and `False`. These are often the result
+### of comparisons or match operations, such as `infix:<==>` or `infix:<~~>`.
+###
+###     say(2 + 2 == 5);        # --> `False`
+###     say(7 ~~ Int);          # --> `True`
+###
+### In 007 as in many other dynamic languages, it's not necessary to use
+### `True` or `False` values directly in conditions such as `if` statements
+### or `while` loops. *Any* value can be used, and there's always a way
+### for each type to convert any of its values to a boolean value:
+###
+###     sub check(value) {
+###         if value {
+###             say("truthy");
+###         }
+###         else {
+###             say("falsy");
+###         }
+###     }
+###     check(None);            # --> `falsy`
+###     check(False);           # --> `falsy`
+###     check(0);               # --> `falsy`
+###     check("");              # --> `falsy`
+###     check([]);              # --> `falsy`
+###     check({});              # --> `falsy`
+###     # all other values are truthy
+###     check(True);            # ---> `truthy`
+###     check(42);              # ---> `truthy`
+###     check("James");         # ---> `truthy`
+###     check([0, 0, 7]);       # ---> `truthy`
+###     check({ name: "Jim" }); # ---> `truthy`
+###
+### Similarly, when applying the `infix:<||>` and `infix:<&&>` macros to
+### some expressions, the result isn't coerced to a boolean value, but
+### instead the last value that needed to be evaluated is returned as-is:
+###
+###     say(1 || 2);            # ---> `1`
+###     say(1 && 2);            # ---> `2`
+###     say(None && "!");       # ---> `None`
+###     say(None || "!");       # ---> `!`
+###
 class Val::Bool does Val {
     has Bool $.value;
 
