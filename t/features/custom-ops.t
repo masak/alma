@@ -353,7 +353,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        sub postfix:<‡>(term) {
+        sub postfix:<!>(term) {
             return "postfix is looser";
         }
 
@@ -365,7 +365,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        say(?[]‡);
+        say(?[]!);
         say(%[]$);
         .
 
