@@ -601,7 +601,7 @@ use _007::Test;
         my q = quasi @ Q::Infix { + }; say(q ~~ Q::Infix)
         .
 
-    outputs $program, "True\n", "typecheck returns 1 on success";
+    outputs $program, "True\n", "successful typecheck";
 }
 
 {
@@ -609,7 +609,7 @@ use _007::Test;
         my q = quasi @ Q::Infix { + }; say(q ~~ Q::Prefix)
         .
 
-    outputs $program, "False\n", "typecheck returns 0 on failure";
+    outputs $program, "False\n", "unsuccessful typecheck";
 }
 
 {
