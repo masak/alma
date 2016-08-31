@@ -91,15 +91,6 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (postfix:() (identifier "str") (argumentlist (int 6)))))))))
-        .
-
-    is-result $ast, "<type Str>\n", "str() works";
-}
-
-{
     my $program = q:to/./;
         say( +7 ~~ Int );
         .

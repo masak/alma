@@ -2,8 +2,6 @@ use _007::Val;
 use _007::Q;
 
 sub builtins(:$input!, :$output!, :$opscope!) is export {
-    sub str($_) { Val::Str.new(:value(.Str)) }
-
     sub wrap($_) {
         when Val | Q { $_ }
         when Nil  { NONE }
@@ -111,7 +109,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             return wrap($input.get());
         },
         type => -> $arg { Val::Type.of($arg.WHAT) },
-        str => &str,
         min => -> $a, $b { wrap(min($a.value, $b.value)) },
         max => -> $a, $b { wrap(max($a.value, $b.value)) },
 
@@ -307,6 +304,12 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
 
         # prefixes
+        'prefix:~' => op(
+            sub prefix-str($expr) {
+                Val::Str.new(:value($expr.Str));
+            },
+            :qtype(Q::Prefix::Str),
+        ),
         'prefix:+' => op(
             sub prefix-plus($_) {
                 when Val::Str {

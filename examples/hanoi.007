@@ -29,7 +29,7 @@ sub show() {
 
 sub move(diskname, from, to) {
     say("");
-    say("Moving " ~ diskname ~ " from pile " ~ str(from + 1) ~ " to pile " ~ str(to + 1) ~ "...");
+    say("Moving " ~ diskname ~ " from pile " ~ ~(from + 1) ~ " to pile " ~ ~(to + 1) ~ "...");
     say("");
     my disk = state[from].pop();
     state[to].push(disk);

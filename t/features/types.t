@@ -40,11 +40,11 @@ use _007::Test;
 }
 
 {
-    outputs 'say(str([1, 2, "foo"]))', qq|[1, 2, "foo"]\n|,
+    outputs 'say(~[1, 2, "foo"])', qq|[1, 2, "foo"]\n|,
         "strings inside arrays get quoted (#6)";
 
     outputs 'say([1, 2, "foo"])', qq|[1, 2, "foo"]\n|,
-        "...and it works even without explicit str() coercion (#6)";
+        "...and it works even without explicit prefix:<~> coercion (#6)";
 
     outputs qq|say(["'\\"\\\\"])|, qq|["'\\"\\\\"]\n|,
         "double quotes and backslashes are escaped properly in strings in arrays (#6)";

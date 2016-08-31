@@ -715,4 +715,13 @@ use _007::Test;
     is-result $ast, "<type Int>\n<type Int>\n", "prefix:<+> works";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:~ (int 6))))))))
+        .
+
+    is-result $ast, "<type Str>\n", "prefix:<~> works";
+}
+
 done-testing;

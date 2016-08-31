@@ -23,7 +23,7 @@ sub quicksort(array) {
 }
 
 my unsorted = (^20).shuffle();
-say("Unsorted: " ~ str(unsorted));
+say("Unsorted: " ~ ~unsorted);
 say("Sorting...");
 my sorted = quicksort(unsorted);
-say("Sorted: " ~ str(sorted));
+say("Sorted: " ~ ~sorted);

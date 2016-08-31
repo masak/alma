@@ -235,6 +235,8 @@ class Q::Prefix does Q::Expr {
     }
 }
 
+class Q::Prefix::Str is Q::Prefix {}
+
 class Q::Prefix::Plus is Q::Prefix {}
 
 class Q::Prefix::Minus is Q::Prefix {}
