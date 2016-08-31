@@ -520,4 +520,26 @@ use _007::Test;
     outputs $program, "[]\n", "Prepostfix boundaries are respected";
 }
 
+{
+    my $program = q:to/./;
+        sub prefix:<&>(x) {
+            return x ~ " prefix:<&>";
+        }
+
+        sub postfix:<‡>(x) is looser(prefix:<&>) {
+            return x ~ " postfix:<‡>";
+        }
+
+        {
+            sub prefix:<$>(x) {
+                return x ~ " prefix:<$>";
+            }
+
+            say($&"application order:"‡);
+        }
+        .
+
+    outputs $program, "application order: prefix:<&> prefix:<\$> postfix:<‡>\n", "Prepostfix boundaries are respected, #2";
+}
+
 done-testing;
