@@ -153,11 +153,11 @@ class _007::Parser::Actions {
                     unless $identifier ~~ Q::Identifier;
                 sub check-if-op($s) {
                     die "Unknown thing in '$name' trait"
-                        unless $s ~~ /< pre in post > 'fix:' (<-[>]>+)/;
-                    %precedence{$name} = ~$0;
+                        unless $s ~~ /^ < pre in post > 'fix:' /;
                     die X::Precedence::Incompatible.new
                         if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
                         || $type eq 'infix' && $s ~~ /^ < pre post >/;
+                    %precedence{$name} = $s;
                 }($identifier.name);
             }
             elsif $name eq "assoc" {
@@ -299,7 +299,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.identifier.name.value.subst(/^ \w+ ":"/, "");
+            $op.identifier.name.value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.infixprec) {
@@ -376,7 +376,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.identifier.name.value.subst(/^ \w+ ":"/, "");
+            $op.identifier.name.value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {

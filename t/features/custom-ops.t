@@ -542,4 +542,28 @@ use _007::Test;
     outputs $program, "application order: prefix:<&> prefix:<\$> postfix:<‡>\n", "Prepostfix boundaries are respected, #2";
 }
 
+{
+    my $program = q:to/./;
+        sub postfix:<&>(x) {
+            return 1;
+        }
+
+        sub prefix:<&>(x) {
+            return 2;
+        }
+
+        sub prefix:<@>(x) {
+            return 3;
+        }
+
+        # "I'm reminded of the day my daughter came in, looked over my
+        # shoulder at some Perl 4 code, and said, 'What is that, swearing?'"
+        #                                   -- Larry Wall, Usenet article
+        say(@0&);
+        .
+
+    outputs $program, "3\n",
+        "a postfix is looser than a prefix, even when it has a prefix of the same name (#190)";
+}
+
 done-testing;

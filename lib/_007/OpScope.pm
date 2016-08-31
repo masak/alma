@@ -13,7 +13,8 @@ class _007::OpScope {
     has $.prepostfix-boundary = 0;
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
-        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
+        my $name = "$type:$op";
+        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
             prefix => Q::Prefix.new(:$identifier),
@@ -22,7 +23,7 @@ class _007::OpScope {
         }{$type};
 
         sub prec {
-            _007::Precedence.new(:assoc($assoc // "left"), :ops($op => $q));
+            _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
         my @namespace := $type eq 'infix' ?? @!infixprec !! @!prepostfixprec;
@@ -38,7 +39,7 @@ class _007::OpScope {
             my $prec = @namespace.first(*.contains($other-op));
             die X::Associativity::Conflict.new
                 if $assoc !=== Any && $assoc ne $prec.assoc;
-            $prec.ops{$op} = $q;
+            $prec.ops{$name} = $q;
         }
         elsif $type eq 'prefix' {
             @namespace.splice($!prepostfix-boundary++, 0, prec);

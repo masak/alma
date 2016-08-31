@@ -124,7 +124,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'infix://' => macro-op(
             :qtype(Q::Infix::DefinedOr),
-            :precedence{ equal => "||" },
+            :precedence{ equal => "infix:||" },
         ),
 
         # conjunctive precedence
@@ -146,14 +146,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap(!equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ne),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:<' => op(
             sub ($lhs, $rhs) {
                 return wrap(less-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Lt),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:<=' => op(
             sub ($lhs, $rhs) {
@@ -161,14 +161,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Le),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:>' => op(
             sub ($lhs, $rhs) {
                 return wrap(more-value($lhs, $rhs) )
             },
             :qtype(Q::Infix::Gt),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:>=' => op(
             sub ($lhs, $rhs) {
@@ -176,7 +176,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ge),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:~~' => op(
             sub ($lhs, $rhs) {
@@ -186,7 +186,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap($lhs ~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeMatch),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
         'infix:!~~' => op(
             sub ($lhs, $rhs) {
@@ -196,7 +196,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap($lhs !~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeNonMatch),
-            :precedence{ equal => "==" },
+            :precedence{ equal => "infix:==" },
         ),
 
         # cons precedence
@@ -230,7 +230,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap($lhs.value ~ $rhs.value);
             },
             :qtype(Q::Infix::Concat),
-            :precedence{ equal => "+" },
+            :precedence{ equal => "infix:+" },
         ),
         'infix:-' => op(
             sub ($lhs, $rhs) {
@@ -287,7 +287,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap($lhs.value x $rhs.value);
             },
             :qtype(Q::Infix::Replicate),
-            :precedence{ equal => "*" },
+            :precedence{ equal => "infix:*" },
         ),
         'infix:xx' => op(
             sub ($lhs, $rhs) {
@@ -298,7 +298,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 return wrap(| $lhs.elements xx $rhs.value);
             },
             :qtype(Q::Infix::ArrayReplicate),
-            :precedence{ equal => "*" },
+            :precedence{ equal => "infix:*" },
         ),
 
         # prefixes
