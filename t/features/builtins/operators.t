@@ -361,7 +361,7 @@ use _007::Test;
         "distinct subs are unequal";
     outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "False\n",
         "distinct macros are unequal";
-    outputs 'say(say == min)', "False\n", "distinct built-in subs are unequal";
+    outputs 'say(say == type)', "False\n", "distinct built-in subs are unequal";
     outputs 'say(infix:<+> == prefix:<->)', "False\n",
         "distinct built-in operators are unequal";
     outputs 'sub foo(y) {}; my x = foo; { sub foo(x) {}; say(x == foo) }', "False\n",

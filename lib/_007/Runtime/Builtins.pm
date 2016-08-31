@@ -109,8 +109,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             return wrap($input.get());
         },
         type => -> $arg { Val::Type.of($arg.WHAT) },
-        min => -> $a, $b { wrap(min($a.value, $b.value)) },
-        max => -> $a, $b { wrap(max($a.value, $b.value)) },
 
         # OPERATORS (from loosest to tightest within each category)
 

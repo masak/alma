@@ -26,8 +26,13 @@ macro format(fmt, args) {
 
         my index = +input.substr(openBracePos + 1, closeBracePos - 1);
 
-        return max(index, findHighestIndex(
-            input.suffix(openBracePos + closeBracePos + 1)));
+        my h = findHighestIndex(input.suffix(openBracePos + closeBracePos + 1));
+        if h > index {
+            return h;
+        }
+        else {
+            return index;
+        }
     }
 
     if fmt ~~ Q::Literal::Str && args ~~ Q::Term::Array {
