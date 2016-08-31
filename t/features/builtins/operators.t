@@ -724,4 +724,26 @@ use _007::Test;
     is-result $ast, "<type Str>\n", "prefix:<~> works";
 }
 
+{
+    my $program = q:to/./;
+        say( +7 ~~ Int );
+        .
+
+    outputs
+        $program,
+        "True\n",
+        "+Val::Int outputs a Val::Int (regression)";
+}
+
+{
+    my $program = q:to/./;
+        say( +"007" ~~ Int );
+        .
+
+    outputs
+        $program,
+        "True\n",
+        "+Val::Str outputs a Val::Int (regression)";
+}
+
 done-testing;

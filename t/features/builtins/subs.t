@@ -92,28 +92,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say( +7 ~~ Int );
-        .
-
-    outputs
-        $program,
-        "True\n",
-        "+Val::Int outputs a Val::Int (regression)";
-}
-
-{
-    my $program = q:to/./;
-        say( +"007" ~~ Int );
-        .
-
-    outputs
-        $program,
-        "True\n",
-        "+Val::Str outputs a Val::Int (regression)";
-}
-
-{
-    my $program = q:to/./;
         say( max(1, 2) ~~ Int );
         .
 
