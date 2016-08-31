@@ -566,4 +566,17 @@ use _007::Test;
         "a postfix is looser than a prefix, even when it has a prefix of the same name (#190)";
 }
 
+{
+    my $program = q:to/./;
+        sub infix:«->»(lhs, rhs) {
+            return "Bond";
+        }
+
+        say(1 -> 2);
+        .
+
+    outputs $program, "Bond\n",
+        "defining infix:«->» correctly installs a -> operator (#175)";
+}
+
 done-testing;
