@@ -697,4 +697,12 @@ use _007::Test;
     outputs $program, "True\nTrue\n", "infix:<~~> has the tightness of a comparison operator";
 }
 
+{
+    my $program = q:to/./;
+        say(-"42");
+        .
+
+    outputs $program, "-42\n", "the prefix negation operator also numifies strings";
+}
+
 done-testing;

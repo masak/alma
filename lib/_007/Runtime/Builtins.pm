@@ -322,10 +322,19 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
         # prefixes
         'prefix:-' => op(
-            sub ($expr) {
-                die X::TypeCheck.new(:operation<->, :got($expr), :expected(Val::Int))
-                    unless $expr ~~ Val::Int;
-                return wrap(-$expr.value);
+            sub prefix-minus($_) {
+                when Val::Str {
+                    return wrap(-.value.Int)
+                        if .value ~~ /^ '-'? \d+ $/;
+                    proceed;
+                }
+                when Val::Int {
+                    return wrap(-.value);
+                }
+                die X::TypeCheck.new(
+                    :operation("prefix:<->"),
+                    :got($_),
+                    :expected(Val::Int));
             },
             :qtype(Q::Prefix::Minus),
         ),
