@@ -487,7 +487,7 @@ class _007::Parser::Actions {
             else {
                 my $prefix = @prefixes[0].ast;
                 my $postfix = @postfixes[0].ast;
-                die X::Op::Nonassociative.new(:op1($prefix.identifier.name.value), :op2($postfix.identifier.name.value))
+                die X::Op::Nonassociative.new(:op1(name($prefix)), :op2(name($postfix)))
                     if equal($prefix, $postfix) && non-associative($prefix);
                 if tighter($prefix, $postfix)
                     || equal($prefix, $postfix) && left-associative($prefix) {
