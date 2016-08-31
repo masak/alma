@@ -24,7 +24,7 @@ macro format(fmt, args) {
             return -1;
         }
 
-        my index = int(input.substr(openBracePos + 1, closeBracePos - 1));
+        my index = +input.substr(openBracePos + 1, closeBracePos - 1);
 
         return max(index, findHighestIndex(
             input.suffix(openBracePos + closeBracePos + 1)));
@@ -41,7 +41,7 @@ macro format(fmt, args) {
 
     return quasi {
         replaceAll({{{fmt}}}, "", sub transform(arg) {
-            return {{{args}}}[int(arg)];
+            return {{{args}}}[+arg];
         });
     }
 }

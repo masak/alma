@@ -705,4 +705,14 @@ use _007::Test;
     outputs $program, "-42\n", "the prefix negation operator also numifies strings";
 }
 
+{
+     my $ast = q:to/./;
+         (statementlist
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:+ (str "6")))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:+ (str "-6"))))))))
+        .
+
+    is-result $ast, "<type Int>\n<type Int>\n", "prefix:<+> works";
+}
+
 done-testing;

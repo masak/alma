@@ -112,20 +112,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         },
         type => -> $arg { Val::Type.of($arg.WHAT) },
         str => &str,
-        int => sub ($_) {
-            when Val::Str {
-                return wrap(.value.Int)
-                    if .value ~~ /^ '-'? \d+ $/;
-                proceed;
-            }
-            when Val::Int {
-                return $_;
-            }
-            die X::TypeCheck.new(
-                :operation<int()>,
-                :got($_),
-                :expected(Val::Int));
-        },
         min => -> $a, $b { wrap(min($a.value, $b.value)) },
         max => -> $a, $b { wrap(max($a.value, $b.value)) },
 
@@ -321,6 +307,23 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
 
         # prefixes
+        'prefix:+' => op(
+            sub prefix-plus($_) {
+                when Val::Str {
+                    return wrap(.value.Int)
+                        if .value ~~ /^ '-'? \d+ $/;
+                    proceed;
+                }
+                when Val::Int {
+                    return $_;
+                }
+                die X::TypeCheck.new(
+                    :operation("prefix:<+>"),
+                    :got($_),
+                    :expected(Val::Int));
+            },
+            :qtype(Q::Prefix::Plus),
+        ),
         'prefix:-' => op(
             sub prefix-minus($_) {
                 when Val::Str {
