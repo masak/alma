@@ -1,4 +1,3 @@
-Val::Int
 Val::Str
 Val::Regex
 Val::Array

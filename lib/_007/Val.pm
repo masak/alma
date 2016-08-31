@@ -114,6 +114,13 @@ class Val::Bool does Val {
     }
 }
 
+### ### Int
+###
+### An whole number value, such as -8, 0, or 16384.
+###
+### Implementations are required to represent `Int` values either as 32-bit
+### or as arbitrary-precision.
+###
 class Val::Int does Val {
     has Int $.value;
 
