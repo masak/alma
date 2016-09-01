@@ -47,7 +47,7 @@ role Val {
 ###
 ###     say(!!None);        # --> `False`
 ###     say(str(None));     # --> `None`
-###     say(int(None));     # <ERROR>
+###     say(int(None));     # <ERROR X::TypeCheck>
 ###
 ### Since `None` is often used as a default, there's an operator `infix:<//>`
 ### that evaluates its right-hand side if it finds `None` on the left:
