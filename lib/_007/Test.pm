@@ -324,6 +324,28 @@ sub parse-error($program, $expected-error, $desc = $expected-error.^name) is exp
     flunk $desc;
 }
 
+sub runtime-error($program, $expected-error, $desc = $expected-error.^name) is export {
+    my $output = StrOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $parser = _007.parser(:$runtime);
+    my $ast = $parser.parse($program);
+    {
+        $runtime.run($ast);
+
+        CATCH {
+            when $expected-error {
+                pass $desc;
+            }
+            default {
+                is .^name, $expected-error.^name, $desc;   # which we know will flunk
+                return;
+            }
+        }
+
+        is "no error", $expected-error.^name, $desc;
+    }
+}
+
 sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);

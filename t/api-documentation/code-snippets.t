@@ -3,27 +3,30 @@ use Test;
 use _007::Test;
 
 for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
-    my $code;
-    my $result;
-
+    my ($n, $topic, @snippet-lines);
     for $file.IO.lines -> $line {
-        if $line ~~ /^ \h* '###' ' ' ** 5 (.+) / {
+        if $line ~~ /^ \h* '### ### ' (.+) / {  # a heading
+            $topic = ~$0;
+        }
+        elsif $line ~~ /^ \h* '###' ' ' ** 5 (.+) / {  # a code snippet
+            my $snippet-line = ~$0;
+            @snippet-lines.push($snippet-line);
 
-            my $c = ~$0;
-            if $c ~~ / \h* '`' (<-[`]>*) '`' $/ {
-                $result = ~$0;
-            }
-            $code ~= $c;
+            my $snippet = @snippet-lines.join("\n");
+            sub desc { "{$topic}:{++$n}" }
 
-            if $result {
-                outputs $code, $result ~ "\n", $code;
-                
-                $code = '';
-                $result = '';
+            if $snippet-line ~~ / '#' \h+ '-->' \h* '`' (<-[`]>*) '`' $/ { # a result line
+                my $expected = $0;
+                outputs $snippet, $expected ~ "\n", "[$topic] $snippet-line";
+                @snippet-lines.pop;
             }
-            else {
-                $code ~= "\n";
+            elsif $snippet-line ~~ / '#' \h+ '<ERROR>' / { # an expect-error line
+                runtime-error $snippet, X::TypeCheck, "[$topic] $snippet-line";
+                @snippet-lines.pop;
             }
+        }
+        else {
+            @snippet-lines = ();
         }
     }
 }
