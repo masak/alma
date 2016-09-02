@@ -210,8 +210,8 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::Term::Quasi"] <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Trait"] <.ws> '{' <.ws> <trait> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::TraitList"] <.ws> '{' <.ws> <traitlist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::Statement"] <.ws> '{' <.ws> <statement><.eat_terminator> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::StatementList"] <.ws> '{' <.ws> <statementlist> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::Statement"] <.ws> <block>
+            || "@" <.ws> $<qtype>=["Q::StatementList"] <.ws> <block>
             || "@" <.ws> $<qtype>=["Q::Parameter"] <.ws> '{' <.ws> <parameter> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::ParameterList"] <.ws> '{' <.ws> <parameterlist> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::ArgumentList"] <.ws> '{' <.ws> <argumentlist> <.ws> '}'

@@ -579,7 +579,6 @@ class _007::Parser::Actions {
         my $qtype = Val::Str.new(:value(~($<qtype> // "")));
 
         if $<block> -> $block {
-
             # If the quasi consists of a block with a single expression statement, it's very
             # likely that what we want to inject is the expression, not the block.
             #
@@ -590,7 +589,18 @@ class _007::Parser::Actions {
             # to the troubled musings in <https://github.com/masak/007/issues/7>, which aren't
             # completely solved yet.
 
-            if $qtype.value ne "Q::Block"
+            if $qtype.value eq "Q::Statement" {
+                # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
+                my $contents = $block.ast.statementlist.statements.elements[0];
+                make Q::Term::Quasi.new(:$contents, :$qtype);
+                return;
+            }
+            elsif $qtype.value eq "Q::StatementList" {
+                my $contents = $block.ast.statementlist;
+                make Q::Term::Quasi.new(:$contents, :$qtype);
+                return;
+            }
+            elsif $qtype.value ne "Q::Block"
                 && $block.ast ~~ Q::Block
                 && $block.ast.statementlist.statements.elements.elems == 1
                 && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
@@ -606,7 +616,8 @@ class _007::Parser::Actions {
             term trait traitlist unquote> -> $subrule {
 
             if $/{$subrule} -> $submatch {
-                make Q::Term::Quasi.new(:contents($submatch.ast), :$qtype);
+                my $contents = $submatch.ast;
+                make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
         }

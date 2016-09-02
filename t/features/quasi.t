@@ -312,4 +312,23 @@ use _007::Test;
     outputs $program, "<type Q::Unquote>\n", "quasi @ Q::Unquote";
 }
 
+{
+    my $program = q:to/./;
+        my q1 = quasi @ Q::Statement { my x; };
+        my q2 = quasi @ Q::Statement { my x; };
+        say("alive");
+        .
+
+    outputs $program, "alive\n", "Q::Statement quasis don't leak (I)";
+}
+
+{
+    my $program = q:to/./;
+        my q1 = quasi @ Q::Statement { my x; };
+        say(x);
+        .
+
+    parse-error $program, X::Undeclared, "Q::Statement quasis don't leak (II)";
+}
+
 done-testing;
