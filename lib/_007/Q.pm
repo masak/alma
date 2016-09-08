@@ -149,7 +149,7 @@ class Q::Term::Object does Q::Term {
     has $.propertylist;
 
     method eval($runtime) {
-        return $runtime.get-var($.type.name.value).create(
+        return $runtime.get-var($.type.name.value, $.type.frame).create(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
         );
     }

@@ -12,14 +12,16 @@ class _007::Runtime {
     has $.output;
     has @!frames;
     has $.builtin-opscope;
+    has $.builtin-frame;
 
     submethod BUILD(:$!input, :$!output) {
-        my $setting = Val::Block.new(
+        my $builtin-block = Val::Block.new(
             :parameterlist(Q::ParameterList.new),
             :statementlist(Q::StatementList.new),
             :static-lexpad(Val::Object.new),
             :outer-frame(NO_OUTER));
-        self.enter($setting);
+        self.enter($builtin-block);
+        $!builtin-frame = @!frames[*-1];
         $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
     }
@@ -86,6 +88,9 @@ class _007::Runtime {
     }
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
+        if $frame ~~ Val::NoneType {    # XXX: make a `defined` method on NoneType so we can use `//`
+            $frame = self.current-frame;
+        }
         repeat until $frame === NO_OUTER {
             return $frame.properties<pad>
                 if $frame.properties<pad>.properties{$symbol} :exists;

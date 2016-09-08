@@ -38,4 +38,19 @@ ensure-feature-flag("CLASS");
     outputs $program, "<type C>\n", "can create a new instance of the class";
 }
 
+{
+    my $program = q:to/./;
+        constant Builtin::Object = Object;
+        {
+            class Object {
+            }
+
+            say({} ~~ Builtin::Object);
+            say({} ~~ Object);
+        }
+        .
+
+    outputs $program, "True\nFalse\n", "the `\{\}` syntax uses the built-in Object, even when overridden";
+}
+
 done-testing;
