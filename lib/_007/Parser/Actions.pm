@@ -651,8 +651,8 @@ class _007::Parser::Actions {
         make Q::Unquote.new(:expr($<EXPR>.ast));
     }
 
-    method term:object ($/) {
-        my $type = ~($<identifier> // "Object");
+    method term:new-object ($/) {
+        my $type = $<identifier>.Str;
         my $type-obj = $*runtime.get-var($type).type;
 
         if $type-obj !=== Val::Object {
@@ -675,6 +675,15 @@ class _007::Parser::Actions {
 
         make Q::Term::Object.new(
             :type(Q::Identifier.new(:name(Val::Str.new(:value($type))))),
+            :propertylist($<propertylist>.ast));
+    }
+
+    method term:object ($/) {
+        my $type = "Object";
+        my $name = Val::Str.new(:value($type));
+
+        make Q::Term::Object.new(
+            :type(Q::Identifier.new(:$name)),
             :propertylist($<propertylist>.ast));
     }
 

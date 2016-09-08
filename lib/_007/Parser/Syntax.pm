@@ -221,10 +221,12 @@ grammar _007::Parser::Syntax {
             || <.panic("quasi")>
         ]
     }
+    token term:new-object {
+        new» <.ws>
+        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>
+        '{' ~ '}' <propertylist>
+    }
     token term:object {
-        [new» <.ws>
-            <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>
-        ]?
         '{' ~ '}' <propertylist>
     }
     token term:identifier {
