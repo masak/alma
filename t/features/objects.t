@@ -227,20 +227,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my o1 = { name: "James" };
-        my o2 = new { name: "James" };
-
-        say(o1 == o2);
-        .
-
-    outputs
-        $program,
-        qq[True\n],
-        "`new` on object literals without the type is allowed but optional";
-}
-
-{
-    my $program = q:to/./;
         f();
         my o = { say };
         sub f() { say("Mr. Bond") }
