@@ -117,10 +117,7 @@ class Q::Identifier does Q::Term {
     method attribute-order { <name> }
 
     method eval($runtime) {
-        return $runtime.get-var(
-            $.name.value,
-            $.frame ~~ Val::NoneType ?? $runtime.current-frame !! $.frame
-        );
+        return $runtime.get-var($.name.value, $.frame);
     }
 
     method put-value($value, $runtime) {
