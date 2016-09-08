@@ -652,7 +652,7 @@ class _007::Parser::Actions {
     }
 
     method term:new-object ($/) {
-        my $type = $<identifier>.Str;
+        my $type = $<identifier>.ast.name.value;
         my $type-obj = $*runtime.get-var($type).type;
 
         if $type-obj !=== Val::Object {
