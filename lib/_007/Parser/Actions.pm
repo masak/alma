@@ -681,9 +681,10 @@ class _007::Parser::Actions {
     method term:object ($/) {
         my $type = "Object";
         my $name = Val::Str.new(:value($type));
+        my $frame = $*runtime.builtin-frame;
 
         make Q::Term::Object.new(
-            :type(Q::Identifier.new(:$name)),
+            :type(Q::Identifier.new(:$name, :$frame)),
             :propertylist($<propertylist>.ast));
     }
 
