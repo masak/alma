@@ -1,5 +1,6 @@
 use _007::Q;
 use _007::Parser::Syntax;
+use MONKEY-SEE-NO-EVAL;
 
 class X::String::Newline is Exception {
     method message { "Found a newline inside a string literal" }
@@ -250,10 +251,10 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
         make Q::Statement::Class.new(:$block);
-        my $val = Val::Type.of(class :: {
-            method attributes { () }
-            method ^name($) { $identifier.name.value }
-        });
+        my $val = Val::Type.of(EVAL qq[class :: \{
+            method attributes \{ () \}
+            method ^name(\$) \{ "{$identifier.name.value}" \}
+        \}]);
         $identifier.put-value($val, $*runtime);
     }
 

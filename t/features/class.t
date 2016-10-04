@@ -53,4 +53,38 @@ ensure-feature-flag("CLASS");
     outputs $program, "True\nFalse\n", "the `\{\}` syntax uses the built-in Object, even when overridden";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            class C {
+            }
+
+            return quasi {
+                new C {}
+            }
+        }
+
+        class C {
+        }
+
+        say(moo() ~~ C);
+        .
+
+    outputs $program, "False\n", "lookup stays hygienic even when a `new C \{\}` is expanded";
+}
+
+{
+    my $program = q:to/./;
+        class C {
+        }
+
+        class D {
+        }
+
+        say(new D {} ~~ C);
+        .
+
+    outputs $program, "False\n", "two different classes are not type compatible";
+}
+
 done-testing;
