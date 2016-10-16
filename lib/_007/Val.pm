@@ -37,7 +37,7 @@ role Val {
 ### Finally, it's found in various places in the Q hierarchy to indicate that
 ### a certain child element is not present. For example, a `my` declaration
 ### can have an assignment attached to it, in which case its `expr` property
-### is a `Q::Literal::Int` &mdash; but if no assignment is present, the `expr`
+### is a `Q::Expr` &mdash; but if no assignment is present, the `expr`
 ### property is the value `None`.
 ###
 ###     say(type((quasi @ Q::Statement { my x = 2 }).expr)); # --> `<type Q::Literal::Int>`
