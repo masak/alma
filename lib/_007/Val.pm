@@ -91,20 +91,20 @@ constant NONE is export = Val::NoneType.new;
 ###     check([]);              # --> `falsy`
 ###     check({});              # --> `falsy`
 ###     # all other values are truthy
-###     check(True);            # ---> `truthy`
-###     check(42);              # ---> `truthy`
-###     check("James");         # ---> `truthy`
-###     check([0, 0, 7]);       # ---> `truthy`
-###     check({ name: "Jim" }); # ---> `truthy`
+###     check(True);            # --> `truthy`
+###     check(42);              # --> `truthy`
+###     check("James");         # --> `truthy`
+###     check([0, 0, 7]);       # --> `truthy`
+###     check({ name: "Jim" }); # --> `truthy`
 ###
 ### Similarly, when applying the `infix:<||>` and `infix:<&&>` macros to
 ### some expressions, the result isn't coerced to a boolean value, but
 ### instead the last value that needed to be evaluated is returned as-is:
 ###
-###     say(1 || 2);            # ---> `1`
-###     say(1 && 2);            # ---> `2`
-###     say(None && "!");       # ---> `None`
-###     say(None || "!");       # ---> `!`
+###     say(1 || 2);            # --> `1`
+###     say(1 && 2);            # --> `2`
+###     say(None && "!");       # --> `None`
+###     say(None || "!");       # --> `!`
 ###
 class Val::Bool does Val {
     has Bool $.value;
