@@ -187,6 +187,21 @@ class Val::Str does Val {
     }
 }
 
+### ### Regex
+###
+### A regex. As a runtime value, a regex is like a black box that can be put
+### to work matching strings or parts of strings. Its main purpose is
+### to let us know whether the string matches the pattern described in the
+### regex. In other words, it returns `True` or `False`.
+###
+### (Regexes are currently under development, and are hidden behind a feature
+### flag for the time being: `FLAG_007_REGEX`.)
+###
+### A few methods are defined on regexes:
+###
+###     say(/"Bond"/.fullmatch("J. Bond"));     # --> `False`
+###     say(/"Bond"/.search("J. Bond"));        # --> `True`
+###
 class Val::Regex does Val {
     has Val::Str $.contents;
 

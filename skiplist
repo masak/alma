@@ -1,4 +1,3 @@
-Val::Regex
 Val::Array
 Val::Object
 Val::Type
