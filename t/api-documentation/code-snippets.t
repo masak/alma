@@ -4,7 +4,9 @@ use _007::Test;
 
 for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
     my ($topic, @snippet-lines);
+    my $line-number = 0;
     for $file.IO.lines -> $line {
+        ++$line-number;
         if $line ~~ /^ \h* '### ### ' (.+) / {  # a heading
             $topic = ~$0;
         }
@@ -14,8 +16,12 @@ for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
 
             my $snippet = @snippet-lines.join("\n");
 
-            if $snippet-line ~~ / '#' \h+ '-->' \h* '`' (<-[`]>*) '`' $/ { # a result line
-                my $expected = $0 ~ "\n";
+            if $snippet-line ~~ / '#' \h+ ('-'+ '>') \h* '`' (<-[`]>*) '`' $/ { # a result line
+                my $arrow = ~$0;
+                if $arrow ne "-->" {
+                    die "Arrows need to be exactly `-->`, not `$arrow` (in $file:$line-number)";
+                }
+                my $expected = $1 ~ "\n";
                 outputs $snippet, $expected, "[$topic] $snippet-line";
                 @snippet-lines.pop;
             }
