@@ -148,6 +148,33 @@ class Val::Int does Val {
     }
 }
 
+### ### Str
+###
+### A piece of text. Strings are frequent whenever a program does text-based
+### input/output. Since this language cares a lot about parsing, strings occur
+### a lot.
+###
+### A number of useful operators are defined to work with strings:
+###
+###     say("James" ~ " Bond"); # --> `James Bond`
+###     say("tap" x 3);         # --> `taptaptap`
+###
+### Besides which, the `Str` type also carries many useful methods:
+###
+###     say("x".ord());                         # --> `120`
+###     say("James".chars());                   # --> `5`
+###     say("Bond".uc());                       # --> `BOND`
+###     say("Bond".lc());                       # --> `bond`
+###     say("  hi   ".trim());                  # --> `hi`
+###     say("1,2,3".split(","));                # --> `["1", "2", "3"]`
+###     say([4, 5].join(":"));                  # --> `4:5`
+###     say("a fool's errand".index("foo"));    # --> `2`
+###     say("abcd".substr(1, 2));               # --> `bc`
+###     say("abcd".prefix(3));                  # --> `abc`
+###     say("abcd".suffix(2));                  # --> `cd`
+###     say("James Bond".contains("s B"));      # --> `True`
+###     say("James".charat(2));                 # --> `m`
+###
 class Val::Str does Val {
     has Str $.value;
 
