@@ -1,4 +1,3 @@
-Val::Array
 Val::Object
 Val::Type
 Val::Block

@@ -210,6 +210,65 @@ class Val::Regex does Val {
     }
 }
 
+### ### Array
+###
+### A mutable sequence of values. An array contains zero or more elements,
+### indexed from `0` up to `elems - 1`, where `elems` is the number of
+### elements.
+###
+### Besides creating an array using an array literal, one can also use the
+### "upto" prefix operator, which creates an array where the elemens equal the
+### indices:
+###
+###     say(["a", "b", "c"]);   # --> `["a", "b", "c"]`
+###     say(^3);                # --> `[0, 1, 2]`
+###
+### Other array constructors which create entirely new arrays out of old ones
+### (and leave the old ones unchanged) are concatenation and consing:
+###
+###     say([1, 2].concat([3, 4])); # --> `[1, 2, 3, 4]`
+###     say(0 :: [0, 7]);           # --> `[0, 0, 7]`
+###
+### Sorting, shuffling, and reversing an array also leave the original
+### array unchanged:
+###
+###     my a = [6, 4, 5];
+###     say(a.reverse());           # --> `[5, 4, 6]`
+###     say(a);                     # --> `[6, 4, 5]`
+###     say(a.sort());              # --> `[4, 5, 6]`
+###     say(a);                     # --> `[6, 4, 5]`
+###     say(a.shuffle().sort());    # --> `[4, 5, 6]`
+###     say(a);                     # --> `[6, 4, 5]`
+###
+### The `.elems` method gives you the length (number of elements) of the
+### array:
+###
+###     say([].elems());        # --> `0`
+###
+### Some common methods use the fact that the array is mutable:
+###
+###     my a = [1, 2, 3];
+###     a.push(4);
+###     say(a);                 # --> `[1, 2, 3, 4]`
+###     my x = a.pop();
+###     say(x);                 # --> `4`
+###     say(a);                 # --> `[1, 2, 3]`
+###
+###     my a = ["a", "b", "c"];
+###     my y = a.shift();
+###     say(y);                 # --> `a`
+###     say(a);                 # --> `["b", "c"]
+###     a.unshift(y);
+###     say(a);                 # --> `["a", "b", "c"]
+###
+### You can also *transform* an entire array, either by mapping
+### each element through a function, or by filtering each element
+### through a predicate function:
+###
+###     my numbers = [1, 2, 3, 4, 5];
+###     say(numbers.map(sub (e) { return e * 2 }));     # --> `[2, 4, 6, 8, 10]`
+###     say(numbers.filter(sub (e) { return e %% 2 })); # --> `[2, 4]`
+###
 class Val::Array does Val {
     has @.elements;
 
