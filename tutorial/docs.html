@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>007 tutorial</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <style>
+      .perl6-feature { background: #ddf; }
+      .python-feature { background: #dfd; }
+    </style>
+  </head>
+  <body>
+<a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+<div class="container">
+<h3 id="nonetype">NoneType</h3>
+<p>A type with only one value, indicating the lack of a value where one was expected.</p>
+<p>It is the value variables have that haven't been assigned to:</p>
+<pre><code>my empty;
+say(empty);         # --&gt; `None`</code></pre>
+<p>It is also the value returned from a subroutine that didn't explicitly return a value:</p>
+<pre><code>sub noreturn() {
+}
+say(noreturn());    # --&gt; `None`</code></pre>
+<p>Finally, it's found in various places in the Q hierarchy to indicate that a certain child element is not present. For example, a <code>my</code> declaration can have an assignment attached to it, in which case its <code>expr</code> property is a <code>Q::Expr</code> &amp;mdash; but if no assignment is present, the <code>expr</code> property is the value <code>None</code>.</p>
+<pre><code>say(type((quasi @ Q::Statement { my x = 2 }).expr)); # --&gt; `&lt;type Q::Literal::Int&gt;`
+say(type((quasi @ Q::Statement { my x; }).expr));    # --&gt; `&lt;type NoneType&gt;`</code></pre>
+<p>The value <code>None</code> is falsy, stringifies to <code>None</code>, and doesn't numify.</p>
+<pre><code>say(!!None);        # --&gt; `False`
+say(str(None));     # --&gt; `None`
+say(int(None));     # &lt;ERROR X::TypeCheck&gt;</code></pre>
+<p>Since <code>None</code> is often used as a default, there's an operator <code>infix:&lt;//&gt;</code> that evaluates its right-hand side if it finds <code>None</code> on the left:</p>
+<pre><code>say(None // &quot;default&quot;);     # --&gt; `default`
+say(&quot;value&quot; // &quot;default&quot;);  # --&gt; `value`</code></pre>
+<h3 id="bool">Bool</h3>
+<p>A type with two values, <code>True</code> and <code>False</code>. These are often the result of comparisons or match operations, such as <code>infix:&lt;==&gt;</code> or <code>infix:&lt;~~&gt;</code>.</p>
+<pre><code>say(2 + 2 == 5);        # --&gt; `False`
+say(7 ~~ Int);          # --&gt; `True`</code></pre>
+<p>In 007 as in many other dynamic languages, it's not necessary to use <code>True</code> or <code>False</code> values directly in conditions such as <code>if</code> statements or <code>while</code> loops. <em>Any</em> value can be used, and there's always a way for each type to convert any of its values to a boolean value:</p>
+<pre><code>sub check(value) {
+    if value {
+        say(&quot;truthy&quot;);
+    }
+    else {
+        say(&quot;falsy&quot;);
+    }
+}
+check(None);            # --&gt; `falsy`
+check(False);           # --&gt; `falsy`
+check(0);               # --&gt; `falsy`
+check(&quot;&quot;);              # --&gt; `falsy`
+check([]);              # --&gt; `falsy`
+check({});              # --&gt; `falsy`
+# all other values are truthy
+check(True);            # --&gt; `truthy`
+check(42);              # --&gt; `truthy`
+check(&quot;James&quot;);         # --&gt; `truthy`
+check([0, 0, 7]);       # --&gt; `truthy`
+check({ name: &quot;Jim&quot; }); # --&gt; `truthy`</code></pre>
+<p>Similarly, when applying the <code>infix:&lt;||&gt;</code> and <code>infix:&lt;&amp;&amp;&gt;</code> macros to some expressions, the result isn't coerced to a boolean value, but instead the last value that needed to be evaluated is returned as-is:</p>
+<pre><code>say(1 || 2);            # --&gt; `1`
+say(1 &amp;&amp; 2);            # --&gt; `2`
+say(None &amp;&amp; &quot;!&quot;);       # --&gt; `None`
+say(None || &quot;!&quot;);       # --&gt; `!`</code></pre>
+<h3 id="int">Int</h3>
+<p>An whole number value, such as -8, 0, or 16384.</p>
+<p>Implementations are required to represent <code>Int</code> values either as 32-bit or as arbitrary-precision bigints.</p>
+<p>The standard arithmetic operations are defined in the language, with the notable exception of division.</p>
+<pre><code>say(-7);                # --&gt; `-7`
+say(3 + 2);             # --&gt; `5`
+say(3 * 2);             # --&gt; `6`
+say(3 % 2);             # --&gt; `1`</code></pre>
+<p>Division is not defined, because there's no sensible thing to return for something like <code>3 / 2</code>. Returning <code>1.5</code> is not an option, because the language does not have a built-in rational or floating-point type. Returning <code>1</code> (truncating to an integer) would be possible but unsatisfactory and a source of confusion.</p>
+<p>There are also a few methods defined on <code>Int</code>:</p>
+<pre><code>say((-7).abs());        # --&gt; `7`
+say(97.chr());          # --&gt; `a`</code></pre>
+<h3 id="str">Str</h3>
+<p>A piece of text. Strings are frequent whenever a program does text-based input/output. Since this language cares a lot about parsing, strings occur a lot.</p>
+<p>A number of useful operators are defined to work with strings:</p>
+<pre><code>say(&quot;James&quot; ~ &quot; Bond&quot;); # --&gt; `James Bond`
+say(&quot;tap&quot; x 3);         # --&gt; `taptaptap`</code></pre>
+<p>Besides which, the <code>Str</code> type also carries many useful methods:</p>
+<pre><code>say(&quot;x&quot;.ord());                         # --&gt; `120`
+say(&quot;James&quot;.chars());                   # --&gt; `5`
+say(&quot;Bond&quot;.uc());                       # --&gt; `BOND`
+say(&quot;Bond&quot;.lc());                       # --&gt; `bond`
+say(&quot;  hi   &quot;.trim());                  # --&gt; `hi`
+say(&quot;1,2,3&quot;.split(&quot;,&quot;));                # --&gt; `[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;]`
+say([4, 5].join(&quot;:&quot;));                  # --&gt; `4:5`
+say(&quot;a fool&#39;s errand&quot;.index(&quot;foo&quot;));    # --&gt; `2`
+say(&quot;abcd&quot;.substr(1, 2));               # --&gt; `bc`
+say(&quot;abcd&quot;.prefix(3));                  # --&gt; `abc`
+say(&quot;abcd&quot;.suffix(2));                  # --&gt; `cd`
+say(&quot;James Bond&quot;.contains(&quot;s B&quot;));      # --&gt; `True`
+say(&quot;James&quot;.charat(2));                 # --&gt; `m`</code></pre>
+<h3 id="regex">Regex</h3>
+<p>A regex. As a runtime value, a regex is like a black box that can be put to work matching strings or parts of strings. Its main purpose is to let us know whether the string matches the pattern described in the regex. In other words, it returns <code>True</code> or <code>False</code>.</p>
+<p>(Regexes are currently under development, and are hidden behind a feature flag for the time being: <code>FLAG_007_REGEX</code>.)</p>
+<p>A few methods are defined on regexes:</p>
+<pre><code>say(/&quot;Bond&quot;/.fullmatch(&quot;J. Bond&quot;));     # --&gt; `False`
+say(/&quot;Bond&quot;/.search(&quot;J. Bond&quot;));        # --&gt; `True`</code></pre>
+<h3 id="array">Array</h3>
+<p>A mutable sequence of values. An array contains zero or more elements, indexed from <code>0</code> up to <code>elems - 1</code>, where <code>elems</code> is the number of elements.</p>
+<p>Besides creating an array using an array term, one can also use the &quot;upto&quot; prefix operator, which creates an array where the elemens equal the indices:</p>
+<pre><code>say([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]);   # --&gt; `[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]`
+say(^3);                # --&gt; `[0, 1, 2]`</code></pre>
+<p>Other array constructors which create entirely new arrays out of old ones (and leave the old ones unchanged) are concatenation and consing:</p>
+<pre><code>say([1, 2].concat([3, 4])); # --&gt; `[1, 2, 3, 4]`
+say(0 :: [0, 7]);           # --&gt; `[0, 0, 7]`</code></pre>
+<p>Sorting, shuffling, and reversing an array also leave the original array unchanged:</p>
+<pre><code>my a = [6, 4, 5];
+say(a.reverse());           # --&gt; `[5, 4, 6]`
+say(a);                     # --&gt; `[6, 4, 5]`
+say(a.sort());              # --&gt; `[4, 5, 6]`
+say(a);                     # --&gt; `[6, 4, 5]`
+say(a.shuffle().sort());    # --&gt; `[4, 5, 6]`
+say(a);                     # --&gt; `[6, 4, 5]`</code></pre>
+<p>The <code>.elems</code> method gives you the length (number of elements) of the array:</p>
+<pre><code>say([].elems());        # --&gt; `0`</code></pre>
+<p>Some common methods use the fact that the array is mutable:</p>
+<pre><code>my a = [1, 2, 3];
+a.push(4);
+say(a);                 # --&gt; `[1, 2, 3, 4]`
+my x = a.pop();
+say(x);                 # --&gt; `4`
+say(a);                 # --&gt; `[1, 2, 3]`
+
+my a = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+my y = a.shift();
+say(y);                 # --&gt; `a`
+say(a);                 # --&gt; `[&quot;b&quot;, &quot;c&quot;]`
+a.unshift(y);
+say(a);                 # --&gt; `[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]`</code></pre>
+<p>You can also <em>transform</em> an entire array, either by mapping each element through a function, or by filtering each element through a predicate function:</p>
+<pre><code>my numbers = [1, 2, 3, 4, 5];
+say(numbers.map(sub (e) { return e * 2 }));     # --&gt; `[2, 4, 6, 8, 10]`
+say(numbers.filter(sub (e) { return e %% 2 })); # --&gt; `[2, 4]`</code></pre>
+<h3 id="object">Object</h3>
+<p>A mutable unordered collection of key/value properties. An object contains zero or more such properties, each with a unique string name.</p>
+<p>The way to create an object from scratch is to use the object term syntax:</p>
+<pre><code>my o1 = { foo: 42 };        # autoquoted key
+my o2 = { &quot;foo&quot;: 42 };      # string key
+say(o1 == o2);              # --&gt; `True`
+my foo = 42;
+my o3 = { foo };            # property shorthand
+say(o1 == o3);              # --&gt; `True`
+
+my o4 = {
+    greet: sub () {
+        return &quot;hi!&quot;;
+    }
+};
+my o5 = {
+    greet() {               # method shorthand
+        return &quot;hi!&quot;;
+    }
+};
+say(o4.greet() == o5.greet());  # --&gt; `True`</code></pre>
+<p>All of the above will create objects of type <code>Object</code>, which is the topmost type in the type system. <code>Object</code> also has the special property that it can accept any set of keys.</p>
+<pre><code>say(type({}));              # --&gt; `&lt;type Object&gt;`</code></pre>
+<p>There are also two ways to create a new, similar object from an old one.</p>
+<pre><code>my o6 = {
+    name: &quot;James&quot;,
+    job: &quot;librarian&quot;
+};
+my o7 = o6.update({
+    job: &quot;secret agent&quot;
+});
+say(o7);                    # --&gt; `{job: &quot;secret agent&quot;, name: &quot;James&quot;}`
+
+my o8 = {
+    name: &quot;Blofeld&quot;
+};
+my o9 = o8.extend({
+    job: &quot;supervillain&quot;
+});
+say(o9);                    # --&gt; `{job: &quot;supervillain&quot;, name: &quot;Blofeld&quot;}`</code></pre>
+<p>There's a way to extract an array of an object's keys. The order of the keys in this list is not defined and may even change from call to call.</p>
+<pre><code>my o10 = {
+    one: 1,
+    two: 2,
+    three: 3
+};
+say(o10.keys().sort());     # --&gt; `[&quot;one&quot;, &quot;three&quot;, &quot;two&quot;]`</code></pre>
+<p>You can also ask whether a key exists on an object.</p>
+<pre><code>my o11 = {
+    foo: 42,
+    bar: None
+};
+say(o11.has(&quot;foo&quot;));        # --&gt; `True`
+say(o11.has(&quot;bar&quot;));        # --&gt; `True`
+say(o11.has(&quot;bazinga&quot;));    # --&gt; `False`</code></pre>
+<p>Note that the criterion is whether the <em>key</em> exists, not whether the corresponding value is defined.</p>
+<p>Each object has a unique ID, corresponding to references in other languages. Comparison of objects happens by comparing keys and values, not by reference. If you want to do a reference comparison, you need to use the <code>.id</code> property:</p>
+<pre><code>my o12 = { foo: 5 };
+my o13 = { foo: 5 };        # same key/value but different reference
+say(o12 == o13);            # --&gt; `True`
+say(o12.id == o13.id);      # --&gt; `False`</code></pre>
+<h3 id="type">Type</h3>
+<p>A type in 007's type system. All values have a type, which determines the value's &quot;shape&quot;: what properties it can have, and which of these are required.</p>
+<pre><code>say(type(007));         # --&gt; `&lt;type Int&gt;`
+say(type(&quot;Bond&quot;));      # --&gt; `&lt;type Str&gt;`
+say(type({}));          # --&gt; `&lt;type Object&gt;`
+say(type(type({})));    # --&gt; `&lt;type Type&gt;`</code></pre>
+<p>007 comes with a number of built-in types: <code>NoneType</code>, <code>Bool</code>, <code>Int</code>, <code>Str</code>, <code>Array</code>, <code>Object</code>, <code>Regex</code>, <code>Type</code>, <code>Block</code>, <code>Sub</code>, <code>Macro</code>, and <code>Exception</code>.</p>
+<p>There's also a whole hierarchy of Q types, which describe parts of program structure.</p>
+<p>Besides these built-in types, the programmer can also introduce new types by using the <code>class</code> statement:</p>
+<pre><code>class C {       # TODO: improve this example
+}
+say(type(new C {}));    # --&gt; `&lt;type C&gt;`
+say(type(C));           # --&gt; `&lt;type Type&gt;`</code></pre>
+<p>If you want to check whether a certain object is of a certain type, you can use the <code>infix:&lt;~~&gt;</code> operator:</p>
+<pre><code>say(42 ~~ Int);         # --&gt; `True`
+say(42 ~~ Str);         # --&gt; `False`</code></pre>
+<p>The <code>infix:&lt;~~&gt;</code> operator respects subtyping, so checking against a wider type also gives a <code>True</code> result:</p>
+<pre><code>my q = new Q::Literal::Int { value: 42 };
+say(q ~~ Q::Literal::Int);  # --&gt; `True`
+say(q ~~ Q::Literal);       # --&gt; `True`
+# say(q ~~ Q);                # --&gt; `True` TODO: this could still be there after #201
+say(q ~~ Int);              # --&gt; `False`</code></pre>
+<p>If you want <em>exact</em> type matching (which isn't a very OO thing to want), consider using infix:&lt;==&gt; on the respective type objects instead:</p>
+<pre><code>my q = new Q::Literal::Str { value: &quot;Bond&quot; };
+say(type(q) == Q::Literal::Str);    # --&gt; `True`
+say(type(q) == Q::Literal);         # --&gt; `False`</code></pre>
+<h3 id="block">Block</h3>
+<p>A code block. This type is probably not needed, because all it's used for is entering blocks at runtime. So, the less said about that, the better.</p>
+<h3 id="sub">Sub</h3>
+<p>A subroutine. When you define a subroutine in 007, the value of the name bound is a <code>Sub</code> object.</p>
+<pre><code>sub agent() {
+    return &quot;Bond&quot;;
+}
+say(agent);             # --&gt; `&lt;sub agent()&gt;`</code></pre>
+<p>Subroutines are mostly distinguished by being <em>callable</em>, that is, they can be called at runtime by passing some values into them.</p>
+<pre><code>sub add(x, y) {
+    return x + y;
+}
+say(add(2, 5));         # --&gt; `7`</code></pre>
+<h3 id="macro">Macro</h3>
+<p>A macro. When you define a macro in 007, the value of the name bound is a macro object.</p>
+<pre><code>macro agent() {
+    return quasi { &quot;Bond&quot; };
+}
+say(agent);             # --&gt; `&lt;macro agent()&gt;`</code></pre>
+<h3 id="exception">Exception</h3>
+<p>An exception. Represents an error condition, or some other way control flow couldn't continue normally.</p>
+<h3 id="qexpr">Q::Expr</h3>
+<p>An expression; something that can be evaluated to a value.</p>
+<h3 id="qterm">Q::Term</h3>
+<p>A term; a unit of parsing describing a value or an identifier. Along with operators, what makes up expressions.</p>
+<h3 id="qliteral">Q::Literal</h3>
+<p>A literal; a constant value written out explicitly in the program, such as <code>None</code>, <code>True</code>, <code>5</code>, or <code>&quot;James Bond&quot;</code>.</p>
+<p>Compound values such as arrays and objects are considered terms but not literals.</p>
+<h3 id="qliteralnone">Q::Literal::None</h3>
+<p>The <code>None</code> literal.</p>
+<h3 id="qliteralbool">Q::Literal::Bool</h3>
+<p>A boolean literal; either <code>True</code> or <code>False</code>.</p>
+<h3 id="qliteralint">Q::Literal::Int</h3>
+<p>An integer literal; a non-negative number.</p>
+<p>Negative numbers are not themselves considered integer literals: something like <code>-5</code> is parsed as a <code>prefix:&lt;-&gt;</code> containing a literal <code>5</code>.</p>
+<h3 id="qliteralstr">Q::Literal::Str</h3>
+<p>A string literal.</p>
+<h3 id="qidentifier">Q::Identifier</h3>
+<p>An identifier; a name which identifies a storage location in the program.</p>
+<p>Identifiers are subject to <em>scoping</em>: the same name can point to different storage locations because they belong to different scopes.</p>
+<h3 id="qtermregex">Q::Term::Regex</h3>
+<p>A regular expression (<em>regex</em>).</p>
+<h3 id="qtermarray">Q::Term::Array</h3>
+<p>An array. Array terms consist of zero or more <em>elements</em>, each of which can be an arbitrary expression.</p>
+<h3 id="qtermobject">Q::Term::Object</h3>
+<p>An object. Object terms consist of an optional <em>type</em>, and a property list with zero or more key/value pairs.</p>
+<h3 id="qproperty">Q::Property</h3>
+<p>An object property. Properties have a key and a value.</p>
+<h3 id="qpropertylist">Q::PropertyList</h3>
+<p>A property list in an object. Property lists have zero or more key/value pairs. Keys in objects are considered unordered, but a property list has a specified order: the order the properties occur in the program text.</p>
+<h3 id="qdeclaration">Q::Declaration</h3>
+<p>A declaration; something that introduces a name.</p>
+<h3 id="qtrait">Q::Trait</h3>
+<p>A trait; a piece of metadata for a routine. A trait consists of an identifier and an expression.</p>
+<h3 id="qtraitlist">Q::TraitList</h3>
+<p>A list of zero or more traits. Each routine has a traitlist.</p>
+<h3 id="qtermsub">Q::Term::Sub</h3>
+<p>A subroutine.</p>
+<h3 id="qblock">Q::Block</h3>
+<p>A block. Blocks are used in a number of places: by routines, by block statements, by other compound statements (such as <code>if</code> statements) and by <code>quasi</code> terms and sub terms. Blocks are not, however, terms in their own regard.</p>
+<p>A block has a parameter list and a statement list, each of which can be empty.</p>
+<h3 id="qprefix">Q::Prefix</h3>
+<p>A prefix operator; an operator that occurs before a term, like the <code>-</code> in <code>-5</code>.</p>
+<h3 id="qprefixminus">Q::Prefix::Minus</h3>
+<p>A numeric negation operator.</p>
+<h3 id="qprefixnot">Q::Prefix::Not</h3>
+<p>A boolean negation operator.</p>
+<h3 id="qprefixupto">Q::Prefix::Upto</h3>
+<p>An &quot;upto&quot; operator; applied to a number <code>n</code> it produces an array of values <code>[0, 1, ... , n-1]</code>.</p>
+<h3 id="qinfix">Q::Infix</h3>
+<p>An infix operator; something like the <code>+</code> in <code>2 + 2</code> that occurs between two terms.</p>
+<h3 id="qinfixaddition">Q::Infix::Addition</h3>
+<p>A numeric addition operator.</p>
+<h3 id="qinfixaddition-1">Q::Infix::Addition</h3>
+<p>A numeric subtraction operator.</p>
+<h3 id="qinfixmultiplication">Q::Infix::Multiplication</h3>
+<p>A numeric multiplication operator.</p>
+<h3 id="qinfixmodulo">Q::Infix::Modulo</h3>
+<p>A numeric modulo operator; produces the <em>remainder</em> left from an integer division between two numbers. For example, <code>456 % 100</code> is <code>56</code> because the remainder from dividing <code>456</code> by <code>100</code> is <code>56</code>.</p>
+<h3 id="qinfixdivisibility">Q::Infix::Divisibility</h3>
+<p>A divisibility test operator. Returns <code>True</code> exactly when the remainder operator would return <code>0</code>.</p>
+<h3 id="qinfixconcat">Q::Infix::Concat</h3>
+<p>A string concatenation operator. Returns a single string that is the result of sequentially putting two strings together.</p>
+<h3 id="qinfixreplicate">Q::Infix::Replicate</h3>
+<p>A string replication operator. Returns a string which consists of <code>n</code> copies of a string.</p>
+<h3 id="qinfixarrayreplicate">Q::Infix::ArrayReplicate</h3>
+<p>An array replication operator. Returns an array which consists of the original array's elements, repeated <code>n</code> times.</p>
+<h3 id="qinfixcons">Q::Infix::Cons</h3>
+<p>A &quot;cons&quot; operator. Given a value and an array, returns a new array with the value added as the first element.</p>
+<h3 id="qinfixassignment">Q::Infix::Assignment</h3>
+<p>An assignment operator. Puts a value in a storage location.</p>
+<h3 id="qinfixeq">Q::Infix::Eq</h3>
+<p>A string equality test operator.</p>
+<h3 id="qinfixne">Q::Infix::Ne</h3>
+<p>A string inequality test operator.</p>
+<h3 id="qinfixgt">Q::Infix::Gt</h3>
+<p>A string greater-than test operator.</p>
+<h3 id="qinfixlt">Q::Infix::Lt</h3>
+<p>A string less-than test operator.</p>
+<h3 id="qinfixge">Q::Infix::Ge</h3>
+<p>A string greater-than-or-equal test operator.</p>
+<h3 id="qinfixle">Q::Infix::Le</h3>
+<p>A string less-than-or-equal test operator.</p>
+<h3 id="qinfixor">Q::Infix::Or</h3>
+<p>A short-circuiting disjunction operator; evaluates its right-hand side only if the left-hand side is falsy.</p>
+<h3 id="qinfixdefinedor">Q::Infix::DefinedOr</h3>
+<p>A short-circuiting &quot;defined-or&quot; operator. Evaluates its right-hand side only if the left-hand side is <code>None</code>.</p>
+<h3 id="qinfixand">Q::Infix::And</h3>
+<p>A short-circuiting &quot;and&quot; operator. Evaluates its right-hand side only if the left-hand side is truthy.</p>
+<h3 id="qinfixtypematch">Q::Infix::TypeMatch</h3>
+<p>A type match operator. Checks if a value on the left-hand side has the type on the right-hand side, including subtypes.</p>
+<h3 id="qinfixtypenonmatch">Q::Infix::TypeNonMatch</h3>
+<p>A negative type match operator. Returns <code>True</code> exactly in the cases a type match would return <code>False</code>.</p>
+<h3 id="qpostfix">Q::Postfix</h3>
+<p>A postfix operator; something like the <code>[0]</code> in <code>agents[0]</code> that occurs after a term.</p>
+<h3 id="qpostfixindex">Q::Postfix::Index</h3>
+<p>An indexing operator; returns an array element or object property. Arrays expect integer indices and objects expect string property names.</p>
+<h3 id="qpostfixcall">Q::Postfix::Call</h3>
+<p>An invocation operator; calls a routine.</p>
+<h3 id="qpostfixproperty">Q::Postfix::Property</h3>
+<p>An object property operator; fetches a property out of an object.</p>
+<h3 id="qunquote">Q::Unquote</h3>
+<p>An unquote; allows Qtree fragments to be inserted into places in a quasi.</p>
+<h3 id="qunquoteprefix">Q::Unquote::Prefix</h3>
+<p>An unquote which is a prefix operator.</p>
+<h3 id="qunquoteinfix">Q::Unquote::Infix</h3>
+<p>An unquote which is an infix operator.</p>
+<h3 id="qtermquasi">Q::Term::Quasi</h3>
+<p>A quasi; a piece of 007 code which evaluates to that code's Qtree representation. A way to &quot;quote&quot; code in a program instead of running it directly in place. Used together with macros.</p>
+<p>The term &quot;quasi&quot; comes from the fact that inside the quoted code there can be parametric holes (&quot;unquotes&quot;) where Qtree fragments can be inserted. Quasiquotation is the practice of combining literal code fragments with such parametric holes.</p>
+<h3 id="qparameter">Q::Parameter</h3>
+<p>A parameter. Any identifier that's declared as the input to a block is a parameter, including subs, macros, and <code>if</code> statements.</p>
+<h3 id="qparameterlist">Q::ParameterList</h3>
+<p>A list of zero or more parameters.</p>
+<h3 id="qargumentlist">Q::ArgumentList</h3>
+<p>A list of zero or more arguments.</p>
+<h3 id="qstatement">Q::Statement</h3>
+<p>A statement.</p>
+<h3 id="qstatementmy">Q::Statement::My</h3>
+<p>A <code>my</code> variable declaration statement.</p>
+<h3 id="qstatementconstant">Q::Statement::Constant</h3>
+<p>A <code>constant</code> declaration statement.</p>
+<h3 id="qstatementexpr">Q::Statement::Expr</h3>
+<p>A statement consisting of an expression.</p>
+<h3 id="qstatementif">Q::Statement::If</h3>
+<p>An <code>if</code> statement.</p>
+<h3 id="qstatementblock">Q::Statement::Block</h3>
+<p>A block statement.</p>
+<h3 id="qcompunit">Q::CompUnit</h3>
+<p>A block-level statement representing a whole compilation unit. We can read &quot;compilation unit&quot; here as meaning &quot;file&quot;.</p>
+<h3 id="qstatementfor">Q::Statement::For</h3>
+<p>A <code>for</code> loop statement.</p>
+<h3 id="qstatementwhile">Q::Statement::While</h3>
+<p>A <code>while</code> loop statement.</p>
+<h3 id="qstatementreturn">Q::Statement::Return</h3>
+<p>A <code>return</code> statement.</p>
+<h3 id="qstatementthrow">Q::Statement::Throw</h3>
+<p>A <code>throw</code> statement.</p>
+<h3 id="qstatementsub">Q::Statement::Sub</h3>
+<p>A subroutine declaration statement.</p>
+<h3 id="qstatementmacro">Q::Statement::Macro</h3>
+<p>A macro declaration statement.</p>
+<h3 id="qstatementbegin">Q::Statement::BEGIN</h3>
+<p>A <code>BEGIN</code> block statement.</p>
+<h3 id="qstatementclass">Q::Statement::Class</h3>
+<p>A class declaration statement.</p>
+<h3 id="qstatementlist">Q::StatementList</h3>
+<p>A list of zero or more statements. Statement lists commonly occur directly inside blocks (or at the top level of the program, on the compunit level). However, it's also possible for a <code>quasi</code> to denote a statement list without any surrounding block.</p>
+<h3 id="qexprstatementlistadapter">Q::Expr::StatementListAdapter</h3>
+<p>An expression which holds a statement list. Surprisingly, this never happens in the source code text itself; because of 007's grammar, an expression can never consist of a list of statements.</p>
+<p>However, it can happen as a macro call (an expression) expands into a statement list; that's when this Qtype is used.</p>
+<p>Semantically, the contained statement list is executed normally, and if execution evaluates the last statement and the statement turns out to have a value (because it's an expression statement), then this value is the value of the whole containing expression. (Note: this is not actually true yet in the implementation. Currently a <code>Q::Expr::StatementListAdapter</code> always returns <code>None</code> no matter what.)</p>
+</div>
+  </body>
+</html>
+
