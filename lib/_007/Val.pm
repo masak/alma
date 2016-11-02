@@ -216,7 +216,7 @@ class Val::Regex does Val {
 ### indexed from `0` up to `elems - 1`, where `elems` is the number of
 ### elements.
 ###
-### Besides creating an array using an array literal, one can also use the
+### Besides creating an array using an array term, one can also use the
 ### "upto" prefix operator, which creates an array where the elemens equal the
 ### indices:
 ###
@@ -257,9 +257,9 @@ class Val::Regex does Val {
 ###     my a = ["a", "b", "c"];
 ###     my y = a.shift();
 ###     say(y);                 # --> `a`
-###     say(a);                 # --> `["b", "c"]
+###     say(a);                 # --> `["b", "c"]`
 ###     a.unshift(y);
-###     say(a);                 # --> `["a", "b", "c"]
+###     say(a);                 # --> `["a", "b", "c"]`
 ###
 ### You can also *transform* an entire array, either by mapping
 ### each element through a function, or by filtering each element
