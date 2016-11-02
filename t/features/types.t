@@ -70,4 +70,9 @@ use _007::Test;
     is-error $ast, X::Uninstantiable, "abstract Q types are uninstantiable (#140)";
 }
 
+{
+    outputs 'say(Q.name)', "Q\n",
+        "Q is a built-in type";
+}
+
 done-testing;

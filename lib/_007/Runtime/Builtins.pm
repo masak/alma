@@ -378,6 +378,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     }
     tree-walk(Val::);
     tree-walk(Q::);
+    push @builtins, "Q" => Val::Type.of(Q);
 
     sub install-op($name, $placeholder) {
         $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/
