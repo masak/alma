@@ -72,7 +72,7 @@ use _007::Test;
 
 {
     outputs 'say(Q.name)', "Q\n",
-        "Q is a built-in type";
+        "Q is a built-in type (#201)";
 }
 
 done-testing;
