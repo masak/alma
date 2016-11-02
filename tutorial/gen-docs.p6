@@ -1,9 +1,12 @@
 use v6;
 
 my $docs;
+my $contents = "##Table of Contents\n\n";
+
 for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
     for $file.IO.lines -> $line {
         if $line ~~ /^ \h* '### ### ' (.+) / {  # a heading
+            $contents ~= "- [$0](#{idfy(~$0)})\n";
             $docs ~= "\n";
         }
 
@@ -18,6 +21,8 @@ for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
 
     $docs ~= "\n\n";
 }
+
+$docs = $contents ~ "\n\n\n" ~ $docs;
 
 my $md-file = "tutorial/DOCS.md";
 my $output-file = "tutorial/docs.html";
@@ -49,3 +54,9 @@ FOOTER
 spurt($output-file, $header);
 shell("pandoc -f markdown -t html5 $md-file >> $output-file");
 shell("echo '$footer' >> $output-file");
+
+sub idfy(Str $title is copy) {
+    $title .= subst(/'::'/, "", :g);
+    $title .= lc;
+    return $title;
+}
