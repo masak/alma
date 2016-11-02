@@ -3,13 +3,15 @@ use Test;
 
 sub find($dir, Regex $pattern) {
     my @targets = dir($dir);
-    gather while @targets {
+    my @files;
+    while @targets {
         my $file = @targets.shift;
-        take $file if $file ~~ $pattern;
+        push @files, $file if $file ~~ $pattern;
         if $file.IO ~~ :d {
             @targets.append: dir($file);
         }
     }
+    return @files;
 }
 
 my @failing-typechecks;
