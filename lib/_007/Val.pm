@@ -286,6 +286,92 @@ class Val::Array does Val {
 
 our $global-object-id = 0;
 
+### ### Object
+###
+### A mutable unordered collection of key/value properties. An object
+### contains zero or more such properties, each with a unique string
+### name.
+###
+### The way to create an object from scratch is to use the object term
+### syntax:
+###
+###     my o1 = { foo: 42 };        # autoquoted key
+###     my o2 = { "foo": 42 };      # string key
+###     say(o1 == o2);              # --> `True`
+###     my foo = 42;
+###     my o3 = { foo };            # property shorthand
+###     say(o1 == o3);              # --> `True`
+###
+###     my o4 = {
+###         greet: sub () {
+###             return "hi!";
+###         }
+###     };
+###     my o5 = {
+###         greet() {               # method shorthand
+###             return "hi!";
+###         }
+###     };
+###     say(o4.greet() == o5.greet());  # --> `True`
+###
+### All of the above will create objects of type `Object`, which is
+### the topmost type in the type system. `Object` also has the special
+### property that it can accept any set of keys.
+###
+###     say(type({}));              # --> `<type Object>`
+###
+### There are also two ways to create a new, similar object from an old one.
+###
+###     my o6 = {
+###         name: "James",
+###         job: "librarian"
+###     };
+###     my o7 = o6.update({
+###         job: "secret agent"
+###     });
+###     say(o7);                    # --> `{job: "secret agent", name: "James"}`
+###
+###     my o8 = {
+###         name: "Blofeld"
+###     };
+###     my o9 = o8.extend({
+###         job: "supervillain"
+###     });
+###     say(o9);                    # --> `{job: "supervillain", name: "Blofeld"}`
+###
+### There's a way to extract an array of an object's keys. The order of the keys in
+### this list is not defined and may even change from call to call.
+###
+###     my o10 = {
+###         one: 1,
+###         two: 2,
+###         three: 3
+###     };
+###     say(o10.keys().sort());     # --> `["one", "three", "two"]`
+###
+### You can also ask whether a key exists on an object.
+###
+###     my o11 = {
+###         foo: 42,
+###         bar: None
+###     };
+###     say(o11.has("foo"));        # --> `True`
+###     say(o11.has("bar"));        # --> `True`
+###     say(o11.has("bazinga"));    # --> `False`
+###
+### Note that the criterion is whether the *key* exists, not whether the
+### corresponding value is defined.
+###
+### Each object has a unique ID, corresponding to references in other
+### languages. Comparison of objects happens by comparing keys and values,
+### not by reference. If you want to do a reference comparison, you need
+### to use the `.id` property:
+###
+###     my o12 = { foo: 5 };
+###     my o13 = { foo: 5 };        # same key/value but different reference
+###     say(o12 == o13);            # --> `True`
+###     say(o12.id == o13.id);      # --> `False`
+###
 class Val::Object does Val {
     has %.properties{Str};
     has $.id = $global-object-id++;
