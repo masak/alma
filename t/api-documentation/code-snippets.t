@@ -23,7 +23,7 @@ for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
                 if $arrow ne "-->" {
                     die "Arrows need to be exactly `-->`, not `$arrow` (in $file:$line-number)";
                 }
-                my $expected = $1 ~ "\n";
+                my $expected = "$1\n";
                 outputs $snippet, $expected, "[$topic] $snippet-line";
                 @snippet-lines.pop;
             }
