@@ -2,6 +2,7 @@ use v6;
 use Test;
 use _007::Test;
 
+%*ENV<FLAG_007_CLASS> = "1";    # so that we can parse class declarations in the documentation
 %*ENV<FLAG_007_REGEX> = "1";    # so that we can parse regexes in the documentation
 
 for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
