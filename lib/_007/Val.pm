@@ -393,6 +393,54 @@ class Val::Object does Val {
     }
 }
 
+### ### Type
+###
+### A type in 007's type system. All values have a type, which determines
+### the value's "shape": what properties it can have, and which of these
+### are required.
+###
+###     say(type(007));         # --> `<type Int>`
+###     say(type("Bond"));      # --> `<type Str>`
+###     say(type({}));          # --> `<type Object>`
+###     say(type(type({})));    # --> `<type Type>`
+###
+### 007 comes with a number of built-in types: `NoneType`, `Bool`, `Int`,
+### `Str`, `Array`, `Object`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
+### and `Exception`.
+###
+### There's also a whole hierarchy of Q types, which describe parts of
+### program structure.
+###
+### Besides these built-in types, the programmer can also introduce new
+### types by using the `class` statement:
+###
+###     class C {       # TODO: improve this example
+###     }
+###     say(type(new C {}));    # --> `<type C>`
+###     say(type(C));           # --> `<type Type>`
+###
+### If you want to check whether a certain object is of a certain type,
+### you can use the `infix:<~~>` operator:
+###
+###     say(42 ~~ Int);         # --> `True`
+###     say(42 ~~ Str);         # --> `False`
+###
+### The `infix:<~~>` operator respects subtyping, so checking against a
+### wider type also gives a `True` result:
+###
+###     my q = new Q::Literal::Int { value: 42 };
+###     say(q ~~ Q::Literal::Int);  # --> `True`
+###     say(q ~~ Q::Literal);       # --> `True`
+###     # say(q ~~ Q);                # --> `True` TODO: this could still be there after #201
+###     say(q ~~ Int);              # --> `False`
+###
+### If you want *exact* type matching (which isn't a very OO thing to want),
+### consider using infix:<==> on the respective type objects instead:
+###
+###     my q = new Q::Literal::Str { value: "Bond" };
+###     say(type(q) == Q::Literal::Str);    # --> `True`
+###     say(type(q) == Q::Literal);         # --> `False`
+###
 class Val::Type does Val {
     has $.type;
 
