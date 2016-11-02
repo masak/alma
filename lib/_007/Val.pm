@@ -431,6 +431,12 @@ class Val::Type does Val {
     }
 }
 
+### ### Block
+###
+### A code block. This type is probably not needed, because all it's
+### used for is entering blocks at runtime. So, the less said about
+### that, the better.
+###
 class Val::Block does Val {
     has $.parameterlist;
     has $.statementlist;
@@ -442,6 +448,24 @@ class Val::Block does Val {
     }
 }
 
+### ### Sub
+###
+### A subroutine. When you define a subroutine in 007, the value of the
+### name bound is a `Sub` object.
+###
+###     sub agent() {
+###         return "Bond";
+###     }
+###     say(agent);             # --> `<sub agent()>`
+###
+### Subroutines are mostly distinguished by being *callable*, that is, they
+### can be called at runtime by passing some values into them.
+###
+###     sub add(x, y) {
+###         return x + y;
+###     }
+###     say(add(2, 5));         # --> `7`
+###
 class Val::Sub is Val::Block {
     has Val::Str $.name;
     has &.hook = Callable;
@@ -469,10 +493,25 @@ class Val::Sub is Val::Block {
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
 }
 
+### ### Macro
+###
+### A macro. When you define a macro in 007, the value of the name bound
+### is a macro object.
+###
+###     macro agent() {
+###         return quasi { "Bond" };
+###     }
+###     say(agent);             # --> `<macro agent()>`
+###
 class Val::Macro is Val::Sub {
     method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
+### ### Exception
+###
+### An exception. Represents an error condition, or some other way control
+### flow couldn't continue normally.
+###
 class Val::Exception does Val {
     has Val::Str $.message;
 }
