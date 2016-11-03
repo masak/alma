@@ -327,7 +327,7 @@ class _007::Parser::Actions {
             my $t1 = @termstack.pop;
 
             if $infix ~~ Q::Unquote {
-                @termstack.push(Q::Unquote::Infix.new(:expr($infix.expr), :lhs($t1), :rhs($t2)));
+                @termstack.push(Q::Unquote::Infix.new(:qtype($infix.qtype), :expr($infix.expr), :lhs($t1), :rhs($t2)));
                 return;
             }
 
@@ -405,7 +405,7 @@ class _007::Parser::Actions {
             my $prefix = @prefixes.shift.ast;
 
             if $prefix ~~ Q::Unquote {
-                make Q::Unquote::Prefix.new(:expr($prefix.expr), :operand($/.ast));
+                make Q::Unquote::Prefix.new(:qtype($prefix.qtype), :expr($prefix.expr), :operand($/.ast));
                 return;
             }
 
@@ -649,7 +649,10 @@ class _007::Parser::Actions {
     }
 
     method unquote ($/) {
-        make Q::Unquote.new(:expr($<EXPR>.ast));
+        my $qtype = $<identifier>
+            ?? $*runtime.get-var($<identifier>.ast.name.value).type
+            !! Q::Term;
+        make Q::Unquote.new(:$qtype, :expr($<EXPR>.ast));
     }
 
     method term:new-object ($/) {

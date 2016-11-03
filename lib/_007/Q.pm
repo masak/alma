@@ -430,6 +430,7 @@ class Q::Postfix::Property is Q::Postfix {
 }
 
 class Q::Unquote does Q {
+    has $.qtype;
     has $.expr;
 
     method eval($runtime) {
