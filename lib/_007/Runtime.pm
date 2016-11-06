@@ -409,7 +409,7 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
         }
-        elsif $obj ~~ Val::Block && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+        elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {

@@ -195,7 +195,6 @@ class Helper {
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
-        when Val::Block { "<block {.pretty-parameters}>" }
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;

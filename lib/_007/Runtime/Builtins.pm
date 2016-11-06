@@ -49,7 +49,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     multi equal-value(Val::Type $l, Val::Type $r) {
         $l.type === $r.type
     }
-    multi equal-value(Val::Block $l, Val::Block $r) {
+    multi equal-value(Val::Sub $l, Val::Sub $r) {
         $l.name eq $r.name
             && equal-value($l.parameterlist, $r.parameterlist)
             && equal-value($l.statementlist, $r.statementlist)

@@ -346,7 +346,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
-            when Val::Object | Val::Block | Q {
+            when Val::Object | Val::Sub | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
@@ -391,7 +391,7 @@ class Q::Postfix::Call is Q::Postfix {
         die "macro is called at runtime"
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
-            unless $c ~~ Val::Block;
+            unless $c ~~ Val::Sub;
         my @arguments = $.argumentlist.arguments.elements.map(*.eval($runtime));
         return $runtime.call($c, @arguments);
     }
