@@ -148,9 +148,13 @@ class Val::Block does Val {
     }
 }
 
-class Val::Sub is Val::Block {
+class Val::Sub is Val {
     has Val::Str $.name;
     has &.hook = Callable;
+    has $.parameterlist;
+    has $.statementlist;
+    has Val::Object $.static-lexpad is rw = Val::Object.new;
+    has Val::Object $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
@@ -170,6 +174,10 @@ class Val::Sub is Val::Block {
             if $1.contains(">");
 
         return "{$0}:<{escape-backslashes $1}>";
+    }
+
+    method pretty-parameters {
+        sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
 
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
