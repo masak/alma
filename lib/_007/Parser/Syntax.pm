@@ -19,11 +19,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        my $block = Val::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist(Q::StatementList.new),
-            :outer-frame($*runtime.current-frame));
-        $*runtime.enter($block)
+        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
     } }
 
     token finishpad { <?> {

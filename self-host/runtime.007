@@ -15,12 +15,11 @@ constant NO_OUTER = {};
 my Runtime = {
     new() {
         my frames = [];
-        sub enter(block) {
-            my outer_frame = block["outer-frame"];
+        sub enter(outer_frame, static_lexpad) {
             my frame = { outer_frame, pad: {} };
             frames.push(frame);
-            for block["static-lexpad"].keys() -> name {
-                my value = block["static-lexpad"][name];
+            for static_lexpad.keys() -> name {
+                my value = static_lexpad[name];
                 my identifier = new Q::Identifier { name };
                 declare_var(identifier, value);
             }
@@ -79,7 +78,7 @@ my Runtime = {
             if paramcount != argcount {
                 throw new Exception { message: "parameter mismatch" };
             }
-            enter(c);
+            enter(c["outer-frame"], c["static-lexpad"]);
             for ^argcount -> i {
                 my param = c.parameterlist.parameters[i];
                 my arg = arguments[i];
@@ -233,7 +232,7 @@ my Runtime = {
                 # no runtime behavior
             },
             Q::CompUnit(compunit) {
-                enter(reify(compunit.block));
+                enter(current_frame(), compunit.block["static-lexpad"]);
                 run(compunit.block.statementlist);
                 leave();
             },
@@ -241,7 +240,7 @@ my Runtime = {
                 # no runtime behavior
             },
             Q::Statement::Block(stmt) {
-                enter(reify(stmt.block));
+                enter(current_frame(), stmt.block["static-lexpad"]);
                 run(stmt.block.statementlist);
                 leave();
             },
@@ -249,11 +248,10 @@ my Runtime = {
                 eval(stmt.expr);
             },
             Q::Statement::For(stmt) {
-                my block = reify(stmt.block);
                 my array = eval(stmt.expr);
 
                 for array -> arg {
-                    enter(block);
+                    enter(current_frame(), stmt.block["static-lexpad"]);
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, arg);
@@ -265,8 +263,7 @@ my Runtime = {
             Q::Statement::If(stmt) {
                 my expr = eval(stmt.expr);
                 if expr {
-                    my block = reify(stmt.block);
-                    enter(block);
+                    enter(current_frame(), stmt.block["static-lexpad"]);
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, expr);
@@ -289,9 +286,8 @@ my Runtime = {
             },
             Q::Statement::While(stmt) {
                 my expr;
-                my block = reify(stmt.block);
                 while expr = eval(stmt.expr) {
-                    enter(block);
+                    enter(current_frame(), stmt.block["static-lexpad"]);
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, expr);

@@ -15,12 +15,7 @@ class _007::Runtime {
     has $.builtin-frame;
 
     submethod BUILD(:$!input, :$!output) {
-        my $builtin-block = Val::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist(Q::StatementList.new),
-            :static-lexpad(Val::Object.new),
-            :outer-frame(NO_OUTER));
-        self.enter($builtin-block);
+        self.enter(NO_OUTER, Val::Object.new, Q::StatementList.new);
         $!builtin-frame = @!frames[*-1];
         $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
@@ -35,17 +30,16 @@ class _007::Runtime {
         }
     }
 
-    method enter(Val::Block $block) {
-        my $outer-frame = $block.outer-frame;
+    method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
         my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
         @!frames.push($frame);
-        for $block.static-lexpad.properties.kv -> $name, $value {
+        for $static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
-        for $block.statementlist.statements.elements.kv -> $i, $_ {
+        for $statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .identifier.name;
                 my $parameterlist = .block.parameterlist;
@@ -62,10 +56,10 @@ class _007::Runtime {
                 self.declare-var(.identifier, $val);
             }
         }
-        if $block ~~ Val::Sub {
-            my $name = $block.name;
+        if $routine {
+            my $name = $routine.name;
             my $identifier = Q::Identifier.new(:$name, :$frame);
-            self.declare-var($identifier, $block);
+            self.declare-var($identifier, $routine);
         }
     }
 
@@ -161,7 +155,7 @@ class _007::Runtime {
         if $c.hook -> &hook {
             return &hook(|@arguments) || NONE;
         }
-        self.enter($c);
+        self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c);
         for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }

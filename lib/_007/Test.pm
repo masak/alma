@@ -189,7 +189,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     }
 
     multi handle(Q::Statement::Block $block) {
-        $runtime.enter($block.block.reify($runtime));
+        $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
         handle($block.block.statementlist);
         $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();
@@ -203,7 +203,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($sub.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($val);
+        $runtime.enter($outer-frame, Val::Object.new, $sub.block.statementlist, $val);
         handle($sub.block);
         $runtime.leave();
 
@@ -218,7 +218,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($macro.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($val);
+        $runtime.enter($outer-frame, Val::Object.new, $macro.block.statementlist, $val);
         handle($macro.block);
         $runtime.leave();
 
@@ -238,12 +238,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     }
 
     multi handle(Q::Block $block) {
-        my $valblock = Val::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist(Q::StatementList.new),
-            :static-lexpad(Val::Object.new()),
-            :outer-frame($runtime.current-frame));
-        $runtime.enter($valblock);
+        $runtime.enter($runtime.current-frame, Val::Object.new, Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
         $block.static-lexpad = $runtime.current-frame.properties<pad>;
