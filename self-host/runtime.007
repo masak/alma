@@ -63,15 +63,6 @@ my Runtime = {
             frame.pad[name] = value;
         }
 
-        sub reify(block) {
-            return new Block {
-                parameterlist: block.parameterlist,
-                statementlist: block.statementlist,
-                "static-lexpad": block["static-lexpad"],
-                "outer-frame": current_frame(),
-            };
-        }
-
         sub sigbind(c, arguments) {
             my paramcount = c.parameterlist.parameters.elems();
             my argcount = arguments.elems();

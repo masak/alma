@@ -207,16 +207,6 @@ class Q::Block does Q {
     has Val::Object $.static-lexpad is rw = Val::Object.new;
 
     method attribute-order { <parameterlist statementlist> }
-
-    method reify($runtime) {
-        my Val::Object $outer-frame = $runtime.current-frame;
-        Val::Block.new(
-            :$.parameterlist,
-            :$.statementlist,
-            :$.static-lexpad,
-            :$outer-frame
-        );
-    }
 }
 
 class Q::Prefix does Q::Expr {
