@@ -36,7 +36,8 @@ class _007::Runtime {
     }
 
     method enter(Val::Block $block) {
-        my $frame = Val::Object.new(:properties(:$block, :pad(Val::Object.new)));
+        my $outer-frame = $block.outer-frame;
+        my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
         @!frames.push($frame);
         for $block.static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
@@ -94,7 +95,7 @@ class _007::Runtime {
         repeat until $frame === NO_OUTER {
             return $frame.properties<pad>
                 if $frame.properties<pad>.properties{$symbol} :exists;
-            $frame = $frame.properties<block>.outer-frame;
+            $frame = $frame.properties<outer-frame>;
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;

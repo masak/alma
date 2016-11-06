@@ -16,7 +16,8 @@ my Runtime = {
     new() {
         my frames = [];
         sub enter(block) {
-            my frame = { block, pad: {} };
+            my outer_frame = block["outer-frame"];
+            my frame = { outer_frame, pad: {} };
             frames.push(frame);
             for block["static-lexpad"].keys() -> name {
                 my value = block["static-lexpad"][name];
@@ -43,7 +44,7 @@ my Runtime = {
                 if frame.pad.has(symbol) {
                     return frame.pad;
                 }
-                frame = frame.block["outer-frame"];
+                frame = frame.outer_frame;
             }
             throw new Exception { message: "Cannot find variable '" ~ symbol ~ "'" };
         }

@@ -634,7 +634,7 @@ class _007::Parser::Actions {
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
             my $name = $<identifier>.ast.name;
-            my $outer-frame = $*runtime.current-frame.properties<block>.outer-frame;
+            my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
             my $static-lexpad = $*runtime.current-frame.properties<pad>;
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
