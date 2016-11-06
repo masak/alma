@@ -137,17 +137,6 @@ class Val::Type does Val {
     }
 }
 
-class Val::Block does Val {
-    has $.parameterlist;
-    has $.statementlist;
-    has Val::Object $.static-lexpad is rw = Val::Object.new;
-    has Val::Object $.outer-frame;
-
-    method pretty-parameters {
-        sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
-    }
-}
-
 class Val::Sub is Val {
     has Val::Str $.name;
     has &.hook = Callable;
