@@ -12,9 +12,21 @@ for <lib/_007/Val.pm lib/_007/Q.pm> -> $file {
             }
         }
 
-        if $line ~~ /^ \h* '### ' (.+)/ {
+        if $line ~~ /^ \h* '### ' (.+) / {
             $docs ~= "\n";
-            $docs ~= $0;
+            my $snippet-line = ~$0;
+            my $additional-line;
+
+            if $snippet-line ~~ / '#' \h+ ('-'+ '>') \h* '`' (<-[`]>*) '`' $/ { # a result line
+                $additional-line = "&#8658; $1".indent(8);
+            }
+            elsif $snippet-line ~~ / '#' \h+ '<ERROR' \h+ (<-[>]>+) '>' / { # an expect-error line
+                $additional-line = "&#9760; $0".indent(8);
+            }
+
+            $snippet-line .= subst(/ \s+ '#' .+ /, '');
+            $docs ~= $snippet-line;
+            $docs ~= "\n$additional-line" if $additional-line;
         }
         elsif $line ~~ /^ \h* '###' $/ {
             $docs ~= "\n";

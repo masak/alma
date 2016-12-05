@@ -45,14 +45,16 @@ expected.
 It is the value variables have that haven't been assigned to:
 
     my empty;
-    say(empty);         # --> `None`
+    say(empty);
+        &#8658; None
 
 It is also the value returned from a subroutine that didn't explicitly
 return a value:
 
     sub noreturn() {
     }
-    say(noreturn());    # --> `None`
+    say(noreturn());
+        &#8658; None
 
 Finally, it's found in various places in the Q hierarchy to indicate that
 a certain child element is not present. For example, a `my` declaration
@@ -60,20 +62,27 @@ can have an assignment attached to it, in which case its `expr` property
 is a `Q::Expr` &mdash; but if no assignment is present, the `expr`
 property is the value `None`.
 
-    say(type((quasi @ Q::Statement { my x = 2 }).expr)); # --> `<type Q::Literal::Int>`
-    say(type((quasi @ Q::Statement { my x; }).expr));    # --> `<type NoneType>`
+    say(type((quasi @ Q::Statement { my x = 2 }).expr));
+        &#8658; <type Q::Literal::Int>
+    say(type((quasi @ Q::Statement { my x; }).expr));
+        &#8658; <type NoneType>
 
 The value `None` is falsy, stringifies to `None`, and doesn't numify.
 
-    say(!!None);        # --> `False`
-    say(str(None));     # --> `None`
-    say(int(None));     # <ERROR X::TypeCheck>
+    say(!!None);
+        &#8658; False
+    say(str(None));
+        &#8658; None
+    say(int(None));
+        &#9760; X::TypeCheck
 
 Since `None` is often used as a default, there's an operator `infix:<//>`
 that evaluates its right-hand side if it finds `None` on the left:
 
-    say(None // "default");     # --> `default`
-    say("value" // "default");  # --> `value`
+    say(None // "default");
+        &#8658; default
+    say("value" // "default");
+        &#8658; value
 
 
 ### Bool
@@ -81,8 +90,10 @@ that evaluates its right-hand side if it finds `None` on the left:
 A type with two values, `True` and `False`. These are often the result
 of comparisons or match operations, such as `infix:<==>` or `infix:<~~>`.
 
-    say(2 + 2 == 5);        # --> `False`
-    say(7 ~~ Int);          # --> `True`
+    say(2 + 2 == 5);
+        &#8658; False
+    say(7 ~~ Int);
+        &#8658; True
 
 In 007 as in many other dynamic languages, it's not necessary to use
 `True` or `False` values directly in conditions such as `if` statements
@@ -97,27 +108,42 @@ for each type to convert any of its values to a boolean value:
             say("falsy");
         }
     }
-    check(None);            # --> `falsy`
-    check(False);           # --> `falsy`
-    check(0);               # --> `falsy`
-    check("");              # --> `falsy`
-    check([]);              # --> `falsy`
-    check({});              # --> `falsy`
-    # all other values are truthy
-    check(True);            # --> `truthy`
-    check(42);              # --> `truthy`
-    check("James");         # --> `truthy`
-    check([0, 0, 7]);       # --> `truthy`
-    check({ name: "Jim" }); # --> `truthy`
+    check(None);
+        &#8658; falsy
+    check(False);
+        &#8658; falsy
+    check(0);
+        &#8658; falsy
+    check("");
+        &#8658; falsy
+    check([]);
+        &#8658; falsy
+    check({});
+        &#8658; falsy
+
+    check(True);
+        &#8658; truthy
+    check(42);
+        &#8658; truthy
+    check("James");
+        &#8658; truthy
+    check([0, 0, 7]);
+        &#8658; truthy
+    check({ name: "Jim" });
+        &#8658; truthy
 
 Similarly, when applying the `infix:<||>` and `infix:<&&>` macros to
 some expressions, the result isn't coerced to a boolean value, but
 instead the last value that needed to be evaluated is returned as-is:
 
-    say(1 || 2);            # --> `1`
-    say(1 && 2);            # --> `2`
-    say(None && "!");       # --> `None`
-    say(None || "!");       # --> `!`
+    say(1 || 2);
+        &#8658; 1
+    say(1 && 2);
+        &#8658; 2
+    say(None && "!");
+        &#8658; None
+    say(None || "!");
+        &#8658; !
 
 
 ### Int
@@ -130,10 +156,14 @@ or as arbitrary-precision bigints.
 The standard arithmetic operations are defined in the language, with the
 notable exception of division.
 
-    say(-7);                # --> `-7`
-    say(3 + 2);             # --> `5`
-    say(3 * 2);             # --> `6`
-    say(3 % 2);             # --> `1`
+    say(-7);
+        &#8658; -7
+    say(3 + 2);
+        &#8658; 5
+    say(3 * 2);
+        &#8658; 6
+    say(3 % 2);
+        &#8658; 1
 
 Division is not defined, because there's no sensible thing to return for
 something like `3 / 2`. Returning `1.5` is not an option, because the
@@ -143,8 +173,10 @@ unsatisfactory and a source of confusion.
 
 There are also a few methods defined on `Int`:
 
-    say((-7).abs());        # --> `7`
-    say(97.chr());          # --> `a`
+    say((-7).abs());
+        &#8658; 7
+    say(97.chr());
+        &#8658; a
 
 
 ### Str
@@ -155,24 +187,39 @@ a lot.
 
 A number of useful operators are defined to work with strings:
 
-    say("James" ~ " Bond"); # --> `James Bond`
-    say("tap" x 3);         # --> `taptaptap`
+    say("James" ~ " Bond");
+        &#8658; James Bond
+    say("tap" x 3);
+        &#8658; taptaptap
 
 Besides which, the `Str` type also carries many useful methods:
 
-    say("x".ord());                         # --> `120`
-    say("James".chars());                   # --> `5`
-    say("Bond".uc());                       # --> `BOND`
-    say("Bond".lc());                       # --> `bond`
-    say("  hi   ".trim());                  # --> `hi`
-    say("1,2,3".split(","));                # --> `["1", "2", "3"]`
-    say([4, 5].join(":"));                  # --> `4:5`
-    say("a fool's errand".index("foo"));    # --> `2`
-    say("abcd".substr(1, 2));               # --> `bc`
-    say("abcd".prefix(3));                  # --> `abc`
-    say("abcd".suffix(2));                  # --> `cd`
-    say("James Bond".contains("s B"));      # --> `True`
-    say("James".charat(2));                 # --> `m`
+    say("x".ord());
+        &#8658; 120
+    say("James".chars());
+        &#8658; 5
+    say("Bond".uc());
+        &#8658; BOND
+    say("Bond".lc());
+        &#8658; bond
+    say("  hi   ".trim());
+        &#8658; hi
+    say("1,2,3".split(","));
+        &#8658; ["1", "2", "3"]
+    say([4, 5].join(":"));
+        &#8658; 4:5
+    say("a fool's errand".index("foo"));
+        &#8658; 2
+    say("abcd".substr(1, 2));
+        &#8658; bc
+    say("abcd".prefix(3));
+        &#8658; abc
+    say("abcd".suffix(2));
+        &#8658; cd
+    say("James Bond".contains("s B"));
+        &#8658; True
+    say("James".charat(2));
+        &#8658; m
 
 
 ### Regex
@@ -187,8 +234,10 @@ flag for the time being: `FLAG_007_REGEX`.)
 
 A few methods are defined on regexes:
 
-    say(/"Bond"/.fullmatch("J. Bond"));     # --> `False`
-    say(/"Bond"/.search("J. Bond"));        # --> `True`
+    say(/"Bond"/.fullmatch("J. Bond"));
+        &#8658; False
+    say(/"Bond"/.search("J. Bond"));
+        &#8658; True
 
 
 ### Array
@@ -201,54 +250,73 @@ Besides creating an array using an array term, one can also use the
 "upto" prefix operator, which creates an array where the elemens equal the
 indices:
 
-    say(["a", "b", "c"]);   # --> `["a", "b", "c"]`
-    say(^3);                # --> `[0, 1, 2]`
+    say(["a", "b", "c"]);
+        &#8658; ["a", "b", "c"]
+    say(^3);
+        &#8658; [0, 1, 2]
 
 Other array constructors which create entirely new arrays out of old ones
 (and leave the old ones unchanged) are concatenation and consing:
 
-    say([1, 2].concat([3, 4])); # --> `[1, 2, 3, 4]`
-    say(0 :: [0, 7]);           # --> `[0, 0, 7]`
+    say([1, 2].concat([3, 4]));
+        &#8658; [1, 2, 3, 4]
+    say(0 :: [0, 7]);
+        &#8658; [0, 0, 7]
 
 Sorting, shuffling, and reversing an array also leave the original
 array unchanged:
 
     my a = [6, 4, 5];
-    say(a.reverse());           # --> `[5, 4, 6]`
-    say(a);                     # --> `[6, 4, 5]`
-    say(a.sort());              # --> `[4, 5, 6]`
-    say(a);                     # --> `[6, 4, 5]`
-    say(a.shuffle().sort());    # --> `[4, 5, 6]`
-    say(a);                     # --> `[6, 4, 5]`
+    say(a.reverse());
+        &#8658; [5, 4, 6]
+    say(a);
+        &#8658; [6, 4, 5]
+    say(a.sort());
+        &#8658; [4, 5, 6]
+    say(a);
+        &#8658; [6, 4, 5]
+    say(a.shuffle().sort());
+        &#8658; [4, 5, 6]
+    say(a);
+        &#8658; [6, 4, 5]
 
 The `.elems` method gives you the length (number of elements) of the
 array:
 
-    say([].elems());        # --> `0`
+    say([].elems());
+        &#8658; 0
 
 Some common methods use the fact that the array is mutable:
 
     my a = [1, 2, 3];
     a.push(4);
-    say(a);                 # --> `[1, 2, 3, 4]`
+    say(a);
+        &#8658; [1, 2, 3, 4]
     my x = a.pop();
-    say(x);                 # --> `4`
-    say(a);                 # --> `[1, 2, 3]`
+    say(x);
+        &#8658; 4
+    say(a);
+        &#8658; [1, 2, 3]
 
     my a = ["a", "b", "c"];
     my y = a.shift();
-    say(y);                 # --> `a`
-    say(a);                 # --> `["b", "c"]`
+    say(y);
+        &#8658; a
+    say(a);
+        &#8658; ["b", "c"]
     a.unshift(y);
-    say(a);                 # --> `["a", "b", "c"]`
+    say(a);
+        &#8658; ["a", "b", "c"]
 
 You can also *transform* an entire array, either by mapping
 each element through a function, or by filtering each element
 through a predicate function:
 
     my numbers = [1, 2, 3, 4, 5];
-    say(numbers.map(sub (e) { return e * 2 }));     # --> `[2, 4, 6, 8, 10]`
-    say(numbers.filter(sub (e) { return e %% 2 })); # --> `[2, 4]`
+    say(numbers.map(sub (e) { return e * 2 }));
+        &#8658; [2, 4, 6, 8, 10]
+    say(numbers.filter(sub (e) { return e %% 2 }));
+        &#8658; [2, 4]
 
 
 ### Object
@@ -260,12 +328,14 @@ name.
 The way to create an object from scratch is to use the object term
 syntax:
 
-    my o1 = { foo: 42 };        # autoquoted key
-    my o2 = { "foo": 42 };      # string key
-    say(o1 == o2);              # --> `True`
+    my o1 = { foo: 42 };
+    my o2 = { "foo": 42 };
+    say(o1 == o2);
+        &#8658; True
     my foo = 42;
-    my o3 = { foo };            # property shorthand
-    say(o1 == o3);              # --> `True`
+    my o3 = { foo };
+    say(o1 == o3);
+        &#8658; True
 
     my o4 = {
         greet: sub () {
@@ -273,17 +343,19 @@ syntax:
         }
     };
     my o5 = {
-        greet() {               # method shorthand
+        greet() {
             return "hi!";
         }
     };
-    say(o4.greet() == o5.greet());  # --> `True`
+    say(o4.greet() == o5.greet());
+        &#8658; True
 
 All of the above will create objects of type `Object`, which is
 the topmost type in the type system. `Object` also has the special
 property that it can accept any set of keys.
 
-    say(type({}));              # --> `<type Object>`
+    say(type({}));
+        &#8658; <type Object>
 
 There are also two ways to create a new, similar object from an old one.
 
@@ -294,7 +366,8 @@ There are also two ways to create a new, similar object from an old one.
     my o7 = o6.update({
         job: "secret agent"
     });
-    say(o7);                    # --> `{job: "secret agent", name: "James"}`
+    say(o7);
+        &#8658; {job: "secret agent", name: "James"}
 
     my o8 = {
         name: "Blofeld"
@@ -302,7 +375,8 @@ There are also two ways to create a new, similar object from an old one.
     my o9 = o8.extend({
         job: "supervillain"
     });
-    say(o9);                    # --> `{job: "supervillain", name: "Blofeld"}`
+    say(o9);
+        &#8658; {job: "supervillain", name: "Blofeld"}
 
 There's a way to extract an array of an object's keys. The order of the keys in
 this list is not defined and may even change from call to call.
@@ -312,7 +386,8 @@ this list is not defined and may even change from call to call.
         two: 2,
         three: 3
     };
-    say(o10.keys().sort());     # --> `["one", "three", "two"]`
+    say(o10.keys().sort());
+        &#8658; ["one", "three", "two"]
 
 You can also ask whether a key exists on an object.
 
@@ -320,9 +395,12 @@ You can also ask whether a key exists on an object.
         foo: 42,
         bar: None
     };
-    say(o11.has("foo"));        # --> `True`
-    say(o11.has("bar"));        # --> `True`
-    say(o11.has("bazinga"));    # --> `False`
+    say(o11.has("foo"));
+        &#8658; True
+    say(o11.has("bar"));
+        &#8658; True
+    say(o11.has("bazinga"));
+        &#8658; False
 
 Note that the criterion is whether the *key* exists, not whether the
 corresponding value is defined.
@@ -333,9 +411,11 @@ not by reference. If you want to do a reference comparison, you need
 to use the `.id` property:
 
     my o12 = { foo: 5 };
-    my o13 = { foo: 5 };        # same key/value but different reference
-    say(o12 == o13);            # --> `True`
-    say(o12.id == o13.id);      # --> `False`
+    my o13 = { foo: 5 };
+    say(o12 == o13);
+        &#8658; True
+    say(o12.id == o13.id);
+        &#8658; False
 
 
 ### Type
@@ -344,10 +424,14 @@ A type in 007's type system. All values have a type, which determines
 the value's "shape": what properties it can have, and which of these
 are required.
 
-    say(type(007));         # --> `<type Int>`
-    say(type("Bond"));      # --> `<type Str>`
-    say(type({}));          # --> `<type Object>`
-    say(type(type({})));    # --> `<type Type>`
+    say(type(007));
+        &#8658; <type Int>
+    say(type("Bond"));
+        &#8658; <type Str>
+    say(type({}));
+        &#8658; <type Object>
+    say(type(type({})));
+        &#8658; <type Type>
 
 007 comes with a number of built-in types: `NoneType`, `Bool`, `Int`,
 `Str`, `Array`, `Object`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
@@ -359,32 +443,41 @@ program structure.
 Besides these built-in types, the programmer can also introduce new
 types by using the `class` statement:
 
-    class C {       # TODO: improve this example
+    class C {
     }
-    say(type(new C {}));    # --> `<type C>`
-    say(type(C));           # --> `<type Type>`
+    say(type(new C {}));
+        &#8658; <type C>
+    say(type(C));
+        &#8658; <type Type>
 
 If you want to check whether a certain object is of a certain type,
 you can use the `infix:<~~>` operator:
 
-    say(42 ~~ Int);         # --> `True`
-    say(42 ~~ Str);         # --> `False`
+    say(42 ~~ Int);
+        &#8658; True
+    say(42 ~~ Str);
+        &#8658; False
 
 The `infix:<~~>` operator respects subtyping, so checking against a
 wider type also gives a `True` result:
 
     my q = new Q::Literal::Int { value: 42 };
-    say(q ~~ Q::Literal::Int);  # --> `True`
-    say(q ~~ Q::Literal);       # --> `True`
-    # say(q ~~ Q);                # --> `True` TODO: this could still be there after #201
-    say(q ~~ Int);              # --> `False`
+    say(q ~~ Q::Literal::Int);
+        &#8658; True
+    say(q ~~ Q::Literal);
+        &#8658; True
+
+    say(q ~~ Int);
+        &#8658; False
 
 If you want *exact* type matching (which isn't a very OO thing to want),
 consider using infix:<==> on the respective type objects instead:
 
     my q = new Q::Literal::Str { value: "Bond" };
-    say(type(q) == Q::Literal::Str);    # --> `True`
-    say(type(q) == Q::Literal);         # --> `False`
+    say(type(q) == Q::Literal::Str);
+        &#8658; True
+    say(type(q) == Q::Literal);
+        &#8658; False
 
 
 ### Block
@@ -402,7 +495,8 @@ name bound is a `Sub` object.
     sub agent() {
         return "Bond";
     }
-    say(agent);             # --> `<sub agent()>`
+    say(agent);
+        &#8658; <sub agent()>
 
 Subroutines are mostly distinguished by being *callable*, that is, they
 can be called at runtime by passing some values into them.
@@ -410,7 +504,8 @@ can be called at runtime by passing some values into them.
     sub add(x, y) {
         return x + y;
     }
-    say(add(2, 5));         # --> `7`
+    say(add(2, 5));
+        &#8658; 7
 
 
 ### Macro
@@ -421,7 +516,8 @@ is a macro object.
     macro agent() {
         return quasi { "Bond" };
     }
-    say(agent);             # --> `<macro agent()>`
+    say(agent);
+        &#8658; <macro agent()>
 
 
 ### Exception
