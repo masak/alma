@@ -15,75 +15,23 @@
 - [Q::Expr](#qexpr)
 - [Q::Term](#qterm)
 - [Q::Literal](#qliteral)
-- [Q::Literal::None](#qliteralnone)
-- [Q::Literal::Bool](#qliteralbool)
-- [Q::Literal::Int](#qliteralint)
-- [Q::Literal::Str](#qliteralstr)
 - [Q::Identifier](#qidentifier)
-- [Q::Term::Regex](#qtermregex)
-- [Q::Term::Array](#qtermarray)
-- [Q::Term::Object](#qtermobject)
 - [Q::Property](#qproperty)
 - [Q::PropertyList](#qpropertylist)
 - [Q::Declaration](#qdeclaration)
 - [Q::Trait](#qtrait)
 - [Q::TraitList](#qtraitlist)
-- [Q::Term::Sub](#qtermsub)
 - [Q::Block](#qblock)
 - [Q::Prefix](#qprefix)
-- [Q::Prefix::Minus](#qprefixminus)
-- [Q::Prefix::Not](#qprefixnot)
-- [Q::Prefix::Upto](#qprefixupto)
 - [Q::Infix](#qinfix)
-- [Q::Infix::Addition](#qinfixaddition)
-- [Q::Infix::Addition](#qinfixaddition)
-- [Q::Infix::Multiplication](#qinfixmultiplication)
-- [Q::Infix::Modulo](#qinfixmodulo)
-- [Q::Infix::Divisibility](#qinfixdivisibility)
-- [Q::Infix::Concat](#qinfixconcat)
-- [Q::Infix::Replicate](#qinfixreplicate)
-- [Q::Infix::ArrayReplicate](#qinfixarrayreplicate)
-- [Q::Infix::Cons](#qinfixcons)
-- [Q::Infix::Assignment](#qinfixassignment)
-- [Q::Infix::Eq](#qinfixeq)
-- [Q::Infix::Ne](#qinfixne)
-- [Q::Infix::Gt](#qinfixgt)
-- [Q::Infix::Lt](#qinfixlt)
-- [Q::Infix::Ge](#qinfixge)
-- [Q::Infix::Le](#qinfixle)
-- [Q::Infix::Or](#qinfixor)
-- [Q::Infix::DefinedOr](#qinfixdefinedor)
-- [Q::Infix::And](#qinfixand)
-- [Q::Infix::TypeMatch](#qinfixtypematch)
-- [Q::Infix::TypeNonMatch](#qinfixtypenonmatch)
 - [Q::Postfix](#qpostfix)
-- [Q::Postfix::Index](#qpostfixindex)
-- [Q::Postfix::Call](#qpostfixcall)
-- [Q::Postfix::Property](#qpostfixproperty)
 - [Q::Unquote](#qunquote)
-- [Q::Unquote::Prefix](#qunquoteprefix)
-- [Q::Unquote::Infix](#qunquoteinfix)
-- [Q::Term::Quasi](#qtermquasi)
 - [Q::Parameter](#qparameter)
 - [Q::ParameterList](#qparameterlist)
 - [Q::ArgumentList](#qargumentlist)
 - [Q::Statement](#qstatement)
-- [Q::Statement::My](#qstatementmy)
-- [Q::Statement::Constant](#qstatementconstant)
-- [Q::Statement::Expr](#qstatementexpr)
-- [Q::Statement::If](#qstatementif)
-- [Q::Statement::Block](#qstatementblock)
 - [Q::CompUnit](#qcompunit)
-- [Q::Statement::For](#qstatementfor)
-- [Q::Statement::While](#qstatementwhile)
-- [Q::Statement::Return](#qstatementreturn)
-- [Q::Statement::Throw](#qstatementthrow)
-- [Q::Statement::Sub](#qstatementsub)
-- [Q::Statement::Macro](#qstatementmacro)
-- [Q::Statement::BEGIN](#qstatementbegin)
-- [Q::Statement::Class](#qstatementclass)
 - [Q::StatementList](#qstatementlist)
-- [Q::Expr::StatementListAdapter](#qexprstatementlistadapter)
 
 
 
@@ -503,16 +451,13 @@ A literal; a constant value written out explicitly in the program, such as
 Compound values such as arrays and objects are considered terms but not
 literals.
 
-
 ### Q::Literal::None
 
 The `None` literal.
 
-
 ### Q::Literal::Bool
 
 A boolean literal; either `True` or `False`.
-
 
 ### Q::Literal::Int
 
@@ -520,7 +465,6 @@ An integer literal; a non-negative number.
 
 Negative numbers are not themselves considered integer literals: something
 like `-5` is parsed as a `prefix:<->` containing a literal `5`.
-
 
 ### Q::Literal::Str
 
@@ -534,17 +478,14 @@ An identifier; a name which identifies a storage location in the program.
 Identifiers are subject to *scoping*: the same name can point to different
 storage locations because they belong to different scopes.
 
-
 ### Q::Term::Regex
 
 A regular expression (*regex*).
-
 
 ### Q::Term::Array
 
 An array. Array terms consist of zero or more *elements*, each of which
 can be an arbitrary expression.
-
 
 ### Q::Term::Object
 
@@ -579,7 +520,6 @@ identifier and an expression.
 
 A list of zero or more traits. Each routine has a traitlist.
 
-
 ### Q::Term::Sub
 
 A subroutine.
@@ -601,16 +541,13 @@ be empty.
 A prefix operator; an operator that occurs before a term, like the
 `-` in `-5`.
 
-
 ### Q::Prefix::Minus
 
 A numeric negation operator.
 
-
 ### Q::Prefix::Not
 
 A boolean negation operator.
-
 
 ### Q::Prefix::Upto
 
@@ -623,21 +560,17 @@ of values `[0, 1, ... , n-1]`.
 An infix operator; something like the `+` in `2 + 2` that occurs between
 two terms.
 
-
 ### Q::Infix::Addition
 
 A numeric addition operator.
-
 
 ### Q::Infix::Addition
 
 A numeric subtraction operator.
 
-
 ### Q::Infix::Multiplication
 
 A numeric multiplication operator.
-
 
 ### Q::Infix::Modulo
 
@@ -645,95 +578,78 @@ A numeric modulo operator; produces the *remainder* left from an integer
 division between two numbers. For example, `456 % 100` is `56` because the
 remainder from dividing `456` by `100` is `56`.
 
-
 ### Q::Infix::Divisibility
 
 A divisibility test operator. Returns `True` exactly when the remainder
 operator would return `0`.
-
 
 ### Q::Infix::Concat
 
 A string concatenation operator. Returns a single string that is the
 result of sequentially putting two strings together.
 
-
 ### Q::Infix::Replicate
 
 A string replication operator. Returns a string which consists of `n`
 copies of a string.
-
 
 ### Q::Infix::ArrayReplicate
 
 An array replication operator. Returns an array which consists of
 the original array's elements, repeated `n` times.
 
-
 ### Q::Infix::Cons
 
 A "cons" operator. Given a value and an array, returns a new
 array with the value added as the first element.
 
-
 ### Q::Infix::Assignment
 
 An assignment operator. Puts a value in a storage location.
-
 
 ### Q::Infix::Eq
 
 A string equality test operator.
 
-
 ### Q::Infix::Ne
 
 A string inequality test operator.
-
 
 ### Q::Infix::Gt
 
 A string greater-than test operator.
 
-
 ### Q::Infix::Lt
 
 A string less-than test operator.
-
 
 ### Q::Infix::Ge
 
 A string greater-than-or-equal test operator.
 
-
 ### Q::Infix::Le
 
 A string less-than-or-equal test operator.
-
 
 ### Q::Infix::Or
 
 A short-circuiting disjunction operator; evaluates its right-hand
 side only if the left-hand side is falsy.
 
-
 ### Q::Infix::DefinedOr
 
 A short-circuiting "defined-or" operator. Evaluates its
 right-hand side only if the left-hand side is `None`.
-
 
 ### Q::Infix::And
 
 A short-circuiting "and" operator. Evaluates its
 right-hand side only if the left-hand side is truthy.
 
-
 ### Q::Infix::TypeMatch
 
 A type match operator. Checks if a value on the left-hand side has
 the type on the right-hand side, including subtypes.
-
 
 ### Q::Infix::TypeNonMatch
 
@@ -746,17 +662,14 @@ a type match would return `False`.
 A postfix operator; something like the `[0]` in `agents[0]` that occurs
 after a term.
 
-
 ### Q::Postfix::Index
 
 An indexing operator; returns an array element or object property.
 Arrays expect integer indices and objects expect string property names.
 
-
 ### Q::Postfix::Call
 
 An invocation operator; calls a routine.
-
 
 ### Q::Postfix::Property
 
@@ -767,16 +680,13 @@ An object property operator; fetches a property out of an object.
 
 An unquote; allows Qtree fragments to be inserted into places in a quasi.
 
-
 ### Q::Unquote::Prefix
 
 An unquote which is a prefix operator.
 
-
 ### Q::Unquote::Infix
 
 An unquote which is an infix operator.
-
 
 ### Q::Term::Quasi
 
@@ -810,26 +720,21 @@ A list of zero or more arguments.
 
 A statement.
 
-
 ### Q::Statement::My
 
 A `my` variable declaration statement.
-
 
 ### Q::Statement::Constant
 
 A `constant` declaration statement.
 
-
 ### Q::Statement::Expr
 
 A statement consisting of an expression.
 
-
 ### Q::Statement::If
 
 An `if` statement.
-
 
 ### Q::Statement::Block
 
@@ -841,41 +746,33 @@ A block statement.
 A block-level statement representing a whole compilation unit.
 We can read "compilation unit" here as meaning "file".
 
-
 ### Q::Statement::For
 
 A `for` loop statement.
-
 
 ### Q::Statement::While
 
 A `while` loop statement.
 
-
 ### Q::Statement::Return
 
 A `return` statement.
-
 
 ### Q::Statement::Throw
 
 A `throw` statement.
 
-
 ### Q::Statement::Sub
 
 A subroutine declaration statement.
-
 
 ### Q::Statement::Macro
 
 A macro declaration statement.
 
-
 ### Q::Statement::BEGIN
 
 A `BEGIN` block statement.
-
 
 ### Q::Statement::Class
 
@@ -888,7 +785,6 @@ A list of zero or more statements. Statement lists commonly occur
 directly inside blocks (or at the top level of the program, on the
 compunit level). However, it's also possible for a `quasi` to
 denote a statement list without any surrounding block.
-
 
 ### Q::Expr::StatementListAdapter
 
