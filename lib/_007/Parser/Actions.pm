@@ -1,3 +1,4 @@
+use _007::Val;
 use _007::Q;
 use _007::Parser::Syntax;
 use MONKEY-SEE-NO-EVAL;
