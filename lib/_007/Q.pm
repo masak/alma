@@ -158,8 +158,7 @@ class Q::Property does Q {
 }
 
 class Q::PropertyList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.properties = Val::Array.new;
+    has Val::Array $.properties .= new;
 }
 
 role Q::Declaration {
@@ -174,8 +173,7 @@ class Q::Trait does Q {
 }
 
 class Q::TraitList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.traits = Val::Array.new;
+    has Val::Array $.traits .= new;
 
     method attribute-order { <traits> }
 }
@@ -498,13 +496,11 @@ class Q::Parameter does Q does Q::Declaration {
 }
 
 class Q::ParameterList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.parameters = Val::Array.new;
+    has Val::Array $.parameters .= new;
 }
 
 class Q::ArgumentList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.arguments = Val::Array.new;
+    has Val::Array $.arguments .= new;
 }
 
 role Q::Statement does Q {
@@ -706,8 +702,7 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
 }
 
 class Q::StatementList does Q {
-    # RAKUDO: Can simplify this to `.=` once [RT #126975] is fixed
-    has Val::Array $.statements = Val::Array.new;
+    has Val::Array $.statements .= new;
 
     method run($runtime) {
         for $.statements.elements -> $statement {
