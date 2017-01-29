@@ -1,17 +1,20 @@
 macro format(fmt, args) {
-    sub replaceAll(input, output, transform) {
-        if !input.contains("{") {
-            return output ~ input;
+    sub replaceAll(input, transform) {
+        sub helper(input, output) {
+            if !input.contains("{") {
+                return output ~ input;
+            }
+            my openBracePos = input.index("{");
+            if !input.suffix(openBracePos).contains("}") {
+                return output ~ input;
+            }
+            my closeBracePos = input.suffix(openBracePos).index("}");
+            return helper(
+                input.suffix(openBracePos + closeBracePos + 1),
+                output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)));
         }
-        my openBracePos = input.index("{");
-        if !input.suffix(openBracePos).contains("}") {
-            return output ~ input;
-        }
-        my closeBracePos = input.suffix(openBracePos).index("}");
-        return replaceAll(
-            input.suffix(openBracePos + closeBracePos + 1),
-            output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)),
-            transform);
+
+        return helper(input, "");
     }
 
     sub findHighestIndex(input) {
@@ -45,7 +48,7 @@ macro format(fmt, args) {
     }
 
     return quasi {
-        replaceAll({{{fmt}}}, "", sub transform(arg) {
+        replaceAll({{{fmt}}}, sub transform(arg) {
             return {{{args}}}[+arg];
         });
     }
