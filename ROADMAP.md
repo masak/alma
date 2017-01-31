@@ -92,5 +92,6 @@ a language both extensible, introspectable, and bootstrappable all at once.
 * equality protocol
 * assignment protocol
 * iterator protocol
+* declaration protocol
 * signature binder protocol
 * control flow protocol
