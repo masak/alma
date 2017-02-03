@@ -375,4 +375,19 @@ use _007::Test;
     outputs $program, "", "a quasi doesn't have to return a value";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            return quasi {
+                my x = 7;
+                say(x + 35);
+            }
+        }
+
+        moo();
+        .
+
+    outputs $program, "42\n", "can declare and assign `my` var in quasi (#212)";
+}
+
 done-testing;
