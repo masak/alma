@@ -446,7 +446,7 @@ class Q::Term::Quasi does Q::Term {
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;
 
-            return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
+            return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
                 if $thing ~~ Val::Object;
 
             return $thing
