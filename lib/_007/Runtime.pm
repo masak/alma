@@ -2,11 +2,14 @@ use _007::Val;
 use _007::Q;
 use _007::Runtime::Builtins;
 use _007::OpScope;
+use _007::Instrumentation;
 
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
     :frame(NONE));
+
+my $call-counter = "A";
 
 class _007::Runtime {
     has $.input;
@@ -31,7 +34,7 @@ class _007::Runtime {
         }
     }
 
-    method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
+    method enter($outer-frame, $static-lexpad, $statementlist, $routine?, $caller-line-number = "zero") {
         my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
@@ -61,6 +64,9 @@ class _007::Runtime {
             my $name = $routine.name;
             my $identifier = Q::Identifier.new(:$name, :$frame);
             self.declare-var($identifier, $routine);
+        }
+        if _007::Instrumentation.static-lexpads{$static-lexpad} -> $line-number {
+            _007::Instrumentation.annotate-line($line-number, "call {$call-counter++} from line {$caller-line-number}: frame {_007::Instrumentation.frame-counter++}");
         }
     }
 
@@ -156,7 +162,7 @@ class _007::Runtime {
         if $c.hook -> &hook {
             return &hook(|@arguments) || NONE;
         }
-        self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c);
+        self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c, 17);
         for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }

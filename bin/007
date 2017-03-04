@@ -2,6 +2,7 @@
 use v6;
 use _007;
 use _007::Backend::JavaScript;
+use _007::Instrumentation;
 
 class Ref {
     has Str $.deref;
@@ -18,9 +19,20 @@ constant %BACKENDS = hash
     "js" => ref("javascript"),
     "ast" => -> $ast, $ { say ~$ast },
     "unexpanded-ast" => -> $ast, $ { say ~$ast },
+    "i13n" => -> $ast, $ {
+        my $width = ceiling(log($*program.lines + 1)/log(10));
+        say $*program.lines.kv.map(-> $i, $line {
+            my $line-number = $i + 1;
+            my @lines = _007::Instrumentation.annotations-for-line($line-number);
+            my $indent = ($line ~~ /^ " "*/).chars;
+            @lines.=map({ " " x $width ~ "  " ~ " " x $indent ~ "# " ~ $_ });
+            @lines.push(sprintf "%{$width}d. %s", $line-number, $line);
+            slip(@lines);
+        }).join("\n")
+    },
 ;
 
-sub run_007($program, Str $backend is copy) {
+sub run_007($*program, Str $backend is copy) {
     die "Unknown backend '$backend'"
         unless %BACKENDS{$backend} :exists;
     $backend = %BACKENDS{$backend}.deref
@@ -28,7 +40,7 @@ sub run_007($program, Str $backend is copy) {
 
     my $runtime = _007.runtime;
     my $unexpanded = $backend eq "unexpanded-ast";
-    my $ast = _007.parser(:$runtime).parse($program, :$unexpanded);
+    my $ast = _007.parser(:$runtime).parse($*program, :$unexpanded);
     %BACKENDS{$backend}($ast, $runtime);
 }
 

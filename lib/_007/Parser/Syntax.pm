@@ -1,5 +1,6 @@
 use _007::Val;
 use _007::Q;
+use _007::Instrumentation;
 
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
@@ -19,7 +20,11 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        my $static-lexpad = Val::Object.new;
+        $*runtime.enter($*runtime.current-frame, $static-lexpad, Q::StatementList.new);
+        my $line-number = self.orig.substr(0, self.pos).comb("\n") + 1;
+        _007::Instrumentation.register-static-lexpad($static-lexpad, $line-number);
+        _007::Instrumentation.annotate-line($line-number, "static frame #{_007::Instrumentation.frame-counter++}");
     } }
 
     token finishpad { <?> {
