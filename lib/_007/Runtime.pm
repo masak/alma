@@ -23,6 +23,7 @@ class _007::Runtime {
     }
 
     method run(Q::CompUnit $compunit) {
+        my $*expr-last-statement-value = NONE;
         $compunit.run(self);
         CATCH {
             when X::Control::Return {
