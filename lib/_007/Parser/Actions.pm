@@ -449,6 +449,11 @@ class _007::Parser::Actions {
                         ))
                     );
                 }
+                elsif $expansion ~~ Q::Block {
+                    make Q::Expr::StatementListAdapter.new(
+                        :statementlist($expansion.statementlist)
+                    );
+                }
                 else {
                     make $expansion;
                 }
