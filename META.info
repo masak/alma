@@ -5,6 +5,7 @@
     "authors"   : [ "github:masak" ],
     "description"   : "Small experimental language with a license to macro",
     "depends"   : [],
+    "license"   : "Artistic-2.0",
     "provides" : {
         "_007" : "lib/_007.pm",
         "_007::Backend::JavaScript" : "lib/_007/Backend/JavaScript.pm",
