@@ -454,6 +454,11 @@ class _007::Parser::Actions {
                         :statementlist($expansion.statementlist)
                     );
                 }
+                elsif $expansion === NONE {
+                    make Q::Expr::StatementListAdapter.new(
+                        :statementlist(Q::StatementList.new())
+                    );
+                }
                 else {
                     make $expansion;
                 }

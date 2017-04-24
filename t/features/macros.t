@@ -57,4 +57,20 @@ use _007::Test;
         "cannot assign to a macro (#68)";
 }
 
+{
+    my $program = q:to/./;
+        macro foo() {
+            return None;
+        }
+
+        foo();
+        say("OH HAI");
+        .
+
+    outputs
+        $program,
+        "OH HAI\n",
+        "a macro that returns `None` expands to nothing";
+}
+
 done-testing;
