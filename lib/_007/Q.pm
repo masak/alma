@@ -705,12 +705,10 @@ class Q::StatementList does Q {
     has Val::Array $.statements .= new;
 
     method run($runtime) {
-        my $statement-count = +$.statements.elements;
         for $.statements.elements -> $statement {
             my $value = $statement.run($runtime);
-            my $is-last-statement = ++$ == $statement-count;
-            if $is-last-statement && $statement ~~ Q::Statement::Expr {
-                $*expr-last-statement-value = $value;
+            LAST if $statement ~~ Q::Statement::Expr {
+                return $value;
             }
         }
     }
@@ -720,8 +718,6 @@ class Q::Expr::StatementListAdapter does Q::Expr {
     has $.statementlist;
 
     method eval($runtime) {
-        my $*expr-last-statement-value = NONE;
-        $.statementlist.run($runtime);
-        return $*expr-last-statement-value;
+        return $.statementlist.run($runtime);
     }
 }
