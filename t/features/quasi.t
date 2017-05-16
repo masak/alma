@@ -363,4 +363,16 @@ use _007::Test;
     outputs $program, "1\nBond\n", "the last statement of a quasi becomes the value of the quasi";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            quasi {}
+        };
+
+        moo();
+        .
+
+    outputs $program, "", "a quasi doesn't have to return a value";
+}
+
 done-testing;
