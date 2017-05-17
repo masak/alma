@@ -79,6 +79,10 @@ Two things would be worthy enough to produce a v2.0.0 version. Either 007 being
 bootstrapping enough to have both a runtime and a parser written in itself; or
 007 having all three of regular macros, syntax macros, and visitor macros.
 
+## Examples
+
+XXX Describe how the examples have become a driving force in the issue queue.
+
 ## Various protocols
 
 XXX Will have to describe these protocols more in detail later. All the information
