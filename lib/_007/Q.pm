@@ -226,6 +226,8 @@ class Q::Prefix::Plus is Q::Prefix {}
 
 class Q::Prefix::Minus is Q::Prefix {}
 
+class Q::Prefix::So is Q::Prefix {}
+
 class Q::Prefix::Not is Q::Prefix {}
 
 class Q::Prefix::Upto is Q::Prefix {}

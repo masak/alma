@@ -342,6 +342,12 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             },
             :qtype(Q::Prefix::Minus),
         ),
+        'prefix:?' => op(
+            sub ($a) {
+                return wrap(?$a.truthy)
+            },
+            :qtype(Q::Prefix::So),
+        ),
         'prefix:!' => op(
             sub ($a) {
                 return wrap(!$a.truthy)

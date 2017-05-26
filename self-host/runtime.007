@@ -179,6 +179,9 @@ my Runtime = {
             Q::Prefix::Minus(op) {
                 return -eval(op.operand);
             },
+            Q::Prefix::So(op) {
+                return ?eval(op.operand);
+            },
             Q::Prefix::Not(op) {
                 return !eval(op.operand);
             },

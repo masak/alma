@@ -325,11 +325,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return 42;
         }
 
-        say(?"forty-two");
+        say(¿"forty-two");
         .
 
     outputs $program, "42\n", "declaring and using a prefix op works";
@@ -349,7 +349,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return "prefix is looser";
         }
 
@@ -365,7 +365,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -374,11 +374,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return "prefix is looser";
         }
 
-        sub postfix:<!>(term) is looser(prefix:<?>) {
+        sub postfix:<!>(term) is looser(prefix:<¿>) {
             return "postfix is looser";
         }
 
@@ -390,7 +390,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -403,7 +403,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        sub prefix:<?>(term) is tighter(postfix:<!>) {
+        sub prefix:<¿>(term) is tighter(postfix:<!>) {
             return "prefix is looser";
         }
 
@@ -415,7 +415,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -428,7 +428,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        sub prefix:<?>(term) is equal(postfix:<¡>) {
+        sub prefix:<¿>(term) is equal(postfix:<¡>) {
             return "prefix is looser";
         }
 
@@ -440,7 +440,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        say(?[]¡);
+        say(¿[]¡);
         say(%[]$);
         .
 
@@ -450,13 +450,13 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(left, right) is assoc("non") {
+        sub prefix:<¿>(left, right) is assoc("non") {
         }
 
-        sub postfix:<!>(left, right) is equal(prefix:<?>) {
+        sub postfix:<!>(left, right) is equal(prefix:<¿>) {
         }
 
-        say(?0!);
+        say(¿0!);
         .
 
     parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
