@@ -1,3 +1,4 @@
+use _007;
 use _007::Test <&read &check &ensure-feature-flag>;
 
 my class StrOutput {
