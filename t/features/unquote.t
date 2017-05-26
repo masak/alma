@@ -38,20 +38,20 @@ use _007::Test;
     my $program = q:to/./;
         macro moo() {
             my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
+            return quasi { say(2 {{{Q::Infix @ q}}} 2) };
         }
 
         moo();
         .
 
-    outputs $program, "4\n", "unquote @ Q::Infix";
+    outputs $program, "4\n", "Q::Infix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
             my q = quasi @ Q::Term { "foo" };
-            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
+            return quasi { say(2 {{{Q::Infix @ q}}} 2) };
         }
 
         moo();
@@ -59,14 +59,14 @@ use _007::Test;
 
     parse-error $program,
         X::TypeCheck,
-        "can't put a non-infix in a Q::Infix unquote";
+        "can't put a non-infix in a Q::Infix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
             my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{q @ Q::Term}}} 2) };
+            return quasi { say(2 {{{Q::Term @ q}}} 2) };
         }
 
         moo();
@@ -96,20 +96,20 @@ use _007::Test;
     my $program = q:to/./;
         macro moo() {
             my q = quasi @ Q::Prefix { - };
-            return quasi { say({{{q @ Q::Prefix}}} 17) };
+            return quasi { say({{{Q::Prefix @ q}}} 17) };
         }
 
         moo();
         .
 
-    outputs $program, "-17\n", "unquote @ Q::Prefix";
+    outputs $program, "-17\n", "Q::Prefix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
             my q = quasi @ Q::Term { "foo" };
-            return quasi { say({{{q @ Q::Prefix}}} 17) };
+            return quasi { say({{{Q::Prefix @ q}}} 17) };
         }
 
         moo();
@@ -117,7 +117,7 @@ use _007::Test;
 
     parse-error $program,
         X::TypeCheck,
-        "can't put a non-prefix in a Q::Prefix unquote";
+        "can't put a non-prefix in a Q::Prefix @ unquote";
 }
 
 {
@@ -130,22 +130,22 @@ use _007::Test;
 
         macro moo() {
             my q = quasi @ Q::ArgumentList { 1, "foo", [0, 0, 7] };
-            return quasi { foo({{{q @ Q::ArgumentList}}}) };
+            return quasi { foo({{{Q::ArgumentList @ q}}}) };
         }
 
         moo();
         .
 
-    outputs $program, "1\nfoo\n[0, 0, 7]\n", "unquote @ Q::ArgumentList";
+    outputs $program, "1\nfoo\n[0, 0, 7]\n", "Q::ArgumentList @ unquote";
 }
 
 {
     my $program = q:to/./;
         my q = quasi @ Q::CompUnit { say("James"); };
-        say(type(quasi @ Q::CompUnit { {{{q @ Q::CompUnit}}} }));
+        say(type(quasi @ Q::CompUnit { {{{Q::CompUnit @ q}}} }));
         .
 
-    outputs $program, "<type Q::CompUnit>\n", "unquote @ Q::CompUnit";
+    outputs $program, "<type Q::CompUnit>\n", "Q::CompUnit @ q";
 }
 
 done-testing;

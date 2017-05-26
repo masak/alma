@@ -247,9 +247,9 @@ grammar _007::Parser::Syntax {
 
     token unquote($type?) {
         '{{{'
-        <EXPR>
-        [:s "@" <identifier> ]?
+        [:s <identifier> "@" ]?
         <?{ !$type || ($<identifier> // "") eq $type }>
+        <EXPR>
         '}}}'
     }
 
