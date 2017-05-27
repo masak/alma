@@ -72,7 +72,16 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2)) (identifier "size")) (argumentlist))))))
         .
 
-    is-result $ast, "2\n", "size() works";
+    is-result $ast, "2\n", "size() works -- Array";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (object (identifier "Object") (propertylist)) (identifier "size")) (argumentlist))))))
+        .
+
+    is-result $ast, "0\n", "size() works -- Object";
 }
 
 {

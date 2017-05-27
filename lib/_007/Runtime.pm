@@ -298,6 +298,11 @@ class _007::Runtime {
                 return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
             });
         }
+        elsif $obj ~~ Val::Object && $propname eq "size" {
+            return builtin(sub size() {
+                return Val::Int.new(:value($obj.properties.elems));
+            });
+        }
         elsif $obj ~~ Val::Str && $propname eq "split" {
             return builtin(sub split($sep) {
                 my @elements = (Val::Str.new(:value($_)) for $obj.value.split($sep.value));
