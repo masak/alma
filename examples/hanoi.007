@@ -14,7 +14,7 @@ my state = [
 ];
 
 sub tw(n, L) {
-    my e = state[n].elems();
+    my e = state[n].size();
     if L >= e {
         return PIN;
     }

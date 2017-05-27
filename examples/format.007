@@ -40,7 +40,7 @@ macro format(fmt, args) {
 
     if fmt ~~ Q::Literal::Str && args ~~ Q::Term::Array {
         my highestUsedIndex = findHighestIndex(fmt.value);
-        my argCount = args.elements.elems();
+        my argCount = args.elements.size();
         if argCount <= highestUsedIndex {
             throw new Exception { message: "Highest index was " ~ ~highestUsedIndex
                 ~ " but got only " ~ ~argCount ~ " arguments." };

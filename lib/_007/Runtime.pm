@@ -266,8 +266,8 @@ class _007::Runtime {
                 return Val::Str.new(:value($obj.value.trim));
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "elems" {
-            return builtin(sub elems() {
+        elsif $obj ~~ Val::Array && $propname eq "size" {
+            return builtin(sub size() {
                 return Val::Int.new(:value($obj.elements.elems));
             });
         }

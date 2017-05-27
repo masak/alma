@@ -1,5 +1,5 @@
 sub quicksort(array) {
-    if array.elems() > 1 {
+    if array.size() > 1 {
         my pivot = array[0];
         my less = [];
         my equal = [];

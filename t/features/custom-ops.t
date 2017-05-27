@@ -511,7 +511,7 @@ use _007::Test;
         }
 
         sub prefix:<$>(x) {
-            return x.elems();
+            return x.size();
         }
 
         say($^5‡);

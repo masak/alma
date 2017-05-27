@@ -196,7 +196,7 @@ use _007::Test;
         };
 
         say(type(q));
-        say(q.properties.elems());
+        say(q.properties.size());
         .
 
     outputs $program, "<type Q::PropertyList>\n4\n", "quasi @ Q::PropertyList";

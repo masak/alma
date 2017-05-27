@@ -69,10 +69,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2)) (identifier "elems")) (argumentlist))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2)) (identifier "size")) (argumentlist))))))
         .
 
-    is-result $ast, "2\n", "elems() works";
+    is-result $ast, "2\n", "size() works";
 }
 
 {

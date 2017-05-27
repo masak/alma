@@ -31,7 +31,7 @@ my Runtime = {
             if !frames {
                 return NO_OUTER;
             }
-            return frames[frames.elems() - 1];
+            return frames[frames.size() - 1];
         }
 
         sub find_pad(symbol) {
@@ -64,8 +64,8 @@ my Runtime = {
         }
 
         sub sigbind(c, arguments) {
-            my paramcount = c.parameterlist.parameters.elems();
-            my argcount = arguments.elems();
+            my paramcount = c.parameterlist.parameters.size();
+            my argcount = arguments.size();
             if paramcount != argcount {
                 throw new Exception { message: "parameter mismatch" };
             }
