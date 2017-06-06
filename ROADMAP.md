@@ -16,6 +16,62 @@ have downstream consumers. It's not even meant to be a real, usable language.
 For the purposes of this roadmap, however, the versions are a way to structure
 milestones and hang important features off of them.
 
+## Driving examples
+
+After most of the rest of the roadmap was written, one issue in particular
+emerged as setting the agenda for what needs to be done short-term with 007:
+#194. It has proved to be important because it re-focuses 007 to get useful
+and usable macros ASAP.
+
+Here's the current proposed order of macro examples to tackle:
+
+* An `infix:<ff>` macro, same as Perl 6's operator. This macro hits a sweet
+  spot of being simple and also clearly needing to be a macro. It ends up
+  being code with some private state, since hitting the same `ff` expression
+  several times will have results depending on what has happened to that
+  expression before. (#207)
+
+* A `swap` macro. Takes two lvalues and swaps their contents. The term
+  "lvalue" here is significant, as these need to be assignable. (That's also
+  why a simple sub wouldn't be enough in this case, since we have
+  call-by-value.) This macro needs the assignment protocol to be in place in
+  order to work fully. (#218)
+
+* Reduction metaoperator, such as `[+](1, 2, 3)`. In 007, the `[+]` would
+  parse into a code-generated anonymous subroutine. This one is interesting
+  for two reasons. First, it *really* uses closures and hygiene all-out.
+  Second, it requires `is parsed` to be implemented enough to pass the `+`
+  part of `[+]` as a parameter to the macro so that it can be part of the
+  generated code. (#176)
+
+* `postfix:<++>` and family; a total of four operators. Also requires the
+  assignment protocol. (#122)
+
+* `+=` assignment operators and family. Requires both the assignment
+  protocol and `is parsed`. (#152)
+
+* `.=` mutating method call. Also requires both the assignment protocol and
+  `is parsed`. (#203)
+
+* Unbound methods. Something like `unbound .abs()` to denote the longer
+  `sub (obj) { return obj.abs(); }`. (#202)
+
+* Arrow functions. Something like `x => x * x` to denote the longer
+  `sub (x) { return x * x; }`. (#215)
+
+* Ternary operator `?? !!`. Also needs `is parsed`. (#163)
+
+* `each()` macro. This one is interesting because it's build using a
+  statement macro inside of it. (#158)
+
+These are features/bug fixes that will need to be in place for the above to
+work:
+
+* Allowing declarations in macro expansions. (#212)
+* The assignment protocol. (See below.) (#214)
+* `is parsed`, or at least enough of it. (#177)
+* Various Qnode introspection and manipulation. (No issue for this yet.)
+
 ## Pre-v1.0.0
 
 Work on 007 falls into two main tracks:
@@ -78,10 +134,6 @@ expected areas of focus after v1.0.0.
 Two things would be worthy enough to produce a v2.0.0 version. Either 007 being
 bootstrapping enough to have both a runtime and a parser written in itself; or
 007 having all three of regular macros, syntax macros, and visitor macros.
-
-## Examples
-
-XXX Describe how the examples have become a driving force in the issue queue.
 
 ## Various protocols
 
