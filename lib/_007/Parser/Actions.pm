@@ -73,7 +73,7 @@ class X::Property::Duplicate is Exception {
 }
 
 class _007::Parser::Actions {
-    method finish-block($block) {
+    sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
         $*runtime.leave;
     }
@@ -88,7 +88,7 @@ class _007::Parser::Actions {
             :statementlist($<statementlist>.ast)
         )));
         make $cu;
-        self.finish-block($cu.block);
+        finish-block($cu.block);
     }
 
     method statementlist($/) {
@@ -194,7 +194,7 @@ class _007::Parser::Actions {
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         my $static-lexpad = $*runtime.current-frame.properties<pad>;
-        self.finish-block($block);
+        finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val;
@@ -279,7 +279,7 @@ class _007::Parser::Actions {
             :parameterlist(Q::ParameterList.new),
             :statementlist($<blockoid>.ast));
         make $block;
-        self.finish-block($block);
+        finish-block($block);
     }
     method pblock ($/) {
         if $<parameterlist> {
@@ -287,7 +287,7 @@ class _007::Parser::Actions {
                 :parameterlist($<parameterlist>.ast),
                 :statementlist($<blockoid>.ast));
             make $block;
-            self.finish-block($block);
+            finish-block($block);
         } else {
             make $<block>.ast;
         }
@@ -325,11 +325,16 @@ class _007::Parser::Actions {
             }
 
             if $expansion ~~ Q::StatementList {
-                $expansion = Q::Expr::BlockAdapter.new(:statementlist($expansion));
+                $*runtime.enter($*runtime.current-frame, Val::Object.new, $expansion);
+                $expansion = Q::Block.new(
+                    :parameterlist(Q::ParameterList.new())
+                    :statementlist($expansion));
+                finish-block($expansion);
+
             }
 
             if $expansion ~~ Q::Block {
-                $expansion = Q::Expr::BlockAdapter.new(:statementlist($expansion.statementlist));
+                $expansion = Q::Expr::BlockAdapter.new(:block($expansion));
             }
 
             return $expansion;
@@ -672,7 +677,7 @@ class _007::Parser::Actions {
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
         }
-        self.finish-block($block);
+        finish-block($block);
 
         my $name = $<identifier>.ast.name;
         my $identifier = $<identifier>
@@ -758,7 +763,7 @@ class _007::Parser::Actions {
         my $identifier = Q::Identifier.new(:$name);
         make Q::Property.new(:key($name), :value(
             Q::Term::Sub.new(:$identifier, :$block)));
-        self.finish-block($block);
+        finish-block($block);
     }
 
     method infix($/) {
