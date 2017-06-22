@@ -1084,9 +1084,9 @@ class Q::StatementList does Q {
 ### value is the value of the whole containing expression.
 ###
 class Q::Expr::BlockAdapter does Q::Expr {
-    has $.statementlist;
+    has $.block;
 
     method eval($runtime) {
-        return $.statementlist.run($runtime);
+        return $.block.statementlist.run($runtime);
     }
 }
