@@ -1069,21 +1069,21 @@ class Q::StatementList does Q {
     }
 }
 
-### ### Q::Expr::StatementListAdapter
+### ### Q::Expr::BlockAdapter
 ###
-### An expression which holds a statement list. Surprisingly, this never
+### An expression which holds a block. Surprisingly, this never
 ### happens in the source code text itself; because of 007's grammar, an
-### expression can never consist of a list of statements.
+### expression can never consist of a block.
 ###
 ### However, it can happen as a macro call (an expression) expands into
-### a statement list; that's when this Qtype is used.
+### a block of one or more statements; that's when this Qtype is used.
 ###
-### Semantically, the contained statement list is executed normally, and
+### Semantically, the block is executed normally, and
 ### if execution evaluates the last statement and the statement turns out
 ### to have a value (because it's an expression statement), then this
 ### value is the value of the whole containing expression.
 ###
-class Q::Expr::StatementListAdapter does Q::Expr {
+class Q::Expr::BlockAdapter does Q::Expr {
     has $.statementlist;
 
     method eval($runtime) {
