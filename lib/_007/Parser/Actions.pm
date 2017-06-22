@@ -325,11 +325,11 @@ class _007::Parser::Actions {
             }
 
             if $expansion ~~ Q::StatementList {
-                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion));
+                $expansion = Q::Expr::BlockAdapter.new(:statementlist($expansion));
             }
 
             if $expansion ~~ Q::Block {
-                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion.statementlist));
+                $expansion = Q::Expr::BlockAdapter.new(:statementlist($expansion.statementlist));
             }
 
             return $expansion;
