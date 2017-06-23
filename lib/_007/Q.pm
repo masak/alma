@@ -1176,6 +1176,9 @@ class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
 
     method eval($runtime) {
-        return $.block.statementlist.run($runtime);
+        $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
+        my $result = $.block.statementlist.run($runtime);
+        $runtime.leave;
+        return $result;
     }
 }
