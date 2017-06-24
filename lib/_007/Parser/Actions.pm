@@ -299,6 +299,43 @@ class _007::Parser::Actions {
         };
     }
 
+    sub is-macro($q, $qtype, $identifier) {
+        $q ~~ $qtype
+            && $identifier ~~ Q::Identifier
+            && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ Val::Macro
+            && $macro;
+    }
+
+    sub expand($macro, @arguments, &unexpanded-callback:()) {
+        my $expansion = $*runtime.call($macro, @arguments);
+
+        if $expansion ~~ Q::Statement::My {
+            _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);
+        }
+
+        if $*unexpanded {
+            return &unexpanded-callback();
+        }
+        else {
+            if $expansion ~~ Q::Statement {
+                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([$expansion]))));
+            }
+            elsif $expansion === NONE {
+                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([]))));
+            }
+
+            if $expansion ~~ Q::StatementList {
+                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion));
+            }
+
+            if $expansion ~~ Q::Block {
+                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion.statementlist));
+            }
+
+            return $expansion;
+        }
+    }
+
     method EXPR($/) {
         sub name($op) {
             $op.identifier.name.value;
@@ -332,15 +369,9 @@ class _007::Parser::Actions {
                 return;
             }
 
-            my $c = $*runtime.maybe-get-var($infix.identifier.name.value);
-            if $c ~~ Val::Macro {
-                my $expansion = $*runtime.call($c, [$t1, $t2]);
-                if $*unexpanded {
-                    @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
-                }
-                else {
-                    @termstack.push($expansion);
-                }
+            if my $macro = is-macro($infix, Q::Infix, $infix.identifier) {
+                @termstack.push(expand($macro, [$t1, $t2],
+                    -> { $infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)) }));
             }
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
@@ -410,15 +441,9 @@ class _007::Parser::Actions {
                 return;
             }
 
-            my $c = $*runtime.maybe-get-var($prefix.identifier.name.value);
-            if $c ~~ Val::Macro {
-                my $expansion = $*runtime.call($c, [$/.ast]);
-                if $*unexpanded {
-                    make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
-                }
-                else {
-                    make $expansion;
-                }
+            if my $macro = is-macro($prefix, Q::Prefix, $prefix.identifier) {
+                make expand($macro, [$/.ast],
+                    -> { $prefix.new(:operand($/.ast), :identifier($prefix.identifier)) });
             }
             else {
                 make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
@@ -428,40 +453,9 @@ class _007::Parser::Actions {
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
-            # XXX: factor the logic that checks for macro call out into its own helper sub
-            if $postfix ~~ Q::Postfix::Call
-            && $/.ast ~~ Q::Identifier
-            && (my $macro = $*runtime.maybe-get-var($/.ast.name.value)) ~~ Val::Macro {
-                my @arguments = $postfix.argumentlist.arguments.elements;
-                my $expansion = $*runtime.call($macro, @arguments);
-
-                if $expansion ~~ Q::Statement::My {
-                    _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);
-                }
-
-                if $*unexpanded {
-                    make $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist));
-                }
-                elsif $expansion ~~ Q::Statement {
-                    make Q::Expr::StatementListAdapter.new(
-                        :statementlist(Q::StatementList.new(
-                            :statements(Val::Array.new(:elements([$expansion])))
-                        ))
-                    );
-                }
-                elsif $expansion ~~ Q::Block {
-                    make Q::Expr::StatementListAdapter.new(
-                        :statementlist($expansion.statementlist)
-                    );
-                }
-                elsif $expansion === NONE {
-                    make Q::Expr::StatementListAdapter.new(
-                        :statementlist(Q::StatementList.new())
-                    );
-                }
-                else {
-                    make $expansion;
-                }
+            if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
+                make expand($macro, $postfix.argumentlist.arguments.elements,
+                    -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
             }
             elsif $postfix ~~ Q::Postfix::Index {
                 make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));
@@ -473,15 +467,9 @@ class _007::Parser::Actions {
                 make $postfix.new(:$identifier, :operand($/.ast), :property($postfix.property));
             }
             else {
-                my $c = $*runtime.maybe-get-var($postfix.identifier.name.value);
-                if $c ~~ Val::Macro {
-                    my $expansion = $*runtime.call($c, [$/.ast]);
-                    if $*unexpanded {
-                        make $postfix.new(:$identifier, :operand($/.ast));
-                    }
-                    else {
-                        make $expansion;
-                    }
+                if my $macro = is-macro($postfix, Q::Postfix, $identifier) {
+                    make expand($macro, [$/.ast],
+                        -> { $postfix.new(:$identifier, :operand($/.ast)) });
                 }
                 else {
                     make $postfix.new(:$identifier, :operand($/.ast));
