@@ -753,7 +753,11 @@ class Q::Term::Quasi does Q::Term {
                 aname($attr) => interpolate(avalue($attr, $thing))
             };
 
-            $thing.new(|%attributes);
+            my $new-thing = $thing.new(|%attributes);
+            if $thing ~~ Q::Block {
+                $new-thing.static-lexpad = $thing.static-lexpad;
+            }
+            $new-thing;
         }
 
         if $.qtype.value eq "Q::Unquote" && $.contents ~~ Q::Unquote {
@@ -1087,7 +1091,9 @@ class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
 
     method eval($runtime) {
+        say "A";
         $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
+        say "B";
         my $result = $.block.statementlist.run($runtime);
         $runtime.leave;
         return $result;

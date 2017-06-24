@@ -33,12 +33,15 @@ class _007::Runtime {
 
     method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
         my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
+        say "Entering frame {$frame.WHICH}";
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
+            say "copying name from static lexpad: $name, {$value.perl.substr(0, 20)}";
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(NONE));
             self.declare-var($identifier, $value);
+            say "  $name is now declared. local pad has {+self.current-frame.properties<pad>.properties.keys} entries";
         }
         for $statementlist.statements.elements.kv -> $i, $_ {
             when Q::Statement::Sub {
@@ -65,7 +68,8 @@ class _007::Runtime {
     }
 
     method leave {
-        @!frames.pop;
+        my $frame = @!frames.pop;
+        say "Exiting frame {$frame.WHICH}";
     }
 
     method unroll-to($frame) {
@@ -84,12 +88,19 @@ class _007::Runtime {
     }
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
+        say "Looking up $symbol";
         if $frame ~~ Val::NoneType {    # XXX: make a `defined` method on NoneType so we can use `//`
             $frame = self.current-frame;
+            say "it didn't have its own frame";
+        }
+        else {
+            say "it had its own frame: {$frame.WHICH}";
         }
         repeat until $frame === NO_OUTER {
+            say "  looking in frame {$frame.WHICH} with pad {+$frame.properties<pad>.properties.keys} names: {$frame.properties<pad>.properties.keys.join(", ").substr(0, 20)}";
             return $frame.properties<pad>
                 if $frame.properties<pad>.properties{$symbol} :exists;
+            say "  ...not found here";
             $frame = $frame.properties<outer-frame>;
         }
         die X::ControlFlow::Return.new
