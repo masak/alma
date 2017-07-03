@@ -201,7 +201,7 @@ The contact gets an abstracted look. "But wait, won't there be weird and interes
 
 *Office.*
 
-"Interesting," says Bond. "I wonder what Bill Murray would have done in a situation like this? Hold on, let me try something else..."
+"Interesting," says Bond. "I wonder what Phil Connors would have done in a situation like this? Hold on, let me try something else..."
 
 ---
 
