@@ -20,7 +20,7 @@ milestones and hang important features off of them.
 
 After most of the rest of the roadmap was written, one issue in particular
 emerged as setting the agenda for what needs to be done short-term with 007:
-#194. It has proved to be important because it re-focuses 007 to get useful
+[#194](https://github.com/masak/007/issues/194). It has proved to be important because it re-focuses 007 to get useful
 and usable macros ASAP.
 
 Here's the current proposed order of macro examples to tackle:
