@@ -147,7 +147,7 @@ a language both extensible, introspectable, and bootstrappable all at once.
 * boolification protocol
 * equality protocol
 * assignment protocol
-* iterator protocol
+* loop protocol
 * declaration protocol
 * signature binder protocol
 * control flow protocol
