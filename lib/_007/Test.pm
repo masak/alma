@@ -419,6 +419,19 @@ sub ensure-feature-flag($flag) is export {
     }
 }
 
+sub find($dir, Regex $pattern) is export {
+    my @targets = dir($dir);
+    my @files;
+    while @targets {
+        my $file = @targets.shift;
+        push @files, $file if $file ~~ $pattern;
+        if $file.IO ~~ :d {
+            @targets.append: dir($file);
+        }
+    }
+    return @files;
+}
+
 our sub EXPORT(*@things) {
     my %exports;
     for @things -> $thing {

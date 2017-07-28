@@ -1,18 +1,6 @@
 use v6;
 use Test;
-
-sub find($dir, Regex $pattern) {
-    my @targets = dir($dir);
-    my @files;
-    while @targets {
-        my $file = @targets.shift;
-        push @files, $file if $file ~~ $pattern;
-        if $file.IO ~~ :d {
-            @targets.append: dir($file);
-        }
-    }
-    return @files;
-}
+use _007::Test;
 
 my $files = find(".", /[".pm" | ".t"] $/)\
     .grep({ $_ !~~ / "no-commented-out-debug-code.t" / })\
