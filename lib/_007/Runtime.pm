@@ -162,7 +162,7 @@ class _007::Runtime {
         }
         self.register-subhandler;
         my $frame = self.current-frame;
-        $c.statementlist.run(self);
+        my $value = $c.statementlist.run(self);
         self.leave;
         CATCH {
             when X::Control::Return {
@@ -171,7 +171,7 @@ class _007::Runtime {
                 return .value;
             }
         }
-        return NONE;
+        $value || NONE
     }
 
     method property($obj, Str $propname) {

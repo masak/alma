@@ -58,4 +58,14 @@ use _007::Test;
     is-result $ast, "None\n", "sub returning nothing";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stsub (identifier "f") (block (parameterlist) (statementlist
+            (stexpr (int 7)))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+        .
+
+    is-result $ast, "7\n", "sub returning implicitly";
+}
 done-testing;
