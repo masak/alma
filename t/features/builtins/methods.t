@@ -334,17 +334,6 @@ use _007::Test;
     my $program = q:to/./;
         (statementlist
           (my (identifier "r") (regex "hey"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (str "hey"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (str "hi")))))))
-        .
-
-    is-result $program, "True\nFalse\n", "Regex.fullmatch() works positively and negatively";
-}
-
-{
-    my $program = q:to/./;
-        (statementlist
-          (my (identifier "r") (regex "hey"))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (str "Oh, hey you!"))))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (str "Well, hi there.")))))))
         .
