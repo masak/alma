@@ -19,6 +19,32 @@ ensure-feature-flag("REGEX");
 
     outputs $program, "True\n", "Regexes are truthy";
 }
+{
+    my $program = q:to/./;
+        say(/"abc" "def"/.fullmatch("abcdef")); #True
+        say(/"abc" "def"/.fullmatch("abcde")); #False
+        say(/"abc"? "def"?/.fullmatch("")); #True
+        say(/"abc"? "def"?/.fullmatch("abc")); #True
+        say(/"abc"? "def"?/.fullmatch("abcdef")); #True
+        say(/"abc"? "def"?/.fullmatch("def")); #True
+        say(/"abc"? "def"?/.fullmatch("defxyz")); #False
+        say(/"abc" "def"+/.fullmatch("abc")); #False
+        say(/"abc" "def"+/.fullmatch("abcdef")); #True
+        say(/"abc" "def"+/.fullmatch("abcdefdefdef")); #True
+        say(/"abc" ["def"+ "xyz"]/.fullmatch("abcdefdefdefxyz")); #True
+        say(/"abc" ["def"+ "xyz"]/.fullmatch("abcdefdefdefxy")); #False
+        say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abc|")); #True
+        say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcxyz|")); #True
+        say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdef|")); #True
+        say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxyz|defdef|")); #True
+        say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxy|")); #False
+        .
+
+    my $expected = ($program ~~ m:g['#' (\w+)]).map(*.[0].Str);
+    #my $expected = $program.lines.map(*.split('#')[1]);
+
+    outputs $program, $expected.join("\n")~"\n", "Some regexes test";
+}
 
 {
     my $program = q:to/./;
