@@ -215,6 +215,14 @@ class Q::Regex::Call does Q::Regex::Fragment {
     has Q::Identifier $.identifier;
 }
 
+### ### Q::Regex::Alternation
+###
+### An alternation between fragments.
+###
+class Q::Regex::Alternation does Q::Regex::Fragment {
+    has Q::Regex::Fragment @.alternatives;
+}
+
 ### ### Q::Regex::Group
 ###
 ### A regex fragment containing several other fragments.
@@ -253,10 +261,10 @@ class Q::Regex::ZeroOrOne does Q::Regex::Fragment {
 ### A regular expression (*regex*).
 ###
 class Q::Term::Regex does Q::Term {
-    has Q::Regex::Fragment @.contents;
+    has Q::Regex::Fragment $.contents;
 
     method eval($runtime) {
-        Val::Regex.new(:@.contents);
+        Val::Regex.new(:$.contents);
     }
 }
 

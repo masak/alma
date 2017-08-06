@@ -552,7 +552,15 @@ class _007::Parser::Actions {
         make $<EXPR>.ast;
     }
 
-    method regex-quantified ($/) {
+    method regex-part($/) {
+        make Q::Regex::Alternation.new(:alternatives($<regex-group>».ast));
+    }
+
+    method regex-group($/) {
+        make Q::Regex::Group.new(:fragments($<regex-quantified>».ast));
+    }
+
+    method regex-quantified($/) {
         given $<quantifier>.Str {
             when ''  { make $<regex-fragment>.ast }
             when '+'  { make Q::Regex::OneOrMore.new(:fragment($<regex-fragment>.ast)) }
@@ -575,11 +583,11 @@ class _007::Parser::Actions {
     }
 
     method regex-fragment:group ($/) {
-        make Q::Regex::Group.new(:fragments($<regex-quantified>».ast));
+        make $<regex-part>.ast;
     }
 
     method term:regex ($/) {
-        make Q::Term::Regex.new(:contents($<regex-quantified>».ast));
+        make Q::Term::Regex.new(:contents($<regex-part>.ast));
     }
 
     method term:identifier ($/) {

@@ -38,6 +38,9 @@ ensure-feature-flag("REGEX");
         'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdef|"));' => True,
         'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxyz|defdef|"));' => True,
         'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxy|"));' => False,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzde"));' => False,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzxydef"));' => False,
         ;
 
     for %programs.kv -> $program, $result {
