@@ -231,24 +231,24 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
-        elsif $obj ~~ Val::Int && $propname eq "abs" {
+        elsif $obj ~~ _007::Object && $propname eq "abs" {
             return builtin(sub abs() {
-                return Val::Int.new(:value($obj.value.abs));
+                return sevenize($obj.value.abs);
             });
         }
-        elsif $obj ~~ Val::Int && $propname eq "chr" {
+        elsif $obj ~~ _007::Object && $propname eq "chr" {
             return builtin(sub chr() {
                 return Val::Str.new(:value($obj.value.chr));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "ord" {
             return builtin(sub ord() {
-                return Val::Int.new(:value($obj.value.ord));
+                return sevenize($obj.value.ord);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "chars" {
             return builtin(sub chars() {
-                return Val::Int.new(:value($obj.value.chars));
+                return sevenize($obj.value.chars);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "uc" {
@@ -268,7 +268,7 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "size" {
             return builtin(sub size() {
-                return Val::Int.new(:value($obj.elements.elems));
+                return sevenize($obj.elements.elems);
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "reverse" {
@@ -300,7 +300,7 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Object && $propname eq "size" {
             return builtin(sub size() {
-                return Val::Int.new(:value($obj.properties.elems));
+                return sevenize($obj.properties.elems);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "split" {
@@ -311,7 +311,7 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Str && $propname eq "index" {
             return builtin(sub index($substr) {
-                return Val::Int.new(:value($obj.value.index($substr.value) // -1));
+                return sevenize($obj.value.index($substr.value) // -1);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "substr" {
@@ -326,7 +326,7 @@ class _007::Runtime {
                 die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
                     unless $substr ~~ Val::Str;
 
-                return Val::Int.new(:value(
+                return Val::Bool.new(:value(
                         $obj.value.contains($substr.value);
                 ));
             });
@@ -412,8 +412,16 @@ class _007::Runtime {
                 return NONE;
             });
         }
-        elsif $obj ~~ Val::Type && $propname eq "name" {
+        elsif $obj ~~ _007::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
+        }
+        elsif $obj ~~ Val::Type | _007::Type && $propname eq "name" {
+            return Val::Str.new(:value($obj.name));
+        }
+        elsif $obj ~~ _007::Type && $propname eq "create" {
+            return builtin(sub create($properties) {
+                _007::Object.new(:value($properties.elements[0].elements[1].value));
+            });
         }
         elsif $obj ~~ Val::Type && $propname eq "create" {
             return builtin(sub create($properties) {
@@ -466,7 +474,7 @@ class _007::Runtime {
         }
         elsif $propname eq "id" {
             # XXX: Make this work for Q-type objects, too.
-            return Val::Int.new(:value($obj.id));
+            return sevenize($obj.id);
         }
         else {
             die X::Property::NotFound.new(:$propname, :$type);

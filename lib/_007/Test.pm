@@ -122,7 +122,7 @@ sub read(Str $ast) is export {
             make $qtype.new(|%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
-        method expr:int ($/) { make Val::Int.new(:value(+$/)) }
+        method expr:int ($/) { make sevenize(+$/) }
         method expr:str ($/) { make Val::Str.new(:value((~$0).subst(q[\\"], q["], :g))) }
     };
 

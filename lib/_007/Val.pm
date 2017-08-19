@@ -8,6 +8,35 @@ class X::Uninstantiable is Exception {
 
 class Helper { ... }
 
+class _007::Type {
+    has $.name;
+
+    method quoted-Str { self.Str }
+    method Str {
+        my %*stringification-seen;
+        Helper::Str(self);
+    }
+}
+
+constant TYPE_TYPE = _007::Type.new(:name("Type"));
+constant TYPE_INT = _007::Type.new(:name("Int"));
+
+class _007::Object {
+    has $.type;
+    has $.value;
+
+    method attributes { () }
+
+    method truthy { ?$.value }
+
+    method quoted-Str { self.Str }
+    method Str { ~($.value // "EMPTY") }
+}
+
+sub sevenize($value) is export {
+    _007::Object.new(:type(TYPE_INT), :$value);
+}
+
 role Val {
     method truthy { True }
     method attributes { self.^attributes }
@@ -144,6 +173,10 @@ class Val::Bool does Val {
 ###
 class Val::Int does Val {
     has Int $.value;
+
+    submethod BUILD(:$value) {
+        die "Not supposed to use this class anymore";
+    }
 
     method truthy {
         ?$.value;
@@ -460,7 +493,10 @@ class Val::Type does Val {
         if $.type ~~ Val::Object {
             return $.type.new(:@properties);
         }
-        elsif $.type ~~ Val::Int | Val::Str {
+        elsif $.type ~~ _007::Object {
+            return $.type.new(:value(@properties[0].value.value));
+        }
+        elsif $.type ~~ Val::Str {
             return $.type.new(:value(@properties[0].value.value));
         }
         elsif $.type ~~ Val::Array {
@@ -572,6 +608,8 @@ class Helper {
         when Val::Array { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
+        when _007::Type { "<type {.name}>" }
+        when _007::Object { .value.Str }    # XXX: wrong in the general case
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }

@@ -137,7 +137,7 @@ class Q::Literal::Bool does Q::Literal {
 ### like `-5` is parsed as a `prefix:<->` containing a literal `5`.
 ###
 class Q::Literal::Int does Q::Literal {
-    has Val::Int $.value;
+    has _007::Object $.value;
 
     method eval($) { $.value }
 }
@@ -209,6 +209,12 @@ class Q::Term::Object does Q::Term {
     has $.propertylist;
 
     method eval($runtime) {
+        my $type = $runtime.get-var($.type.name.value, $.type.frame);
+        if $type ~~ _007::Type {
+            my $value = $.propertylist.properties.elements[0].value.eval($runtime);
+            # XXX: cheat less
+            return $value;
+        }
         return $runtime.get-var($.type.name.value, $.type.frame).create(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
         );
@@ -580,7 +586,7 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ Val::Int;
+                    if $index !~~ _007::Object;
                 die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
                     if $index.value >= .elements;
                 die X::Subscript::Negative.new(:$index, :type([]))
@@ -603,7 +609,7 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ Val::Int;
+                    if $index !~~ _007::Object;
                 die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
                     if $index.value >= .elements;
                 die X::Subscript::Negative.new(:$index, :type([]))
@@ -717,6 +723,9 @@ class Q::Term::Quasi does Q::Term {
 
     method eval($runtime) {
         sub interpolate($thing) {
+            return $thing
+                if $thing ~~ _007::Object;      # XXX: won't hold true for everything
+
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;
 

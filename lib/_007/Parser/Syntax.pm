@@ -219,7 +219,7 @@ grammar _007::Parser::Syntax {
     }
     token term:new-object {
         new» <.ws>
-        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>
+        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type | _007::Type }> <.ws>
         '{' ~ '}' <propertylist>
     }
     token term:object {

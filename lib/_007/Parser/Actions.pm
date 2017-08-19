@@ -537,7 +537,7 @@ class _007::Parser::Actions {
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(Val::Int.new(:value(+$/))));
+        make Q::Literal::Int.new(:value(sevenize(+$/)));
     }
 
     method term:str ($/) {
@@ -656,9 +656,16 @@ class _007::Parser::Actions {
 
     method term:new-object ($/) {
         my $type = $<identifier>.ast.name.value;
-        my $type-obj = $*runtime.get-var($type).type;
+        my $type-var = $*runtime.get-var($type);
+        my $type-obj = $type-var ~~ _007::Type
+            ?? $type-var
+            !! $type-var.type;
 
-        if $type-obj !=== Val::Object {
+        if $type-obj ~~ _007::Type {
+            # XXX: need to figure out how to do the corresponding error handling here
+            # something with .fields, most likely?
+        }
+        elsif $type-obj !=== Val::Object {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
