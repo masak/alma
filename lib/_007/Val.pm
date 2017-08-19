@@ -18,8 +18,9 @@ class _007::Type {
     }
 }
 
-constant TYPE_TYPE = _007::Type.new(:name("Type"));
-constant TYPE_INT = _007::Type.new(:name("Int"));
+constant TYPE = {};
+TYPE<Type> = _007::Type.new(:name("Type"));
+TYPE<Int> = _007::Type.new(:name("Int"));
 
 class _007::Object {
     has $.type;
@@ -34,7 +35,7 @@ class _007::Object {
 }
 
 sub sevenize($value) is export {
-    _007::Object.new(:type(TYPE_INT), :$value);
+    _007::Object.new(:type(TYPE<Int>), :$value);
 }
 
 role Val {

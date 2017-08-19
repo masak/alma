@@ -111,7 +111,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         },
         type => sub ($arg) {
             $arg ~~ _007::Type
-                ?? TYPE_TYPE
+                ?? TYPE<Type>
                 !! $arg ~~ _007::Object
                     ?? $arg.type
                     !! Val::Type.of($arg.WHAT);
@@ -400,7 +400,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     tree-walk(Val::);
     tree-walk(Q::);
     push @builtins, "Q" => Val::Type.of(Q);
-    push @builtins, ("Int" => TYPE_INT);
+    push @builtins, ("Int" => TYPE<Int>);
 
     sub install-op($name, $placeholder) {
         $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/
