@@ -145,44 +145,6 @@ class Val::Bool does Val {
     }
 }
 
-### ### Int
-###
-### An whole number value, such as -8, 0, or 16384.
-###
-### Implementations are required to represent `Int` values either as 32-bit
-### or as arbitrary-precision bigints.
-###
-### The standard arithmetic operations are defined in the language, with the
-### notable exception of division.
-###
-###     say(-7);                # --> `-7`
-###     say(3 + 2);             # --> `5`
-###     say(3 * 2);             # --> `6`
-###     say(3 % 2);             # --> `1`
-###
-### Division is not defined, because there's no sensible thing to return for
-### something like `3 / 2`. Returning `1.5` is not an option, because the
-### language does not have a built-in rational or floating-point type.
-### Returning `1` (truncating to an integer) would be possible but
-### unsatisfactory and a source of confusion.
-###
-### There are also a few methods defined on `Int`:
-###
-###     say((-7).abs());        # --> `7`
-###     say(97.chr());          # --> `a`
-###
-class Val::Int does Val {
-    has Int $.value;
-
-    submethod BUILD(:$value) {
-        die "Not supposed to use this class anymore";
-    }
-
-    method truthy {
-        ?$.value;
-    }
-}
-
 ### ### Str
 ###
 ### A piece of text. Strings are frequent whenever a program does text-based
@@ -602,7 +564,6 @@ class Helper {
     our sub Str($_) {
         when Val::NoneType { "None" }
         when Val::Bool { .value.Str }
-        when Val::Int { .value.Str }
         when Val::Str { .value }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }

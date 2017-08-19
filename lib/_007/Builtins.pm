@@ -194,10 +194,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                     unless $rhs ~~ Val::Type;
 
-                if $lhs ~~ _007::Object && $rhs.type === Val::Int {
-                    return True;
-                }
-
                 return wrap($lhs ~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeMatch),
