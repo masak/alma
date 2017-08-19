@@ -1,6 +1,6 @@
 use _007::Val;
 use _007::Q;
-use _007::Runtime::Builtins;
+use _007::Builtins;
 use _007::OpScope;
 
 constant NO_OUTER = Val::Object.new;

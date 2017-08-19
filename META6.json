@@ -17,7 +17,7 @@
         "_007::Precedence" : "lib/_007/Precedence.pm",
         "_007::Q" : "lib/_007/Q.pm",
         "_007::Runtime" : "lib/_007/Runtime.pm",
-        "_007::Runtime::Builtins" : "lib/_007/Runtime/Builtins.pm",
+        "_007::Builtins" : "lib/_007/Builtins.pm",
         "_007::Test" : "lib/_007/Test.pm",
         "_007::Val" : "lib/_007/Val.pm"
     },
