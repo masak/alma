@@ -21,6 +21,7 @@ class _007::Type {
 constant TYPE = {};
 TYPE<Type> = _007::Type.new(:name("Type"));
 TYPE<Int> = _007::Type.new(:name("Int"));
+TYPE<Str> = _007::Type.new(:name("Str"));
 
 class _007::Object {
     has $.type;
@@ -30,12 +31,26 @@ class _007::Object {
 
     method truthy { ?$.value }
 
-    method quoted-Str { self.Str }
+    method quoted-Str {
+        if $.type === TYPE<Str> {
+            return q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
+        }
+        return self.Str;
+    }
+
     method Str { ~($.value // "EMPTY") }
 }
 
 sub sevenize($value) is export {
-    _007::Object.new(:type(TYPE<Int>), :$value);
+    if $value ~~ Int {
+        return _007::Object.new(:type(TYPE<Int>), :$value);
+    }
+    elsif $value ~~ Str {
+        return _007::Object.new(:type(TYPE<Str>), :$value);
+    }
+    else {
+        die "Tried to sevenize unknown value ", $value.^name;
+    }
 }
 
 role Val {
@@ -201,7 +216,7 @@ class Val::Str does Val {
 ###     say(/"Bond"/.search("J. Bond"));        # --> `True`
 ###
 class Val::Regex does Val {
-    has Val::Str $.contents;
+    has _007::Object $.contents;
 
     method quoted-Str {
         "/" ~ $.contents.quoted-Str ~ "/"
@@ -382,7 +397,7 @@ class Val::Object does Val {
         return '{' ~ %.properties.map({
             my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                 ?? .key
-                !! Val::Str.new(value => .key).quoted-Str;
+                !! sevenize(.key).quoted-Str;
             "{$key}: {.value.quoted-Str}"
         }).sort.join(', ') ~ '}';
     }
@@ -459,9 +474,6 @@ class Val::Type does Val {
         elsif $.type ~~ _007::Object {
             return $.type.new(:value(@properties[0].value.value));
         }
-        elsif $.type ~~ Val::Str {
-            return $.type.new(:value(@properties[0].value.value));
-        }
         elsif $.type ~~ Val::Array {
             return $.type.new(:elements(@properties[0].value.elements));
         }
@@ -504,7 +516,7 @@ class Val::Type does Val {
 ###     say(add(2, 5));         # --> `7`
 ###
 class Val::Sub is Val {
-    has Val::Str $.name;
+    has _007::Object $.name;
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
@@ -512,7 +524,7 @@ class Val::Sub is Val {
     has Val::Object $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
-        self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
+        self.bless(:name(sevenize($name)), :&hook, :$parameterlist, :$statementlist);
     }
 
     method escaped-name {
@@ -558,14 +570,13 @@ class Val::Macro is Val::Sub {
 ### flow couldn't continue normally.
 ###
 class Val::Exception does Val {
-    has Val::Str $.message;
+    has _007::Object $.message;
 }
 
 class Helper {
     our sub Str($_) {
         when Val::NoneType { "None" }
         when Val::Bool { .value.Str }
-        when Val::Str { .value }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
         when Val::Object { .quoted-Str }

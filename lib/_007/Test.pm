@@ -8,7 +8,8 @@ use Test;
 
 sub read(Str $ast) is export {
     sub n($type, $op) {
-        Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
+        my $name = sevenize($type ~ ":<$op>");
+        return Q::Identifier.new(:$name);
     }
 
     my %q_lookup =
@@ -96,7 +97,8 @@ sub read(Str $ast) is export {
             sub check-if-operator() {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this
-                    %arguments<identifier> = Q::Identifier.new(:name(Val::Str.new(:value($qname))));
+                    my $name = sevenize($qname);
+                    %arguments<identifier> = Q::Identifier.new(:$name);
                     shift @attributes;  # $.identifier
                 }
             }();
@@ -123,7 +125,7 @@ sub read(Str $ast) is export {
         }
         method expr:symbol ($/) { make ~$/ }
         method expr:int ($/) { make sevenize(+$/) }
-        method expr:str ($/) { make Val::Str.new(:value((~$0).subst(q[\\"], q["], :g))) }
+        method expr:str ($/) { make sevenize((~$0).subst(q[\\"], q["], :g)) }
     };
 
     AST::Syntax.parse($ast, :$actions)

@@ -119,7 +119,7 @@ class _007::Parser::Actions {
         #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
+                :identifier(Q::Identifier.new(:name(sevenize("postfix:()")))),
                 :operand(Q::Term::Sub.new(:identifier(NONE), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
@@ -504,7 +504,7 @@ class _007::Parser::Actions {
     method prefix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("prefix:$op"))),
+            :name(sevenize("prefix:$op")),
             :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
@@ -519,8 +519,7 @@ class _007::Parser::Actions {
             die X::String::Newline.new
                 if $s ~~ /\n/;
         }(~$0);
-        my $value = (~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
-        $value = Val::Str.new(:$value);
+        my $value = sevenize((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
         make Q::Literal::Str.new(:$value);
     }
 
@@ -576,7 +575,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        my $qtype = Val::Str.new(:value(~($<qtype> // "")));
+        my $qtype = sevenize(~($<qtype> // ""));
 
         if $<block> -> $block {
             # If the quasi consists of a block with a single expression statement, it's very
@@ -684,13 +683,13 @@ class _007::Parser::Actions {
         }
 
         make Q::Term::Object.new(
-            :type(Q::Identifier.new(:name(Val::Str.new(:value($type))))),
+            :type(Q::Identifier.new(:name(sevenize($type)))),
             :propertylist($<propertylist>.ast));
     }
 
     method term:object ($/) {
         my $type = "Object";
-        my $name = Val::Str.new(:value($type));
+        my $name = sevenize($type);
         my $frame = $*runtime.builtin-frame;
 
         make Q::Term::Object.new(
@@ -737,7 +736,7 @@ class _007::Parser::Actions {
     method infix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("infix:$op"))),
+            :name(sevenize("infix:$op")),
             :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
@@ -763,7 +762,7 @@ class _007::Parser::Actions {
             $op = ".";
         }
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("postfix:$op"))),
+            :name(sevenize("postfix:$op")),
             :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
@@ -791,7 +790,8 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';
         }();
-        make Q::Identifier.new(:name(Val::Str.new(:$value)));
+        my $name = sevenize($value);
+        make Q::Identifier.new(:$name);
     }
 
     method argumentlist($/) {

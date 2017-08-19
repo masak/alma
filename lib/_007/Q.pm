@@ -147,7 +147,7 @@ class Q::Literal::Int does Q::Literal {
 ### A string literal.
 ###
 class Q::Literal::Str does Q::Literal {
-    has Val::Str $.value;
+    has _007::Object $.value;
 
     method eval($) { $.value }
 }
@@ -160,7 +160,7 @@ class Q::Literal::Str does Q::Literal {
 ### storage locations because they belong to different scopes.
 ###
 class Q::Identifier does Q::Term {
-    has Val::Str $.name;
+    has _007::Object $.name;
     has $.frame = NONE;
 
     method attribute-order { <name> }
@@ -179,7 +179,7 @@ class Q::Identifier does Q::Term {
 ### A regular expression (*regex*).
 ###
 class Q::Term::Regex does Q::Term {
-    has Val::Str $.contents;
+    has _007::Object $.contents;
 
     method eval($runtime) {
         Val::Regex.new(:$.contents);
@@ -226,7 +226,7 @@ class Q::Term::Object does Q::Term {
 ### An object property. Properties have a key and a value.
 ###
 class Q::Property does Q {
-    has Val::Str $.key;
+    has _007::Object $.key;
     has $.value;
 }
 
@@ -283,7 +283,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 
     method eval($runtime) {
         my $name = $.identifier ~~ Val::NoneType
-            ?? Val::Str.new(:value(""))
+            ?? sevenize("")
             !! $.identifier.name;
         return Val::Sub.new(
             :$name,
@@ -596,7 +596,7 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Object | Val::Sub | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
+                    unless $property ~~ _007::Object && $property.type === TYPE<Str>;
                 my $propname = $property.value;
                 return $runtime.property($_, $propname);
             }
@@ -619,7 +619,7 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Object | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
+                    unless $property ~~ _007::Object && $property.type === TYPE<Str>;
                 my $propname = $property.value;
                 $runtime.put-property($_, $propname, $value);
             }
@@ -995,7 +995,7 @@ class Q::Statement::Throw does Q::Statement {
 
     method run($runtime) {
         my $value = $.expr ~~ Val::NoneType
-            ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
+            ?? Val::Exception.new(:message(sevenize("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;

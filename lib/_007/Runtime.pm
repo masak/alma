@@ -5,7 +5,7 @@ use _007::OpScope;
 
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
-    :name(Val::Str.new(:value("--RETURN-TO--"))),
+    :name(sevenize("--RETURN-TO--")),
     :frame(NONE));
 
 class _007::Runtime {
@@ -36,7 +36,7 @@ class _007::Runtime {
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($name))),
+                :name(sevenize($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
@@ -142,7 +142,7 @@ class _007::Runtime {
         my $opscope = $!builtin-opscope;
         for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :$value) {
             my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($name))),
+                :name(sevenize($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
@@ -178,7 +178,7 @@ class _007::Runtime {
         sub builtin(&fn) {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
-            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
+            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(sevenize($^value))))) };
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
@@ -231,39 +231,39 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
-        elsif $obj ~~ _007::Object && $propname eq "abs" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Int> && $propname eq "abs" {
             return builtin(sub abs() {
                 return sevenize($obj.value.abs);
             });
         }
-        elsif $obj ~~ _007::Object && $propname eq "chr" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Int> && $propname eq "chr" {
             return builtin(sub chr() {
-                return Val::Str.new(:value($obj.value.chr));
+                return sevenize($obj.value.chr);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "ord" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "ord" {
             return builtin(sub ord() {
                 return sevenize($obj.value.ord);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "chars" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "chars" {
             return builtin(sub chars() {
                 return sevenize($obj.value.chars);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "uc" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "uc" {
             return builtin(sub uc() {
-                return Val::Str.new(:value($obj.value.uc));
+                return sevenize($obj.value.uc);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "lc" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "lc" {
             return builtin(sub lc() {
-                return Val::Str.new(:value($obj.value.lc));
+                return sevenize($obj.value.lc);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "trim" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "trim" {
             return builtin(sub trim() {
-                return Val::Str.new(:value($obj.value.trim));
+                return sevenize($obj.value.trim);
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "size" {
@@ -295,7 +295,7 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "join" {
             return builtin(sub join($sep) {
-                return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
+                return sevenize($obj.elements.join($sep.value.Str));
             });
         }
         elsif $obj ~~ Val::Object && $propname eq "size" {
@@ -303,55 +303,55 @@ class _007::Runtime {
                 return sevenize($obj.properties.elems);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "split" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "split" {
             return builtin(sub split($sep) {
-                my @elements = (Val::Str.new(:value($_)) for $obj.value.split($sep.value));
+                my @elements = (sevenize($_) for $obj.value.split($sep.value));
                 return Val::Array.new(:@elements);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "index" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "index" {
             return builtin(sub index($substr) {
                 return sevenize($obj.value.index($substr.value) // -1);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "substr" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
-                return Val::Str.new(:value($obj.value.substr(
+                return sevenize($obj.value.substr(
                     $pos.value,
-                    $chars.value)));
+                    $chars.value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "contains" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "contains" {
             return builtin(sub contains($substr) {
-                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
-                    unless $substr ~~ Val::Str;
+                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(_007::Object))
+                    unless $substr ~~ _007::Object && $substr.type === TYPE<Str>;
 
                 return Val::Bool.new(:value(
                         $obj.value.contains($substr.value);
                 ));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "prefix" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "prefix" {
             return builtin(sub prefix($pos) {
-                return Val::Str.new(:value($obj.value.substr(
+                return sevenize($obj.value.substr(
                     0,
-                    $pos.value)));
+                    $pos.value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "suffix" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "suffix" {
             return builtin(sub suffix($pos) {
-                return Val::Str.new(:value($obj.value.substr(
-                    $pos.value)));
+                return sevenize($obj.value.substr(
+                    $pos.value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "charat" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "charat" {
             return builtin(sub charat($pos) {
                 my $s = $obj.value;
 
                 die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
                     if $pos.value >= $s.chars;
 
-                return Val::Str.new(:value($s.substr($pos.value, 1)));
+                return sevenize($s.substr($pos.value, 1));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
@@ -359,7 +359,7 @@ class _007::Runtime {
                 my $regex-string = $obj.contents.value;
 
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ Val::Str;
+                    unless $str ~~ _007::Object && $str.type === TYPE<Str>;
 
                 return Val::Bool.new(:value($regex-string eq $str.value));
             });
@@ -369,7 +369,7 @@ class _007::Runtime {
                 my $regex-string = $obj.contents.value;
 
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ Val::Str;
+                    unless $str ~~ _007::Object && $str.type === TYPE<Str>;
 
                 return Val::Bool.new(:value($str.value.contains($regex-string)));
             });
@@ -413,10 +413,10 @@ class _007::Runtime {
             });
         }
         elsif $obj ~~ _007::Type && $propname eq "name" {
-            return Val::Str.new(:value($obj.name));
+            return sevenize($obj.name);
         }
         elsif $obj ~~ Val::Type | _007::Type && $propname eq "name" {
-            return Val::Str.new(:value($obj.name));
+            return sevenize($obj.name);
         }
         elsif $obj ~~ _007::Type && $propname eq "create" {
             return builtin(sub create($properties) {
@@ -441,9 +441,7 @@ class _007::Runtime {
         }
         elsif $propname eq "keys" {
             return builtin(sub keys() {
-                return Val::Array.new(:elements($obj.properties.keys.map({
-                    Val::Str.new(:$^value)
-                })));
+                return Val::Array.new(:elements($obj.properties.keys.map(&sevenize)));
             });
         }
         elsif $propname eq "has" {
