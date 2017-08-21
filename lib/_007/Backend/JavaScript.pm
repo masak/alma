@@ -12,12 +12,12 @@ my %builtins =
 class _007::Backend::JavaScript {
     method emit(Q::CompUnit $compunit) {
         return ""
-            unless $compunit.block.statementlist.statements.elements;
+            unless $compunit.block.statementlist.statements.value;
 
         my @builtins;
         my @main;
 
-        for $compunit.block.statementlist.statements.elements -> $stmt {
+        for $compunit.block.statementlist.statements.value -> $stmt {
             emit-stmt($stmt);
         }
 
@@ -40,7 +40,7 @@ class _007::Backend::JavaScript {
                 && $expr.operand.name.value eq "say" {
 
                 @builtins.push(%builtins<say>);
-                my @arguments = $expr.argumentlist.arguments.elements.map: {
+                my @arguments = $expr.argumentlist.arguments.value.map: {
                     die "Cannot handle non-literal-Str arguments just yet!"
                         unless $_ ~~ Q::Literal::Str;
                     .value.quoted-Str;

@@ -8,7 +8,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         when Nil  { NONE }
         when Bool { Val::Bool.new(:value($_)) }
         when Str  { die "A Str was sent to &wrap" }
-        when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
         default { die "Got some unknown value of type ", .^name }
     }
 
@@ -20,25 +19,29 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         return False
             unless $l.type === $r.type;
         my $type = $l.type;
-        return $type === TYPE<Int>
-            ?? $l.value == $r.value
-            !! $type === TYPE<Str>
-                ?? $l.value eq $r.value
-                !! die "Unknown type ", $type.Str;
-    }
-    multi equal-value(Val::Array $l, Val::Array $r) {
-        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
-            return $l === $r;
+        if $type === TYPE<Int> {
+            return $l.value == $r.value;
         }
-        %*equality-seen{$l.WHICH}++;
-        %*equality-seen{$r.WHICH}++;
-
-        sub equal-at-index($i) {
-            equal-value($l.elements[$i], $r.elements[$i]);
+        elsif $type === TYPE<Str> {
+            return $l.value eq $r.value;
         }
+        elsif $type === TYPE<Array> {
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
 
-        [&&] $l.elements == $r.elements,
-            |(^$l.elements).map(&equal-at-index);
+            sub equal-at-index($i) {
+                equal-value($l.value[$i], $r.value[$i]);
+            }
+
+            [&&] $l.value == $r.value,
+                |(^$l.value).map(&equal-at-index);
+        }
+        else {
+            die "Unknown type ", $type.Str;
+        }
     }
     multi equal-value(Val::Object $l, Val::Object $r) {
         if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
@@ -241,9 +244,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         # cons precedence
         'infix:::' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
-                    unless $rhs ~~ Val::Array;
-                return wrap([$lhs, |$rhs.elements]);
+                die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(_007::Object))
+                    unless $rhs ~~ _007::Object && $rhs.type === TYPE<Array>;
+                return sevenize([$lhs, |$rhs.value]);
             },
             :qtype(Q::Infix::Cons),
             :assoc<right>,
@@ -330,11 +333,11 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'infix:xx' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
-                    unless $lhs ~~ Val::Array;
+                die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(_007::Object))
+                    unless $lhs ~~ _007::Object && $lhs.type === TYPE<Array>;
                 die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return wrap(| $lhs.elements xx $rhs.value);
+                return sevenize(| $lhs.value xx $rhs.value);
             },
             :qtype(Q::Infix::ArrayReplicate),
             :precedence{ equal => "infix:*" },
@@ -397,7 +400,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             sub ($n) {
                 die X::TypeCheck.new(:operation<^>, :got($n), :expected(_007::Object))
                     unless $n ~~ _007::Object && $n.type === TYPE<Int>;
-                return wrap([(^$n.value).map(&sevenize)]);
+                return sevenize([(^$n.value).map(&sevenize)]);
             },
             :qtype(Q::Prefix::Upto),
         ),
@@ -424,8 +427,10 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     tree-walk(Val::);
     tree-walk(Q::);
     push @builtins, "Q" => Val::Type.of(Q);
-    push @builtins, ("Int" => TYPE<Int>);
-    push @builtins, ("Str" => TYPE<Str>);
+    for TYPE.keys -> $type {
+        next if $type eq "Type";
+        push @builtins, ($type => TYPE{$type});
+    }
 
     sub install-op($name, $placeholder) {
         $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/
@@ -447,7 +452,8 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         }
         when .value ~~ Block {
             my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+            my $parameters = sevenize(@elements);
+            my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
         }
@@ -455,7 +461,8 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my $name = .key;
             install-op($name, .value);
             my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+            my $parameters = sevenize(@elements);
+            my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
         }
@@ -464,7 +471,8 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             install-op($name, .value);
             my &fn = .value.fn;
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+            my $parameters = sevenize(@elements);
+            my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
         }

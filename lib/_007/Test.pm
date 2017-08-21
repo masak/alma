@@ -73,6 +73,17 @@ sub read(Str $ast) is export {
         propertylist   => Q::PropertyList,
     ;
 
+    # XXX this is a temporary hack while we're refactoring the type system
+    # XXX when the system is limber enough to describe itself, it won't be necessary
+    my %qtype-has-just-array = qw<
+        Q::Term::Array          1
+        Q::PropertyList         1
+        Q::TraitList            1
+        Q::ParameterList        1
+        Q::ArgumentList         1
+        Q::StatementList        1
+    >;
+
     my grammar AST::Syntax {
         regex TOP { \s* <expr> \s* }
         proto token expr {*}
@@ -104,9 +115,9 @@ sub read(Str $ast) is export {
             }();
             sub aname($attr) { $attr.name.substr(2) }
 
-            if @attributes == 1 && @attributes[0].type ~~ Val::Array {
+            if @attributes == 1 && (%qtype-has-just-array{$qtype.^name} :exists) {
                 my $aname = aname(@attributes[0]);
-                %arguments{$aname} = Val::Array.new(:elements(@rest));
+                %arguments{$aname} = sevenize(@rest);
             }
             else {
                 die "{+@rest} arguments passed, only {+@attributes} parameters expected for {$qtype.^name}"
@@ -162,7 +173,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
-        for $statementlist.statements.elements -> $statement {
+        for $statementlist.statements.value -> $statement {
             handle($statement);
         }
     }
@@ -256,7 +267,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
 
     multi handle(Q::PropertyList $propertylist) {
         my %seen;
-        for $propertylist.properties.elements -> Q::Property $p {
+        for $propertylist.properties.value -> Q::Property $p {
             my Str $property = $p.key.value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;

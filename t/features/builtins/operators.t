@@ -617,7 +617,7 @@ use _007::Test;
         my q = 42; say(q ~~ Int)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Int";
+    outputs $program, "True\n", "typecheck works for Int";
 }
 
 {
@@ -625,7 +625,7 @@ use _007::Test;
         my q = [4, 2]; say(q ~~ Array)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Array";
+    outputs $program, "True\n", "typecheck works for Array";
 }
 
 {

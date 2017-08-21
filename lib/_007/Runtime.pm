@@ -40,7 +40,7 @@ class _007::Runtime {
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
-        for $statementlist.statements.elements.kv -> $i, $_ {
+        for $statementlist.statements.value.kv -> $i, $_ {
             when Q::Statement::Sub {
                 my $name = .identifier.name;
                 my $parameterlist = .block.parameterlist;
@@ -149,7 +149,7 @@ class _007::Runtime {
     }
 
     method call(Val::Sub $c, @arguments) {
-        my $paramcount = $c.parameterlist.parameters.elements.elems;
+        my $paramcount = $c.parameterlist.parameters.value.elems;
         my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
@@ -157,7 +157,7 @@ class _007::Runtime {
             return &hook(|@arguments) || NONE;
         }
         self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c);
-        for @($c.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
+        for @($c.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }
         self.register-subhandler;
@@ -180,7 +180,8 @@ class _007::Runtime {
             my &ditch-sigil = { $^str.substr(1) };
             my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(sevenize($^value))))) };
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+            my $parameters = sevenize(@elements);
+            my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             return Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
         }
@@ -192,8 +193,8 @@ class _007::Runtime {
                 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
                 sub interpolate($thing) {
-                    return $thing.new(:elements($thing.elements.map(&interpolate)))
-                        if $thing ~~ Val::Array;
+                    return sevenize($thing.value.map(&interpolate))
+                        if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
 
                     return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
                         if $thing ~~ Val::Object;
@@ -266,36 +267,36 @@ class _007::Runtime {
                 return sevenize($obj.value.trim);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "size" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "size" {
             return builtin(sub size() {
-                return sevenize($obj.elements.elems);
+                return sevenize($obj.value.elems);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "reverse" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "reverse" {
             return builtin(sub reverse() {
-                return Val::Array.new(:elements($obj.elements.reverse));
+                return sevenize($obj.value.reverse);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "sort" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "sort" {
             return builtin(sub sort() {
-                return Val::Array.new(:elements($obj.elements.sort));
+                return sevenize($obj.value.sort);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "shuffle" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "shuffle" {
             return builtin(sub shuffle() {
-                return Val::Array.new(:elements($obj.elements.pick(*)));
+                return sevenize($obj.value.pick(*));
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "concat" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "concat" {
             return builtin(sub concat($array) {
-                die X::TypeCheck.new(:operation<concat>, :got($array), :expected(Val::Array))
-                    unless $array ~~ Val::Array;
-                return Val::Array.new(:elements([|$obj.elements , |$array.elements]));
+                die X::TypeCheck.new(:operation<concat>, :got($array), :expected(_007::Object))
+                    unless $array ~~ _007::Object && $array.type === TYPE<Array>;
+                return sevenize([|$obj.value, |$array.value]);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "join" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "join" {
             return builtin(sub join($sep) {
-                return sevenize($obj.elements.join($sep.value.Str));
+                return sevenize($obj.value.join($sep.value.Str));
             });
         }
         elsif $obj ~~ Val::Object && $propname eq "size" {
@@ -305,8 +306,8 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "split" {
             return builtin(sub split($sep) {
-                my @elements = (sevenize($_) for $obj.value.split($sep.value));
-                return Val::Array.new(:@elements);
+                my @elements = $obj.value.split($sep.value).map(&sevenize);
+                return sevenize(@elements);
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "index" {
@@ -374,41 +375,41 @@ class _007::Runtime {
                 return Val::Bool.new(:value($str.value.contains($regex-string)));
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "filter" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
             return builtin(sub filter($fn) {
-                my @elements = $obj.elements.grep({ self.call($fn, [$_]).truthy });
-                return Val::Array.new(:@elements);
+                my @elements = $obj.value.grep({ self.call($fn, [$_]).truthy });
+                return sevenize(@elements);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "map" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "map" {
             return builtin(sub map($fn) {
-                my @elements = $obj.elements.map({ self.call($fn, [$_]) });
-                return Val::Array.new(:@elements);
+                my @elements = $obj.value.map({ self.call($fn, [$_]) });
+                return sevenize(@elements);
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "push" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "push" {
             return builtin(sub push($newelem) {
-                $obj.elements.push($newelem);
+                $obj.value.push($newelem);
                 return NONE;
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "pop" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "pop" {
             return builtin(sub pop() {
                 die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
-                    if $obj.elements.elems == 0;
-                return $obj.elements.pop();
+                    if $obj.value.elems == 0;
+                return $obj.value.pop();
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "shift" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "shift" {
             return builtin(sub shift() {
                 die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
-                    if $obj.elements.elems == 0;
-                return $obj.elements.shift();
+                    if $obj.value.elems == 0;
+                return $obj.value.shift();
             });
         }
-        elsif $obj ~~ Val::Array && $propname eq "unshift" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "unshift" {
             return builtin(sub unshift($newelem) {
-                $obj.elements.unshift($newelem);
+                $obj.value.unshift($newelem);
                 return NONE;
             });
         }
@@ -420,12 +421,14 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Type && $propname eq "create" {
             return builtin(sub create($properties) {
-                _007::Object.new(:value($properties.elements[0].elements[1].value));
+                # XXX: needs more sanity checking
+                sevenize($properties.value[0].value[1].value);  # XXX: won't work for non-wrapped objects
+                # _007::Object.new(:value($properties.value[0].value[1].value));
             });
         }
         elsif $obj ~~ Val::Type && $propname eq "create" {
             return builtin(sub create($properties) {
-                $obj.create($properties.elements.map({ .elements[0].value => .elements[1] }));
+                $obj.create($properties.value.map({ .value[0].value => .value[1] }));
             });
         }
         elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
@@ -441,7 +444,7 @@ class _007::Runtime {
         }
         elsif $propname eq "keys" {
             return builtin(sub keys() {
-                return Val::Array.new(:elements($obj.properties.keys.map(&sevenize)));
+                return sevenize($obj.properties.keys.map(&sevenize));
             });
         }
         elsif $propname eq "has" {

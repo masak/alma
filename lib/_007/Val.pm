@@ -22,6 +22,7 @@ constant TYPE = {};
 TYPE<Type> = _007::Type.new(:name("Type"));
 TYPE<Int> = _007::Type.new(:name("Int"));
 TYPE<Str> = _007::Type.new(:name("Str"));
+TYPE<Array> = _007::Type.new(:name("Array"));
 
 class _007::Object {
     has $.type;
@@ -35,10 +36,20 @@ class _007::Object {
         if $.type === TYPE<Str> {
             return q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
         }
+        if $.type === TYPE<Array> {
+            if %*stringification-seen{self.WHICH}++ {
+                return "[...]";
+            }
+            return "[" ~ @($.value)».quoted-Str.join(', ') ~ "]";
+        }
         return self.Str;
     }
 
-    method Str { ~($.value // "EMPTY") }
+    method Str {
+        my %*stringification-seen;
+        Helper::Str(self);
+    }
+
 }
 
 sub sevenize($value) is export {
@@ -47,6 +58,9 @@ sub sevenize($value) is export {
     }
     elsif $value ~~ Str {
         return _007::Object.new(:type(TYPE<Str>), :$value);
+    }
+    elsif $value ~~ Array | Seq {
+        return _007::Object.new(:type(TYPE<Array>), :value($value.Array));
     }
     else {
         die "Tried to sevenize unknown value ", $value.^name;
@@ -435,9 +449,6 @@ class Val::Type does Val {
         elsif $.type ~~ _007::Object {
             return $.type.new(:value(@properties[0].value.value));
         }
-        elsif $.type ~~ Val::Array {
-            return $.type.new(:elements(@properties[0].value.elements));
-        }
         elsif $.type ~~ Val::Type {
             my $name = @properties[0].value;
             return $.type.new(:type(EVAL qq[class :: \{
@@ -505,7 +516,7 @@ class Val::Sub is Val {
     }
 
     method pretty-parameters {
-        sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
+        sprintf "(%s)", $.parameterlist.parameters.value».identifier».name.join(", ");
     }
 
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
@@ -539,17 +550,20 @@ class Helper {
         when Val::NoneType { "None" }
         when Val::Bool { .value.Str }
         when Val::Regex { .quoted-Str }
-        when Val::Array { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
-        when _007::Object { .value.Str }    # XXX: wrong in the general case
+        when _007::Object {
+            .type === TYPE<Array>
+                ?? .quoted-Str
+                !! .value.Str
+        }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;
-            die "Unexpected type -- some invariant must be broken"
+            die "Unexpected type -- some invariant must be broken ({$self.^name})"
                 unless $self.^name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
 
             sub aname($attr) { $attr.name.substr(2) }

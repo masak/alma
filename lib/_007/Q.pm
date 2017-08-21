@@ -53,6 +53,8 @@ class X::_007::RuntimeException is Exception {
     }
 }
 
+sub empty-array() { sevenize([]) }
+
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
@@ -192,10 +194,10 @@ class Q::Term::Regex does Q::Term {
 ### can be an arbitrary expression.
 ###
 class Q::Term::Array does Q::Term {
-    has Val::Array $.elements;
+    has _007::Object $.elements;
 
     method eval($runtime) {
-        Val::Array.new(:elements($.elements.elements.map(*.eval($runtime))));
+        sevenize($.elements.value.map(*.eval($runtime)));
     }
 }
 
@@ -211,12 +213,12 @@ class Q::Term::Object does Q::Term {
     method eval($runtime) {
         my $type = $runtime.get-var($.type.name.value, $.type.frame);
         if $type ~~ _007::Type {
-            my $value = $.propertylist.properties.elements[0].value.eval($runtime);
+            my $value = $.propertylist.properties.value[0].value.eval($runtime);
             # XXX: cheat less
             return $value;
         }
         return $runtime.get-var($.type.name.value, $.type.frame).create(
-            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+            $.propertylist.properties.value.map({.key.value => .value.eval($runtime)})
         );
     }
 }
@@ -237,7 +239,7 @@ class Q::Property does Q {
 ### a specified order: the order the properties occur in the program text.
 ###
 class Q::PropertyList does Q {
-    has Val::Array $.properties .= new;
+    has _007::Object $.properties = empty-array();
 }
 
 ### ### Q::Declaration
@@ -265,7 +267,7 @@ class Q::Trait does Q {
 ### A list of zero or more traits. Each routine has a traitlist.
 ###
 class Q::TraitList does Q {
-    has Val::Array $.traits .= new;
+    has _007::Object $.traits = empty-array();
 
     method attribute-order { <traits> }
 }
@@ -583,15 +585,15 @@ class Q::Postfix::Index is Q::Postfix {
 
     method eval($runtime) {
         given $.operand.eval($runtime) {
-            when Val::Array {
+            if $_ ~~ _007::Object && .type === TYPE<Array> {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ _007::Object;
-                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.value >= .elements;
+                    unless $index ~~ _007::Object && $index.type === TYPE<Int>;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
+                    if $index.value >= .value;
                 die X::Subscript::Negative.new(:$index, :type([]))
                     if $index.value < 0;
-                return .elements[$index.value];
+                return .value[$index.value];
             }
             when Val::Object | Val::Sub | Q {
                 my $property = $.index.eval($runtime);
@@ -600,21 +602,22 @@ class Q::Postfix::Index is Q::Postfix {
                 my $propname = $property.value;
                 return $runtime.property($_, $propname);
             }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
         }
     }
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
-            when Val::Array {
+            if $_ ~~ _007::Object && .type === TYPE<Array> {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ _007::Object;
-                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.value >= .elements;
+                    unless $index ~~ _007::Object && $index.type === TYPE<Int>;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
+                    if $index.value >= .value;
                 die X::Subscript::Negative.new(:$index, :type([]))
                     if $index.value < 0;
-                .elements[$index.value] = $value;
+                .value[$index.value] = $value;
+                return;
             }
             when Val::Object | Q {
                 my $property = $.index.eval($runtime);
@@ -623,7 +626,7 @@ class Q::Postfix::Index is Q::Postfix {
                 my $propname = $property.value;
                 $runtime.put-property($_, $propname, $value);
             }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
         }
     }
 }
@@ -643,7 +646,7 @@ class Q::Postfix::Call is Q::Postfix {
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Sub;
-        my @arguments = $.argumentlist.arguments.elements.map(*.eval($runtime));
+        my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
         return $runtime.call($c, @arguments);
     }
 }
@@ -723,11 +726,11 @@ class Q::Term::Quasi does Q::Term {
 
     method eval($runtime) {
         sub interpolate($thing) {
+            return sevenize($thing.value.map(&interpolate))
+                if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
+
             return $thing
                 if $thing ~~ _007::Object;      # XXX: won't hold true for everything
-
-            return $thing.new(:elements($thing.elements.map(&interpolate)))
-                if $thing ~~ Val::Array;
 
             return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
                 if $thing ~~ Val::Object;
@@ -788,7 +791,7 @@ class Q::Parameter does Q does Q::Declaration {
 ### A list of zero or more parameters.
 ###
 class Q::ParameterList does Q {
-    has Val::Array $.parameters .= new;
+    has _007::Object $.parameters = empty-array();
 }
 
 ### ### Q::ArgumentList
@@ -796,7 +799,7 @@ class Q::ParameterList does Q {
 ### A list of zero or more arguments.
 ###
 class Q::ArgumentList does Q {
-    has Val::Array $.arguments .= new;
+    has _007::Object $.arguments = empty-array();
 }
 
 ### ### Q::Statement
@@ -872,8 +875,8 @@ class Q::Statement::If does Q::Statement {
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-            for @($.block.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.identifier, $arg);
+            if $.block.parameterlist.parameters.value == 1 {
+                $runtime.declare-var($.block.parameterlist.parameters.value[0].identifier, $expr);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -926,19 +929,19 @@ class Q::Statement::For does Q::Statement {
     method attribute-order { <expr block> }
 
     method run($runtime) {
-        my $count = $.block.parameterlist.parameters.elements.elems;
+        my $count = $.block.parameterlist.parameters.value.elems;
         die X::ParameterMismatch.new(
             :type("For loop"), :paramcount($count), :argcount("0 or 1"))
             if $count > 1;
 
         my $array = $.expr.eval($runtime);
-        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(Val::Array))
-            unless $array ~~ Val::Array;
+        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(_007::Object))
+            unless $array ~~ _007::Object && $array.type === TYPE<Array>;
 
-        for $array.elements -> $arg {
+        for $array.value -> $arg {
             $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
             if $count == 1 {
-                $runtime.declare-var($.block.parameterlist.parameters.elements[0].identifier, $arg.list[0]);
+                $runtime.declare-var($.block.parameterlist.parameters.value[0].identifier, $arg.list[0]);
             }
             $.block.statementlist.run($runtime);
             $runtime.leave;
@@ -958,12 +961,12 @@ class Q::Statement::While does Q::Statement {
 
     method run($runtime) {
         while (my $expr = $.expr.eval($runtime)).truthy {
-            my $paramcount = $.block.parameterlist.parameters.elements.elems;
+            my $paramcount = $.block.parameterlist.parameters.value.elems;
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
             $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-            for @($.block.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
+            for @($.block.parameterlist.parameters.value) Z $expr -> ($param, $arg) {
                 $runtime.declare-var($param.identifier, $arg);
             }
             $.block.statementlist.run($runtime);
@@ -1066,10 +1069,10 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
 ### denote a statement list without any surrounding block.
 ###
 class Q::StatementList does Q {
-    has Val::Array $.statements .= new;
+    has _007::Object $.statements = empty-array();
 
     method run($runtime) {
-        for $.statements.elements -> $statement {
+        for $.statements.value -> $statement {
             my $value = $statement.run($runtime);
             LAST if $statement ~~ Q::Statement::Expr {
                 return $value;

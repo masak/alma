@@ -9,7 +9,7 @@ use _007::Test;
 
     my $expected = read(
         "(statementlist (stexpr (infix:+ (int 1) (int 1))))"
-    ).block.statementlist.statements.elements[0].expr.Str;
+    ).block.statementlist.statements.value[0].expr.Str;
     outputs $program, "$expected\n", "Basic quasi quoting";
 }
 

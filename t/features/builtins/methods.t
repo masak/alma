@@ -386,7 +386,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Array.create([["elements", [0, 0, 7]]]));
+        say(Array.create([["value", [0, 0, 7]]]));
         .
 
     outputs $program, qq<[0, 0, 7]\n>, "Type.create() method to create an Array";
