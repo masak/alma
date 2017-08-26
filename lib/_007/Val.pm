@@ -18,11 +18,9 @@ class _007::Type {
     }
 }
 
-constant TYPE = {};
-TYPE<Type> = _007::Type.new(:name("Type"));
-TYPE<Int> = _007::Type.new(:name("Int"));
-TYPE<Str> = _007::Type.new(:name("Str"));
-TYPE<Array> = _007::Type.new(:name("Array"));
+constant TYPE = hash(<Type Int Str Array>.map(-> $name {
+    $name => _007::Type.new(:$name)
+}));
 
 class _007::Object {
     has $.type;
