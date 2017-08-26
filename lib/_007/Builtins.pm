@@ -13,7 +13,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
-    multi equal-value(Val::NoneType, Val::NoneType) { True }
     multi equal-value(Val::Bool $l, Val::Bool $r) { $l.value == $r.value }
     multi equal-value(_007::Object $l, _007::Object $r) {
         return False
@@ -36,8 +35,10 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 equal-value($l.value[$i], $r.value[$i]);
             }
 
-            [&&] $l.value == $r.value,
-                |(^$l.value).map(&equal-at-index);
+            return [&&] $l.value == $r.value, |(^$l.value).map(&equal-at-index);
+        }
+        elsif $type === TYPE<NoneType> {
+            return True;
         }
         else {
             die "Unknown type ", $type.Str;

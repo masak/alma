@@ -11,6 +11,8 @@ class Helper { ... }
 class _007::Type {
     has $.name;
 
+    method attributes { () }
+
     method quoted-Str { self.Str }
     method Str {
         my %*stringification-seen;
@@ -18,15 +20,29 @@ class _007::Type {
     }
 }
 
-constant TYPE = hash(<Type Int Str Array>.map(-> $name {
+constant TYPE = hash(<Type Int Str Array NoneType>.map(-> $name {
     $name => _007::Type.new(:$name)
 }));
 
 class _007::Object {
     has $.type;
-    has $.value;
 
     method attributes { () }
+
+    method Str {
+        my %*stringification-seen;
+        Helper::Str(self);
+    }
+
+    method quoted-Str { self.Str }
+
+    method truthy {
+        $.type !=== TYPE<NoneType>
+    }
+}
+
+class _007::Object::Wrapped is _007::Object {
+    has $.value;
 
     method truthy { ?$.value }
 
@@ -42,23 +58,22 @@ class _007::Object {
         }
         return self.Str;
     }
-
-    method Str {
-        my %*stringification-seen;
-        Helper::Str(self);
-    }
-
 }
+
+constant NONE is export = _007::Object.new(:type(TYPE<NoneType>));
 
 sub sevenize($value) is export {
     if $value ~~ Int {
-        return _007::Object.new(:type(TYPE<Int>), :$value);
+        return _007::Object::Wrapped.new(:type(TYPE<Int>), :$value);
     }
     elsif $value ~~ Str {
-        return _007::Object.new(:type(TYPE<Str>), :$value);
+        return _007::Object::Wrapped.new(:type(TYPE<Str>), :$value);
     }
     elsif $value ~~ Array | Seq {
-        return _007::Object.new(:type(TYPE<Array>), :value($value.Array));
+        return _007::Object::Wrapped.new(:type(TYPE<Array>), :value($value.Array));
+    }
+    elsif $value ~~ Nil {
+        return NONE;
     }
     else {
         die "Tried to sevenize unknown value ", $value.^name;
@@ -104,7 +119,7 @@ role Val {
 ###
 ### The value `None` is falsy, stringifies to `None`, and doesn't numify.
 ###
-###     say(!!None);        # --> `False`
+###     say(?None);         # --> `False`
 ###     say(~None);         # --> `None`
 ###     say(+None);         # <ERROR X::TypeCheck>
 ###
@@ -119,8 +134,6 @@ class Val::NoneType does Val {
         False
     }
 }
-
-constant NONE is export = Val::NoneType.new;
 
 ### ### Bool
 ###
@@ -470,16 +483,17 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::NoneType { "None" }
         when Val::Bool { .value.Str }
         when Val::Regex { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
-            .type === TYPE<Array>
-                ?? .quoted-Str
-                !! .value.Str
+            .type === TYPE<NoneType>
+                ?? "None"
+                !! .type === TYPE<Array>
+                    ?? .quoted-Str
+                    !! .value.Str
         }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }

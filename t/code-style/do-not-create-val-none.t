@@ -7,11 +7,11 @@ my $files = find(".", /[".pm" | ".t"] $/)\
     .join(" ");
 
 my @lines-with-val-none-new =
-    qqx[grep -Fwrin 'Val::NoneType.new' $files].lines\
-        # exception: we store Val::NoneType.new once as a constant
+    qqx[grep -Fwrin '_007::Object.new(:type(TYPE<NoneType>)' $files].lines\
+        # exception: we store _007::Object.new(:type(TYPE<NoneType>) once as a constant
         .grep({ $_ !~~ /  ":constant NONE is export = " / });
 
 is @lines-with-val-none-new.join("\n"), "",
-    "no unnecessary calls to Val::NoneType.new";
+    "no unnecessary calls to _007::Object.new(:type(TYPE<NoneType>)";
 
 done-testing;

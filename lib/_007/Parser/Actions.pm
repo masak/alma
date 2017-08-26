@@ -511,7 +511,7 @@ class _007::Parser::Actions {
             :name(sevenize("prefix:$op")),
             :frame($*runtime.current-frame),
         );
-        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
+        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(TYPE<NoneType>));
     }
 
     method prefix-unquote($/) {
