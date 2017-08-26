@@ -91,50 +91,6 @@ role Val {
     }
 }
 
-### ### NoneType
-###
-### A type with only one value, indicating the lack of a value where one was
-### expected.
-###
-### It is the value variables have that haven't been assigned to:
-###
-###     my empty;
-###     say(empty);         # --> `None`
-###
-### It is also the value returned from a subroutine that didn't explicitly
-### return a value:
-###
-###     sub noreturn() {
-###     }
-###     say(noreturn());    # --> `None`
-###
-### Finally, it's found in various places in the Q hierarchy to indicate that
-### a certain child element is not present. For example, a `my` declaration
-### can have an assignment attached to it, in which case its `expr` property
-### is a `Q::Expr` &mdash; but if no assignment is present, the `expr`
-### property is the value `None`.
-###
-###     say(type((quasi @ Q::Statement { my x = 2 }).expr)); # --> `<type Q::Literal::Int>`
-###     say(type((quasi @ Q::Statement { my x; }).expr));    # --> `<type NoneType>`
-###
-### The value `None` is falsy, stringifies to `None`, and doesn't numify.
-###
-###     say(?None);         # --> `False`
-###     say(~None);         # --> `None`
-###     say(+None);         # <ERROR X::TypeCheck>
-###
-### Since `None` is often used as a default, there's an operator `infix:<//>`
-### that evaluates its right-hand side if it finds `None` on the left:
-###
-###     say(None // "default");     # --> `default`
-###     say("value" // "default");  # --> `value`
-###
-class Val::NoneType does Val {
-    method truthy {
-        False
-    }
-}
-
 ### ### Bool
 ###
 ### A type with two values, `True` and `False`. These are often the result
