@@ -20,7 +20,7 @@ class _007::Type {
     }
 }
 
-constant TYPE = hash(<Type Int Str Array NoneType>.map(-> $name {
+constant TYPE = hash(<Type Int Str Array NoneType Bool>.map(-> $name {
     $name => _007::Type.new(:$name)
 }));
 
@@ -36,9 +36,7 @@ class _007::Object {
 
     method quoted-Str { self.Str }
 
-    method truthy {
-        $.type !=== TYPE<NoneType>
-    }
+    method truthy { truthy(self) }
 }
 
 class _007::Object::Wrapped is _007::Object {
@@ -61,9 +59,18 @@ class _007::Object::Wrapped is _007::Object {
 }
 
 constant NONE is export = _007::Object.new(:type(TYPE<NoneType>));
+constant TRUE is export = _007::Object.new(:type(TYPE<Bool>));
+constant FALSE is export = _007::Object.new(:type(TYPE<Bool>));
+
+sub truthy($v) {
+    $v !=== NONE && $v !=== FALSE
+}
 
 sub sevenize($value) is export {
-    if $value ~~ Int {
+    if $value ~~ Bool {
+        return $value ?? TRUE !! FALSE;
+    }
+    elsif $value ~~ Int {
         return _007::Object::Wrapped.new(:type(TYPE<Int>), :$value);
     }
     elsif $value ~~ Str {
@@ -439,7 +446,6 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::Bool { .value.Str }
         when Val::Regex { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
@@ -447,9 +453,11 @@ class Helper {
         when _007::Object {
             .type === TYPE<NoneType>
                 ?? "None"
-                !! .type === TYPE<Array>
-                    ?? .quoted-Str
-                    !! .value.Str
+                !! .type === TYPE<Bool>
+                    ?? ($_ === TRUE ?? "True" !! "False")
+                    !! .type === TYPE<Array>
+                        ?? .quoted-Str
+                        !! .value.Str
         }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }

@@ -328,9 +328,7 @@ class _007::Runtime {
                 die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(_007::Object))
                     unless $substr ~~ _007::Object && $substr.type === TYPE<Str>;
 
-                return Val::Bool.new(:value(
-                        $obj.value.contains($substr.value);
-                ));
+                return sevenize($obj.value.contains($substr.value));
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "prefix" {
@@ -363,7 +361,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ _007::Object && $str.type === TYPE<Str>;
 
-                return Val::Bool.new(:value($regex-string eq $str.value));
+                return sevenize($regex-string eq $str.value);
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
@@ -373,7 +371,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ _007::Object && $str.type === TYPE<Str>;
 
-                return Val::Bool.new(:value($str.value.contains($regex-string)));
+                return sevenize($str.value.contains($regex-string));
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
@@ -455,7 +453,7 @@ class _007::Runtime {
                 #      substrate, and the special-cased properties
                 #      <get has extend update id>
                 my $value = $obj.properties{$prop.value} :exists;
-                return Val::Bool.new(:$value);
+                return sevenize($value);
             });
         }
         elsif $propname eq "update" {

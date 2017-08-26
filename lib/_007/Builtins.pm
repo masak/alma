@@ -5,15 +5,12 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     sub wrap($_) {
         when _007::Object { $_ }
         when Val | Q { $_ }
-        when Nil  { NONE }
-        when Bool { Val::Bool.new(:value($_)) }
         when Str  { die "A Str was sent to &wrap" }
         default { die "Got some unknown value of type ", .^name }
     }
 
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
-    multi equal-value(Val::Bool $l, Val::Bool $r) { $l.value == $r.value }
     multi equal-value(_007::Object $l, _007::Object $r) {
         return False
             unless $l.type === $r.type;
@@ -39,6 +36,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         }
         elsif $type === TYPE<NoneType> {
             return True;
+        }
+        elsif $type === TYPE<Bool> {
+            return $l === $r;
         }
         else {
             die "Unknown type ", $type.Str;
@@ -171,21 +171,21 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:==' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return wrap(equal-value($lhs, $rhs));
+                return sevenize(equal-value($lhs, $rhs));
             },
             :qtype(Q::Infix::Eq),
         ),
         'infix:!=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return wrap(!equal-value($lhs, $rhs))
+                return sevenize(!equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ne),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<' => op(
             sub ($lhs, $rhs) {
-                return wrap(less-value($lhs, $rhs))
+                return sevenize(less-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Lt),
             :precedence{ equal => "infix:==" },
@@ -193,14 +193,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:<=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                return sevenize(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Le),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>' => op(
             sub ($lhs, $rhs) {
-                return wrap(more-value($lhs, $rhs) )
+                return sevenize(more-value($lhs, $rhs) )
             },
             :qtype(Q::Infix::Gt),
             :precedence{ equal => "infix:==" },
@@ -208,7 +208,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:>=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                return sevenize(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ge),
             :precedence{ equal => "infix:==" },
@@ -216,13 +216,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:~~' => op(
             sub ($lhs, $rhs) {
                 if $rhs ~~ _007::Type {
-                    return wrap($lhs ~~ _007::Object && $lhs.type === $rhs);
+                    return sevenize($lhs ~~ _007::Object && $lhs.type === $rhs);
                 }
 
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                     unless $rhs ~~ Val::Type;
 
-                return wrap($lhs ~~ $rhs.type);
+                return sevenize($lhs ~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeMatch),
             :precedence{ equal => "infix:==" },
@@ -230,13 +230,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:!~~' => op(
             sub ($lhs, $rhs) {
                 if $rhs ~~ _007::Type {
-                    return wrap($lhs !~~ _007::Object || $lhs.type !=== $rhs);
+                    return sevenize($lhs !~~ _007::Object || $lhs.type !=== $rhs);
                 }
 
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                     unless $rhs ~~ Val::Type | _007::Type;
 
-                return wrap($lhs !~~ $rhs.type);
+                return sevenize($lhs !~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeNonMatch),
             :precedence{ equal => "infix:==" },
@@ -317,7 +317,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
                 die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
                     if $rhs.value == 0;
-                return wrap($lhs.value %% $rhs.value);
+                return sevenize($lhs.value %% $rhs.value);
             },
             :qtype(Q::Infix::Divisibility),
         ),
@@ -387,13 +387,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:?' => op(
             sub ($a) {
-                return wrap(?$a.truthy)
+                return sevenize(?$a.truthy)
             },
             :qtype(Q::Prefix::So),
         ),
         'prefix:!' => op(
             sub ($a) {
-                return wrap(!$a.truthy)
+                return sevenize(!$a.truthy)
             },
             :qtype(Q::Prefix::Not),
         ),

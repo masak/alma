@@ -126,7 +126,7 @@ class Q::Literal::None does Q::Literal {
 ### A boolean literal; either `True` or `False`.
 ###
 class Q::Literal::Bool does Q::Literal {
-    has Val::Bool $.value;
+    has _007::Object $.value;
 
     method eval($) { $.value }
 }
