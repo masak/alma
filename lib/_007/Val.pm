@@ -39,6 +39,9 @@ class _007::Object {
     method truthy { truthy(self) }
 }
 
+class _007::Object::Enum is _007::Object {
+}
+
 class _007::Object::Wrapped is _007::Object {
     has $.value;
 
@@ -58,9 +61,9 @@ class _007::Object::Wrapped is _007::Object {
     }
 }
 
-constant NONE is export = _007::Object.new(:type(TYPE<NoneType>));
-constant TRUE is export = _007::Object.new(:type(TYPE<Bool>));
-constant FALSE is export = _007::Object.new(:type(TYPE<Bool>));
+constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>));
+constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
+constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
 
 sub truthy($v) {
     $v !=== NONE && $v !=== FALSE
