@@ -212,6 +212,11 @@ class Q::Term::Object does Q::Term {
 
     method eval($runtime) {
         my $type = $runtime.get-var($.type.name.value, $.type.frame);
+        if $type === TYPE<Exception> {
+            return $type.create(|hash($.propertylist.properties.value.map(-> $property {
+                $property.key.value => $property.value.eval($runtime)
+            })));
+        }
         if $type ~~ _007::Type {
             my $value = $.propertylist.properties.value[0].value.eval($runtime);
             # XXX: cheat less
@@ -999,12 +1004,12 @@ class Q::Statement::Throw does Q::Statement {
 
     method run($runtime) {
         my $value = $.expr ~~ _007::Object && $.expr.type === TYPE<NoneType>
-            ?? Val::Exception.new(:message(sevenize("Died")))
+            ?? TYPE<Exception>.create(:message(sevenize("Died")))
             !! $.expr.eval($runtime);
-        die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
-            if $value !~~ Val::Exception;
+        die X::TypeCheck.new(:got($value), :expected(_007::Object))
+            unless $value ~~ _007::Object && $value.type === TYPE<Exception>;
 
-        die X::_007::RuntimeException.new(:msg($value.message.value));
+        die X::_007::RuntimeException.new(:msg($value.properties<message>.value));
     }
 }
 

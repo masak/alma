@@ -7,9 +7,11 @@ class X::Uninstantiable is Exception {
 }
 
 class Helper { ... }
+class _007::Object::Class { ... }
 
 class _007::Type {
     has $.name;
+    has @.fields;
 
     method attributes { () }
 
@@ -18,11 +20,17 @@ class _007::Type {
         my %*stringification-seen;
         Helper::Str(self);
     }
+
+    method create(*%properties) {
+        # XXX: need to check %properties agains @.fields
+        return _007::Object::Class.new(:type(self), :%properties);
+    }
 }
 
 constant TYPE = hash(<Type Int Str Array NoneType Bool>.map(-> $name {
     $name => _007::Type.new(:$name)
 }));
+TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 
 class _007::Object {
     has $.type;
@@ -37,6 +45,10 @@ class _007::Object {
     method quoted-Str { self.Str }
 
     method truthy { truthy(self) }
+}
+
+class _007::Object::Class is _007::Object {
+    has %.properties;
 }
 
 class _007::Object::Enum is _007::Object {
@@ -403,17 +415,15 @@ class Helper {
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
-            .type === TYPE<NoneType>
-                ?? "None"
-                !! .type === TYPE<Bool>
-                    ?? ($_ === TRUE ?? "True" !! "False")
-                    !! .type === TYPE<Array>
-                        ?? .quoted-Str
-                        !! .value.Str
+            when .type === TYPE<NoneType> { "None" }
+            when .type === TYPE<Bool> { $_ === TRUE ?? "True" !! "False" }
+            when .type === TYPE<Array> { .quoted-Str }
+            when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
+            when _007::Object::Wrapped { .value.Str }
+            default { die "Unexpected type ", .^name }
         }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
-        when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;
             die "Unexpected type -- some invariant must be broken ({$self.^name})"
