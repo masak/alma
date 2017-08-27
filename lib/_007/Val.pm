@@ -399,15 +399,6 @@ class Val::Macro is Val::Sub {
     method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
-### ### Exception
-###
-### An exception. Represents an error condition, or some other way control
-### flow couldn't continue normally.
-###
-class Val::Exception does Val {
-    has _007::Object $.message;
-}
-
 class Helper {
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
