@@ -27,7 +27,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o") (object (identifier "Object") (propertylist (property "foo" (int 42)))))
+          (my (identifier "o") (dict (propertylist (property "foo" (int 42)))))
           (stexpr (infix:= (postfix:[] (identifier "o") (str "bar")) (str "James")))
           (stexpr (infix:= (postfix:. (identifier "o") (identifier "baz")) (str "Bond")))
           (stexpr (postfix:() (identifier "say") (argumentlist (identifier "o")))))
@@ -35,7 +35,7 @@ use _007::Test;
 
     is-result $ast,
         "\{bar: \"James\", baz: \"Bond\", foo: 42\}\n",
-        "can assign to a property of an object (I)";
+        "can assign to a property of a dict (I)";
 }
 
 {
@@ -47,7 +47,7 @@ use _007::Test;
 
         qq!\{bar: "James", baz: "Bond", foo: 42\}\n!,
 
-        "can assign to a property of an object (II)";
+        "can assign to a property of a dict (II)";
 }
 
 done-testing;

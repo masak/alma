@@ -26,17 +26,17 @@ use _007::Test;
           (macro (identifier "bar") (block (parameterlist) (statementlist)))
           (if (identifier "bar") (block (parameterlist) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy macro")))))))
-          (if (object (identifier "Object") (propertylist)) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy object")))))))
-          (if (object (identifier "Object") (propertylist (property "a" (int 3)))) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy object")))))))
+          (if (dict (propertylist)) (block (parameterlist) (statementlist
+            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy dict")))))))
+          (if (dict (propertylist (property "a" (int 3)))) (block (parameterlist) (statementlist
+            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy dict")))))))
           (if (object (identifier "Q::Literal::Int") (propertylist (property "value" (int 0))))
             (block (parameterlist) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy qnode"))))))))
         .
 
     is-result $ast,
-        <int str array sub macro object qnode>.map({"truthy $_\n"}).join,
+        <int str array sub macro dict qnode>.map({"truthy $_\n"}).join,
         "if statements run truthy things";
 }
 

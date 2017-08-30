@@ -228,6 +228,19 @@ class Q::Term::Object does Q::Term {
     }
 }
 
+### ### Q::Term::Dict
+###
+### An dictionary. Dict terms consist of a property list
+### with zero or more key/value pairs.
+###
+class Q::Term::Dict does Q::Term {
+    has $.propertylist;
+
+    method eval($runtime) {
+        return sevenize(hash($.propertylist.properties.value.map({ .key.value => .value.eval($runtime) })));
+    }
+}
+
 ### ### Q::Property
 ###
 ### An object property. Properties have a key and a value.
@@ -315,7 +328,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
-    has Val::Object $.static-lexpad is rw = Val::Object.new;
+    has _007::Object::Wrapped $.static-lexpad is rw = sevenize({});
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -600,7 +613,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .value[$index.value];
             }
-            when Val::Object | Val::Sub | Q {
+            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Val::Sub || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless $property ~~ _007::Object && $property.type === TYPE<Str>;
@@ -624,12 +637,13 @@ class Q::Postfix::Index is Q::Postfix {
                 .value[$index.value] = $value;
                 return;
             }
-            when Val::Object | Q {
+            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless $property ~~ _007::Object && $property.type === TYPE<Str>;
                 my $propname = $property.value;
                 $runtime.put-property($_, $propname, $value);
+                return;
             }
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
         }
@@ -673,9 +687,10 @@ class Q::Postfix::Property is Q::Postfix {
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
-            when Val::Object | Q {
+            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Q {
                 my $propname = $.property.name.value;
                 $runtime.put-property($_, $propname, $value);
+                return;
             }
             die "We don't handle this case yet"; # XXX: think more about this case
         }
@@ -737,8 +752,9 @@ class Q::Term::Quasi does Q::Term {
             return $thing
                 if $thing ~~ _007::Object;      # XXX: won't hold true for everything
 
-            return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
-                if $thing ~~ Val::Object;
+            sub interpolate-entry($_) { .key => interpolate(.value) }
+            return sevenize(hash($thing.value.map(&interpolate-entry)))
+                if $thing ~~ _007::Object && $thing.type === TYPE<Dict>;
 
             return $thing
                 if $thing ~~ Val;

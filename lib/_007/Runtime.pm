@@ -3,7 +3,7 @@ use _007::Q;
 use _007::Builtins;
 use _007::OpScope;
 
-constant NO_OUTER = Val::Object.new;
+constant NO_OUTER = sevenize({});
 constant RETURN_TO = Q::Identifier.new(
     :name(sevenize("--RETURN-TO--")),
     :frame(NONE));
@@ -16,7 +16,7 @@ class _007::Runtime {
     has $.builtin-frame;
 
     submethod BUILD(:$!input, :$!output) {
-        self.enter(NO_OUTER, Val::Object.new, Q::StatementList.new);
+        self.enter(NO_OUTER, sevenize({}), Q::StatementList.new);
         $!builtin-frame = @!frames[*-1];
         $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
@@ -32,9 +32,12 @@ class _007::Runtime {
     }
 
     method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
-        my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
+        my $frame = sevenize({
+            :$outer-frame,
+            :pad(sevenize({}))
+        });
         @!frames.push($frame);
-        for $static-lexpad.properties.kv -> $name, $value {
+        for $static-lexpad.value.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
                 :name(sevenize($name)),
                 :frame(NONE));
@@ -89,9 +92,9 @@ class _007::Runtime {
             $frame = self.current-frame;
         }
         repeat until $frame === NO_OUTER {
-            return $frame.properties<pad>
-                if $frame.properties<pad>.properties{$symbol} :exists;
-            $frame = $frame.properties<outer-frame>;
+            return $frame.value<pad>
+                if $frame.value<pad>.value{$symbol} :exists;
+            $frame = $frame.value<outer-frame>;
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;
@@ -103,26 +106,26 @@ class _007::Runtime {
             ?? self.current-frame
             !! $identifier.frame;
         my $pad = self!find-pad($name, $frame);
-        $pad.properties{$name} = $value;
+        $pad.value{$name} = $value;
     }
 
     method get-var(Str $name, $frame = self.current-frame) {
         my $pad = self!find-pad($name, $frame);
-        return $pad.properties{$name};
+        return $pad.value{$name};
     }
 
     method maybe-get-var(Str $name, $frame = self.current-frame) {
         if self!maybe-find-pad($name, $frame) -> $pad {
-            return $pad.properties{$name};
+            return $pad.value{$name};
         }
     }
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my Val::Object $frame = $identifier.frame ~~ _007::Object && $identifier.frame.type === TYPE<NoneType>
+        my _007::Object::Wrapped $frame = $identifier.frame ~~ _007::Object && $identifier.frame.type === TYPE<NoneType>
             ?? self.current-frame
             !! $identifier.frame;
-        $frame.properties<pad>.properties{$name} = $value // NONE;
+        $frame.value<pad>.value{$name} = $value // NONE;
     }
 
     method declared($name) {
@@ -132,7 +135,7 @@ class _007::Runtime {
     method declared-locally($name) {
         my $frame = self.current-frame;
         return True
-            if $frame.properties<pad>.properties{$name} :exists;
+            if $frame.value<pad>.value{$name} :exists;
     }
 
     method register-subhandler {
@@ -197,8 +200,9 @@ class _007::Runtime {
                     return sevenize($thing.value.map(&interpolate))
                         if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
 
-                    return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
-                        if $thing ~~ Val::Object;
+                    sub interpolate-entry($_) { .key => interpolate(.value) }
+                    return sevenize(hash($thing.value.map(&interpolate-entry)))
+                        if $thing ~~ _007::Object && $thing.type === TYPE<Dict>;
 
                     return $thing
                         if $thing ~~ Val;
@@ -300,9 +304,9 @@ class _007::Runtime {
                 return sevenize($obj.value.join($sep.value.Str));
             });
         }
-        elsif $obj ~~ Val::Object && $propname eq "size" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Dict> && $propname eq "size" {
             return builtin(sub size() {
-                return sevenize($obj.properties.elems);
+                return sevenize($obj.value.elems);
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "split" {
@@ -433,8 +437,11 @@ class _007::Runtime {
         elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
-        elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
+        elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
+        }
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Dict> && ($obj.value{$propname} :exists) {
+            return $obj.value{$propname};
         }
         elsif $propname eq "get" {
             return builtin(sub get($prop) {
@@ -443,7 +450,7 @@ class _007::Runtime {
         }
         elsif $propname eq "keys" {
             return builtin(sub keys() {
-                return sevenize($obj.properties.keys.map(&sevenize));
+                return sevenize($obj.value.keys.map(&sevenize));
             });
         }
         elsif $propname eq "has" {
@@ -452,22 +459,22 @@ class _007::Runtime {
                 #      both Q objects, which are still hard-coded into the
                 #      substrate, and the special-cased properties
                 #      <get has extend update id>
-                my $value = $obj.properties{$prop.value} :exists;
+                my $value = $obj.value{$prop.value} :exists;
                 return sevenize($value);
             });
         }
         elsif $propname eq "update" {
             return builtin(sub update($newprops) {
-                for $obj.properties.keys {
-                    $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
+                for $obj.value.keys {
+                    $obj.value{$_} = $newprops.value{$_} // $obj.value{$_};
                 }
                 return $obj;
             });
         }
         elsif $propname eq "extend" {
             return builtin(sub extend($newprops) {
-                for $newprops.properties.keys {
-                    $obj.properties{$_} = $newprops.properties{$_};
+                for $newprops.value.keys {
+                    $obj.value{$_} = $newprops.value{$_};
                 }
                 return $obj;
             });
@@ -485,11 +492,11 @@ class _007::Runtime {
         if $obj ~~ Q {
             die "We don't handle assigning to Q object properties yet";
         }
-        elsif $obj !~~ Val::Object {
-            die "We don't handle assigning to non-Val::Object types yet";
+        elsif $obj !~~ _007::Object || $obj.type !=== TYPE<Dict> {
+            die "We don't handle assigning to non-Dict types yet";
         }
         else {
-            $obj.properties{$propname} = $newvalue;
+            $obj.value{$propname} = $newvalue;
         }
     }
 }

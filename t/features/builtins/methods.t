@@ -78,10 +78,10 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (object (identifier "Object") (propertylist)) (identifier "size")) (argumentlist))))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (dict (propertylist)) (identifier "size")) (argumentlist))))))
         .
 
-    is-result $ast, "0\n", "size() works -- Object";
+    is-result $ast, "0\n", "size() works -- Dict";
 }
 
 {
@@ -362,10 +362,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Object.create([["foo", 42]]));
+        say(Dict.create([["value", { foo: 42 }]]));
         .
 
-    outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create an Object";
+    outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create a Dict";
 }
 
 {

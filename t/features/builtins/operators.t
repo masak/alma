@@ -254,33 +254,33 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (dict (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "True\nFalse\n", "object equality";
+    is-result $ast, "True\nFalse\n", "dict equality";
 }
 
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (dict (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "False\nTrue\n", "object inequality";
+    is-result $ast, "False\nTrue\n", "dict inequality";
 }
 
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o3") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o3") (dict (propertylist (property "x" (int 7)))))
 
           (stexpr (infix:= (postfix:. (identifier "o3") (identifier "y")) (identifier "o3")))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o3") (identifier "o3"))))))
@@ -630,10 +630,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = {}; say(q ~~ Object)
+        my q = {}; say(q ~~ Dict)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Object";
+    outputs $program, "True\n", "typecheck works for Dict";
 }
 
 {
@@ -642,9 +642,9 @@ use _007::Test;
         say(quasi @ Q::Infix { + } !~~ Q::Prefix);
         say(42 !~~ Int);
         say([4, 2] !~~ Array);
-        say({} !~~ Object);
+        say({} !~~ Dict);
         say(42 !~~ Array);
-        say([4, 2] !~~ Object);
+        say([4, 2] !~~ Dict);
         say({} !~~ Int);
         .
 

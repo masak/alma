@@ -34,6 +34,19 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
             return [&&] $l.value == $r.value, |(^$l.value).map(&equal-at-index);
         }
+        elsif $type === TYPE<Dict> {
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
+
+            sub equal-at-key(Str $key) {
+                equal-value($l.value{$key}, $r.value{$key});
+            }
+
+            return [&&] $l.value.keys.sort.perl eq $r.value.keys.sort.perl, |($l.value.keys).map(&equal-at-key);
+        }
         elsif $type === TYPE<NoneType> {
             return True;
         }
@@ -41,22 +54,8 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             return $l === $r;
         }
         else {
-            die "Unknown type ", $type.Str;
+            die "Unknown type ", $type.^name;
         }
-    }
-    multi equal-value(Val::Object $l, Val::Object $r) {
-        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
-            return $l === $r;
-        }
-        %*equality-seen{$l.WHICH}++;
-        %*equality-seen{$r.WHICH}++;
-
-        sub equal-at-key(Str $key) {
-            equal-value($l.properties{$key}, $r.properties{$key});
-        }
-
-        [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
-            |($l.properties.keys).map(&equal-at-key);
     }
     multi equal-value(_007::Type $l, _007::Type $r) { $l === $r }
     multi equal-value(Val::Type $l, Val::Type $r) {

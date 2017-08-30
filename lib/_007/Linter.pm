@@ -88,7 +88,7 @@ class _007::Linter {
             sub ref(Str $name) {
                 for @blocks.reverse -> $block {
                     my $pad = $block.static-lexpad;
-                    if $pad.properties{$name} {
+                    if $pad.value{$name} {
                         return "{$block.WHICH.Str}|$name";
                     }
                 }

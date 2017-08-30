@@ -74,7 +74,7 @@ class X::Property::Duplicate is Exception {
 
 class _007::Parser::Actions {
     method finish-block($block) {
-        $block.static-lexpad = $*runtime.current-frame.properties<pad>;
+        $block.static-lexpad = $*runtime.current-frame.value<pad>;
         $*runtime.leave;
     }
 
@@ -194,7 +194,7 @@ class _007::Parser::Actions {
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my $static-lexpad = $*runtime.current-frame.properties<pad>;
+        my $static-lexpad = $*runtime.current-frame.value<pad>;
         self.finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
@@ -637,8 +637,8 @@ class _007::Parser::Actions {
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
             my $name = $<identifier>.ast.name;
-            my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
-            my $static-lexpad = $*runtime.current-frame.properties<pad>;
+            my $outer-frame = $*runtime.current-frame.value<outer-frame>;
+            my $static-lexpad = $*runtime.current-frame.value<pad>;
             my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
         }
@@ -669,36 +669,31 @@ class _007::Parser::Actions {
             # XXX: need to figure out how to do the corresponding error handling here
             # something with .fields, most likely?
         }
-        elsif $type-obj !=== Val::Object {
-            sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
-            for $<propertylist>.ast.properties.value -> $p {
-                my $property = $p.key.value;
-                die X::Property::NotDeclared.new(:$type, :$property)
-                    unless %known-properties{$property};
-            }
-            for %known-properties.keys -> $property {
-                # If an attribute has an initializer, then we don't require that it be
-                # passed, since it will get a sensible value anyway.
-                next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
-                die X::Property::Required.new(:$type, :$property)
-                    unless $property eq any($<propertylist>.ast.properties.value».key».value);
-            }
-        }
+        # XXX: Need some way to detect undeclared or required properties with _007::Type
+#            sub aname($attr) { $attr.name.substr(2) }
+#            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
+#            for $<propertylist>.ast.value.value -> $p {
+#                my $property = $p.key.value;
+#                die X::Property::NotDeclared.new(:$type, :$property)
+#                    unless %known-properties{$property};
+#            }
+#            for %known-properties.keys -> $property {
+#                # If an attribute has an initializer, then we don't require that it be
+#                # passed, since it will get a sensible value anyway.
+#                next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
+#
+#                die X::Property::Required.new(:$type, :$property)
+#                    unless $property eq any($<propertylist>.ast.value.value».key».value);
+#            }
 
         make Q::Term::Object.new(
             :type(Q::Identifier.new(:name(sevenize($type)))),
             :propertylist($<propertylist>.ast));
     }
 
-    method term:object ($/) {
-        my $type = "Object";
-        my $name = sevenize($type);
-        my $frame = $*runtime.builtin-frame;
-
-        make Q::Term::Object.new(
-            :type(Q::Identifier.new(:$name, :$frame)),
+    method term:dict ($/) {
+        make Q::Term::Dict.new(
             :propertylist($<propertylist>.ast));
     }
 

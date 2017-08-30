@@ -19,7 +19,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, sevenize({}), Q::StatementList.new);
     } }
 
     token finishpad { <?> {
@@ -201,6 +201,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::PropertyList"] <.ws> '{' <.ws> <propertylist> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term"] <.ws> '{' <.ws> <term> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Array"] <.ws> '{' <.ws> <term:array> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::Term::Dict"] <.ws> '{' <.ws> <term:dict> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Object"] <.ws> '{' <.ws> <term:object> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Quasi"] <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Trait"] <.ws> '{' <.ws> <trait> <.ws> '}'
@@ -221,7 +222,7 @@ grammar _007::Parser::Syntax {
         <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type | _007::Type }> <.ws>
         '{' ~ '}' <propertylist>
     }
-    token term:object {
+    token term:dict {
         '{' ~ '}' <propertylist>
     }
     token term:identifier {

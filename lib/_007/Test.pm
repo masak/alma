@@ -17,6 +17,7 @@ sub read(Str $ast) is export {
         int            => Q::Literal::Int,
         str            => Q::Literal::Str,
         array          => Q::Term::Array,
+        dict           => Q::Term::Dict,
         object         => Q::Term::Object,
         regex          => Q::Term::Regex,
         sub            => Q::Term::Sub,
@@ -207,7 +208,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
         handle($block.block.statementlist);
-        $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
+        $block.block.static-lexpad = $runtime.current-frame.value<pad>;
         $runtime.leave();
     }
 
@@ -219,7 +220,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($sub.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Object.new, $sub.block.statementlist, $val);
+        $runtime.enter($outer-frame, sevenize({}), $sub.block.statementlist, $val);
         handle($sub.block);
         $runtime.leave();
 
@@ -234,7 +235,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($macro.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Object.new, $macro.block.statementlist, $val);
+        $runtime.enter($outer-frame, sevenize({}), $macro.block.statementlist, $val);
         handle($macro.block);
         $runtime.leave();
 
@@ -254,10 +255,10 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     }
 
     multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        $runtime.enter($runtime.current-frame, sevenize({}), Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.properties<pad>;
+        $block.static-lexpad = $runtime.current-frame.value<pad>;
         $runtime.leave();
     }
 

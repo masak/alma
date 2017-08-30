@@ -9,9 +9,12 @@ class X::Uninstantiable is Exception {
 class Helper { ... }
 class _007::Object::Class { ... }
 
+sub unique-id { ++$ }
+
 class _007::Type {
     has $.name;
     has @.fields;
+    # XXX: $.id
 
     method attributes { () }
 
@@ -27,13 +30,14 @@ class _007::Type {
     }
 }
 
-constant TYPE = hash(<Type Int Str Array NoneType Bool>.map(-> $name {
+constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name {
     $name => _007::Type.new(:$name)
 }));
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 
 class _007::Object {
     has $.type;
+    has $.id = unique-id;
 
     method attributes { () }
 
@@ -69,6 +73,17 @@ class _007::Object::Wrapped is _007::Object {
             }
             return "[" ~ @($.value)».quoted-Str.join(', ') ~ "]";
         }
+        if $.type === TYPE<Dict> {
+            if %*stringification-seen{self.WHICH}++ {
+                return "\{...\}";
+            }
+            return '{' ~ %.value.map({
+                my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
+                    ?? .key
+                    !! sevenize(.key).quoted-Str;
+                "{$key}: {.value.quoted-Str}"
+            }).sort.join(', ') ~ '}';
+        }
         return self.Str;
     }
 }
@@ -93,6 +108,9 @@ sub sevenize($value) is export {
     }
     elsif $value ~~ Array | Seq {
         return _007::Object::Wrapped.new(:type(TYPE<Array>), :value($value.Array));
+    }
+    elsif $value ~~ Hash {
+        return _007::Object::Wrapped.new(:type(TYPE<Dict>), :$value);
     }
     elsif $value ~~ Nil {
         return NONE;
@@ -154,23 +172,7 @@ our $global-object-id = 0;
 ###     my o3 = { foo };            # property shorthand
 ###     say(o1 == o3);              # --> `True`
 ###
-###     my o4 = {
-###         greet: sub () {
-###             return "hi!";
-###         }
-###     };
-###     my o5 = {
-###         greet() {               # method shorthand
-###             return "hi!";
-###         }
-###     };
-###     say(o4.greet() == o5.greet());  # --> `True`
-###
-### All of the above will create objects of type `Object`, which is
-### the topmost type in the type system. `Object` also has the special
-### property that it can accept any set of keys.
-###
-###     say(type({}));              # --> `<type Object>`
+###     say(type({}));              # --> `<type Dict>`
 ###
 ### There are also two ways to create a new, similar object from an old one.
 ###
@@ -253,7 +255,7 @@ class Val::Object does Val {
 ###
 ###     say(type(007));         # --> `<type Int>`
 ###     say(type("Bond"));      # --> `<type Str>`
-###     say(type({}));          # --> `<type Object>`
+###     say(type({}));          # --> `<type Dict>`
 ###     say(type(type({})));    # --> `<type Type>`
 ###
 ### 007 comes with a number of built-in types: `NoneType`, `Bool`, `Int`,
@@ -306,10 +308,8 @@ class Val::Type does Val {
     }
 
     method create(@properties) {
-        if $.type ~~ Val::Object {
-            return $.type.new(:@properties);
-        }
-        elsif $.type ~~ _007::Object {
+        # XXX: there used to be a Val__Object case here
+        if $.type ~~ _007::Object {
             return $.type.new(:value(@properties[0].value.value));
         }
         elsif $.type ~~ Val::Type {
@@ -355,8 +355,8 @@ class Val::Sub is Val {
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
-    has Val::Object $.static-lexpad is rw = Val::Object.new;
-    has Val::Object $.outer-frame;
+    has _007::Object::Wrapped $.static-lexpad is rw = sevenize({});
+    has _007::Object::Wrapped $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(sevenize($name)), :&hook, :$parameterlist, :$statementlist);
@@ -402,13 +402,13 @@ class Val::Macro is Val::Sub {
 class Helper {
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
-        when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
             when .type === TYPE<NoneType> { "None" }
             when .type === TYPE<Bool> { $_ === TRUE ?? "True" !! "False" }
             when .type === TYPE<Array> { .quoted-Str }
+            when .type === TYPE<Dict> { .quoted-Str }
             when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
             when _007::Object::Wrapped { .value.Str }
             default { die "Unexpected type ", .^name }
