@@ -92,7 +92,7 @@ class _007::Parser::Actions {
     }
 
     method statementlist($/) {
-        my $statements = sevenize($<statement>».ast);
+        my $statements = wrap($<statement>».ast);
         make Q::StatementList.new(:$statements);
     }
 
@@ -120,7 +120,7 @@ class _007::Parser::Actions {
         #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(sevenize("postfix:()")))),
+                :identifier(Q::Identifier.new(:name(wrap("postfix:()")))),
                 :operand(Q::Term::Sub.new(:identifier(NONE), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
@@ -266,7 +266,7 @@ class _007::Parser::Actions {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
-        my $traits = sevenize(@traits);
+        my $traits = wrap(@traits);
         make Q::TraitList.new(:$traits);
     }
     method trait($/) {
@@ -320,11 +320,11 @@ class _007::Parser::Actions {
         }
         else {
             if $expansion ~~ Q::Statement {
-                my $statements = sevenize([$expansion]);
+                my $statements = wrap([$expansion]);
                 $expansion = Q::StatementList.new(:$statements);
             }
             elsif $expansion === NONE {
-                my $statements = sevenize([]);
+                my $statements = wrap([]);
                 $expansion = Q::StatementList.new(:$statements);
             }
 
@@ -508,7 +508,7 @@ class _007::Parser::Actions {
     method prefix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(sevenize("prefix:$op")),
+            :name(wrap("prefix:$op")),
             :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(TYPE<NoneType>));
@@ -523,7 +523,7 @@ class _007::Parser::Actions {
             die X::String::Newline.new
                 if $s ~~ /\n/;
         }(~$0);
-        my $value = sevenize((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
+        my $value = wrap((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
         make Q::Literal::Str.new(:$value);
     }
 
@@ -540,7 +540,7 @@ class _007::Parser::Actions {
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(sevenize(+$/)));
+        make Q::Literal::Int.new(:value(wrap(+$/)));
     }
 
     method term:str ($/) {
@@ -548,7 +548,7 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        my $elements = sevenize($<EXPR>».ast);
+        my $elements = wrap($<EXPR>».ast);
         make Q::Term::Array.new(:$elements);
     }
 
@@ -580,7 +580,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        my $qtype = sevenize(~($<qtype> // ""));
+        my $qtype = wrap(~($<qtype> // ""));
 
         if $<block> -> $block {
             # If the quasi consists of a block with a single expression statement, it's very
@@ -688,7 +688,7 @@ class _007::Parser::Actions {
 #            }
 
         make Q::Term::Object.new(
-            :type(Q::Identifier.new(:name(sevenize($type)))),
+            :type(Q::Identifier.new(:name(wrap($type)))),
             :propertylist($<propertylist>.ast));
     }
 
@@ -705,7 +705,7 @@ class _007::Parser::Actions {
                 if %seen{$property}++;
         }
 
-        my $properties = sevenize($<property>».ast);
+        my $properties = wrap($<property>».ast);
         make Q::PropertyList.new(:$properties);
     }
 
@@ -737,7 +737,7 @@ class _007::Parser::Actions {
     method infix($/) {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
-            :name(sevenize("infix:$op")),
+            :name(wrap("infix:$op")),
             :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
@@ -763,7 +763,7 @@ class _007::Parser::Actions {
             $op = ".";
         }
         my $identifier = Q::Identifier.new(
-            :name(sevenize("postfix:$op")),
+            :name(wrap("postfix:$op")),
             :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
@@ -791,17 +791,17 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';
         }();
-        my $name = sevenize($value);
+        my $name = wrap($value);
         make Q::Identifier.new(:$name);
     }
 
     method argumentlist($/) {
-        my $arguments = sevenize($<EXPR>».ast);
+        my $arguments = wrap($<EXPR>».ast);
         make Q::ArgumentList.new(:$arguments);
     }
 
     method parameterlist($/) {
-        my $parameters = sevenize($<parameter>».ast);
+        my $parameters = wrap($<parameter>».ast);
         make Q::ParameterList.new(:$parameters);
     }
 

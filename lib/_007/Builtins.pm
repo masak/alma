@@ -127,7 +127,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         prompt => sub ($arg) {
             $output.print($arg);
             $output.flush();
-            return sevenize($input.get());
+            return wrap($input.get());
         },
         type => sub ($arg) {
             $arg ~~ _007::Type
@@ -163,21 +163,21 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:==' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return sevenize(equal-value($lhs, $rhs));
+                return wrap(equal-value($lhs, $rhs));
             },
             :qtype(Q::Infix::Eq),
         ),
         'infix:!=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return sevenize(!equal-value($lhs, $rhs))
+                return wrap(!equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ne),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<' => op(
             sub ($lhs, $rhs) {
-                return sevenize(less-value($lhs, $rhs))
+                return wrap(less-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Lt),
             :precedence{ equal => "infix:==" },
@@ -185,14 +185,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:<=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return sevenize(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Le),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>' => op(
             sub ($lhs, $rhs) {
-                return sevenize(more-value($lhs, $rhs) )
+                return wrap(more-value($lhs, $rhs) )
             },
             :qtype(Q::Infix::Gt),
             :precedence{ equal => "infix:==" },
@@ -200,7 +200,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:>=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
-                return sevenize(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
+                return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
             :qtype(Q::Infix::Ge),
             :precedence{ equal => "infix:==" },
@@ -208,13 +208,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:~~' => op(
             sub ($lhs, $rhs) {
                 if $rhs ~~ _007::Type {
-                    return sevenize($lhs ~~ _007::Object && $lhs.type === $rhs);
+                    return wrap($lhs ~~ _007::Object && $lhs.type === $rhs);
                 }
 
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                     unless $rhs ~~ Val::Type;
 
-                return sevenize($lhs ~~ $rhs.type);
+                return wrap($lhs ~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeMatch),
             :precedence{ equal => "infix:==" },
@@ -222,13 +222,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:!~~' => op(
             sub ($lhs, $rhs) {
                 if $rhs ~~ _007::Type {
-                    return sevenize($lhs !~~ _007::Object || $lhs.type !=== $rhs);
+                    return wrap($lhs !~~ _007::Object || $lhs.type !=== $rhs);
                 }
 
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
                     unless $rhs ~~ Val::Type | _007::Type;
 
-                return sevenize($lhs !~~ $rhs.type);
+                return wrap($lhs !~~ $rhs.type);
             },
             :qtype(Q::Infix::TypeNonMatch),
             :precedence{ equal => "infix:==" },
@@ -239,7 +239,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Array>;
-                return sevenize([$lhs, |$rhs.value]);
+                return wrap([$lhs, |$rhs.value]);
             },
             :qtype(Q::Infix::Cons),
             :assoc<right>,
@@ -252,7 +252,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Int>;
                 die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return sevenize($lhs.value + $rhs.value);
+                return wrap($lhs.value + $rhs.value);
             },
             :qtype(Q::Infix::Addition),
         ),
@@ -262,7 +262,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Str>;
                 die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Str>;
-                return sevenize($lhs.value ~ $rhs.value);
+                return wrap($lhs.value ~ $rhs.value);
             },
             :qtype(Q::Infix::Concat),
             :precedence{ equal => "infix:+" },
@@ -273,7 +273,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Int>;
                 die X::TypeCheck.new(:operation<->, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return sevenize($lhs.value - $rhs.value);
+                return wrap($lhs.value - $rhs.value);
             },
             :qtype(Q::Infix::Subtraction),
         ),
@@ -285,7 +285,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Int>;
                 die X::TypeCheck.new(:operation<*>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return sevenize($lhs.value * $rhs.value);
+                return wrap($lhs.value * $rhs.value);
             },
             :qtype(Q::Infix::Multiplication),
         ),
@@ -297,7 +297,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
                 die X::Numeric::DivideByZero.new(:using<%>, :numerator($lhs.value))
                     if $rhs.value == 0;
-                return sevenize($lhs.value % $rhs.value);
+                return wrap($lhs.value % $rhs.value);
             },
             :qtype(Q::Infix::Modulo),
         ),
@@ -309,7 +309,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
                 die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
                     if $rhs.value == 0;
-                return sevenize($lhs.value %% $rhs.value);
+                return wrap($lhs.value %% $rhs.value);
             },
             :qtype(Q::Infix::Divisibility),
         ),
@@ -319,7 +319,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Str>;
                 die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return sevenize($lhs.value x $rhs.value);
+                return wrap($lhs.value x $rhs.value);
             },
             :qtype(Q::Infix::Replicate),
             :precedence{ equal => "infix:*" },
@@ -330,7 +330,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $lhs ~~ _007::Object && $lhs.type === TYPE<Array>;
                 die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(_007::Object))
                     unless $rhs ~~ _007::Object && $rhs.type === TYPE<Int>;
-                return sevenize(| $lhs.value xx $rhs.value);
+                return wrap(| $lhs.value xx $rhs.value);
             },
             :qtype(Q::Infix::ArrayReplicate),
             :precedence{ equal => "infix:*" },
@@ -338,14 +338,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
         # prefixes
         'prefix:~' => op(
-            sub prefix-str($expr) { sevenize($expr.Str) },
+            sub prefix-str($expr) { wrap($expr.Str) },
             :qtype(Q::Prefix::Str),
         ),
         'prefix:+' => op(
             sub prefix-plus($expr) {
                 if $expr ~~ _007::Object {
                     if $expr.type === TYPE<Str> {
-                        return sevenize($expr.value.Int)
+                        return wrap($expr.value.Int)
                             if $expr.value ~~ /^ '-'? \d+ $/;
                     }
                     elsif $expr.type === TYPE<Int> {
@@ -363,11 +363,11 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             sub prefix-minus($expr) {
                 if $expr ~~ _007::Object {
                     if $expr.type === TYPE<Str> {
-                        return sevenize(-$expr.value.Int)
+                        return wrap(-$expr.value.Int)
                             if $expr.value ~~ /^ '-'? \d+ $/;
                     }
                     elsif $expr.type === TYPE<Int> {
-                        return sevenize(-$expr.value);
+                        return wrap(-$expr.value);
                     }
                 }
                 die X::TypeCheck.new(
@@ -379,13 +379,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:?' => op(
             sub ($a) {
-                return sevenize(?$a.truthy)
+                return wrap(?$a.truthy)
             },
             :qtype(Q::Prefix::So),
         ),
         'prefix:!' => op(
             sub ($a) {
-                return sevenize(!$a.truthy)
+                return wrap(!$a.truthy)
             },
             :qtype(Q::Prefix::Not),
         ),
@@ -393,7 +393,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             sub ($n) {
                 die X::TypeCheck.new(:operation<^>, :got($n), :expected(_007::Object))
                     unless $n ~~ _007::Object && $n.type === TYPE<Int>;
-                return sevenize([(^$n.value).map(&sevenize)]);
+                return wrap([(^$n.value).map(&wrap)]);
             },
             :qtype(Q::Prefix::Upto),
         ),
@@ -437,7 +437,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     }
 
     my &ditch-sigil = { $^str.substr(1) };
-    my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(sevenize($^value))))) };
+    my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(wrap($^value))))) };
 
     return @builtins.map: {
         when .value ~~ _007::Type | Val::Type {
@@ -445,7 +445,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         }
         when .value ~~ Block {
             my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
-            my $parameters = sevenize(@elements);
+            my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
@@ -454,7 +454,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my $name = .key;
             install-op($name, .value);
             my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
-            my $parameters = sevenize(@elements);
+            my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
@@ -464,7 +464,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             install-op($name, .value);
             my &fn = .value.fn;
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameters = sevenize(@elements);
+            my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
             .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);

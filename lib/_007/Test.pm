@@ -8,7 +8,7 @@ use Test;
 
 sub read(Str $ast) is export {
     sub n($type, $op) {
-        my $name = sevenize($type ~ ":<$op>");
+        my $name = wrap($type ~ ":<$op>");
         return Q::Identifier.new(:$name);
     }
 
@@ -109,7 +109,7 @@ sub read(Str $ast) is export {
             sub check-if-operator() {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this
-                    my $name = sevenize($qname);
+                    my $name = wrap($qname);
                     %arguments<identifier> = Q::Identifier.new(:$name);
                     shift @attributes;  # $.identifier
                 }
@@ -118,7 +118,7 @@ sub read(Str $ast) is export {
 
             if @attributes == 1 && (%qtype-has-just-array{$qtype.^name} :exists) {
                 my $aname = aname(@attributes[0]);
-                %arguments{$aname} = sevenize(@rest);
+                %arguments{$aname} = wrap(@rest);
             }
             else {
                 die "{+@rest} arguments passed, only {+@attributes} parameters expected for {$qtype.^name}"
@@ -136,8 +136,8 @@ sub read(Str $ast) is export {
             make $qtype.new(|%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
-        method expr:int ($/) { make sevenize(+$/) }
-        method expr:str ($/) { make sevenize((~$0).subst(q[\\"], q["], :g)) }
+        method expr:int ($/) { make wrap(+$/) }
+        method expr:str ($/) { make wrap((~$0).subst(q[\\"], q["], :g)) }
     };
 
     AST::Syntax.parse($ast, :$actions)
@@ -220,7 +220,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($sub.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, sevenize({}), $sub.block.statementlist, $val);
+        $runtime.enter($outer-frame, wrap({}), $sub.block.statementlist, $val);
         handle($sub.block);
         $runtime.leave();
 
@@ -235,7 +235,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             :statementlist($macro.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, sevenize({}), $macro.block.statementlist, $val);
+        $runtime.enter($outer-frame, wrap({}), $macro.block.statementlist, $val);
         handle($macro.block);
         $runtime.leave();
 
@@ -255,7 +255,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     }
 
     multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, sevenize({}), Q::StatementList.new);
+        $runtime.enter($runtime.current-frame, wrap({}), Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
         $block.static-lexpad = $runtime.current-frame.value<pad>;

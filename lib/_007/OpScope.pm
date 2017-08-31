@@ -15,7 +15,7 @@ class _007::OpScope {
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         my $name = "$type:$op";
-        my $identifier = Q::Identifier.new(:name(sevenize($name)));
+        my $identifier = Q::Identifier.new(:name(wrap($name)));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
             prefix => Q::Prefix.new(:$identifier),

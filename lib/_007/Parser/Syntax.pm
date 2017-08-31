@@ -19,7 +19,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, sevenize({}), Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, wrap({}), Q::StatementList.new);
     } }
 
     token finishpad { <?> {
@@ -41,7 +41,7 @@ grammar _007::Parser::Syntax {
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.id ~ $symbol};
-        my $name = sevenize($symbol);
+        my $name = wrap($symbol);
         my $identifier = Q::Identifier.new(:$name, :$frame);
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;

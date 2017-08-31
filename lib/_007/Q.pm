@@ -53,7 +53,7 @@ class X::_007::RuntimeException is Exception {
     }
 }
 
-sub empty-array() { sevenize([]) }
+sub empty-array() { wrap([]) }
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -197,7 +197,7 @@ class Q::Term::Array does Q::Term {
     has _007::Object $.elements;
 
     method eval($runtime) {
-        sevenize($.elements.value.map(*.eval($runtime)));
+        wrap($.elements.value.map(*.eval($runtime)));
     }
 }
 
@@ -237,7 +237,7 @@ class Q::Term::Dict does Q::Term {
     has $.propertylist;
 
     method eval($runtime) {
-        return sevenize(hash($.propertylist.properties.value.map({ .key.value => .value.eval($runtime) })));
+        return wrap(hash($.propertylist.properties.value.map({ .key.value => .value.eval($runtime) })));
     }
 }
 
@@ -303,7 +303,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 
     method eval($runtime) {
         my $name = $.identifier ~~ _007::Object && $.identifier.type === TYPE<NoneType>
-            ?? sevenize("")
+            ?? wrap("")
             !! $.identifier.name;
         return Val::Sub.new(
             :$name,
@@ -328,7 +328,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
-    has _007::Object::Wrapped $.static-lexpad is rw = sevenize({});
+    has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -746,14 +746,14 @@ class Q::Term::Quasi does Q::Term {
 
     method eval($runtime) {
         sub interpolate($thing) {
-            return sevenize($thing.value.map(&interpolate))
+            return wrap($thing.value.map(&interpolate))
                 if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
 
             return $thing
                 if $thing ~~ _007::Object;      # XXX: won't hold true for everything
 
             sub interpolate-entry($_) { .key => interpolate(.value) }
-            return sevenize(hash($thing.value.map(&interpolate-entry)))
+            return wrap(hash($thing.value.map(&interpolate-entry)))
                 if $thing ~~ _007::Object && $thing.type === TYPE<Dict>;
 
             return $thing
@@ -1020,7 +1020,7 @@ class Q::Statement::Throw does Q::Statement {
 
     method run($runtime) {
         my $value = $.expr ~~ _007::Object && $.expr.type === TYPE<NoneType>
-            ?? TYPE<Exception>.create(:message(sevenize("Died")))
+            ?? TYPE<Exception>.create(:message(wrap("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :expected(_007::Object))
             unless $value ~~ _007::Object && $value.type === TYPE<Exception>;

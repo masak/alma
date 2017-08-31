@@ -80,7 +80,7 @@ class _007::Object::Wrapped is _007::Object {
             return '{' ~ %.value.map({
                 my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                     ?? .key
-                    !! sevenize(.key).quoted-Str;
+                    !! wrap(.key).quoted-Str;
                 "{$key}: {.value.quoted-Str}"
             }).sort.join(', ') ~ '}';
         }
@@ -96,7 +96,7 @@ sub truthy($v) {
     $v !=== NONE && $v !=== FALSE
 }
 
-sub sevenize($value) is export {
+sub wrap($value) is export {
     if $value ~~ Bool {
         return $value ?? TRUE !! FALSE;
     }
@@ -116,7 +116,7 @@ sub sevenize($value) is export {
         return NONE;
     }
     else {
-        die "Tried to sevenize unknown value ", $value.^name;
+        die "Tried to wrap unknown value ", $value.^name;
     }
 }
 
@@ -262,11 +262,11 @@ class Val::Sub is Val {
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
-    has _007::Object::Wrapped $.static-lexpad is rw = sevenize({});
+    has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
     has _007::Object::Wrapped $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
-        self.bless(:name(sevenize($name)), :&hook, :$parameterlist, :$statementlist);
+        self.bless(:name(wrap($name)), :&hook, :$parameterlist, :$statementlist);
     }
 
     method escaped-name {
