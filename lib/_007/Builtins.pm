@@ -2,13 +2,6 @@ use _007::Val;
 use _007::Q;
 
 sub builtins(:$input!, :$output!, :$opscope!) is export {
-    sub wrap($_) {
-        when _007::Object { $_ }
-        when Val | Q { $_ }
-        when Str  { die "A Str was sent to &wrap" }
-        default { die "Got some unknown value of type ", .^name }
-    }
-
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
     multi equal-value(_007::Object $l, _007::Object $r) {
