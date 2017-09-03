@@ -52,26 +52,6 @@ class X::Precedence::Incompatible is Exception {
     method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }
 
-class X::Property::NotDeclared is Exception {
-    has Str $.type;
-    has Str $.property;
-
-    method message { "The property '$.property' is not defined on type '$.type'" }
-}
-
-class X::Property::Required is Exception {
-    has Str $.type;
-    has Str $.property;
-
-    method message { "The property '$.property' is required on type '$.type'" }
-}
-
-class X::Property::Duplicate is Exception {
-    has Str $.property;
-
-    method message { "The property '$.property' was declared more than once in a property list" }
-}
-
 class _007::Parser::Actions {
     method finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.value<pad>;

@@ -6,13 +6,33 @@ class X::Uninstantiable is Exception {
     method message() { "<type {$.name}> is abstract and uninstantiable"; }
 }
 
+class X::Property::NotDeclared is Exception {
+    has Str $.type;
+    has Str $.property;
+
+    method message { "The property '$.property' is not defined on type '$.type'" }
+}
+
+class X::Property::Required is Exception {
+    has Str $.type;
+    has Str $.property;
+
+    method message { "The property '$.property' is required on type '$.type'" }
+}
+
+class X::Property::Duplicate is Exception {
+    has Str $.property;
+
+    method message { "The property '$.property' was declared more than once in a property list" }
+}
+
 class Helper { ... }
 class _007::Object::Class { ... }
 
 sub unique-id { ++$ }
 
 class _007::Type {
-    has $.name;
+    has Str $.name;
     has @.fields;
     # XXX: $.id
 
@@ -25,7 +45,21 @@ class _007::Type {
     }
 
     method create(*%properties) {
-        # XXX: need to check %properties agains @.fields
+        my $type = $.name;
+        my $fields = set(@.fields);
+        my $seen = set();
+        for %properties.keys.sort -> $property {
+            die X::Property::NotDeclared.new(:$type, :$property)
+                unless $property (elem) $fields;
+
+            die X::Property::Duplicate.new(:$type, :$property)
+                if $property (elem) $seen;
+
+            $seen (|)= $property;
+        }
+        # XXX: need to screen for required properties by traversing @.fields, but we don't have the
+        #      infrastructure in terms of a way to mark up a field as required
+
         return _007::Object::Class.new(:type(self), :%properties);
     }
 }
