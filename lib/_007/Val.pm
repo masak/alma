@@ -32,7 +32,7 @@ class X::Control::Return is Exception {
 }
 
 class Helper { ... }
-class _007::Object::Class { ... }
+class _007::Object { ... }
 
 sub unique-id { ++$ }
 
@@ -65,7 +65,7 @@ class _007::Type {
         # XXX: need to screen for required properties by traversing @.fields, but we don't have the
         #      infrastructure in terms of a way to mark up a field as required
 
-        return _007::Object::Class.new(:type(self), :%properties);
+        return _007::Object.new(:type(self), :%properties);
     }
 }
 
@@ -73,10 +73,12 @@ constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name
     $name => _007::Type.new(:$name)
 }));
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
+TYPE<NativeSub> = _007::Type.new(:name<NativeSub>, :fields["name", "parameterlist", "statementlist"]);
 
 class _007::Object {
     has $.type;
     has $.id = unique-id;
+    has %.properties;
 
     method attributes { () }
 
@@ -88,10 +90,6 @@ class _007::Object {
     method quoted-Str { self.Str }
 
     method truthy { truthy(self) }
-}
-
-class _007::Object::Class is _007::Object {
-    has %.properties;
 }
 
 class _007::Object::Enum is _007::Object {
@@ -157,6 +155,15 @@ sub wrap($value) is export {
     else {
         die "Tried to wrap unknown value ", $value.^name;
     }
+}
+
+sub wrap-fn(&value, Str $name, $parameterlist, $statementlist) is export {
+    my %properties =
+        name => wrap($name),
+        :$parameterlist,
+        :$statementlist,
+    ;
+    return _007::Object::Wrapped.new(:type(TYPE<NativeSub>), :&value, :%properties);
 }
 
 role Val {
@@ -298,24 +305,16 @@ class Val::Type does Val {
 ###
 class Val::Sub is Val {
     has _007::Object $.name;
-    has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
     has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
     has _007::Object::Wrapped $.outer-frame;
-
-    method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
-        self.bless(:name(wrap($name)), :&hook, :$parameterlist, :$statementlist);
-    }
 
     method call($runtime, @arguments) {
         my $paramcount = $.parameterlist.parameters.value.elems;
         my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
-        if self.hook -> &hook {
-            return &hook(|@arguments) || NONE;
-        }
         $runtime.enter($.outer-frame, $.static-lexpad, $.statementlist, self);
         for @($.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
             $runtime.declare-var($param.identifier, $arg);
@@ -372,6 +371,28 @@ class Val::Macro is Val::Sub {
 }
 
 class Helper {
+    sub escaped($name) {
+        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
+        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
+
+        return $name
+            unless $name ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+
+        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
+            if $1.contains(">") && $1.contains("»");
+
+        return "{$0}:«{escape-backslashes $1}»"
+            if $1.contains(">");
+
+        return "{$0}:<{escape-backslashes $1}>";
+    }
+
+    sub pretty($parameterlist) {
+        return sprintf "(%s)", $parameterlist.parameters.value».identifier».name.join(", ");
+    }
+
+    method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
+
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
         when Val::Type { "<type {.name}>" }
@@ -382,6 +403,9 @@ class Helper {
             when .type === TYPE<Array> { .quoted-Str }
             when .type === TYPE<Dict> { .quoted-Str }
             when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
+            when .type === TYPE<NativeSub> {
+                sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
+            }
             when _007::Object::Wrapped { .value.Str }
             default { die "Unexpected type ", .^name }
         }

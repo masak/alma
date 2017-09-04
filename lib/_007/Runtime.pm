@@ -161,7 +161,7 @@ class _007::Runtime {
             my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
-            return Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            return wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
 
         my $type = Val::Type.of($obj.WHAT).name;

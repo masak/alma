@@ -46,6 +46,11 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         elsif $type === TYPE<Bool> {
             return $l === $r;
         }
+        elsif $type === TYPE<NativeSub> {
+            return $l.properties<name>.value eq $r.properties<name>.value
+                && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
+                && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
+        }
         else {
             die "Unknown type ", $type.^name;
         }
@@ -132,9 +137,11 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         type => sub ($arg) {
             $arg ~~ _007::Type
                 ?? TYPE<Type>
-                !! $arg ~~ _007::Object
-                    ?? $arg.type
-                    !! Val::Type.of($arg.WHAT);
+                !! $arg !~~ _007::Object
+                    ?? Val::Type.of($arg.WHAT)
+                    !! $arg.type === TYPE<NativeSub>    # lie about NativeSub
+                        ?? Val::Type.of(Val::Sub)
+                        !! $arg.type;
         },
 
         # OPERATORS (from loosest to tightest within each category)
@@ -448,7 +455,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
+            .key => wrap-fn(.value, .key, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
@@ -457,7 +464,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(sub () {}, $name, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::Op {
             my $name = .key;
@@ -467,7 +474,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my $parameters = wrap(@elements);
             my $parameterlist = Q::ParameterList.new(:$parameters);
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
         default { die "Unknown type {.value.^name}" }
     };
