@@ -152,32 +152,6 @@ class _007::Runtime {
         }
     }
 
-    method call(Val::Sub $c, @arguments) {
-        my $paramcount = $c.parameterlist.parameters.value.elems;
-        my $argcount = @arguments.elems;
-        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
-            unless $paramcount == $argcount;
-        if $c.hook -> &hook {
-            return &hook(|@arguments) || NONE;
-        }
-        self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c);
-        for @($c.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
-            self.declare-var($param.identifier, $arg);
-        }
-        self.register-subhandler;
-        my $frame = self.current-frame;
-        my $value = $c.statementlist.run(self);
-        self.leave;
-        CATCH {
-            when X::Control::Return {
-                self.unroll-to($frame);
-                self.leave;
-                return .value;
-            }
-        }
-        $value || NONE
-    }
-
     method property($obj, Str $propname) {
         sub builtin(&fn) {
             my $name = &fn.name;
@@ -380,13 +354,13 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
             return builtin(sub filter($fn) {
-                my @elements = $obj.value.grep({ self.call($fn, [$_]).truthy });
+                my @elements = $obj.value.grep({ $fn.call(self, [$_]).truthy });
                 return wrap(@elements);
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "map" {
             return builtin(sub map($fn) {
-                my @elements = $obj.value.map({ self.call($fn, [$_]) });
+                my @elements = $obj.value.map({ $fn.call(self, [$_]) });
                 return wrap(@elements);
             });
         }

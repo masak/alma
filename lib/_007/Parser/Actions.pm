@@ -289,7 +289,7 @@ class _007::Parser::Actions {
     }
 
     sub expand($macro, @arguments, &unexpanded-callback:()) {
-        my $expansion = $*runtime.call($macro, @arguments);
+        my $expansion = $macro.call($*runtime, @arguments);
 
         if $expansion ~~ Q::Statement::My {
             _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);

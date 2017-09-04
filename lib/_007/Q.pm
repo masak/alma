@@ -1,10 +1,5 @@
 use _007::Val;
 
-class X::Control::Return is Exception {
-    has $.frame;
-    has $.value;
-}
-
 class X::Subscript::TooLarge is Exception {
     has $.value;
     has $.length;
@@ -347,7 +342,7 @@ class Q::Prefix does Q::Expr {
     method eval($runtime) {
         my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$e]);
+        return $c.call($runtime, [$e]);
     }
 }
 
@@ -404,7 +399,7 @@ class Q::Infix does Q::Expr {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$l, $r]);
+        return $c.call($runtime, [$l, $r]);
     }
 }
 
@@ -587,7 +582,7 @@ class Q::Postfix does Q::Expr {
     method eval($runtime) {
         my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$e]);
+        return $c.call($runtime, [$e]);
     }
 }
 
@@ -666,7 +661,7 @@ class Q::Postfix::Call is Q::Postfix {
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Sub;
         my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
-        return $runtime.call($c, @arguments);
+        return $c.call($runtime, @arguments);
     }
 }
 

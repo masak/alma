@@ -26,6 +26,11 @@ class X::Property::Duplicate is Exception {
     method message { "The property '$.property' was declared more than once in a property list" }
 }
 
+class X::Control::Return is Exception {
+    has $.frame;
+    has $.value;
+}
+
 class Helper { ... }
 class _007::Object::Class { ... }
 
@@ -301,6 +306,32 @@ class Val::Sub is Val {
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(wrap($name)), :&hook, :$parameterlist, :$statementlist);
+    }
+
+    method call($runtime, @arguments) {
+        my $paramcount = $.parameterlist.parameters.value.elems;
+        my $argcount = @arguments.elems;
+        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
+            unless $paramcount == $argcount;
+        if self.hook -> &hook {
+            return &hook(|@arguments) || NONE;
+        }
+        $runtime.enter($.outer-frame, $.static-lexpad, $.statementlist, self);
+        for @($.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
+            $runtime.declare-var($param.identifier, $arg);
+        }
+        $runtime.register-subhandler;
+        my $frame = $runtime.current-frame;
+        my $value = $.statementlist.run($runtime);
+        $runtime.leave;
+        CATCH {
+            when X::Control::Return {
+                $runtime.unroll-to($frame);
+                $runtime.leave;
+                return .value;
+            }
+        }
+        return $value || NONE;
     }
 
     method escaped-name {
