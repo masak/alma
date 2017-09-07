@@ -46,7 +46,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         elsif $type === TYPE<Bool> {
             return $l === $r;
         }
-        elsif $type === TYPE<Sub> {
+        elsif $type === TYPE<Sub> | TYPE<Macro> {   # XXX: should really do subtyping check here
             return $l.properties<name>.value eq $r.properties<name>.value
                 && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
                 && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
@@ -58,11 +58,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     multi equal-value(_007::Type $l, _007::Type $r) { $l === $r }
     multi equal-value(Val::Type $l, Val::Type $r) {
         $l.type === $r.type
-    }
-    multi equal-value(Val::Macro $l, Val::Macro $r) {
-        $l.name eq $r.name
-            && equal-value($l.parameterlist, $r.parameterlist)
-            && equal-value($l.statementlist, $r.statementlist)
     }
     multi equal-value(Q $l, Q $r) {
         sub same-avalue($attr) {

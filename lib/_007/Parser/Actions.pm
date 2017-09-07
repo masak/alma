@@ -185,7 +185,7 @@ class _007::Parser::Actions {
         }
         elsif $<routine> eq "macro" {
             make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            $val = TYPE<Macro>.create(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         else {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
@@ -284,12 +284,13 @@ class _007::Parser::Actions {
     sub is-macro($q, $qtype, $identifier) {
         $q ~~ $qtype
             && $identifier ~~ Q::Identifier
-            && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ Val::Macro
+            && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ _007::Object
+            && $macro.type === TYPE<Macro>
             && $macro;
     }
 
     sub expand($macro, @arguments, &unexpanded-callback:()) {
-        my $expansion = $macro.call($*runtime, @arguments);
+        my $expansion = internal-call($macro, $*runtime, @arguments);
 
         if $expansion ~~ Q::Statement::My {
             _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);
@@ -548,7 +549,7 @@ class _007::Parser::Actions {
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
                 die X::Macro::Postdeclared.new(:$name)
-                    if $value ~~ Val::Macro;
+                    if $value ~~ _007::Object && $value.type === TYPE<Macro>;
                 die X::Undeclared.new(:symbol($name))
                     unless $value ~~ _007::Object && $value.type === TYPE<Sub>;
             };

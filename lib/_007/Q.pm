@@ -608,7 +608,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .value[$index.value];
             }
-            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Val::Macro || $_ ~~ Q {
+            if ($_ ~~ _007::Object && .type === TYPE<Dict> | TYPE<Sub> | TYPE<Macro>) || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless $property ~~ _007::Object && $property.type === TYPE<Str>;
@@ -657,9 +657,9 @@ class Q::Postfix::Call is Q::Postfix {
     method eval($runtime) {
         my $c = $.operand.eval($runtime);
         die "macro is called at runtime"
-            if $c ~~ Val::Macro;
+            if $c ~~ _007::Object && $c.type === TYPE<Macro>;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
-            unless ($c ~~ _007::Object && $c.type === TYPE<Sub>) || $c ~~ Val::Macro;
+            unless ($c ~~ _007::Object && $c.type === TYPE<Sub>) || $c ~~ _007::Object && $c.type === TYPE<Macro>;
         my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
         return internal-call($c, $runtime, @arguments);
     }

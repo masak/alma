@@ -231,7 +231,8 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
         my $name = $macro.identifier.name;
-        my $val = Val::Macro.new(:$name,
+        my $val = TYPE<Macro>.create(
+            :$name,
             :parameterlist($macro.block.parameterlist),
             :statementlist($macro.block.statementlist),
             :$outer-frame

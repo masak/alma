@@ -74,6 +74,7 @@ constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name
 }));
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
+TYPE<Macro> = _007::Type.new(:name<Macro>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 
 class _007::Object {
     has $.type;
@@ -287,7 +288,7 @@ class Val::Type does Val {
 
 sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     die "Tried to call a {$sub.^name}, expected a Sub"
-        unless $sub ~~ _007::Object && $sub.type === TYPE<Sub>;
+        unless $sub ~~ _007::Object && $sub.type === TYPE<Sub> | TYPE<Macro>;   # XXX: should do subtyping check
 
     if $sub ~~ _007::Object::Wrapped && $sub.type === TYPE<Macro> {
         die "Don't handle the wrapped macro case yet";
@@ -418,10 +419,12 @@ class Helper {
             when .type === TYPE<Sub> {
                 sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
             }
+            when .type === TYPE<Macro> {
+                sprintf "<macro %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
+            }
             when _007::Object::Wrapped { .value.Str }
             default { die "Unexpected type ", .^name }
         }
-        when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         default {
             my $self = $_;
             die "Unexpected type -- some invariant must be broken ({$self.^name})"

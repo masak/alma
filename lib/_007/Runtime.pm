@@ -61,9 +61,7 @@ class _007::Runtime {
             }
         }
         if $routine {
-            my $name = $routine ~~ Val::Macro
-                ?? $routine.name
-                !! $routine.properties<name>;
+            my $name = $routine.properties<name>;
             my $identifier = Q::Identifier.new(:$name, :$frame);
             self.declare-var($identifier, $routine);
         }
@@ -412,11 +410,8 @@ class _007::Runtime {
                 $obj.create($properties.value.map({ .value[0].value => .value[1] }));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Sub> && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Sub> | TYPE<Macro> && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj.properties{$propname};
-        }
-        elsif $obj ~~ Val::Macro && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
-            return $obj."$propname"();
         }
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
