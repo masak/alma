@@ -73,7 +73,6 @@ constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name
     $name => _007::Type.new(:$name)
 }));
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
-TYPE<NativeSub> = _007::Type.new(:name<NativeSub>, :fields["name", "parameterlist", "statementlist"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 
 class _007::Object {
@@ -164,7 +163,7 @@ sub wrap-fn(&value, Str $name, $parameterlist, $statementlist) is export {
         :$parameterlist,
         :$statementlist,
     ;
-    return _007::Object::Wrapped.new(:type(TYPE<NativeSub>), :&value, :%properties);
+    return _007::Object::Wrapped.new(:type(TYPE<Sub>), :&value, :%properties);
 }
 
 role Val {
@@ -408,7 +407,7 @@ class Helper {
             when .type === TYPE<Array> { .quoted-Str }
             when .type === TYPE<Dict> { .quoted-Str }
             when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
-            when .type === TYPE<NativeSub> | TYPE<Sub> {
+            when .type === TYPE<Sub> {
                 sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
             }
             when _007::Object::Wrapped { .value.Str }

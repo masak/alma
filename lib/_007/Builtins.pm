@@ -46,7 +46,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         elsif $type === TYPE<Bool> {
             return $l === $r;
         }
-        elsif $type === TYPE<NativeSub> | TYPE<Sub> {
+        elsif $type === TYPE<Sub> {
             return $l.properties<name>.value eq $r.properties<name>.value
                 && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
                 && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
@@ -139,9 +139,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 ?? TYPE<Type>
                 !! $arg !~~ _007::Object
                     ?? Val::Type.of($arg.WHAT)
-                    !! $arg.type === TYPE<NativeSub>    # lie about NativeSub
-                        ?? TYPE<Sub>
-                        !! $arg.type;
+                    !! $arg.type;
         },
 
         # OPERATORS (from loosest to tightest within each category)
