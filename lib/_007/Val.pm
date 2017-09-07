@@ -320,69 +320,6 @@ sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     return $value || NONE;
 }
 
-### ### Macro
-###
-### A macro. When you define a macro in 007, the value of the name bound
-### is a macro object.
-###
-###     macro agent() {
-###         return quasi { "Bond" };
-###     }
-###     say(agent);             # --> `<macro agent()>`
-###
-class Val::Macro is Val {
-    has _007::Object $.name;
-    has $.parameterlist;
-    has $.statementlist;
-    has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
-    has _007::Object::Wrapped $.outer-frame;
-
-    method escaped-name {
-        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
-        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
-
-        return $.name.value
-            unless $.name.value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
-
-        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
-            if $1.contains(">") && $1.contains("»");
-
-        return "{$0}:«{escape-backslashes $1}»"
-            if $1.contains(">");
-
-        return "{$0}:<{escape-backslashes $1}>";
-    }
-
-    method pretty-parameters {
-        sprintf "(%s)", $.parameterlist.parameters.value».identifier».name.join(", ");
-    }
-
-    method call($runtime, @arguments) {
-        my $paramcount = $.parameterlist.parameters.value.elems;
-        my $argcount = @arguments.elems;
-        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
-            unless $paramcount == $argcount;
-        $runtime.enter($.outer-frame, $.static-lexpad, $.statementlist, self);
-        for @($.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
-            $runtime.declare-var($param.identifier, $arg);
-        }
-        $runtime.register-subhandler;
-        my $frame = $runtime.current-frame;
-        my $value = $.statementlist.run($runtime);
-        $runtime.leave;
-        CATCH {
-            when X::Control::Return {
-                $runtime.unroll-to($frame);
-                $runtime.leave;
-                return .value;
-            }
-        }
-        return $value || NONE;
-    }
-
-    method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
-}
-
 class Helper {
     sub escaped($name) {
         sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
