@@ -286,54 +286,6 @@ class Val::Type does Val {
     }
 }
 
-### ### Sub
-###
-### A subroutine. When you define a subroutine in 007, the value of the
-### name bound is a `Sub` object.
-###
-###     sub agent() {
-###         return "Bond";
-###     }
-###     say(agent);             # --> `<sub agent()>`
-###
-### Subroutines are mostly distinguished by being *callable*, that is, they
-### can be called at runtime by passing some values into them.
-###
-###     sub add(x, y) {
-###         return x + y;
-###     }
-###     say(add(2, 5));         # --> `7`
-###
-class Val::Sub is Val {
-    has _007::Object $.name;
-    has $.parameterlist;
-    has $.statementlist;
-    has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
-    has _007::Object::Wrapped $.outer-frame;
-
-    method escaped-name {
-        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
-        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
-
-        return $.name.value
-            unless $.name.value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
-
-        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
-            if $1.contains(">") && $1.contains("»");
-
-        return "{$0}:«{escape-backslashes $1}»"
-            if $1.contains(">");
-
-        return "{$0}:<{escape-backslashes $1}>";
-    }
-
-    method pretty-parameters {
-        sprintf "(%s)", $.parameterlist.parameters.value».identifier».name.join(", ");
-    }
-
-    method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
-}
-
 sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     die "Tried to call a {$sub.^name}, expected a Sub"
         unless $sub ~~ _007::Object && $sub.type === TYPE<Sub>;
@@ -370,7 +322,33 @@ sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
 ###     }
 ###     say(agent);             # --> `<macro agent()>`
 ###
-class Val::Macro is Val::Sub {
+class Val::Macro is Val {
+    has _007::Object $.name;
+    has $.parameterlist;
+    has $.statementlist;
+    has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
+    has _007::Object::Wrapped $.outer-frame;
+
+    method escaped-name {
+        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
+        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
+
+        return $.name.value
+            unless $.name.value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+
+        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
+            if $1.contains(">") && $1.contains("»");
+
+        return "{$0}:«{escape-backslashes $1}»"
+            if $1.contains(">");
+
+        return "{$0}:<{escape-backslashes $1}>";
+    }
+
+    method pretty-parameters {
+        sprintf "(%s)", $.parameterlist.parameters.value».identifier».name.join(", ");
+    }
+
     method call($runtime, @arguments) {
         my $paramcount = $.parameterlist.parameters.value.elems;
         my $argcount = @arguments.elems;
@@ -437,7 +415,6 @@ class Helper {
             default { die "Unexpected type ", .^name }
         }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
-        when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
         default {
             my $self = $_;
             die "Unexpected type -- some invariant must be broken ({$self.^name})"
