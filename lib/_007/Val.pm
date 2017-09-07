@@ -289,6 +289,14 @@ sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     die "Tried to call a {$sub.^name}, expected a Sub"
         unless $sub ~~ _007::Object && $sub.type === TYPE<Sub>;
 
+    if $sub ~~ _007::Object::Wrapped && $sub.type === TYPE<Macro> {
+        die "Don't handle the wrapped macro case yet";
+    }
+
+    if $sub ~~ _007::Object::Wrapped && $sub.type === TYPE<Sub> {
+        return $sub.value()(|@arguments);
+    }
+
     my $paramcount = $sub.properties<parameterlist>.parameters.value.elems;
     my $argcount = @arguments.elems;
     die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)

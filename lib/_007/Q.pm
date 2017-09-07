@@ -342,9 +342,6 @@ class Q::Prefix does Q::Expr {
     method eval($runtime) {
         my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        if $c ~~ _007::Object::Wrapped && $c.type === TYPE<Sub> {
-            return $c.value()($e);
-        }
         return internal-call($c, $runtime, [$e]);
     }
 }
@@ -402,9 +399,6 @@ class Q::Infix does Q::Expr {
         my $l = $.lhs.eval($runtime);
         my $r = $.rhs.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        if $c ~~ _007::Object::Wrapped && $c.type === TYPE<Sub> {
-            return $c.value()($l, $r);
-        }
         return internal-call($c, $runtime, [$l, $r]);
     }
 }
@@ -588,9 +582,6 @@ class Q::Postfix does Q::Expr {
     method eval($runtime) {
         my $e = $.operand.eval($runtime);
         my $c = $.identifier.eval($runtime);
-        if $c ~~ _007::Object::Wrapped && $c.type === TYPE<Sub> {
-            return $c.value()($e);
-        }
         return internal-call($c, $runtime, [$e]);
     }
 }
@@ -667,10 +658,6 @@ class Q::Postfix::Call is Q::Postfix {
         my $c = $.operand.eval($runtime);
         die "macro is called at runtime"
             if $c ~~ Val::Macro;
-        if $c ~~ _007::Object::Wrapped && $c.type === TYPE<Sub> {
-            my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
-            return $c.value()(|@arguments);
-        }
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless ($c ~~ _007::Object && $c.type === TYPE<Sub>) || $c ~~ Val::Macro;
         my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));

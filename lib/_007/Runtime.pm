@@ -356,12 +356,14 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
             return builtin(sub filter($fn) {
+                # XXX: Need to typecheck here if $fn is callable
                 my @elements = $obj.value.grep({ internal-call($fn, self, [$_]).truthy });
                 return wrap(@elements);
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "map" {
             return builtin(sub map($fn) {
+                # XXX: Need to typecheck here if $fn is callable
                 my @elements = $obj.value.map({ internal-call($fn, self, [$_]) });
                 return wrap(@elements);
             });
