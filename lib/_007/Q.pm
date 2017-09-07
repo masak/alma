@@ -300,7 +300,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
         my $name = $.identifier ~~ _007::Object && $.identifier.type === TYPE<NoneType>
             ?? wrap("")
             !! $.identifier.name;
-        return Val::Sub.new(
+        return TYPE<Sub>.create(
             :$name,
             :parameterlist($.block.parameterlist),
             :statementlist($.block.statementlist),
@@ -345,7 +345,7 @@ class Q::Prefix does Q::Expr {
         if $c ~~ _007::Object::Wrapped && $c.type === TYPE<NativeSub> {
             return $c.value()($e);
         }
-        return $c.call($runtime, [$e]);
+        return internal-call($c, $runtime, [$e]);
     }
 }
 
@@ -405,7 +405,7 @@ class Q::Infix does Q::Expr {
         if $c ~~ _007::Object::Wrapped && $c.type === TYPE<NativeSub> {
             return $c.value()($l, $r);
         }
-        return $c.call($runtime, [$l, $r]);
+        return internal-call($c, $runtime, [$l, $r]);
     }
 }
 
@@ -591,7 +591,7 @@ class Q::Postfix does Q::Expr {
         if $c ~~ _007::Object::Wrapped && $c.type === TYPE<NativeSub> {
             return $c.value()($e);
         }
-        return $c.call($runtime, [$e]);
+        return internal-call($c, $runtime, [$e]);
     }
 }
 
@@ -617,7 +617,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .value[$index.value];
             }
-            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Val::Sub || $_ ~~ Q {
+            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Val::Macro || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless $property ~~ _007::Object && $property.type === TYPE<Str>;
@@ -672,9 +672,9 @@ class Q::Postfix::Call is Q::Postfix {
             return $c.value()(|@arguments);
         }
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
-            unless $c ~~ Val::Sub;
+            unless ($c ~~ _007::Object && $c.type === TYPE<Sub>) || $c ~~ Val::Macro;
         my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
-        return $c.call($runtime, @arguments);
+        return internal-call($c, $runtime, @arguments);
     }
 }
 

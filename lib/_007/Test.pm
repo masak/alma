@@ -215,10 +215,11 @@ sub check(Q::CompUnit $ast, $runtime) is export {
     multi handle(Q::Statement::Sub $sub) {
         my $outer-frame = $runtime.current-frame;
         my $name = $sub.identifier.name;
-        my $val = Val::Sub.new(:$name,
+        my $val = TYPE<Sub>.create(
+            :$name,
             :parameterlist($sub.block.parameterlist),
             :statementlist($sub.block.statementlist),
-            :$outer-frame
+            :$outer-frame,
         );
         $runtime.enter($outer-frame, wrap({}), $sub.block.statementlist, $val);
         handle($sub.block);

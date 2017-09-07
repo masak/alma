@@ -50,7 +50,7 @@ class _007::Runtime {
                 my $statementlist = .block.statementlist;
                 my $static-lexpad = .block.static-lexpad;
                 my $outer-frame = $frame;
-                my $val = Val::Sub.new(
+                my $val = TYPE<Sub>.create(
                     :$name,
                     :$parameterlist,
                     :$statementlist,
@@ -61,7 +61,9 @@ class _007::Runtime {
             }
         }
         if $routine {
-            my $name = $routine.name;
+            my $name = $routine ~~ Val::Macro
+                ?? $routine.name
+                !! $routine.properties<name>;
             my $identifier = Q::Identifier.new(:$name, :$frame);
             self.declare-var($identifier, $routine);
         }
@@ -354,13 +356,13 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
             return builtin(sub filter($fn) {
-                my @elements = $obj.value.grep({ $fn.call(self, [$_]).truthy });
+                my @elements = $obj.value.grep({ internal-call($fn, self, [$_]).truthy });
                 return wrap(@elements);
             });
         }
         elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "map" {
             return builtin(sub map($fn) {
-                my @elements = $obj.value.map({ $fn.call(self, [$_]) });
+                my @elements = $obj.value.map({ internal-call($fn, self, [$_]) });
                 return wrap(@elements);
             });
         }
@@ -408,7 +410,10 @@ class _007::Runtime {
                 $obj.create($properties.value.map({ .value[0].value => .value[1] }));
             });
         }
-        elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Sub> && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+            return $obj.properties{$propname};
+        }
+        elsif $obj ~~ Val::Macro && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {

@@ -181,7 +181,7 @@ class _007::Parser::Actions {
         my $val;
         if $<routine> eq "sub" {
             make Q::Statement::Sub.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            $val = TYPE<Sub>.create(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         elsif $<routine> eq "macro" {
             make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
@@ -550,7 +550,7 @@ class _007::Parser::Actions {
                 die X::Macro::Postdeclared.new(:$name)
                     if $value ~~ Val::Macro;
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ Val::Sub;
+                    unless $value ~~ _007::Object && $value.type === TYPE<Sub>;
             };
         }
     }
@@ -619,7 +619,7 @@ class _007::Parser::Actions {
             my $name = $<identifier>.ast.name;
             my $outer-frame = $*runtime.current-frame.value<outer-frame>;
             my $static-lexpad = $*runtime.current-frame.value<pad>;
-            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            my $val = TYPE<Sub>.create(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
         }
         self.finish-block($block);

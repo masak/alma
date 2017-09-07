@@ -46,7 +46,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         elsif $type === TYPE<Bool> {
             return $l === $r;
         }
-        elsif $type === TYPE<NativeSub> {
+        elsif $type === TYPE<NativeSub> | TYPE<Sub> {
             return $l.properties<name>.value eq $r.properties<name>.value
                 && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
                 && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
@@ -59,7 +59,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     multi equal-value(Val::Type $l, Val::Type $r) {
         $l.type === $r.type
     }
-    multi equal-value(Val::Sub $l, Val::Sub $r) {
+    multi equal-value(Val::Macro $l, Val::Macro $r) {
         $l.name eq $r.name
             && equal-value($l.parameterlist, $r.parameterlist)
             && equal-value($l.statementlist, $r.statementlist)
@@ -140,7 +140,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 !! $arg !~~ _007::Object
                     ?? Val::Type.of($arg.WHAT)
                     !! $arg.type === TYPE<NativeSub>    # lie about NativeSub
-                        ?? Val::Type.of(Val::Sub)
+                        ?? TYPE<Sub>
                         !! $arg.type;
         },
 

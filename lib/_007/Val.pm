@@ -74,6 +74,7 @@ constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name
 }));
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<NativeSub> = _007::Type.new(:name<NativeSub>, :fields["name", "parameterlist", "statementlist"]);
+TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 
 class _007::Object {
     has $.type;
@@ -310,29 +311,6 @@ class Val::Sub is Val {
     has _007::Object::Wrapped $.static-lexpad is rw = wrap({});
     has _007::Object::Wrapped $.outer-frame;
 
-    method call($runtime, @arguments) {
-        my $paramcount = $.parameterlist.parameters.value.elems;
-        my $argcount = @arguments.elems;
-        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
-            unless $paramcount == $argcount;
-        $runtime.enter($.outer-frame, $.static-lexpad, $.statementlist, self);
-        for @($.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
-            $runtime.declare-var($param.identifier, $arg);
-        }
-        $runtime.register-subhandler;
-        my $frame = $runtime.current-frame;
-        my $value = $.statementlist.run($runtime);
-        $runtime.leave;
-        CATCH {
-            when X::Control::Return {
-                $runtime.unroll-to($frame);
-                $runtime.leave;
-                return .value;
-            }
-        }
-        return $value || NONE;
-    }
-
     method escaped-name {
         sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
         sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
@@ -356,6 +334,32 @@ class Val::Sub is Val {
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
 }
 
+sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
+    die "Tried to call a {$sub.^name}, expected a Sub"
+        unless $sub ~~ _007::Object && $sub.type === TYPE<Sub>;
+
+    my $paramcount = $sub.properties<parameterlist>.parameters.value.elems;
+    my $argcount = @arguments.elems;
+    die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
+        unless $paramcount == $argcount;
+    $runtime.enter($sub.properties<outer-frame>, $sub.properties<static-lexpad>, $sub.properties<statementlist>, $sub);
+    for @($sub.properties<parameterlist>.parameters.value) Z @arguments -> ($param, $arg) {
+        $runtime.declare-var($param.identifier, $arg);
+    }
+    $runtime.register-subhandler;
+    my $frame = $runtime.current-frame;
+    my $value = $sub.properties<statementlist>.run($runtime);
+    $runtime.leave;
+    CATCH {
+        when X::Control::Return {
+            $runtime.unroll-to($frame);
+            $runtime.leave;
+            return .value;
+        }
+    }
+    return $value || NONE;
+}
+
 ### ### Macro
 ###
 ### A macro. When you define a macro in 007, the value of the name bound
@@ -367,6 +371,29 @@ class Val::Sub is Val {
 ###     say(agent);             # --> `<macro agent()>`
 ###
 class Val::Macro is Val::Sub {
+    method call($runtime, @arguments) {
+        my $paramcount = $.parameterlist.parameters.value.elems;
+        my $argcount = @arguments.elems;
+        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
+            unless $paramcount == $argcount;
+        $runtime.enter($.outer-frame, $.static-lexpad, $.statementlist, self);
+        for @($.parameterlist.parameters.value) Z @arguments -> ($param, $arg) {
+            $runtime.declare-var($param.identifier, $arg);
+        }
+        $runtime.register-subhandler;
+        my $frame = $runtime.current-frame;
+        my $value = $.statementlist.run($runtime);
+        $runtime.leave;
+        CATCH {
+            when X::Control::Return {
+                $runtime.unroll-to($frame);
+                $runtime.leave;
+                return .value;
+            }
+        }
+        return $value || NONE;
+    }
+
     method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
@@ -403,7 +430,7 @@ class Helper {
             when .type === TYPE<Array> { .quoted-Str }
             when .type === TYPE<Dict> { .quoted-Str }
             when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
-            when .type === TYPE<NativeSub> {
+            when .type === TYPE<NativeSub> | TYPE<Sub> {
                 sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
             }
             when _007::Object::Wrapped { .value.Str }
