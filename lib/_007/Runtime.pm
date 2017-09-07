@@ -332,9 +332,9 @@ class _007::Runtime {
                 return wrap($s.substr($pos.value, 1));
             });
         }
-        elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Regex> && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
-                my $regex-string = $obj.contents.value;
+                my $regex-string = $obj.properties<contents>.value;
 
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ _007::Object && $str.type === TYPE<Str>;
@@ -342,9 +342,9 @@ class _007::Runtime {
                 return wrap($regex-string eq $str.value);
             });
         }
-        elsif $obj ~~ Val::Regex && $propname eq "search" {
+        elsif $obj ~~ _007::Object && $obj.type === TYPE<Regex> && $propname eq "search" {
             return builtin(sub search($str) {
-                my $regex-string = $obj.contents.value;
+                my $regex-string = $obj.properties<contents>.value;
 
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ _007::Object && $str.type === TYPE<Str>;

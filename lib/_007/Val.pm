@@ -75,6 +75,7 @@ constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 TYPE<Macro> = _007::Type.new(:name<Macro>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
+TYPE<Regex> = _007::Type.new(:name<Regex>, :fields["contents"]);
 
 class _007::Object {
     has $.type;
@@ -344,7 +345,6 @@ class Helper {
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
 
     our sub Str($_) {
-        when Val::Regex { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
@@ -358,6 +358,9 @@ class Helper {
             }
             when .type === TYPE<Macro> {
                 sprintf "<macro %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
+            }
+            when .type === TYPE<Regex> {
+                "/" ~ .contents.quoted-Str ~ "/"
             }
             when _007::Object::Wrapped { .value.Str }
             default { die "Unexpected type ", .^name }

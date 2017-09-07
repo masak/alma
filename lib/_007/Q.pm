@@ -179,7 +179,7 @@ class Q::Term::Regex does Q::Term {
     has _007::Object $.contents;
 
     method eval($runtime) {
-        Val::Regex.new(:$.contents);
+        TYPE<Regex>.create(:$.contents);
     }
 }
 
