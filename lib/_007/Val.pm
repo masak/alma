@@ -69,9 +69,15 @@ class _007::Type {
     }
 }
 
-constant TYPE = hash(<Type Object Int Str Array NoneType Bool Dict>.map(-> $name {
-    $name => _007::Type.new(:$name)
-}));
+constant TYPE = hash();
+BEGIN {
+    for <Object Type NoneType Bool> -> $name {
+        TYPE{$name} = _007::Type.new(:$name);
+    }
+}
+for <Int Str Array Dict> -> $name {
+    TYPE{$name} = _007::Type.new(:$name);
+}
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 TYPE<Macro> = _007::Type.new(:name<Macro>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
