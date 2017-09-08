@@ -36,6 +36,8 @@ class _007::Object { ... }
 
 sub unique-id { ++$ }
 
+constant TYPE = hash();
+
 class _007::Type {
     has Str $.name;
     has @.fields;
@@ -69,7 +71,6 @@ class _007::Type {
     }
 }
 
-constant TYPE = hash();
 BEGIN {
     for <Object Type NoneType Bool> -> $name {
         TYPE{$name} = _007::Type.new(:$name);
