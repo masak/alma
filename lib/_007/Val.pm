@@ -48,6 +48,16 @@ class _007::Type {
         $!base = $none;
     }
 
+    method type-chain() {
+        my @chain;
+        my $t = self;
+        while $t ~~ _007::Type {
+            @chain.push($t);
+            $t.=base;
+        }
+        return @chain;
+    }
+
     method attributes { () }
 
     method quoted-Str { self.Str }
@@ -93,6 +103,14 @@ class _007::Object {
     has $.type;
     has $.id = unique-id;
     has %.properties;
+
+    multi method isa(Str $typename) {
+        self.isa(TYPE{$typename});
+    }
+
+    multi method isa(_007::Type $type) {
+        return $type (elem) $.type.type-chain;
+    }
 
     method attributes { () }
 
