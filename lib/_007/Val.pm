@@ -40,8 +40,13 @@ constant TYPE = hash();
 
 class _007::Type {
     has Str $.name;
+    has $.base = TYPE<Object>;
     has @.fields;
     # XXX: $.id
+
+    method install-base($none) {
+        $!base = $none;
+    }
 
     method attributes { () }
 
@@ -81,7 +86,7 @@ for <Int Str Array Dict> -> $name {
 }
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
-TYPE<Macro> = _007::Type.new(:name<Macro>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
+TYPE<Macro> = _007::Type.new(:name<Macro>, :base(TYPE<Sub>), :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
 TYPE<Regex> = _007::Type.new(:name<Regex>, :fields["contents"]);
 
 class _007::Object {
@@ -135,6 +140,10 @@ class _007::Object::Wrapped is _007::Object {
 }
 
 constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>));
+
+# Now we can install NONE into TYPE<Object>.base
+TYPE<Object>.install-base(NONE);
+
 constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
 constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
 
