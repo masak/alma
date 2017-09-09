@@ -285,7 +285,7 @@ class _007::Parser::Actions {
         $q ~~ $qtype
             && $identifier ~~ Q::Identifier
             && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ _007::Object
-            && $macro.type === TYPE<Macro>
+            && $macro.isa("Macro")
             && $macro;
     }
 
@@ -549,9 +549,9 @@ class _007::Parser::Actions {
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
                 die X::Macro::Postdeclared.new(:$name)
-                    if $value ~~ _007::Object && $value.type === TYPE<Macro>;
+                    if $value ~~ _007::Object && $value.isa("Macro");
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ _007::Object && $value.type === TYPE<Sub>;
+                    unless $value ~~ _007::Object && $value.isa("Sub");
             };
         }
     }

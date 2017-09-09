@@ -207,6 +207,7 @@ class Q::Term::Object does Q::Term {
 
     method eval($runtime) {
         my $type = $runtime.get-var($.type.name.value, $.type.frame);
+        # XXX: Need to do a subtyping check here instead
         if $type === TYPE<Exception> {
             return $type.create(|hash($.propertylist.properties.value.map(-> $property {
                 $property.key.value => $property.value.eval($runtime)
@@ -297,7 +298,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
     method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
-        my $name = $.identifier ~~ _007::Object && $.identifier.type === TYPE<NoneType>
+        my $name = $.identifier ~~ _007::Object && $.identifier.isa("NoneType")
             ?? wrap("")
             !! $.identifier.name;
         return TYPE<Sub>.create(
@@ -598,20 +599,20 @@ class Q::Postfix::Index is Q::Postfix {
 
     method eval($runtime) {
         given $.operand.eval($runtime) {
-            if $_ ~~ _007::Object && .type === TYPE<Array> {
+            if $_ ~~ _007::Object && .isa("Array") {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    unless $index ~~ _007::Object && $index.type === TYPE<Int>;
+                    unless $index ~~ _007::Object && $index.isa("Int");
                 die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                     if $index.value >= .value;
                 die X::Subscript::Negative.new(:$index, :type([]))
                     if $index.value < 0;
                 return .value[$index.value];
             }
-            if ($_ ~~ _007::Object && (.type === TYPE<Dict> || .isa("Sub"))) || $_ ~~ Q {
+            if ($_ ~~ _007::Object && (.isa("Dict") || .isa("Sub"))) || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    unless $property ~~ _007::Object && $property.type === TYPE<Str>;
+                    unless $property ~~ _007::Object && $property.isa("Str");
                 my $propname = $property.value;
                 return $runtime.property($_, $propname);
             }
@@ -621,10 +622,10 @@ class Q::Postfix::Index is Q::Postfix {
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
-            if $_ ~~ _007::Object && .type === TYPE<Array> {
+            if $_ ~~ _007::Object && .isa("Array") {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    unless $index ~~ _007::Object && $index.type === TYPE<Int>;
+                    unless $index ~~ _007::Object && $index.isa("Int");
                 die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                     if $index.value >= .value;
                 die X::Subscript::Negative.new(:$index, :type([]))
@@ -632,10 +633,10 @@ class Q::Postfix::Index is Q::Postfix {
                 .value[$index.value] = $value;
                 return;
             }
-            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Q {
+            if ($_ ~~ _007::Object && .isa("Dict")) || $_ ~~ Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    unless $property ~~ _007::Object && $property.type === TYPE<Str>;
+                    unless $property ~~ _007::Object && $property.isa("Str");
                 my $propname = $property.value;
                 $runtime.put-property($_, $propname, $value);
                 return;
@@ -657,7 +658,7 @@ class Q::Postfix::Call is Q::Postfix {
     method eval($runtime) {
         my $c = $.operand.eval($runtime);
         die "macro is called at runtime"
-            if $c ~~ _007::Object && $c.type === TYPE<Macro>;
+            if $c ~~ _007::Object && $c.isa("Macro");
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ _007::Object && $c.isa("Sub");
         my @arguments = $.argumentlist.arguments.value.map(*.eval($runtime));
@@ -682,7 +683,7 @@ class Q::Postfix::Property is Q::Postfix {
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
-            if ($_ ~~ _007::Object && .type === TYPE<Dict>) || $_ ~~ Q {
+            if ($_ ~~ _007::Object && .isa("Dict")) || $_ ~~ Q {
                 my $propname = $.property.name.value;
                 $runtime.put-property($_, $propname, $value);
                 return;
@@ -742,14 +743,14 @@ class Q::Term::Quasi does Q::Term {
     method eval($runtime) {
         sub interpolate($thing) {
             return wrap($thing.value.map(&interpolate))
-                if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
+                if $thing ~~ _007::Object && $thing.isa("Array");
 
             return $thing
                 if $thing ~~ _007::Object;      # XXX: won't hold true for everything
 
             sub interpolate-entry($_) { .key => interpolate(.value) }
             return wrap(hash($thing.value.map(&interpolate-entry)))
-                if $thing ~~ _007::Object && $thing.type === TYPE<Dict>;
+                if $thing ~~ _007::Object && $thing.isa("Dict");
 
             return $thing
                 if $thing ~~ Val;
@@ -839,7 +840,7 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
 
     method run($runtime) {
         return
-            if $.expr ~~ _007::Object && $.expr.type === TYPE<NoneType>;
+            if $.expr ~~ _007::Object && $.expr.isa("NoneType");
 
         my $value = $.expr.eval($runtime);
         $.identifier.put-value($value, $runtime);
@@ -953,7 +954,7 @@ class Q::Statement::For does Q::Statement {
 
         my $array = $.expr.eval($runtime);
         die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(_007::Object))
-            unless $array ~~ _007::Object && $array.type === TYPE<Array>;
+            unless $array ~~ _007::Object && $array.isa("Array");
 
         for $array.value -> $arg {
             $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
@@ -1000,7 +1001,7 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ _007::Object && $.expr.type === TYPE<NoneType> ?? $.expr !! $.expr.eval($runtime);
+        my $value = $.expr ~~ _007::Object && $.expr.isa("NoneType") ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -1014,11 +1015,11 @@ class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ _007::Object && $.expr.type === TYPE<NoneType>
+        my $value = $.expr ~~ _007::Object && $.expr.isa("NoneType")
             ?? TYPE<Exception>.create(:message(wrap("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :expected(_007::Object))
-            unless $value ~~ _007::Object && $value.type === TYPE<Exception>;
+            unless $value ~~ _007::Object && $value.isa("Exception");
 
         die X::_007::RuntimeException.new(:msg($value.properties<message>.value));
     }

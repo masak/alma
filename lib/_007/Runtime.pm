@@ -88,7 +88,7 @@ class _007::Runtime {
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
         # XXX: make a `defined` method on NoneType so we can use `//`
-        if $frame ~~ _007::Object && $frame.type === TYPE<NoneType> {
+        if $frame ~~ _007::Object && $frame.isa("NoneType") {
             $frame = self.current-frame;
         }
         repeat until $frame === NO_OUTER {
@@ -102,7 +102,7 @@ class _007::Runtime {
 
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ _007::Object && $identifier.frame.type === TYPE<NoneType>
+        my $frame = $identifier.frame ~~ _007::Object && $identifier.frame.isa("NoneType")
             ?? self.current-frame
             !! $identifier.frame;
         my $pad = self!find-pad($name, $frame);
@@ -122,7 +122,7 @@ class _007::Runtime {
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my _007::Object::Wrapped $frame = $identifier.frame ~~ _007::Object && $identifier.frame.type === TYPE<NoneType>
+        my _007::Object::Wrapped $frame = $identifier.frame ~~ _007::Object && $identifier.frame.isa("NoneType")
             ?? self.current-frame
             !! $identifier.frame;
         $frame.value<pad>.value{$name} = $value // NONE;
@@ -172,11 +172,11 @@ class _007::Runtime {
 
                 sub interpolate($thing) {
                     return wrap($thing.value.map(&interpolate))
-                        if $thing ~~ _007::Object && $thing.type === TYPE<Array>;
+                        if $thing ~~ _007::Object && $thing.isa("Array");
 
                     sub interpolate-entry($_) { .key => interpolate(.value) }
                     return wrap(hash($thing.value.map(&interpolate-entry)))
-                        if $thing ~~ _007::Object && $thing.type === TYPE<Dict>;
+                        if $thing ~~ _007::Object && $thing.isa("Dict");
 
                     return $thing
                         if $thing ~~ Val;
@@ -211,118 +211,118 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Int> && $propname eq "abs" {
+        elsif $obj ~~ _007::Object && $obj.isa("Int") && $propname eq "abs" {
             return builtin(sub abs() {
                 return wrap($obj.value.abs);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Int> && $propname eq "chr" {
+        elsif $obj ~~ _007::Object && $obj.isa("Int") && $propname eq "chr" {
             return builtin(sub chr() {
                 return wrap($obj.value.chr);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "ord" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "ord" {
             return builtin(sub ord() {
                 return wrap($obj.value.ord);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "chars" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "chars" {
             return builtin(sub chars() {
                 return wrap($obj.value.chars);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "uc" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "uc" {
             return builtin(sub uc() {
                 return wrap($obj.value.uc);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "lc" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "lc" {
             return builtin(sub lc() {
                 return wrap($obj.value.lc);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "trim" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "trim" {
             return builtin(sub trim() {
                 return wrap($obj.value.trim);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "size" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "size" {
             return builtin(sub size() {
                 return wrap($obj.value.elems);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "reverse" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "reverse" {
             return builtin(sub reverse() {
                 return wrap($obj.value.reverse);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "sort" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "sort" {
             return builtin(sub sort() {
                 return wrap($obj.value.sort);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "shuffle" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "shuffle" {
             return builtin(sub shuffle() {
                 return wrap($obj.value.pick(*));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "concat" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "concat" {
             return builtin(sub concat($array) {
                 die X::TypeCheck.new(:operation<concat>, :got($array), :expected(_007::Object))
-                    unless $array ~~ _007::Object && $array.type === TYPE<Array>;
+                    unless $array ~~ _007::Object && $array.isa("Array");
                 return wrap([|$obj.value, |$array.value]);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "join" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "join" {
             return builtin(sub join($sep) {
                 return wrap($obj.value.join($sep.value.Str));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Dict> && $propname eq "size" {
+        elsif $obj ~~ _007::Object && $obj.isa("Dict") && $propname eq "size" {
             return builtin(sub size() {
                 return wrap($obj.value.elems);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "split" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "split" {
             return builtin(sub split($sep) {
                 my @elements = $obj.value.split($sep.value).map(&wrap);
                 return wrap(@elements);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "index" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "index" {
             return builtin(sub index($substr) {
                 return wrap($obj.value.index($substr.value) // -1);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "substr" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
                 return wrap($obj.value.substr(
                     $pos.value,
                     $chars.value));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "contains" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "contains" {
             return builtin(sub contains($substr) {
                 die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(_007::Object))
-                    unless $substr ~~ _007::Object && $substr.type === TYPE<Str>;
+                    unless $substr ~~ _007::Object && $substr.isa("Str");
 
                 return wrap($obj.value.contains($substr.value));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "prefix" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "prefix" {
             return builtin(sub prefix($pos) {
                 return wrap($obj.value.substr(
                     0,
                     $pos.value));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "suffix" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "suffix" {
             return builtin(sub suffix($pos) {
                 return wrap($obj.value.substr(
                     $pos.value));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Str> && $propname eq "charat" {
+        elsif $obj ~~ _007::Object && $obj.isa("Str") && $propname eq "charat" {
             return builtin(sub charat($pos) {
                 my $s = $obj.value;
 
@@ -332,61 +332,61 @@ class _007::Runtime {
                 return wrap($s.substr($pos.value, 1));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Regex> && $propname eq "fullmatch" {
+        elsif $obj ~~ _007::Object && $obj.isa("Regex") && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
                 my $regex-string = $obj.properties<contents>.value;
 
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ _007::Object && $str.type === TYPE<Str>;
+                    unless $str ~~ _007::Object && $str.isa("Str");
 
                 return wrap($regex-string eq $str.value);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Regex> && $propname eq "search" {
+        elsif $obj ~~ _007::Object && $obj.isa("Regex") && $propname eq "search" {
             return builtin(sub search($str) {
                 my $regex-string = $obj.properties<contents>.value;
 
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ _007::Object && $str.type === TYPE<Str>;
+                    unless $str ~~ _007::Object && $str.isa("Str");
 
                 return wrap($str.value.contains($regex-string));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "filter" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "filter" {
             return builtin(sub filter($fn) {
                 # XXX: Need to typecheck here if $fn is callable
                 my @elements = $obj.value.grep({ internal-call($fn, self, [$_]).truthy });
                 return wrap(@elements);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "map" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "map" {
             return builtin(sub map($fn) {
                 # XXX: Need to typecheck here if $fn is callable
                 my @elements = $obj.value.map({ internal-call($fn, self, [$_]) });
                 return wrap(@elements);
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "push" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "push" {
             return builtin(sub push($newelem) {
                 $obj.value.push($newelem);
                 return NONE;
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "pop" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "pop" {
             return builtin(sub pop() {
                 die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
                     if $obj.value.elems == 0;
                 return $obj.value.pop();
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "shift" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "shift" {
             return builtin(sub shift() {
                 die X::Cannot::Empty.new(:action<pop>, :what($obj.^name))
                     if $obj.value.elems == 0;
                 return $obj.value.shift();
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Array> && $propname eq "unshift" {
+        elsif $obj ~~ _007::Object && $obj.isa("Array") && $propname eq "unshift" {
             return builtin(sub unshift($newelem) {
                 $obj.value.unshift($newelem);
                 return NONE;
@@ -416,7 +416,7 @@ class _007::Runtime {
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Dict> && ($obj.value{$propname} :exists) {
+        elsif $obj ~~ _007::Object && $obj.isa("Dict") && ($obj.value{$propname} :exists) {
             return $obj.value{$propname};
         }
         elsif $propname eq "get" {
@@ -468,7 +468,7 @@ class _007::Runtime {
         if $obj ~~ Q {
             die "We don't handle assigning to Q object properties yet";
         }
-        elsif $obj !~~ _007::Object || $obj.type !=== TYPE<Dict> {
+        elsif $obj !~~ _007::Object || !$obj.isa("Dict") {
             die "We don't handle assigning to non-Dict types yet";
         }
         else {
