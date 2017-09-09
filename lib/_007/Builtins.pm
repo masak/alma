@@ -46,7 +46,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         elsif $type === TYPE<Bool> {
             return $l === $r;
         }
-        elsif $type === TYPE<Sub> | TYPE<Macro> {   # XXX: should really do subtyping check here
+        elsif $l.isa("Sub") {
             return $l.properties<name>.value eq $r.properties<name>.value
                 && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
                 && equal-value($l.properties<statementlist>, $r.properties<statementlist>);

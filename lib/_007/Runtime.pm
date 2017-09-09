@@ -410,7 +410,7 @@ class _007::Runtime {
                 $obj.create($properties.value.map({ .value[0].value => .value[1] }));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.type === TYPE<Sub> | TYPE<Macro> && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+        elsif $obj ~~ _007::Object && $obj.isa("Sub") && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj.properties{$propname};
         }
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
