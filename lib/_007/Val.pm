@@ -359,7 +359,7 @@ class Helper {
         when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
-            when .type === TYPE<NoneType> { "None" }
+            when NONE { "None" }
             when .type === TYPE<Bool> { $_ === TRUE ?? "True" !! "False" }
             when .type === TYPE<Array> { .quoted-Str }
             when .type === TYPE<Dict> { .quoted-Str }

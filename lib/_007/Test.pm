@@ -188,7 +188,7 @@ sub check(Q::CompUnit $ast, $runtime) is export {
             if %*assigned{$block ~ $symbol};
         $runtime.declare-var($my.identifier);
 
-        if $my.expr !~~ _007::Object || $my.expr.type !=== TYPE<NoneType> {
+        if $my.expr !=== NONE {
             handle($my.expr);
         }
     }

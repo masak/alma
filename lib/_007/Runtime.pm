@@ -87,8 +87,7 @@ class _007::Runtime {
     }
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
-        # XXX: make a `defined` method on NoneType so we can use `//`
-        if $frame ~~ _007::Object && $frame.isa("NoneType") {
+        if $frame === NONE {
             $frame = self.current-frame;
         }
         repeat until $frame === NO_OUTER {
@@ -102,7 +101,7 @@ class _007::Runtime {
 
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ _007::Object && $identifier.frame.isa("NoneType")
+        my $frame = $identifier.frame === NONE
             ?? self.current-frame
             !! $identifier.frame;
         my $pad = self!find-pad($name, $frame);
@@ -122,7 +121,7 @@ class _007::Runtime {
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my _007::Object::Wrapped $frame = $identifier.frame ~~ _007::Object && $identifier.frame.isa("NoneType")
+        my _007::Object::Wrapped $frame = $identifier.frame === NONE
             ?? self.current-frame
             !! $identifier.frame;
         $frame.value<pad>.value{$name} = $value // NONE;

@@ -298,7 +298,7 @@ class Q::Term::Sub does Q::Term does Q::Declaration {
     method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
-        my $name = $.identifier ~~ _007::Object && $.identifier.isa("NoneType")
+        my $name = $.identifier === NONE
             ?? wrap("")
             !! $.identifier.name;
         return TYPE<Sub>.create(
@@ -535,7 +535,7 @@ class Q::Infix::Or is Q::Infix {
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return $l !~~ _007::Object || $l.type !=== TYPE<NoneType>
+        return $l !=== NONE
             ?? $l
             !! $.rhs.eval($runtime);
     }
@@ -840,7 +840,7 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
 
     method run($runtime) {
         return
-            if $.expr ~~ _007::Object && $.expr.isa("NoneType");
+            if $.expr === NONE;
 
         my $value = $.expr.eval($runtime);
         $.identifier.put-value($value, $runtime);
@@ -1001,7 +1001,9 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ _007::Object && $.expr.isa("NoneType") ?? $.expr !! $.expr.eval($runtime);
+        my $value = $.expr === NONE
+            ?? $.expr
+            !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -1015,7 +1017,7 @@ class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ _007::Object && $.expr.isa("NoneType")
+        my $value = $.expr === NONE
             ?? TYPE<Exception>.create(:message(wrap("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :expected(_007::Object))
