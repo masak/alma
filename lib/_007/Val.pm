@@ -68,7 +68,7 @@ class _007::Type {
 
     method create(*%properties) {
         my $type = $.name;
-        my $fields = set(@.fields);
+        my $fields = set(self.type-chain.map({ .fields }));
         my $seen = set();
         for %properties.keys.sort -> $property {
             die X::Property::NotDeclared.new(:$type, :$property)
@@ -96,7 +96,7 @@ for <Int Str Array Dict> -> $name {
 }
 TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
-TYPE<Macro> = _007::Type.new(:name<Macro>, :base(TYPE<Sub>), :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
+TYPE<Macro> = _007::Type.new(:name<Macro>, :base(TYPE<Sub>));
 TYPE<Regex> = _007::Type.new(:name<Regex>, :fields["contents"]);
 
 class _007::Object {
