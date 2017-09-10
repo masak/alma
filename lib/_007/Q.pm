@@ -207,7 +207,6 @@ class Q::Term::Object does Q::Term {
 
     method eval($runtime) {
         my $type = $runtime.get-var($.type.name.value, $.type.frame);
-        # XXX: Need to do a subtyping check here instead
         if $type === TYPE<Exception> {
             return $type.create(|hash($.propertylist.properties.value.map(-> $property {
                 $property.key.value => $property.value.eval($runtime)
