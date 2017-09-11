@@ -117,6 +117,9 @@ grammar _007::Parser::Syntax {
         { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
         <block>
     }
+    token statement:custom {
+        "whoa!"
+    }
 
     rule traitlist {
         <trait> *
