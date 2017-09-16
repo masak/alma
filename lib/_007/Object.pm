@@ -1,5 +1,3 @@
-use MONKEY-SEE-NO-EVAL;
-
 class X::Uninstantiable is Exception {
     has Str $.name;
 

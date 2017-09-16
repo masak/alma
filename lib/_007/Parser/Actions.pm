@@ -1,6 +1,5 @@
 use _007::Object;
 use _007::Parser::Syntax;
-use MONKEY-SEE-NO-EVAL;
 
 class X::String::Newline is Exception {
     method message { "Found a newline inside a string literal" }
