@@ -309,17 +309,6 @@ TYPE<Object>.install-base(NONE);
 constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
 constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
 
-role Val {
-    method truthy { True }
-    method attributes { self.^attributes }
-    method quoted-Str { self.Str }
-
-    method Str {
-        my %*stringification-seen;
-        Helper::Str(self);
-    }
-}
-
 # XXX: this is not optimal -- I wanted to declare these as part of the types themselves, but
 # a rakudobug currently prevents subs in constants from being accessed from another module
 sub bound-method($object, $name) is export {
@@ -582,7 +571,7 @@ sub bound-method($object, $name) is export {
             my $c = bound-method($object.properties<operand>, "eval")($runtime);
             die "macro is called at runtime"
                 if $c ~~ _007::Object && $c.isa("Macro");
-            die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
+            die "Trying to invoke a {$c.type.name}" # XXX: make this into an X::
                 unless $c ~~ _007::Object && $c.isa("Sub");
             my @arguments = $object.properties<argumentlist>.properties<arguments>.value.map({
                 bound-method($_, "eval")($runtime)
@@ -674,9 +663,6 @@ sub bound-method($object, $name) is export {
 
                 return $thing
                     if $thing ~~ _007::Type;
-
-                return $thing
-                    if $thing ~~ Val;
 
                 return $thing
                     if $thing ~~ _007::Object && ($thing.isa("Int") || $thing.isa("Str"));

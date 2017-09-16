@@ -192,9 +192,6 @@ class _007::Runtime {
                     return wrap(hash($thing.value.map(&interpolate-entry)))
                         if $thing ~~ _007::Object && $thing.isa("Dict");
 
-                    return $thing
-                        if $thing ~~ Val;
-
                     return $thing.type.create(:name($thing.properties<name>), :frame(NONE))
                         if $thing.isa("Q::Identifier");
 
