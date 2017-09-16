@@ -23,6 +23,10 @@ class _007::Type {
         return @chain;
     }
 
+    method type {
+        TYPE<Type>;
+    }
+
     multi method isa(Str $typename) {
         ($typename eq "Object" || $typename eq "Type") && self;
     }

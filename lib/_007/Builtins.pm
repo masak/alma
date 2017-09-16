@@ -1,10 +1,6 @@
 use _007::Type;
 use _007::Object;
 
-proto type-of($) is export {*}
-multi type-of(_007::Object $obj) { $obj.type }
-multi type-of(_007::Type $obj) { TYPE<Type> }
-
 sub builtins(:$input!, :$output!, :$opscope!) is export {
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
@@ -128,7 +124,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             return wrap($input.get());
         },
         type => sub ($arg) {
-            type-of($arg);
+            $arg.type;
         },
 
         # OPERATORS (from loosest to tightest within each category)

@@ -218,7 +218,7 @@ class _007::Runtime {
 
             my %known-properties = $obj.type.type-chain.reverse.map({ .fields }).flat.map({ $_ => 1 });
 
-            my $type = type-of($obj);
+            my $type = $obj.type;
             die X::Property::NotFound.new(:$propname, :$type)
                 unless %known-properties{$propname};
 
@@ -464,7 +464,7 @@ class _007::Runtime {
             return wrap($obj.id);
         }
         else {
-            my $type = type-of($obj);
+            my $type = $obj.type;
             die X::Property::NotFound.new(:$propname, :$type);
         }
     }
