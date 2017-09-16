@@ -1,5 +1,4 @@
 use _007::Val;
-use _007::Q;
 use _007::Parser::Syntax;
 use MONKEY-SEE-NO-EVAL;
 
@@ -468,9 +467,10 @@ class _007::Parser::Actions {
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.properties<identifier>;
-            if my $macro = is-macro($postfix, TYPE<Q::Postfix::Call>, $/.ast) {
-                make expand($macro, $postfix.properties<argumentlist>.properties<arguments>.value,
-                    -> { $postfix.type.create(:$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>)) });
+            if is-macro($postfix, TYPE<Q::Postfix::Call>, $/.ast) -> $macro {
+                make expand($macro, $postfix.properties<argumentlist>.properties<arguments>.value, -> {
+                    $postfix.type.create(:$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>));
+                });
             }
             elsif $postfix.isa("Q::Postfix::Index") {
                 make $postfix.type.create(:$identifier, :operand($/.ast), :index($postfix.properties<index>));
@@ -482,9 +482,10 @@ class _007::Parser::Actions {
                 make $postfix.type.create(:$identifier, :operand($/.ast), :property($postfix.properties<property>));
             }
             else {
-                if my $macro = is-macro($postfix, TYPE<Q::Postfix>, $identifier) {
-                    make expand($macro, [$/.ast],
-                        -> { $postfix.type.create(:$identifier, :operand($/.ast)) });
+                if is-macro($postfix, TYPE<Q::Postfix>, $identifier) -> $macro {
+                    make expand($macro, [$/.ast], -> {
+                        $postfix.type.create(:$identifier, :operand($/.ast));
+                    });
                 }
                 else {
                     make $postfix.type.create(:$identifier, :operand($/.ast));

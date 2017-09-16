@@ -1,5 +1,4 @@
 use _007::Val;
-use _007::Q;
 
 my %builtins =
     "say" => q:to '----',

@@ -1,5 +1,4 @@
 use _007::Val;
-use _007::Q;
 
 sub builtins(:$input!, :$output!, :$opscope!) is export {
     # These multis are used below by infix:<==> and infix:<!=>
@@ -65,14 +64,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     multi equal-value(_007::Type $l, _007::Type $r) { $l === $r }
     multi equal-value(Val::Type $l, Val::Type $r) {
         $l.type === $r.type
-    }
-    multi equal-value(Q $l, Q $r) {
-        sub same-avalue($attr) {
-            equal-value($attr.get_value($l), $attr.get_value($r));
-        }
-
-        [&&] $l.WHAT === $r.WHAT,
-            |$l.attributes.map(&same-avalue);
     }
 
     multi less-value($, $) {
@@ -423,8 +414,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         }
     }
     tree-walk(Val::);
-    tree-walk(Q::);
-    push @builtins, "Q" => Val::Type.of(Q);
     for TYPE.keys -> $type {
         next if $type eq "Type";
         push @builtins, ($type => TYPE{$type});

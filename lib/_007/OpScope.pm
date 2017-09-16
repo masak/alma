@@ -1,5 +1,4 @@
 use _007::Val;
-use _007::Q;
 use _007::Precedence;
 
 class X::Associativity::Conflict is Exception {

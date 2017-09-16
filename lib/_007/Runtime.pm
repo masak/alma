@@ -1,5 +1,4 @@
 use _007::Val;
-use _007::Q;
 use _007::Builtins;
 use _007::OpScope;
 
@@ -110,8 +109,6 @@ class _007::Runtime {
                 if $frame.value<pad>.value{$symbol} :exists;
             $frame = $frame.value<outer-frame>;
         }
-        die X::ControlFlow::Return.new
-            if $symbol eq RETURN_TO;
     }
 
     method put-var(_007::Object $identifier, $value) {
@@ -186,53 +183,7 @@ class _007::Runtime {
         }
 
         my $type = Val::Type.of($obj.WHAT).name;
-        if $obj ~~ Q {
-            if $propname eq "detach" {
-                sub aname($attr) { $attr.name.substr(2) }
-                sub avalue($attr, $obj) { $attr.get_value($obj) }
-
-                sub interpolate($thing) {
-                    return wrap($thing.value.map(&interpolate))
-                        if $thing ~~ _007::Object && $thing.isa("Array");
-
-                    sub interpolate-entry($_) { .key => interpolate(.value) }
-                    return wrap(hash($thing.value.map(&interpolate-entry)))
-                        if $thing ~~ _007::Object && $thing.isa("Dict");
-
-                    return $thing
-                        if $thing ~~ Val;
-
-                    return $thing.new(:name($thing.name), :frame(NONE))
-                        if $thing.isa("Q::Identifier");
-
-                    return $thing
-                        if $thing.isa("Q::Unquote");
-
-                    my %attributes = $thing.attributes.map: -> $attr {
-                        aname($attr) => interpolate(avalue($attr, $thing))
-                    };
-
-                    $thing.new(|%attributes);
-                }
-
-                return builtin(sub detach() {
-                    return interpolate($obj);
-                });
-            }
-
-            sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
-            # XXX: hack
-            if $obj.isa("Q::Block") {
-                %known-properties<static-lexpad> = 1;
-            }
-
-            die X::Property::NotFound.new(:$propname, :$type)
-                unless %known-properties{$propname};
-
-            return $obj."$propname"();
-        }
-        elsif $obj ~~ _007::Object && $obj.isa("Q") {
+        if $obj ~~ _007::Object && $obj.isa("Q") {
             if $propname eq "detach" {
                 sub interpolate($thing) {
                     return wrap($thing.value.map(&interpolate))
@@ -474,9 +425,6 @@ class _007::Runtime {
         elsif $obj ~~ _007::Object && $obj.isa("Sub") && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj.properties{$propname};
         }
-        elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
-            return $obj.properties{$propname};
-        }
         elsif $obj ~~ _007::Object && $obj.isa("Dict") && ($obj.value{$propname} :exists) {
             return $obj.value{$propname};
         }
@@ -529,10 +477,7 @@ class _007::Runtime {
     }
 
     method put-property($obj, Str $propname, $newvalue) {
-        if $obj ~~ Q {
-            die "We don't handle assigning to Q object properties yet";
-        }
-        elsif $obj !~~ _007::Object || !$obj.isa("Dict") {
+        if $obj !~~ _007::Object || !$obj.isa("Dict") {
             die "We don't handle assigning to non-Dict types yet";
         }
         else {
