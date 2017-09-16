@@ -1,5 +1,9 @@
 use _007::Val;
 
+proto type-of($) is export {*}
+multi type-of(_007::Object $obj) { $obj.type }
+multi type-of(_007::Type $obj) { TYPE<Type> }
+
 sub builtins(:$input!, :$output!, :$opscope!) is export {
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
@@ -126,11 +130,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             return wrap($input.get());
         },
         type => sub ($arg) {
-            $arg ~~ _007::Type
-                ?? TYPE<Type>
-                !! $arg ~~ _007::Object
-                    ?? $arg.type
-                    !! Val::Type.of($arg.WHAT);
+            type-of($arg);
         },
 
         # OPERATORS (from loosest to tightest within each category)
@@ -203,28 +203,20 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'infix:~~' => op(
             sub ($lhs, $rhs) {
-                if $rhs ~~ _007::Type {
-                    return wrap($lhs ~~ _007::Object && ?$lhs.isa($rhs));
-                }
+                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(_007::Type))
+                    unless $rhs ~~ _007::Type;
 
-                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                    unless $rhs ~~ Val::Type;
-
-                return wrap($lhs ~~ $rhs.type);
+                return wrap(?$lhs.isa($rhs));
             },
             :qtype(TYPE<Q::Infix::TypeMatch>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:!~~' => op(
             sub ($lhs, $rhs) {
-                if $rhs ~~ _007::Type {
-                    return wrap($lhs !~~ _007::Object || !$lhs.isa($rhs));
-                }
+                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(_007::Type))
+                    unless $rhs ~~ _007::Type;
 
-                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                    unless $rhs ~~ Val::Type | _007::Type;
-
-                return wrap($lhs !~~ $rhs.type);
+                return wrap(!$lhs.isa($rhs));
             },
             :qtype(TYPE<Q::Infix::TypeNonMatch>),
             :precedence{ equal => "infix:==" },
@@ -406,16 +398,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
     ;
 
-    sub tree-walk(%package) {
-        for %package.keys.map({ %package ~ "::$_" }) -> $name {
-            my $type = ::($name);
-            push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
-            tree-walk($type.WHO);
-        }
-    }
-    tree-walk(Val::);
     for TYPE.keys -> $type {
-        next if $type eq "Type";
         push @builtins, ($type => TYPE{$type});
     }
 

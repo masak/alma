@@ -107,6 +107,15 @@ class _007::Type {
             return %properties<value>;
         }
 
+        if self === TYPE<Type> {
+            return _007::Type.new(
+                :name(%properties<name> ?? %properties<name>.value !! ""),
+                :base(%properties<base> // TYPE<Object>),
+                :fields(%properties<fields> ?? %properties<fields>.value !! []),
+                :is-abstract(%properties<is-abstract> // False),
+            );
+        }
+
         my $type = $.name;
         my $fields = set(self.type-chain.map({ .fields }));
         my $seen = set();
@@ -998,7 +1007,6 @@ class Helper {
     method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
 
     our sub Str($_) {
-        when Val::Type { "<type {.name}>" }
         when _007::Type { "<type {.name}>" }
         when _007::Object {
             when NONE { "None" }

@@ -242,10 +242,8 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
         make TYPE<Q::Statement::Class>.create(:$block);
-        my $val = Val::Type.of(EVAL qq[class :: \{
-            method attributes \{ () \}
-            method ^name(\$) \{ "{$identifier.properties<name>.value}" \}
-        \}]);
+        my $name = $identifier.properties<name>.value;
+        my $val = _007::Type.new(:$name);
         bound-method($identifier, "put-value")($val, $*runtime);
     }
 

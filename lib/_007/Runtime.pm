@@ -182,7 +182,6 @@ class _007::Runtime {
             return wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
 
-        my $type = Val::Type.of($obj.WHAT).name;
         if $obj ~~ _007::Object && $obj.isa("Q") {
             if $propname eq "detach" {
                 sub interpolate($thing) {
@@ -216,6 +215,7 @@ class _007::Runtime {
 
             my %known-properties = $obj.type.type-chain.reverse.map({ .fields }).flat.map({ $_ => 1 });
 
+            my $type = type-of($obj);
             die X::Property::NotFound.new(:$propname, :$type)
                 unless %known-properties{$propname};
 
@@ -417,11 +417,6 @@ class _007::Runtime {
                 })));
             });
         }
-        elsif $obj ~~ Val::Type && $propname eq "create" {
-            return builtin(sub create($properties) {
-                $obj.create($properties.value.map({ .value[0].value => .value[1] }));
-            });
-        }
         elsif $obj ~~ _007::Object && $obj.isa("Sub") && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj.properties{$propname};
         }
@@ -472,6 +467,7 @@ class _007::Runtime {
             return wrap($obj.id);
         }
         else {
+            my $type = type-of($obj);
             die X::Property::NotFound.new(:$propname, :$type);
         }
     }
