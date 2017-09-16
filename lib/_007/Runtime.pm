@@ -4,7 +4,7 @@ use _007::Builtins;
 use _007::OpScope;
 
 constant NO_OUTER = wrap({});
-constant RETURN_TO = Q::Identifier.new(
+constant RETURN_TO = TYPE<Q::Identifier>.create(
     :name(wrap("--RETURN-TO--")),
     :frame(NONE));
 
@@ -16,14 +16,16 @@ class _007::Runtime {
     has $.builtin-frame;
 
     submethod BUILD(:$!input, :$!output) {
-        self.enter(NO_OUTER, wrap({}), Q::StatementList.new);
+        self.enter(NO_OUTER, wrap({}), TYPE<Q::StatementList>.create(
+            :statements(wrap([])),
+        ));
         $!builtin-frame = @!frames[*-1];
         $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
     }
 
-    method run(Q::CompUnit $compunit) {
-        $compunit.run(self);
+    method run(_007::Object $compunit) {
+        bound-method($compunit, "run")(self);
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
@@ -38,17 +40,17 @@ class _007::Runtime {
         });
         @!frames.push($frame);
         for $static-lexpad.value.kv -> $name, $value {
-            my $identifier = Q::Identifier.new(
+            my $identifier = TYPE<Q::Identifier>.create(
                 :name(wrap($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
-        for $statementlist.statements.value.kv -> $i, $_ {
-            when Q::Statement::Sub {
-                my $name = .identifier.name;
-                my $parameterlist = .block.parameterlist;
-                my $statementlist = .block.statementlist;
-                my $static-lexpad = .block.static-lexpad;
+        for $statementlist.properties<statements>.value.kv -> $i, $_ {
+            if .isa("Q::Statement::Sub") {
+                my $name = .properties<identifier>.properties<name>;
+                my $parameterlist = .properties<block>.properties<parameterlist>;
+                my $statementlist = .properties<block>.properties<statementlist>;
+                my $static-lexpad = .properties<block>.properties<static-lexpad>;
                 my $outer-frame = $frame;
                 my $val = TYPE<Sub>.create(
                     :$name,
@@ -57,12 +59,12 @@ class _007::Runtime {
                     :$static-lexpad,
                     :$outer-frame
                 );
-                self.declare-var(.identifier, $val);
+                self.declare-var(.properties<identifier>, $val);
             }
         }
         if $routine {
             my $name = $routine.properties<name>;
-            my $identifier = Q::Identifier.new(:$name, :$frame);
+            my $identifier = TYPE<Q::Identifier>.create(:$name, :$frame);
             self.declare-var($identifier, $routine);
         }
     }
@@ -99,11 +101,11 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
-    method put-var(Q::Identifier $identifier, $value) {
-        my $name = $identifier.name.value;
-        my $frame = $identifier.frame === NONE
+    method put-var(_007::Object $identifier, $value) {
+        my $name = $identifier.properties<name>.value;
+        my $frame = $identifier.properties<frame> === NONE
             ?? self.current-frame
-            !! $identifier.frame;
+            !! $identifier.properties<frame>;
         my $pad = self!find-pad($name, $frame);
         $pad.value{$name} = $value;
     }
@@ -119,11 +121,11 @@ class _007::Runtime {
         }
     }
 
-    method declare-var(Q::Identifier $identifier, $value?) {
-        my $name = $identifier.name.value;
-        my _007::Object::Wrapped $frame = $identifier.frame === NONE
+    method declare-var(_007::Object $identifier, $value?) {
+        my $name = $identifier.properties<name>.value;
+        my _007::Object::Wrapped $frame = $identifier.properties<frame> === NONE
             ?? self.current-frame
-            !! $identifier.frame;
+            !! $identifier.properties<frame>;
         $frame.value<pad>.value{$name} = $value // NONE;
     }
 
@@ -144,7 +146,7 @@ class _007::Runtime {
     method load-builtins {
         my $opscope = $!builtin-opscope;
         for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :$value) {
-            my $identifier = Q::Identifier.new(
+            my $identifier = TYPE<Q::Identifier>.create(
                 :name(wrap($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
@@ -155,11 +157,18 @@ class _007::Runtime {
         sub builtin(&fn) {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
-            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(wrap($^value))))) };
+            my &parameter = {
+                TYPE<Q::Parameter>.create(
+                    :identifier(TYPE<Q::Identifier>.create(
+                        :name(wrap($^value))
+                        :frame(NONE))
+                    )
+                )
+            };
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameters = wrap(@elements);
-            my $parameterlist = Q::ParameterList.new(:$parameters);
-            my $statementlist = Q::StatementList.new();
+            my $parameterlist = TYPE<Q::ParameterList>.create(:$parameters);
+            my $statementlist = TYPE<Q::StatementList>.create(:statements(wrap([])));
             return wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
 
@@ -181,10 +190,10 @@ class _007::Runtime {
                         if $thing ~~ Val;
 
                     return $thing.new(:name($thing.name), :frame(NONE))
-                        if $thing ~~ Q::Identifier;
+                        if $thing.isa("Q::Identifier");
 
                     return $thing
-                        if $thing ~~ Q::Unquote;
+                        if $thing.isa("Q::Unquote");
 
                     my %attributes = $thing.attributes.map: -> $attr {
                         aname($attr) => interpolate(avalue($attr, $thing))
@@ -201,7 +210,7 @@ class _007::Runtime {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
             # XXX: hack
-            if $obj ~~ Q::Block {
+            if $obj.isa("Q::Block") {
                 %known-properties<static-lexpad> = 1;
             }
 
@@ -209,6 +218,44 @@ class _007::Runtime {
                 unless %known-properties{$propname};
 
             return $obj."$propname"();
+        }
+        elsif $obj ~~ _007::Object && $obj.isa("Q") {
+            if $propname eq "detach" {
+                sub interpolate($thing) {
+                    return wrap($thing.value.map(&interpolate))
+                        if $thing ~~ _007::Object && $thing.isa("Array");
+
+                    sub interpolate-entry($_) { .key => interpolate(.value) }
+                    return wrap(hash($thing.value.map(&interpolate-entry)))
+                        if $thing ~~ _007::Object && $thing.isa("Dict");
+
+                    return $thing
+                        if $thing ~~ Val;
+
+                    return $thing.type.create(:name($thing.properties<name>), :frame(NONE))
+                        if $thing.isa("Q::Identifier");
+
+                    return $thing
+                        if $thing.isa("Q::Unquote");
+
+                    my %properties = $thing.type.type-chain.reverse.map({ .fields }).flat.map: -> $fieldname {
+                        $fieldname => interpolate($thing.properties{$fieldname})
+                    };
+
+                    $thing.type.create(|%properties);
+                }
+
+                return builtin(sub detach() {
+                    return interpolate($obj);
+                });
+            }
+
+            my %known-properties = $obj.type.type-chain.reverse.map({ .fields }).flat.map({ $_ => 1 });
+
+            die X::Property::NotFound.new(:$propname, :$type)
+                unless %known-properties{$propname};
+
+            return $obj.properties{$propname};
         }
         elsif $obj ~~ _007::Object && $obj.isa("Int") && $propname eq "abs" {
             return builtin(sub abs() {
@@ -399,9 +446,11 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Type && $propname eq "create" {
             return builtin(sub create($properties) {
-                # XXX: needs more sanity checking
-                wrap($properties.value[0].value[1].value);  # XXX: won't work for non-wrapped objects
-                # _007::Object.new(:value($properties.value[0].value[1].value));
+                # XXX: check that $properties is an array of [k, v] arrays
+                $obj.create(|hash($properties.value.map(-> $p {
+                    my ($k, $v) = @($p.value);
+                    $k.value => $v;
+                })));
             });
         }
         elsif $obj ~~ Val::Type && $propname eq "create" {
@@ -417,6 +466,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ _007::Object && $obj.isa("Dict") && ($obj.value{$propname} :exists) {
             return $obj.value{$propname};
+        }
+        elsif $obj ~~ _007::Object && ($obj.properties{$propname} :exists) {
+            return $obj.properties{$propname};
         }
         elsif $propname eq "get" {
             return builtin(sub get($prop) {

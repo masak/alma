@@ -7,7 +7,8 @@ use _007::Test;
         macro moo() {
             return new Q::Statement::My {
                 identifier: new Q::Identifier {
-                    name: "agent_name"
+                    name: "agent_name",
+                    frame: None,
                 },
                 expr: new Q::Literal::Str {
                     value: "James Bond"

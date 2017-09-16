@@ -19,7 +19,9 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, wrap({}), Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, wrap({}), TYPE<Q::StatementList>.create(
+            :statements(wrap([])),
+        ));
     } }
 
     token finishpad { <?> {
@@ -35,14 +37,14 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    our sub declare(Q::Declaration $decltype, $symbol) {
+    our sub declare(_007::Type $decltype, $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.id ~ $symbol};
         my $name = wrap($symbol);
-        my $identifier = Q::Identifier.new(:$name, :$frame);
+        my $identifier = TYPE<Q::Identifier>.create(:$name, :$frame);
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
@@ -50,15 +52,15 @@ grammar _007::Parser::Syntax {
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        { declare(Q::Statement::My, $<identifier>.ast.name.value); }
+        { declare(TYPE<Q::Statement::My>, $<identifier>.ast.properties<name>.value); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
         constant <identifier>
         {
-            my $symbol = $<identifier>.ast.name.value;
+            my $symbol = $<identifier>.ast.properties<name>.value;
             # XXX: a suspicious lack of redeclaration checks here
-            declare(Q::Statement::Constant, $symbol);
+            declare(TYPE<Q::Statement::Constant>, $symbol);
         }
         ['=' <EXPR>]?
     }
@@ -72,9 +74,9 @@ grammar _007::Parser::Syntax {
         :my $*insub = True;
         {
             declare($<routine> eq "sub"
-                        ?? Q::Statement::Sub
-                        !! Q::Statement::Macro,
-                    $<identifier>.ast.name.value);
+                        ?? TYPE<Q::Statement::Sub>
+                        !! TYPE<Q::Statement::Macro>,
+                    $<identifier>.ast.properties<name>.value);
         }
         <.newpad>
         '(' ~ ')' <parameterlist>
@@ -113,7 +115,7 @@ grammar _007::Parser::Syntax {
         class <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
         <identifier> <.ws>
-        { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
+        { declare(TYPE<Q::Statement::Class>, $<identifier>.ast.properties<name>.value); }
         <block>
     }
 
@@ -234,7 +236,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Sub, $<identifier>.ast.name.value);
+                declare(TYPE<Q::Term::Sub>, $<identifier>.ast.properties<name>.value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -318,7 +320,7 @@ grammar _007::Parser::Syntax {
     rule parameterlist {
         [
             <parameter>
-            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.value); }
+            { declare(TYPE<Q::Parameter>, $<parameter>[*-1]<identifier>.ast.properties<name>.value); }
         ]* %% ','
     }
 

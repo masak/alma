@@ -4,7 +4,12 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::My { identifier: new Q::Identifier { name: "foo" } };
+        # XXX: can remove `frame: None` once we have proper initializers
+        my q = new Q::Statement::My {
+            identifier: new Q::Identifier { name: "foo", frame: None },
+            # XXX: and `expr: None` too
+            expr: None,
+        };
         say(q.expr);
         .
 
@@ -16,7 +21,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::Return {};
+        # XXX: Can remove `expr: None` once we have proper initializers
+        my q = new Q::Statement::Return { expr: None };
         say(q.expr);
         .
 
@@ -36,8 +42,12 @@ use _007::Test;
                 },
                 statementlist: new Q::StatementList {
                     statements: []
-                }
-            }
+                },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
+            # XXX: and this
+            else: None,
         };
         say(q.else);
         .
@@ -51,11 +61,16 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = new Q::Statement::Sub {
-            identifier: new Q::Identifier { name: "foo" },
+            # XXX: can remove `frame: None` once we have proper initializers
+            identifier: new Q::Identifier { name: "foo", frame: None },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
-            }
+                statementlist: new Q::StatementList { statements: [] },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
+            # XXX: and this
+            traitlist: new Q::TraitList { traits: [] },
         };
         say(q.traitlist);
         .
@@ -69,11 +84,16 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = new Q::Statement::Macro {
-            identifier: new Q::Identifier { name: "moo" },
+            # XXX: can remove `frame: None` once we have proper initializers
+            identifier: new Q::Identifier { name: "moo", frame: None },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
-            }
+                statementlist: new Q::StatementList { statements: [] },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
+            # XXX: and this
+            traitlist: new Q::TraitList { traits: [] },
         };
         say(q.traitlist);
         .

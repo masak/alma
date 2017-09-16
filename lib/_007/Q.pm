@@ -1,28 +1,5 @@
 use _007::Val;
 
-class X::Subscript::TooLarge is Exception {
-    has $.value;
-    has $.length;
-
-    method message() { "Subscript ($.value) too large (array length $.length)" }
-}
-
-class X::Subscript::NonInteger is Exception {
-}
-
-class X::Subscript::NonString is Exception {
-}
-
-class X::ParameterMismatch is Exception {
-    has $.type;
-    has $.paramcount;
-    has $.argcount;
-
-    method message {
-        "$.type with $.paramcount parameters called with $.argcount arguments"
-    }
-}
-
 class X::Property::NotFound is Exception {
     has $.propname;
     has $.type;
@@ -38,14 +15,6 @@ class X::Associativity::Conflict is Exception {
 
 class X::Regex::InvalidMatchType is Exception {
     method message { "A regex can only match strings" }
-}
-
-class X::_007::RuntimeException is Exception {
-    has $.msg;
-
-    method message {
-        $.msg.Str;
-    }
 }
 
 sub empty-array() { wrap([]) }
@@ -207,19 +176,9 @@ class Q::Term::Object does Q::Term {
 
     method eval($runtime) {
         my $type = $runtime.get-var($.type.name.value, $.type.frame);
-        if $type === TYPE<Exception> {
-            return $type.create(|hash($.propertylist.properties.value.map(-> $property {
-                $property.key.value => $property.value.eval($runtime)
-            })));
-        }
-        if $type ~~ _007::Type {
-            my $value = $.propertylist.properties.value[0].value.eval($runtime);
-            # XXX: cheat less
-            return $value;
-        }
-        return $runtime.get-var($.type.name.value, $.type.frame).create(
-            $.propertylist.properties.value.map({.key.value => .value.eval($runtime)})
-        );
+        return $type.create(|hash($.propertylist.properties.value.map(-> $property {
+            $property.key.value => $property.value.eval($runtime)
+        })));
     }
 }
 

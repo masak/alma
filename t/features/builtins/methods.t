@@ -402,7 +402,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Q::Identifier.create([["name", "Steve"]]));
+        # XXX: can remove this "frame" prop once we have property initializers
+        say(Q::Identifier.create([["name", "Steve"], ["frame", None]]));
         .
 
     outputs $program, qq[Q::Identifier "Steve"\n], "Type.create() method to create a Q::Identifier";

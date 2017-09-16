@@ -10,14 +10,14 @@ my %builtins =
 ;
 
 class _007::Backend::JavaScript {
-    method emit(Q::CompUnit $compunit) {
+    method emit(_007::Object $compunit) {
         return ""
-            unless $compunit.block.statementlist.statements.value;
+            unless $compunit.properties<block>.properties<statementlist>.properties<statements>.value;
 
         my @builtins;
         my @main;
 
-        for $compunit.block.statementlist.statements.value -> $stmt {
+        for $compunit.properties<block>.properties<statementlist>.properties<statements>.value -> $stmt {
             emit-stmt($stmt);
         }
 
@@ -29,38 +29,38 @@ class _007::Backend::JavaScript {
             \})();
             PROGRAM
 
-        multi emit-stmt(Q::Statement $stmt) {
-            die "Cannot handle {$stmt.^name}";
-        }
+        sub emit-stmt(_007::Object $stmt) {
+            if $stmt.isa("Q::Statement::Expr") {
+                my $expr = $stmt.properties<expr>;
+                when $expr.isa("Q::Postfix::Call")
+                    && $expr.properties<operand>.isa("Q::Identifier")
+                    && $expr.properties<operand>.properties<name>.value eq "say" {
 
-        multi emit-stmt(Q::Statement::Expr $stmt) {
-            my $expr = $stmt.expr;
-            when $expr ~~ Q::Postfix::Call
-                && $expr.operand ~~ Q::Identifier
-                && $expr.operand.name.value eq "say" {
+                    @builtins.push(%builtins<say>);
+                    my @arguments = $expr.properties<argumentlist>.properties<arguments>.value.map: {
+                        die "Cannot handle non-literal-Str arguments just yet!"
+                            unless .isa("Q::Literal::Str");
+                        .properties<value>.quoted-Str;
+                    };
+                    @main.push("say({@arguments.join(", ")});");
+                }
 
-                @builtins.push(%builtins<say>);
-                my @arguments = $expr.argumentlist.arguments.value.map: {
-                    die "Cannot handle non-literal-Str arguments just yet!"
-                        unless $_ ~~ Q::Literal::Str;
-                    .value.quoted-Str;
-                };
-                @main.push("say({@arguments.join(", ")});");
+                die "Cannot handle this type of Q::Statement::Expr yet!";
             }
-
-            die "Cannot handle this type of Q::Statement::Expr yet!";
-        }
-
-        multi emit-stmt(Q::Statement::My $stmt) {
-            my $name = $stmt.identifier.name.value;
-            if $stmt.expr !~~ NONE {
-                die "Cannot handle non-literal-Int rhs just yet!"
-                        unless $stmt.expr ~~ Q::Literal::Int;
-                my $expr = $stmt.expr.value.Str;
-                @main.push("let {$name} = {$expr};");
+            elsif $stmt.isa("Q::Statement::My") {
+                my $name = $stmt.properties<identifier>.properties<name>.value;
+                if $stmt.properties<expr> !=== NONE {
+                    die "Cannot handle non-literal-Int rhs just yet!"
+                        unless $stmt.properties<expr>.isa("Q::Literal::Int");
+                    my $expr = $stmt.properties<expr>.properties<value>.Str;
+                    @main.push("let {$name} = {$expr};");
+                }
+                else {
+                    @main.push("let {$name};");
+                }
             }
             else {
-                @main.push("let {$name};");
+                die "Cannot handle {$stmt.type.name}";
             }
         }
     }

@@ -9,69 +9,69 @@ use Test;
 sub read(Str $ast) is export {
     sub n($type, $op) {
         my $name = wrap($type ~ ":<$op>");
-        return Q::Identifier.new(:$name);
+        return TYPE<Q::Identifier>.create(:$name, :frame(NONE));
     }
 
     my %q_lookup =
-        none           => Q::Literal::None,
-        int            => Q::Literal::Int,
-        str            => Q::Literal::Str,
-        array          => Q::Term::Array,
-        dict           => Q::Term::Dict,
-        object         => Q::Term::Object,
-        regex          => Q::Term::Regex,
-        sub            => Q::Term::Sub,
-        quasi          => Q::Term::Quasi,
+        none           => TYPE<Q::Literal::None>,
+        int            => TYPE<Q::Literal::Int>,
+        str            => TYPE<Q::Literal::Str>,
+        array          => TYPE<Q::Term::Array>,
+        dict           => TYPE<Q::Term::Dict>,
+        object         => TYPE<Q::Term::Object>,
+        regex          => TYPE<Q::Term::Regex>,
+        sub            => TYPE<Q::Term::Sub>,
+        quasi          => TYPE<Q::Term::Quasi>,
 
-        'prefix:~'     => Q::Prefix::Str,
-        'prefix:+'     => Q::Prefix::Plus,
-        'prefix:-'     => Q::Prefix::Minus,
-        'prefix:^'     => Q::Prefix::Upto,
+        'prefix:~'     => TYPE<Q::Prefix::Str>,
+        'prefix:+'     => TYPE<Q::Prefix::Plus>,
+        'prefix:-'     => TYPE<Q::Prefix::Minus>,
+        'prefix:^'     => TYPE<Q::Prefix::Upto>,
 
-        'infix:+'      => Q::Infix::Addition,
-        'infix:-'      => Q::Infix::Subtraction,
-        'infix:*'      => Q::Infix::Multiplication,
-        'infix:%'      => Q::Infix::Modulo,
-        'infix:%%'     => Q::Infix::Divisibility,
-        'infix:~'      => Q::Infix::Concat,
-        'infix:x'      => Q::Infix::Replicate,
-        'infix:xx'     => Q::Infix::ArrayReplicate,
-        'infix:::'     => Q::Infix::Cons,
-        'infix:='      => Q::Infix::Assignment,
-        'infix:=='     => Q::Infix::Eq,
-        'infix:!='     => Q::Infix::Ne,
-        'infix:~~'     => Q::Infix::TypeMatch,
-        'infix:!~'     => Q::Infix::TypeNonMatch,
+        'infix:+'      => TYPE<Q::Infix::Addition>,
+        'infix:-'      => TYPE<Q::Infix::Subtraction>,
+        'infix:*'      => TYPE<Q::Infix::Multiplication>,
+        'infix:%'      => TYPE<Q::Infix::Modulo>,
+        'infix:%%'     => TYPE<Q::Infix::Divisibility>,
+        'infix:~'      => TYPE<Q::Infix::Concat>,
+        'infix:x'      => TYPE<Q::Infix::Replicate>,
+        'infix:xx'     => TYPE<Q::Infix::ArrayReplicate>,
+        'infix:::'     => TYPE<Q::Infix::Cons>,
+        'infix:='      => TYPE<Q::Infix::Assignment>,
+        'infix:=='     => TYPE<Q::Infix::Eq>,
+        'infix:!='     => TYPE<Q::Infix::Ne>,
+        'infix:~~'     => TYPE<Q::Infix::TypeMatch>,
+        'infix:!~'     => TYPE<Q::Infix::TypeNonMatch>,
 
-        'infix:<='     => Q::Infix::Le,
-        'infix:>='     => Q::Infix::Ge,
-        'infix:<'      => Q::Infix::Lt,
-        'infix:>'      => Q::Infix::Gt,
+        'infix:<='     => TYPE<Q::Infix::Le>,
+        'infix:>='     => TYPE<Q::Infix::Ge>,
+        'infix:<'      => TYPE<Q::Infix::Lt>,
+        'infix:>'      => TYPE<Q::Infix::Gt>,
 
-        'postfix:()'   => Q::Postfix::Call,
-        'postfix:[]'   => Q::Postfix::Index,
-        'postfix:.'    => Q::Postfix::Property,
+        'postfix:()'   => TYPE<Q::Postfix::Call>,
+        'postfix:[]'   => TYPE<Q::Postfix::Index>,
+        'postfix:.'    => TYPE<Q::Postfix::Property>,
 
-        my             => Q::Statement::My,
-        stexpr         => Q::Statement::Expr,
-        if             => Q::Statement::If,
-        stblock        => Q::Statement::Block,
-        stsub          => Q::Statement::Sub,
-        macro          => Q::Statement::Macro,
-        return         => Q::Statement::Return,
-        for            => Q::Statement::For,
-        while          => Q::Statement::While,
-        begin          => Q::Statement::BEGIN,
+        my             => TYPE<Q::Statement::My>,
+        stexpr         => TYPE<Q::Statement::Expr>,
+        if             => TYPE<Q::Statement::If>,
+        stblock        => TYPE<Q::Statement::Block>,
+        stsub          => TYPE<Q::Statement::Sub>,
+        macro          => TYPE<Q::Statement::Macro>,
+        return         => TYPE<Q::Statement::Return>,
+        for            => TYPE<Q::Statement::For>,
+        while          => TYPE<Q::Statement::While>,
+        begin          => TYPE<Q::Statement::BEGIN>,
 
-        identifier     => Q::Identifier,
-        block          => Q::Block,
-        param          => Q::Parameter,
-        property       => Q::Property,
+        identifier     => TYPE<Q::Identifier>,
+        block          => TYPE<Q::Block>,
+        param          => TYPE<Q::Parameter>,
+        property       => TYPE<Q::Property>,
 
-        statementlist  => Q::StatementList,
-        parameterlist  => Q::ParameterList,
-        argumentlist   => Q::ArgumentList,
-        propertylist   => Q::PropertyList,
+        statementlist  => TYPE<Q::StatementList>,
+        parameterlist  => TYPE<Q::ParameterList>,
+        argumentlist   => TYPE<Q::ArgumentList>,
+        propertylist   => TYPE<Q::PropertyList>,
     ;
 
     # XXX this is a temporary hack while we're refactoring the type system
@@ -105,35 +105,58 @@ sub read(Str $ast) is export {
             my @rest = $<expr>».ast[1..*];
             my $qtype = %q_lookup{$qname};
             my %arguments;
-            my @attributes = $qtype.attributes;
+            my @attributes = $qtype.type-chain.reverse.map({ .fields }).flat;
             sub check-if-operator() {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this
                     my $name = wrap($qname);
-                    %arguments<identifier> = Q::Identifier.new(:$name);
+                    %arguments<identifier> = TYPE<Q::Identifier>.create(:$name, :frame(NONE));
                     shift @attributes;  # $.identifier
                 }
             }();
-            sub aname($attr) { $attr.name.substr(2) }
 
-            if @attributes == 1 && (%qtype-has-just-array{$qtype.^name} :exists) {
-                my $aname = aname(@attributes[0]);
+            if @attributes == 1 && (%qtype-has-just-array{$qtype.name} :exists) {
+                my $aname = @attributes[0];
                 %arguments{$aname} = wrap(@rest);
             }
             else {
-                die "{+@rest} arguments passed, only {+@attributes} parameters expected for {$qtype.^name}"
+                die "{+@rest} arguments passed, only {+@attributes} parameters expected for {$qtype.name}"
                     if @rest > @attributes;
 
                 for @attributes.kv -> $i, $attr {
-                    if $attr.build && @rest < @attributes {
+                    #if $attr.build && @rest < @attributes {
+                    #    @rest.splice($i, 0, "dummy value to make the indices add up");
+                    #    next;
+                    #}
+                    if $attr eq "traitlist" && @rest < @attributes {
                         @rest.splice($i, 0, "dummy value to make the indices add up");
                         next;
                     }
-                    my $aname = aname($attr);
-                    %arguments{$aname} = @rest[$i] // last;
+                    %arguments{$attr} = @rest[$i] // last;
                 }
             }
-            make $qtype.new(|%arguments);
+            # XXX: these exceptions can go away once we support initializers
+            if $qtype === TYPE<Q::Identifier> {
+                %arguments<frame> //= NONE;
+            }
+            if $qtype === TYPE<Q::Block> {
+                %arguments<static-lexpad> //= wrap({});
+            }
+            if $qtype === TYPE<Q::Statement::Sub> | TYPE<Q::Statement::Macro> {
+                %arguments<traitlist> //= TYPE<Q::TraitList>.create(
+                    :traits(wrap([])),
+                );
+            }
+            if $qtype === TYPE<Q::Statement::My> {
+                %arguments<expr> //= NONE;
+            }
+            if $qtype === TYPE<Q::Statement::If> {
+                %arguments<else> //= NONE;
+            }
+            if $qtype === TYPE<Q::Statement::Return> {
+                %arguments<expr> //= NONE;
+            }
+            make $qtype.create(|%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
         method expr:int ($/) { make wrap(+$/) }
@@ -142,9 +165,12 @@ sub read(Str $ast) is export {
 
     AST::Syntax.parse($ast, :$actions)
         or die "couldn't parse AST syntax";
-    return Q::CompUnit.new(:block(Q::Block.new(
-        :parameterlist(Q::ParameterList.new()),
-        :statementlist($/.ast)
+    return TYPE<Q::CompUnit>.create(:block(TYPE<Q::Block>.create(
+        :parameterlist(TYPE<Q::ParameterList>.create(
+            :parameters(wrap([])),
+        )),
+        :statementlist($/.ast),
+        :static-lexpad(wrap({})),
     )));
 }
 
@@ -160,122 +186,120 @@ my class UnwantedOutput {
     method print($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
-sub check(Q::CompUnit $ast, $runtime) is export {
+sub check(_007::Object $ast, $runtime) is export {
     my %*assigned;
+
+    sub handle($ast) {
+        if $ast.isa("Q::StatementList") -> $statementlist {
+            for $statementlist.properties<statements>.value -> $statement {
+                handle($statement);
+            }
+        }
+        elsif $ast.isa("Q::Statement::My") -> $my {
+            my $symbol = $my.properties<identifier>.properties<name>.value;
+            my $block = $runtime.current-frame();
+            die X::Redeclaration.new(:$symbol)
+                if $runtime.declared-locally($symbol);
+            die X::Redeclaration::Outer.new(:$symbol)
+                if %*assigned{$block.id ~ $symbol};
+            $runtime.declare-var($my.properties<identifier>);
+
+            if $my.properties<expr> !=== NONE {
+                handle($my.properties<expr>);
+            }
+        }
+        elsif $ast.isa("Q::Statement::Constant") -> $constant {
+            my $symbol = $constant.properties<identifier>.properties<name>.value;
+            my $block = $runtime.current-frame();
+            die X::Redeclaration.new(:$symbol)
+                if $runtime.declared-locally($symbol);
+            die X::Redeclaration::Outer.new(:$symbol)
+                if %*assigned{$block.id ~ $symbol};
+            $runtime.declare-var($constant.properties<identifier>);
+
+            handle($constant.expr);
+        }
+        elsif $ast.isa("Q::Statement::Block") -> $block {
+            $runtime.enter(
+                $runtime.current-frame,
+                $block.properties<block>.properties<static-lexpad>,
+                $block.properties<block>.properties<statementlist>);
+            handle($block.properties<block>.properties<statementlist>);
+            $block.properties<block>.properties<static-lexpad> = $runtime.current-frame.value<pad>;
+            $runtime.leave();
+        }
+        elsif $ast.isa("Q::ParameterList") || $ast.isa("Q::Statement::Return") || $ast.isa("Q::Statement::Expr")
+            || $ast.isa("Q::Statement::BEGIN") || $ast.isa("Q::Literal") || $ast.isa("Q::Term")
+            || $ast.isa("Q::Postfix") {
+            # we don't care about descending into these
+        }
+        elsif $ast.isa("Q::Statement::Sub") -> $sub {
+            my $outer-frame = $runtime.current-frame;
+            my $name = $sub.properties<identifier>.properties<name>;
+            my $val = TYPE<Sub>.create(
+                :$name,
+                :parameterlist($sub.properties<block>.properties<parameterlist>),
+                :statementlist($sub.properties<block>.properties<statementlist>),
+                :$outer-frame,
+                :static-lexpad(wrap({})),
+            );
+            $runtime.enter($outer-frame, wrap({}), $sub.properties<block>.properties<statementlist>, $val);
+            handle($sub.properties<block>);
+            $runtime.leave();
+
+            $runtime.declare-var($sub.properties<identifier>, $val);
+        }
+        elsif $ast.isa("Q::Statement::Macro") -> $macro {
+            my $outer-frame = $runtime.current-frame;
+            my $name = $macro.properties<identifier>.properties<name>;
+            my $val = TYPE<Macro>.create(
+                :$name,
+                :parameterlist($macro.properties<block>.properties<parameterlist>),
+                :statementlist($macro.properties<block>.properties<statementlist>),
+                :$outer-frame,
+                :static-lexpad(wrap({})),
+            );
+            $runtime.enter($outer-frame, wrap({}), $macro.properties<block>.properties<statementlist>, $val);
+            handle($macro.properties<block>);
+            $runtime.leave();
+
+            $runtime.declare-var($macro.properties<identifier>, $val);
+        }
+        elsif $ast.isa("Q::Statement::If") -> $if {
+            handle($if.properties<block>);
+        }
+        elsif $ast.isa("Q::Statement::For") -> $for {
+            handle($for.properties<block>);
+        }
+        elsif $ast.isa("Q::Statement::While") -> $while {
+            handle($while.properties<block>);
+        }
+        elsif $ast.isa("Q::Block") -> $block {
+            $runtime.enter($runtime.current-frame, wrap({}), TYPE<Q::StatementList>.create(
+                :statements(wrap([])),
+            ));
+            handle($block.properties<parameterlist>);
+            handle($block.properties<statementlist>);
+            $block.properties<static-lexpad> = $runtime.current-frame.value<pad>;
+            $runtime.leave();
+        }
+        elsif $ast.isa("Q::Term::Object") -> $object {
+            handle($object.properties<propertylist>);
+        }
+        elsif $ast.isa("Q::PropertyList") -> $propertylist {
+            my %seen;
+            for $propertylist.properties<properties>.value -> _007::Object $p {
+                my Str $property = $p.properties<key>.value;
+                die X::Property::Duplicate.new(:$property)
+                    if %seen{$property}++;
+            }
+        }
+        else {
+            die "Don't know how to handle type {$ast.type}";
+        }
+    }
+
     handle($ast);
-
-    # a bunch of nodes we don't care about descending into
-    multi handle(Q::ParameterList $) {}
-    multi handle(Q::Statement::Return $) {}
-    multi handle(Q::Statement::Expr $) {}
-    multi handle(Q::Statement::BEGIN $) {}
-    multi handle(Q::Literal $) {}
-    multi handle(Q::Term $) {} # except Q::Term::Object, see below
-    multi handle(Q::Postfix $) {}
-
-    multi handle(Q::StatementList $statementlist) {
-        for $statementlist.statements.value -> $statement {
-            handle($statement);
-        }
-    }
-
-    multi handle(Q::Statement::My $my) {
-        my $symbol = $my.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($my.identifier);
-
-        if $my.expr !=== NONE {
-            handle($my.expr);
-        }
-    }
-
-    multi handle(Q::Statement::Constant $constant) {
-        my $symbol = $constant.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($symbol);
-
-        handle($constant.expr);
-    }
-
-    multi handle(Q::Statement::Block $block) {
-        $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
-        handle($block.block.statementlist);
-        $block.block.static-lexpad = $runtime.current-frame.value<pad>;
-        $runtime.leave();
-    }
-
-    multi handle(Q::Statement::Sub $sub) {
-        my $outer-frame = $runtime.current-frame;
-        my $name = $sub.identifier.name;
-        my $val = TYPE<Sub>.create(
-            :$name,
-            :parameterlist($sub.block.parameterlist),
-            :statementlist($sub.block.statementlist),
-            :$outer-frame,
-        );
-        $runtime.enter($outer-frame, wrap({}), $sub.block.statementlist, $val);
-        handle($sub.block);
-        $runtime.leave();
-
-        $runtime.declare-var($sub.identifier, $val);
-    }
-
-    multi handle(Q::Statement::Macro $macro) {
-        my $outer-frame = $runtime.current-frame;
-        my $name = $macro.identifier.name;
-        my $val = TYPE<Macro>.create(
-            :$name,
-            :parameterlist($macro.block.parameterlist),
-            :statementlist($macro.block.statementlist),
-            :$outer-frame
-        );
-        $runtime.enter($outer-frame, wrap({}), $macro.block.statementlist, $val);
-        handle($macro.block);
-        $runtime.leave();
-
-        $runtime.declare-var($macro.identifier, $val);
-    }
-
-    multi handle(Q::Statement::If $if) {
-        handle($if.block);
-    }
-
-    multi handle(Q::Statement::For $for) {
-        handle($for.block);
-    }
-
-    multi handle(Q::Statement::While $while) {
-        handle($while.block);
-    }
-
-    multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, wrap({}), Q::StatementList.new);
-        handle($block.parameterlist);
-        handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.value<pad>;
-        $runtime.leave();
-    }
-
-    multi handle(Q::Term::Object $object) {
-        handle($object.propertylist);
-    }
-
-    multi handle(Q::PropertyList $propertylist) {
-        my %seen;
-        for $propertylist.properties.value -> Q::Property $p {
-            my Str $property = $p.key.value;
-            die X::Property::Duplicate.new(:$property)
-                if %seen{$property}++;
-        }
-    }
 }
 
 sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {

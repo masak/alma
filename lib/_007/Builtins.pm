@@ -50,6 +50,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
                 && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
         }
+        elsif $l.isa("Q") {
+            sub same-propvalue($prop) {
+                equal-value($l.properties{$prop}, $r.properties{$prop});
+            }
+
+            [&&] $l.type === $r.type,
+                |$l.type.type-chain.reverse.map({ .fields }).flat.grep({ $_ ne "frame" }).map(&same-propvalue);
+        }
         else {
             die "Unknown type ", $l.type.^name;
         }
@@ -138,22 +146,22 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
         # assignment precedence
         'infix:=' => macro-op(
-            :qtype(Q::Infix::Assignment),
+            :qtype(TYPE<Q::Infix::Assignment>),
             :assoc<right>,
         ),
 
         # disjunctive precedence
         'infix:||' => macro-op(
-            :qtype(Q::Infix::Or),
+            :qtype(TYPE<Q::Infix::Or>),
         ),
         'infix://' => macro-op(
-            :qtype(Q::Infix::DefinedOr),
+            :qtype(TYPE<Q::Infix::DefinedOr>),
             :precedence{ equal => "infix:||" },
         ),
 
         # conjunctive precedence
         'infix:&&' => macro-op(
-            :qtype(Q::Infix::And),
+            :qtype(TYPE<Q::Infix::And>),
         ),
 
         # comparison precedence
@@ -162,21 +170,21 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(equal-value($lhs, $rhs));
             },
-            :qtype(Q::Infix::Eq),
+            :qtype(TYPE<Q::Infix::Eq>),
         ),
         'infix:!=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
                 return wrap(!equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Ne),
+            :qtype(TYPE<Q::Infix::Ne>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<' => op(
             sub ($lhs, $rhs) {
                 return wrap(less-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Lt),
+            :qtype(TYPE<Q::Infix::Lt>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<=' => op(
@@ -184,14 +192,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Le),
+            :qtype(TYPE<Q::Infix::Le>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>' => op(
             sub ($lhs, $rhs) {
                 return wrap(more-value($lhs, $rhs) )
             },
-            :qtype(Q::Infix::Gt),
+            :qtype(TYPE<Q::Infix::Gt>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>=' => op(
@@ -199,13 +207,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Ge),
+            :qtype(TYPE<Q::Infix::Ge>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:~~' => op(
             sub ($lhs, $rhs) {
                 if $rhs ~~ _007::Type {
-                    return wrap($lhs ~~ _007::Object && $lhs.isa($rhs));
+                    return wrap($lhs ~~ _007::Object && ?$lhs.isa($rhs));
                 }
 
                 die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
@@ -213,7 +221,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
                 return wrap($lhs ~~ $rhs.type);
             },
-            :qtype(Q::Infix::TypeMatch),
+            :qtype(TYPE<Q::Infix::TypeMatch>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:!~~' => op(
@@ -227,7 +235,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
                 return wrap($lhs !~~ $rhs.type);
             },
-            :qtype(Q::Infix::TypeNonMatch),
+            :qtype(TYPE<Q::Infix::TypeNonMatch>),
             :precedence{ equal => "infix:==" },
         ),
 
@@ -238,7 +246,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Array");
                 return wrap([$lhs, |$rhs.value]);
             },
-            :qtype(Q::Infix::Cons),
+            :qtype(TYPE<Q::Infix::Cons>),
             :assoc<right>,
         ),
 
@@ -251,7 +259,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Int");
                 return wrap($lhs.value + $rhs.value);
             },
-            :qtype(Q::Infix::Addition),
+            :qtype(TYPE<Q::Infix::Addition>),
         ),
         'infix:~' => op(
             sub ($lhs, $rhs) {
@@ -261,7 +269,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Str");
                 return wrap($lhs.value ~ $rhs.value);
             },
-            :qtype(Q::Infix::Concat),
+            :qtype(TYPE<Q::Infix::Concat>),
             :precedence{ equal => "infix:+" },
         ),
         'infix:-' => op(
@@ -272,7 +280,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Int");
                 return wrap($lhs.value - $rhs.value);
             },
-            :qtype(Q::Infix::Subtraction),
+            :qtype(TYPE<Q::Infix::Subtraction>),
         ),
 
         # multiplicative precedence
@@ -284,7 +292,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Int");
                 return wrap($lhs.value * $rhs.value);
             },
-            :qtype(Q::Infix::Multiplication),
+            :qtype(TYPE<Q::Infix::Multiplication>),
         ),
         'infix:%' => op(
             sub ($lhs, $rhs) {
@@ -296,7 +304,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     if $rhs.value == 0;
                 return wrap($lhs.value % $rhs.value);
             },
-            :qtype(Q::Infix::Modulo),
+            :qtype(TYPE<Q::Infix::Modulo>),
         ),
         'infix:%%' => op(
             sub ($lhs, $rhs) {
@@ -308,7 +316,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     if $rhs.value == 0;
                 return wrap($lhs.value %% $rhs.value);
             },
-            :qtype(Q::Infix::Divisibility),
+            :qtype(TYPE<Q::Infix::Divisibility>),
         ),
         'infix:x' => op(
             sub ($lhs, $rhs) {
@@ -318,7 +326,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Int");
                 return wrap($lhs.value x $rhs.value);
             },
-            :qtype(Q::Infix::Replicate),
+            :qtype(TYPE<Q::Infix::Replicate>),
             :precedence{ equal => "infix:*" },
         ),
         'infix:xx' => op(
@@ -329,14 +337,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $rhs ~~ _007::Object && $rhs.isa("Int");
                 return wrap(| $lhs.value xx $rhs.value);
             },
-            :qtype(Q::Infix::ArrayReplicate),
+            :qtype(TYPE<Q::Infix::ArrayReplicate>),
             :precedence{ equal => "infix:*" },
         ),
 
         # prefixes
         'prefix:~' => op(
             sub prefix-str($expr) { wrap($expr.Str) },
-            :qtype(Q::Prefix::Str),
+            :qtype(TYPE<Q::Prefix::Str>),
         ),
         'prefix:+' => op(
             sub prefix-plus($expr) {
@@ -354,7 +362,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     :got($expr),
                     :expected(_007::Object));
             },
-            :qtype(Q::Prefix::Plus),
+            :qtype(TYPE<Q::Prefix::Plus>),
         ),
         'prefix:-' => op(
             sub prefix-minus($expr) {
@@ -372,19 +380,19 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     :got($expr),
                     :expected(_007::Object));
             },
-            :qtype(Q::Prefix::Minus),
+            :qtype(TYPE<Q::Prefix::Minus>),
         ),
         'prefix:?' => op(
             sub ($a) {
                 return wrap(?$a.truthy)
             },
-            :qtype(Q::Prefix::So),
+            :qtype(TYPE<Q::Prefix::So>),
         ),
         'prefix:!' => op(
             sub ($a) {
                 return wrap(!$a.truthy)
             },
-            :qtype(Q::Prefix::Not),
+            :qtype(TYPE<Q::Prefix::Not>),
         ),
         'prefix:^' => op(
             sub ($n) {
@@ -392,18 +400,18 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                     unless $n ~~ _007::Object && $n.isa("Int");
                 return wrap([(^$n.value).map(&wrap)]);
             },
-            :qtype(Q::Prefix::Upto),
+            :qtype(TYPE<Q::Prefix::Upto>),
         ),
 
         # postfixes
         'postfix:[]' => macro-op(
-            :qtype(Q::Postfix::Index),
+            :qtype(TYPE<Q::Postfix::Index>),
         ),
         'postfix:()' => macro-op(
-            :qtype(Q::Postfix::Call),
+            :qtype(TYPE<Q::Postfix::Call>),
         ),
         'postfix:.' => macro-op(
-            :qtype(Q::Postfix::Property),
+            :qtype(TYPE<Q::Postfix::Property>),
         ),
     ;
 
@@ -427,14 +435,20 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             or die "This shouldn't be an op";
         my $type = ~$0;
         my $opname = ~$1;
-        my $qtype = $placeholder.qtype;
+        my %properties = hash($placeholder.qtype.type-chain.reverse.map({ .fields }).flat.map({ $_ => NONE }));
+        my $q = $placeholder.qtype.create(|%properties);
         my $assoc = $placeholder.assoc;
         my %precedence = $placeholder.precedence;
-        $opscope.install($type, $opname, $qtype, :$assoc, :%precedence);
+        $opscope.install($type, $opname, $q, :$assoc, :%precedence);
     }
 
     my &ditch-sigil = { $^str.substr(1) };
-    my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(wrap($^value))))) };
+    my &parameter = {
+        TYPE<Q::Parameter>.create(:identifier(TYPE<Q::Identifier>.create(
+            :name(wrap($^value)),
+            :frame(NONE),
+        )))
+    };
 
     return @builtins.map: {
         when .value ~~ _007::Type | Val::Type {
@@ -443,17 +457,17 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         when .value ~~ Block {
             my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
             my $parameters = wrap(@elements);
-            my $parameterlist = Q::ParameterList.new(:$parameters);
-            my $statementlist = Q::StatementList.new();
+            my $parameterlist = TYPE<Q::ParameterList>.create(:$parameters);
+            my $statementlist = TYPE<Q::StatementList>.create(:statements(wrap([])));
             .key => wrap-fn(.value, .key, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
             install-op($name, .value);
-            my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
+            my @elements = .value.qtype.fields.grep({ $_ ne "identifier" })».&parameter;
             my $parameters = wrap(@elements);
-            my $parameterlist = Q::ParameterList.new(:$parameters);
-            my $statementlist = Q::StatementList.new();
+            my $parameterlist = TYPE<Q::ParameterList>.create(:$parameters);
+            my $statementlist = TYPE<Q::StatementList>.create(:statements(wrap([])));
             .key => wrap-fn(sub () {}, $name, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::Op {
@@ -462,8 +476,8 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my &fn = .value.fn;
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameters = wrap(@elements);
-            my $parameterlist = Q::ParameterList.new(:$parameters);
-            my $statementlist = Q::StatementList.new();
+            my $parameterlist = TYPE<Q::ParameterList>.create(:$parameters);
+            my $statementlist = TYPE<Q::StatementList>.create(:statements(wrap([])));
             .key => wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
         default { die "Unknown type {.value.^name}" }

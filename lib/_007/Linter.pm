@@ -47,112 +47,106 @@ class _007::Linter {
 
         {
             my $root = $.parser.parse($program);
-            traverse($root);
-
             my @blocks;
-
-            multi traverse(Q::Statement::Block $stblock) {
-                traverse($stblock.block);
-            }
-
-            multi traverse(Q::Block $block) {
-                @blocks.push: $block;
-                traverse($block.parameterlist);
-                traverse($block.statementlist);
-                @blocks.pop;
-            }
-
-            multi traverse(Q::ParameterList $parameterlist) {
-            }
-
-            multi traverse(Q::StatementList $statementlist) {
-                for $statementlist.statements.value -> $stmt {
-                    traverse($stmt);
-                }
-            }
-
-            multi traverse(Q::Statement::Sub $sub) {
-                my $name = $sub.identifier.name;
-                %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::SubNotUsed;
-            }
-
-            multi traverse(Q::Statement::Expr $stexpr) {
-                traverse($stexpr.expr);
-            }
-
-            multi traverse(Q::Postfix::Call $call) {
-                traverse($call.operand);
-                traverse($call.argumentlist);
-            }
 
             sub ref(Str $name) {
                 for @blocks.reverse -> $block {
-                    my $pad = $block.static-lexpad;
+                    my $pad = $block.properties<static-lexpad>;
                     if $pad.value{$name} {
-                        return "{$block.WHICH.Str}|$name";
+                        return "{$block.id}|$name";
                     }
                 }
                 fail X::AssertionFailure.new("A thing that is used must be declared somewhere");
             }
 
-            multi traverse(Q::Identifier $identifier) {
-                my $name = $identifier.name.value;
-                # XXX: what we should really do is whitelist all of he built-ins
-                return if $name eq "say";
-                my $ref = ref $name;
-
-                %used{ref $name} = True;
-                if !%assigned{ref $name} {
-                    %readbeforeassigned{$ref} = True;
+            sub traverse(_007::Object $node) {
+                if $node.isa("Q::Statement::Block") -> $stblock {
+                    traverse($stblock.properties<block>);
                 }
-            }
-
-            multi traverse(Q::ArgumentList $argumentlist) {
-                for $argumentlist.arguments.value -> $expr {
-                    traverse($expr);
+                elsif $node.isa("Q::Block") -> $block {
+                    @blocks.push: $block;
+                    traverse($block.properties<parameterlist>);
+                    traverse($block.properties<statementlist>);
+                    @blocks.pop;
                 }
-            }
-
-            multi traverse(Q::Literal $literal) {
-            }
-
-            multi traverse(Q::Term $term) {
-            }
-
-            multi traverse(Q::Statement::For $for) {
-                traverse($for.expr);
-                traverse($for.block);
-            }
-
-            multi traverse(Q::Statement::My $my) {
-                my $name = $my.identifier.name;
-                my $ref = "{@blocks[*-1].WHICH.Str}|$name";
-                %declared{$ref} = L::VariableNotUsed;
-                if $my.expr !~~ NONE {
-                    traverse($my.expr);
-                    %assigned{$ref} = True;
-                    if $my.expr ~~ Q::Identifier && $my.expr.name eq $name {
-                        @complaints.push: L::RedundantAssignment.new(:$name);
-                        %readbeforeassigned{$ref} :delete;
+                elsif $node.isa("Q::StatementList") -> $statementlist {
+                    for $statementlist.properties<statements>.value -> $stmt {
+                        traverse($stmt);
                     }
                 }
-            }
-
-            multi traverse(Q::Infix::Assignment $infix) {
-                traverse($infix.rhs);
-                die "LHS was not an identifier"
-                    unless $infix.lhs ~~ Q::Identifier;
-                my $name = $infix.lhs.name.value;
-                if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
-                    @complaints.push: L::RedundantAssignment.new(:$name);
+                elsif $node.isa("Q::Statement::Sub") -> $sub {
+                    my $name = $sub.properties<identifier>.properties<name>;
+                    %declared{"{@blocks[*-1].id}|$name"} = L::SubNotUsed;
                 }
-                %assigned{ref $name} = True;
+                elsif $node.isa("Q::Statement::Expr") -> $stexpr {
+                    traverse($stexpr.properties<expr>);
+                }
+                elsif $node.isa("Q::Postfix::Call") -> $call {
+                    traverse($call.properties<operand>);
+                    traverse($call.properties<argumentlist>);
+                }
+                elsif $node.isa("Q::Identifier") -> $identifier {
+                    my $name = $identifier.properties<name>.value;
+                    # XXX: what we should really do is whitelist all of he built-ins
+                    return if $name eq "say";
+                    my $ref = ref $name;
+
+                    %used{ref $name} = True;
+                    if !%assigned{ref $name} {
+                        %readbeforeassigned{$ref} = True;
+                    }
+                }
+                elsif $node.isa("Q::ArgumentList") -> $argumentlist {
+                    for $argumentlist.properties<arguments>.value -> $expr {
+                        traverse($expr);
+                    }
+                }
+                elsif $node.isa("Q::Statement::For") -> $for {
+                    traverse($for.properties<expr>);
+                    traverse($for.properties<block>);
+                }
+                elsif $node.isa("Q::Statement::My") -> $my {
+                    my $name = $my.properties<identifier>.properties<name>;
+                    my $ref = "{@blocks[*-1].id}|$name";
+                    %declared{$ref} = L::VariableNotUsed;
+                    if $my.properties<expr> !=== NONE {
+                        traverse($my.properties<expr>);
+                        %assigned{$ref} = True;
+                        if $my.properties<expr>.isa("Q::Identifier") && $my.properties<expr>.properties<name>.value eq $name {
+                            @complaints.push: L::RedundantAssignment.new(:$name);
+                            %readbeforeassigned{$ref} :delete;
+                        }
+                    }
+                }
+                elsif $node.isa("Q::Infix::Assignment") -> $infix {
+                    traverse($infix.properties<rhs>);
+                    die "LHS was not an identifier"
+                        unless $infix.properties<lhs>.isa("Q::Identifier");
+                    my $name = $infix.properties<lhs>.properties<name>.value;
+                    if $infix.properties<rhs>.isa("Q::Identifier") && $infix.properties<rhs>.properties<name>.value eq $name {
+                        @complaints.push: L::RedundantAssignment.new(:$name);
+                    }
+                    %assigned{ref $name} = True;
+                }
+                elsif $node.isa("Q::Infix::Addition") -> $infix {
+                    traverse($infix.properties<lhs>);
+                    traverse($infix.properties<rhs>);
+                }
+                elsif $node.isa("Q::ParameterList") -> $parameterlist {
+                    # nothing
+                }
+                elsif $node.isa("Q::Literal") -> $literal {
+                    # nothing
+                }
+                elsif $node.isa("Q::Term") -> $term {
+                    # nothing
+                }
+                else {
+                    die "Couldn't handle ", $node.type;
+                }
             }
 
-            multi traverse(Q::Infix::Addition $infix) {
-                traverse($infix.lhs);
-                traverse($infix.rhs);
-            }
+            traverse($root);
         }
 
         for %declared.keys -> $ref {
