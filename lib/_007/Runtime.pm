@@ -16,7 +16,7 @@ class X::Regex::InvalidMatchType is Exception {
 }
 
 constant NO_OUTER = wrap({});
-constant RETURN_TO = TYPE<Q::Identifier>.create(
+constant RETURN_TO = create(TYPE<Q::Identifier>,
     :name(wrap("--RETURN-TO--")),
     :frame(NONE));
 
@@ -28,7 +28,7 @@ class _007::Runtime {
     has $.builtin-frame;
 
     submethod BUILD(:$!input, :$!output) {
-        self.enter(NO_OUTER, wrap({}), TYPE<Q::StatementList>.create(
+        self.enter(NO_OUTER, wrap({}), create(TYPE<Q::StatementList>,
             :statements(wrap([])),
         ));
         $!builtin-frame = @!frames[*-1];
@@ -52,7 +52,7 @@ class _007::Runtime {
         });
         @!frames.push($frame);
         for $static-lexpad.value.kv -> $name, $value {
-            my $identifier = TYPE<Q::Identifier>.create(
+            my $identifier = create(TYPE<Q::Identifier>,
                 :name(wrap($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
@@ -64,7 +64,7 @@ class _007::Runtime {
                 my $statementlist = .properties<block>.properties<statementlist>;
                 my $static-lexpad = .properties<block>.properties<static-lexpad>;
                 my $outer-frame = $frame;
-                my $val = TYPE<Sub>.create(
+                my $val = create(TYPE<Sub>,
                     :$name,
                     :$parameterlist,
                     :$statementlist,
@@ -76,7 +76,7 @@ class _007::Runtime {
         }
         if $routine {
             my $name = $routine.properties<name>;
-            my $identifier = TYPE<Q::Identifier>.create(:$name, :$frame);
+            my $identifier = create(TYPE<Q::Identifier>, :$name, :$frame);
             self.declare-var($identifier, $routine);
         }
     }
@@ -156,7 +156,7 @@ class _007::Runtime {
     method load-builtins {
         my $opscope = $!builtin-opscope;
         for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :$value) {
-            my $identifier = TYPE<Q::Identifier>.create(
+            my $identifier = create(TYPE<Q::Identifier>,
                 :name(wrap($name)),
                 :frame(NONE));
             self.declare-var($identifier, $value);
@@ -168,8 +168,8 @@ class _007::Runtime {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
             my &parameter = {
-                TYPE<Q::Parameter>.create(
-                    :identifier(TYPE<Q::Identifier>.create(
+                create(TYPE<Q::Parameter>,
+                    :identifier(create(TYPE<Q::Identifier>,
                         :name(wrap($^value))
                         :frame(NONE))
                     )
@@ -177,8 +177,8 @@ class _007::Runtime {
             };
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameters = wrap(@elements);
-            my $parameterlist = TYPE<Q::ParameterList>.create(:$parameters);
-            my $statementlist = TYPE<Q::StatementList>.create(:statements(wrap([])));
+            my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
+            my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
             return wrap-fn(&fn, $name, $parameterlist, $statementlist);
         }
 
@@ -192,7 +192,7 @@ class _007::Runtime {
                     return wrap(hash($thing.value.map(&interpolate-entry)))
                         if $thing ~~ _007::Object && $thing.isa("Dict");
 
-                    return $thing.type.create(:name($thing.properties<name>), :frame(NONE))
+                    return create($thing.type, :name($thing.properties<name>), :frame(NONE))
                         if $thing.isa("Q::Identifier");
 
                     return $thing
@@ -202,7 +202,7 @@ class _007::Runtime {
                         $fieldname => interpolate($thing.properties{$fieldname})
                     };
 
-                    $thing.type.create(|%properties);
+                    create($thing.type, |%properties);
                 }
 
                 return builtin(sub detach() {
@@ -413,7 +413,7 @@ class _007::Runtime {
         elsif $obj ~~ _007::Type && $propname eq "create" {
             return builtin(sub create($properties) {
                 # XXX: check that $properties is an array of [k, v] arrays
-                $obj.create(|hash($properties.value.map(-> $p {
+                create($obj, |hash($properties.value.map(-> $p {
                     my ($k, $v) = @($p.value);
                     $k.value => $v;
                 })));

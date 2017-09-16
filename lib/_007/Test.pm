@@ -8,7 +8,7 @@ use Test;
 sub read(Str $ast) is export {
     sub n($type, $op) {
         my $name = wrap($type ~ ":<$op>");
-        return TYPE<Q::Identifier>.create(:$name, :frame(NONE));
+        return create(TYPE<Q::Identifier>, :$name, :frame(NONE));
     }
 
     my %q_lookup =
@@ -109,7 +109,7 @@ sub read(Str $ast) is export {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this
                     my $name = wrap($qname);
-                    %arguments<identifier> = TYPE<Q::Identifier>.create(:$name, :frame(NONE));
+                    %arguments<identifier> = create(TYPE<Q::Identifier>, :$name, :frame(NONE));
                     shift @attributes;  # $.identifier
                 }
             }();
@@ -142,7 +142,7 @@ sub read(Str $ast) is export {
                 %arguments<static-lexpad> //= wrap({});
             }
             if $qtype === TYPE<Q::Statement::Sub> | TYPE<Q::Statement::Macro> {
-                %arguments<traitlist> //= TYPE<Q::TraitList>.create(
+                %arguments<traitlist> //= create(TYPE<Q::TraitList>,
                     :traits(wrap([])),
                 );
             }
@@ -155,7 +155,7 @@ sub read(Str $ast) is export {
             if $qtype === TYPE<Q::Statement::Return> {
                 %arguments<expr> //= NONE;
             }
-            make $qtype.create(|%arguments);
+            make create($qtype, |%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
         method expr:int ($/) { make wrap(+$/) }
@@ -164,8 +164,8 @@ sub read(Str $ast) is export {
 
     AST::Syntax.parse($ast, :$actions)
         or die "couldn't parse AST syntax";
-    return TYPE<Q::CompUnit>.create(:block(TYPE<Q::Block>.create(
-        :parameterlist(TYPE<Q::ParameterList>.create(
+    return create(TYPE<Q::CompUnit>, :block(create(TYPE<Q::Block>,
+        :parameterlist(create(TYPE<Q::ParameterList>,
             :parameters(wrap([])),
         )),
         :statementlist($/.ast),
@@ -235,7 +235,7 @@ sub check(_007::Object $ast, $runtime) is export {
         elsif $ast.isa("Q::Statement::Sub") -> $sub {
             my $outer-frame = $runtime.current-frame;
             my $name = $sub.properties<identifier>.properties<name>;
-            my $val = TYPE<Sub>.create(
+            my $val = create(TYPE<Sub>,
                 :$name,
                 :parameterlist($sub.properties<block>.properties<parameterlist>),
                 :statementlist($sub.properties<block>.properties<statementlist>),
@@ -251,7 +251,7 @@ sub check(_007::Object $ast, $runtime) is export {
         elsif $ast.isa("Q::Statement::Macro") -> $macro {
             my $outer-frame = $runtime.current-frame;
             my $name = $macro.properties<identifier>.properties<name>;
-            my $val = TYPE<Macro>.create(
+            my $val = create(TYPE<Macro>,
                 :$name,
                 :parameterlist($macro.properties<block>.properties<parameterlist>),
                 :statementlist($macro.properties<block>.properties<statementlist>),
@@ -274,7 +274,7 @@ sub check(_007::Object $ast, $runtime) is export {
             handle($while.properties<block>);
         }
         elsif $ast.isa("Q::Block") -> $block {
-            $runtime.enter($runtime.current-frame, wrap({}), TYPE<Q::StatementList>.create(
+            $runtime.enter($runtime.current-frame, wrap({}), create(TYPE<Q::StatementList>,
                 :statements(wrap([])),
             ));
             handle($block.properties<parameterlist>);

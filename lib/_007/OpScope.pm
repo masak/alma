@@ -18,15 +18,15 @@ class _007::OpScope {
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         my $name = "$type:$op";
-        my $identifier = TYPE<Q::Identifier>.create(
+        my $identifier = create(TYPE<Q::Identifier>,
             :name(wrap($name)),
             :frame(NONE),
         );
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
-            prefix => TYPE<Q::Prefix>.create(:$identifier, :operand(NONE)),
-            infix => TYPE<Q::Infix>.create(:$identifier, :lhs(NONE), :rhs(NONE)),
-            postfix => TYPE<Q::Postfix>.create(:$identifier, :operand(NONE)),
+            prefix => create(TYPE<Q::Prefix>, :$identifier, :operand(NONE)),
+            infix => create(TYPE<Q::Infix>, :$identifier, :lhs(NONE), :rhs(NONE)),
+            postfix => create(TYPE<Q::Postfix>, :$identifier, :operand(NONE)),
         }{$type};
 
         sub prec {

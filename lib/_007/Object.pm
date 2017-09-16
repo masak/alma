@@ -61,7 +61,6 @@ class X::ParameterMismatch is Exception {
 }
 
 class Helper { ... }
-class _007::Object { ... }
 
 sub unique-id { ++$ }
 
@@ -94,50 +93,6 @@ class _007::Type {
     method Str {
         my %*stringification-seen;
         Helper::Str(self);
-    }
-
-    method create(*%properties) {
-        die X::Uninstantiable.new(:$.name)
-            if self.is-abstract;
-
-        # XXX: For Dict and Array, we might instead want to do a shallow copy
-        if self === TYPE<Dict> || self === TYPE<Array> || self === TYPE<Int> || self === TYPE<Str> {
-            return %properties<value>;
-        }
-
-        if self === TYPE<Type> {
-            return _007::Type.new(
-                :name(%properties<name> ?? %properties<name>.value !! ""),
-                :base(%properties<base> // TYPE<Object>),
-                :fields(%properties<fields> ?? %properties<fields>.value !! []),
-                :is-abstract(%properties<is-abstract> // False),
-            );
-        }
-
-        my $type = $.name;
-        my $fields = set(self.type-chain.map({ .fields }));
-        my $seen = set();
-        for %properties.keys.sort -> $property {
-            die X::Property::NotDeclared.new(:$type, :$property)
-                unless $property (elem) $fields;
-
-            die X::Property::Duplicate.new(:$type, :$property)
-                if $property (elem) $seen;
-
-            $seen (|)= $property;
-        }
-        # XXX: need to screen for required properties by traversing @.fields, but we don't have the
-        #      infrastructure in terms of a way to mark up a field as required
-
-        # XXX: for now, let's pretend all properties are required. not pleasant, but we can live with it for a short time
-        for $fields.keys -> $field {
-            die "Need to pass property '$field' when creating a $type"
-                unless $field (elem) $seen;
-        }
-
-        # XXX: ditto for property default values
-
-        return _007::Object.new(:type(self), :%properties);
     }
 }
 
@@ -264,6 +219,49 @@ class _007::Object {
     method quoted-Str { self.Str }
 
     method truthy { truthy(self) }
+}
+
+sub create(_007::Type $type, *%properties) is export {
+    die X::Uninstantiable.new(:name($type.name))
+        if $type.is-abstract;
+
+    # XXX: For Dict and Array, we might instead want to do a shallow copy
+    if $type === TYPE<Dict> || $type === TYPE<Array> || $type === TYPE<Int> || $type === TYPE<Str> {
+        return %properties<value>;
+    }
+
+    if $type === TYPE<Type> {
+        return _007::Type.new(
+            :name(%properties<name> ?? %properties<name>.value !! ""),
+            :base(%properties<base> // TYPE<Object>),
+            :fields(%properties<fields> ?? %properties<fields>.value !! []),
+            :is-abstract(%properties<is-abstract> // False),
+        );
+    }
+
+    my $fields = set($type.type-chain.map({ .fields }));
+    my $seen = set();
+    for %properties.keys.sort -> $property {
+        die X::Property::NotDeclared.new(:type($type.name), :$property)
+            unless $property (elem) $fields;
+
+        die X::Property::Duplicate.new(:type($type.name), :$property)
+            if $property (elem) $seen;
+
+        $seen (|)= $property;
+    }
+    # XXX: need to screen for required properties by traversing @.fields, but we don't have the
+    #      infrastructure in terms of a way to mark up a field as required
+
+    # XXX: for now, let's pretend all properties are required. not pleasant, but we can live with it for a short time
+    for $fields.keys -> $field {
+        die "Need to pass property '$field' when creating a {$type.name}"
+            unless $field (elem) $seen;
+    }
+
+    # XXX: ditto for property default values
+
+    return _007::Object.new(:$type, :%properties);
 }
 
 class _007::Object::Enum is _007::Object {
@@ -439,11 +437,11 @@ sub bound-method($object, $name) is export {
                 $object.properties<type>.properties<name>.value,
                 $object.properties<type>.properties<frame>);
             if $type ~~ _007::Type {
-                return $type.create(|hash($object.properties<propertylist>.properties<properties>.value.map({
+                return create($type, |hash($object.properties<propertylist>.properties<properties>.value.map({
                     .properties<key>.value => bound-method(.properties<value>, "eval")($runtime)
                 })));
             }
-            return $type.create($object.properties<propertylist>.properties<properties>.value.map({
+            return create($type, $object.properties<propertylist>.properties<properties>.value.map({
                 .properties<key>.value => bound-method(.properties<value>, "eval")($runtime)
             }));
         };
@@ -668,20 +666,20 @@ sub bound-method($object, $name) is export {
                 return $thing
                     if $thing ~~ _007::Object && $thing.isa("Sub");
 
-                return $thing.type.create(:name($thing.properties<name>), :frame($runtime.current-frame))
+                return create($thing.type, :name($thing.properties<name>), :frame($runtime.current-frame))
                     if $thing ~~ _007::Object && $thing.isa("Q::Identifier");
 
                 if $thing ~~ _007::Object && $thing.isa("Q::Unquote::Prefix") {
                     my $prefix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(_007::Object))
                         unless $prefix ~~ _007::Object && $prefix.isa("Q::Prefix");
-                    return $prefix.type.create(:identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
+                    return create($prefix.type, :identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
                 }
                 elsif $thing ~~ _007::Object && $thing.isa("Q::Unquote::Infix") {
                     my $infix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(_007::Object))
                         unless $infix ~~ _007::Object && $infix.isa("Q::Infix");
-                    return $infix.type.create(:identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
+                    return create($infix.type, :identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
                 }
 
                 if $thing ~~ _007::Object && $thing.isa("Q::Unquote") {
@@ -693,7 +691,7 @@ sub bound-method($object, $name) is export {
 
                 my %properties = $thing.properties.keys.map: -> $key { $key => interpolate($thing.properties{$key}) };
 
-                $thing.type.create(|%properties);
+                create($thing.type, |%properties);
             }
 
             if $object.properties<qtype>.value eq "Q::Unquote" && $object.properties<contents>.isa("Q::Unquote") {
@@ -712,7 +710,7 @@ sub bound-method($object, $name) is export {
             my $statementlist = $object.properties<block>.properties<statementlist>;
             my $static-lexpad = $object.properties<block>.properties<static-lexpad>;
             my $outer-frame = $runtime.current-frame;
-            return TYPE<Sub>.create(:$name, :$parameterlist, :$statementlist, :$static-lexpad, :$outer-frame);
+            return create(TYPE<Sub>, :$name, :$parameterlist, :$statementlist, :$static-lexpad, :$outer-frame);
         };
     }
 
@@ -725,7 +723,7 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Statement::Throw") && $name eq "run" {
         return sub eval-q-statement-throw($runtime) {
             my $value = $object.properties<expr> === NONE
-                ?? TYPE<Exception>.create(:message(wrap("Died")))
+                ?? create(TYPE<Exception>, :message(wrap("Died")))
                 !! bound-method($object.properties<expr>, "eval")($runtime);
             die X::TypeCheck.new(:got($value), :expected(_007::Object))
                 unless $value ~~ _007::Object && $value.isa("Exception");
@@ -782,7 +780,7 @@ sub bound-method($object, $name) is export {
 
     if $object.isa("Q::Term::Regex") && $name eq "eval" {
         return sub eval-q-term-regex($runtime) {
-            TYPE<Regex>.create(:contents($object.properties<contents>));
+            create(TYPE<Regex>, :contents($object.properties<contents>));
         };
     }
 

@@ -18,7 +18,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, wrap({}), TYPE<Q::StatementList>.create(
+        $*runtime.enter($*runtime.current-frame, wrap({}), create(TYPE<Q::StatementList>,
             :statements(wrap([])),
         ));
     } }
@@ -43,7 +43,7 @@ grammar _007::Parser::Syntax {
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.id ~ $symbol};
         my $name = wrap($symbol);
-        my $identifier = TYPE<Q::Identifier>.create(:$name, :$frame);
+        my $identifier = create(TYPE<Q::Identifier>, :$name, :$frame);
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
