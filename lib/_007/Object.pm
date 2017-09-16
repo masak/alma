@@ -901,8 +901,6 @@ class Helper {
         }).join(", ");
     }
 
-    method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
-
     our sub Str($_) {
         when _007::Type { "<type {.name}>" }
         when _007::Object {
@@ -937,22 +935,6 @@ class Helper {
             }
             when _007::Object::Wrapped { .value.Str }
             default { die "Unexpected type ", .^name }
-        }
-        default {
-            my $self = $_;
-            die "Unexpected type -- some invariant must be broken ({$self.^name})"
-                unless $self.^name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
-
-            sub aname($attr) { $attr.name.substr(2) }
-            sub avalue($attr, $obj) { $attr.get_value($obj) }
-
-            my @attrs = $self.attributes;
-            if @attrs == 1 {
-                return "{.^name} { avalue(@attrs[0], $self).quoted-Str }";
-            }
-            sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $self).quoted-Str }
-            my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-            return "{$self.^name} \{\n$contents\n\}";
         }
     }
 }
