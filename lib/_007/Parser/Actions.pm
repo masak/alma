@@ -800,6 +800,7 @@ class _007::Parser::Actions {
             make TYPE<Q::Postfix::Property>.create(property => $<identifier>.ast, :$identifier, :operand(NONE));
         }
         else {
+            say $<prop>;
             make $*parser.opscope.ops<postfix>{$op}.type.create(:$identifier, :operand(NONE));
         }
     }

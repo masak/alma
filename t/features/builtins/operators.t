@@ -456,19 +456,22 @@ use _007::Test;
 {
     my $program = q:to/./;
         my a = [1, 2, 3];
+        my d = { foo: 12 };
         sub f() { return 7 };
-        my o = { foo: 12 };
+        my o = new Q::Identifier { name: "19", frame: None };
 
         say(-a[1]);
+        say(-d["foo"]);
         say(-f());
-        say(-o.foo);
+        say(-o.name);
 
         say(!a[2]);
+        say(!d["foo"]);
         say(!f());
-        say(!o.foo);
+        say(!o.name);
         .
 
-    outputs $program, "-2\n-7\n-12\nFalse\nFalse\nFalse\n", "all postfixes are tighter than both prefixes";
+    outputs $program, "-2\n-12\n-7\n-19\nFalse\nFalse\nFalse\nFalse\n", "all postfixes are tighter than all prefixes";
 }
 
 {

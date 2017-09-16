@@ -209,6 +209,11 @@ class _007::Runtime {
                     return interpolate($obj);
                 });
             }
+            elsif $propname eq "get" {
+                return builtin(sub get($prop) {
+                    return self.property($obj, $prop.value);
+                });
+            }
 
             my %known-properties = $obj.type.type-chain.reverse.map({ .fields }).flat.map({ $_ => 1 });
 
@@ -413,9 +418,6 @@ class _007::Runtime {
                     $k.value => $v;
                 })));
             });
-        }
-        elsif $obj ~~ _007::Object && $obj.isa("Dict") && ($obj.value{$propname} :exists) {
-            return $obj.value{$propname};
         }
         elsif $obj ~~ _007::Object && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};

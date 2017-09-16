@@ -552,12 +552,12 @@ sub bound-method($object, $name) is export {
                         if $index.value < 0;
                     return .value[$index.value];
                 }
-                if $_ ~~ _007::Object && (.isa("Dict") || .isa("Sub") || .isa("Q")) {
+                if $_ ~~ _007::Object && .isa("Dict") {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
                         unless $property ~~ _007::Object && $property.isa("Str");
-                    my $propname = $property.value;
-                    return $runtime.property($_, $propname);
+                    my $key = $property.value;
+                    return .value{$key};
                 }
                 die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
             }
