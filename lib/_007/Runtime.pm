@@ -414,9 +414,6 @@ class _007::Runtime {
                 })));
             });
         }
-        elsif $obj ~~ _007::Object && $obj.isa("Sub") && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
-            return $obj.properties{$propname};
-        }
         elsif $obj ~~ _007::Object && $obj.isa("Dict") && ($obj.value{$propname} :exists) {
             return $obj.value{$propname};
         }
