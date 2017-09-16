@@ -1,3 +1,4 @@
+use _007::Type;
 use _007::Object;
 
 sub check-feature-flag($feature, $word) {

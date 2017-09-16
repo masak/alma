@@ -1,3 +1,4 @@
+use _007::Type;
 use _007::Object;
 use _007::Builtins;
 use _007::OpScope;

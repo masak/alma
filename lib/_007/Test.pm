@@ -1,5 +1,6 @@
 use v6;
 use _007;
+use _007::Type;
 use _007::Object;
 use _007::Backend::JavaScript;
 
