@@ -295,9 +295,7 @@ class _007::Parser::Actions {
     sub is-macro($q, $qtype, $identifier) {
         $q.isa($qtype)
             && $identifier.isa("Q::Identifier")
-            && (my $macro = $*runtime.maybe-get-var($identifier.properties<name>.value)) ~~ _007::Object
-            && $macro.isa("Macro")
-            && $macro;
+            && $*runtime.maybe-get-var($identifier.properties<name>.value).isa("Macro");
     }
 
     sub expand($macro, @arguments, &unexpanded-callback:()) {
@@ -578,9 +576,9 @@ class _007::Parser::Actions {
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
                 die X::Macro::Postdeclared.new(:$name)
-                    if $value ~~ _007::Object && $value.isa("Macro");
+                    if $value.isa("Macro");
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ _007::Object && $value.isa("Sub");
+                    unless $value.isa("Sub");
             };
         }
     }

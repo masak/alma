@@ -272,7 +272,7 @@ sub bound-method($object, $name) is export {
 
             my $array = bound-method($object.properties<expr>, "eval")($runtime);
             die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(_007::Object))
-                unless $array ~~ _007::Object && $array.isa("Array");
+                unless $array.isa("Array");
 
             for $array.value -> $arg {
                 $runtime.enter(
@@ -417,20 +417,20 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Postfix::Index") && $name eq "eval" {
         return sub eval-q-postfix-index($runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if $_ ~~ _007::Object && .isa("Array") {
+                if .isa("Array") {
                     my $index = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonInteger.new
-                        unless $index ~~ _007::Object && $index.isa("Int");
+                        unless $index.isa("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                         if $index.value >= .value;
                     die X::Subscript::Negative.new(:$index, :type([]))
                         if $index.value < 0;
                     return .value[$index.value];
                 }
-                if $_ ~~ _007::Object && .isa("Dict") {
+                if .isa("Dict") {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
-                        unless $property ~~ _007::Object && $property.isa("Str");
+                        unless $property.isa("Str");
                     my $key = $property.value;
                     return .value{$key};
                 }
@@ -443,9 +443,9 @@ sub bound-method($object, $name) is export {
         return sub eval-q-postfix-call($runtime) {
             my $c = bound-method($object.properties<operand>, "eval")($runtime);
             die "macro is called at runtime"
-                if $c ~~ _007::Object && $c.isa("Macro");
+                if $c.isa("Macro");
             die "Trying to invoke a {$c.type.name}" # XXX: make this into an X::
-                unless $c ~~ _007::Object && $c.isa("Sub");
+                unless $c.isa("Sub");
             my @arguments = $object.properties<argumentlist>.properties<arguments>.value.map({
                 bound-method($_, "eval")($runtime)
             });
@@ -528,41 +528,41 @@ sub bound-method($object, $name) is export {
         return sub eval-q-term-quasi($runtime) {
             sub interpolate($thing) {
                 return wrap($thing.value.map(&interpolate))
-                    if $thing ~~ _007::Object && $thing.isa("Array");
+                    if $thing.isa("Array");
 
                 sub interpolate-entry($_) { .key => interpolate(.value) }
                 return wrap(hash($thing.value.map(&interpolate-entry)))
-                    if $thing ~~ _007::Object && $thing.isa("Dict");
+                    if $thing.isa("Dict");
 
                 return $thing
                     if $thing ~~ _007::Type;
 
                 return $thing
-                    if $thing ~~ _007::Object && ($thing.isa("Int") || $thing.isa("Str"));
+                    if $thing.isa("Int") || $thing.isa("Str");
 
                 return $thing
-                    if $thing ~~ _007::Object && $thing.isa("Sub");
+                    if $thing.isa("Sub");
 
                 return create($thing.type, :name($thing.properties<name>), :frame($runtime.current-frame))
-                    if $thing ~~ _007::Object && $thing.isa("Q::Identifier");
+                    if $thing.isa("Q::Identifier");
 
-                if $thing ~~ _007::Object && $thing.isa("Q::Unquote::Prefix") {
+                if $thing.isa("Q::Unquote::Prefix") {
                     my $prefix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(_007::Object))
-                        unless $prefix ~~ _007::Object && $prefix.isa("Q::Prefix");
+                        unless $prefix.isa("Q::Prefix");
                     return create($prefix.type, :identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
                 }
-                elsif $thing ~~ _007::Object && $thing.isa("Q::Unquote::Infix") {
+                elsif $thing.isa("Q::Unquote::Infix") {
                     my $infix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(_007::Object))
-                        unless $infix ~~ _007::Object && $infix.isa("Q::Infix");
+                        unless $infix.isa("Q::Infix");
                     return create($infix.type, :identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
                 }
 
-                if $thing ~~ _007::Object && $thing.isa("Q::Unquote") {
+                if $thing.isa("Q::Unquote") {
                     my $ast = bound-method($thing.properties<expr>, "eval")($runtime);
                     die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                        unless $ast ~~ _007::Object && $ast.isa("Q");
+                        unless $ast.isa("Q");
                     return $ast;
                 }
 
@@ -603,7 +603,7 @@ sub bound-method($object, $name) is export {
                 ?? create(TYPE<Exception>, :message(wrap("Died")))
                 !! bound-method($object.properties<expr>, "eval")($runtime);
             die X::TypeCheck.new(:got($value), :expected(_007::Object))
-                unless $value ~~ _007::Object && $value.isa("Exception");
+                unless $value.isa("Exception");
 
             die X::_007::RuntimeException.new(:msg($value.properties<message>.value));
         };
@@ -612,10 +612,10 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Postfix::Index") && $name eq "put-value" {
         return sub put-value-q-postfix-index($value, $runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if $_ ~~ _007::Object && .isa("Array") {
+                if .isa("Array") {
                     my $index = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonInteger.new
-                        unless $index ~~ _007::Object && $index.isa("Int");
+                        unless $index.isa("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                         if $index.value >= .value;
                     die X::Subscript::Negative.new(:$index, :type([]))
@@ -623,10 +623,10 @@ sub bound-method($object, $name) is export {
                     .value[$index.value] = $value;
                     return;
                 }
-                if $_ ~~ _007::Object && (.isa("Dict") || .isa("Q")) {
+                if .isa("Dict") || .isa("Q") {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
-                        unless $property ~~ _007::Object && $property.isa("Str");
+                        unless $property.isa("Str");
                     my $propname = $property.value;
                     $runtime.put-property($_, $propname, $value);
                     return;
@@ -639,7 +639,7 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Postfix::Property") && $name eq "put-value" {
         return sub put-value-q-postfix-property($value, $runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if $_ ~~ _007::Object && (.isa("Dict") || .isa("Q")) {
+                if .isa("Dict") || .isa("Q") {
                     my $propname = $object.properties<property>.properties<name>.value;
                     $runtime.put-property($_, $propname, $value);
                     return;
@@ -723,7 +723,7 @@ sub wrap-fn(&value, Str $name, $parameterlist, $statementlist) is export {
 
 sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     die "Tried to call a {$sub.^name}, expected a Sub"
-        unless $sub ~~ _007::Object && $sub.type === TYPE<Sub> | TYPE<Macro>;   # XXX: should do subtyping check
+        unless $sub.isa("Sub");   # XXX: should do subtyping check
 
     if $sub ~~ _007::Object::Wrapped && $sub.type === TYPE<Macro> {
         die "Don't handle the wrapped macro case yet";

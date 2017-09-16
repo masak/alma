@@ -224,7 +224,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:::' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Array");
+                    unless $rhs.isa("Array");
                 return wrap([$lhs, |$rhs.value]);
             },
             :qtype(TYPE<Q::Infix::Cons>),
@@ -235,9 +235,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:+' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Int");
+                    unless $lhs.isa("Int");
                 die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 return wrap($lhs.value + $rhs.value);
             },
             :qtype(TYPE<Q::Infix::Addition>),
@@ -245,9 +245,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:~' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Str");
+                    unless $lhs.isa("Str");
                 die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Str");
+                    unless $rhs.isa("Str");
                 return wrap($lhs.value ~ $rhs.value);
             },
             :qtype(TYPE<Q::Infix::Concat>),
@@ -256,9 +256,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:-' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<->, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Int");
+                    unless $lhs.isa("Int");
                 die X::TypeCheck.new(:operation<->, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 return wrap($lhs.value - $rhs.value);
             },
             :qtype(TYPE<Q::Infix::Subtraction>),
@@ -268,9 +268,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:*' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Int");
+                    unless $lhs.isa("Int");
                 die X::TypeCheck.new(:operation<*>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 return wrap($lhs.value * $rhs.value);
             },
             :qtype(TYPE<Q::Infix::Multiplication>),
@@ -278,9 +278,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:%' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Int");
+                    unless $lhs.isa("Int");
                 die X::TypeCheck.new(:operation<%>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 die X::Numeric::DivideByZero.new(:using<%>, :numerator($lhs.value))
                     if $rhs.value == 0;
                 return wrap($lhs.value % $rhs.value);
@@ -290,9 +290,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:%%' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Int");
+                    unless $lhs.isa("Int");
                 die X::TypeCheck.new(:operation<%%>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
                     if $rhs.value == 0;
                 return wrap($lhs.value %% $rhs.value);
@@ -302,9 +302,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:x' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Str");
+                    unless $lhs.isa("Str");
                 die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 return wrap($lhs.value x $rhs.value);
             },
             :qtype(TYPE<Q::Infix::Replicate>),
@@ -313,9 +313,9 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'infix:xx' => op(
             sub ($lhs, $rhs) {
                 die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(_007::Object))
-                    unless $lhs ~~ _007::Object && $lhs.isa("Array");
+                    unless $lhs.isa("Array");
                 die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(_007::Object))
-                    unless $rhs ~~ _007::Object && $rhs.isa("Int");
+                    unless $rhs.isa("Int");
                 return wrap(| $lhs.value xx $rhs.value);
             },
             :qtype(TYPE<Q::Infix::ArrayReplicate>),
@@ -329,14 +329,12 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:+' => op(
             sub prefix-plus($expr) {
-                if $expr ~~ _007::Object {
-                    if $expr.isa("Str") {
-                        return wrap($expr.value.Int)
-                            if $expr.value ~~ /^ '-'? \d+ $/;
-                    }
-                    elsif $expr.isa("Int") {
-                        return $expr;
-                    }
+                if $expr.isa("Str") {
+                    return wrap($expr.value.Int)
+                        if $expr.value ~~ /^ '-'? \d+ $/;
+                }
+                elsif $expr.isa("Int") {
+                    return $expr;
                 }
                 die X::TypeCheck.new(
                     :operation("prefix:<+>"),
@@ -347,14 +345,12 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:-' => op(
             sub prefix-minus($expr) {
-                if $expr ~~ _007::Object {
-                    if $expr.isa("Str") {
-                        return wrap(-$expr.value.Int)
-                            if $expr.value ~~ /^ '-'? \d+ $/;
-                    }
-                    elsif $expr.isa("Int") {
-                        return wrap(-$expr.value);
-                    }
+                if $expr.isa("Str") {
+                    return wrap(-$expr.value.Int)
+                        if $expr.value ~~ /^ '-'? \d+ $/;
+                }
+                elsif $expr.isa("Int") {
+                    return wrap(-$expr.value);
                 }
                 die X::TypeCheck.new(
                     :operation("prefix:<->"),
@@ -378,7 +374,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         'prefix:^' => op(
             sub ($n) {
                 die X::TypeCheck.new(:operation<^>, :got($n), :expected(_007::Object))
-                    unless $n ~~ _007::Object && $n.isa("Int");
+                    unless $n.isa("Int");
                 return wrap([(^$n.value).map(&wrap)]);
             },
             :qtype(TYPE<Q::Prefix::Upto>),

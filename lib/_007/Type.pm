@@ -23,6 +23,13 @@ class _007::Type {
         return @chain;
     }
 
+    multi method isa(Str $typename) {
+        ($typename eq "Object" || $typename eq "Type") && self;
+    }
+    multi method isa(_007::Type $type) {
+        ($type === TYPE<Object> || $type === TYPE<Type>) && self;
+    }
+
     method attributes { () }
 
     method quoted-Str { self.Str }
