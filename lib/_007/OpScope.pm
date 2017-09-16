@@ -2,6 +2,10 @@ use _007::Val;
 use _007::Q;
 use _007::Precedence;
 
+class X::Associativity::Conflict is Exception {
+    method message { "The operator already has a defined associativity" }
+}
+
 class _007::OpScope {
     has %.ops =
         prefix => {},

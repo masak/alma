@@ -1,22 +1,5 @@
 use _007::Val;
 
-class X::Property::NotFound is Exception {
-    has $.propname;
-    has $.type;
-
-    method message {
-        "Property '$.propname' not found on object of type $.type"
-    }
-}
-
-class X::Associativity::Conflict is Exception {
-    method message { "The operator already has a defined associativity" }
-}
-
-class X::Regex::InvalidMatchType is Exception {
-    method message { "A regex can only match strings" }
-}
-
 sub empty-array() { wrap([]) }
 
 sub aname($attr) { $attr.name.substr(2) }

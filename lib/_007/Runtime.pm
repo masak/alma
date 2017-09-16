@@ -3,6 +3,19 @@ use _007::Q;
 use _007::Builtins;
 use _007::OpScope;
 
+class X::Property::NotFound is Exception {
+    has $.propname;
+    has $.type;
+
+    method message {
+        "Property '$.propname' not found on object of type $.type"
+    }
+}
+
+class X::Regex::InvalidMatchType is Exception {
+    method message { "A regex can only match strings" }
+}
+
 constant NO_OUTER = wrap({});
 constant RETURN_TO = TYPE<Q::Identifier>.create(
     :name(wrap("--RETURN-TO--")),
