@@ -405,7 +405,7 @@ class _007::Runtime {
         elsif $obj ~~ _007::Type && $propname eq "name" {
             return wrap($obj.name);
         }
-        elsif $obj ~~ Val::Type | _007::Type && $propname eq "name" {
+        elsif $obj ~~ _007::Type && $propname eq "name" {
             return wrap($obj.name);
         }
         elsif $obj ~~ _007::Type && $propname eq "create" {

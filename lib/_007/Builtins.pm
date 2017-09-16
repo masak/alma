@@ -66,9 +66,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         }
     }
     multi equal-value(_007::Type $l, _007::Type $r) { $l === $r }
-    multi equal-value(Val::Type $l, Val::Type $r) {
-        $l.type === $r.type
-    }
 
     multi less-value($, $) {
         die X::TypeCheck.new(
@@ -423,7 +420,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     };
 
     return @builtins.map: {
-        when .value ~~ _007::Type | Val::Type {
+        when .value ~~ _007::Type {
             .key => .value;
         }
         when .value ~~ Block {
