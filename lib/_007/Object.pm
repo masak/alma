@@ -265,6 +265,7 @@ sub create(_007::Type $type, *%properties) is export {
 }
 
 class _007::Object::Enum is _007::Object {
+    has Str $.name;
 }
 
 class _007::Object::Wrapped is _007::Object {
@@ -297,13 +298,13 @@ class _007::Object::Wrapped is _007::Object {
     }
 }
 
-constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>));
+constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>), :name<None>);
 
 # Now we can install NONE into TYPE<Object>.base
 TYPE<Object>.install-base(NONE);
 
-constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
-constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>));
+constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<True>);
+constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<False>);
 
 # XXX: this is not optimal -- I wanted to declare these as part of the types themselves, but
 # a rakudobug currently prevents subs in constants from being accessed from another module
@@ -903,38 +904,35 @@ class Helper {
 
     our sub Str($_) {
         when _007::Type { "<type {.name}>" }
-        when _007::Object {
-            when NONE { "None" }
-            when .type === TYPE<Bool> { $_ === TRUE ?? "True" !! "False" }
-            when .type === TYPE<Array> { .quoted-Str }
-            when .type === TYPE<Dict> { .quoted-Str }
-            when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
-            when .type === TYPE<Sub> {
-                sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
-            }
-            when .type === TYPE<Macro> {
-                sprintf "<macro %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
-            }
-            when .type === TYPE<Regex> {
-                "/" ~ .contents.quoted-Str ~ "/"
-            }
-            when .isa("Q") {
-                my $self = $_;
-                my @props = $self.type.type-chain.reverse.map({ .fields }).flat;
-                # XXX: thuggish way to hide things that weren't listed in `attributes` before
-                @props.=grep: {
-                    !($self.isa("Q::Identifier") && $_ eq "frame") &&
-                    !($self.isa("Q::Block") && $_ eq "static-lexpad")
-                };
-                if @props == 1 {
-                    return "{$self.type.name} { ($self.properties{@props[0]} // NONE).quoted-Str }";
-                }
-                sub keyvalue($prop) { $prop ~ ": " ~ $self.properties{$prop}.quoted-Str }
-                my $contents = @props.map(&keyvalue).join(",\n").indent(4);
-                return "{$self.type.name} \{\n$contents\n\}";
-            }
-            when _007::Object::Wrapped { .value.Str }
-            default { die "Unexpected type ", .^name }
+        when .type === TYPE<NoneType> | TYPE<Bool> { .name }
+        when .type === TYPE<Array> { .quoted-Str }
+        when .type === TYPE<Dict> { .quoted-Str }
+        when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
+        when .type === TYPE<Sub> {
+            sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
         }
+        when .type === TYPE<Macro> {
+            sprintf "<macro %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
+        }
+        when .type === TYPE<Regex> {
+            "/" ~ .contents.quoted-Str ~ "/"
+        }
+        when .isa("Q") {
+            my $self = $_;
+            my @props = $self.type.type-chain.reverse.map({ .fields }).flat;
+            # XXX: thuggish way to hide things that weren't listed in `attributes` before
+            @props.=grep: {
+                !($self.isa("Q::Identifier") && $_ eq "frame") &&
+                !($self.isa("Q::Block") && $_ eq "static-lexpad")
+            };
+            if @props == 1 {
+                return "{$self.type.name} { ($self.properties{@props[0]} // NONE).quoted-Str }";
+            }
+            sub keyvalue($prop) { $prop ~ ": " ~ $self.properties{$prop}.quoted-Str }
+            my $contents = @props.map(&keyvalue).join(",\n").indent(4);
+            return "{$self.type.name} \{\n$contents\n\}";
+        }
+        when _007::Object::Wrapped { .value.Str }
+        default { die "Unexpected type ", .^name }
     }
 }
