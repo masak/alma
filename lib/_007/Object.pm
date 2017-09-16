@@ -89,7 +89,7 @@ class _007::Object {
 
     method Str {
         my %*stringification-seen;
-        Helper::Str(self);
+        str-helper(self);
     }
 
     method quoted-Str { self.Str }
