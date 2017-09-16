@@ -1,4 +1,4 @@
-use _007::Val;
+use _007::Object;
 
 proto type-of($) is export {*}
 multi type-of(_007::Object $obj) { $obj.type }

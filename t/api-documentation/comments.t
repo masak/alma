@@ -1,7 +1,7 @@
 use v6;
 use Test;
 
-for <lib/_007/Val.pm> -> $file {
+for <lib/_007/Object.pm> -> $file {
     # I am a state machine. Hello.
     my enum State <Normal ApiComment>;
     my $state = Normal;

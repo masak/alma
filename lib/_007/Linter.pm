@@ -1,4 +1,4 @@
-use _007::Val;
+use _007::Object;
 
 role Lint {
     method message { ... }

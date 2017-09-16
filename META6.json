@@ -18,7 +18,7 @@
         "_007::Runtime" : "lib/_007/Runtime.pm",
         "_007::Builtins" : "lib/_007/Builtins.pm",
         "_007::Test" : "lib/_007/Test.pm",
-        "_007::Val" : "lib/_007/Val.pm"
+        "_007::Object" : "lib/_007/Object.pm"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }
 }

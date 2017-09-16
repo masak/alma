@@ -1,4 +1,4 @@
-use _007::Val;
+use _007::Object;
 
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
