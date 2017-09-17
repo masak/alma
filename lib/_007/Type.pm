@@ -462,6 +462,11 @@ TYPE<Q::Term::Regex> = _007::Type.new(:name<Q::Term::Regex>, :base(TYPE<Q::Term>
 ###
 TYPE<Q::Term::Array> = _007::Type.new(:name<Q::Term::Array>, :base(TYPE<Q::Term>), :fields["elements"]);
 
+### ### Q::Term::Dict
+###
+### A dictionary. Dict terms consist of zero or more *properties*, each of which
+### consists of a key and a value.
+###
 TYPE<Q::Term::Dict> = _007::Type.new(:name<Q::Term::Dict>, :base(TYPE<Q::Term>), :fields["propertylist"]);
 
 ### ### Q::Term::Object
