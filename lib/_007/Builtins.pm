@@ -368,14 +368,22 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             :qtype(TYPE<Q::Prefix::Minus>),
         ),
         'prefix:?' => op(
-            sub ($a) {
-                return wrap(?$a.truthy)
+            sub ($arg) {
+                my $b = bound-method($arg, "Bool")();
+                die X::Type.new(:operation<boolification>, :got($b), :expected(TYPE<Bool>))
+                    unless $b.isa("Bool");
+                return $b;
             },
             :qtype(TYPE<Q::Prefix::So>),
         ),
         'prefix:!' => op(
-            sub ($a) {
-                return wrap(!$a.truthy)
+            sub ($arg) {
+                my $b = bound-method($arg, "Bool")();
+                die X::Type.new(:operation<boolification>, :got($b), :expected(TYPE<Bool>))
+                    unless $b.isa("Bool");
+                return $b === TRUE
+                    ?? FALSE
+                    !! TRUE;
             },
             :qtype(TYPE<Q::Prefix::Not>),
         ),

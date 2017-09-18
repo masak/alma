@@ -97,8 +97,6 @@ class _007::Object {
 
         return $type (elem) $.type.type-chain && self;
     }
-
-    method truthy { truthy(self) }
 }
 
 sub create(_007::Type $type, *%properties) is export {
@@ -150,8 +148,6 @@ class _007::Object::Enum is _007::Object {
 
 class _007::Object::Wrapped is _007::Object {
     has $.value;
-
-    method truthy { ?$.value }
 }
 
 constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>), :name<None>);
@@ -300,7 +296,8 @@ sub bound-method($object, $name) is export {
 
     if $object.isa("Q::Statement::While") && $name eq "run" {
         return sub run-q-statement-while($runtime) {
-            while (my $expr = bound-method($object.properties<expr>, "eval")($runtime)).truthy {
+            # XXX: need to typecheck the result coming back from .Bool
+            while bound-method((my $expr = bound-method($object.properties<expr>, "eval")($runtime)), "Bool")() === TRUE {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(
                     :type("While loop"), :$paramcount, :argcount("0 or 1"))
@@ -345,7 +342,8 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Infix::And") && $name eq "eval" {
         return sub eval-q-infix-and($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
-            return $l.truthy
+            # XXX: need to typecheck result of .Bool
+            return bound-method($l, "Bool")() === TRUE
                 ?? bound-method($object.properties<rhs>, "eval")($runtime)
                 !! $l;
         };
@@ -354,7 +352,8 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Infix::Or") && $name eq "eval" {
         return sub eval-q-infix-or($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
-            return $l.truthy
+            # XXX: need to typecheck result of .Bool
+            return bound-method($l, "Bool")() === TRUE
                 ?? $l
                 !! bound-method($object.properties<rhs>, "eval")($runtime);
         };
@@ -460,7 +459,8 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Statement::If") && $name eq "run" {
         return sub run-q-statement-if($runtime) {
             my $expr = bound-method($object.properties<expr>, "eval")($runtime);
-            if $expr.truthy {
+            # XXX: need to typecheck return value from .Bool
+            if bound-method($expr, "Bool")() === TRUE {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(:type("If statement"), :$paramcount, :argcount("0 or 1"))
                     if $paramcount > 1;
@@ -778,13 +778,51 @@ sub bound-method($object, $name) is export {
         };
     }
 
+    if $object.isa("Bool") && $name eq "Bool" {
+        return sub bool-bool() {
+            return $object;
+        };
+    }
+
+    if $object.isa("NoneType") && $name eq "Bool" {
+        return sub bool-nonetype() {
+            return FALSE;
+        };
+    }
+
+    if $object.isa("Int") && $name eq "Bool" {
+        return sub bool-int() {
+            return wrap($object.value != 0);
+        };
+    }
+
+    if $object.isa("Str") && $name eq "Bool" {
+        return sub bool-str() {
+            return wrap($object.value ne "");
+        };
+    }
+
+    if $object.isa("Array") && $name eq "Bool" {
+        return sub bool-array() {
+            return wrap($object.value.elems > 0);
+        };
+    }
+
+    if $object.isa("Dict") && $name eq "Bool" {
+        return sub bool-dict() {
+            return wrap($object.value.keys > 0);
+        };
+    }
+
+    if $object.isa("Object") && $name eq "Bool" {
+        return sub bool-object() {
+            return TRUE;
+        };
+    }
+
     die "The invocant is undefined"
         if $object === Any;
     die "Method '$name' does not exist on {$object.type.name}";
-}
-
-sub truthy($v) {
-    $v !=== NONE && $v !=== FALSE
 }
 
 sub wrap($value) is export {

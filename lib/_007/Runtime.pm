@@ -382,7 +382,7 @@ class _007::Runtime {
         elsif $obj.isa("Array") && $propname eq "filter" {
             return builtin(sub filter($fn) {
                 # XXX: Need to typecheck here if $fn is callable
-                my @elements = $obj.value.grep({ internal-call($fn, self, [$_]).truthy });
+                my @elements = $obj.value.grep({ bound-method(internal-call($fn, self, [$_]), "Bool")() === TRUE });
                 return wrap(@elements);
             });
         }
