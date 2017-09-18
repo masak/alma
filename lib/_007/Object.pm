@@ -359,28 +359,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    # XXX: these should sit on Q::Infix
-    my @infixes = <
-        Q::Infix::TypeMatch
-        Q::Infix::TypeNonMatch
-        Q::Infix::Eq
-        Q::Infix::Ne
-        Q::Infix::Concat
-        Q::Infix::Addition
-        Q::Infix::Subtraction
-        Q::Infix::Multiplication
-        Q::Infix::Replicate
-        Q::Infix::ArrayReplicate
-        Q::Infix::Gt
-        Q::Infix::Lt
-        Q::Infix::Ge
-        Q::Infix::Le
-        Q::Infix::Modulo
-        Q::Infix::Divisibility
-        Q::Infix::Cons
-        Q::Infix
-    >;
-    if any(@infixes.map({ $object.type === TYPE{$_} })) && $name eq "eval" {
+    if $object.isa("Q::Infix") && $name eq "eval" {
         return sub eval-q-infix($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
             my $r = bound-method($object.properties<rhs>, "eval")($runtime);
@@ -389,16 +368,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    # XXX: these should sit on Q::Prefix
-    my @prefixes = <
-        Q::Prefix::Upto
-        Q::Prefix::Str
-        Q::Prefix::Plus
-        Q::Prefix::Minus
-        Q::Prefix::Not
-        Q::Prefix
-    >;
-    if any(@prefixes.map({ $object.type === TYPE{$_} })) && $name eq "eval" {
+    if $object.isa("Q::Prefix") && $name eq "eval" {
         return sub eval-q-prefix($runtime) {
             my $e = bound-method($object.properties<operand>, "eval")($runtime);
             my $c = bound-method($object.properties<identifier>, "eval")($runtime);
