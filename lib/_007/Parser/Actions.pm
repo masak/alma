@@ -766,7 +766,7 @@ class _007::Parser::Actions {
 
     method infix-unquote($/) {
         my $got = ~($<unquote><identifier> // "Q::Term");
-        die X::TypeCheck.new(:operation<parsing>, :$got, :expected(_007::Object))
+        die X::Type.new(:operation<parsing>, :$got, :expected(TYPE<Q::Infix>))
             unless $got eq "Q::Infix";
 
         make $<unquote>.ast;

@@ -133,7 +133,7 @@ BEGIN {
     ###
     ###     say(!!None);        # --> `False`
     ###     say(~None);         # --> `None`
-    ###     say(+None);         # <ERROR X::TypeCheck>
+    ###     say(+None);         # <ERROR X::Type>
     ###
     ### Since `None` is often used as a default, there's an operator `infix:<//>`
     ### that evaluates its right-hand side if it finds `None` on the left:

@@ -62,6 +62,19 @@ class X::ParameterMismatch is Exception {
     }
 }
 
+# We previously used Perl 6's X::TypeCheck, but it wants the .expected attribute to be a Perl 6 type.
+# This is insufficient after switching to 007 having its own object system where basically everything is
+# a _007::Object. Instead we use our own exception type, which is otherwise identical.
+class X::Type is Exception {
+    has $.operation;
+    has $.got;
+    has _007::Type $.expected;
+
+    method message {
+        "Type check failed in {$.operation}; expected {$.expected.name} but got {$.got.type.name} ({$.got.Str})"
+    }
+}
+
 class _007::Object {
     has $.type;
     has $.id = unique-id;
@@ -271,7 +284,7 @@ sub bound-method($object, $name) is export {
                 if $count > 1;
 
             my $array = bound-method($object.properties<expr>, "eval")($runtime);
-            die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(_007::Object))
+            die X::Type.new(:operation("for loop"), :got($array), :expected(TYPE<Array>))
                 unless $array.isa("Array");
 
             for $array.value -> $arg {
@@ -404,7 +417,7 @@ sub bound-method($object, $name) is export {
                     my $key = $property.value;
                     return .value{$key};
                 }
-                die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
+                die X::Type.new(:operation<indexing>, :got($_), :expected(TYPE<Int>));
             }
         };
     }
@@ -518,13 +531,13 @@ sub bound-method($object, $name) is export {
 
                 if $thing.isa("Q::Unquote::Prefix") {
                     my $prefix = bound-method($thing.properties<expr>, "eval")($runtime);
-                    die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(_007::Object))
+                    die X::Type.new(:operation("interpolating an unquote"), :got($prefix), :expected(TYPE<Q::Prefix>))
                         unless $prefix.isa("Q::Prefix");
                     return create($prefix.type, :identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
                 }
                 elsif $thing.isa("Q::Unquote::Infix") {
                     my $infix = bound-method($thing.properties<expr>, "eval")($runtime);
-                    die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(_007::Object))
+                    die X::Type.new(:operation("interpolating an unquote"), :got($infix), :expected(TYPE<Q::Infix>))
                         unless $infix.isa("Q::Infix");
                     return create($infix.type, :identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
                 }
@@ -572,7 +585,7 @@ sub bound-method($object, $name) is export {
             my $value = $object.properties<expr> === NONE
                 ?? create(TYPE<Exception>, :message(wrap("Died")))
                 !! bound-method($object.properties<expr>, "eval")($runtime);
-            die X::TypeCheck.new(:got($value), :expected(_007::Object))
+            die X::Type.new(:got($value), :expected(TYPE<Exception>))
                 unless $value.isa("Exception");
 
             die X::_007::RuntimeException.new(:msg($value.properties<message>.value));
@@ -601,7 +614,7 @@ sub bound-method($object, $name) is export {
                     $runtime.put-property($_, $propname, $value);
                     return;
                 }
-                die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Object));
+                die X::Type.new(:operation<indexing>, :got($_), :expected(TYPE<Int>));
             }
         };
     }

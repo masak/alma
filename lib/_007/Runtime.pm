@@ -281,7 +281,7 @@ class _007::Runtime {
         }
         elsif $obj.isa("Array") && $propname eq "concat" {
             return builtin(sub concat($array) {
-                die X::TypeCheck.new(:operation<concat>, :got($array), :expected(_007::Object))
+                die X::Type.new(:operation<concat>, :got($array), :expected(TYPE<Array>))
                     unless $array.isa("Array");
                 return wrap([|$obj.value, |$array.value]);
             });
@@ -316,7 +316,7 @@ class _007::Runtime {
         }
         elsif $obj.isa("Str") && $propname eq "contains" {
             return builtin(sub contains($substr) {
-                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(_007::Object))
+                die X::Type.new(:operation<contains>, :got($substr), :expected(TYPE<Str>))
                     unless $substr.isa("Str");
 
                 return wrap($obj.value.contains($substr.value));

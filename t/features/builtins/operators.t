@@ -431,7 +431,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "adding non-ints is an error";
+    is-error $ast, X::Type, "adding non-ints is an error";
 }
 
 {
@@ -440,7 +440,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
+    is-error $ast, X::Type, "concatenating non-strs is an error";
 }
 
 {
@@ -450,7 +450,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 0))))))
         .
 
-    is-error $ast, X::TypeCheck, "indexing a non-array is an error";
+    is-error $ast, X::Type, "indexing a non-array is an error";
 }
 
 {
@@ -598,7 +598,7 @@ use _007::Test;
           (stexpr (prefix:^ (str "Mr Bond"))))
         .
 
-    is-error $ast, X::TypeCheck, "can't upto a string (or other non-integer types)";
+    is-error $ast, X::Type, "can't upto a string (or other non-integer types)";
 }
 
 {
