@@ -98,8 +98,6 @@ class _007::Object {
         return $type (elem) $.type.type-chain && self;
     }
 
-    method attributes { () }
-
     method truthy { truthy(self) }
 }
 
