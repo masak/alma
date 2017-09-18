@@ -18,7 +18,7 @@ use _007::Test;
 
 {
     outputs 'my foo = [0, 0, 7]; foo[2] = foo; say(foo)', "[0, 0, [...]]\n", "array with reference to itself";
-    outputs 'my foo = {}; foo.x = foo; say(foo)', "\{x: \{...\}\}\n", "object with reference to itself";
+    outputs 'my foo = {}; foo.x = foo; say(foo)', "\{x: \{...\}\}\n", "dict with reference to itself";
 }
 
 done-testing;

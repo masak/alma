@@ -271,7 +271,14 @@ class _007::Runtime {
         }
         elsif $obj.isa("Array") && $propname eq "sort" {
             return builtin(sub sort() {
-                return wrap($obj.value.sort);
+                # XXX: this method needs to be seriously reconsidered once comparison methods can be defined on
+                # custom objects
+                # XXX: should also disallow sorting on heterogenous types
+                return wrap($obj.value.map({
+                    die "Cannot sort a {.type.name}"
+                        if $_ !~~ _007::Object::Wrapped;
+                    .value;
+                }).sort().map(&wrap));
             });
         }
         elsif $obj.isa("Array") && $propname eq "shuffle" {
@@ -288,7 +295,14 @@ class _007::Runtime {
         }
         elsif $obj.isa("Array") && $propname eq "join" {
             return builtin(sub join($sep) {
-                return wrap($obj.value.join($sep.value.Str));
+                die X::Type.new(:operation<join>, :got($sep), :expected(TYPE<Str>))
+                    unless $sep.isa("Str");
+                return wrap($obj.value.map({
+                    my $s = bound-method($_, "Str")();
+                    die X::Type.new(:operation<stringification>, :got($s), :expected(TYPE<Str>))
+                        unless $s.isa("Str");
+                    $s.value;
+                }).join($sep.value));
             });
         }
         elsif $obj.isa("Dict") && $propname eq "size" {

@@ -343,7 +343,7 @@ sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION", Bool :$un
     my $parser = _007.parser(:$runtime);
     my $actual-ast = $parser.parse($program, :$unexpanded);
 
-    empty-diff ~$expected-ast, ~$actual-ast, $desc;
+    empty-diff bound-method($expected-ast, "Str")().value, bound-method($actual-ast, "Str")().value, $desc;
 }
 
 sub parse-error($program, $expected-error, $desc = $expected-error.^name) is export {

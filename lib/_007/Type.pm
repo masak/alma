@@ -35,12 +35,6 @@ class _007::Type {
     }
 
     method attributes { () }
-
-    method quoted-Str { self.Str }
-    method Str {
-        my %*stringification-seen;
-        str-helper(self);
-    }
 }
 
 BEGIN {
@@ -901,59 +895,3 @@ TYPE<Q::StatementList> = _007::Type.new(:name<Q::StatementList>, :base(TYPE<Q>),
 ### value is the value of the whole containing expression.
 ###
 TYPE<Q::Expr::StatementListAdapter> = _007::Type.new(:name<Q::Expr::StatementListAdapter>, :base(TYPE<Q::Expr>), :fields["statementlist"]);
-
-sub escaped($name) {
-    sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
-    sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
-
-    return $name
-        unless $name ~~ /^ (prefix | infix | postfix) ':' (.+) /;
-
-    return "{$0}:<{escape-less-thans escape-backslashes $1}>"
-        if $1.contains(">") && $1.contains("»");
-
-    return "{$0}:«{escape-backslashes $1}»"
-        if $1.contains(">");
-
-    return "{$0}:<{escape-backslashes $1}>";
-}
-
-sub pretty($parameterlist) {
-    return sprintf "(%s)", $parameterlist.properties<parameters>.value.map({
-        .properties<identifier>.properties<name>
-    }).join(", ");
-}
-
-our sub str-helper($_) is export {
-    when _007::Type { "<type {.name}>" }
-    when .type === TYPE<NoneType> | TYPE<Bool> { .name }
-    when .type === TYPE<Array> { .quoted-Str }
-    when .type === TYPE<Dict> { .quoted-Str }
-    when .type === TYPE<Exception> { "Exception \{message: {.properties<message>.quoted-Str}\}" }
-    when .type === TYPE<Sub> {
-        sprintf "<sub %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
-    }
-    when .type === TYPE<Macro> {
-        sprintf "<macro %s%s>", escaped(.properties<name>.value), pretty(.properties<parameterlist>)
-    }
-    when .type === TYPE<Regex> {
-        "/" ~ .contents.quoted-Str ~ "/"
-    }
-    when .isa("Q") {
-        my $self = $_;
-        my @props = $self.type.type-chain.reverse.map({ .fields }).flat;
-        # XXX: thuggish way to hide things that weren't listed in `attributes` before
-        @props.=grep: {
-            !($self.isa("Q::Identifier") && $_ eq "frame") &&
-            !($self.isa("Q::Block") && $_ eq "static-lexpad")
-        };
-        if @props == 1 {
-            return "{$self.type.name} { $self.properties{@props[0]}.quoted-Str }";
-        }
-        sub keyvalue($prop) { $prop ~ ": " ~ $self.properties{$prop}.quoted-Str }
-        my $contents = @props.map(&keyvalue).join(",\n").indent(4);
-        return "{$self.type.name} \{\n$contents\n\}";
-    }
-    when .^name eq "_007::Object::Wrapped" { .value.Str }
-    default { die "Unexpected type ", .^name }
-}

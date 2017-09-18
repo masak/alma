@@ -100,13 +100,6 @@ class _007::Object {
 
     method attributes { () }
 
-    method Str {
-        my %*stringification-seen;
-        str-helper(self);
-    }
-
-    method quoted-Str { self.Str }
-
     method truthy { truthy(self) }
 }
 
@@ -161,30 +154,6 @@ class _007::Object::Wrapped is _007::Object {
     has $.value;
 
     method truthy { ?$.value }
-
-    method quoted-Str {
-        if $.type === TYPE<Str> {
-            return q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
-        }
-        if $.type === TYPE<Array> {
-            if %*stringification-seen{self.WHICH}++ {
-                return "[...]";
-            }
-            return "[" ~ @($.value)».quoted-Str.join(', ') ~ "]";
-        }
-        if $.type === TYPE<Dict> {
-            if %*stringification-seen{self.WHICH}++ {
-                return "\{...\}";
-            }
-            return '{' ~ %.value.map({
-                my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
-                    ?? .key
-                    !! wrap(.key).quoted-Str;
-                "{$key}: {.value.quoted-Str}"
-            }).sort.join(', ') ~ '}';
-        }
-        return self.Str;
-    }
 }
 
 constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>), :name<None>);
@@ -194,6 +163,36 @@ TYPE<Object>.install-base(NONE);
 
 constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<True>);
 constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<False>);
+
+sub escaped($name) {
+    sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
+    sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
+
+    return $name
+        unless $name ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+
+    return "{$0}:<{escape-less-thans escape-backslashes $1}>"
+        if $1.contains(">") && $1.contains("»");
+
+    return "{$0}:«{escape-backslashes $1}»"
+        if $1.contains(">");
+
+    return "{$0}:<{escape-backslashes $1}>";
+}
+
+sub pretty($parameterlist) {
+    return sprintf "(%s)", $parameterlist.properties<parameters>.value.map({
+        .properties<identifier>.properties<name>.value
+    }).join(", ");
+}
+
+my $str-array-depth = 0;
+my $str-array-seen;
+
+my $str-dict-depth = 0;
+my $str-dict-seen;
+
+# XXX: now need the same thing done with objects
 
 # XXX: this is not optimal -- I wanted to declare these as part of the types themselves, but
 # a rakudobug currently prevents subs in constants from being accessed from another module
@@ -662,9 +661,128 @@ sub bound-method($object, $name) is export {
         };
     }
 
+    if $object.isa("Str") && $name eq "Str" {
+        return sub str-str() {
+            return $object;
+        }
+    }
+
+    if $object.isa("Int") && $name eq "Str" {
+        return sub str-int() {
+            return wrap(~$object.value);
+        }
+    }
+
+    if $object.isa("Bool") && $name eq "Str" {
+        return sub str-bool() {
+            return wrap($object.name);
+        }
+    }
+
+    if $object.isa("NoneType") && $name eq "Str" {
+        return sub str-nonetype() {
+            return wrap($object.name);
+        }
+    }
+
+    if $object.isa("Type") && $name eq "Str" {
+        return sub str-type() {
+            return wrap("<type {$object.name}>");
+        }
+    }
+
+    if $object.isa("Array") && $name eq "Str" {
+        return sub str-array() {
+            if $str-array-depth++ == 0 {
+                $str-array-seen = {};
+            }
+            LEAVE $str-array-depth--;
+
+            if $str-array-seen{$object.id}++ {
+                return wrap("[...]");
+            }
+
+            return wrap("[" ~ $object.value.map({
+                my $s = bound-method($_, "repr")();
+                die X::Type.new(:operation("stringification"), :got($s), :expected(TYPE<Str>))
+                    unless $s.isa("Str");
+                $s.value;
+            }).join(", ") ~ "]");
+        };
+    }
+
+    if $object.isa("Dict") && $name eq "Str" {
+        return sub str-dict() {
+            if $str-dict-depth++ == 0 {
+                $str-dict-seen = {};
+            }
+            LEAVE $str-dict-depth--;
+
+            if $str-dict-seen{$object.id}++ {
+                return wrap(q[{...}]);
+            }
+
+            return wrap('{' ~ $object.value.map({
+                my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
+                    ?? .key
+                    !! bound-method(wrap(.key), "repr")().value;
+                "{$key}: {bound-method(.value, "repr")().value}";
+            }).sort.join(', ') ~ '}');
+        };
+    }
+
+    if $object.isa("Str") && $name eq "repr" {
+        return sub repr-str() {
+            return wrap(q["] ~ $object.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]);
+        }
+    }
+
+    if $object.isa("Object") && $name eq "repr" {
+        return sub repr-object() {
+            return bound-method($object, "Str")();
+        }
+    }
+
+    if $object.isa("Macro") && $name eq "Str" {
+        return sub str-sub() {
+            return wrap(
+                sprintf "<macro %s%s>",
+                    escaped($object.properties<name>.value),
+                    pretty($object.properties<parameterlist>)
+            );
+        };
+    }
+
+    if $object.isa("Sub") && $name eq "Str" {
+        return sub str-sub() {
+            return wrap(
+                sprintf "<sub %s%s>",
+                    escaped($object.properties<name>.value),
+                    pretty($object.properties<parameterlist>)
+            );
+        };
+    }
+
+    if $object.isa("Q") && $name eq "Str" {
+        return sub str-q() {
+            my @props = $object.type.type-chain.reverse.map({ .fields }).flat;
+            # XXX: thuggish way to hide things that weren't listed in `attributes` before
+            @props.=grep: {
+                !($object.isa("Q::Identifier") && $_ eq "frame") &&
+                !($object.isa("Q::Block") && $_ eq "static-lexpad")
+            };
+            if @props == 1 {
+                return wrap("{$object.type.name} { bound-method($object.properties{@props[0]}, "repr")().value }");
+            }
+            sub keyvalue($prop) { $prop ~ ": " ~ bound-method($object.properties{$prop}, "repr")().value }
+            my $contents = @props.map(&keyvalue).join(",\n").indent(4);
+            return wrap("{$object.type.name} \{\n$contents\n\}");
+        };
+    }
+
     die "The invocant is undefined"
         if $object === Any;
-    die "Method '$name' does not exist on {$object.type.Str}";
+    die "Method '$name' does not exist on {$object.type.name}";
 }
 
 sub truthy($v) {

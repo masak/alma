@@ -121,7 +121,7 @@ class _007::Parser::Actions {
         make create(TYPE<Q::Statement::Block>, :block($<pblock>.ast));
     }
 
-    sub maybe-install-operator($identname, @trait) {
+    sub maybe-install-operator(Str $identname, @trait) {
         return
             unless $identname ~~ /^ (< prefix infix postfix >)
                                     ':' (.+) /;
@@ -133,7 +133,7 @@ class _007::Parser::Actions {
         my @prec-traits = <equal looser tighter>;
         my $assoc;
         for @trait -> $trait {
-            my $name = $trait<identifier>.ast.properties<name>;
+            my $name = $trait<identifier>.ast.properties<name>.value;
             if $name eq any @prec-traits {
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equal" ?? "to" !! "than";
@@ -202,7 +202,7 @@ class _007::Parser::Actions {
 
         bound-method($identifier, "put-value")($val, $*runtime);
 
-        maybe-install-operator($name, $<traitlist><trait>);
+        maybe-install-operator($name.value, $<traitlist><trait>);
     }
 
     method statement:return ($/) {
@@ -799,7 +799,6 @@ class _007::Parser::Actions {
             make create(TYPE<Q::Postfix::Property>, property => $<identifier>.ast, :$identifier, :operand(NONE));
         }
         else {
-            say $<prop>;
             make create($*parser.opscope.ops<postfix>{$op}.type, :$identifier, :operand(NONE));
         }
     }

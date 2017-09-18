@@ -39,7 +39,8 @@ class _007::Backend::JavaScript {
                     my @arguments = $expr.properties<argumentlist>.properties<arguments>.value.map: {
                         die "Cannot handle non-literal-Str arguments just yet!"
                             unless .isa("Q::Literal::Str");
-                        .properties<value>.quoted-Str;
+                        # XXX: should really type-check the result of the .repr() call
+                        bound-method(.properties<value>, "repr")().value;
                     };
                     @main.push("say({@arguments.join(", ")});");
                 }
@@ -51,7 +52,8 @@ class _007::Backend::JavaScript {
                 if $stmt.properties<expr> !=== NONE {
                     die "Cannot handle non-literal-Int rhs just yet!"
                         unless $stmt.properties<expr>.isa("Q::Literal::Int");
-                    my $expr = $stmt.properties<expr>.properties<value>.Str;
+                    # XXX: should really type-check the result of the .Str() call
+                    my $expr = bound-method($stmt.properties<expr>.properties<value>, "Str")().value;
                     @main.push("let {$name} = {$expr};");
                 }
                 else {

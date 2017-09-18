@@ -1,5 +1,6 @@
 use v6;
 use Test;
+use _007::Object;
 use _007::Test;
 
 {
@@ -7,9 +8,9 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    my $expected = read(
+    my $expected = bound-method(read(
         "(statementlist (stexpr (infix:+ (int 1) (int 1))))"
-    ).properties<block>.properties<statementlist>.properties<statements>.value[0].properties<expr>.Str;
+    ).properties<block>.properties<statementlist>.properties<statements>.value[0].properties<expr>, "Str")().value;
     outputs $program, "$expected\n", "Basic quasi quoting";
 }
 

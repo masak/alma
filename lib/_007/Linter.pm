@@ -74,7 +74,7 @@ class _007::Linter {
                     }
                 }
                 elsif $node.isa("Q::Statement::Sub") -> $sub {
-                    my $name = $sub.properties<identifier>.properties<name>;
+                    my $name = $sub.properties<identifier>.properties<name>.value;
                     %declared{"{@blocks[*-1].id}|$name"} = L::SubNotUsed;
                 }
                 elsif $node.isa("Q::Statement::Expr") -> $stexpr {
@@ -105,7 +105,7 @@ class _007::Linter {
                     traverse($for.properties<block>);
                 }
                 elsif $node.isa("Q::Statement::My") -> $my {
-                    my $name = $my.properties<identifier>.properties<name>;
+                    my $name = $my.properties<identifier>.properties<name>.value;
                     my $ref = "{@blocks[*-1].id}|$name";
                     %declared{$ref} = L::VariableNotUsed;
                     if $my.properties<expr> !=== NONE {
