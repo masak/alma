@@ -297,12 +297,7 @@ class _007::Runtime {
             return builtin(sub join($sep) {
                 die X::Type.new(:operation<join>, :got($sep), :expected(TYPE<Str>))
                     unless $sep.isa("Str");
-                return wrap($obj.value.map({
-                    my $s = bound-method($_, "Str")();
-                    die X::Type.new(:operation<stringification>, :got($s), :expected(TYPE<Str>))
-                        unless $s.isa("Str");
-                    $s.value;
-                }).join($sep.value));
+                return wrap($obj.value.map(&stringify).join($sep.value));
             });
         }
         elsif $obj.isa("Dict") && $propname eq "size" {

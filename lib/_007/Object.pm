@@ -180,6 +180,13 @@ sub pretty($parameterlist) {
     }).join(", ");
 }
 
+sub stringify($object) is export {
+    my $s = bound-method($object, "Str")();
+    die X::Type.new(:operation<stringification>, :got($s), :expected(TYPE<Str>))
+        unless $s.isa("Str");
+    return $s.value;
+}
+
 my $str-array-depth = 0;
 my $str-array-seen;
 
@@ -737,7 +744,7 @@ sub bound-method($object, $name) is export {
 
     if $object.isa("Object") && $name eq "repr" {
         return sub repr-object() {
-            return bound-method($object, "Str")();
+            return wrap(stringify($object));
         }
     }
 

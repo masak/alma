@@ -52,8 +52,7 @@ class _007::Backend::JavaScript {
                 if $stmt.properties<expr> !=== NONE {
                     die "Cannot handle non-literal-Int rhs just yet!"
                         unless $stmt.properties<expr>.isa("Q::Literal::Int");
-                    # XXX: should really type-check the result of the .Str() call
-                    my $expr = bound-method($stmt.properties<expr>.properties<value>, "Str")().value;
+                    my $expr = stringify($stmt.properties<expr>.properties<value>);
                     @main.push("let {$name} = {$expr};");
                 }
                 else {

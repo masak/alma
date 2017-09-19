@@ -115,12 +115,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     my @builtins =
         say => -> $arg {
-            my $str = bound-method($arg, "Str")();
-
-            die X::Type.new(:operation("printing"), :got(Str), :expected(TYPE<Str>))
-                unless $str.isa("Str");
-
-            $output.print($str.value ~ "\n");
+            $output.print(stringify($arg) ~ "\n");
             Nil;
         },
         prompt => sub ($arg) {
@@ -326,12 +321,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         # prefixes
         'prefix:~' => op(
             sub prefix-str($expr) {
-                my $str = bound-method($expr, "Str")();
-
-                die X::Type.new(:operation("stringification"), :got(Str), :expected(TYPE<Str>))
-                    unless $str.isa("Str");
-
-                return $str;
+                return wrap(stringify($expr));
             },
             :qtype(TYPE<Q::Prefix::Str>),
         ),
