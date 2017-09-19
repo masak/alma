@@ -39,8 +39,7 @@ class _007::Backend::JavaScript {
                     my @arguments = $expr.properties<argumentlist>.properties<arguments>.value.map: {
                         die "Cannot handle non-literal-Str arguments just yet!"
                             unless .isa("Q::Literal::Str");
-                        # XXX: should really type-check the result of the .repr() call
-                        bound-method(.properties<value>, "repr")().value;
+                        reprify(.properties<value>);
                     };
                     @main.push("say({@arguments.join(", ")});");
                 }

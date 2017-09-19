@@ -187,6 +187,13 @@ sub stringify($object) is export {
     return $s.value;
 }
 
+sub reprify($object) is export {
+    my $s = bound-method($object, "repr")();
+    die X::Type.new(:operation<reprification>, :got($s), :expected(TYPE<Str>))
+        unless $s.isa("Str");
+    return $s.value;
+}
+
 my $str-array-depth = 0;
 my $str-array-seen;
 
@@ -707,12 +714,7 @@ sub bound-method($object, $name) is export {
                 return wrap("[...]");
             }
 
-            return wrap("[" ~ $object.value.map({
-                my $s = bound-method($_, "repr")();
-                die X::Type.new(:operation("stringification"), :got($s), :expected(TYPE<Str>))
-                    unless $s.isa("Str");
-                $s.value;
-            }).join(", ") ~ "]");
+            return wrap("[" ~ $object.value.map(&reprify).join(", ") ~ "]");
         };
     }
 
@@ -730,8 +732,8 @@ sub bound-method($object, $name) is export {
             return wrap('{' ~ $object.value.map({
                 my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                     ?? .key
-                    !! bound-method(wrap(.key), "repr")().value;
-                "{$key}: {bound-method(.value, "repr")().value}";
+                    !! reprify(wrap(.key));
+                "{$key}: {reprify(.value)}";
             }).sort.join(', ') ~ '}');
         };
     }
@@ -777,9 +779,9 @@ sub bound-method($object, $name) is export {
                 !($object.isa("Q::Block") && $_ eq "static-lexpad")
             };
             if @props == 1 {
-                return wrap("{$object.type.name} { bound-method($object.properties{@props[0]}, "repr")().value }");
+                return wrap("{$object.type.name} { reprify($object.properties{@props[0]}) }");
             }
-            sub keyvalue($prop) { $prop ~ ": " ~ bound-method($object.properties{$prop}, "repr")().value }
+            sub keyvalue($prop) { $prop ~ ": " ~ reprify($object.properties{$prop}) }
             my $contents = @props.map(&keyvalue).join(",\n").indent(4);
             return wrap("{$object.type.name} \{\n$contents\n\}");
         };
