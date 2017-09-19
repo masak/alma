@@ -194,6 +194,13 @@ sub reprify($object) is export {
     return $s.value;
 }
 
+sub boolify($object) is export {
+    my $s = bound-method($object, "Bool")();
+    die X::Type.new(:operation<boolification>, :got($s), :expected(TYPE<Bool>))
+        unless $s.isa("Bool");
+    return $s === TRUE;
+}
+
 my $str-array-depth = 0;
 my $str-array-seen;
 
@@ -310,8 +317,7 @@ sub bound-method($object, $name) is export {
 
     if $object.isa("Q::Statement::While") && $name eq "run" {
         return sub run-q-statement-while($runtime) {
-            # XXX: need to typecheck the result coming back from .Bool
-            while bound-method((my $expr = bound-method($object.properties<expr>, "eval")($runtime)), "Bool")() === TRUE {
+            while boolify(my $expr = bound-method($object.properties<expr>, "eval")($runtime)) {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(
                     :type("While loop"), :$paramcount, :argcount("0 or 1"))
@@ -356,8 +362,7 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Infix::And") && $name eq "eval" {
         return sub eval-q-infix-and($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
-            # XXX: need to typecheck result of .Bool
-            return bound-method($l, "Bool")() === TRUE
+            return boolify($l)
                 ?? bound-method($object.properties<rhs>, "eval")($runtime)
                 !! $l;
         };
@@ -366,8 +371,7 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Infix::Or") && $name eq "eval" {
         return sub eval-q-infix-or($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
-            # XXX: need to typecheck result of .Bool
-            return bound-method($l, "Bool")() === TRUE
+            return boolify($l)
                 ?? $l
                 !! bound-method($object.properties<rhs>, "eval")($runtime);
         };
@@ -473,8 +477,7 @@ sub bound-method($object, $name) is export {
     if $object.isa("Q::Statement::If") && $name eq "run" {
         return sub run-q-statement-if($runtime) {
             my $expr = bound-method($object.properties<expr>, "eval")($runtime);
-            # XXX: need to typecheck return value from .Bool
-            if bound-method($expr, "Bool")() === TRUE {
+            if boolify($expr) {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(:type("If statement"), :$paramcount, :argcount("0 or 1"))
                     if $paramcount > 1;

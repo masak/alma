@@ -359,21 +359,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:?' => op(
             sub ($arg) {
-                my $b = bound-method($arg, "Bool")();
-                die X::Type.new(:operation<boolification>, :got($b), :expected(TYPE<Bool>))
-                    unless $b.isa("Bool");
-                return $b;
+                return wrap(boolify($arg));
             },
             :qtype(TYPE<Q::Prefix::So>),
         ),
         'prefix:!' => op(
             sub ($arg) {
-                my $b = bound-method($arg, "Bool")();
-                die X::Type.new(:operation<boolification>, :got($b), :expected(TYPE<Bool>))
-                    unless $b.isa("Bool");
-                return $b === TRUE
-                    ?? FALSE
-                    !! TRUE;
+                return wrap(!boolify($arg));
             },
             :qtype(TYPE<Q::Prefix::Not>),
         ),
