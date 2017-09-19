@@ -1,7 +1,7 @@
 use _007::Type;
 use _007::Object;
 
-sub builtins(:$input!, :$output!, :$opscope!) is export {
+sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
     multi equal-value(_007::Object $l, _007::Object $r) {
@@ -115,7 +115,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     my @builtins =
         say => -> $arg {
-            $output.print(stringify($arg) ~ "\n");
+            $output.print(stringify($arg, $runtime) ~ "\n");
             Nil;
         },
         prompt => sub ($arg) {
@@ -321,7 +321,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         # prefixes
         'prefix:~' => op(
             sub prefix-str($expr) {
-                return wrap(stringify($expr));
+                return wrap(stringify($expr, $runtime));
             },
             :qtype(TYPE<Q::Prefix::Str>),
         ),
@@ -359,13 +359,13 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
         ),
         'prefix:?' => op(
             sub ($arg) {
-                return wrap(boolify($arg));
+                return wrap(boolify($arg, $runtime));
             },
             :qtype(TYPE<Q::Prefix::So>),
         ),
         'prefix:!' => op(
             sub ($arg) {
-                return wrap(!boolify($arg));
+                return wrap(!boolify($arg, $runtime));
             },
             :qtype(TYPE<Q::Prefix::Not>),
         ),

@@ -93,7 +93,7 @@ BEGIN {
     ###     say(type(q) == Q::Literal::Str);    # --> `True`
     ###     say(type(q) == Q::Literal);         # --> `False`
     ###
-    TYPE<Type> = _007::Type.new(:name<Type>);
+    TYPE<Type> = _007::Type.new(:name<Type>, :fields["name"]);
 
     ### ### NoneType
     ###

@@ -3,7 +3,6 @@ use v6;
 
 my $type_count = 0;
 my $bound_method_count = 0;
-my $runtime_builtin_method_count = 0;
 my $built_in_subs = 0;
 my $exception_types_in_007 = 0;
 my $exception_types_in_perl6 = 0;
@@ -40,14 +39,6 @@ for <lib/_007/Object.pm> -> $file {
     }
 }
 
-for <lib/_007/Runtime.pm> -> $file {
-    for $file.IO.lines {
-        if /^ \h* "return builtin(" / {
-            $runtime_builtin_method_count++;
-        }
-    }
-}
-
 for <lib/_007/Builtins.pm> -> $file {
     for $file.IO.lines {
         if /^ \h* "my @builtins ="/ ff /^ \h* ";" \h* $/ {
@@ -68,7 +59,6 @@ for <lib/_007/Object.pm lib/_007/OpScope.pm lib/_007/Parser/Actions.pm lib/_007/
 
 say "Types: $type_count";
 say "Bound methods: $bound_method_count";
-say "Built-in methods in Runtime.pm: $runtime_builtin_method_count";
 say "Built-in subs: $built_in_subs";
 say "Exception types in 007: $exception_types_in_007";
 say "Exception types in Perl 6: $exception_types_in_perl6";

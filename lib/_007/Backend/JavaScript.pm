@@ -39,7 +39,7 @@ class _007::Backend::JavaScript {
                     my @arguments = $expr.properties<argumentlist>.properties<arguments>.value.map: {
                         die "Cannot handle non-literal-Str arguments just yet!"
                             unless .is-a("Q::Literal::Str");
-                        reprify(.properties<value>);
+                        q["] ~ .properties<value>.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
                     };
                     @main.push("say({@arguments.join(", ")});");
                 }
@@ -51,7 +51,7 @@ class _007::Backend::JavaScript {
                 if $stmt.properties<expr> !=== NONE {
                     die "Cannot handle non-literal-Int rhs just yet!"
                         unless $stmt.properties<expr>.is-a("Q::Literal::Int");
-                    my $expr = stringify($stmt.properties<expr>.properties<value>);
+                    my $expr = ~$stmt.properties<expr>.properties<value>.value;
                     @main.push("let {$name} = {$expr};");
                 }
                 else {
