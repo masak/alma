@@ -671,34 +671,27 @@ class _007::Parser::Actions {
 
     method term:new-object ($/) {
         my $type = $<identifier>.ast.properties<name>.value;
-        my $type-var = $*runtime.get-var($type);
-        my $type-obj = $type-var ~~ _007::Type
-            ?? $type-var
-            !! $type-var.type;
+        my $type-obj = $*runtime.get-var($type);
 
-        if $type-obj ~~ _007::Type {
-            # XXX: need to figure out how to do the corresponding error handling here
-            # something with .fields, most likely?
+        my $known-properties = set($type-obj.type-chain.reverse.map({ .fields }).flat);
+        my $seen-properties = set();
+        for $<propertylist>.ast.properties<properties>.value -> $p {
+            my $property = $p.properties<key>.value;
+            # Here we make a slight exception for the wrapped types
+            next if $property eq "value" && $type eq "Int" | "Str" | "Array" | "Dict";
+            die X::Property::NotDeclared.new(:$type, :$property)
+                unless $property (elem) $known-properties;
+            $seen-properties (|)= $property;
+        }
+        for $known-properties.keys -> $property {
+            # XXX: once we handle optional properties, we will `next` here
+
+            die X::Property::Required.new(:$type, :$property)
+                unless $property (elem) $seen-properties;
         }
 
-        # XXX: Need some way to detect undeclared or required properties with _007::Type
-#            sub aname($attr) { $attr.name.substr(2) }
-#            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
-#            for $<propertylist>.ast.value.value -> $p {
-#                my $property = $p.key.value;
-#                die X::Property::NotDeclared.new(:$type, :$property)
-#                    unless %known-properties{$property};
-#            }
-#            for %known-properties.keys -> $property {
-#                # If an attribute has an initializer, then we don't require that it be
-#                # passed, since it will get a sensible value anyway.
-#                next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
-#
-#                die X::Property::Required.new(:$type, :$property)
-#                    unless $property eq any($<propertylist>.ast.value.value».key».value);
-#            }
-
         make create(TYPE<Q::Term::Object>,
+            # XXX: couldn't we just pass $type here?
             :type(create(TYPE<Q::Identifier>,
                 :name(wrap($type)),
                 :frame(NONE),

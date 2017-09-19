@@ -2,10 +2,13 @@ my ast;
 if !ast {
     ast = new Q::CompUnit {
         block: new Q::Block {
-            parameterlist: new Q::ParameterList {},
+            parameterlist: new Q::ParameterList {
+                parameters: [],
+            },
             statementlist: new Q::StatementList {
-                statements: []
-            }
+                statements: [],
+            },
+            "static-lexpad": {},
         }
     };
 }
@@ -20,7 +23,10 @@ my Runtime = {
             frames.push(frame);
             for static_lexpad.keys() -> name {
                 my value = static_lexpad[name];
-                my identifier = new Q::Identifier { name };
+                my identifier = new Q::Identifier {
+                    name,
+                    frame: None,
+                };
                 declare_var(identifier, value);
             }
         }
