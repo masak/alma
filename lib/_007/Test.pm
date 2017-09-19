@@ -142,7 +142,7 @@ sub read(Str $ast) is export {
             if $qtype === TYPE<Q::Block> {
                 %arguments<static-lexpad> //= wrap({});
             }
-            if $qtype === TYPE<Q::Statement::Sub> | TYPE<Q::Statement::Macro> {
+            if $qtype === TYPE<Q::Statement::Sub> | TYPE<Q::Statement::Macro> | TYPE<Q::Term::Sub> {
                 %arguments<traitlist> //= create(TYPE<Q::TraitList>,
                     :traits(wrap([])),
                 );
@@ -228,11 +228,6 @@ sub check(_007::Object $ast, $runtime) is export {
             $block.properties<block>.properties<static-lexpad> = $runtime.current-frame.value<pad>;
             $runtime.leave();
         }
-        elsif $ast.is-a("Q::ParameterList") || $ast.is-a("Q::Statement::Return") || $ast.is-a("Q::Statement::Expr")
-            || $ast.is-a("Q::Statement::BEGIN") || $ast.is-a("Q::Literal") || $ast.is-a("Q::Term")
-            || $ast.is-a("Q::Postfix") {
-            # we don't care about descending into these
-        }
         elsif $ast.is-a("Q::Statement::Sub") -> $sub {
             my $outer-frame = $runtime.current-frame;
             my $name = $sub.properties<identifier>.properties<name>;
@@ -286,6 +281,9 @@ sub check(_007::Object $ast, $runtime) is export {
         elsif $ast.is-a("Q::Term::Object") -> $object {
             handle($object.properties<propertylist>);
         }
+        elsif $ast.is-a("Q::Term::Dict") -> $object {
+            handle($object.properties<propertylist>);
+        }
         elsif $ast.is-a("Q::PropertyList") -> $propertylist {
             my %seen;
             for $propertylist.properties<properties>.value -> _007::Object $p {
@@ -293,6 +291,11 @@ sub check(_007::Object $ast, $runtime) is export {
                 die X::Property::Duplicate.new(:$property)
                     if %seen{$property}++;
             }
+        }
+        elsif $ast.is-a("Q::ParameterList") || $ast.is-a("Q::Statement::Return") || $ast.is-a("Q::Statement::Expr")
+            || $ast.is-a("Q::Statement::BEGIN") || $ast.is-a("Q::Literal") || $ast.is-a("Q::Term")
+            || $ast.is-a("Q::Postfix") {
+            # we don't care about descending into these
         }
         else {
             die "Don't know how to handle type {$ast.type}";

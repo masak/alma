@@ -75,6 +75,15 @@ class X::Type is Exception {
     }
 }
 
+class X::Property::NotFound is Exception {
+    has $.propname;
+    has $.type;
+
+    method message {
+        "Property '$.propname' not found on object of type $.type"
+    }
+}
+
 class _007::Object {
     has $.type;
     has $.id = unique-id;
@@ -424,12 +433,14 @@ sub bound-method($object, $name) is export {
                         if $index.value < 0;
                     return .value[$index.value];
                 }
-                if .is-a("Dict") {
+                if .is-a("Dict") -> $dict {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
                         unless $property.is-a("Str");
-                    my $key = $property.value;
-                    return .value{$key};
+                    my $propname = $property.value;
+                    die X::Property::NotFound.new(:$propname, :type<Dict>)
+                        unless $dict.value{$propname} :exists;
+                    return $dict.value{$propname};
                 }
                 die X::Type.new(:operation<indexing>, :got($_), :expected(TYPE<Int>));
             }

@@ -3,15 +3,6 @@ use _007::Object;
 use _007::Builtins;
 use _007::OpScope;
 
-class X::Property::NotFound is Exception {
-    has $.propname;
-    has $.type;
-
-    method message {
-        "Property '$.propname' not found on object of type $.type"
-    }
-}
-
 class X::Regex::InvalidMatchType is Exception {
     method message { "A regex can only match strings" }
 }
@@ -218,7 +209,7 @@ class _007::Runtime {
 
             my %known-properties = $obj.type.type-chain.reverse.map({ .fields }).flat.map({ $_ => 1 });
 
-            my $type = $obj.type;
+            my $type = $obj.type.name;
             die X::Property::NotFound.new(:$propname, :$type)
                 unless %known-properties{$propname};
 
@@ -473,7 +464,7 @@ class _007::Runtime {
             return wrap($obj.id);
         }
         else {
-            my $type = $obj.type;
+            my $type = $obj.type.name;
             die X::Property::NotFound.new(:$propname, :$type);
         }
     }
