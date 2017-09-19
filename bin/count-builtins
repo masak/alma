@@ -23,7 +23,7 @@ for <lib/_007/Object.pm> -> $file {
     for $file.IO.lines {
         if /^ "sub bound-method(" / ff /^ "}" / {
             if /^ " " ** 4 \S / {
-                if /^ \h* "if \$object.isa" / {
+                if /^ \h* "if \$object.is-a" / {
                     $bound_method_count++;
                 }
                 elsif /^ \h* "}" / {

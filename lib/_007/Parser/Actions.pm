@@ -103,7 +103,7 @@ class _007::Parser::Actions {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
         #      in the expression tree
-        if $<EXPR>.ast.isa("Q::Block") {
+        if $<EXPR>.ast.is-a("Q::Block") {
             make create(TYPE<Q::Statement::Expr>, :expr(create(TYPE<Q::Postfix::Call>,
                 :identifier(create(TYPE<Q::Identifier>, :name(wrap("postfix:()")))),
                 :operand(create(TYPE<Q::Term::Sub>, :identifier(NONE), :block($<EXPR>.ast))),
@@ -138,7 +138,7 @@ class _007::Parser::Actions {
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equal" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
-                    unless $identifier.isa("Q::Identifier");
+                    unless $identifier.is-a("Q::Identifier");
                 sub check-if-op(Str $s) {
                     die "Unknown thing in '$name' trait"
                         unless $s ~~ /^ < pre in post > 'fix:' /;
@@ -151,7 +151,7 @@ class _007::Parser::Actions {
             elsif $name eq "assoc" {
                 my $string = $trait<EXPR>.ast;
                 die "The associativity must be a string"
-                    unless $string.isa("Q::Literal::Str");
+                    unless $string.is-a("Q::Literal::Str");
                 my Str $value = $string.properties<value>.value;
                 die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
@@ -293,15 +293,16 @@ class _007::Parser::Actions {
     }
 
     sub is-macro($q, $qtype, $identifier) {
-        $q.isa($qtype)
-            && $identifier.isa("Q::Identifier")
-            && $*runtime.maybe-get-var($identifier.properties<name>.value).isa("Macro");
+        $q.is-a($qtype)
+            && $identifier.is-a("Q::Identifier")
+            && defined((my $macro = $*runtime.maybe-get-var($identifier.properties<name>.value)))
+            && $macro.is-a("Macro");
     }
 
     sub expand($macro, @arguments, &unexpanded-callback:()) {
         my $expansion = internal-call($macro, $*runtime, @arguments);
 
-        if $expansion.isa("Q::Statement::My") {
+        if $expansion.is-a("Q::Statement::My") {
             _007::Parser::Syntax::declare(TYPE<Q::Statement::My>, $expansion.properties<identifier>.properties<name>.value);
         }
 
@@ -309,7 +310,7 @@ class _007::Parser::Actions {
             return &unexpanded-callback();
         }
         else {
-            if $expansion.isa("Q::Statement") {
+            if $expansion.is-a("Q::Statement") {
                 my $statements = wrap([$expansion]);
                 $expansion = create(TYPE<Q::StatementList>, :$statements);
             }
@@ -318,11 +319,11 @@ class _007::Parser::Actions {
                 $expansion = create(TYPE<Q::StatementList>, :$statements);
             }
 
-            if $expansion.isa("Q::StatementList") {
+            if $expansion.is-a("Q::StatementList") {
                 $expansion = create(TYPE<Q::Expr::StatementListAdapter>, :statementlist($expansion));
             }
 
-            if $expansion.isa("Q::Block") {
+            if $expansion.is-a("Q::Block") {
                 $expansion = create(TYPE<Q::Expr::StatementListAdapter>, :statementlist($expansion.properties<statementlist>));
             }
 
@@ -363,7 +364,7 @@ class _007::Parser::Actions {
             my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
-            if $infix.isa("Q::Unquote") {
+            if $infix.is-a("Q::Unquote") {
                 @termstack.push(create(TYPE<Q::Unquote::Infix>,
                     :qtype($infix.properties<qtype>),
                     :expr($infix.properties<expr>),
@@ -380,7 +381,7 @@ class _007::Parser::Actions {
             else {
                 @termstack.push(create($infix.type, :lhs($t1), :rhs($t2), :identifier($infix.properties<identifier>)));
 
-                if $infix.isa("Q::Infix::Assignment") && $t1.isa("Q::Identifier") {
+                if $infix.is-a("Q::Infix::Assignment") && $t1.is-a("Q::Identifier") {
                     my $frame = $*runtime.current-frame;
                     my $symbol = $t1.properties<name>.value;
                     die X::Undeclared.new(:$symbol)
@@ -442,7 +443,7 @@ class _007::Parser::Actions {
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
 
-            if $prefix.isa("Q::Unquote") {
+            if $prefix.is-a("Q::Unquote") {
                 make create(TYPE<Q::Unquote::Prefix>,
                     :qtype($prefix.properties<qtype>),
                     :expr($prefix.properties<expr>),
@@ -468,13 +469,13 @@ class _007::Parser::Actions {
                     create($postfix.type, :$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>));
                 });
             }
-            elsif $postfix.isa("Q::Postfix::Index") {
+            elsif $postfix.is-a("Q::Postfix::Index") {
                 make create($postfix.type, :$identifier, :operand($/.ast), :index($postfix.properties<index>));
             }
-            elsif $postfix.isa("Q::Postfix::Call") {
+            elsif $postfix.is-a("Q::Postfix::Call") {
                 make create($postfix.type, :$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>));
             }
-            elsif $postfix.isa("Q::Postfix::Property") {
+            elsif $postfix.is-a("Q::Postfix::Property") {
                 make create($postfix.type, :$identifier, :operand($/.ast), :property($postfix.properties<property>));
             }
             else {
@@ -575,10 +576,12 @@ class _007::Parser::Actions {
             my $frame = $*runtime.current-frame;
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
-                die X::Macro::Postdeclared.new(:$name)
-                    if $value.isa("Macro");
                 die X::Undeclared.new(:symbol($name))
-                    unless $value.isa("Sub");
+                    unless defined $value;
+                die X::Macro::Postdeclared.new(:$name)
+                    if $value.is-a("Macro");
+                die X::Undeclared.new(:symbol($name))
+                    unless $value.is-a("Sub");
             };
         }
     }
@@ -613,9 +616,9 @@ class _007::Parser::Actions {
                 return;
             }
             elsif $qtype.value ne "Q::Block"
-                && $block.ast.isa("Q::Block")
+                && $block.ast.is-a("Q::Block")
                 && $block.ast.properties<statementlist>.properties<statements>.value.elems == 1
-                && $block.ast.properties<statementlist>.properties<statements>.value[0].isa("Q::Statement::Expr") {
+                && $block.ast.properties<statementlist>.properties<statements>.value[0].is-a("Q::Statement::Expr") {
 
                 my $contents = $block.ast.properties<statementlist>.properties<statements>.value[0].properties<expr>;
                 make create(TYPE<Q::Term::Quasi>, :$contents, :$qtype);

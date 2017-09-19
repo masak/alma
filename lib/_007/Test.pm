@@ -190,12 +190,12 @@ sub check(_007::Object $ast, $runtime) is export {
     my %*assigned;
 
     sub handle($ast) {
-        if $ast.isa("Q::StatementList") -> $statementlist {
+        if $ast.is-a("Q::StatementList") -> $statementlist {
             for $statementlist.properties<statements>.value -> $statement {
                 handle($statement);
             }
         }
-        elsif $ast.isa("Q::Statement::My") -> $my {
+        elsif $ast.is-a("Q::Statement::My") -> $my {
             my $symbol = $my.properties<identifier>.properties<name>.value;
             my $block = $runtime.current-frame();
             die X::Redeclaration.new(:$symbol)
@@ -208,7 +208,7 @@ sub check(_007::Object $ast, $runtime) is export {
                 handle($my.properties<expr>);
             }
         }
-        elsif $ast.isa("Q::Statement::Constant") -> $constant {
+        elsif $ast.is-a("Q::Statement::Constant") -> $constant {
             my $symbol = $constant.properties<identifier>.properties<name>.value;
             my $block = $runtime.current-frame();
             die X::Redeclaration.new(:$symbol)
@@ -219,7 +219,7 @@ sub check(_007::Object $ast, $runtime) is export {
 
             handle($constant.expr);
         }
-        elsif $ast.isa("Q::Statement::Block") -> $block {
+        elsif $ast.is-a("Q::Statement::Block") -> $block {
             $runtime.enter(
                 $runtime.current-frame,
                 $block.properties<block>.properties<static-lexpad>,
@@ -228,12 +228,12 @@ sub check(_007::Object $ast, $runtime) is export {
             $block.properties<block>.properties<static-lexpad> = $runtime.current-frame.value<pad>;
             $runtime.leave();
         }
-        elsif $ast.isa("Q::ParameterList") || $ast.isa("Q::Statement::Return") || $ast.isa("Q::Statement::Expr")
-            || $ast.isa("Q::Statement::BEGIN") || $ast.isa("Q::Literal") || $ast.isa("Q::Term")
-            || $ast.isa("Q::Postfix") {
+        elsif $ast.is-a("Q::ParameterList") || $ast.is-a("Q::Statement::Return") || $ast.is-a("Q::Statement::Expr")
+            || $ast.is-a("Q::Statement::BEGIN") || $ast.is-a("Q::Literal") || $ast.is-a("Q::Term")
+            || $ast.is-a("Q::Postfix") {
             # we don't care about descending into these
         }
-        elsif $ast.isa("Q::Statement::Sub") -> $sub {
+        elsif $ast.is-a("Q::Statement::Sub") -> $sub {
             my $outer-frame = $runtime.current-frame;
             my $name = $sub.properties<identifier>.properties<name>;
             my $val = create(TYPE<Sub>,
@@ -249,7 +249,7 @@ sub check(_007::Object $ast, $runtime) is export {
 
             $runtime.declare-var($sub.properties<identifier>, $val);
         }
-        elsif $ast.isa("Q::Statement::Macro") -> $macro {
+        elsif $ast.is-a("Q::Statement::Macro") -> $macro {
             my $outer-frame = $runtime.current-frame;
             my $name = $macro.properties<identifier>.properties<name>;
             my $val = create(TYPE<Macro>,
@@ -265,16 +265,16 @@ sub check(_007::Object $ast, $runtime) is export {
 
             $runtime.declare-var($macro.properties<identifier>, $val);
         }
-        elsif $ast.isa("Q::Statement::If") -> $if {
+        elsif $ast.is-a("Q::Statement::If") -> $if {
             handle($if.properties<block>);
         }
-        elsif $ast.isa("Q::Statement::For") -> $for {
+        elsif $ast.is-a("Q::Statement::For") -> $for {
             handle($for.properties<block>);
         }
-        elsif $ast.isa("Q::Statement::While") -> $while {
+        elsif $ast.is-a("Q::Statement::While") -> $while {
             handle($while.properties<block>);
         }
-        elsif $ast.isa("Q::Block") -> $block {
+        elsif $ast.is-a("Q::Block") -> $block {
             $runtime.enter($runtime.current-frame, wrap({}), create(TYPE<Q::StatementList>,
                 :statements(wrap([])),
             ));
@@ -283,10 +283,10 @@ sub check(_007::Object $ast, $runtime) is export {
             $block.properties<static-lexpad> = $runtime.current-frame.value<pad>;
             $runtime.leave();
         }
-        elsif $ast.isa("Q::Term::Object") -> $object {
+        elsif $ast.is-a("Q::Term::Object") -> $object {
             handle($object.properties<propertylist>);
         }
-        elsif $ast.isa("Q::PropertyList") -> $propertylist {
+        elsif $ast.is-a("Q::PropertyList") -> $propertylist {
             my %seen;
             for $propertylist.properties<properties>.value -> _007::Object $p {
                 my Str $property = $p.properties<key>.value;

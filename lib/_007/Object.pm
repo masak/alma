@@ -80,18 +80,18 @@ class _007::Object {
     has $.id = unique-id;
     has %.properties;
 
-    multi method isa(Str $typename) {
+    multi method is-a(Str $typename) {
         die "Asked to typecheck against $typename but no such type is declared"
             unless TYPE{$typename} :exists;
 
-        return self.isa(TYPE{$typename});
+        return self.is-a(TYPE{$typename});
     }
 
-    multi method isa(_007::Type $type) {
+    multi method is-a(_007::Type $type) {
         # We return `self` as an "interesting truthy value" so as to enable
         # renaming as part of finding out an object's true type:
         #
-        #   if $ast.isa("Q::StatementList") -> $statementlist {
+        #   if $ast.is-a("Q::StatementList") -> $statementlist {
         #       # ...
         #   }
 
@@ -183,21 +183,21 @@ sub pretty($parameterlist) {
 sub stringify($object) is export {
     my $s = bound-method($object, "Str")();
     die X::Type.new(:operation<stringification>, :got($s), :expected(TYPE<Str>))
-        unless $s.isa("Str");
+        unless $s.is-a("Str");
     return $s.value;
 }
 
 sub reprify($object) is export {
     my $s = bound-method($object, "repr")();
     die X::Type.new(:operation<reprification>, :got($s), :expected(TYPE<Str>))
-        unless $s.isa("Str");
+        unless $s.is-a("Str");
     return $s.value;
 }
 
 sub boolify($object) is export {
     my $s = bound-method($object, "Bool")();
     die X::Type.new(:operation<boolification>, :got($s), :expected(TYPE<Bool>))
-        unless $s.isa("Bool");
+        unless $s.is-a("Bool");
     return $s === TRUE;
 }
 
@@ -212,7 +212,7 @@ my $str-dict-seen;
 # XXX: this is not optimal -- I wanted to declare these as part of the types themselves, but
 # a rakudobug currently prevents subs in constants from being accessed from another module
 sub bound-method($object, $name) is export {
-    if $object.isa("Q::Statement::Block") && $name eq "run" {
+    if $object.is-a("Q::Statement::Block") && $name eq "run" {
         return sub run-q-statement-block($runtime) {
             $runtime.enter(
                 $runtime.current-frame,
@@ -223,42 +223,42 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::StatementList") && $name eq "run" {
+    if $object.is-a("Q::StatementList") && $name eq "run" {
         return sub run-q-statementlist($runtime) {
             for $object.properties<statements>.value -> $statement {
                 my $value = bound-method($statement, "run")($runtime);
-                LAST if $statement.isa("Q::Statement::Expr") {
+                LAST if $statement.is-a("Q::Statement::Expr") {
                     return $value;
                 }
             }
         };
     }
 
-    if $object.isa("Q::Statement::Expr") && $name eq "run" {
+    if $object.is-a("Q::Statement::Expr") && $name eq "run" {
         return sub run-q-statement-expr($runtime) {
             return bound-method($object.properties<expr>, "eval")($runtime);
         };
     }
 
-    if $object.isa("Q::Identifier") && $name eq "eval" {
+    if $object.is-a("Q::Identifier") && $name eq "eval" {
         return sub eval-q-identifier($runtime) {
             return $runtime.get-var($object.properties<name>.value, $object.properties<frame>);
         };
     }
 
-    if $object.isa("Q::Literal::Int") && $name eq "eval" {
+    if $object.is-a("Q::Literal::Int") && $name eq "eval" {
         return sub eval-q-literal-int($runtime) {
             return $object.properties<value>;
         };
     }
 
-    if $object.isa("Q::Literal::Str") && $name eq "eval" {
+    if $object.is-a("Q::Literal::Str") && $name eq "eval" {
         return sub eval-q-literal-str($runtime) {
             return $object.properties<value>;
         };
     }
 
-    if $object.isa("Q::Term::Dict") && $name eq "eval" {
+    if $object.is-a("Q::Term::Dict") && $name eq "eval" {
         return sub eval-q-term-dict($runtime) {
             return wrap(hash($object.properties<propertylist>.properties<properties>.value.map({
                 .properties<key>.value => bound-method(.properties<value>, "eval")($runtime);
@@ -266,31 +266,31 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Identifier") && $name eq "put-value" {
+    if $object.is-a("Q::Identifier") && $name eq "put-value" {
         return sub put-value-q-identifier($value, $runtime) {
             $runtime.put-var($object, $value);
         };
     }
 
-    if $object.isa("Q::Statement::Class") && $name eq "run" {
+    if $object.is-a("Q::Statement::Class") && $name eq "run" {
         return sub run-q-statement-class($runtime) {
             # a class block does not run at runtime
         };
     }
 
-    if $object.isa("Q::Statement::Sub") && $name eq "run" {
+    if $object.is-a("Q::Statement::Sub") && $name eq "run" {
         return sub run-q-statement-sub($runtime) {
             # a sub declaration does not run at runtime
         };
     }
 
-    if $object.isa("Q::Statement::Macro") && $name eq "run" {
+    if $object.is-a("Q::Statement::Macro") && $name eq "run" {
         return sub run-q-statement-macro($runtime) {
             # a macro declaration does not run at runtime
         };
     }
 
-    if $object.isa("Q::Statement::For") && $name eq "run" {
+    if $object.is-a("Q::Statement::For") && $name eq "run" {
         return sub run-q-statement-for($runtime) {
             my $count = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
             die X::ParameterMismatch.new(
@@ -299,7 +299,7 @@ sub bound-method($object, $name) is export {
 
             my $array = bound-method($object.properties<expr>, "eval")($runtime);
             die X::Type.new(:operation("for loop"), :got($array), :expected(TYPE<Array>))
-                unless $array.isa("Array");
+                unless $array.is-a("Array");
 
             for $array.value -> $arg {
                 $runtime.enter(
@@ -315,7 +315,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Statement::While") && $name eq "run" {
+    if $object.is-a("Q::Statement::While") && $name eq "run" {
         return sub run-q-statement-while($runtime) {
             while boolify(my $expr = bound-method($object.properties<expr>, "eval")($runtime)) {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
@@ -335,7 +335,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Term::Object") && $name eq "eval" {
+    if $object.is-a("Q::Term::Object") && $name eq "eval" {
         return sub eval-q-term-object($runtime) {
             my $type = $runtime.get-var(
                 $object.properties<type>.properties<name>.value,
@@ -351,7 +351,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Infix::Assignment") && $name eq "eval" {
+    if $object.is-a("Q::Infix::Assignment") && $name eq "eval" {
         return sub eval-q-infix-assignment($runtime) {
             my $value = bound-method($object.properties<rhs>, "eval")($runtime);
             bound-method($object.properties<lhs>, "put-value")($value, $runtime);
@@ -359,7 +359,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Infix::And") && $name eq "eval" {
+    if $object.is-a("Q::Infix::And") && $name eq "eval" {
         return sub eval-q-infix-and($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
             return boolify($l)
@@ -368,7 +368,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Infix::Or") && $name eq "eval" {
+    if $object.is-a("Q::Infix::Or") && $name eq "eval" {
         return sub eval-q-infix-or($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
             return boolify($l)
@@ -377,7 +377,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Infix::DefinedOr") && $name eq "eval" {
+    if $object.is-a("Q::Infix::DefinedOr") && $name eq "eval" {
         return sub eval-q-infix-definedor($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
             return $l !=== NONE
@@ -386,7 +386,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Infix") && $name eq "eval" {
+    if $object.is-a("Q::Infix") && $name eq "eval" {
         return sub eval-q-infix($runtime) {
             my $l = bound-method($object.properties<lhs>, "eval")($runtime);
             my $r = bound-method($object.properties<rhs>, "eval")($runtime);
@@ -395,7 +395,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Prefix") && $name eq "eval" {
+    if $object.is-a("Q::Prefix") && $name eq "eval" {
         return sub eval-q-prefix($runtime) {
             my $e = bound-method($object.properties<operand>, "eval")($runtime);
             my $c = bound-method($object.properties<identifier>, "eval")($runtime);
@@ -403,7 +403,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Postfix::Property") && $name eq "eval" {
+    if $object.is-a("Q::Postfix::Property") && $name eq "eval" {
         return sub eval-q-postfix-property($runtime) {
             my $obj = bound-method($object.properties<operand>, "eval")($runtime);
             my $propname = $object.properties<property>.properties<name>.value;
@@ -411,23 +411,23 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Postfix::Index") && $name eq "eval" {
+    if $object.is-a("Q::Postfix::Index") && $name eq "eval" {
         return sub eval-q-postfix-index($runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if .isa("Array") {
+                if .is-a("Array") {
                     my $index = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonInteger.new
-                        unless $index.isa("Int");
+                        unless $index.is-a("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                         if $index.value >= .value;
                     die X::Subscript::Negative.new(:$index, :type([]))
                         if $index.value < 0;
                     return .value[$index.value];
                 }
-                if .isa("Dict") {
+                if .is-a("Dict") {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
-                        unless $property.isa("Str");
+                        unless $property.is-a("Str");
                     my $key = $property.value;
                     return .value{$key};
                 }
@@ -436,13 +436,13 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Postfix::Call") && $name eq "eval" {
+    if $object.is-a("Q::Postfix::Call") && $name eq "eval" {
         return sub eval-q-postfix-call($runtime) {
             my $c = bound-method($object.properties<operand>, "eval")($runtime);
             die "macro is called at runtime"
-                if $c.isa("Macro");
+                if $c.is-a("Macro");
             die "Trying to invoke a {$c.type.name}" # XXX: make this into an X::
-                unless $c.isa("Sub");
+                unless $c.is-a("Sub");
             my @arguments = $object.properties<argumentlist>.properties<arguments>.value.map({
                 bound-method($_, "eval")($runtime)
             });
@@ -450,7 +450,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Postfix") && $name eq "eval" {
+    if $object.is-a("Q::Postfix") && $name eq "eval" {
         return sub eval-q-postfix($runtime) {
             my $e = bound-method($object.properties<operand>, "eval")($runtime);
             my $c = bound-method($object.properties<identifier>, "eval")($runtime);
@@ -458,7 +458,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Statement::My") && $name eq "run" {
+    if $object.is-a("Q::Statement::My") && $name eq "run" {
         return sub run-q-statement-my($runtime) {
             return
                 if $object.properties<expr> === NONE;
@@ -468,13 +468,13 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Statement::Constant") && $name eq "run" {
+    if $object.is-a("Q::Statement::Constant") && $name eq "run" {
         return sub run-q-statement-constant($runtime) {
             # value has already been assigned
         };
     }
 
-    if $object.isa("Q::Statement::If") && $name eq "run" {
+    if $object.is-a("Q::Statement::If") && $name eq "run" {
         return sub run-q-statement-if($runtime) {
             my $expr = bound-method($object.properties<expr>, "eval")($runtime);
             if boolify($expr) {
@@ -495,10 +495,10 @@ sub bound-method($object, $name) is export {
             }
             else {
                 given $object.properties<else> {
-                    when .isa("Q::Statement::If") {
+                    when .is-a("Q::Statement::If") {
                         bound-method($object.properties<else>, "run")($runtime)
                     }
-                    when .isa("Q::Block") {
+                    when .is-a("Q::Block") {
                         $runtime.enter(
                             $runtime.current-frame,
                             $object.properties<else>.properties<static-lexpad>,
@@ -511,7 +511,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Statement::Return") && $name eq "run" {
+    if $object.is-a("Q::Statement::Return") && $name eq "run" {
         return sub run-q-statement-return($runtime) {
             my $value = $object.properties<expr> === NONE
                 ?? $object.properties<expr>
@@ -521,45 +521,45 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Term::Quasi") && $name eq "eval" {
+    if $object.is-a("Q::Term::Quasi") && $name eq "eval" {
         return sub eval-q-term-quasi($runtime) {
             sub interpolate($thing) {
                 return wrap($thing.value.map(&interpolate))
-                    if $thing.isa("Array");
+                    if $thing.is-a("Array");
 
                 sub interpolate-entry($_) { .key => interpolate(.value) }
                 return wrap(hash($thing.value.map(&interpolate-entry)))
-                    if $thing.isa("Dict");
+                    if $thing.is-a("Dict");
 
                 return $thing
                     if $thing ~~ _007::Type;
 
                 return $thing
-                    if $thing.isa("Int") || $thing.isa("Str");
+                    if $thing.is-a("Int") || $thing.is-a("Str");
 
                 return $thing
-                    if $thing.isa("Sub");
+                    if $thing.is-a("Sub");
 
                 return create($thing.type, :name($thing.properties<name>), :frame($runtime.current-frame))
-                    if $thing.isa("Q::Identifier");
+                    if $thing.is-a("Q::Identifier");
 
-                if $thing.isa("Q::Unquote::Prefix") {
+                if $thing.is-a("Q::Unquote::Prefix") {
                     my $prefix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::Type.new(:operation("interpolating an unquote"), :got($prefix), :expected(TYPE<Q::Prefix>))
-                        unless $prefix.isa("Q::Prefix");
+                        unless $prefix.is-a("Q::Prefix");
                     return create($prefix.type, :identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
                 }
-                elsif $thing.isa("Q::Unquote::Infix") {
+                elsif $thing.is-a("Q::Unquote::Infix") {
                     my $infix = bound-method($thing.properties<expr>, "eval")($runtime);
                     die X::Type.new(:operation("interpolating an unquote"), :got($infix), :expected(TYPE<Q::Infix>))
-                        unless $infix.isa("Q::Infix");
+                        unless $infix.is-a("Q::Infix");
                     return create($infix.type, :identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
                 }
 
-                if $thing.isa("Q::Unquote") {
+                if $thing.is-a("Q::Unquote") {
                     my $ast = bound-method($thing.properties<expr>, "eval")($runtime);
                     die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                        unless $ast.isa("Q");
+                        unless $ast.is-a("Q");
                     return $ast;
                 }
 
@@ -568,14 +568,14 @@ sub bound-method($object, $name) is export {
                 create($thing.type, |%properties);
             }
 
-            if $object.properties<qtype>.value eq "Q::Unquote" && $object.properties<contents>.isa("Q::Unquote") {
+            if $object.properties<qtype>.value eq "Q::Unquote" && $object.properties<contents>.is-a("Q::Unquote") {
                 return $object.properties<contents>;
             }
             return interpolate($object.properties<contents>);
         };
     }
 
-    if $object.isa("Q::Term::Sub") && $name eq "eval" {
+    if $object.is-a("Q::Term::Sub") && $name eq "eval" {
         return sub eval-q-term-sub($runtime) {
             my $name = $object.properties<identifier> === NONE
                 ?? wrap("")
@@ -588,31 +588,31 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Term::Array") && $name eq "eval" {
+    if $object.is-a("Q::Term::Array") && $name eq "eval" {
         return sub eval-q-term-array($runtime) {
             return wrap($object.properties<elements>.value.map({ bound-method($_, "eval")($runtime) }));
         };
     }
 
-    if $object.isa("Q::Statement::Throw") && $name eq "run" {
+    if $object.is-a("Q::Statement::Throw") && $name eq "run" {
         return sub eval-q-statement-throw($runtime) {
             my $value = $object.properties<expr> === NONE
                 ?? create(TYPE<Exception>, :message(wrap("Died")))
                 !! bound-method($object.properties<expr>, "eval")($runtime);
             die X::Type.new(:got($value), :expected(TYPE<Exception>))
-                unless $value.isa("Exception");
+                unless $value.is-a("Exception");
 
             die X::_007::RuntimeException.new(:msg($value.properties<message>.value));
         };
     }
 
-    if $object.isa("Q::Postfix::Index") && $name eq "put-value" {
+    if $object.is-a("Q::Postfix::Index") && $name eq "put-value" {
         return sub put-value-q-postfix-index($value, $runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if .isa("Array") {
+                if .is-a("Array") {
                     my $index = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonInteger.new
-                        unless $index.isa("Int");
+                        unless $index.is-a("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
                         if $index.value >= .value;
                     die X::Subscript::Negative.new(:$index, :type([]))
@@ -620,10 +620,10 @@ sub bound-method($object, $name) is export {
                     .value[$index.value] = $value;
                     return;
                 }
-                if .isa("Dict") || .isa("Q") {
+                if .is-a("Dict") || .is-a("Q") {
                     my $property = bound-method($object.properties<index>, "eval")($runtime);
                     die X::Subscript::NonString.new
-                        unless $property.isa("Str");
+                        unless $property.is-a("Str");
                     my $propname = $property.value;
                     $runtime.put-property($_, $propname, $value);
                     return;
@@ -633,10 +633,10 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Postfix::Property") && $name eq "put-value" {
+    if $object.is-a("Q::Postfix::Property") && $name eq "put-value" {
         return sub put-value-q-postfix-property($value, $runtime) {
             given bound-method($object.properties<operand>, "eval")($runtime) {
-                if .isa("Dict") || .isa("Q") {
+                if .is-a("Dict") || .is-a("Q") {
                     my $propname = $object.properties<property>.properties<name>.value;
                     $runtime.put-property($_, $propname, $value);
                     return;
@@ -646,67 +646,67 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q::Statement::BEGIN") && $name eq "run" {
+    if $object.is-a("Q::Statement::BEGIN") && $name eq "run" {
         return sub run-q-statement-begin($runtime) {
             # a BEGIN block does not run at runtime
         };
     }
 
-    if $object.isa("Q::Term::Regex") && $name eq "eval" {
+    if $object.is-a("Q::Term::Regex") && $name eq "eval" {
         return sub eval-q-term-regex($runtime) {
             create(TYPE<Regex>, :contents($object.properties<contents>));
         };
     }
 
-    if $object.isa("Q::Literal::None") && $name eq "eval" {
+    if $object.is-a("Q::Literal::None") && $name eq "eval" {
         return sub eval-q-literal-none($runtime) {
             NONE;
         };
     }
 
-    if $object.isa("Q::Literal::Bool") && $name eq "eval" {
+    if $object.is-a("Q::Literal::Bool") && $name eq "eval" {
         return sub eval-q-literal-bool($runtime) {
             $object.properties<value>;
         };
     }
 
-    if $object.isa("Q::Expr::StatementListAdapter") && $name eq "eval" {
+    if $object.is-a("Q::Expr::StatementListAdapter") && $name eq "eval" {
         return sub eval-q-expr-statementlistadapter($runtime) {
             return bound-method($object.properties<statementlist>, "run")($runtime);
         };
     }
 
-    if $object.isa("Str") && $name eq "Str" {
+    if $object.is-a("Str") && $name eq "Str" {
         return sub str-str() {
             return $object;
         }
     }
 
-    if $object.isa("Int") && $name eq "Str" {
+    if $object.is-a("Int") && $name eq "Str" {
         return sub str-int() {
             return wrap(~$object.value);
         }
     }
 
-    if $object.isa("Bool") && $name eq "Str" {
+    if $object.is-a("Bool") && $name eq "Str" {
         return sub str-bool() {
             return wrap($object.name);
         }
     }
 
-    if $object.isa("NoneType") && $name eq "Str" {
+    if $object.is-a("NoneType") && $name eq "Str" {
         return sub str-nonetype() {
             return wrap($object.name);
         }
     }
 
-    if $object.isa("Type") && $name eq "Str" {
+    if $object.is-a("Type") && $name eq "Str" {
         return sub str-type() {
             return wrap("<type {$object.name}>");
         }
     }
 
-    if $object.isa("Array") && $name eq "Str" {
+    if $object.is-a("Array") && $name eq "Str" {
         return sub str-array() {
             if $str-array-depth++ == 0 {
                 $str-array-seen = {};
@@ -721,7 +721,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Dict") && $name eq "Str" {
+    if $object.is-a("Dict") && $name eq "Str" {
         return sub str-dict() {
             if $str-dict-depth++ == 0 {
                 $str-dict-seen = {};
@@ -741,19 +741,19 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Str") && $name eq "repr" {
+    if $object.is-a("Str") && $name eq "repr" {
         return sub repr-str() {
             return wrap(q["] ~ $object.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]);
         }
     }
 
-    if $object.isa("Object") && $name eq "repr" {
+    if $object.is-a("Object") && $name eq "repr" {
         return sub repr-object() {
             return wrap(stringify($object));
         }
     }
 
-    if $object.isa("Macro") && $name eq "Str" {
+    if $object.is-a("Macro") && $name eq "Str" {
         return sub str-sub() {
             return wrap(
                 sprintf "<macro %s%s>",
@@ -763,7 +763,7 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Sub") && $name eq "Str" {
+    if $object.is-a("Sub") && $name eq "Str" {
         return sub str-sub() {
             return wrap(
                 sprintf "<sub %s%s>",
@@ -773,13 +773,13 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Q") && $name eq "Str" {
+    if $object.is-a("Q") && $name eq "Str" {
         return sub str-q() {
             my @props = $object.type.type-chain.reverse.map({ .fields }).flat;
             # XXX: thuggish way to hide things that weren't listed in `attributes` before
             @props.=grep: {
-                !($object.isa("Q::Identifier") && $_ eq "frame") &&
-                !($object.isa("Q::Block") && $_ eq "static-lexpad")
+                !($object.is-a("Q::Identifier") && $_ eq "frame") &&
+                !($object.is-a("Q::Block") && $_ eq "static-lexpad")
             };
             if @props == 1 {
                 return wrap("{$object.type.name} { reprify($object.properties{@props[0]}) }");
@@ -790,43 +790,43 @@ sub bound-method($object, $name) is export {
         };
     }
 
-    if $object.isa("Bool") && $name eq "Bool" {
+    if $object.is-a("Bool") && $name eq "Bool" {
         return sub bool-bool() {
             return $object;
         };
     }
 
-    if $object.isa("NoneType") && $name eq "Bool" {
+    if $object.is-a("NoneType") && $name eq "Bool" {
         return sub bool-nonetype() {
             return FALSE;
         };
     }
 
-    if $object.isa("Int") && $name eq "Bool" {
+    if $object.is-a("Int") && $name eq "Bool" {
         return sub bool-int() {
             return wrap($object.value != 0);
         };
     }
 
-    if $object.isa("Str") && $name eq "Bool" {
+    if $object.is-a("Str") && $name eq "Bool" {
         return sub bool-str() {
             return wrap($object.value ne "");
         };
     }
 
-    if $object.isa("Array") && $name eq "Bool" {
+    if $object.is-a("Array") && $name eq "Bool" {
         return sub bool-array() {
             return wrap($object.value.elems > 0);
         };
     }
 
-    if $object.isa("Dict") && $name eq "Bool" {
+    if $object.is-a("Dict") && $name eq "Bool" {
         return sub bool-dict() {
             return wrap($object.value.keys > 0);
         };
     }
 
-    if $object.isa("Object") && $name eq "Bool" {
+    if $object.is-a("Object") && $name eq "Bool" {
         return sub bool-object() {
             return TRUE;
         };
@@ -872,7 +872,7 @@ sub wrap-fn(&value, Str $name, $parameterlist, $statementlist) is export {
 
 sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     die "Tried to call a {$sub.^name}, expected a Sub"
-        unless $sub.isa("Sub");   # XXX: should do subtyping check
+        unless $sub.is-a("Sub");   # XXX: should do subtyping check
 
     if $sub ~~ _007::Object::Wrapped && $sub.type === TYPE<Macro> {
         die "Don't handle the wrapped macro case yet";

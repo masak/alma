@@ -59,32 +59,32 @@ class _007::Linter {
             }
 
             sub traverse(_007::Object $node) {
-                if $node.isa("Q::Statement::Block") -> $stblock {
+                if $node.is-a("Q::Statement::Block") -> $stblock {
                     traverse($stblock.properties<block>);
                 }
-                elsif $node.isa("Q::Block") -> $block {
+                elsif $node.is-a("Q::Block") -> $block {
                     @blocks.push: $block;
                     traverse($block.properties<parameterlist>);
                     traverse($block.properties<statementlist>);
                     @blocks.pop;
                 }
-                elsif $node.isa("Q::StatementList") -> $statementlist {
+                elsif $node.is-a("Q::StatementList") -> $statementlist {
                     for $statementlist.properties<statements>.value -> $stmt {
                         traverse($stmt);
                     }
                 }
-                elsif $node.isa("Q::Statement::Sub") -> $sub {
+                elsif $node.is-a("Q::Statement::Sub") -> $sub {
                     my $name = $sub.properties<identifier>.properties<name>.value;
                     %declared{"{@blocks[*-1].id}|$name"} = L::SubNotUsed;
                 }
-                elsif $node.isa("Q::Statement::Expr") -> $stexpr {
+                elsif $node.is-a("Q::Statement::Expr") -> $stexpr {
                     traverse($stexpr.properties<expr>);
                 }
-                elsif $node.isa("Q::Postfix::Call") -> $call {
+                elsif $node.is-a("Q::Postfix::Call") -> $call {
                     traverse($call.properties<operand>);
                     traverse($call.properties<argumentlist>);
                 }
-                elsif $node.isa("Q::Identifier") -> $identifier {
+                elsif $node.is-a("Q::Identifier") -> $identifier {
                     my $name = $identifier.properties<name>.value;
                     # XXX: what we should really do is whitelist all of he built-ins
                     return if $name eq "say";
@@ -95,49 +95,49 @@ class _007::Linter {
                         %readbeforeassigned{$ref} = True;
                     }
                 }
-                elsif $node.isa("Q::ArgumentList") -> $argumentlist {
+                elsif $node.is-a("Q::ArgumentList") -> $argumentlist {
                     for $argumentlist.properties<arguments>.value -> $expr {
                         traverse($expr);
                     }
                 }
-                elsif $node.isa("Q::Statement::For") -> $for {
+                elsif $node.is-a("Q::Statement::For") -> $for {
                     traverse($for.properties<expr>);
                     traverse($for.properties<block>);
                 }
-                elsif $node.isa("Q::Statement::My") -> $my {
+                elsif $node.is-a("Q::Statement::My") -> $my {
                     my $name = $my.properties<identifier>.properties<name>.value;
                     my $ref = "{@blocks[*-1].id}|$name";
                     %declared{$ref} = L::VariableNotUsed;
                     if $my.properties<expr> !=== NONE {
                         traverse($my.properties<expr>);
                         %assigned{$ref} = True;
-                        if $my.properties<expr>.isa("Q::Identifier") && $my.properties<expr>.properties<name>.value eq $name {
+                        if $my.properties<expr>.is-a("Q::Identifier") && $my.properties<expr>.properties<name>.value eq $name {
                             @complaints.push: L::RedundantAssignment.new(:$name);
                             %readbeforeassigned{$ref} :delete;
                         }
                     }
                 }
-                elsif $node.isa("Q::Infix::Assignment") -> $infix {
+                elsif $node.is-a("Q::Infix::Assignment") -> $infix {
                     traverse($infix.properties<rhs>);
                     die "LHS was not an identifier"
-                        unless $infix.properties<lhs>.isa("Q::Identifier");
+                        unless $infix.properties<lhs>.is-a("Q::Identifier");
                     my $name = $infix.properties<lhs>.properties<name>.value;
-                    if $infix.properties<rhs>.isa("Q::Identifier") && $infix.properties<rhs>.properties<name>.value eq $name {
+                    if $infix.properties<rhs>.is-a("Q::Identifier") && $infix.properties<rhs>.properties<name>.value eq $name {
                         @complaints.push: L::RedundantAssignment.new(:$name);
                     }
                     %assigned{ref $name} = True;
                 }
-                elsif $node.isa("Q::Infix::Addition") -> $infix {
+                elsif $node.is-a("Q::Infix::Addition") -> $infix {
                     traverse($infix.properties<lhs>);
                     traverse($infix.properties<rhs>);
                 }
-                elsif $node.isa("Q::ParameterList") -> $parameterlist {
+                elsif $node.is-a("Q::ParameterList") -> $parameterlist {
                     # nothing
                 }
-                elsif $node.isa("Q::Literal") -> $literal {
+                elsif $node.is-a("Q::Literal") -> $literal {
                     # nothing
                 }
-                elsif $node.isa("Q::Term") -> $term {
+                elsif $node.is-a("Q::Term") -> $term {
                     # nothing
                 }
                 else {

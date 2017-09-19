@@ -27,10 +27,10 @@ class _007::Type {
         TYPE<Type>;
     }
 
-    multi method isa(Str $typename) {
-        ($typename eq "Object" || $typename eq "Type") && self;
+    multi method is-a(Str $typename) {
+        self.is-a(TYPE{$typename});
     }
-    multi method isa(_007::Type $type) {
+    multi method is-a(_007::Type $type) {
         ($type === TYPE<Object> || $type === TYPE<Type>) && self;
     }
 }
