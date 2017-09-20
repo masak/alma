@@ -673,7 +673,7 @@ class _007::Parser::Actions {
         my $type = $<identifier>.ast.properties<name>.value;
         my $type-obj = $*runtime.get-var($type);
 
-        my $known-properties = set($type-obj.type-chain.reverse.map({ .fields }).flat);
+        my $known-properties = set($type-obj.type-chain.reverse.map({ .fields }).flat.map({ .<name> }));
         my $seen-properties = set();
         for $<propertylist>.ast.properties<properties>.value -> $p {
             my $property = $p.properties<key>.value;

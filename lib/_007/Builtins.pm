@@ -56,7 +56,7 @@ sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
             }
 
             [&&] $l.type === $r.type,
-                |$l.type.type-chain.reverse.map({ .fields }).flat.grep({ $_ ne "frame" }).map(&same-propvalue);
+                |$l.type.type-chain.reverse.map({ .fields }).flat.map({ .<name> }).grep({ $_ ne "frame" }).map(&same-propvalue);
         }
         else {
             die "Unknown type ", $l.type.^name;
@@ -399,7 +399,7 @@ sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
             or die "This shouldn't be an op";
         my $type = ~$0;
         my $opname = ~$1;
-        my %properties = hash($placeholder.qtype.type-chain.reverse.map({ .fields }).flat.map({ $_ => NONE }));
+        my %properties = hash($placeholder.qtype.type-chain.reverse.map({ .fields }).flat.map({ .<name> }).map({ $_ => NONE }));
         my $q = create($placeholder.qtype, |%properties);
         my $assoc = $placeholder.assoc;
         my %precedence = $placeholder.precedence;
@@ -428,7 +428,7 @@ sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
             install-op($name, .value);
-            my @elements = .value.qtype.fields.grep({ $_ ne "identifier" })».&parameter;
+            my @elements = .value.qtype.fields.map({ .<name> }).grep({ $_ ne "identifier" })».&parameter;
             my $parameters = wrap(@elements);
             my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
             my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));

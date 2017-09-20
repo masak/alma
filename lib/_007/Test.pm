@@ -105,7 +105,7 @@ sub read(Str $ast) is export {
             my @rest = $<expr>».ast[1..*];
             my $qtype = %q_lookup{$qname};
             my %arguments;
-            my @attributes = $qtype.type-chain.reverse.map({ .fields }).flat;
+            my @attributes = $qtype.type-chain.reverse.map({ .fields }).flat.map({ .<name> });
             sub check-if-operator() {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this

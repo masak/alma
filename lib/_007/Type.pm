@@ -93,7 +93,12 @@ BEGIN {
     ###     say(type(q) == Q::Literal::Str);    # --> `True`
     ###     say(type(q) == Q::Literal);         # --> `False`
     ###
-    TYPE<Type> = _007::Type.new(:name<Type>, :fields["name"]);
+    TYPE<Type> = _007::Type.new(
+        :name<Type>,
+        :fields[
+            { :name<name>, :type<Str> },
+        ],
+    );
 
     ### ### NoneType
     ###
@@ -133,7 +138,12 @@ BEGIN {
     ###     say(None // "default");     # --> `default`
     ###     say("value" // "default");  # --> `value`
     ###
-    TYPE<NoneType> = _007::Type.new(:name<NoneType>, :fields["name"]);
+    TYPE<NoneType> = _007::Type.new(
+        :name<NoneType>,
+        :fields[
+            { :name<name>, :type<Str> },
+        ],
+    );
 
     ### ### Bool
     ###
@@ -178,7 +188,12 @@ BEGIN {
     ###     say(None && "!");       # --> `None`
     ###     say(None || "!");       # --> `!`
     ###
-    TYPE<Bool> = _007::Type.new(:name<Bool>, :fields["name"]);
+    TYPE<Bool> = _007::Type.new(
+        :name<NoneType>,
+        :fields[
+            { :name<name>, :type<Str> },
+        ],
+    );
 }
 
 ### ### Int
@@ -330,7 +345,12 @@ TYPE<Dict> = _007::Type.new(:name<Dict>);
 ### An exception. Represents an error condition, or some other way control
 ### flow couldn't continue normally.
 ###
-TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
+TYPE<Exception> = _007::Type.new(
+    :name<Exception>,
+    :fields[
+        { :name<message>, :type<Str> },
+    ],
+);
 
 ### ### Sub
 ###
@@ -350,7 +370,16 @@ TYPE<Exception> = _007::Type.new(:name<Exception>, :fields["message"]);
 ###     }
 ###     say(add(2, 5));         # --> `7`
 ###
-TYPE<Sub> = _007::Type.new(:name<Sub>, :fields["name", "parameterlist", "statementlist", "static-lexpad", "outer-frame"]);
+TYPE<Sub> = _007::Type.new(
+    :name<Sub>,
+    :fields[
+        { :name<name>, :type<Str> },
+        { :name<parameterlist>, :type<Q::ParameterList> },
+        { :name<statementlist>, :type<Q::StatementList> },
+        { :name<static-lexpad>, :type<Dict> },              # XXX: add an initializer
+        { :name<outer-frame>, :type<Dict> },                # XXX: make optional
+    ],
+);
 
 ### ### Macro
 ###
@@ -379,7 +408,12 @@ TYPE<Macro> = _007::Type.new(:name<Macro>, :base(TYPE<Sub>));
 ###     say(/"Bond"/.fullmatch("J. Bond"));     # --> `False`
 ###     say(/"Bond"/.search("J. Bond"));        # --> `True`
 ###
-TYPE<Regex> = _007::Type.new(:name<Regex>, :fields["contents"]);
+TYPE<Regex> = _007::Type.new(
+    :name<Regex>,
+    :fields[
+        { :name<contents>, :type<Str> },
+    ],
+);
 
 ### ### Q
 ###
@@ -421,7 +455,13 @@ TYPE<Q::Literal::None> = _007::Type.new(:name<Q::Literal::None>, :base(TYPE<Q::L
 ###
 ### A boolean literal; either `True` or `False`.
 ###
-TYPE<Q::Literal::Bool> = _007::Type.new(:name<Q::Literal::Bool>, :base(TYPE<Q::Literal>), :fields["value"]);
+TYPE<Q::Literal::Bool> = _007::Type.new(
+    :name<Q::Literal::Bool>,
+    :base(TYPE<Q::Literal>),
+    :fields[
+        { :name<value>, :type<Str> },
+    ],
+);
 
 ### ### Q::Literal::Int
 ###
@@ -430,13 +470,25 @@ TYPE<Q::Literal::Bool> = _007::Type.new(:name<Q::Literal::Bool>, :base(TYPE<Q::L
 ### Negative numbers are not themselves considered integer literals: something
 ### like `-5` is parsed as a `prefix:<->` containing a literal `5`.
 ###
-TYPE<Q::Literal::Int> = _007::Type.new(:name<Q::Literal::Int>, :base(TYPE<Q::Literal>), :fields["value"]);
+TYPE<Q::Literal::Int> = _007::Type.new(
+    :name<Q::Literal::Int>,
+    :base(TYPE<Q::Literal>),
+    :fields[
+        { :name<value>, :type<Int> },
+    ],
+);
 
 ### ### Q::Literal::Str
 ###
 ### A string literal.
 ###
-TYPE<Q::Literal::Str> = _007::Type.new(:name<Q::Literal::Str>, :base(TYPE<Q::Literal>), :fields["value"]);
+TYPE<Q::Literal::Str> = _007::Type.new(
+    :name<Q::Literal::Str>,
+    :base(TYPE<Q::Literal>),
+    :fields[
+        { :name<value>, :type<Str> },
+    ],
+);
 
 ### ### Q::Identifier
 ###
@@ -445,40 +497,79 @@ TYPE<Q::Literal::Str> = _007::Type.new(:name<Q::Literal::Str>, :base(TYPE<Q::Lit
 ### Identifiers are subject to *scoping*: the same name can point to different
 ### storage locations because they belong to different scopes.
 ###
-TYPE<Q::Identifier> = _007::Type.new(:name<Q::Identifier>, :base(TYPE<Q>), :fields["name", "frame"]);
+TYPE<Q::Identifier> = _007::Type.new(
+    :name<Q::Identifier>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<name>, :type<Str> },
+        { :name<frame>, :type<Dict> },                              # XXX: make optional
+    ],
+);
 
 ### ### Q::Term::Regex
 ###
 ### A regular expression (*regex*).
 ###
-TYPE<Q::Term::Regex> = _007::Type.new(:name<Q::Term::Regex>, :base(TYPE<Q::Term>), :fields["contents"]);
+TYPE<Q::Term::Regex> = _007::Type.new(
+    :name<Q::Term::Regex>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<contents>, :type<Str> },
+    ],
+);
 
 ### ### Q::Term::Array
 ###
 ### An array. Array terms consist of zero or more *elements*, each of which
 ### can be an arbitrary expression.
 ###
-TYPE<Q::Term::Array> = _007::Type.new(:name<Q::Term::Array>, :base(TYPE<Q::Term>), :fields["elements"]);
+TYPE<Q::Term::Array> = _007::Type.new(
+    :name<Q::Term::Array>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<elements>, :type<Array> },
+    ],
+);
 
 ### ### Q::Term::Dict
 ###
 ### A dictionary. Dict terms consist of zero or more *properties*, each of which
 ### consists of a key and a value.
 ###
-TYPE<Q::Term::Dict> = _007::Type.new(:name<Q::Term::Dict>, :base(TYPE<Q::Term>), :fields["propertylist"]);
+TYPE<Q::Term::Dict> = _007::Type.new(
+    :name<Q::Term::Dict>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<propertylist>, :type<Q::PropertyList> },
+    ],
+);
 
 ### ### Q::Term::Object
 ###
 ### An object. Object terms consist of an optional *type*, and a property list
 ### with zero or more key/value pairs.
 ###
-TYPE<Q::Term::Object> = _007::Type.new(:name<Q::Term::Object>, :base(TYPE<Q::Term>), :fields["type", "propertylist"]);
+TYPE<Q::Term::Object> = _007::Type.new(
+    :name<Q::Term::Object>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<type>, :type<Type> },
+        { :name<propertylist>, :type<Q::PropertyList> },
+    ],
+);
 
 ### ### Q::Property
 ###
 ### An object property. Properties have a key and a value.
 ###
-TYPE<Q::Property> = _007::Type.new(:name<Q::Property>, :base(TYPE<Q>), :fields["key", "value"]);
+TYPE<Q::Property> = _007::Type.new(
+    :name<Q::Property>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<key>, :type<Str> },
+        { :name<value>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::PropertyList
 ###
@@ -486,26 +577,53 @@ TYPE<Q::Property> = _007::Type.new(:name<Q::Property>, :base(TYPE<Q>), :fields["
 ### pairs. Keys in objects are considered unordered, but a property list has
 ### a specified order: the order the properties occur in the program text.
 ###
-TYPE<Q::PropertyList> = _007::Type.new(:name<Q::PropertyList>, :base(TYPE<Q>), :fields["properties"]);
+TYPE<Q::PropertyList> = _007::Type.new(
+    :name<Q::PropertyList>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<properties>, :type<Array> },
+    ],
+);
 
 ### ### Q::Trait
 ###
 ### A trait; a piece of metadata for a routine. A trait consists of an
 ### identifier and an expression.
 ###
-TYPE<Q::Trait> = _007::Type.new(:name<Q::Trait>, :base(TYPE<Q>), :fields["identifier", "expr"]);
+TYPE<Q::Trait> = _007::Type.new(
+    :name<Q::Trait>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::TraitList
 ###
 ### A list of zero or more traits. Each routine has a traitlist.
 ###
-TYPE<Q::TraitList> = _007::Type.new(:name<Q::TraitList>, :base(TYPE<Q>), :fields["traits"]);
+TYPE<Q::TraitList> = _007::Type.new(
+    :name<Q::TraitList>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<traits>, :type<Q::Trait> },
+    ],
+);
 
 ### ### Q::Term::Sub
 ###
 ### A subroutine.
 ###
-TYPE<Q::Term::Sub> = _007::Type.new(:name<Q::Term::Sub>, :base(TYPE<Q::Term>), :fields["identifier", "traitlist", "block"]);
+TYPE<Q::Term::Sub> = _007::Type.new(
+    :name<Q::Term::Sub>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<traitlist>, :type<Q::TraitList> },                          # XXX: give initializer
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Block
 ###
@@ -517,14 +635,29 @@ TYPE<Q::Term::Sub> = _007::Type.new(:name<Q::Term::Sub>, :base(TYPE<Q::Term>), :
 ### A block has a parameter list and a statement list, each of which can
 ### be empty.
 ###
-TYPE<Q::Block> = _007::Type.new(:name<Q::Block>, :base(TYPE<Q>), :fields["parameterlist", "statementlist", "static-lexpad"]);
+TYPE<Q::Block> = _007::Type.new(
+    :name<Q::Block>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<parameterlist>, :type<Q::ParameterList> },
+        { :name<statementlist>, :type<Q::StatementList> },
+        { :name<static-lexpad>, :type<Dict> },                              # XXX: give initializer
+    ],
+);
 
 ### ### Q::Prefix
 ###
 ### A prefix operator; an operator that occurs before a term, like the
 ### `-` in `-5`.
 ###
-TYPE<Q::Prefix> = _007::Type.new(:name<Q::Prefix>, :base(TYPE<Q::Expr>), :fields["identifier", "operand"]);
+TYPE<Q::Prefix> = _007::Type.new(
+    :name<Q::Prefix>,
+    :base(TYPE<Q::Expr>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<operand>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Prefix::Str
 ###
@@ -568,7 +701,15 @@ TYPE<Q::Prefix::Upto> = _007::Type.new(:name<Q::Prefix::Upto>, :base(TYPE<Q::Pre
 ### An infix operator; something like the `+` in `2 + 2` that occurs between
 ### two terms.
 ###
-TYPE<Q::Infix> = _007::Type.new(:name<Q::Infix>, :base(TYPE<Q::Expr>), :fields["identifier", "lhs", "rhs"]);
+TYPE<Q::Infix> = _007::Type.new(
+    :name<Q::Infix>,
+    :base(TYPE<Q::Expr>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<lhs>, :type<Q::Expr> },
+        { :name<rhs>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Infix::Addition
 ###
@@ -713,44 +854,89 @@ TYPE<Q::Infix::TypeNonMatch> = _007::Type.new(:name<Q::Infix::TypeNonMatch>, :ba
 ### A postfix operator; something like the `[0]` in `agents[0]` that occurs
 ### after a term.
 ###
-TYPE<Q::Postfix> = _007::Type.new(:name<Q::Postfix>, :base(TYPE<Q::Expr>), :fields["identifier", "operand"]);
+TYPE<Q::Postfix> = _007::Type.new(
+    :name<Q::Postfix>,
+    :base(TYPE<Q::Expr>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<operand>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Postfix::Index
 ###
 ### An indexing operator; returns an array element or object property.
 ### Arrays expect integer indices and objects expect string property names.
 ###
-TYPE<Q::Postfix::Index> = _007::Type.new(:name<Q::Postfix::Index>, :base(TYPE<Q::Postfix>), :fields["index"]);
+TYPE<Q::Postfix::Index> = _007::Type.new(
+    :name<Q::Postfix::Index>,
+    :base(TYPE<Q::Postfix>),
+    :fields[
+        { :name<index>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Postfix::Call
 ###
 ### An invocation operator; calls a routine.
 ###
-TYPE<Q::Postfix::Call> = _007::Type.new(:name<Q::Postfix::Call>, :base(TYPE<Q::Postfix>), :fields["argumentlist"]);
+TYPE<Q::Postfix::Call> = _007::Type.new(
+    :name<Q::Postfix::Call>,
+    :base(TYPE<Q::Postfix>),
+    :fields[
+        { :name<argumentlist>, :type<Q::ArgumentList> },
+    ],
+);
 
 ### ### Q::Postfix::Property
 ###
 ### An object property operator; fetches a property out of an object.
 ###
-TYPE<Q::Postfix::Property> = _007::Type.new(:name<Q::Postfix::Property>, :base(TYPE<Q::Postfix>), :fields["property"]);
+TYPE<Q::Postfix::Property> = _007::Type.new(
+    :name<Q::Postfix::Property>,
+    :base(TYPE<Q::Postfix>),
+    :fields[
+        { :name<property>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Unquote
 ###
 ### An unquote; allows Qtree fragments to be inserted into places in a quasi.
 ###
-TYPE<Q::Unquote> = _007::Type.new(:name<Q::Unquote>, :base(TYPE<Q>), :fields["qtype", "expr"]);
+TYPE<Q::Unquote> = _007::Type.new(
+    :name<Q::Unquote>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<qtype>, :type<Q::Identifier> },
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Unquote::Prefix
 ###
 ### An unquote which is a prefix operator.
 ###
-TYPE<Q::Unquote::Prefix> = _007::Type.new(:name<Q::Unquote::Prefix>, :base(TYPE<Q::Unquote>), :fields["operand"]);
+TYPE<Q::Unquote::Prefix> = _007::Type.new(
+    :name<Q::Unquote::Prefix>,
+    :base(TYPE<Q::Unquote>),
+    :fields[
+        { :name<operand>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Unquote::Infix
 ###
 ### An unquote which is an infix operator.
 ###
-TYPE<Q::Unquote::Infix> = _007::Type.new(:name<Q::Unquote::Infix>, :base(TYPE<Q::Unquote>), :fields["lhs", "rhs"]);
+TYPE<Q::Unquote::Infix> = _007::Type.new(
+    :name<Q::Unquote::Infix>,
+    :base(TYPE<Q::Unquote>),
+    :fields[
+        { :name<lhs>, :type<Q::Expr> },
+        { :name<rhs>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Term::Quasi
 ###
@@ -763,26 +949,51 @@ TYPE<Q::Unquote::Infix> = _007::Type.new(:name<Q::Unquote::Infix>, :base(TYPE<Q:
 ### inserted. Quasiquotation is the practice of combining literal code
 ### fragments with such parametric holes.
 ###
-TYPE<Q::Term::Quasi> = _007::Type.new(:name<Q::Term::Quasi>, :base(TYPE<Q::Term>), :fields["qtype", "contents"]);
+TYPE<Q::Term::Quasi> = _007::Type.new(
+    :name<Q::Term::Quasi>,
+    :base(TYPE<Q::Term>),
+    :fields[
+        { :name<qtype>, :type<Q::Identifier> },
+        { :name<contents>, :type<Q> },
+    ],
+);
 
 ### ### Q::Parameter
 ###
 ### A parameter. Any identifier that's declared as the input to a block
 ### is a parameter, including subs, macros, and `if` statements.
 ###
-TYPE<Q::Parameter> = _007::Type.new(:name<Q::Parameter>, :base(TYPE<Q>), :fields["identifier"]);
+TYPE<Q::Parameter> = _007::Type.new(
+    :name<Q::Parameter>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+    ],
+);
 
 ### ### Q::ParameterList
 ###
 ### A list of zero or more parameters.
 ###
-TYPE<Q::ParameterList> = _007::Type.new(:name<Q::ParameterList>, :base(TYPE<Q>), :fields["parameters"]);
+TYPE<Q::ParameterList> = _007::Type.new(
+    :name<Q::ParameterList>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<parameters>, :type<Array> },
+    ],
+);
 
 ### ### Q::ArgumentList
 ###
 ### A list of zero or more arguments.
 ###
-TYPE<Q::ArgumentList> = _007::Type.new(:name<Q::ArgumentList>, :base(TYPE<Q>), :fields["arguments"]);
+TYPE<Q::ArgumentList> = _007::Type.new(
+    :name<Q::ArgumentList>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<arguments>, :type<Array> },
+    ],
+);
 
 ### ### Q::Statement
 ###
@@ -794,31 +1005,65 @@ TYPE<Q::Statement> = _007::Type.new(:name<Q::Statement>, :base(TYPE<Q>), :is-abs
 ###
 ### A `my` variable declaration statement.
 ###
-TYPE<Q::Statement::My> = _007::Type.new(:name<Q::Statement::My>, :base(TYPE<Q::Statement>), :fields["identifier", "expr"]);
+TYPE<Q::Statement::My> = _007::Type.new(
+    :name<Q::Statement::My>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Statement::Constant
 ###
 ### A `constant` declaration statement.
 ###
-TYPE<Q::Statement::Constant> = _007::Type.new(:name<Q::Statement::Constant>, :base(TYPE<Q::Statement>), :fields["identifier", "expr"]);
+TYPE<Q::Statement::Constant> = _007::Type.new(
+    :name<Q::Statement::Constant>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Statement::Expr
 ###
 ### A statement consisting of an expression.
 ###
-TYPE<Q::Statement::Expr> = _007::Type.new(:name<Q::Statement::Expr>, :base(TYPE<Q::Statement>), :fields["expr"]);
+TYPE<Q::Statement::Expr> = _007::Type.new(
+    :name<Q::Statement::Expr>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Statement::If
 ###
 ### An `if` statement.
 ###
-TYPE<Q::Statement::If> = _007::Type.new(:name<Q::Statement::If>, :base(TYPE<Q::Statement>), :fields["expr", "block", "else"]);
+TYPE<Q::Statement::If> = _007::Type.new(
+    :name<Q::Statement::If>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },
+        { :name<block>, :type<Q::Block> },
+        { :name<else>, :type<Object> },
+    ],
+);
 
 ### ### Q::Statement::Block
 ###
 ### A block statement.
 ###
-TYPE<Q::Statement::Block> = _007::Type.new(:name<Q::Statement::Block>, :base(TYPE<Q::Statement>), :fields["block"]);
+TYPE<Q::Statement::Block> = _007::Type.new(
+    :name<Q::Statement::Block>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::CompUnit
 ###
@@ -831,49 +1076,103 @@ TYPE<Q::CompUnit> = _007::Type.new(:name<Q::CompUnit>, :base(TYPE<Q::Statement::
 ###
 ### A `for` loop statement.
 ###
-TYPE<Q::Statement::For> = _007::Type.new(:name<Q::Statement::For>, :base(TYPE<Q::Statement>), :fields["expr", "block"]);
+TYPE<Q::Statement::For> = _007::Type.new(
+    :name<Q::Statement::For>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Statement::While
 ###
 ### A `while` loop statement.
 ###
-TYPE<Q::Statement::While> = _007::Type.new(:name<Q::Statement::While>, :base(TYPE<Q::Statement>), :fields["expr", "block"]);
+TYPE<Q::Statement::While> = _007::Type.new(
+    :name<Q::Statement::While>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Statement::Return
 ###
 ### A `return` statement.
 ###
-TYPE<Q::Statement::Return> = _007::Type.new(:name<Q::Statement::Return>, :base(TYPE<Q::Statement>), :fields["expr"]);
+TYPE<Q::Statement::Return> = _007::Type.new(
+    :name<Q::Statement::Return>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },                                # XXX: make optional
+    ],
+);
 
 ### ### Q::Statement::Throw
 ###
 ### A `throw` statement.
 ###
-TYPE<Q::Statement::Throw> = _007::Type.new(:name<Q::Statement::Throw>, :base(TYPE<Q::Statement>), :fields["expr"]);
+TYPE<Q::Statement::Throw> = _007::Type.new(
+    :name<Q::Statement::Throw>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<expr>, :type<Q::Expr> },
+    ],
+);
 
 ### ### Q::Statement::Sub
 ###
 ### A subroutine declaration statement.
 ###
-TYPE<Q::Statement::Sub> = _007::Type.new(:name<Q::Statement::Sub>, :base(TYPE<Q::Statement>), :fields["identifier", "traitlist", "block"]);
+TYPE<Q::Statement::Sub> = _007::Type.new(
+    :name<Q::Statement::Sub>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<traitlist>, :type<Q::TraitList> },
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Statement::Macro
 ###
 ### A macro declaration statement.
 ###
-TYPE<Q::Statement::Macro> = _007::Type.new(:name<Q::Statement::Macro>, :base(TYPE<Q::Statement>), :fields["identifier", "traitlist", "block"]);
+TYPE<Q::Statement::Macro> = _007::Type.new(
+    :name<Q::Statement::Macro>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<identifier>, :type<Q::Identifier> },
+        { :name<traitlist>, :type<Q::TraitList> },
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Statement::BEGIN
 ###
 ### A `BEGIN` block statement.
 ###
-TYPE<Q::Statement::BEGIN> = _007::Type.new(:name<Q::Statement::BEGIN>, :base(TYPE<Q::Statement>), :fields["block"]);
+TYPE<Q::Statement::BEGIN> = _007::Type.new(
+    :name<Q::Statement::BEGIN>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::Statement::Class
 ###
 ### A class declaration statement.
 ###
-TYPE<Q::Statement::Class> = _007::Type.new(:name<Q::Statement::Class>, :base(TYPE<Q::Statement>), :fields["block"]);
+TYPE<Q::Statement::Class> = _007::Type.new(
+    :name<Q::Statement::Class>,
+    :base(TYPE<Q::Statement>),
+    :fields[
+        { :name<block>, :type<Q::Block> },
+    ],
+);
 
 ### ### Q::StatementList
 ###
@@ -882,7 +1181,13 @@ TYPE<Q::Statement::Class> = _007::Type.new(:name<Q::Statement::Class>, :base(TYP
 ### compunit level). However, it's also possible for a `quasi` to
 ### denote a statement list without any surrounding block.
 ###
-TYPE<Q::StatementList> = _007::Type.new(:name<Q::StatementList>, :base(TYPE<Q>), :fields["statements"]);
+TYPE<Q::StatementList> = _007::Type.new(
+    :name<Q::StatementList>,
+    :base(TYPE<Q>),
+    :fields[
+        { :name<statements>, :type<Array> },
+    ],
+);
 
 ### ### Q::Expr::StatementListAdapter
 ###
@@ -898,4 +1203,10 @@ TYPE<Q::StatementList> = _007::Type.new(:name<Q::StatementList>, :base(TYPE<Q>),
 ### to have a value (because it's an expression statement), then this
 ### value is the value of the whole containing expression.
 ###
-TYPE<Q::Expr::StatementListAdapter> = _007::Type.new(:name<Q::Expr::StatementListAdapter>, :base(TYPE<Q::Expr>), :fields["statementlist"]);
+TYPE<Q::Expr::StatementListAdapter> = _007::Type.new(
+    :name<Q::Expr::StatementListAdapter>,
+    :base(TYPE<Q::Expr>),
+    :fields[
+        { :name<statementlist>, :type<Q::StatementList> },
+    ],
+);

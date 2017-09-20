@@ -130,7 +130,7 @@ sub create(_007::Type $type, *%properties) is export {
         );
     }
 
-    my $fields = set($type.type-chain.map({ .fields }));
+    my $fields = set($type.type-chain.map({ .fields }).flat.map({ .<name> }));
     my $seen = set();
     for %properties.keys.sort -> $property {
         die X::Property::NotDeclared.new(:type($type.name), :$property)
@@ -419,7 +419,7 @@ sub bound-method($object, $name, $runtime) is export {
         return sub eval-q-postfix-property() {
             my $obj = bound-method($object.properties<operand>, "eval", $runtime)();
             my $propname = $object.properties<property>.properties<name>.value;
-            my @props = $obj.type.type-chain.map({ .fields }).flat;
+            my @props = $obj.type.type-chain.map({ .fields }).flat.map({ .<name> });
             if $propname (elem) @props {
                 if $obj.is-a("Type") && $propname eq "name" {
                     return wrap($obj.name);
@@ -815,7 +815,7 @@ sub bound-method($object, $name, $runtime) is export {
 
     if $object.is-a("Q") && $name eq "Str" {
         return sub str-q() {
-            my @props = $object.type.type-chain.reverse.map({ .fields }).flat;
+            my @props = $object.type.type-chain.reverse.map({ .fields }).flat.map({ .<name> });
             # XXX: thuggish way to hide things that weren't listed in `attributes` before
             @props.=grep: {
                 !($object.is-a("Q::Identifier") && $_ eq "frame") &&
@@ -1109,8 +1109,9 @@ sub bound-method($object, $name, $runtime) is export {
             return $thing
                 if $thing.is-a("Q::Unquote");
 
-            my %properties = $thing.type.type-chain.reverse.map({ .fields }).flat.map: -> $fieldname {
-                $fieldname => interpolate($thing.properties{$fieldname})
+            my %properties = $thing.type.type-chain.reverse.map({ .fields }).flat.map: -> $field {
+                my $fieldname = $field<name>;
+                $fieldname => interpolate($thing.properties{$fieldname});
             };
 
             create($thing.type, |%properties);
@@ -1122,7 +1123,7 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Type") && $name eq "create" {
-        return sub create($properties) {
+        return sub create-type($properties) {
             # XXX: check that $properties is an array of [k, v] arrays
             create($object, |hash($properties.value.map(-> $p {
                 my ($k, $v) = @($p.value);
