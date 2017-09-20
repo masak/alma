@@ -5,12 +5,17 @@ constant TYPE = hash();
 class _007::Type {
     has Str $.name;
     has $.base = TYPE<Object>;
+    has $.type = TYPE<Type>;
     has @.fields;
     has Bool $.is-abstract = False;
     # XXX: $.id
 
     method install-base($none) {
         $!base = $none;
+    }
+
+    method install-type($type) {
+        $!type = $type;
     }
 
     method type-chain() {
@@ -23,15 +28,11 @@ class _007::Type {
         return @chain;
     }
 
-    method type {
-        TYPE<Type>;
-    }
-
     multi method is-a(Str $typename) {
         self.is-a(TYPE{$typename});
     }
     multi method is-a(_007::Type $type) {
-        ($type === TYPE<Object> || $type === TYPE<Type>) && self;
+        $type (elem) $.type.type-chain && self;
     }
 }
 
@@ -99,6 +100,7 @@ BEGIN {
             { :name<name>, :type<Str> },
         ],
     );
+    TYPE<Type>.install-type(TYPE<Type>);
 
     ### ### NoneType
     ###
