@@ -88,28 +88,9 @@ class X::Regex::InvalidMatchType is Exception {
     method message { "A regex can only match strings" }
 }
 
-class _007::Object {
-    has $.type;
+class _007::Object does Typable {
     has $.id = unique-id;
     has %.properties;
-
-    multi method is-a(Str $typename) {
-        die "Asked to typecheck against $typename but no such type is declared"
-            unless TYPE{$typename} :exists;
-
-        return self.is-a(TYPE{$typename});
-    }
-
-    multi method is-a(_007::Type $type) {
-        # We return `self` as an "interesting truthy value" so as to enable
-        # renaming as part of finding out an object's true type:
-        #
-        #   if $ast.is-a("Q::StatementList") -> $statementlist {
-        #       # ...
-        #   }
-
-        return $type (elem) $.type.type-chain && self;
-    }
 }
 
 sub create(_007::Type $type, *%properties) is export {

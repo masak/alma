@@ -2,20 +2,43 @@ sub unique-id is export { ++$ }
 
 constant TYPE = hash();
 
-class _007::Type {
+class _007::Type { ... }
+
+role Typable {
+    has $.type = TYPE<Type>;
+
+    method install-type($type) {
+        $!type = $type;
+    }
+
+    multi method is-a(Str $typename) {
+        die "Asked to typecheck against $typename but no such type is declared"
+            unless TYPE{$typename} :exists;
+
+        return self.is-a(TYPE{$typename});
+    }
+
+    multi method is-a(_007::Type $type) {
+        # We return `self` as an "interesting truthy value" so as to enable
+        # renaming as part of finding out an object's true type:
+        #
+        #   if $ast.is-a("Q::StatementList") -> $statementlist {
+        #       # ...
+        #   }
+
+        return $type (elem) $.type.type-chain && self;
+    }
+}
+
+class _007::Type does Typable {
     has Str $.name;
     has $.base = TYPE<Object>;
-    has $.type = TYPE<Type>;
     has @.fields;
     has Bool $.is-abstract = False;
     # XXX: $.id
 
     method install-base($none) {
         $!base = $none;
-    }
-
-    method install-type($type) {
-        $!type = $type;
     }
 
     method type-chain() {
@@ -26,13 +49,6 @@ class _007::Type {
             $t.=base;
         }
         return @chain;
-    }
-
-    multi method is-a(Str $typename) {
-        self.is-a(TYPE{$typename});
-    }
-    multi method is-a(_007::Type $type) {
-        $type (elem) $.type.type-chain && self;
     }
 }
 
