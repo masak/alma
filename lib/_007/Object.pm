@@ -111,22 +111,28 @@ sub create(_007::Type $type, *%properties) is export {
         );
     }
 
-    my $fields = set($type.type-chain.map({ .fields }).flat.map({ .<name> }));
+    my %fields = $type.type-chain.map({ .fields }).flat.map({ .<name> => $_ });
     my $seen = set();
     for %properties.keys.sort -> $property {
         die X::Property::NotDeclared.new(:type($type.name), :$property)
-            unless $property (elem) $fields;
+            unless %fields{$property};
 
         die X::Property::Duplicate.new(:type($type.name), :$property)
             if $property (elem) $seen;
 
         $seen (|)= $property;
+
+        my $value = %properties{$property};
+        my $fieldtype = TYPE{%fields{$property}<type>}
+            or die "No such type {%fields{$property}<type>}";
+        die X::Type.new(:operation("instantiation of {$type.name} with property $property"), :got($value), :expected($fieldtype))
+            unless $value.is-a($fieldtype);
     }
     # XXX: need to screen for required properties by traversing @.fields, but we don't have the
     #      infrastructure in terms of a way to mark up a field as required
 
     # XXX: for now, let's pretend all properties are required. not pleasant, but we can live with it for a short time
-    for $fields.keys -> $field {
+    for %fields.keys -> $field {
         die "Need to pass property '$field' when creating a {$type.name}"
             unless $field (elem) $seen;
     }

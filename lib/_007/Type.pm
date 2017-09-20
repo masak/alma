@@ -451,7 +451,7 @@ TYPE<Q::Expr> = _007::Type.new(:name<Q::Expr>, :base(TYPE<Q>), :is-abstract);
 ### A term; a unit of parsing describing a value or an identifier. Along with
 ### operators, what makes up expressions.
 ###
-TYPE<Q::Term> = _007::Type.new(:name<Q::Term>, :base(TYPE<Q>), :is-abstract);
+TYPE<Q::Term> = _007::Type.new(:name<Q::Term>, :base(TYPE<Q::Expr>), :is-abstract);
 
 ### ### Q::Literal
 ###
@@ -477,7 +477,7 @@ TYPE<Q::Literal::Bool> = _007::Type.new(
     :name<Q::Literal::Bool>,
     :base(TYPE<Q::Literal>),
     :fields[
-        { :name<value>, :type<Str> },
+        { :name<value>, :type<Bool> },
     ],
 );
 
@@ -517,10 +517,10 @@ TYPE<Q::Literal::Str> = _007::Type.new(
 ###
 TYPE<Q::Identifier> = _007::Type.new(
     :name<Q::Identifier>,
-    :base(TYPE<Q>),
+    :base(TYPE<Q::Term>),
     :fields[
         { :name<name>, :type<Str> },
-        { :name<frame>, :type<Dict> },                              # XXX: make optional
+        { :name<frame>, :type<Object> },                              # XXX: make optional
     ],
 );
 
@@ -571,7 +571,7 @@ TYPE<Q::Term::Object> = _007::Type.new(
     :name<Q::Term::Object>,
     :base(TYPE<Q::Term>),
     :fields[
-        { :name<type>, :type<Type> },
+        { :name<type>, :type<Q::Identifier> },
         { :name<propertylist>, :type<Q::PropertyList> },
     ],
 );
@@ -625,7 +625,7 @@ TYPE<Q::TraitList> = _007::Type.new(
     :name<Q::TraitList>,
     :base(TYPE<Q>),
     :fields[
-        { :name<traits>, :type<Q::Trait> },
+        { :name<traits>, :type<Array> },
     ],
 );
 
@@ -637,7 +637,7 @@ TYPE<Q::Term::Sub> = _007::Type.new(
     :name<Q::Term::Sub>,
     :base(TYPE<Q::Term>),
     :fields[
-        { :name<identifier>, :type<Q::Identifier> },
+        { :name<identifier>, :type<Object> },                               # XXX: make optional
         { :name<traitlist>, :type<Q::TraitList> },                          # XXX: give initializer
         { :name<block>, :type<Q::Block> },
     ],
@@ -659,7 +659,7 @@ TYPE<Q::Block> = _007::Type.new(
     :fields[
         { :name<parameterlist>, :type<Q::ParameterList> },
         { :name<statementlist>, :type<Q::StatementList> },
-        { :name<static-lexpad>, :type<Dict> },                              # XXX: give initializer
+        { :name<static-lexpad>, :type<Object> },                              # XXX: make optional
     ],
 );
 
@@ -672,8 +672,8 @@ TYPE<Q::Prefix> = _007::Type.new(
     :name<Q::Prefix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Q::Identifier> },
-        { :name<operand>, :type<Q::Expr> },
+        { :name<identifier>, :type<Object> },
+        { :name<operand>, :type<Object> },
     ],
 );
 
@@ -723,9 +723,9 @@ TYPE<Q::Infix> = _007::Type.new(
     :name<Q::Infix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Q::Identifier> },
-        { :name<lhs>, :type<Q::Expr> },
-        { :name<rhs>, :type<Q::Expr> },
+        { :name<identifier>, :type<Object> },
+        { :name<lhs>, :type<Object> },
+        { :name<rhs>, :type<Object> },
     ],
 );
 
@@ -876,8 +876,8 @@ TYPE<Q::Postfix> = _007::Type.new(
     :name<Q::Postfix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Q::Identifier> },
-        { :name<operand>, :type<Q::Expr> },
+        { :name<identifier>, :type<Object> },
+        { :name<operand>, :type<Object> },
     ],
 );
 
@@ -890,7 +890,7 @@ TYPE<Q::Postfix::Index> = _007::Type.new(
     :name<Q::Postfix::Index>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<index>, :type<Q::Expr> },
+        { :name<index>, :type<Object> },
     ],
 );
 
@@ -902,7 +902,7 @@ TYPE<Q::Postfix::Call> = _007::Type.new(
     :name<Q::Postfix::Call>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<argumentlist>, :type<Q::ArgumentList> },
+        { :name<argumentlist>, :type<Object> },
     ],
 );
 
@@ -914,7 +914,7 @@ TYPE<Q::Postfix::Property> = _007::Type.new(
     :name<Q::Postfix::Property>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<property>, :type<Q::Expr> },
+        { :name<property>, :type<Object> },
     ],
 );
 
@@ -926,7 +926,7 @@ TYPE<Q::Unquote> = _007::Type.new(
     :name<Q::Unquote>,
     :base(TYPE<Q>),
     :fields[
-        { :name<qtype>, :type<Q::Identifier> },
+        { :name<qtype>, :type<Type> },
         { :name<expr>, :type<Q::Expr> },
     ],
 );
@@ -971,7 +971,7 @@ TYPE<Q::Term::Quasi> = _007::Type.new(
     :name<Q::Term::Quasi>,
     :base(TYPE<Q::Term>),
     :fields[
-        { :name<qtype>, :type<Q::Identifier> },
+        { :name<qtype>, :type<Str> },
         { :name<contents>, :type<Q> },
     ],
 );
@@ -1028,7 +1028,7 @@ TYPE<Q::Statement::My> = _007::Type.new(
     :base(TYPE<Q::Statement>),
     :fields[
         { :name<identifier>, :type<Q::Identifier> },
-        { :name<expr>, :type<Q::Expr> },
+        { :name<expr>, :type<Object> },                     # XXX: make optional
     ],
 );
 
@@ -1124,7 +1124,7 @@ TYPE<Q::Statement::Return> = _007::Type.new(
     :name<Q::Statement::Return>,
     :base(TYPE<Q::Statement>),
     :fields[
-        { :name<expr>, :type<Q::Expr> },                                # XXX: make optional
+        { :name<expr>, :type<Object> },                                # XXX: make optional
     ],
 );
 
