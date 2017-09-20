@@ -25,7 +25,7 @@ class _007::Runtime {
     }
 
     method run(_007::Object $compunit) {
-        bound-method($compunit, "run", self)(self);
+        bound-method($compunit, "run", self)();
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;

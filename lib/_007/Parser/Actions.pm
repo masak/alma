@@ -95,8 +95,8 @@ class _007::Parser::Actions {
             :identifier($<identifier>.ast),
             :expr($<EXPR>.ast));
 
-        my $value = bound-method($<EXPR>.ast, "eval", $*runtime)($*runtime);
-        bound-method($<identifier>.ast, "put-value", $*runtime)($value, $*runtime);
+        my $value = bound-method($<EXPR>.ast, "eval", $*runtime)();
+        bound-method($<identifier>.ast, "put-value", $*runtime)($value);
     }
 
     method statement:expr ($/) {
@@ -200,7 +200,7 @@ class _007::Parser::Actions {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
         }
 
-        bound-method($identifier, "put-value", $*runtime)($val, $*runtime);
+        bound-method($identifier, "put-value", $*runtime)($val);
 
         maybe-install-operator($name.value, $<traitlist><trait>);
     }
@@ -244,7 +244,7 @@ class _007::Parser::Actions {
         make create(TYPE<Q::Statement::Class>, :$block);
         my $name = $identifier.properties<name>.value;
         my $val = _007::Type.new(:$name);
-        bound-method($identifier, "put-value", $*runtime)($val, $*runtime);
+        bound-method($identifier, "put-value", $*runtime)($val);
     }
 
     method traitlist($/) {
@@ -651,7 +651,7 @@ class _007::Parser::Actions {
             my $outer-frame = $*runtime.current-frame.value<outer-frame>;
             my $static-lexpad = $*runtime.current-frame.value<pad>;
             my $val = create(TYPE<Sub>, :$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
-            bound-method($<identifier>.ast, "put-value", $*runtime)($val, $*runtime);
+            bound-method($<identifier>.ast, "put-value", $*runtime)($val);
         }
         self.finish-block($block);
 

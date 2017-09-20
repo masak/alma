@@ -229,20 +229,20 @@ sub bound-method($object, $name, $runtime) is export {
         if $object === Any;
 
     if $object.is-a("Q::Statement::Block") && $name eq "run" {
-        return sub run-q-statement-block($runtime) {
+        return sub run-q-statement-block() {
             $runtime.enter(
                 $runtime.current-frame,
                 $object.properties<block>.properties<static-lexpad>,
                 $object.properties<block>.properties<statementlist>);
-            bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)($runtime);
+            bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)();
             $runtime.leave;
         };
     }
 
     if $object.is-a("Q::StatementList") && $name eq "run" {
-        return sub run-q-statementlist($runtime) {
+        return sub run-q-statementlist() {
             for $object.properties<statements>.value -> $statement {
-                my $value = bound-method($statement, "run", $runtime)($runtime);
+                my $value = bound-method($statement, "run", $runtime)();
                 LAST if $statement.is-a("Q::Statement::Expr") {
                     return $value;
                 }
@@ -251,69 +251,69 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Statement::Expr") && $name eq "run" {
-        return sub run-q-statement-expr($runtime) {
-            return bound-method($object.properties<expr>, "eval", $runtime)($runtime);
+        return sub run-q-statement-expr() {
+            return bound-method($object.properties<expr>, "eval", $runtime)();
         };
     }
 
     if $object.is-a("Q::Identifier") && $name eq "eval" {
-        return sub eval-q-identifier($runtime) {
+        return sub eval-q-identifier() {
             return $runtime.get-var($object.properties<name>.value, $object.properties<frame>);
         };
     }
 
     if $object.is-a("Q::Literal::Int") && $name eq "eval" {
-        return sub eval-q-literal-int($runtime) {
+        return sub eval-q-literal-int() {
             return $object.properties<value>;
         };
     }
 
     if $object.is-a("Q::Literal::Str") && $name eq "eval" {
-        return sub eval-q-literal-str($runtime) {
+        return sub eval-q-literal-str() {
             return $object.properties<value>;
         };
     }
 
     if $object.is-a("Q::Term::Dict") && $name eq "eval" {
-        return sub eval-q-term-dict($runtime) {
+        return sub eval-q-term-dict() {
             return wrap(hash($object.properties<propertylist>.properties<properties>.value.map({
-                .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)($runtime);
+                .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)();
             })));
         };
     }
 
     if $object.is-a("Q::Identifier") && $name eq "put-value" {
-        return sub put-value-q-identifier($value, $runtime) {
+        return sub put-value-q-identifier($value) {
             $runtime.put-var($object, $value);
         };
     }
 
     if $object.is-a("Q::Statement::Class") && $name eq "run" {
-        return sub run-q-statement-class($runtime) {
+        return sub run-q-statement-class() {
             # a class block does not run at runtime
         };
     }
 
     if $object.is-a("Q::Statement::Sub") && $name eq "run" {
-        return sub run-q-statement-sub($runtime) {
+        return sub run-q-statement-sub() {
             # a sub declaration does not run at runtime
         };
     }
 
     if $object.is-a("Q::Statement::Macro") && $name eq "run" {
-        return sub run-q-statement-macro($runtime) {
+        return sub run-q-statement-macro() {
             # a macro declaration does not run at runtime
         };
     }
 
     if $object.is-a("Q::Statement::For") && $name eq "run" {
-        return sub run-q-statement-for($runtime) {
+        return sub run-q-statement-for() {
             my $count = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
             die X::ParameterMismatch.new(
                 :type("For loop"), :paramcount($count), :argcount("0 or 1"))
                 if $count > 1;
 
-            my $array = bound-method($object.properties<expr>, "eval", $runtime)($runtime);
+            my $array = bound-method($object.properties<expr>, "eval", $runtime)();
             die X::Type.new(:operation("for loop"), :got($array), :expected(TYPE<Array>))
                 unless $array.is-a("Array");
 
@@ -325,15 +325,15 @@ sub bound-method($object, $name, $runtime) is export {
                 if $count == 1 {
                     $runtime.declare-var($object.properties<block>.properties<parameterlist>.properties<parameters>.value[0].properties<identifier>, $arg.list[0]);
                 }
-                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)($runtime);
+                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)();
                 $runtime.leave;
             }
         };
     }
 
     if $object.is-a("Q::Statement::While") && $name eq "run" {
-        return sub run-q-statement-while($runtime) {
-            while boolify(my $expr = bound-method($object.properties<expr>, "eval", $runtime)($runtime), $runtime) {
+        return sub run-q-statement-while() {
+            while boolify(my $expr = bound-method($object.properties<expr>, "eval", $runtime)(), $runtime) {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(
                     :type("While loop"), :$paramcount, :argcount("0 or 1"))
@@ -345,83 +345,83 @@ sub bound-method($object, $name, $runtime) is export {
                 for @($object.properties<block>.properties<parameterlist>.properties<parameters>.value) Z $expr -> ($param, $arg) {
                     $runtime.declare-var($param.properties<identifier>, $arg);
                 }
-                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)($runtime);
+                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)();
                 $runtime.leave;
             }
         };
     }
 
     if $object.is-a("Q::Term::Object") && $name eq "eval" {
-        return sub eval-q-term-object($runtime) {
+        return sub eval-q-term-object() {
             my $type = $runtime.get-var(
                 $object.properties<type>.properties<name>.value,
                 $object.properties<type>.properties<frame>);
             if $type ~~ _007::Type {
                 return create($type, |hash($object.properties<propertylist>.properties<properties>.value.map({
-                    .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)($runtime)
+                    .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)()
                 })));
             }
             return create($type, $object.properties<propertylist>.properties<properties>.value.map({
-                .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)($runtime)
+                .properties<key>.value => bound-method(.properties<value>, "eval", $runtime)()
             }));
         };
     }
 
     if $object.is-a("Q::Infix::Assignment") && $name eq "eval" {
-        return sub eval-q-infix-assignment($runtime) {
-            my $value = bound-method($object.properties<rhs>, "eval", $runtime)($runtime);
-            bound-method($object.properties<lhs>, "put-value", $runtime)($value, $runtime);
+        return sub eval-q-infix-assignment() {
+            my $value = bound-method($object.properties<rhs>, "eval", $runtime)();
+            bound-method($object.properties<lhs>, "put-value", $runtime)($value);
             return $value;
         };
     }
 
     if $object.is-a("Q::Infix::And") && $name eq "eval" {
-        return sub eval-q-infix-and($runtime) {
-            my $l = bound-method($object.properties<lhs>, "eval", $runtime)($runtime);
+        return sub eval-q-infix-and() {
+            my $l = bound-method($object.properties<lhs>, "eval", $runtime)();
             return boolify($l, $runtime)
-                ?? bound-method($object.properties<rhs>, "eval", $runtime)($runtime)
+                ?? bound-method($object.properties<rhs>, "eval", $runtime)()
                 !! $l;
         };
     }
 
     if $object.is-a("Q::Infix::Or") && $name eq "eval" {
-        return sub eval-q-infix-or($runtime) {
-            my $l = bound-method($object.properties<lhs>, "eval", $runtime)($runtime);
+        return sub eval-q-infix-or() {
+            my $l = bound-method($object.properties<lhs>, "eval", $runtime)();
             return boolify($l, $runtime)
                 ?? $l
-                !! bound-method($object.properties<rhs>, "eval", $runtime)($runtime);
+                !! bound-method($object.properties<rhs>, "eval", $runtime)();
         };
     }
 
     if $object.is-a("Q::Infix::DefinedOr") && $name eq "eval" {
-        return sub eval-q-infix-definedor($runtime) {
-            my $l = bound-method($object.properties<lhs>, "eval", $runtime)($runtime);
+        return sub eval-q-infix-definedor() {
+            my $l = bound-method($object.properties<lhs>, "eval", $runtime)();
             return $l !=== NONE
                 ?? $l
-                !! bound-method($object.properties<rhs>, "eval", $runtime)($runtime);
+                !! bound-method($object.properties<rhs>, "eval", $runtime)();
         };
     }
 
     if $object.is-a("Q::Infix") && $name eq "eval" {
-        return sub eval-q-infix($runtime) {
-            my $l = bound-method($object.properties<lhs>, "eval", $runtime)($runtime);
-            my $r = bound-method($object.properties<rhs>, "eval", $runtime)($runtime);
-            my $c = bound-method($object.properties<identifier>, "eval", $runtime)($runtime);
+        return sub eval-q-infix() {
+            my $l = bound-method($object.properties<lhs>, "eval", $runtime)();
+            my $r = bound-method($object.properties<rhs>, "eval", $runtime)();
+            my $c = bound-method($object.properties<identifier>, "eval", $runtime)();
             return internal-call($c, $runtime, [$l, $r]);
         };
     }
 
     if $object.is-a("Q::Prefix") && $name eq "eval" {
-        return sub eval-q-prefix($runtime) {
-            my $e = bound-method($object.properties<operand>, "eval", $runtime)($runtime);
-            my $c = bound-method($object.properties<identifier>, "eval", $runtime)($runtime);
+        return sub eval-q-prefix() {
+            my $e = bound-method($object.properties<operand>, "eval", $runtime)();
+            my $c = bound-method($object.properties<identifier>, "eval", $runtime)();
             return internal-call($c, $runtime, [$e]);
         };
     }
 
     if $object.is-a("Q::Postfix::Property") && $name eq "eval" {
-        return sub eval-q-postfix-property($runtime) {
-            my $obj = bound-method($object.properties<operand>, "eval", $runtime)($runtime);
+        return sub eval-q-postfix-property() {
+            my $obj = bound-method($object.properties<operand>, "eval", $runtime)();
             my $propname = $object.properties<property>.properties<name>.value;
             my @props = $obj.type.type-chain.map({ .fields }).flat;
             if $propname (elem) @props {
@@ -454,10 +454,10 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Postfix::Index") && $name eq "eval" {
-        return sub eval-q-postfix-index($runtime) {
-            given bound-method($object.properties<operand>, "eval", $runtime)($runtime) {
+        return sub eval-q-postfix-index() {
+            given bound-method($object.properties<operand>, "eval", $runtime)() {
                 if .is-a("Array") {
-                    my $index = bound-method($object.properties<index>, "eval", $runtime)($runtime);
+                    my $index = bound-method($object.properties<index>, "eval", $runtime)();
                     die X::Subscript::NonInteger.new
                         unless $index.is-a("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
@@ -467,7 +467,7 @@ sub bound-method($object, $name, $runtime) is export {
                     return .value[$index.value];
                 }
                 if .is-a("Dict") -> $dict {
-                    my $property = bound-method($object.properties<index>, "eval", $runtime)($runtime);
+                    my $property = bound-method($object.properties<index>, "eval", $runtime)();
                     die X::Subscript::NonString.new
                         unless $property.is-a("Str");
                     my $propname = $property.value;
@@ -481,46 +481,46 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Postfix::Call") && $name eq "eval" {
-        return sub eval-q-postfix-call($runtime) {
-            my $c = bound-method($object.properties<operand>, "eval", $runtime)($runtime);
+        return sub eval-q-postfix-call() {
+            my $c = bound-method($object.properties<operand>, "eval", $runtime)();
             die "macro is called at runtime"
                 if $c.is-a("Macro");
             die "Trying to invoke a {$c.type.name}" # XXX: make this into an X::
                 unless $c.is-a("Sub");
             my @arguments = $object.properties<argumentlist>.properties<arguments>.value.map({
-                bound-method($_, "eval", $runtime)($runtime)
+                bound-method($_, "eval", $runtime)()
             });
             return internal-call($c, $runtime, @arguments);
         };
     }
 
     if $object.is-a("Q::Postfix") && $name eq "eval" {
-        return sub eval-q-postfix($runtime) {
-            my $e = bound-method($object.properties<operand>, "eval", $runtime)($runtime);
-            my $c = bound-method($object.properties<identifier>, "eval", $runtime)($runtime);
+        return sub eval-q-postfix() {
+            my $e = bound-method($object.properties<operand>, "eval", $runtime)();
+            my $c = bound-method($object.properties<identifier>, "eval", $runtime)();
             return internal-call($c, $runtime, [$e]);
         };
     }
 
     if $object.is-a("Q::Statement::My") && $name eq "run" {
-        return sub run-q-statement-my($runtime) {
+        return sub run-q-statement-my() {
             return
                 if $object.properties<expr> === NONE;
 
-            my $value = bound-method($object.properties<expr>, "eval", $runtime)($runtime);
-            bound-method($object.properties<identifier>, "put-value", $runtime)($value, $runtime);
+            my $value = bound-method($object.properties<expr>, "eval", $runtime)();
+            bound-method($object.properties<identifier>, "put-value", $runtime)($value);
         };
     }
 
     if $object.is-a("Q::Statement::Constant") && $name eq "run" {
-        return sub run-q-statement-constant($runtime) {
+        return sub run-q-statement-constant() {
             # value has already been assigned
         };
     }
 
     if $object.is-a("Q::Statement::If") && $name eq "run" {
-        return sub run-q-statement-if($runtime) {
-            my $expr = bound-method($object.properties<expr>, "eval", $runtime)($runtime);
+        return sub run-q-statement-if() {
+            my $expr = bound-method($object.properties<expr>, "eval", $runtime)();
             if boolify($expr, $runtime) {
                 my $paramcount = $object.properties<block>.properties<parameterlist>.properties<parameters>.value.elems;
                 die X::ParameterMismatch.new(:type("If statement"), :$paramcount, :argcount("0 or 1"))
@@ -534,20 +534,20 @@ sub bound-method($object, $name, $runtime) is export {
                         $object.properties<block>.properties<parameterlist>.properties<parameters>.value[0].properties<identifier>,
                         $expr);
                 }
-                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)($runtime);
+                bound-method($object.properties<block>.properties<statementlist>, "run", $runtime)();
                 $runtime.leave;
             }
             else {
                 given $object.properties<else> {
                     when .is-a("Q::Statement::If") {
-                        bound-method($object.properties<else>, "run", $runtime)($runtime)
+                        bound-method($object.properties<else>, "run", $runtime)()
                     }
                     when .is-a("Q::Block") {
                         $runtime.enter(
                             $runtime.current-frame,
                             $object.properties<else>.properties<static-lexpad>,
                             $object.properties<else>.properties<statementlist>);
-                        bound-method($object.properties<else>.properties<statementlist>, "run", $runtime)($runtime);
+                        bound-method($object.properties<else>.properties<statementlist>, "run", $runtime)();
                         $runtime.leave;
                     }
                 }
@@ -556,17 +556,17 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Statement::Return") && $name eq "run" {
-        return sub run-q-statement-return($runtime) {
+        return sub run-q-statement-return() {
             my $value = $object.properties<expr> === NONE
                 ?? $object.properties<expr>
-                !! bound-method($object.properties<expr>, "eval", $runtime)($runtime);
+                !! bound-method($object.properties<expr>, "eval", $runtime)();
             my $frame = $runtime.get-var("--RETURN-TO--");
             die X::Control::Return.new(:$value, :$frame);
         };
     }
 
     if $object.is-a("Q::Term::Quasi") && $name eq "eval" {
-        return sub eval-q-term-quasi($runtime) {
+        return sub eval-q-term-quasi() {
             sub interpolate($thing) {
                 return wrap($thing.value.map(&interpolate))
                     if $thing.is-a("Array");
@@ -588,20 +588,20 @@ sub bound-method($object, $name, $runtime) is export {
                     if $thing.is-a("Q::Identifier");
 
                 if $thing.is-a("Q::Unquote::Prefix") {
-                    my $prefix = bound-method($thing.properties<expr>, "eval", $runtime)($runtime);
+                    my $prefix = bound-method($thing.properties<expr>, "eval", $runtime)();
                     die X::Type.new(:operation("interpolating an unquote"), :got($prefix), :expected(TYPE<Q::Prefix>))
                         unless $prefix.is-a("Q::Prefix");
                     return create($prefix.type, :identifier($prefix.properties<identifier>), :operand($thing.properties<operand>));
                 }
                 elsif $thing.is-a("Q::Unquote::Infix") {
-                    my $infix = bound-method($thing.properties<expr>, "eval", $runtime)($runtime);
+                    my $infix = bound-method($thing.properties<expr>, "eval", $runtime)();
                     die X::Type.new(:operation("interpolating an unquote"), :got($infix), :expected(TYPE<Q::Infix>))
                         unless $infix.is-a("Q::Infix");
                     return create($infix.type, :identifier($infix.properties<identifier>), :lhs($thing.properties<lhs>), :rhs($thing.properties<rhs>));
                 }
 
                 if $thing.is-a("Q::Unquote") {
-                    my $ast = bound-method($thing.properties<expr>, "eval", $runtime)($runtime);
+                    my $ast = bound-method($thing.properties<expr>, "eval", $runtime)();
                     die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
                         unless $ast.is-a("Q");
                     return $ast;
@@ -620,7 +620,7 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Term::Sub") && $name eq "eval" {
-        return sub eval-q-term-sub($runtime) {
+        return sub eval-q-term-sub() {
             my $name = $object.properties<identifier> === NONE
                 ?? wrap("")
                 !! $object.properties<identifier>.properties<name>;
@@ -633,16 +633,16 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Term::Array") && $name eq "eval" {
-        return sub eval-q-term-array($runtime) {
-            return wrap($object.properties<elements>.value.map({ bound-method($_, "eval", $runtime)($runtime) }));
+        return sub eval-q-term-array() {
+            return wrap($object.properties<elements>.value.map({ bound-method($_, "eval", $runtime)() }));
         };
     }
 
     if $object.is-a("Q::Statement::Throw") && $name eq "run" {
-        return sub eval-q-statement-throw($runtime) {
+        return sub eval-q-statement-throw() {
             my $value = $object.properties<expr> === NONE
                 ?? create(TYPE<Exception>, :message(wrap("Died")))
-                !! bound-method($object.properties<expr>, "eval", $runtime)($runtime);
+                !! bound-method($object.properties<expr>, "eval", $runtime)();
             die X::Type.new(:got($value), :expected(TYPE<Exception>))
                 unless $value.is-a("Exception");
 
@@ -651,10 +651,10 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Postfix::Index") && $name eq "put-value" {
-        return sub put-value-q-postfix-index($value, $runtime) {
-            given bound-method($object.properties<operand>, "eval", $runtime)($runtime) {
+        return sub put-value-q-postfix-index($value) {
+            given bound-method($object.properties<operand>, "eval", $runtime)() {
                 if .is-a("Array") {
-                    my $index = bound-method($object.properties<index>, "eval", $runtime)($runtime);
+                    my $index = bound-method($object.properties<index>, "eval", $runtime)();
                     die X::Subscript::NonInteger.new
                         unless $index.is-a("Int");
                     die X::Subscript::TooLarge.new(:value($index.value), :length(+.value))
@@ -665,7 +665,7 @@ sub bound-method($object, $name, $runtime) is export {
                     return;
                 }
                 if .is-a("Dict") || .is-a("Q") {
-                    my $property = bound-method($object.properties<index>, "eval", $runtime)($runtime);
+                    my $property = bound-method($object.properties<index>, "eval", $runtime)();
                     die X::Subscript::NonString.new
                         unless $property.is-a("Str");
                     my $propname = $property.value;
@@ -678,8 +678,8 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Postfix::Property") && $name eq "put-value" {
-        return sub put-value-q-postfix-property($value, $runtime) {
-            given bound-method($object.properties<operand>, "eval", $runtime)($runtime) {
+        return sub put-value-q-postfix-property($value) {
+            given bound-method($object.properties<operand>, "eval", $runtime)() {
                 if .is-a("Dict") || .is-a("Q") {
                     my $propname = $object.properties<property>.properties<name>.value;
                     $runtime.put-property($_, $propname, $value);
@@ -691,32 +691,32 @@ sub bound-method($object, $name, $runtime) is export {
     }
 
     if $object.is-a("Q::Statement::BEGIN") && $name eq "run" {
-        return sub run-q-statement-begin($runtime) {
+        return sub run-q-statement-begin() {
             # a BEGIN block does not run at runtime
         };
     }
 
     if $object.is-a("Q::Term::Regex") && $name eq "eval" {
-        return sub eval-q-term-regex($runtime) {
+        return sub eval-q-term-regex() {
             create(TYPE<Regex>, :contents($object.properties<contents>));
         };
     }
 
     if $object.is-a("Q::Literal::None") && $name eq "eval" {
-        return sub eval-q-literal-none($runtime) {
+        return sub eval-q-literal-none() {
             NONE;
         };
     }
 
     if $object.is-a("Q::Literal::Bool") && $name eq "eval" {
-        return sub eval-q-literal-bool($runtime) {
+        return sub eval-q-literal-bool() {
             $object.properties<value>;
         };
     }
 
     if $object.is-a("Q::Expr::StatementListAdapter") && $name eq "eval" {
-        return sub eval-q-expr-statementlistadapter($runtime) {
-            return bound-method($object.properties<statementlist>, "run", $runtime)($runtime);
+        return sub eval-q-expr-statementlistadapter() {
+            return bound-method($object.properties<statementlist>, "run", $runtime)();
         };
     }
 
@@ -1208,7 +1208,7 @@ sub internal-call(_007::Object $sub, $runtime, @arguments) is export {
     }
     $runtime.register-subhandler;
     my $frame = $runtime.current-frame;
-    my $value = bound-method($sub.properties<statementlist>, "run", $runtime)($runtime);
+    my $value = bound-method($sub.properties<statementlist>, "run", $runtime)();
     $runtime.leave;
     CATCH {
         when X::Control::Return {
