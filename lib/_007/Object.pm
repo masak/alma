@@ -155,21 +155,17 @@ sub create(_007::Type $type, *%properties) is export {
     return _007::Object.new(:$type, :%properties);
 }
 
-class _007::Object::Enum is _007::Object {
-    has Str $.name;
-}
-
 class _007::Object::Wrapped is _007::Object {
     has $.value;
 }
 
-constant NONE is export = _007::Object::Enum.new(:type(TYPE<NoneType>), :name<None>);
+constant NONE is export = create(TYPE<NoneType>, :name(_007::Object::Wrapped.new(:type(TYPE<Str>), :value("None"))));
 
 # Now we can install NONE into TYPE<Object>.base
 TYPE<Object>.install-base(NONE);
 
-constant TRUE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<True>);
-constant FALSE is export = _007::Object::Enum.new(:type(TYPE<Bool>), :name<False>);
+constant TRUE is export = create(TYPE<Bool>, :name(_007::Object::Wrapped.new(:type(TYPE<Str>), :value("True"))));
+constant FALSE is export = create(TYPE<Bool>, :name(_007::Object::Wrapped.new(:type(TYPE<Str>), :value("False"))));
 
 sub escaped($name) {
     sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
@@ -734,13 +730,13 @@ sub bound-method($object, $name, $runtime) is export {
 
     if $object.is-a("Bool") && $name eq "Str" {
         return sub str-bool() {
-            return wrap($object.name);
+            return $object.properties<name>;
         }
     }
 
     if $object.is-a("NoneType") && $name eq "Str" {
         return sub str-nonetype() {
-            return wrap($object.name);
+            return $object.properties<name>;
         }
     }
 

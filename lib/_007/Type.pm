@@ -133,7 +133,7 @@ BEGIN {
     ###     say(None // "default");     # --> `default`
     ###     say("value" // "default");  # --> `value`
     ###
-    TYPE<NoneType> = _007::Type.new(:name<NoneType>);
+    TYPE<NoneType> = _007::Type.new(:name<NoneType>, :fields["name"]);
 
     ### ### Bool
     ###
@@ -178,7 +178,7 @@ BEGIN {
     ###     say(None && "!");       # --> `None`
     ###     say(None || "!");       # --> `!`
     ###
-    TYPE<Bool> = _007::Type.new(:name<Bool>);
+    TYPE<Bool> = _007::Type.new(:name<Bool>, :fields["name"]);
 }
 
 ### ### Int
