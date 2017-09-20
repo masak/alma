@@ -520,7 +520,7 @@ TYPE<Q::Identifier> = _007::Type.new(
     :base(TYPE<Q::Term>),
     :fields[
         { :name<name>, :type<Str> },
-        { :name<frame>, :type<Object> },                              # XXX: make optional
+        { :name<frame>, :type("Dict | NoneType") },                              # XXX: make optional
     ],
 );
 
@@ -637,7 +637,7 @@ TYPE<Q::Term::Sub> = _007::Type.new(
     :name<Q::Term::Sub>,
     :base(TYPE<Q::Term>),
     :fields[
-        { :name<identifier>, :type<Object> },                               # XXX: make optional
+        { :name<identifier>, :type("Q::Identifier | NoneType") },           # XXX: make optional
         { :name<traitlist>, :type<Q::TraitList> },                          # XXX: give initializer
         { :name<block>, :type<Q::Block> },
     ],
@@ -659,7 +659,7 @@ TYPE<Q::Block> = _007::Type.new(
     :fields[
         { :name<parameterlist>, :type<Q::ParameterList> },
         { :name<statementlist>, :type<Q::StatementList> },
-        { :name<static-lexpad>, :type<Object> },                              # XXX: make optional
+        { :name<static-lexpad>, :type("Dict | NoneType") },                         # XXX: make optional
     ],
 );
 
@@ -672,8 +672,8 @@ TYPE<Q::Prefix> = _007::Type.new(
     :name<Q::Prefix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Object> },
-        { :name<operand>, :type<Object> },
+        { :name<identifier>, :type("Q::Identifier | NoneType") },
+        { :name<operand>, :type("Q::Expr | NoneType") },
     ],
 );
 
@@ -723,9 +723,9 @@ TYPE<Q::Infix> = _007::Type.new(
     :name<Q::Infix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Object> },
-        { :name<lhs>, :type<Object> },
-        { :name<rhs>, :type<Object> },
+        { :name<identifier>, :type("Q::Identifier | NoneType") },
+        { :name<lhs>, :type("Q::Expr | NoneType") },
+        { :name<rhs>, :type("Q::Expr | NoneType") },
     ],
 );
 
@@ -876,8 +876,8 @@ TYPE<Q::Postfix> = _007::Type.new(
     :name<Q::Postfix>,
     :base(TYPE<Q::Expr>),
     :fields[
-        { :name<identifier>, :type<Object> },
-        { :name<operand>, :type<Object> },
+        { :name<identifier>, :type("Q::Identifier | NoneType") },
+        { :name<operand>, :type("Q::Expr | Q::Unquote | NoneType") },      # XXX: Q::Unquote needs mulling over
     ],
 );
 
@@ -890,7 +890,7 @@ TYPE<Q::Postfix::Index> = _007::Type.new(
     :name<Q::Postfix::Index>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<index>, :type<Object> },
+        { :name<index>, :type("Q::Expr | NoneType") },
     ],
 );
 
@@ -902,7 +902,7 @@ TYPE<Q::Postfix::Call> = _007::Type.new(
     :name<Q::Postfix::Call>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<argumentlist>, :type<Object> },
+        { :name<argumentlist>, :type("Q::ArgumentList | Q::Unquote | NoneType") },  # XXX: Q::Unquote needs mulling over
     ],
 );
 
@@ -914,7 +914,7 @@ TYPE<Q::Postfix::Property> = _007::Type.new(
     :name<Q::Postfix::Property>,
     :base(TYPE<Q::Postfix>),
     :fields[
-        { :name<property>, :type<Object> },
+        { :name<property>, :type("Q::Expr | NoneType") },
     ],
 );
 
@@ -1028,7 +1028,7 @@ TYPE<Q::Statement::My> = _007::Type.new(
     :base(TYPE<Q::Statement>),
     :fields[
         { :name<identifier>, :type<Q::Identifier> },
-        { :name<expr>, :type<Object> },                     # XXX: make optional
+        { :name<expr>, :type("Q::Expr | NoneType") },                     # XXX: make optional
     ],
 );
 
@@ -1067,7 +1067,7 @@ TYPE<Q::Statement::If> = _007::Type.new(
     :fields[
         { :name<expr>, :type<Q::Expr> },
         { :name<block>, :type<Q::Block> },
-        { :name<else>, :type<Object> },
+        { :name<else>, :type("Q::Block | Q::Statement::If | NoneType") },
     ],
 );
 
@@ -1124,7 +1124,7 @@ TYPE<Q::Statement::Return> = _007::Type.new(
     :name<Q::Statement::Return>,
     :base(TYPE<Q::Statement>),
     :fields[
-        { :name<expr>, :type<Object> },                                # XXX: make optional
+        { :name<expr>, :type("Q::Expr | NoneType") },                                # XXX: make optional
     ],
 );
 
