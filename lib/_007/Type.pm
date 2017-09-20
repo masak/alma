@@ -317,6 +317,12 @@ TYPE<Array> = _007::Type.new(:name<Array>);
 ###
 ###     say(type({}));              # --> `<type Dict>`
 ###
+### Dicts have various methods on them:
+###
+###     my d = { foo: 1, bar: 2 };
+###     say(d.size());              # --> `2`
+###     say(d.keys().sort());       # --> `["bar", "foo"]`
+###
 TYPE<Dict> = _007::Type.new(:name<Dict>);
 
 ### ### Exception
