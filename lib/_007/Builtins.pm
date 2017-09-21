@@ -419,30 +419,18 @@ sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
             .key => .value;
         }
         when .value ~~ Block {
-            my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
-            my $parameters = wrap(@elements);
-            my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
-            my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
-            .key => wrap-fn(.value, .key, $parameterlist, $statementlist);
+            .key => wrap-fn(.value, .key);
         }
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
             install-op($name, .value);
-            my @elements = .value.qtype.fields.map({ .<name> }).grep({ $_ ne "identifier" })».&parameter;
-            my $parameters = wrap(@elements);
-            my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
-            my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
-            .key => wrap-fn(sub () {}, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(sub () {}, $name);
         }
         when .value ~~ Placeholder::Op {
             my $name = .key;
             install-op($name, .value);
             my &fn = .value.fn;
-            my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameters = wrap(@elements);
-            my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
-            my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
-            .key => wrap-fn(&fn, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(&fn, $name);
         }
         default { die "Unknown type {.value.^name}" }
     };

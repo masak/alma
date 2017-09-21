@@ -426,21 +426,7 @@ sub bound-method($object, $name, $runtime) is export {
                 # XXX: don't want to do it like this
                 # think I want a BoundMethod type instead
                 my &fn = bound-method($obj, $propname, $runtime);
-                my $name = &fn.name;
-                my &ditch-sigil = { $^str.substr(1) };
-                my &parameter = {
-                    create(TYPE<Q::Parameter>,
-                        :identifier(create(TYPE<Q::Identifier>,
-                            :name(wrap($^value))
-                            :frame(NONE))
-                        )
-                    )
-                };
-                my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-                my $parameters = wrap(@elements);
-                my $parameterlist = create(TYPE<Q::ParameterList>, :$parameters);
-                my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
-                return wrap-fn(&fn, $name, $parameterlist, $statementlist);
+                return wrap-fn(&fn);
             }
         };
     }
@@ -1170,7 +1156,19 @@ sub wrap($value) is export {
     }
 }
 
-sub wrap-fn(&value, Str $name, $parameterlist, $statementlist) is export {
+sub wrap-fn(&value, $name = &value.name) is export {
+    my &ditch-sigil = { $^str.substr(1) };
+    my &parameter = -> $name {
+        create(TYPE<Q::Parameter>,
+            :identifier(create(TYPE<Q::Identifier>,
+                :name(wrap($name))
+                :frame(NONE))
+            )
+        )
+    };
+    my @elements = &value.signature.params».name».&ditch-sigil».&parameter;
+    my $parameterlist = create(TYPE<Q::ParameterList>, :parameters(wrap(@elements)));
+    my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));
     my %properties =
         name => wrap($name),
         :$parameterlist,
