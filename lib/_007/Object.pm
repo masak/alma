@@ -1132,6 +1132,12 @@ sub bound-method($object, $name, $runtime) is export {
     die X::Property::NotFound.new(:propname($name), :type($object.type.name));
 }
 
+# There used to be a &wrap function in Builtins.pm, which simulataneously did too much and too little.
+# It did too much in that it *recursively* wrapped array types, to any depth. It did too little in that
+# it silently passed over values that were already effectively wrapped.
+# This new version intentionally has a much thinner interface, in that it expects an *unwrapped*
+# (Perl 6-level) type, and returns a wrapped equivalent. It also does no structural recursion; the
+# elements of arrays and values of dicts have to be wrapped on the caller side.
 sub wrap($value) is export {
     if $value ~~ Bool {
         return $value ?? TRUE !! FALSE;
