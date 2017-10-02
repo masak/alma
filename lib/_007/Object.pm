@@ -125,7 +125,11 @@ sub create(_007::Type $type, *%properties) is export {
 
         my $value = %properties{$property};
         my $type-union = %fields{$property}<type>;
-        for $type-union.split(/ \h* "|" \h* /) -> $fieldtypename {
+        my @type-union = $type-union.split(/ \h* "|" \h* /);
+        if %fields{$property}<optional> {
+            @type-union.push("NoneType");
+        }
+        for @type-union -> $fieldtypename {
             my $fieldtype = TYPE{$fieldtypename}
                 or die "No such type {$fieldtypename}";
             next PROPERTY
@@ -134,16 +138,15 @@ sub create(_007::Type $type, *%properties) is export {
         die X::Type.new(
             :operation("instantiation of {$type.name} with property $property"),
             :got($value),
-            :expected(_007::Type.new(:name($type-union))),
+            :expected(_007::Type.new(:name(@type-union.join(" | ")))),
         );
     }
-    # XXX: need to screen for required properties by traversing @.fields, but we don't have the
-    #      infrastructure in terms of a way to mark up a field as required
 
-    # XXX: for now, let's pretend all properties are required. not pleasant, but we can live with it for a short time
-    for %fields.keys -> $field {
-        die "Need to pass property '$field' when creating a {$type.name}"
-            unless $field (elem) $seen;
+    for %fields.kv -> $name, $field {
+        next if $field<optional>;
+
+        die "Need to pass property '$name' when creating a {$type.name}"
+            unless $name (elem) $seen;
     }
 
     # XXX: ditto for property default values

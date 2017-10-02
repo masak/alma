@@ -673,19 +673,20 @@ class _007::Parser::Actions {
         my $type = $<identifier>.ast.properties<name>.value;
         my $type-obj = $*runtime.get-var($type);
 
-        my $known-properties = set($type-obj.type-chain.reverse.map({ .fields }).flat.map({ .<name> }));
+        my @known-properties = $type-obj.type-chain.reverse.map({ .fields }).flat;
         my $seen-properties = set();
         for $<propertylist>.ast.properties<properties>.value -> $p {
             my $property = $p.properties<key>.value;
             # Here we make a slight exception for the wrapped types
             next if $property eq "value" && $type eq "Int" | "Str" | "Array" | "Dict";
             die X::Property::NotDeclared.new(:$type, :$property)
-                unless $property (elem) $known-properties;
+                unless $property (elem) @known-properties.map({ .<name> });
             $seen-properties (|)= $property;
         }
-        for $known-properties.keys -> $property {
-            # XXX: once we handle optional properties, we will `next` here
+        for @known-properties -> $p {
+            next if $p<optional>;
 
+            my $property = $p<name>;
             die X::Property::Required.new(:$type, :$property)
                 unless $property (elem) $seen-properties;
         }
