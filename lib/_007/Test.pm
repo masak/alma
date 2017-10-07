@@ -9,7 +9,7 @@ use Test;
 sub read(Str $ast) is export {
     sub n($type, $op) {
         my $name = wrap($type ~ ":<$op>");
-        return create(TYPE<Q::Identifier>, :$name, :frame(NONE));
+        return create(TYPE<Q::Identifier>, :$name);
     }
 
     my %q_lookup =
@@ -110,7 +110,7 @@ sub read(Str $ast) is export {
                 if $qname ~~ /^ [prefix | infix | postfix] ":"/ {
                     # XXX: it stinks that we have to do this
                     my $name = wrap($qname);
-                    %arguments<identifier> = create(TYPE<Q::Identifier>, :$name, :frame(NONE));
+                    %arguments<identifier> = create(TYPE<Q::Identifier>, :$name);
                     shift @attributes;  # $.identifier
                 }
             }();
@@ -136,9 +136,6 @@ sub read(Str $ast) is export {
                 }
             }
             # XXX: these exceptions can go away once we support initializers
-            if $qtype === TYPE<Q::Identifier> {
-                %arguments<frame> //= NONE;
-            }
             if $qtype === TYPE<Q::Block> {
                 %arguments<static-lexpad> //= wrap({});
             }

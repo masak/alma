@@ -4,9 +4,7 @@ use _007::Builtins;
 use _007::OpScope;
 
 constant NO_OUTER = wrap({});
-constant RETURN_TO = create(TYPE<Q::Identifier>,
-    :name(wrap("--RETURN-TO--")),
-    :frame(NONE));
+constant RETURN_TO = create(TYPE<Q::Identifier>, :name(wrap("--RETURN-TO--")));
 
 class _007::Runtime {
     has $.input;
@@ -40,9 +38,7 @@ class _007::Runtime {
         });
         @!frames.push($frame);
         for $static-lexpad.value.kv -> $name, $value {
-            my $identifier = create(TYPE<Q::Identifier>,
-                :name(wrap($name)),
-                :frame(NONE));
+            my $identifier = create(TYPE<Q::Identifier>, :name(wrap($name)));
             self.declare-var($identifier, $value);
         }
         for $statementlist.properties<statements>.value.kv -> $i, $_ {
@@ -144,9 +140,7 @@ class _007::Runtime {
     method load-builtins {
         my $opscope = $!builtin-opscope;
         for builtins(:$.input, :$.output, :$opscope, :runtime(self)) -> Pair (:key($name), :$value) {
-            my $identifier = create(TYPE<Q::Identifier>,
-                :name(wrap($name)),
-                :frame(NONE));
+            my $identifier = create(TYPE<Q::Identifier>, :name(wrap($name)));
             self.declare-var($identifier, $value);
         }
     }

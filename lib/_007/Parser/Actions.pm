@@ -657,7 +657,7 @@ class _007::Parser::Actions {
 
         my $name = $<identifier> && $<identifier>.ast.properties<name>;
         my $identifier = $<identifier>
-            ?? create(TYPE<Q::Identifier>, :$name, :frame(NONE))
+            ?? create(TYPE<Q::Identifier>, :$name)
             !! NONE;
         make create(TYPE<Q::Term::Sub>, :$identifier, :$traitlist, :$block);
     }
@@ -693,10 +693,7 @@ class _007::Parser::Actions {
 
         make create(TYPE<Q::Term::Object>,
             # XXX: couldn't we just pass $type here?
-            :type(create(TYPE<Q::Identifier>,
-                :name(wrap($type)),
-                :frame(NONE),
-            )),
+            :type(create(TYPE<Q::Identifier>, :name(wrap($type)))),
             :propertylist($<propertylist>.ast));
     }
 
@@ -738,7 +735,7 @@ class _007::Parser::Actions {
             :static-lexpad(wrap({})),
         );
         my $name = $<identifier>.ast.properties<name>;
-        my $identifier = create(TYPE<Q::Identifier>, :$name, :frame(NONE));
+        my $identifier = create(TYPE<Q::Identifier>, :$name);
         make create(TYPE<Q::Property>,
             :key($name),
             :value(create(TYPE<Q::Term::Sub>,
@@ -810,7 +807,7 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\\\'] = '\\';
         }();
         my $name = wrap($value);
-        make create(TYPE<Q::Identifier>, :$name, :frame(NONE));
+        make create(TYPE<Q::Identifier>, :$name);
     }
 
     method argumentlist($/) {

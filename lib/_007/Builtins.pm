@@ -407,12 +407,7 @@ sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
     }
 
     my &ditch-sigil = { $^str.substr(1) };
-    my &parameter = {
-        create(TYPE<Q::Parameter>, :identifier(create(TYPE<Q::Identifier>,
-            :name(wrap($^value)),
-            :frame(NONE),
-        )))
-    };
+    my &parameter = { create(TYPE<Q::Parameter>, :identifier(create(TYPE<Q::Identifier>, :name(wrap($^value))))) };
 
     return @builtins.map: {
         when .value ~~ _007::Type {

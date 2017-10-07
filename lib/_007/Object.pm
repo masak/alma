@@ -143,10 +143,14 @@ sub create(_007::Type $type, *%properties) is export {
     }
 
     for %fields.kv -> $name, $field {
-        next if $field<optional>;
+        next if $name (elem) $seen;
 
-        die "Need to pass property '$name' when creating a {$type.name}"
-            unless $name (elem) $seen;
+        if $field<optional> {
+            %properties{$name} = none();
+        }
+        else {
+            die "Need to pass property '$name' when creating a {$type.name}";
+        }
     }
 
     # XXX: ditto for property default values
@@ -159,6 +163,7 @@ class _007::Object::Wrapped is _007::Object {
 }
 
 constant NONE is export = create(TYPE<NoneType>, :name(_007::Object::Wrapped.new(:type(TYPE<Str>), :value("None"))));
+sub none() { NONE }
 
 # Now we can install NONE into TYPE<Object>.base
 TYPE<Object>.install-base(NONE);
@@ -1088,7 +1093,7 @@ sub bound-method($object, $name, $runtime) is export {
             return wrap(hash($thing.value.map(&interpolate-entry)))
                 if $thing.is-a("Dict");
 
-            return create($thing.type, :name($thing.properties<name>), :frame(NONE))
+            return create($thing.type, :name($thing.properties<name>))
                 if $thing.is-a("Q::Identifier");
 
             return $thing
@@ -1167,14 +1172,7 @@ sub wrap($value) is export {
 
 sub wrap-fn(&value, $name = &value.name) is export {
     my &ditch-sigil = { $^str.substr(1) };
-    my &parameter = -> $name {
-        create(TYPE<Q::Parameter>,
-            :identifier(create(TYPE<Q::Identifier>,
-                :name(wrap($name))
-                :frame(NONE))
-            )
-        )
-    };
+    my &parameter = -> $name { create(TYPE<Q::Parameter>, :identifier(create(TYPE<Q::Identifier>, :name(wrap($name))))) };
     my @elements = &value.signature.params».name».&ditch-sigil».&parameter;
     my $parameterlist = create(TYPE<Q::ParameterList>, :parameters(wrap(@elements)));
     my $statementlist = create(TYPE<Q::StatementList>, :statements(wrap([])));

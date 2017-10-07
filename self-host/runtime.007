@@ -23,10 +23,7 @@ my Runtime = {
             frames.push(frame);
             for static_lexpad.keys() -> name {
                 my value = static_lexpad[name];
-                my identifier = new Q::Identifier {
-                    name,
-                    frame: None,
-                };
+                my identifier = new Q::Identifier { name };
                 declare_var(identifier, value);
             }
         }

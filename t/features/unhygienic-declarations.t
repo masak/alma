@@ -6,10 +6,7 @@ use _007::Test;
     my $program = q:to/./;
         macro moo() {
             return new Q::Statement::My {
-                identifier: new Q::Identifier {
-                    name: "agent_name",
-                    frame: None,
-                },
+                identifier: new Q::Identifier { name: "agent_name" },
                 expr: new Q::Literal::Str {
                     value: "James Bond"
                 }

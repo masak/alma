@@ -520,7 +520,7 @@ TYPE<Q::Identifier> = _007::Type.new(
     :base(TYPE<Q::Term>),
     :fields[
         { :name<name>, :type<Str> },
-        { :name<frame>, :type("Dict | NoneType") },                              # XXX: make optional
+        { :name<frame>, :type("Dict"), :optional },
     ],
 );
 

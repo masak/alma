@@ -28,10 +28,8 @@ use _007::Test;
     my $program = q:to/./;
         macro foo() {
             return new Q::Postfix::Call {
-                # XXX: can remove `frame: None` once we have property initializers
-                identifier: new Q::Identifier { name: "postfix:()", frame: None },
-                # XXX: and here
-                operand: new Q::Identifier { name: "say", frame: None },
+                identifier: new Q::Identifier { name: "postfix:()" },
+                operand: new Q::Identifier { name: "say" },
                 argumentlist: new Q::ArgumentList {
                     arguments: [new Q::Literal::Str { value: "OH HAI" }]
                 }

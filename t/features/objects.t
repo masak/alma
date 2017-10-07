@@ -4,11 +4,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier {
-            name: "foo",
-            # XXX: can remove this later
-            frame: None,
-        };
+        my q = new Q::Identifier { name: "foo" };
 
         say(q.name);
         .
@@ -32,11 +28,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier {
-            name: "foo",
-            # XXX: can remove this later
-            frame: None,
-        };
+        my q = new Q::Identifier { name: "foo" };
 
         say(type(q));
         .

@@ -4,9 +4,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        # XXX: can remove `frame: None` once we have proper initializers
         my q = new Q::Statement::My {
-            identifier: new Q::Identifier { name: "foo", frame: None },
+            identifier: new Q::Identifier { name: "foo" },
             # XXX: and `expr: None` too
             expr: None,
         };
@@ -61,8 +60,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = new Q::Statement::Sub {
-            # XXX: can remove `frame: None` once we have proper initializers
-            identifier: new Q::Identifier { name: "foo", frame: None },
+            identifier: new Q::Identifier { name: "foo" },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
                 statementlist: new Q::StatementList { statements: [] },
@@ -84,8 +82,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my q = new Q::Statement::Macro {
-            # XXX: can remove `frame: None` once we have proper initializers
-            identifier: new Q::Identifier { name: "moo", frame: None },
+            identifier: new Q::Identifier { name: "moo" },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
                 statementlist: new Q::StatementList { statements: [] },

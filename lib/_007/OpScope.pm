@@ -19,10 +19,7 @@ class _007::OpScope {
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         my $name = "$type:$op";
-        my $identifier = create(TYPE<Q::Identifier>,
-            :name(wrap($name)),
-            :frame(NONE),
-        );
+        my $identifier = create(TYPE<Q::Identifier>, :name(wrap($name)));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
             prefix => create(TYPE<Q::Prefix>, :$identifier, :operand(NONE)),

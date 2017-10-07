@@ -348,8 +348,7 @@ use _007::Test;
     outputs 'macro foo() {}; say(foo == foo)', "True\n", "a macro is equal to itself";
     outputs 'say(say == say)', "True\n", "a built-in sub is equal to itself";
     outputs 'say(infix:<+> == infix:<+>)', "True\n", "a built-in operator is equal to itself";
-    # XXX: can skip `frame` prop once initializers exist
-    outputs 'say(new Q::Identifier { name: "foo", frame: None } == new Q::Identifier { name: "foo", frame: None })', "True\n",
+    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "foo" })', "True\n",
         "two Qtrees with equal content are equal";
     outputs 'my a = []; for [1, 2] { sub fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
         "True\n", "the same sub from two different frames compares favorably to itself";
@@ -369,8 +368,7 @@ use _007::Test;
         "subs with different parameters are unequal";
     outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "False\n",
         "subs with different bodies are unequal";
-    # XXX: can skip `frame` prop once initializers exist
-    outputs 'say(new Q::Identifier { name: "foo", frame: None } == new Q::Identifier { name: "bar", frame: None })', "False\n",
+    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "bar" })', "False\n",
         "two Qtrees with distinct content are unequal";
 }
 
@@ -458,7 +456,7 @@ use _007::Test;
         my a = [1, 2, 3];
         my d = { foo: 12 };
         sub f() { return 7 };
-        my o = new Q::Identifier { name: "19", frame: None };
+        my o = new Q::Identifier { name: "19" };
 
         say(-a[1]);
         say(-d["foo"]);
