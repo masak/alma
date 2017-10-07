@@ -144,9 +144,6 @@ sub read(Str $ast) is export {
                     :traits(wrap([])),
                 );
             }
-            if $qtype === TYPE<Q::Statement::My> {
-                %arguments<expr> //= NONE;
-            }
             if $qtype === TYPE<Q::Statement::If> {
                 %arguments<else> //= NONE;
             }

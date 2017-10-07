@@ -6,8 +6,6 @@ use _007::Test;
     my $program = q:to/./;
         my q = new Q::Statement::My {
             identifier: new Q::Identifier { name: "foo" },
-            # XXX: and `expr: None` too
-            expr: None,
         };
         say(q.expr);
         .

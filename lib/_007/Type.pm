@@ -1028,7 +1028,7 @@ TYPE<Q::Statement::My> = _007::Type.new(
     :base(TYPE<Q::Statement>),
     :fields[
         { :name<identifier>, :type<Q::Identifier> },
-        { :name<expr>, :type("Q::Expr | NoneType") },                     # XXX: make optional
+        { :name<expr>, :type("Q::Expr"), :optional },
     ],
 );
 
