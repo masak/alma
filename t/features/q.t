@@ -43,8 +43,6 @@ use _007::Test;
                 # XXX: can remove this later
                 "static-lexpad": {},
             },
-            # XXX: and this
-            else: None,
         };
         say(q.else);
         .

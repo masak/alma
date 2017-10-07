@@ -1067,7 +1067,7 @@ TYPE<Q::Statement::If> = _007::Type.new(
     :fields[
         { :name<expr>, :type<Q::Expr> },
         { :name<block>, :type<Q::Block> },
-        { :name<else>, :type("Q::Block | Q::Statement::If | NoneType") },
+        { :name<else>, :type("Q::Block | Q::Statement::If"), :optional },
     ],
 );
 
