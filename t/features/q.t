@@ -18,8 +18,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        # XXX: Can remove `expr: None` once we have proper initializers
-        my q = new Q::Statement::Return { expr: None };
+        my q = new Q::Statement::Return {};
         say(q.expr);
         .
 

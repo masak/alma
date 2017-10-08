@@ -144,9 +144,6 @@ sub read(Str $ast) is export {
                     :traits(wrap([])),
                 );
             }
-            if $qtype === TYPE<Q::Statement::Return> {
-                %arguments<expr> //= NONE;
-            }
             make create($qtype, |%arguments);
         }
         method expr:symbol ($/) { make ~$/ }
