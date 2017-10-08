@@ -12,7 +12,7 @@ for "lib/_007/Parser/Actions.pm".IO.lines -> $line {
     }
 
     if $interested {
-        if $line ~~ /"Q::Block.new("/ {
+        if $line ~~ /"create(TYPE<Q::Block>"/ {
             $blocks-minus-finishblocks++;
         }
         if $line ~~ /"self.finish-block("/ {

@@ -1,5 +1,7 @@
 use v6;
 use Test;
+use _007;
+use _007::Object;
 use _007::Test;
 
 {
@@ -7,9 +9,10 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    my $expected = read(
+    # XXX: surely there's a better way to do this?
+    my $expected = bound-method(read(
         "(statementlist (stexpr (infix:+ (int 1) (int 1))))"
-    ).block.statementlist.statements.elements[0].expr.Str;
+    ).properties<block>.properties<statementlist>.properties<statements>.value[0].properties<expr>, "Str", _007.runtime)().value;
     outputs $program, "$expected\n", "Basic quasi quoting";
 }
 
@@ -208,14 +211,14 @@ use _007::Test;
         say(type(quasi @ Q::Term { None }));
         say(type(quasi @ Q::Term { "James Bond" }));
         say(type(quasi @ Q::Term { [0, 0, 7] }));
-        say(type(quasi @ Q::Term { new Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term { { james: "Bond" } }));
         say(type(quasi @ Q::Term { quasi { say("oh, james!") } }));
         say(type(quasi @ Q::Term { (0 + 0 + 7) }));
         .
 
     outputs $program,
         <Literal::Int Literal::None Literal::Str
-            Term::Array Term::Object Term::Quasi
+            Term::Array Term::Dict Term::Quasi
             Infix::Addition>\
             .map({ "<type Q::$_>\n" }).join,
         "quasi @ Q::Term";
@@ -231,10 +234,18 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Object { new Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term::Object { new Object { } }));
         .
 
     outputs $program, "<type Q::Term::Object>\n", "quasi @ Q::Term::Object";
+}
+
+{
+    my $program = q:to/./;
+        say(type(quasi @ Q::Term::Dict { { } }));
+        .
+
+    outputs $program, "<type Q::Term::Dict>\n", "quasi @ Q::Term::Dict";
 }
 
 {

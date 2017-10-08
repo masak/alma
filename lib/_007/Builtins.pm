@@ -1,84 +1,99 @@
-use _007::Val;
-use _007::Q;
+use _007::Type;
+use _007::Object;
 
-sub builtins(:$input!, :$output!, :$opscope!) is export {
-    sub wrap($_) {
-        when Val | Q { $_ }
-        when Nil  { NONE }
-        when Bool { Val::Bool.new(:value($_)) }
-        when Int  { Val::Int.new(:value($_)) }
-        when Str  { Val::Str.new(:value($_)) }
-        when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
-        default { die "Got some unknown value of type ", .^name }
-    }
-
+sub builtins(:$input!, :$output!, :$opscope!, :$runtime) is export {
     # These multis are used below by infix:<==> and infix:<!=>
     multi equal-value($, $) { False }
-    multi equal-value(Val::NoneType, Val::NoneType) { True }
-    multi equal-value(Val::Bool $l, Val::Bool $r) { $l.value == $r.value }
-    multi equal-value(Val::Int $l, Val::Int $r) { $l.value == $r.value }
-    multi equal-value(Val::Str $l, Val::Str $r) { $l.value eq $r.value }
-    multi equal-value(Val::Array $l, Val::Array $r) {
-        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+    multi equal-value(_007::Object $l, _007::Object $r) {
+        return False
+            unless $l.type === $r.type;
+        if $l.is-a("Int") {
+            return $l.value == $r.value;
+        }
+        elsif $l.is-a("Str") {
+            return $l.value eq $r.value;
+        }
+        elsif $l.is-a("Array") {
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
+
+            sub equal-at-index($i) {
+                equal-value($l.value[$i], $r.value[$i]);
+            }
+
+            return [&&] $l.value == $r.value, |(^$l.value).map(&equal-at-index);
+        }
+        elsif $l.is-a("Dict") {
+            if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+                return $l === $r;
+            }
+            %*equality-seen{$l.WHICH}++;
+            %*equality-seen{$r.WHICH}++;
+
+            sub equal-at-key(Str $key) {
+                equal-value($l.value{$key}, $r.value{$key});
+            }
+
+            return [&&] $l.value.keys.sort.perl eq $r.value.keys.sort.perl, |($l.value.keys).map(&equal-at-key);
+        }
+        elsif $l.is-a("NoneType") {
+            return True;
+        }
+        elsif $l.is-a("Bool") {
             return $l === $r;
         }
-        %*equality-seen{$l.WHICH}++;
-        %*equality-seen{$r.WHICH}++;
-
-        sub equal-at-index($i) {
-            equal-value($l.elements[$i], $r.elements[$i]);
+        elsif $l.is-a("Sub") {
+            return $l.properties<name>.value eq $r.properties<name>.value
+                && equal-value($l.properties<parameterlist>, $r.properties<parameterlist>)
+                && equal-value($l.properties<statementlist>, $r.properties<statementlist>);
         }
+        elsif $l.is-a("Q") {
+            sub same-propvalue($prop) {
+                equal-value($l.properties{$prop}, $r.properties{$prop});
+            }
 
-        [&&] $l.elements == $r.elements,
-            |(^$l.elements).map(&equal-at-index);
-    }
-    multi equal-value(Val::Object $l, Val::Object $r) {
-        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
-            return $l === $r;
+            [&&] $l.type === $r.type,
+                |$l.type.type-chain.reverse.map({ .fields }).flat.map({ .<name> }).grep({ $_ ne "frame" }).map(&same-propvalue);
         }
-        %*equality-seen{$l.WHICH}++;
-        %*equality-seen{$r.WHICH}++;
-
-        sub equal-at-key(Str $key) {
-            equal-value($l.properties{$key}, $r.properties{$key});
+        else {
+            die "Unknown type ", $l.type.^name;
         }
-
-        [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
-            |($l.properties.keys).map(&equal-at-key);
     }
-    multi equal-value(Val::Type $l, Val::Type $r) {
-        $l.type === $r.type
-    }
-    multi equal-value(Val::Sub $l, Val::Sub $r) {
-        $l.name eq $r.name
-            && equal-value($l.parameterlist, $r.parameterlist)
-            && equal-value($l.statementlist, $r.statementlist)
-    }
-    multi equal-value(Q $l, Q $r) {
-        sub same-avalue($attr) {
-            equal-value($attr.get_value($l), $attr.get_value($r));
-        }
-
-        [&&] $l.WHAT === $r.WHAT,
-            |$l.attributes.map(&same-avalue);
-    }
+    multi equal-value(_007::Type $l, _007::Type $r) { $l === $r }
 
     multi less-value($, $) {
-        die X::TypeCheck.new(
+        die X::Type.new(
             :operation<less>,
             :got($_),
-            :expected(Val::Int));
+            :expected(TYPE<Int>));
     }
-    multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
-    multi less-value(Val::Str $l, Val::Str $r) { $l.value le $r.value }
+    multi less-value(_007::Object $l, _007::Object $r) {
+        die X::Type.new(:operation<less>, :got($_), :expected(TYPE<Int>))
+            unless $l.type === $r.type;
+        return $l.is-a("Int")
+            ?? $l.value < $r.value
+            !! $l.is-a("Str")
+                ?? $l.value lt $r.value
+                !! die "Unknown type ", $l.type.Str;
+    }
     multi more-value($, $) {
-        die X::TypeCheck.new(
+        die X::Type.new(
             :operation<more>,
             :got($_),
-            :expected(Val::Int));
+            :expected(TYPE<Int>));
     }
-    multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
-    multi more-value(Val::Str $l, Val::Str $r) { $l.value ge $r.value }
+    multi more-value(_007::Object $l, _007::Object $r) {
+        die X::Type.new(:operation<less>, :got($_), :expected(TYPE<Int>))
+            unless $l.type === $r.type;
+        return $l.is-a("Int")
+            ?? $l.value > $r.value
+            !! $l.is-a("Str")
+                ?? $l.value gt $r.value
+                !! die "Unknown type ", $l.type.Str;
+    }
 
     my role Placeholder {
         has $.qtype;
@@ -100,7 +115,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     my @builtins =
         say => -> $arg {
-            $output.print($arg ~ "\n");
+            $output.print(stringify($arg, $runtime) ~ "\n");
             Nil;
         },
         prompt => sub ($arg) {
@@ -108,28 +123,30 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             $output.flush();
             return wrap($input.get());
         },
-        type => -> $arg { Val::Type.of($arg.WHAT) },
+        type => sub ($arg) {
+            $arg.type;
+        },
 
         # OPERATORS (from loosest to tightest within each category)
 
         # assignment precedence
         'infix:=' => macro-op(
-            :qtype(Q::Infix::Assignment),
+            :qtype(TYPE<Q::Infix::Assignment>),
             :assoc<right>,
         ),
 
         # disjunctive precedence
         'infix:||' => macro-op(
-            :qtype(Q::Infix::Or),
+            :qtype(TYPE<Q::Infix::Or>),
         ),
         'infix://' => macro-op(
-            :qtype(Q::Infix::DefinedOr),
+            :qtype(TYPE<Q::Infix::DefinedOr>),
             :precedence{ equal => "infix:||" },
         ),
 
         # conjunctive precedence
         'infix:&&' => macro-op(
-            :qtype(Q::Infix::And),
+            :qtype(TYPE<Q::Infix::And>),
         ),
 
         # comparison precedence
@@ -138,21 +155,21 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(equal-value($lhs, $rhs));
             },
-            :qtype(Q::Infix::Eq),
+            :qtype(TYPE<Q::Infix::Eq>),
         ),
         'infix:!=' => op(
             sub ($lhs, $rhs) {
                 my %*equality-seen;
                 return wrap(!equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Ne),
+            :qtype(TYPE<Q::Infix::Ne>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<' => op(
             sub ($lhs, $rhs) {
                 return wrap(less-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Lt),
+            :qtype(TYPE<Q::Infix::Lt>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:<=' => op(
@@ -160,14 +177,14 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Le),
+            :qtype(TYPE<Q::Infix::Le>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>' => op(
             sub ($lhs, $rhs) {
                 return wrap(more-value($lhs, $rhs) )
             },
-            :qtype(Q::Infix::Gt),
+            :qtype(TYPE<Q::Infix::Gt>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:>=' => op(
@@ -175,257 +192,240 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
                 my %*equality-seen;
                 return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
             },
-            :qtype(Q::Infix::Ge),
+            :qtype(TYPE<Q::Infix::Ge>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:~~' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                    unless $rhs ~~ Val::Type;
+                die X::Type.new(:operation<~~>, :got($rhs), :expected(TYPE<Type>))
+                    unless $rhs.is-a("Type");
 
-                return wrap($lhs ~~ $rhs.type);
+                return wrap(?$lhs.is-a($rhs));
             },
-            :qtype(Q::Infix::TypeMatch),
+            :qtype(TYPE<Q::Infix::TypeMatch>),
             :precedence{ equal => "infix:==" },
         ),
         'infix:!~~' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                    unless $rhs ~~ Val::Type;
+                die X::Type.new(:operation<~~>, :got($rhs), :expected(TYPE<Type>))
+                    unless $rhs.is-a("Type");
 
-                return wrap($lhs !~~ $rhs.type);
+                return wrap(!$lhs.is-a($rhs));
             },
-            :qtype(Q::Infix::TypeNonMatch),
+            :qtype(TYPE<Q::Infix::TypeNonMatch>),
             :precedence{ equal => "infix:==" },
         ),
 
         # cons precedence
         'infix:::' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
-                    unless $rhs ~~ Val::Array;
-                return wrap([$lhs, |$rhs.elements]);
+                die X::Type.new(:operation<::>, :got($rhs), :expected(TYPE<Array>))
+                    unless $rhs.is-a("Array");
+                return wrap([$lhs, |$rhs.value]);
             },
-            :qtype(Q::Infix::Cons),
+            :qtype(TYPE<Q::Infix::Cons>),
             :assoc<right>,
         ),
 
         # additive precedence
         'infix:+' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
-                    unless $lhs ~~ Val::Int;
-                die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<+>, :got($lhs), :expected(TYPE<Int>))
+                    unless $lhs.is-a("Int");
+                die X::Type.new(:operation<+>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 return wrap($lhs.value + $rhs.value);
             },
-            :qtype(Q::Infix::Addition),
+            :qtype(TYPE<Q::Infix::Addition>),
         ),
         'infix:~' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
-                    unless $lhs ~~ Val::Str;
-                die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
-                    unless $rhs ~~ Val::Str;
+                die X::Type.new(:operation<~>, :got($lhs), :expected(TYPE<Str>))
+                    unless $lhs.is-a("Str");
+                die X::Type.new(:operation<~>, :got($rhs), :expected(TYPE<Str>))
+                    unless $rhs.is-a("Str");
                 return wrap($lhs.value ~ $rhs.value);
             },
-            :qtype(Q::Infix::Concat),
+            :qtype(TYPE<Q::Infix::Concat>),
             :precedence{ equal => "infix:+" },
         ),
         'infix:-' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<->, :got($lhs), :expected(Val::Int))
-                    unless $lhs ~~ Val::Int;
-                die X::TypeCheck.new(:operation<->, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<->, :got($lhs), :expected(TYPE<Int>))
+                    unless $lhs.is-a("Int");
+                die X::Type.new(:operation<->, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 return wrap($lhs.value - $rhs.value);
             },
-            :qtype(Q::Infix::Subtraction),
+            :qtype(TYPE<Q::Infix::Subtraction>),
         ),
 
         # multiplicative precedence
         'infix:*' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
-                    unless $lhs ~~ Val::Int;
-                die X::TypeCheck.new(:operation<*>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<*>, :got($lhs), :expected(TYPE<Int>))
+                    unless $lhs.is-a("Int");
+                die X::Type.new(:operation<*>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 return wrap($lhs.value * $rhs.value);
             },
-            :qtype(Q::Infix::Multiplication),
+            :qtype(TYPE<Q::Infix::Multiplication>),
         ),
         'infix:%' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
-                    unless $lhs ~~ Val::Int;
-                die X::TypeCheck.new(:operation<%>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<%>, :got($lhs), :expected(TYPE<Int>))
+                    unless $lhs.is-a("Int");
+                die X::Type.new(:operation<%>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 die X::Numeric::DivideByZero.new(:using<%>, :numerator($lhs.value))
                     if $rhs.value == 0;
                 return wrap($lhs.value % $rhs.value);
             },
-            :qtype(Q::Infix::Modulo),
+            :qtype(TYPE<Q::Infix::Modulo>),
         ),
         'infix:%%' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(Val::Int))
-                    unless $lhs ~~ Val::Int;
-                die X::TypeCheck.new(:operation<%%>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<%%>, :got($lhs), :expected(TYPE<Int>))
+                    unless $lhs.is-a("Int");
+                die X::Type.new(:operation<%%>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
                     if $rhs.value == 0;
                 return wrap($lhs.value %% $rhs.value);
             },
-            :qtype(Q::Infix::Divisibility),
+            :qtype(TYPE<Q::Infix::Divisibility>),
         ),
         'infix:x' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
-                    unless $lhs ~~ Val::Str;
-                die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
+                die X::Type.new(:operation<x>, :got($lhs), :expected(TYPE<Str>))
+                    unless $lhs.is-a("Str");
+                die X::Type.new(:operation<x>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
                 return wrap($lhs.value x $rhs.value);
             },
-            :qtype(Q::Infix::Replicate),
+            :qtype(TYPE<Q::Infix::Replicate>),
             :precedence{ equal => "infix:*" },
         ),
         'infix:xx' => op(
             sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
-                    unless $lhs ~~ Val::Array;
-                die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
-                return wrap(| $lhs.elements xx $rhs.value);
+                die X::Type.new(:operation<xx>, :got($lhs), :expected(TYPE<Array>))
+                    unless $lhs.is-a("Array");
+                die X::Type.new(:operation<xx>, :got($rhs), :expected(TYPE<Int>))
+                    unless $rhs.is-a("Int");
+                return wrap(| $lhs.value xx $rhs.value);
             },
-            :qtype(Q::Infix::ArrayReplicate),
+            :qtype(TYPE<Q::Infix::ArrayReplicate>),
             :precedence{ equal => "infix:*" },
         ),
 
         # prefixes
         'prefix:~' => op(
             sub prefix-str($expr) {
-                Val::Str.new(:value($expr.Str));
+                return wrap(stringify($expr, $runtime));
             },
-            :qtype(Q::Prefix::Str),
+            :qtype(TYPE<Q::Prefix::Str>),
         ),
         'prefix:+' => op(
-            sub prefix-plus($_) {
-                when Val::Str {
-                    return wrap(.value.Int)
-                        if .value ~~ /^ '-'? \d+ $/;
-                    proceed;
+            sub prefix-plus($expr) {
+                if $expr.is-a("Str") {
+                    return wrap($expr.value.Int)
+                        if $expr.value ~~ /^ '-'? \d+ $/;
                 }
-                when Val::Int {
-                    return $_;
+                elsif $expr.is-a("Int") {
+                    return $expr;
                 }
-                die X::TypeCheck.new(
+                die X::Type.new(
                     :operation("prefix:<+>"),
-                    :got($_),
-                    :expected(Val::Int));
+                    :got($expr),
+                    :expected(TYPE<Str>));
             },
-            :qtype(Q::Prefix::Plus),
+            :qtype(TYPE<Q::Prefix::Plus>),
         ),
         'prefix:-' => op(
-            sub prefix-minus($_) {
-                when Val::Str {
-                    return wrap(-.value.Int)
-                        if .value ~~ /^ '-'? \d+ $/;
-                    proceed;
+            sub prefix-minus($expr) {
+                if $expr.is-a("Str") {
+                    return wrap(-$expr.value.Int)
+                        if $expr.value ~~ /^ '-'? \d+ $/;
                 }
-                when Val::Int {
-                    return wrap(-.value);
+                elsif $expr.is-a("Int") {
+                    return wrap(-$expr.value);
                 }
-                die X::TypeCheck.new(
+                die X::Type.new(
                     :operation("prefix:<->"),
-                    :got($_),
-                    :expected(Val::Int));
+                    :got($expr),
+                    :expected(TYPE<Str>));
             },
-            :qtype(Q::Prefix::Minus),
+            :qtype(TYPE<Q::Prefix::Minus>),
         ),
         'prefix:?' => op(
-            sub ($a) {
-                return wrap(?$a.truthy)
+            sub ($arg) {
+                return wrap(boolify($arg, $runtime));
             },
-            :qtype(Q::Prefix::So),
+            :qtype(TYPE<Q::Prefix::So>),
         ),
         'prefix:!' => op(
-            sub ($a) {
-                return wrap(!$a.truthy)
+            sub ($arg) {
+                return wrap(!boolify($arg, $runtime));
             },
-            :qtype(Q::Prefix::Not),
+            :qtype(TYPE<Q::Prefix::Not>),
         ),
         'prefix:^' => op(
             sub ($n) {
-                die X::TypeCheck.new(:operation<^>, :got($n), :expected(Val::Int))
-                    unless $n ~~ Val::Int;
-                return wrap([^$n.value]);
+                die X::Type.new(:operation<^>, :got($n), :expected(TYPE<Int>))
+                    unless $n.is-a("Int");
+                return wrap([(^$n.value).map(&wrap)]);
             },
-            :qtype(Q::Prefix::Upto),
+            :qtype(TYPE<Q::Prefix::Upto>),
         ),
 
         # postfixes
         'postfix:[]' => macro-op(
-            :qtype(Q::Postfix::Index),
+            :qtype(TYPE<Q::Postfix::Index>),
         ),
         'postfix:()' => macro-op(
-            :qtype(Q::Postfix::Call),
+            :qtype(TYPE<Q::Postfix::Call>),
         ),
         'postfix:.' => macro-op(
-            :qtype(Q::Postfix::Property),
+            :qtype(TYPE<Q::Postfix::Property>),
         ),
     ;
 
-    sub tree-walk(%package) {
-        for %package.keys.map({ %package ~ "::$_" }) -> $name {
-            my $type = ::($name);
-            push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
-            tree-walk($type.WHO);
-        }
+    for TYPE.keys -> $type {
+        push @builtins, ($type => TYPE{$type});
     }
-    tree-walk(Val::);
-    tree-walk(Q::);
-    push @builtins, "Q" => Val::Type.of(Q);
 
     sub install-op($name, $placeholder) {
         $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/
             or die "This shouldn't be an op";
         my $type = ~$0;
         my $opname = ~$1;
-        my $qtype = $placeholder.qtype;
+        my %properties = hash($placeholder.qtype.type-chain.reverse.map({ .fields }).flat.map({ .<name> }).map({ $_ => NONE }));
+        my $q = create($placeholder.qtype, |%properties);
         my $assoc = $placeholder.assoc;
         my %precedence = $placeholder.precedence;
-        $opscope.install($type, $opname, $qtype, :$assoc, :%precedence);
+        $opscope.install($type, $opname, $q, :$assoc, :%precedence);
     }
 
     my &ditch-sigil = { $^str.substr(1) };
-    my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
+    my &parameter = { create(TYPE<Q::Parameter>, :identifier(create(TYPE<Q::Identifier>, :name(wrap($^value))))) };
 
     return @builtins.map: {
-        when .value ~~ Val::Type {
+        when .value ~~ _007::Type {
             .key => .value;
         }
         when .value ~~ Block {
-            my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
-            my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
+            .key => wrap-fn(.value, .key);
         }
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
             install-op($name, .value);
-            my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
-            my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(sub () {}, $name);
         }
         when .value ~~ Placeholder::Op {
             my $name = .key;
             install-op($name, .value);
             my &fn = .value.fn;
-            my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
-            my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            .key => wrap-fn(&fn, $name);
         }
         default { die "Unknown type {.value.^name}" }
     };

@@ -15,11 +15,11 @@
         "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm",
         "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm",
         "_007::Precedence" : "lib/_007/Precedence.pm",
-        "_007::Q" : "lib/_007/Q.pm",
         "_007::Runtime" : "lib/_007/Runtime.pm",
         "_007::Builtins" : "lib/_007/Builtins.pm",
         "_007::Test" : "lib/_007/Test.pm",
-        "_007::Val" : "lib/_007/Val.pm"
+        "_007::Object" : "lib/_007/Object.pm",
+        "_007::Type" : "lib/_007/Type.pm"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }
 }

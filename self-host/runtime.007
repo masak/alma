@@ -2,10 +2,13 @@ my ast;
 if !ast {
     ast = new Q::CompUnit {
         block: new Q::Block {
-            parameterlist: new Q::ParameterList {},
+            parameterlist: new Q::ParameterList {
+                parameters: [],
+            },
             statementlist: new Q::StatementList {
-                statements: []
-            }
+                statements: [],
+            },
+            "static-lexpad": {},
         }
     };
 }
@@ -69,7 +72,7 @@ my Runtime = {
             if paramcount != argcount {
                 throw new Exception { message: "parameter mismatch" };
             }
-            enter(c["outer-frame"], c["static-lexpad"]);
+            enter(c.get("outer-frame"), c.get("static-lexpad"));
             for ^argcount -> i {
                 my param = c.parameterlist.parameters[i];
                 my arg = arguments[i];
@@ -197,7 +200,7 @@ my Runtime = {
                     name,
                     parameterlist: term.block.parameterlist,
                     statementlist: term.block.statementlist,
-                    "static-lexpad": term.block["static-lexpad"],
+                    "static-lexpad": term.block.get("static-lexpad"),
                     "outer-frame": current_frame(),
                 };
             },
@@ -226,7 +229,7 @@ my Runtime = {
                 # no runtime behavior
             },
             Q::CompUnit(compunit) {
-                enter(current_frame(), compunit.block["static-lexpad"]);
+                enter(current_frame(), compunit.block.get("static-lexpad"));
                 run(compunit.block.statementlist);
                 leave();
             },
@@ -234,7 +237,7 @@ my Runtime = {
                 # no runtime behavior
             },
             Q::Statement::Block(stmt) {
-                enter(current_frame(), stmt.block["static-lexpad"]);
+                enter(current_frame(), stmt.block.get("static-lexpad"));
                 run(stmt.block.statementlist);
                 leave();
             },
@@ -245,7 +248,7 @@ my Runtime = {
                 my array = eval(stmt.expr);
 
                 for array -> arg {
-                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    enter(current_frame(), stmt.block.get("static-lexpad"));
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, arg);
@@ -257,7 +260,7 @@ my Runtime = {
             Q::Statement::If(stmt) {
                 my expr = eval(stmt.expr);
                 if expr {
-                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    enter(current_frame(), stmt.block.get("static-lexpad"));
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, expr);
@@ -281,7 +284,7 @@ my Runtime = {
             Q::Statement::While(stmt) {
                 my expr;
                 while expr = eval(stmt.expr) {
-                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    enter(current_frame(), stmt.block.get("static-lexpad"));
                     my parameters = stmt.block.parameterlist.parameters;
                     if parameters {
                         declare_var(parameters[0].identifier, expr);
@@ -307,5 +310,5 @@ my Runtime = {
     }
 };
 
-my runtime = Runtime.new();
-runtime.run(ast);
+my runtime = Runtime["new"]();
+runtime["run"](ast);

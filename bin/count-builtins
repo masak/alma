@@ -1,0 +1,64 @@
+#!/usr/bin/env perl6
+use v6;
+
+my $type_count = 0;
+my $bound_method_count = 0;
+my $built_in_subs = 0;
+my $exception_types_in_007 = 0;
+my $exception_types_in_perl6 = 0;
+
+for <lib/_007/Type.pm> -> $file {
+    for $file.IO.lines {
+        if /^ "TYPE<" (<-[>]>+) ">" \h* "=" \h* "_007::Type.new(" / {
+            $type_count++;
+            if $0 eq "Exception" || $0.starts-with("X::") {
+                $exception_types_in_007++;
+            }
+        }
+    }
+}
+
+for <lib/_007/Object.pm> -> $file {
+    for $file.IO.lines {
+        if /^ "sub bound-method(" / ff /^ "}" / {
+            if /^ " " ** 4 \S / {
+                if /^ \h* "if \$object.is-a" / {
+                    $bound_method_count++;
+                }
+                elsif /^ \h* "}" / {
+                    # do nothing
+                }
+                elsif /^ \h* "die " / {
+                    # do nothing
+                }
+                else {
+                    die "Unexpected line: `$_`";
+                }
+            }
+        }
+    }
+}
+
+for <lib/_007/Builtins.pm> -> $file {
+    for $file.IO.lines {
+        if /^ \h* "my @builtins ="/ ff /^ \h* ";" \h* $/ {
+            if /^ \h* \S+ \h* "=>" \h* ["->" | "sub" | "macro-op" | "op"] / {
+                $built_in_subs++;
+            }
+        }
+    }
+}
+
+for <lib/_007/Object.pm lib/_007/OpScope.pm lib/_007/Parser/Actions.pm lib/_007/Runtime.pm> -> $file {
+    for $file.IO.lines {
+        if /^ "class X::" / {
+            $exception_types_in_perl6++;
+        }
+    }
+}
+
+say "Types: $type_count";
+say "Bound methods: $bound_method_count";
+say "Built-in subs: $built_in_subs";
+say "Exception types in 007: $exception_types_in_007";
+say "Exception types in Perl 6: $exception_types_in_perl6";

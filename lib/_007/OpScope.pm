@@ -1,6 +1,10 @@
-use _007::Val;
-use _007::Q;
+use _007::Type;
+use _007::Object;
 use _007::Precedence;
+
+class X::Associativity::Conflict is Exception {
+    method message { "The operator already has a defined associativity" }
+}
 
 class _007::OpScope {
     has %.ops =
@@ -15,12 +19,12 @@ class _007::OpScope {
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
         my $name = "$type:$op";
-        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
+        my $identifier = create(TYPE<Q::Identifier>, :name(wrap($name)));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
-            prefix => Q::Prefix.new(:$identifier),
-            infix => Q::Infix.new(:$identifier),
-            postfix => Q::Postfix.new(:$identifier),
+            prefix => create(TYPE<Q::Prefix>, :$identifier, :operand(NONE)),
+            infix => create(TYPE<Q::Infix>, :$identifier, :lhs(NONE), :rhs(NONE)),
+            postfix => create(TYPE<Q::Postfix>, :$identifier, :operand(NONE)),
         }{$type};
 
         sub prec {

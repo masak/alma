@@ -58,7 +58,7 @@ use _007::Test;
         .
 
     parse-error $program,
-        X::TypeCheck,
+        X::Type,
         "can't put a non-infix in a Q::Infix @ unquote";
 }
 
@@ -73,7 +73,7 @@ use _007::Test;
         .
 
     parse-error $program,
-        X::TypeCheck,
+        X::Type,
         "can't put a non-infix unquote in infix operator position (explicit)";
 }
 
@@ -88,7 +88,7 @@ use _007::Test;
         .
 
     parse-error $program,
-        X::TypeCheck,
+        X::Type,
         "can't put a non-infix unquote in infix operator position (implicit)";
 }
 
@@ -116,7 +116,7 @@ use _007::Test;
         .
 
     parse-error $program,
-        X::TypeCheck,
+        X::Type,
         "can't put a non-prefix in a Q::Prefix @ unquote";
 }
 

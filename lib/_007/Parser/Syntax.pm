@@ -1,5 +1,5 @@
-use _007::Val;
-use _007::Q;
+use _007::Type;
+use _007::Object;
 
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
@@ -19,7 +19,9 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, wrap({}), create(TYPE<Q::StatementList>,
+            :statements(wrap([])),
+        ));
     } }
 
     token finishpad { <?> {
@@ -35,15 +37,14 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    our sub declare(Q::Declaration $decltype, $symbol) {
+    our sub declare(_007::Type $decltype, $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.id ~ $symbol};
-        my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value($symbol))),
-            :$frame);
+        my $name = wrap($symbol);
+        my $identifier = create(TYPE<Q::Identifier>, :$name, :$frame);
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
@@ -51,15 +52,15 @@ grammar _007::Parser::Syntax {
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        { declare(Q::Statement::My, $<identifier>.ast.name.value); }
+        { declare(TYPE<Q::Statement::My>, $<identifier>.ast.properties<name>.value); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
         constant <identifier>
         {
-            my $symbol = $<identifier>.ast.name.value;
+            my $symbol = $<identifier>.ast.properties<name>.value;
             # XXX: a suspicious lack of redeclaration checks here
-            declare(Q::Statement::Constant, $symbol);
+            declare(TYPE<Q::Statement::Constant>, $symbol);
         }
         ['=' <EXPR>]?
     }
@@ -73,9 +74,9 @@ grammar _007::Parser::Syntax {
         :my $*insub = True;
         {
             declare($<routine> eq "sub"
-                        ?? Q::Statement::Sub
-                        !! Q::Statement::Macro,
-                    $<identifier>.ast.name.value);
+                        ?? TYPE<Q::Statement::Sub>
+                        !! TYPE<Q::Statement::Macro>,
+                    $<identifier>.ast.properties<name>.value);
         }
         <.newpad>
         '(' ~ ')' <parameterlist>
@@ -114,7 +115,7 @@ grammar _007::Parser::Syntax {
         class <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
         <identifier> <.ws>
-        { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
+        { declare(TYPE<Q::Statement::Class>, $<identifier>.ast.properties<name>.value); }
         <block>
     }
 
@@ -202,6 +203,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::PropertyList"] <.ws> '{' <.ws> <propertylist> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term"] <.ws> '{' <.ws> <term> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Array"] <.ws> '{' <.ws> <term:array> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::Term::Dict"] <.ws> '{' <.ws> <term:dict> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Object"] <.ws> '{' <.ws> <term:object> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Term::Quasi"] <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Trait"] <.ws> '{' <.ws> <trait> <.ws> '}'
@@ -219,10 +221,10 @@ grammar _007::Parser::Syntax {
     }
     token term:new-object {
         new» <.ws>
-        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>
+        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ _007::Type }> <.ws>
         '{' ~ '}' <propertylist>
     }
-    token term:object {
+    token term:dict {
         '{' ~ '}' <propertylist>
     }
     token term:identifier {
@@ -234,7 +236,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Sub, $<identifier>.ast.name.value);
+                declare(TYPE<Q::Term::Sub>, $<identifier>.ast.properties<name>.value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -318,7 +320,7 @@ grammar _007::Parser::Syntax {
     rule parameterlist {
         [
             <parameter>
-            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.value); }
+            { declare(TYPE<Q::Parameter>, $<parameter>[*-1]<identifier>.ast.properties<name>.value); }
         ]* %% ','
     }
 

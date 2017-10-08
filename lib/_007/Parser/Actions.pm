@@ -1,7 +1,6 @@
-use _007::Val;
-use _007::Q;
+use _007::Type;
+use _007::Object;
 use _007::Parser::Syntax;
-use MONKEY-SEE-NO-EVAL;
 
 class X::String::Newline is Exception {
     method message { "Found a newline inside a string literal" }
@@ -52,29 +51,12 @@ class X::Precedence::Incompatible is Exception {
     method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }
 
-class X::Property::NotDeclared is Exception {
-    has Str $.type;
-    has Str $.property;
-
-    method message { "The property '$.property' is not defined on type '$.type'" }
-}
-
-class X::Property::Required is Exception {
-    has Str $.type;
-    has Str $.property;
-
-    method message { "The property '$.property' is required on type '$.type'" }
-}
-
-class X::Property::Duplicate is Exception {
-    has Str $.property;
-
-    method message { "The property '$.property' was declared more than once in a property list" }
-}
+sub empty-array() { wrap([]) }
+sub empty-dict() { wrap({}) }
 
 class _007::Parser::Actions {
     method finish-block($block) {
-        $block.static-lexpad = $*runtime.current-frame.properties<pad>;
+        $block.properties<static-lexpad> = $*runtime.current-frame.value<pad>;
         $*runtime.leave;
     }
 
@@ -83,20 +65,24 @@ class _007::Parser::Actions {
     }
 
     method compunit($/) {
-        my $cu = Q::CompUnit.new(:block(Q::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist($<statementlist>.ast)
-        )));
-        make $cu;
-        self.finish-block($cu.block);
+        my $block = create(TYPE<Q::Block>,
+            :parameterlist(create(TYPE<Q::ParameterList>,
+                :parameters(empty-array()),
+            )),
+            :statementlist($<statementlist>.ast),
+            :static-lexpad(empty-dict()),
+        );
+        make create(TYPE<Q::CompUnit>, :$block);
+        self.finish-block($block);
     }
 
     method statementlist($/) {
-        make Q::StatementList.new(:statements(Val::Array.new(:elements($<statement>».ast))));
+        my $statements = wrap($<statement>».ast);
+        make create(TYPE<Q::StatementList>, :$statements);
     }
 
     method statement:my ($/) {
-        make Q::Statement::My.new(
+        make create(TYPE<Q::Statement::My>,
             :identifier($<identifier>.ast),
             :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
@@ -105,37 +91,37 @@ class _007::Parser::Actions {
         die X::Syntax::Missing.new(:what("initializer on constant declaration"))
             unless $<EXPR>;
 
-        make Q::Statement::Constant.new(
+        make create(TYPE<Q::Statement::Constant>,
             :identifier($<identifier>.ast),
             :expr($<EXPR>.ast));
 
-        my $value = $<EXPR>.ast.eval($*runtime);
-        $<identifier>.ast.put-value($value, $*runtime);
+        my $value = bound-method($<EXPR>.ast, "eval", $*runtime)();
+        bound-method($<identifier>.ast, "put-value", $*runtime)($value);
     }
 
     method statement:expr ($/) {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
         #      in the expression tree
-        if $<EXPR>.ast ~~ Q::Block {
-            make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
-                :operand(Q::Term::Sub.new(:identifier(NONE), :block($<EXPR>.ast))),
-                :argumentlist(Q::ArgumentList.new)
+        if $<EXPR>.ast.is-a("Q::Block") {
+            make create(TYPE<Q::Statement::Expr>, :expr(create(TYPE<Q::Postfix::Call>,
+                :identifier(create(TYPE<Q::Identifier>, :name(wrap("postfix:()")))),
+                :operand(create(TYPE<Q::Term::Sub>, :identifier(NONE), :block($<EXPR>.ast))),
+                :argumentlist(create(TYPE<Q::ArgumentList>))
             )));
         }
         else {
-            make Q::Statement::Expr.new(:expr($<EXPR>.ast));
+            make create(TYPE<Q::Statement::Expr>, :expr($<EXPR>.ast));
         }
     }
 
     method statement:block ($/) {
         die X::PointyBlock::SinkContext.new
             if $<pblock><parameterlist>;
-        make Q::Statement::Block.new(:block($<pblock>.ast));
+        make create(TYPE<Q::Statement::Block>, :block($<pblock>.ast));
     }
 
-    sub maybe-install-operator($identname, @trait) {
+    sub maybe-install-operator(Str $identname, @trait) {
         return
             unless $identname ~~ /^ (< prefix infix postfix >)
                                     ':' (.+) /;
@@ -147,26 +133,26 @@ class _007::Parser::Actions {
         my @prec-traits = <equal looser tighter>;
         my $assoc;
         for @trait -> $trait {
-            my $name = $trait<identifier>.ast.name;
+            my $name = $trait<identifier>.ast.properties<name>.value;
             if $name eq any @prec-traits {
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equal" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
-                    unless $identifier ~~ Q::Identifier;
-                sub check-if-op($s) {
+                    unless $identifier.is-a("Q::Identifier");
+                sub check-if-op(Str $s) {
                     die "Unknown thing in '$name' trait"
                         unless $s ~~ /^ < pre in post > 'fix:' /;
                     die X::Precedence::Incompatible.new
                         if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
                         || $type eq 'infix' && $s ~~ /^ < pre post >/;
                     %precedence{$name} = $s;
-                }($identifier.name);
+                }($identifier.properties<name>.value);
             }
             elsif $name eq "assoc" {
                 my $string = $trait<EXPR>.ast;
                 die "The associativity must be a string"
-                    unless $string ~~ Q::Literal::Str;
-                my $value = $string.value.value;
+                    unless $string.is-a("Q::Literal::Str");
+                my Str $value = $string.properties<value>.value;
                 die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
                 $assoc = $value;
@@ -187,42 +173,46 @@ class _007::Parser::Actions {
 
     method statement:sub-or-macro ($/) {
         my $identifier = $<identifier>.ast;
-        my $name = $<identifier>.ast.name;
+        my $name = $identifier.properties<name>;
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
-        my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my $static-lexpad = $*runtime.current-frame.properties<pad>;
+        my $block = create(TYPE<Q::Block>,
+            :$parameterlist,
+            :$statementlist,
+            :static-lexpad(empty-dict()),
+        );
+        my $static-lexpad = $*runtime.current-frame.value<pad>;
         self.finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val;
         if $<routine> eq "sub" {
-            make Q::Statement::Sub.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            make create(TYPE<Q::Statement::Sub>, :$identifier, :$traitlist, :$block);
+            $val = create(TYPE<Sub>, :$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         elsif $<routine> eq "macro" {
-            make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            make create(TYPE<Q::Statement::Macro>, :$identifier, :$traitlist, :$block);
+            $val = create(TYPE<Macro>, :$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         else {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
         }
 
-        $identifier.put-value($val, $*runtime);
+        bound-method($identifier, "put-value", $*runtime)($val);
 
-        maybe-install-operator($name, $<traitlist><trait>);
+        maybe-install-operator($name.value, $<traitlist><trait>);
     }
 
     method statement:return ($/) {
         die X::ControlFlow::Return.new
             unless $*insub;
-        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
+        make create(TYPE<Q::Statement::Return>, :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
     method statement:throw ($/) {
-        make Q::Statement::Throw.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
+        make create(TYPE<Q::Statement::Throw>, :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
     method statement:if ($/) {
@@ -231,61 +221,64 @@ class _007::Parser::Actions {
             ?? $<else>.ast
             !! NONE;
 
-        make Q::Statement::If.new(|%parameters);
+        make create(TYPE<Q::Statement::If>, |%parameters);
     }
 
     method statement:for ($/) {
-        make Q::Statement::For.new(|$<xblock>.ast);
+        make create(TYPE<Q::Statement::For>, |$<xblock>.ast);
     }
 
     method statement:while ($/) {
-        make Q::Statement::While.new(|$<xblock>.ast);
+        make create(TYPE<Q::Statement::While>, |$<xblock>.ast);
     }
 
     method statement:BEGIN ($/) {
         my $block = $<block>.ast;
-        make Q::Statement::BEGIN.new(:$block);
-        $*runtime.run(Q::CompUnit.new(:$block));
+        make create(TYPE<Q::Statement::BEGIN>, :$block);
+        $*runtime.run(create(TYPE<Q::CompUnit>, :$block));
     }
 
     method statement:class ($/) {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
-        make Q::Statement::Class.new(:$block);
-        my $val = Val::Type.of(EVAL qq[class :: \{
-            method attributes \{ () \}
-            method ^name(\$) \{ "{$identifier.name.value}" \}
-        \}]);
-        $identifier.put-value($val, $*runtime);
+        make create(TYPE<Q::Statement::Class>, :$block);
+        my $name = $identifier.properties<name>.value;
+        my $val = _007::Type.new(:$name);
+        bound-method($identifier, "put-value", $*runtime)($val);
     }
 
     method traitlist($/) {
         my @traits = $<trait>».ast;
-        if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {
+        if bag( @traits.map: *.properties<identifier>.properties<name>.value ).grep( *.value > 1 )[0] -> $p {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
-        make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
+        my $traits = wrap(@traits);
+        make create(TYPE<Q::TraitList>, :$traits);
     }
     method trait($/) {
-        make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
+        make create(TYPE<Q::Trait>, :identifier($<identifier>.ast), :expr($<EXPR>.ast));
     }
 
     method blockoid ($/) {
         make $<statementlist>.ast;
     }
     method block ($/) {
-        my $block = Q::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist($<blockoid>.ast));
+        my $block = create(TYPE<Q::Block>,
+            :parameterlist(create(TYPE<Q::ParameterList>,
+                :parameters(empty-array()),
+            )),
+            :statementlist($<blockoid>.ast)
+            :static-lexpad(NONE));
         make $block;
         self.finish-block($block);
     }
     method pblock ($/) {
         if $<parameterlist> {
-            my $block = Q::Block.new(
+            my $block = create(TYPE<Q::Block>,
                 :parameterlist($<parameterlist>.ast),
-                :statementlist($<blockoid>.ast));
+                :statementlist($<blockoid>.ast),
+                :static-lexpad(empty-dict()));
             make $block;
             self.finish-block($block);
         } else {
@@ -300,36 +293,38 @@ class _007::Parser::Actions {
     }
 
     sub is-macro($q, $qtype, $identifier) {
-        $q ~~ $qtype
-            && $identifier ~~ Q::Identifier
-            && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ Val::Macro
-            && $macro;
+        $q.is-a($qtype)
+            && $identifier.is-a("Q::Identifier")
+            && defined((my $macro = $*runtime.maybe-get-var($identifier.properties<name>.value)))
+            && $macro.is-a("Macro");
     }
 
     sub expand($macro, @arguments, &unexpanded-callback:()) {
-        my $expansion = $*runtime.call($macro, @arguments);
+        my $expansion = internal-call($macro, $*runtime, @arguments);
 
-        if $expansion ~~ Q::Statement::My {
-            _007::Parser::Syntax::declare(Q::Statement::My, $expansion.identifier.name.value);
+        if $expansion.is-a("Q::Statement::My") {
+            _007::Parser::Syntax::declare(TYPE<Q::Statement::My>, $expansion.properties<identifier>.properties<name>.value);
         }
 
         if $*unexpanded {
             return &unexpanded-callback();
         }
         else {
-            if $expansion ~~ Q::Statement {
-                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([$expansion]))));
+            if $expansion.is-a("Q::Statement") {
+                my $statements = wrap([$expansion]);
+                $expansion = create(TYPE<Q::StatementList>, :$statements);
             }
             elsif $expansion === NONE {
-                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([]))));
+                my $statements = wrap([]);
+                $expansion = create(TYPE<Q::StatementList>, :$statements);
             }
 
-            if $expansion ~~ Q::StatementList {
-                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion));
+            if $expansion.is-a("Q::StatementList") {
+                $expansion = create(TYPE<Q::Expr::StatementListAdapter>, :statementlist($expansion));
             }
 
-            if $expansion ~~ Q::Block {
-                $expansion = Q::Expr::StatementListAdapter.new(:statementlist($expansion.statementlist));
+            if $expansion.is-a("Q::Block") {
+                $expansion = create(TYPE<Q::Expr::StatementListAdapter>, :statementlist($expansion.properties<statementlist>));
             }
 
             return $expansion;
@@ -338,7 +333,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.identifier.name.value;
+            $op.properties<identifier>.properties<name>.value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.infixprec) {
@@ -357,6 +352,11 @@ class _007::Parser::Actions {
             return $*parser.opscope.infixprec.first(*.contains(name($op))).assoc eq "non";
         }
 
+        # XXX: this needs to be lifted up to 007 eventually
+        sub is-assignable(_007::Type $decltype) {
+            return $decltype === TYPE<Q::Parameter> || $decltype === TYPE<Q::Statement::My>;
+        }
+
         my @opstack;
         my @termstack = $<termish>[0].ast;
         sub REDUCE {
@@ -364,27 +364,32 @@ class _007::Parser::Actions {
             my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
-            if $infix ~~ Q::Unquote {
-                @termstack.push(Q::Unquote::Infix.new(:qtype($infix.qtype), :expr($infix.expr), :lhs($t1), :rhs($t2)));
+            if $infix.is-a("Q::Unquote") {
+                @termstack.push(create(TYPE<Q::Unquote::Infix>,
+                    :qtype($infix.properties<qtype>),
+                    :expr($infix.properties<expr>),
+                    :lhs($t1),
+                    :rhs($t2),
+                ));
                 return;
             }
 
-            if my $macro = is-macro($infix, Q::Infix, $infix.identifier) {
+            if my $macro = is-macro($infix, TYPE<Q::Infix>, $infix.properties<identifier>) {
                 @termstack.push(expand($macro, [$t1, $t2],
-                    -> { $infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)) }));
+                    -> { create($infix.type, :lhs($t1), :rhs($t2), :identifier($infix.properties<identifier>)) }));
             }
             else {
-                @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
+                @termstack.push(create($infix.type, :lhs($t1), :rhs($t2), :identifier($infix.properties<identifier>)));
 
-                if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
+                if $infix.is-a("Q::Infix::Assignment") && $t1.is-a("Q::Identifier") {
                     my $frame = $*runtime.current-frame;
-                    my $symbol = $t1.name.value;
+                    my $symbol = $t1.properties<name>.value;
                     die X::Undeclared.new(:$symbol)
                         unless @*declstack[*-1]{$symbol} :exists;
                     my $decltype = @*declstack[*-1]{$symbol};
                     my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
                     die X::Assignment::RO.new(:typename("$declname '$symbol'"))
-                        unless $decltype.is-assignable;
+                        unless is-assignable($decltype);
                     %*assigned{$frame.id ~ $symbol}++;
                 }
             }
@@ -395,7 +400,9 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.value), :op2($infix.identifier.name.value))
+            die X::Op::Nonassociative.new(
+                :op1(@opstack[*-1].properties<identifier>.properties<name>.value),
+                :op2($infix.properties<identifier>.properties<name>.value))
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -409,7 +416,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.identifier.name.value;
+            $op.properties<identifier>.properties<name>.value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {
@@ -436,43 +443,49 @@ class _007::Parser::Actions {
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
 
-            if $prefix ~~ Q::Unquote {
-                make Q::Unquote::Prefix.new(:qtype($prefix.qtype), :expr($prefix.expr), :operand($/.ast));
+            if $prefix.is-a("Q::Unquote") {
+                make create(TYPE<Q::Unquote::Prefix>,
+                    :qtype($prefix.properties<qtype>),
+                    :expr($prefix.properties<expr>),
+                    :operand($/.ast),
+                );
                 return;
             }
 
-            if my $macro = is-macro($prefix, Q::Prefix, $prefix.identifier) {
+            if my $macro = is-macro($prefix, TYPE<Q::Prefix>, $prefix.properties<identifier>) {
                 make expand($macro, [$/.ast],
-                    -> { $prefix.new(:operand($/.ast), :identifier($prefix.identifier)) });
+                    -> { create($prefix.type, :operand($/.ast), :identifier($prefix.properties<identifier>)) });
             }
             else {
-                make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
+                make create($prefix.type, :operand($/.ast), :identifier($prefix.properties<identifier>));
             }
         }
 
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
-            my $identifier = $postfix.identifier;
-            if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
-                make expand($macro, $postfix.argumentlist.arguments.elements,
-                    -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
+            my $identifier = $postfix.properties<identifier>;
+            if is-macro($postfix, TYPE<Q::Postfix::Call>, $/.ast) -> $macro {
+                make expand($macro, $postfix.properties<argumentlist>.properties<arguments>.value, -> {
+                    create($postfix.type, :$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>));
+                });
             }
-            elsif $postfix ~~ Q::Postfix::Index {
-                make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));
+            elsif $postfix.is-a("Q::Postfix::Index") {
+                make create($postfix.type, :$identifier, :operand($/.ast), :index($postfix.properties<index>));
             }
-            elsif $postfix ~~ Q::Postfix::Call {
-                make $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist));
+            elsif $postfix.is-a("Q::Postfix::Call") {
+                make create($postfix.type, :$identifier, :operand($/.ast), :argumentlist($postfix.properties<argumentlist>));
             }
-            elsif $postfix ~~ Q::Postfix::Property {
-                make $postfix.new(:$identifier, :operand($/.ast), :property($postfix.property));
+            elsif $postfix.is-a("Q::Postfix::Property") {
+                make create($postfix.type, :$identifier, :operand($/.ast), :property($postfix.properties<property>));
             }
             else {
-                if my $macro = is-macro($postfix, Q::Postfix, $identifier) {
-                    make expand($macro, [$/.ast],
-                        -> { $postfix.new(:$identifier, :operand($/.ast)) });
+                if is-macro($postfix, TYPE<Q::Postfix>, $identifier) -> $macro {
+                    make expand($macro, [$/.ast], -> {
+                        create($postfix.type, :$identifier, :operand($/.ast));
+                    });
                 }
                 else {
-                    make $postfix.new(:$identifier, :operand($/.ast));
+                    make create($postfix.type, :$identifier, :operand($/.ast));
                 }
             }
         }
@@ -503,11 +516,11 @@ class _007::Parser::Actions {
 
     method prefix($/) {
         my $op = ~$/;
-        my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("prefix:$op"))),
+        my $identifier = create(TYPE<Q::Identifier>,
+            :name(wrap("prefix:$op")),
             :frame($*runtime.current-frame),
         );
-        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
+        make create($*parser.opscope.ops<prefix>{$op}.type, :$identifier, :operand(NONE));
     }
 
     method prefix-unquote($/) {
@@ -519,25 +532,24 @@ class _007::Parser::Actions {
             die X::String::Newline.new
                 if $s ~~ /\n/;
         }(~$0);
-        my $value = (~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
-        $value = Val::Str.new(:$value);
-        make Q::Literal::Str.new(:$value);
+        my $value = wrap((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
+        make create(TYPE<Q::Literal::Str>, :$value);
     }
 
     method term:none ($/) {
-        make Q::Literal::None.new;
+        make create(TYPE<Q::Literal::None>);
     }
 
     method term:false ($/) {
-        make Q::Literal::Bool.new(:value(Val::Bool.new(:value(False))));
+        make create(TYPE<Q::Literal::Bool>, :value(FALSE));
     }
 
     method term:true ($/) {
-        make Q::Literal::Bool.new(:value(Val::Bool.new(:value(True))));
+        make create(TYPE<Q::Literal::Bool>, :value(TRUE));
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(Val::Int.new(:value(+$/))));
+        make create(TYPE<Q::Literal::Int>, :value(wrap(+$/)));
     }
 
     method term:str ($/) {
@@ -545,7 +557,8 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        make Q::Term::Array.new(:elements(Val::Array.new(:elements($<EXPR>».ast))));
+        my $elements = wrap($<EXPR>».ast);
+        make create(TYPE<Q::Term::Array>, :$elements);
     }
 
     method term:parens ($/) {
@@ -553,20 +566,22 @@ class _007::Parser::Actions {
     }
 
     method term:regex ($/) {
-        make Q::Term::Regex.new(:contents($<contents>.ast.value));
+        make create(TYPE<Q::Term::Regex>, :contents($<contents>.ast.properties<value>));
     }
 
     method term:identifier ($/) {
         make $<identifier>.ast;
-        my $name = $<identifier>.ast.name.value;
+        my $name = $<identifier>.ast.properties<name>.value;
         if !$*runtime.declared($name) {
             my $frame = $*runtime.current-frame;
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
-                die X::Macro::Postdeclared.new(:$name)
-                    if $value ~~ Val::Macro;
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ Val::Sub;
+                    unless defined $value;
+                die X::Macro::Postdeclared.new(:$name)
+                    if $value.is-a("Macro");
+                die X::Undeclared.new(:symbol($name))
+                    unless $value.is-a("Sub");
             };
         }
     }
@@ -576,7 +591,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        my $qtype = Val::Str.new(:value(~($<qtype> // "")));
+        my $qtype = wrap(~($<qtype> // ""));
 
         if $<block> -> $block {
             # If the quasi consists of a block with a single expression statement, it's very
@@ -591,22 +606,22 @@ class _007::Parser::Actions {
 
             if $qtype.value eq "Q::Statement" {
                 # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
-                my $contents = $block.ast.statementlist.statements.elements[0];
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                my $contents = $block.ast.properties<statementlist>.properties<statements>.value[0];
+                make create(TYPE<Q::Term::Quasi>, :$contents, :$qtype);
                 return;
             }
             elsif $qtype.value eq "Q::StatementList" {
-                my $contents = $block.ast.statementlist;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                my $contents = $block.ast.properties<statementlist>;
+                make create(TYPE<Q::Term::Quasi>, :$contents, :$qtype);
                 return;
             }
             elsif $qtype.value ne "Q::Block"
-                && $block.ast ~~ Q::Block
-                && $block.ast.statementlist.statements.elements.elems == 1
-                && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
+                && $block.ast.is-a("Q::Block")
+                && $block.ast.properties<statementlist>.properties<statements>.value.elems == 1
+                && $block.ast.properties<statementlist>.properties<statements>.value[0].is-a("Q::Statement::Expr") {
 
-                my $contents = $block.ast.statementlist.statements.elements[0].expr;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                my $contents = $block.ast.properties<statementlist>.properties<statements>.value[0].properties<expr>;
+                make create(TYPE<Q::Term::Quasi>, :$contents, :$qtype);
                 return;
             }
         }
@@ -617,7 +632,7 @@ class _007::Parser::Actions {
 
             if $/{$subrule} -> $submatch {
                 my $contents = $submatch.ast;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                make create(TYPE<Q::Term::Quasi>, :$contents, :$qtype);
                 return;
             }
         }
@@ -630,115 +645,122 @@ class _007::Parser::Actions {
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
-        my $block = Q::Block.new(:$parameterlist, :$statementlist);
+        my $block = create(TYPE<Q::Block>, :$parameterlist, :$statementlist, :static-lexpad(empty-dict()));
         if $<identifier> {
-            my $name = $<identifier>.ast.name;
-            my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
-            my $static-lexpad = $*runtime.current-frame.properties<pad>;
-            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
-            $<identifier>.ast.put-value($val, $*runtime);
+            my $name = $<identifier>.ast.properties<name>;
+            my $outer-frame = $*runtime.current-frame.value<outer-frame>;
+            my $static-lexpad = $*runtime.current-frame.value<pad>;
+            my $val = create(TYPE<Sub>, :$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            bound-method($<identifier>.ast, "put-value", $*runtime)($val);
         }
         self.finish-block($block);
 
-        my $name = $<identifier>.ast.name;
+        my $name = $<identifier> && $<identifier>.ast.properties<name>;
         my $identifier = $<identifier>
-            ?? Q::Identifier.new(:$name)
+            ?? create(TYPE<Q::Identifier>, :$name)
             !! NONE;
-        make Q::Term::Sub.new(:$identifier, :$traitlist, :$block);
+        make create(TYPE<Q::Term::Sub>, :$identifier, :$traitlist, :$block);
     }
 
     method unquote ($/) {
         my $qtype = $<identifier>
-            ?? $*runtime.get-var($<identifier>.ast.name.value).type
-            !! Q::Term;
-        make Q::Unquote.new(:$qtype, :expr($<EXPR>.ast));
+            ?? $*runtime.get-var($<identifier>.ast.properties<name>.value)
+            !! TYPE<Q::Term>;
+        make create(TYPE<Q::Unquote>, :$qtype, :expr($<EXPR>.ast));
     }
 
     method term:new-object ($/) {
-        my $type = $<identifier>.ast.name.value;
-        my $type-obj = $*runtime.get-var($type).type;
+        my $type = $<identifier>.ast.properties<name>.value;
+        my $type-obj = $*runtime.get-var($type);
 
-        if $type-obj !=== Val::Object {
-            sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
-            for $<propertylist>.ast.properties.elements -> $p {
-                my $property = $p.key.value;
-                die X::Property::NotDeclared.new(:$type, :$property)
-                    unless %known-properties{$property};
-            }
-            for %known-properties.keys -> $property {
-                # If an attribute has an initializer, then we don't require that it be
-                # passed, since it will get a sensible value anyway.
-                next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
+        my @known-properties = $type-obj.type-chain.reverse.map({ .fields }).flat;
+        my $seen-properties = set();
+        for $<propertylist>.ast.properties<properties>.value -> $p {
+            my $property = $p.properties<key>.value;
+            # Here we make a slight exception for the wrapped types
+            next if $property eq "value" && $type eq "Int" | "Str" | "Array" | "Dict";
+            die X::Property::NotDeclared.new(:$type, :$property)
+                unless $property (elem) @known-properties.map({ .<name> });
+            $seen-properties (|)= $property;
+        }
+        for @known-properties -> $p {
+            next if $p<optional>;
 
-                die X::Property::Required.new(:$type, :$property)
-                    unless $property eq any($<propertylist>.ast.properties.elements».key».value);
-            }
+            my $property = $p<name>;
+            die X::Property::Required.new(:$type, :$property)
+                unless $property (elem) $seen-properties;
         }
 
-        make Q::Term::Object.new(
-            :type(Q::Identifier.new(:name(Val::Str.new(:value($type))))),
+        make create(TYPE<Q::Term::Object>,
+            # XXX: couldn't we just pass $type here?
+            :type(create(TYPE<Q::Identifier>, :name(wrap($type)))),
             :propertylist($<propertylist>.ast));
     }
 
-    method term:object ($/) {
-        my $type = "Object";
-        my $name = Val::Str.new(:value($type));
-        my $frame = $*runtime.builtin-frame;
-
-        make Q::Term::Object.new(
-            :type(Q::Identifier.new(:$name, :$frame)),
+    method term:dict ($/) {
+        make create(TYPE<Q::Term::Dict>,
             :propertylist($<propertylist>.ast));
     }
 
     method propertylist ($/) {
         my %seen;
-        for $<property>».ast -> Q::Property $p {
-            my Str $property = $p.key.value;
+        for $<property>».ast -> $p {
+            my Str $property = $p.properties<key>.value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }
 
-        make Q::PropertyList.new(:properties(Val::Array.new(:elements($<property>».ast))));
+        my $properties = wrap($<property>».ast);
+        make create(TYPE<Q::PropertyList>, :$properties);
     }
 
     method property:str-expr ($/) {
-        make Q::Property.new(:key($<str>.ast.value), :value($<value>.ast));
+        make create(TYPE<Q::Property>, :key($<str>.ast.properties<value>), :value($<value>.ast));
     }
 
     method property:identifier-expr ($/) {
-        my $key = $<identifier>.ast.name;
-        make Q::Property.new(:$key, :value($<value>.ast));
+        my $key = $<identifier>.ast.properties<name>;
+        make create(TYPE<Q::Property>, :$key, :value($<value>.ast));
     }
 
     method property:identifier ($/) {
-        my $key = $<identifier>.ast.name;
-        make Q::Property.new(:$key, :value($<identifier>.ast));
+        my $key = $<identifier>.ast.properties<name>;
+        make create(TYPE<Q::Property>, :$key, :value($<identifier>.ast));
     }
 
     method property:method ($/) {
-        my $block = Q::Block.new(
+        my $block = create(TYPE<Q::Block>,
             :parameterlist($<parameterlist>.ast),
-            :statementlist($<blockoid>.ast));
-        my $name = $<identifier>.ast.name;
-        my $identifier = Q::Identifier.new(:$name);
-        make Q::Property.new(:key($name), :value(
-            Q::Term::Sub.new(:$identifier, :$block)));
+            :statementlist($<blockoid>.ast),
+            :static-lexpad(wrap({})),
+        );
+        my $name = $<identifier>.ast.properties<name>;
+        my $identifier = create(TYPE<Q::Identifier>, :$name);
+        make create(TYPE<Q::Property>,
+            :key($name),
+            :value(create(TYPE<Q::Term::Sub>,
+                :$identifier,
+                :$block,
+                :traitlist(create(TYPE<Q::TraitList>,
+                    :traits(wrap([])),
+                )),
+            )),
+        );
         self.finish-block($block);
     }
 
     method infix($/) {
         my $op = ~$/;
-        my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("infix:$op"))),
+        my $identifier = create(TYPE<Q::Identifier>,
+            :name(wrap("infix:$op")),
             :frame($*runtime.current-frame),
         );
-        make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
+        make create($*parser.opscope.ops<infix>{$op}.type, :$identifier, :lhs(NONE), :rhs(NONE));
     }
 
     method infix-unquote($/) {
         my $got = ~($<unquote><identifier> // "Q::Term");
-        die X::TypeCheck.new(:operation<parsing>, :$got, :expected(Q::Infix))
+        die X::Type.new(:operation<parsing>, :$got, :expected(TYPE<Q::Infix>))
             unless $got eq "Q::Infix";
 
         make $<unquote>.ast;
@@ -755,23 +777,23 @@ class _007::Parser::Actions {
         elsif $<prop> {
             $op = ".";
         }
-        my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value("postfix:$op"))),
+        my $identifier = create(TYPE<Q::Identifier>,
+            :name(wrap("postfix:$op")),
             :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :operand(NONE));
+            make create(TYPE<Q::Postfix::Index>, index => $<EXPR>.ast, :$identifier, :operand(NONE));
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :operand(NONE));
+            make create(TYPE<Q::Postfix::Call>, argumentlist => $<argumentlist>.ast, :$identifier, :operand(NONE));
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(NONE));
+            make create(TYPE<Q::Postfix::Property>, property => $<identifier>.ast, :$identifier, :operand(NONE));
         }
         else {
-            make $*parser.opscope.ops<postfix>{$op}.new(:$identifier, :operand(NONE));
+            make create($*parser.opscope.ops<postfix>{$op}.type, :$identifier, :operand(NONE));
         }
     }
 
@@ -784,18 +806,21 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';
         }();
-        make Q::Identifier.new(:name(Val::Str.new(:$value)));
+        my $name = wrap($value);
+        make create(TYPE<Q::Identifier>, :$name);
     }
 
     method argumentlist($/) {
-        make Q::ArgumentList.new(:arguments(Val::Array.new(:elements($<EXPR>».ast))));
+        my $arguments = wrap($<EXPR>».ast);
+        make create(TYPE<Q::ArgumentList>, :$arguments);
     }
 
     method parameterlist($/) {
-        make Q::ParameterList.new(:parameters(Val::Array.new(:elements($<parameter>».ast))));
+        my $parameters = wrap($<parameter>».ast);
+        make create(TYPE<Q::ParameterList>, :$parameters);
     }
 
     method parameter($/) {
-        make Q::Parameter.new(:identifier($<identifier>.ast));
+        make create(TYPE<Q::Parameter>, :identifier($<identifier>.ast));
     }
 }

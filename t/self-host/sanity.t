@@ -14,7 +14,7 @@ sub run_007_on_007($program) {
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     my $ast = _007.parser(:$runtime).parse($runtime-program);
-    $ast.block.static-lexpad.properties<ast> = $compunit;
+    $ast.properties<block>.properties<static-lexpad>.value<ast> = $compunit;
     $runtime.run($ast);
     return $output.result;
 }

@@ -254,33 +254,33 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (dict (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "True\nFalse\n", "object equality";
+    is-result $ast, "True\nFalse\n", "dict equality";
 }
 
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
+          (my (identifier "o2") (dict (propertylist (property "x" (int 9)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o2"))))))
         .
 
-    is-result $ast, "False\nTrue\n", "object inequality";
+    is-result $ast, "False\nTrue\n", "dict inequality";
 }
 
 {
     my $ast = q:to/./;
         (statementlist
-          (my (identifier "o3") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o3") (dict (propertylist (property "x" (int 7)))))
 
           (stexpr (infix:= (postfix:. (identifier "o3") (identifier "y")) (identifier "o3")))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o3") (identifier "o3"))))))
@@ -315,7 +315,7 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "s1") (str "10"))
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "i1") (identifier "s1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "s1") (identifier "a1")))))
@@ -332,7 +332,7 @@ use _007::Test;
           (my (identifier "i1") (int 10))
           (my (identifier "s1") (str "10"))
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
+          (my (identifier "o1") (dict (propertylist (property "x" (int 7)))))
 
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "i1") (identifier "s1")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "s1") (identifier "a1")))))
@@ -429,7 +429,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "adding non-ints is an error";
+    is-error $ast, X::Type, "adding non-ints is an error";
 }
 
 {
@@ -438,7 +438,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
+    is-error $ast, X::Type, "concatenating non-strs is an error";
 }
 
 {
@@ -448,25 +448,28 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 0))))))
         .
 
-    is-error $ast, X::TypeCheck, "indexing a non-array is an error";
+    is-error $ast, X::Type, "indexing a non-array is an error";
 }
 
 {
     my $program = q:to/./;
         my a = [1, 2, 3];
+        my d = { foo: 12 };
         sub f() { return 7 };
-        my o = { foo: 12 };
+        my o = new Q::Identifier { name: "19" };
 
         say(-a[1]);
+        say(-d["foo"]);
         say(-f());
-        say(-o.foo);
+        say(-o.name);
 
         say(!a[2]);
+        say(!d["foo"]);
         say(!f());
-        say(!o.foo);
+        say(!o.name);
         .
 
-    outputs $program, "-2\n-7\n-12\nFalse\nFalse\nFalse\n", "all postfixes are tighter than both prefixes";
+    outputs $program, "-2\n-12\n-7\n-19\nFalse\nFalse\nFalse\nFalse\n", "all postfixes are tighter than all prefixes";
 }
 
 {
@@ -593,7 +596,7 @@ use _007::Test;
           (stexpr (prefix:^ (str "Mr Bond"))))
         .
 
-    is-error $ast, X::TypeCheck, "can't upto a string (or other non-integer types)";
+    is-error $ast, X::Type, "can't upto a string (or other non-integer types)";
 }
 
 {
@@ -617,7 +620,7 @@ use _007::Test;
         my q = 42; say(q ~~ Int)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Int";
+    outputs $program, "True\n", "typecheck works for Int";
 }
 
 {
@@ -625,15 +628,15 @@ use _007::Test;
         my q = [4, 2]; say(q ~~ Array)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Array";
+    outputs $program, "True\n", "typecheck works for Array";
 }
 
 {
     my $program = q:to/./;
-        my q = {}; say(q ~~ Object)
+        my q = {}; say(q ~~ Dict)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Object";
+    outputs $program, "True\n", "typecheck works for Dict";
 }
 
 {
@@ -642,9 +645,9 @@ use _007::Test;
         say(quasi @ Q::Infix { + } !~~ Q::Prefix);
         say(42 !~~ Int);
         say([4, 2] !~~ Array);
-        say({} !~~ Object);
+        say({} !~~ Dict);
         say(42 !~~ Array);
-        say([4, 2] !~~ Object);
+        say([4, 2] !~~ Dict);
         say({} !~~ Int);
         .
 

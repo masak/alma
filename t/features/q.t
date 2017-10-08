@@ -4,7 +4,9 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::My { identifier: new Q::Identifier { name: "foo" } };
+        my q = new Q::Statement::My {
+            identifier: new Q::Identifier { name: "foo" },
+        };
         say(q.expr);
         .
 
@@ -36,8 +38,10 @@ use _007::Test;
                 },
                 statementlist: new Q::StatementList {
                     statements: []
-                }
-            }
+                },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
         };
         say(q.else);
         .
@@ -54,8 +58,12 @@ use _007::Test;
             identifier: new Q::Identifier { name: "foo" },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
-            }
+                statementlist: new Q::StatementList { statements: [] },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
+            # XXX: and this
+            traitlist: new Q::TraitList { traits: [] },
         };
         say(q.traitlist);
         .
@@ -72,8 +80,12 @@ use _007::Test;
             identifier: new Q::Identifier { name: "moo" },
             block: new Q::Block {
                 parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
-            }
+                statementlist: new Q::StatementList { statements: [] },
+                # XXX: can remove this later
+                "static-lexpad": {},
+            },
+            # XXX: and this
+            traitlist: new Q::TraitList { traits: [] },
         };
         say(q.traitlist);
         .
