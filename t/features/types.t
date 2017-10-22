@@ -67,7 +67,11 @@ use _007::Test;
           (stexpr (object (identifier "Q::Literal") (propertylist))))
         .
 
-    is-error $ast, X::Uninstantiable, "abstract Q types are uninstantiable (#140)";
+    is-error
+        $ast,
+        X::Uninstantiable,
+        "<type Q::Literal> is abstract and uninstantiable",
+        "abstract Q types are uninstantiable (#140)";
 }
 
 {

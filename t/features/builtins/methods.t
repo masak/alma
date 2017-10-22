@@ -189,7 +189,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "charat")) (argumentlist (int 3)))))))
         .
 
-    is-error $ast, X::Subscript::TooLarge, "charat() dies";
+    is-error
+        $ast,
+        X::Subscript::TooLarge,
+        "Subscript (3) too large (array length 3)",
+        "charat() dies";
 }
 
 {
@@ -271,7 +275,11 @@ use _007::Test;
           (stexpr (postfix:() (postfix:. (identifier "a") (identifier "pop")) (argumentlist))))
         .
 
-    is-error $ast, X::Cannot::Empty, "cannot Array.pop() an empty array";
+    is-error
+        $ast,
+        X::Cannot::Empty,
+        "Cannot pop from an empty Val::Array",
+        "cannot Array.pop() an empty array";
 }
 
 {
@@ -304,7 +312,11 @@ use _007::Test;
           (stexpr (postfix:() (postfix:. (identifier "a") (identifier "shift")) (argumentlist))))
         .
 
-    is-error $ast, X::Cannot::Empty, "cannot Array.shift() an empty array";
+    is-error
+        $ast,
+        X::Cannot::Empty,
+        "Cannot pop from an empty Val::Array",
+        "cannot Array.shift() an empty array";
 }
 
 {
@@ -347,7 +359,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "fullmatch")) (argumentlist (int 3)))))))
         .
 
-    is-error $ast, X::Regex::InvalidMatchType, "Regex.fullmatch() can only match strings";
+    is-error
+        $ast,
+        X::Regex::InvalidMatchType,
+        "A regex can only match strings",
+        "Regex.fullmatch() can only match strings";
 }
 
 {
@@ -357,7 +373,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "r") (identifier "search")) (argumentlist (int 3)))))))
         .
 
-    is-error $ast, X::Regex::InvalidMatchType, "Regex.search() can only match strings";
+    is-error
+        $ast,
+        X::Regex::InvalidMatchType,
+        "A regex can only match strings",
+        "Regex.search() can only match strings";
 }
 
 {

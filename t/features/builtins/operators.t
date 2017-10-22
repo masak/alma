@@ -53,7 +53,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:% (int 5) (int 0))))))
         .
 
-    is-error $ast, X::Numeric::DivideByZero, "dividing by 0 is an error";
+    is-error
+        $ast,
+        X::Numeric::DivideByZero,
+        "Attempt to divide 5 by zero using %",
+        "dividing by 0 is an error";
 }
 
 {
@@ -74,7 +78,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 5) (int 0))))))
         .
 
-    is-error $ast, X::Numeric::DivideByZero, "checking divisibility by 0 is an error";
+    is-error
+        $ast,
+        X::Numeric::DivideByZero,
+        "Attempt to divide 5 by zero using %%",
+        "checking divisibility by 0 is an error";
 }
 
 {
@@ -410,7 +418,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (prefix:- (int 2)))))))
         .
 
-    is-error $ast, X::Subscript::Negative, "negative array indexing is an error";
+    is-error
+        $ast,
+        X::Subscript::Negative,
+        "Calculated index (-2) is negative, but Array allows only 0-based indexing",
+        "negative array indexing is an error";
 }
 
 {
@@ -420,7 +432,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 19))))))
         .
 
-    is-error $ast, X::Subscript::TooLarge, "indexing beyond the last element is an error";
+    is-error
+        $ast,
+        X::Subscript::TooLarge,
+        "Subscript (19) too large (array length 2)",
+        "indexing beyond the last element is an error";
 }
 
 {
@@ -429,7 +445,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "adding non-ints is an error";
+    is-error
+        $ast,
+        X::TypeCheck,
+        "Type check failed in +; expected Val::Int but got Val::Str (Val::Str.new(value =>...)",
+        "adding non-ints is an error";
 }
 
 {
@@ -438,7 +458,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (int 38) (str "4"))))))
         .
 
-    is-error $ast, X::TypeCheck, "concatenating non-strs is an error";
+    is-error
+        $ast,
+        X::TypeCheck,
+        "Type check failed in ~; expected Val::Str but got Val::Int (Val::Int.new(value =>...)",
+        "concatenating non-strs is an error";
 }
 
 {
@@ -448,7 +472,11 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 0))))))
         .
 
-    is-error $ast, X::TypeCheck, "indexing a non-array is an error";
+    is-error
+        $ast,
+        X::TypeCheck,
+        "Type check failed in indexing; expected Val::Array but got Val::Str (Val::Str.new(value =>...)",
+        "indexing a non-array is an error";
 }
 
 {
@@ -593,7 +621,11 @@ use _007::Test;
           (stexpr (prefix:^ (str "Mr Bond"))))
         .
 
-    is-error $ast, X::TypeCheck, "can't upto a string (or other non-integer types)";
+    is-error
+        $ast,
+        X::TypeCheck,
+        "Type check failed in ^; expected Val::Int but got Val::Str (Val::Str.new(value =>...)",
+        "can't upto a string (or other non-integer types)";
 }
 
 {

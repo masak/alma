@@ -272,7 +272,7 @@ sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     is $output.result, $expected, $desc;
 }
 
-sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
+sub is-error($input, $expected-error, $expected-msg, $desc = $expected-error.^name) is export {
     my $ast = read($input);
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
@@ -281,7 +281,7 @@ sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
 
     CATCH {
         when $expected-error {
-            pass $desc;
+            is .message, $expected-msg, $desc;
         }
     }
     flunk $desc;
