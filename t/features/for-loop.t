@@ -30,7 +30,11 @@ use _007::Test;
             (stexpr (postfix:() (identifier "say") (argumentlist (identifier "j"))))))))
         .
 
-    is-error $ast, X::ParameterMismatch, "for-loops with more parameters are not supported";
+    is-error
+        $ast,
+        X::ParameterMismatch,
+        "For loop with 2 parameters called with 0 or 1 arguments",
+        "for-loops with more parameters are not supported";
 }
 
 {

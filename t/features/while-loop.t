@@ -62,7 +62,11 @@ use _007::Test;
             (stexpr (infix:= (identifier "u") (infix:+ (identifier "u") (prefix:- (int 1)))))))))
         .
 
-    is-error $ast, X::ParameterMismatch, "while loops don't accept more than one parameter";
+    is-error
+        $ast,
+        X::ParameterMismatch,
+        "While loop with 3 parameters called with 0 or 1 arguments",
+        "while loops don't accept more than one parameter";
 }
 
 done-testing;
