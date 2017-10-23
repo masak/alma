@@ -131,4 +131,18 @@ use _007::Test;
         "regression test -- newline after an if block is enough, no semicolon needed";
 }
 
+{
+    my $ast = q:to/./;
+        (statementlist
+          (if (int 1) (block (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist
+            (stexpr (postfix:() (identifier "say") (argumentlist (str "this should not work"))))))))
+        .
+
+    is-error
+        $ast,
+        X::ParameterMismatch,
+        "If statement with 2 parameters called with 0 or 1 arguments",
+        "if statement accepts only 0 or 1 argument";
+}
+
 done-testing;
