@@ -20,7 +20,7 @@ ensure-feature-flag("REGEX");
     outputs $program, "True\n", "Regexes are truthy";
 }
 {
-    my %programs =
+    my @programs =
         'say(/"abc" "def"/.fullmatch("abcdef"));' => True,
         'say(/"abc" "def"/.fullmatch("abcde"));' => False,
         'say(/"abc"? "def"?/.fullmatch(""));' => True,
@@ -41,10 +41,18 @@ ensure-feature-flag("REGEX");
         'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzdef"));' => True,
         'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzde"));' => False,
         'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzxydef"));' => False,
+
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("hello abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzdef world"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("hello abcdefxyzdef world"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzxydef"));' => True, # this is a failing case for fullmatch, but search will just stop matching after failing on "xy"
         ;
 
-    for %programs.kv -> $program, $result {
-        outputs $program, "$result\n", "Testing regex, $program";
+    for @programs -> $program {
+        my $code = $program.key;
+        my $expected = $program.value;
+        outputs $code, "$expected\n", "Testing regex, program: $code";
     }
 }
 

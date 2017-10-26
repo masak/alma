@@ -367,7 +367,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ Val::Str;
 
-                return Val::Bool.new(:value($obj.searc($str.value)));
+                return Val::Bool.new(:value($obj.search($str.value)));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {
