@@ -171,8 +171,7 @@ grammar _007::Parser::Syntax {
     token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' } # " you are welcome vim
 
     rule regex-part {
-        <regex-group>
-        [ '|' <regex-group> ]*
+        <regex-group> + %% '|'
     }
 
     rule regex-group {

@@ -359,7 +359,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ Val::Str;
 
-                return Val::Bool.new(:value($obj.match($str.value, True)));
+                return Val::Bool.new(:value($obj.fullmatch($str.value)));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
@@ -367,7 +367,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ Val::Str;
 
-                return Val::Bool.new(:value($obj.match($str.value, False)));
+                return Val::Bool.new(:value($obj.searc($str.value)));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {

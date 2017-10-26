@@ -184,12 +184,10 @@ role Q::Regex::Fragment {
 ### ### Q::Regex::Str
 ###
 ### A regex fragment for a simple string.
-### Corresponds to the '"' ... '"' regex syntax.
+### Corresponds to the `"..."` regex syntax.
 ###
 class Q::Regex::Str does Q::Regex::Fragment {
     has Val::Str $.contents;
-
-    method perl { "Regex::Str\{$.contents\}" }
 }
 
 ### ### Q::Regex::Identifier
@@ -198,18 +196,18 @@ class Q::Regex::Str does Q::Regex::Fragment {
 ### Corresponds to an identifier in a regex.
 ###
 class Q::Regex::Identifier does Q::Regex::Fragment {
-    has Q::Identifier $.identifier;
+  has Q::Identifier $.identifier;
 
-    method eval($runtime) {
-        # XXX check that the value is a string
-        return $.identifier.eval($runtime);
-    }
+  method eval($runtime) {
+      # XXX check that the value is a string
+      return $.identifier.eval($runtime);
+  }
 }
 
 ### ### Q::Regex::Call
 ###
 ### A regex fragment calling to another regex.
-### Corresponds to the "<" ... ">" regex syntax.
+### Corresponds to the `<...>` regex syntax.
 ###
 class Q::Regex::Call does Q::Regex::Fragment {
     has Q::Identifier $.identifier;

@@ -208,83 +208,80 @@ class Val::Regex does Val {
     # note: a regex should probably keep its lexpad or something to resolve calls&identifiers
     has $.contents;
 
-    method quoted-Str {
-        #"/" ~ $.contents.quoted-Str ~ "/"
-        "/...a regex.../"
+    method search(Str $str) {
+       for ^$str.chars {
+          return True with parse($str, $.contents, $_);
+       }
+       return False
     }
 
-    method match(Str $str, Bool $full) {
-        my Int $last-index = 0;
-        sub calibrate($part) {
-            if $last-index == 0 and !$full {
-                $last-index = $str.index($part);
-            }
-        }
+    method fullmatch(Str $str) {
+        return ?($_ == $str.chars with parse($str, $.contents, 0));
+    }
 
-        sub parse($fragment) {
-            when $fragment.^name eq "Q::Regex::Str" {
-                my $value = $fragment.contents.value;
-                calibrate($value);
-                my $slice = $str.substr($last-index, $value.chars);
-                return False if $slice ne $value;
-                $last-index += $value.chars;
-                return True
-            }
-            #when Q::Regex::Identifier {
-            #    die "Unhandled regex fragment";
-            #}
-            #when Q::Regex::Call {
-            #    die "Unhandled regex fragment";
-            #}
-            when $fragment.^name eq "Q::Regex::Group" {
-                for $fragment.fragments -> $group-fragment {
-                    return False unless parse($group-fragment)
+    sub parse($str, $fragment, Int $last-index is copy) {
+        when $fragment.^name eq "Q::Regex::Str" {
+            my $value = $fragment.contents.value;
+            my $slice = $str.substr($last-index, $value.chars);
+            return Nil if $slice ne $value;
+            return $last-index + $value.chars;
+        }
+        #when Q::Regex::Identifier {
+        #    die "Unhandled regex fragment";
+        #}
+        #when Q::Regex::Call {
+        #    die "Unhandled regex fragment";
+        #}
+        when $fragment.^name eq "Q::Regex::Group" {
+            for $fragment.fragments -> $group-fragment {
+                with parse($str, $group-fragment, $last-index) {
+                    $last-index = $_;
+                } else {
+                    return Nil;
                 }
-                return True
             }
-            when $fragment.^name eq "Q::Regex::ZeroOrOne" {
-                my $old-last-index = $last-index;
-                unless parse($fragment.fragment) {
-                    $last-index = $old-last-index;
-                }
-                return True
-            }
-            when $fragment.^name eq "Q::Regex::OneOrMore" {
-                # XXX technically just a fragment+a ZeroOrMore
-                return False unless parse($fragment.fragment);
-                while True {
-                    my $old-last-index = $last-index;
-                    unless parse($fragment.fragment) {
-                        $last-index = $old-last-index;
-                        last;
-                    }
-                }
-                return True
-            }
-            when $fragment.^name eq "Q::Regex::ZeroOrMore" {
-                while True {
-                    my $old-last-index = $last-index;
-                    unless parse($fragment.fragment) {
-                        $last-index = $old-last-index;
-                        last;
-                    }
-                }
-                return True
-            }
-            when $fragment.^name eq "Q::Regex::Alternation" {
-                for $fragment.alternatives -> $alternative {
-                    my $old-last-index = $last-index;
-                    return True if parse($alternative);
-                    $last-index = $old-last-index;
-                }
-                return False;
-            }
-            default {
-                die "No handler for {$fragment.^name}";
+            return $last-index;
+        }
+        when $fragment.^name eq "Q::Regex::ZeroOrOne" {
+            with parse($str, $fragment.fragment, $last-index) {
+                return $_;
+            } else {
+                return $last-index;
             }
         }
-        return False unless parse($.contents);
-        return $last-index == $str.chars || !$full;
+        when $fragment.^name eq "Q::Regex::OneOrMore" {
+            # XXX technically just a fragment+a ZeroOrMore
+            return Nil unless $last-index = parse($str, $fragment.fragment, $last-index);
+            loop {
+                with parse($str, $fragment.fragment, $last-index) {
+                    $last-index = $_;
+                } else {
+                    last;
+                }
+            }
+            return $last-index;
+        }
+        when $fragment.^name eq "Q::Regex::ZeroOrMore" {
+            loop {
+                with parse($str, $fragment.fragment, $last-index) {
+                    $last-index = $_;
+                } else {
+                    last;
+                }
+            }
+            return $last-index;
+        }
+        when $fragment.^name eq "Q::Regex::Alternation" {
+            for $fragment.alternatives -> $alternative {
+                with parse($str, $alternative, $last-index) {
+                    return $_;
+                }
+            }
+            return Nil;
+        }
+        default {
+            die "No handler for {$fragment.^name}";
+        }
     }
 }
 
