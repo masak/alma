@@ -858,7 +858,7 @@ class Q::Statement::If does Q::Statement {
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
         if $expr.truthy {
-            my $paramcount = $.block.parameterlist.elems;
+            my $paramcount = $.block.parameterlist.parameters.elements.elems;
             die X::ParameterMismatch.new(
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
