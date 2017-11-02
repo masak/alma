@@ -209,10 +209,10 @@ class Val::Regex does Val {
     has $.contents;
 
     method search(Str $str) {
-       for ^$str.chars {
-          return True with parse($str, $.contents, $_);
-       }
-       return False
+        for ^$str.chars {
+            return True with parse($str, $.contents, $_);
+        }
+        return False;
     }
 
     method fullmatch(Str $str) {

@@ -196,12 +196,12 @@ class Q::Regex::Str does Q::Regex::Fragment {
 ### Corresponds to an identifier in a regex.
 ###
 class Q::Regex::Identifier does Q::Regex::Fragment {
-  has Q::Identifier $.identifier;
+    has Q::Identifier $.identifier;
 
-  method eval($runtime) {
-      # XXX check that the value is a string
-      return $.identifier.eval($runtime);
-  }
+    method eval($runtime) {
+        # XXX check that the value is a string
+        return $.identifier.eval($runtime);
+    }
 }
 
 ### ### Q::Regex::Call

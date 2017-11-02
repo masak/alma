@@ -5,11 +5,20 @@ use _007::Test;
 ensure-feature-flag("REGEX");
 
 {
-    my $program = q:to/./;
-        my val = /"hey"/;
-        .
-
-    outputs $program, "", "Regexes parse correctly";
+    my @regexes =
+      '/"hey"/',
+      '/"/"/',
+      '/ ["abc"] /',
+      '/[ "abc" ]/',
+      '/"abc" "def"+/',
+      '/"a"+ "b"? "c"*/',
+    ;
+    for @regexes -> $regex {
+        my $program = qq:to/./;
+            my val = $regex;
+            .
+        outputs $program, "", "Regex $regex parses correctly",
+    }
 }
 
 {

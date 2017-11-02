@@ -193,7 +193,7 @@ grammar _007::Parser::Syntax {
         '<' ~ '>'
         <identifier>
     }
-    token regex-fragment:group {
+    rule regex-fragment:group { ''
         '[' ~ ']'
         <regex-part>
     }
