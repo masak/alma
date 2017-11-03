@@ -278,6 +278,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "sort" {
             return builtin(sub sort() {
+                my $types = $obj.elements.map({ .^name }).unique;
+                die X::TypeCheck::HeterogeneousArray.new(:operation<sort>, :$types)
+                    if $types.elems > 1;
                 return Val::Array.new(:elements($obj.elements.sort));
             });
         }

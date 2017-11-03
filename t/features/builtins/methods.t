@@ -105,6 +105,19 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
+          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 2) (int 1) (str "A")) (identifier "sort")) (argumentlist))))))
+        .
+
+    is-error
+        $ast,
+        X::TypeCheck::HeterogeneousArray,
+        "Can't do 'sort' on heterogeneous array, types found: Val::Int Val::Str",
+        "sort() on heterogeneous arrays should not work";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:()
             (postfix:. (array (int 1) (int 2)) (identifier "concat"))
             (argumentlist (array (int 3) (int 4))))))))
