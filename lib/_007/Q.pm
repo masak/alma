@@ -45,6 +45,15 @@ class X::Regex::InvalidMatchType is Exception {
     method message { "A regex can only match strings" }
 }
 
+class X::TypeCheck::HeterogeneousArray is Exception {
+    has $.operation;
+    has $.types;
+
+    method message {
+        "Can't do '$.operation' on heterogeneous array, types found: {$.types.sort}"
+    }
+}
+
 class X::_007::RuntimeException is Exception {
     has $.msg;
 
