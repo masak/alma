@@ -359,22 +359,18 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
-                my $regex-string = $obj.contents.value;
-
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ Val::Str;
 
-                return Val::Bool.new(:value($regex-string eq $str.value));
+                return Val::Bool.new(:value($obj.fullmatch($str.value)));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
             return builtin(sub search($str) {
-                my $regex-string = $obj.contents.value;
-
                 die X::Regex::InvalidMatchType.new
                     unless $str ~~ Val::Str;
 
-                return Val::Bool.new(:value($str.value.contains($regex-string)));
+                return Val::Bool.new(:value($obj.search($str.value)));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {

@@ -183,12 +183,92 @@ class Q::Identifier does Q::Term {
     }
 }
 
+### ### Q::Regex::Fragment
+###
+### The parent role to all regex fragment types.
+###
+role Q::Regex::Fragment {
+}
+
+### ### Q::Regex::Str
+###
+### A regex fragment for a simple string.
+### Corresponds to the `"..."` regex syntax.
+###
+class Q::Regex::Str does Q::Regex::Fragment {
+    has Val::Str $.contents;
+}
+
+### ### Q::Regex::Identifier
+###
+### A regex fragment using a variable from the program.
+### Corresponds to an identifier in a regex.
+###
+class Q::Regex::Identifier does Q::Regex::Fragment {
+    has Q::Identifier $.identifier;
+
+    method eval($runtime) {
+        # XXX check that the value is a string
+        return $.identifier.eval($runtime);
+    }
+}
+
+### ### Q::Regex::Call
+###
+### A regex fragment calling to another regex.
+### Corresponds to the `<...>` regex syntax.
+###
+class Q::Regex::Call does Q::Regex::Fragment {
+    has Q::Identifier $.identifier;
+}
+
+### ### Q::Regex::Alternation
+###
+### An alternation between fragments.
+###
+class Q::Regex::Alternation does Q::Regex::Fragment {
+    has Q::Regex::Fragment @.alternatives;
+}
+
+### ### Q::Regex::Group
+###
+### A regex fragment containing several other fragments.
+### Corresponds to the "[" ... "]" regex syntax.
+###
+class Q::Regex::Group does Q::Regex::Fragment {
+    has Q::Regex::Fragment @.fragments;
+}
+
+### ### Q::Regex::OneOrMore
+###
+### A regex fragment representing the "+" quantifier.
+###
+class Q::Regex::OneOrMore does Q::Regex::Fragment {
+    has Q::Regex::Fragment $.fragment;
+}
+
+### ### Q::Regex::ZeroOrMore
+###
+### A regex fragment representing the "*" quantifier.
+###
+class Q::Regex::ZeroOrMore does Q::Regex::Fragment {
+    has Q::Regex::Fragment $.fragment;
+}
+
+### ### Q::Regex::ZeroOrOne
+###
+### A regex fragment representing the "?" quantifier.
+###
+class Q::Regex::ZeroOrOne does Q::Regex::Fragment {
+    has Q::Regex::Fragment $.fragment;
+}
+
 ### ### Q::Term::Regex
 ###
 ### A regular expression (*regex*).
 ###
 class Q::Term::Regex does Q::Term {
-    has Val::Str $.contents;
+    has Q::Regex::Fragment $.contents;
 
     method eval($runtime) {
         Val::Regex.new(:$.contents);

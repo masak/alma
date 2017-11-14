@@ -170,6 +170,34 @@ grammar _007::Parser::Syntax {
 
     token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' } # " you are welcome vim
 
+    rule regex-part {
+        <regex-group> + %% '|'
+    }
+
+    rule regex-group {
+        <regex-quantified> +
+    }
+
+    token regex-quantified {
+        <regex-fragment> $<quantifier>=<[+ * ?]>?
+    }
+
+    proto token regex-fragment {*}
+    token regex-fragment:str {
+        <str>
+    }
+    token regex-fragment:identifier {
+        <identifier>
+    }
+    token regex-fragment:call {
+        '<' ~ '>'
+        <identifier>
+    }
+    rule regex-fragment:group { ''
+        '[' ~ ']'
+        <regex-part>
+    }
+
     proto token term {*}
     token term:none { None» }
     token term:false { False» }
@@ -182,7 +210,7 @@ grammar _007::Parser::Syntax {
         '/' ~ '/'
         [
             { check-feature-flag("Regex syntax", "REGEX"); }
-            <contents=str>
+            <regex-part>
         ]
     }
     token term:quasi { quasi <.ws>

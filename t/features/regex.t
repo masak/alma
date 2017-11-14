@@ -5,11 +5,20 @@ use _007::Test;
 ensure-feature-flag("REGEX");
 
 {
-    my $program = q:to/./;
-        my val = /"hey"/;
-        .
-
-    outputs $program, "", "Regexes parse correctly";
+    my @regexes =
+      '/"hey"/',
+      '/"/"/',
+      '/ ["abc"] /',
+      '/[ "abc" ]/',
+      '/"abc" "def"+/',
+      '/"a"+ "b"? "c"*/',
+    ;
+    for @regexes -> $regex {
+        my $program = qq:to/./;
+            my val = $regex;
+            .
+        outputs $program, "", "Regex $regex parses correctly",
+    }
 }
 
 {
@@ -19,25 +28,41 @@ ensure-feature-flag("REGEX");
 
     outputs $program, "True\n", "Regexes are truthy";
 }
-
 {
-    my $program = q:to/./;
-        say(/"Blofeld"/.fullmatch("Blofeld"));
-        say(/"Blofeld"/.fullmatch("Bond"));
-        say(/"Blofeld"/.fullmatch("this is Blofeld's work, I know it"));
-        .
+    my @programs =
+        'say(/"abc" "def"/.fullmatch("abcdef"));' => True,
+        'say(/"abc" "def"/.fullmatch("abcde"));' => False,
+        'say(/"abc"? "def"?/.fullmatch(""));' => True,
+        'say(/"abc"? "def"?/.fullmatch("abc"));' => True,
+        'say(/"abc"? "def"?/.fullmatch("abcdef"));' => True,
+        'say(/"abc"? "def"?/.fullmatch("def"));' => True,
+        'say(/"abc"? "def"?/.fullmatch("defxyz"));' => False,
+        'say(/"abc" "def"+/.fullmatch("abc"));' => False,
+        'say(/"abc" "def"+/.fullmatch("abcdef"));' => True,
+        'say(/"abc" "def"+/.fullmatch("abcdefdefdef"));' => True,
+        'say(/"abc" ["def"+ "xyz"]/.fullmatch("abcdefdefdefxyz"));' => True,
+        'say(/"abc" ["def"+ "xyz"]/.fullmatch("abcdefdefdefxy"));' => False,
+        'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abc|"));' => True,
+        'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcxyz|"));' => True,
+        'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdef|"));' => True,
+        'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxyz|defdef|"));' => True,
+        'say(/"abc" ["def"* "xyz"? "|"]+/.fullmatch("abcdefdefdefxy|"));' => False,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzde"));' => False,
+        'say(/"abc" ["def" | "xyz"]+/.fullmatch("abcdefxyzxydef"));' => False,
 
-    outputs $program, "True\nFalse\nFalse\n", "the .fullmatch method matches the whole string";
-}
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("hello abcdefxyzdef"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzdef world"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("hello abcdefxyzdef world"));' => True,
+        'say(/"abc" ["def" | "xyz"]+/.search("abcdefxyzxydef"));' => True, # this is a failing case for fullmatch, but search will just stop matching after failing on "xy"
+        ;
 
-{
-    my $program = q:to/./;
-        say(/"Blofeld"/.search("Blofeld"));
-        say(/"Blofeld"/.search("Bond"));
-        say(/"Blofeld"/.search("this is Blofeld's work, I know it"));
-        .
-
-    outputs $program, "True\nFalse\nTrue\n", "the .search method matches part of the string";
+    for @programs -> $program {
+        my $code = $program.key;
+        my $expected = $program.value;
+        outputs $code, "$expected\n", "Testing regex, program: $code";
+    }
 }
 
 done-testing;

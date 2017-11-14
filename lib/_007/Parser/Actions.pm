@@ -552,8 +552,42 @@ class _007::Parser::Actions {
         make $<EXPR>.ast;
     }
 
+    method regex-part($/) {
+        make Q::Regex::Alternation.new(:alternatives($<regex-group>».ast));
+    }
+
+    method regex-group($/) {
+        make Q::Regex::Group.new(:fragments($<regex-quantified>».ast));
+    }
+
+    method regex-quantified($/) {
+        given $<quantifier>.Str {
+            when ''  { make $<regex-fragment>.ast }
+            when '+'  { make Q::Regex::OneOrMore.new(:fragment($<regex-fragment>.ast)) }
+            when '*'  { make Q::Regex::ZeroOrMore.new(:fragment($<regex-fragment>.ast)) }
+            when '?'  { make Q::Regex::ZeroOrOne.new(:fragment($<regex-fragment>.ast)) }
+            default { die 'Unrecognized regex quantifier '; }
+        }
+    }
+
+    method regex-fragment:str ($/) {
+        make Q::Regex::Str.new(:contents($<str>.ast.value));
+    }
+
+    method regex-fragment:identifier ($/) {
+        make Q::Regex::Identifier.new(:identifier($<identifier>.ast));
+    }
+
+    method regex-fragment:call ($/) {
+        make Q::Regex::Call.new(:identifier($<identifier>.ast));
+    }
+
+    method regex-fragment:group ($/) {
+        make $<regex-part>.ast;
+    }
+
     method term:regex ($/) {
-        make Q::Term::Regex.new(:contents($<contents>.ast.value));
+        make Q::Term::Regex.new(:contents($<regex-part>.ast));
     }
 
     method term:identifier ($/) {
