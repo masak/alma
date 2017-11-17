@@ -87,17 +87,19 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
+* Fix the fact that [variables declared in quasis currently don't work in the
+  corresponding injected code](https://github.com/masak/007/issues/212).
 * Make unhygienic declarations that are injected into code [actually declare
   stuff](https://github.com/masak/007/issues/88). We can cheat majorly at this
   one at first, as long as it works.
+* [`is parsed`](https://github.com/masak/007/issues/#177).
 
 ### Language track
 
 * We're planning to [give the web page a big
   facelift](https://github.com/masak/007/issues/67), including more examples
   and interactive Qtrees. The champion on this one is **masak**.
-    * masak would also like to take this opportunity to tie together some kind
-      of doc-comments, automated tests, and documentation on the web page.
+* Implement some more [code inspection](https://github.com/masak/007/issues/222).
 
 ### General cleanup that should happen before v1.0.0
 
