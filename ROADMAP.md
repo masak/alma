@@ -87,10 +87,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
-* Also want to close [a philosophical
-  issue](https://github.com/masak/007/issues/7) about the statement/expression
-  discrepancy that's exhibited in quasi blocks. We're quite near to being able
-  to resolve this one now.
 * Make unhygienic declarations that are injected into code [actually declare
   stuff](https://github.com/masak/007/issues/88). We can cheat majorly at this
   one at first, as long as it works.
