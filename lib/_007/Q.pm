@@ -392,6 +392,8 @@ class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has Val::Object $.static-lexpad is rw = Val::Object.new;
+    # XXX
+    has $.frame is rw;
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -805,6 +807,8 @@ class Q::Term::Quasi does Q::Term {
     method attribute-order { <qtype contents> }
 
     method eval($runtime) {
+        my $needs-displacement = $.contents !~~ Q::Block;
+
         sub interpolate($thing) {
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;
@@ -815,7 +819,7 @@ class Q::Term::Quasi does Q::Term {
             return $thing
                 if $thing ~~ Val;
 
-            return $thing.new(:name($thing.name), :frame($runtime.current-frame))
+            return $thing.new(:name($thing.name), :frame($needs-displacement ?? $runtime.current-frame !! NONE))
                 if $thing ~~ Q::Identifier;
 
             if $thing ~~ Q::Unquote::Prefix {
@@ -848,7 +852,11 @@ class Q::Term::Quasi does Q::Term {
         if $.qtype.value eq "Q::Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
-        return interpolate($.contents);
+        my $r = interpolate($.contents);
+        if $r ~~ Q::Block {
+            $r.frame = $runtime.current-frame;
+        }
+        return $r;
     }
 }
 
@@ -1176,7 +1184,7 @@ class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
 
     method eval($runtime) {
-        $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
+        $runtime.enter($.block.frame, $.block.static-lexpad, $.block.statementlist);
         my $result = $.block.statementlist.run($runtime);
         $runtime.leave;
         return $result;
