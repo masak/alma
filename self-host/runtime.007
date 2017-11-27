@@ -216,7 +216,7 @@ my Runtime = {
             },
             Q::Term::Quasi(term) {
             },
-            Q::Expr::StatementListAdapter(adapter) {
+            Q::Expr::BlockAdapter(adapter) {
             },
         };
         sub eval(q) { return eval_of_type[type(q).name](q); }

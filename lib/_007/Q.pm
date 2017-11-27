@@ -392,6 +392,8 @@ class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has Val::Object $.static-lexpad is rw = Val::Object.new;
+    # XXX
+    has $.frame is rw;
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -805,6 +807,8 @@ class Q::Term::Quasi does Q::Term {
     method attribute-order { <qtype contents> }
 
     method eval($runtime) {
+        my $needs-displacement = $.contents !~~ Q::Block;
+
         sub interpolate($thing) {
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;
@@ -815,7 +819,7 @@ class Q::Term::Quasi does Q::Term {
             return $thing
                 if $thing ~~ Val;
 
-            return $thing.new(:name($thing.name), :frame($runtime.current-frame))
+            return $thing.new(:name($thing.name), :frame($needs-displacement ?? $runtime.current-frame !! NONE))
                 if $thing ~~ Q::Identifier;
 
             if $thing ~~ Q::Unquote::Prefix {
@@ -848,7 +852,11 @@ class Q::Term::Quasi does Q::Term {
         if $.qtype.value eq "Q::Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
-        return interpolate($.contents);
+        my $r = interpolate($.contents);
+        if $r ~~ Q::Block {
+            $r.frame = $runtime.current-frame;
+        }
+        return $r;
     }
 }
 
@@ -1158,24 +1166,27 @@ class Q::StatementList does Q {
     }
 }
 
-### ### Q::Expr::StatementListAdapter
+### ### Q::Expr::BlockAdapter
 ###
-### An expression which holds a statement list. Surprisingly, this never
+### An expression which holds a block. Surprisingly, this never
 ### happens in the source code text itself; because of 007's grammar, an
-### expression can never consist of a list of statements.
+### expression can never consist of a block.
 ###
 ### However, it can happen as a macro call (an expression) expands into
-### a statement list; that's when this Qtype is used.
+### a block of one or more statements; that's when this Qtype is used.
 ###
-### Semantically, the contained statement list is executed normally, and
+### Semantically, the block is executed normally, and
 ### if execution evaluates the last statement and the statement turns out
 ### to have a value (because it's an expression statement), then this
 ### value is the value of the whole containing expression.
 ###
-class Q::Expr::StatementListAdapter does Q::Expr {
-    has $.statementlist;
+class Q::Expr::BlockAdapter does Q::Expr {
+    has $.block;
 
     method eval($runtime) {
-        return $.statementlist.run($runtime);
+        $runtime.enter($.block.frame, $.block.static-lexpad, $.block.statementlist);
+        my $result = $.block.statementlist.run($runtime);
+        $runtime.leave;
+        return $result;
     }
 }

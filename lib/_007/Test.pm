@@ -2,6 +2,7 @@ use v6;
 use _007;
 use _007::Val;
 use _007::Q;
+use _007::Parser::Actions;
 use _007::Backend::JavaScript;
 
 use Test;
@@ -146,127 +147,11 @@ my class UnwantedOutput {
     method print($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
-sub check(Q::CompUnit $ast, $runtime) is export {
-    my %*assigned;
-    handle($ast);
-
-    # a bunch of nodes we don't care about descending into
-    multi handle(Q::ParameterList $) {}
-    multi handle(Q::Statement::Return $) {}
-    multi handle(Q::Statement::Expr $) {}
-    multi handle(Q::Statement::BEGIN $) {}
-    multi handle(Q::Literal $) {}
-    multi handle(Q::Term $) {} # except Q::Term::Object, see below
-    multi handle(Q::Postfix $) {}
-
-    multi handle(Q::StatementList $statementlist) {
-        for $statementlist.statements.elements -> $statement {
-            handle($statement);
-        }
-    }
-
-    multi handle(Q::Statement::My $my) {
-        my $symbol = $my.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($my.identifier);
-
-        if $my.expr !~~ Val::NoneType {
-            handle($my.expr);
-        }
-    }
-
-    multi handle(Q::Statement::Constant $constant) {
-        my $symbol = $constant.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($symbol);
-
-        handle($constant.expr);
-    }
-
-    multi handle(Q::Statement::Block $block) {
-        $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
-        handle($block.block.statementlist);
-        $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
-        $runtime.leave();
-    }
-
-    multi handle(Q::Statement::Sub $sub) {
-        my $outer-frame = $runtime.current-frame;
-        my $name = $sub.identifier.name;
-        my $val = Val::Sub.new(:$name,
-            :parameterlist($sub.block.parameterlist),
-            :statementlist($sub.block.statementlist),
-            :$outer-frame
-        );
-        $runtime.enter($outer-frame, Val::Object.new, $sub.block.statementlist, $val);
-        handle($sub.block);
-        $runtime.leave();
-
-        $runtime.declare-var($sub.identifier, $val);
-    }
-
-    multi handle(Q::Statement::Macro $macro) {
-        my $outer-frame = $runtime.current-frame;
-        my $name = $macro.identifier.name;
-        my $val = Val::Macro.new(:$name,
-            :parameterlist($macro.block.parameterlist),
-            :statementlist($macro.block.statementlist),
-            :$outer-frame
-        );
-        $runtime.enter($outer-frame, Val::Object.new, $macro.block.statementlist, $val);
-        handle($macro.block);
-        $runtime.leave();
-
-        $runtime.declare-var($macro.identifier, $val);
-    }
-
-    multi handle(Q::Statement::If $if) {
-        handle($if.block);
-    }
-
-    multi handle(Q::Statement::For $for) {
-        handle($for.block);
-    }
-
-    multi handle(Q::Statement::While $while) {
-        handle($while.block);
-    }
-
-    multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, Val::Object.new, Q::StatementList.new);
-        handle($block.parameterlist);
-        handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.properties<pad>;
-        $runtime.leave();
-    }
-
-    multi handle(Q::Term::Object $object) {
-        handle($object.propertylist);
-    }
-
-    multi handle(Q::PropertyList $propertylist) {
-        my %seen;
-        for $propertylist.properties.elements -> Q::Property $p {
-            my Str $property = $p.key.value;
-            die X::Property::Duplicate.new(:$property)
-                if %seen{$property}++;
-        }
-    }
-}
-
 sub is-result($input, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $ast = read($input);
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
-    check($ast, $runtime);
+    check($ast.block, $runtime);
     $runtime.run($ast);
 
     is $output.result, $expected, $desc;
@@ -276,7 +161,7 @@ sub is-error($input, $expected-error, $expected-msg, $desc = $expected-error.^na
     my $ast = read($input);
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
-    check($ast, $runtime);
+    check($ast.block, $runtime);
     $runtime.run($ast);
 
     CATCH {
