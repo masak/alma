@@ -67,7 +67,6 @@ Here's the current proposed order of macro examples to tackle:
 These are features/bug fixes that will need to be in place for the above to
 work:
 
-* Allowing declarations in macro expansions. ([#212](https://github.com/masak/007/issues/212))
 * The assignment protocol. (See below.) ([#214](https://github.com/masak/007/issues/214))
 * `is parsed`, or at least enough of it. ([#177](https://github.com/masak/007/issues/177))
 * Various Qnode introspection and manipulation. (No issue for this yet.)
@@ -87,8 +86,6 @@ The first track is still the *raison d'être* for 007. The second track rounds
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
   big part of making simple macros work as expected. The champion on this one
   is **masak**.
-* Fix the fact that [variables declared in quasis currently don't work in the
-  corresponding injected code](https://github.com/masak/007/issues/212).
 * Make unhygienic declarations that are injected into code [actually declare
   stuff](https://github.com/masak/007/issues/88). We can cheat majorly at this
   one at first, as long as it works.
