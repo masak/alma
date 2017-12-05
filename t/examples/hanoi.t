@@ -1,7 +1,7 @@
 use Test;
+use _007::Test;
 
-my $output = qx[perl6 bin/007 examples/hanoi.007];
-my @lines = lines($output);
+my @lines = run-and-collect-output("examples/hanoi.007");
 
 sub parse-state(@lines) {
     my @state = [], [], [];

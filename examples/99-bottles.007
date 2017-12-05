@@ -1,10 +1,10 @@
 sub verse(n) {
     sub plural(n, thing) {
         if n == 1 {
-            return str(n) ~ " " ~ thing;
+            return ~n ~ " " ~ thing;
         }
         else {
-            return str(n) ~ " " ~ thing ~ "s";
+            return ~n ~ " " ~ thing ~ "s";
         }
     }
 

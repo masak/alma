@@ -1,13 +1,14 @@
 use Test;
+use _007::Test;
 
-my @lines = qx[perl6 bin/007 examples/quicksort.007].lines;
+my @lines = run-and-collect-output("examples/quicksort.007");
 
 is +@lines, 3, "correct number of lines of output";
 
 {
     ok @lines[0] ~~ /^ "Unsorted: [" (\d+)+ % ", " "]" $/, "expected first line";
     my @values = @0».Int;
-    ok sort(@values) eqv (^20).list, "got all the values in the expected range, in some order";
+    ok sort(@values) eqv [^20].Seq, "got all the values in the expected range, in some order";
 }
 
 is @lines[1], "Sorting...";

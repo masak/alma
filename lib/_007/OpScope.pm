@@ -1,4 +1,6 @@
+use _007::Val;
 use _007::Q;
+use _007::Precedence;
 
 class _007::OpScope {
     has %.ops =
@@ -9,10 +11,11 @@ class _007::OpScope {
 
     has @.infixprec;
     has @.prepostfixprec;
-    has $!prepostfix-boundary = 0;
+    has $.prepostfix-boundary = 0;
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
-        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($type ~ ":<$op>"))));
+        my $name = "$type:$op";
+        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
 
         %!ops{$type}{$op} = $q !=== Any ?? $q !! {
             prefix => Q::Prefix.new(:$identifier),
@@ -20,24 +23,15 @@ class _007::OpScope {
             postfix => Q::Postfix.new(:$identifier),
         }{$type};
 
-        my class Precedence {
-            has $.assoc = $assoc // "left";
-            has %.ops = $op => $q;
-
-            method contains($op) {
-                %.ops{$op}:exists;
-            }
-
-            method clone {
-                self.new(:$.assoc, :%.ops);
-            }
+        sub prec {
+            _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
         my @namespace := $type eq 'infix' ?? @!infixprec !! @!prepostfixprec;
         if %precedence<tighter> || %precedence<looser> -> $other-op {
             my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
-            @namespace.splice($pos, 0, Precedence.new);
+            @namespace.splice($pos, 0, prec);
             if $type eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
                 $!prepostfix-boundary++;
             }
@@ -46,13 +40,13 @@ class _007::OpScope {
             my $prec = @namespace.first(*.contains($other-op));
             die X::Associativity::Conflict.new
                 if $assoc !=== Any && $assoc ne $prec.assoc;
-            $prec.ops{$op} = $q;
+            $prec.ops{$name} = $q;
         }
         elsif $type eq 'prefix' {
-            @namespace.splice($!prepostfix-boundary++, 0, Precedence.new);
+            @namespace.splice($!prepostfix-boundary++, 0, prec);
         }
         else {
-            @namespace.push(Precedence.new);
+            @namespace.push(prec);
         }
     }
 
@@ -70,6 +64,3 @@ class _007::OpScope {
         return $opl;
     }
 }
-
-
-

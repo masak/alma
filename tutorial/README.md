@@ -240,7 +240,7 @@ The following built-in types have methods associated with them:
 
 ### `Array`
 
-    .elems()
+    .size()
     .reverse()
     .sort()
     .join(sep)

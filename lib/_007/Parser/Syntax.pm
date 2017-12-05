@@ -1,6 +1,11 @@
 use _007::Val;
 use _007::Q;
-use _007::Parser::Exceptions;
+
+sub check-feature-flag($feature, $word) {
+    my $flag = "FLAG_007_{$word}";
+    die "{$feature} is experimental and requires \%*ENV<{$flag}> to be set"
+        unless %*ENV{$flag};
+}
 
 grammar _007::Parser::Syntax {
     token TOP { <compunit> }
@@ -12,18 +17,14 @@ grammar _007::Parser::Syntax {
     }
 
     token newpad { <?> {
-        $*parser.push-oplevel;
+        $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        my $block = Val::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist(Q::StatementList.new),
-            :outer-frame($*runtime.current-frame));
-        $*runtime.enter($block)
+        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
     } }
 
     token finishpad { <?> {
         @*declstack.pop;
-        $*parser.pop-oplevel;
+        $*parser.pop-opscope;
     } }
 
     rule statementlist {
@@ -39,7 +40,7 @@ grammar _007::Parser::Syntax {
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$frame ~ $symbol};
+            if %*assigned{$frame.id ~ $symbol};
         my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value($symbol))),
             :$frame);
@@ -50,13 +51,13 @@ grammar _007::Parser::Syntax {
     proto token statement {*}
     rule statement:my {
         my [<identifier> || <.panic("identifier")>]
-        { declare(Q::Statement::My, $<identifier>.Str); }
+        { declare(Q::Statement::My, $<identifier>.ast.name.value); }
         ['=' <EXPR>]?
     }
     rule statement:constant {
         constant <identifier>
         {
-            my $symbol = $<identifier>.Str;
+            my $symbol = $<identifier>.ast.name.value;
             # XXX: a suspicious lack of redeclaration checks here
             declare(Q::Statement::Constant, $symbol);
         }
@@ -74,20 +75,16 @@ grammar _007::Parser::Syntax {
             declare($<routine> eq "sub"
                         ?? Q::Statement::Sub
                         !! Q::Statement::Macro,
-                    $<identifier>.Str);
+                    $<identifier>.ast.name.value);
         }
         <.newpad>
         '(' ~ ')' <parameterlist>
         <traitlist>
-        <blockoid>:!s
+        [<blockoid>|| <.panic("block")>]:!s
         <.finishpad>
     }
     token statement:return {
         return [<.ws> <EXPR>]?
-        {
-            die X::ControlFlow::Return.new
-                unless $*insub;
-        }
     }
 
     token statement:throw {
@@ -112,6 +109,13 @@ grammar _007::Parser::Syntax {
     }
     token statement:BEGIN {
         BEGIN <.ws> <block>
+    }
+    token statement:class {
+        class <.ws>
+        { check-feature-flag("'class' keyword", "CLASS"); }
+        <identifier> <.ws>
+        { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
+        <block>
     }
 
     rule traitlist {
@@ -157,21 +161,58 @@ grammar _007::Parser::Syntax {
     token termish { [<prefix> | <prefix=prefix-unquote>]* [<term>|<term=unquote>] <postfix>* }
 
     method prefix {
-        my @ops = $*parser.oplevel.ops<prefix>.keys;
+        my @ops = $*parser.opscope.ops<prefix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("prefix");
         }
         return /<!>/(self);
     }
 
-    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' }
+    token str { '"' ([<-["]> | '\\\\' | '\\"']*) '"' } # " you are welcome vim
+
+    rule regex-part {
+        <regex-group> + %% '|'
+    }
+
+    rule regex-group {
+        <regex-quantified> +
+    }
+
+    token regex-quantified {
+        <regex-fragment> $<quantifier>=<[+ * ?]>?
+    }
+
+    proto token regex-fragment {*}
+    token regex-fragment:str {
+        <str>
+    }
+    token regex-fragment:identifier {
+        <identifier>
+    }
+    token regex-fragment:call {
+        '<' ~ '>'
+        <identifier>
+    }
+    rule regex-fragment:group { ''
+        '[' ~ ']'
+        <regex-part>
+    }
 
     proto token term {*}
-    token term:none { None >> <!before <.ws> '{'> }
+    token term:none { None» }
+    token term:false { False» }
+    token term:true { True» }
     token term:int { \d+ }
-    token term:array { '[' ~ ']' [<.ws> <EXPR>]* %% [\h* ','] }
+    token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }
     token term:parens { '(' ~ ')' <EXPR> }
+    token term:regex {
+        '/' ~ '/'
+        [
+            { check-feature-flag("Regex syntax", "REGEX"); }
+            <regex-part>
+        ]
+    }
     token term:quasi { quasi <.ws>
         [
             || "@" <.ws> $<qtype>=["Q::Infix"] <.ws> '{' <.ws> <infix> <.ws> '}'
@@ -180,7 +221,7 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::Expr"] <.ws> '{' <.ws> <EXPR> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Identifier"] <.ws> '{' <.ws> <term:identifier> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Block"] <.ws> '{' <.ws> <block> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::CompUnit"] <.ws> '{' <.ws> <compunit> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::CompUnit"] <.ws> '{' <.ws> [<compunit=.unquote("Q::CompUnit")> || <compunit>] <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal"] <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal::Int"] <.ws> '{' <.ws> <term:int> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Literal::None"] <.ws> '{' <.ws> <term:none> <.ws> '}'
@@ -193,8 +234,8 @@ grammar _007::Parser::Syntax {
             || "@" <.ws> $<qtype>=["Q::Term::Quasi"] <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::Trait"] <.ws> '{' <.ws> <trait> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::TraitList"] <.ws> '{' <.ws> <traitlist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::Statement"] <.ws> '{' <.ws> <statement><.eat_terminator> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q::StatementList"] <.ws> '{' <.ws> <statementlist> <.ws> '}'
+            || "@" <.ws> $<qtype>=["Q::Statement"] <.ws> <block>
+            || "@" <.ws> $<qtype>=["Q::StatementList"] <.ws> <block>
             || "@" <.ws> $<qtype>=["Q::Parameter"] <.ws> '{' <.ws> <parameter> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::ParameterList"] <.ws> '{' <.ws> <parameterlist> <.ws> '}'
             || "@" <.ws> $<qtype>=["Q::ArgumentList"] <.ws> '{' <.ws> <argumentlist> <.ws> '}'
@@ -204,25 +245,16 @@ grammar _007::Parser::Syntax {
             || <.panic("quasi")>
         ]
     }
+    token term:new-object {
+        new» <.ws>
+        <identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>
+        '{' ~ '}' <propertylist>
+    }
     token term:object {
-        [<identifier> <?{ $*runtime.maybe-get-var(~$<identifier>) ~~ Val::Type }> <.ws>]?
         '{' ~ '}' <propertylist>
     }
     token term:identifier {
         <identifier>
-        {
-            my $name = $<identifier>.Str;
-            if !$*runtime.declared($name) {
-                my $frame = $*runtime.current-frame;
-                $*parser.postpone: sub checking-postdeclared {
-                    my $value = $*runtime.get-var($name, $frame);
-                    die X::Macro::Postdeclared.new(:$name)
-                        if $value ~~ Val::Macro;
-                    die X::Undeclared.new(:symbol($name))
-                        unless $value ~~ Val::Sub;
-                };
-            }
-        }
     }
     token term:sub {
         sub <.ws> <identifier>?
@@ -230,7 +262,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Sub, $<identifier>.Str);
+                declare(Q::Term::Sub, $<identifier>.ast.name.value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -241,15 +273,24 @@ grammar _007::Parser::Syntax {
 
     token propertylist { [<.ws> <property>]* %% [\h* ','] <.ws> }
 
-    token unquote { '{{{' <EXPR> [:s "@" <identifier> ]? '}}}' }
+    token unquote($type?) {
+        '{{{'
+        [:s <identifier> "@" ]?
+        <?{ !$type || ($<identifier> // "") eq $type }>
+        <EXPR>
+        '}}}'
+    }
 
     proto token property {*}
     rule property:str-expr { <key=str> ':' <value=EXPR> }
     rule property:identifier-expr { <identifier> ':' <value=EXPR> }
     rule property:method {
         <identifier>
-        <.newpad>
-        '(' ~ ')' <parameterlist>
+        '(' ~ ')' [
+            :my $*insub = True;
+            <.newpad>
+            <parameterlist>
+        ]
         <trait> *
         <blockoid>:!s
         <.finishpad>
@@ -257,7 +298,7 @@ grammar _007::Parser::Syntax {
     token property:identifier { <identifier> }
 
     method infix {
-        my @ops = $*parser.oplevel.ops<infix>.keys;
+        my @ops = $*parser.opscope.ops<infix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("infix");
         }
@@ -277,14 +318,14 @@ grammar _007::Parser::Syntax {
         if /$<index>=[ <.ws> '[' ~ ']' [<.ws> <EXPR>] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
-        elsif /$<call>=[ <.ws> '(' ~ ')' [<.ws> <argumentlist>] ]/(self) -> $cur {
+        elsif /$<call>=[ <.ws> '(' ~ ')' [<.ws> [<argumentlist=.unquote("Q::ArgumentList")> || <argumentlist>]] ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         elsif /$<prop>=[ <.ws> '.' <identifier> ]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
 
-        my @ops = $*parser.oplevel.ops<postfix>.keys;
+        my @ops = $*parser.opscope.ops<postfix>.keys;
         if /@ops/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
@@ -293,7 +334,9 @@ grammar _007::Parser::Syntax {
 
     token identifier {
         <!before \d> [\w+]+ % '::'
-            [ <?after \w> [':<' <-[>]>+ '>']?  || <.panic("identifier")> ]
+            [ <?after \w> || <.panic("identifier")> ]
+            [ [':<' [ '\\>' | '\\\\' | <-[>]> ]+ '>']
+            | [':«' [ '\\»' | '\\\\' | <-[»]> ]+ '»'] ]?
     }
 
     rule argumentlist {
@@ -301,8 +344,9 @@ grammar _007::Parser::Syntax {
     }
 
     rule parameterlist {
-        [<parameter>
-        { declare(Q::Parameter, $<parameter>[*-1]<identifier>.Str); }
+        [
+            <parameter>
+            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.value); }
         ]* %% ','
     }
 

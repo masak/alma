@@ -6,7 +6,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (macro (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:<()> (identifier "say") (argumentlist (str "OH HAI from inside macro"))))))))
+            (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI from inside macro"))))))))
         .
 
     is-result $ast, "", "macro";
@@ -27,11 +27,11 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro foo() {
-            return Q::Postfix::Call {
-                identifier: Q::Identifier { name: "postfix:<()>" },
-                operand: Q::Identifier { name: "say" },
-                argumentlist: Q::ArgumentList {
-                    arguments: [Q::Literal::Str { value: "OH HAI" }]
+            return new Q::Postfix::Call {
+                identifier: new Q::Identifier { name: "postfix:()" },
+                operand: new Q::Identifier { name: "say" },
+                argumentlist: new Q::ArgumentList {
+                    arguments: [new Q::Literal::Str { value: "OH HAI" }]
                 }
             };
         }
@@ -54,7 +54,23 @@ use _007::Test;
     parse-error
         $program,
         X::Assignment::RO,
-        "cannot assign to a macro";
+        "cannot assign to a macro (#68)";
+}
+
+{
+    my $program = q:to/./;
+        macro foo() {
+            return None;
+        }
+
+        foo();
+        say("OH HAI");
+        .
+
+    outputs
+        $program,
+        "OH HAI\n",
+        "a macro that returns `None` expands to nothing";
 }
 
 done-testing;

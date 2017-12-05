@@ -5,9 +5,9 @@ my $interested = False;
 my Int $blocks-minus-finishblocks;
 my Str $method;
 
-for "lib/_007/Parser/Actions.pm".IO.lines -> $line {
+for "lib/_007/Parser/Actions.pm".IO.lines.kv -> $n, $line {
     if $interested && $line ~~ /^ "    " \} $/ {
-        is $blocks-minus-finishblocks, 0, "method $method has a self.finishblock for each Q::Block";
+        is $blocks-minus-finishblocks, 0, "method $method (line $n) has a self.finishblock for each Q::Block";
         $interested = False;
     }
 
@@ -15,7 +15,7 @@ for "lib/_007/Parser/Actions.pm".IO.lines -> $line {
         if $line ~~ /"Q::Block.new("/ {
             $blocks-minus-finishblocks++;
         }
-        if $line ~~ /"self.finish-block("/ {
+        if $line ~~ /"finish-block(" <-[)]>+ ");"/ {
             $blocks-minus-finishblocks--;
         }
     }

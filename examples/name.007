@@ -1,0 +1,22 @@
+macro name(expr) {
+    if expr ~~ Q::Postfix::Property {
+        expr = expr.property;
+    }
+    if expr !~~ Q::Identifier {
+        throw new Exception {
+            message: "Cannot turn a " ~ type(expr) ~ " into a name"
+        };
+    }
+    return quasi { expr.name };
+}
+
+my info = {
+    foo: "Bond",
+    bar: {
+        baz: "James Bond"
+    },
+};
+
+say(name(info));           # info
+say(name(info.foo));       # foo
+say(name(info.bar.baz));   # baz

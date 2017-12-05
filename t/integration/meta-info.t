@@ -1,30 +1,19 @@
 use v6;
 use Test;
-
-sub find($dir, Regex $pattern) {
-    my @targets = dir($dir);
-    gather while @targets {
-        my $file = @targets.shift;
-        take $file if $file ~~ $pattern;
-        if $file.IO ~~ :d {
-            @targets.append: dir($file);
-        }
-    }
-}
+use _007::Test;
 
 my @lib-pms = find("lib", / ".pm" $/)».Str;
 
-my @meta-info-pms =
-    qx!perl6 -ne'if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ { say ~$0 }' META.info!.lines;
+my @meta-info-pms = "META6.json".IO.lines.map({ ~$0 if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ });
 
 {
     my $missing-meta-info-lines = (@lib-pms (-) @meta-info-pms).keys.map({ "- $_" }).join("\n");
-    is $missing-meta-info-lines, "", "all .pm files in lib/ are declared in META.info";
+    is $missing-meta-info-lines, "", "all .pm files in lib/ are declared in META6.json";
 }
 
 {
     my $superfluous-meta-info-lines = (@meta-info-pms (-) @lib-pms).keys.map({ "- $_" }).join("\n");
-    is $superfluous-meta-info-lines, "", "all .pm files declared in META.info also exist in lib/";
+    is $superfluous-meta-info-lines, "", "all .pm files declared in META6.json also exist in lib/";
 }
 
 {
@@ -148,9 +137,9 @@ my @meta-info-pms =
         }
     }
 
-    from-json(slurp "META.info");
+    from-json(slurp "META6.json");
     my $trailing-commas = @trailing-commas.map({ "- $_" }).join("\n");
-    is $trailing-commas, "", "there are no trailing commas in the META.info file";
+    is $trailing-commas, "", "there are no trailing commas in the META6.json file";
 }
 
 done-testing;

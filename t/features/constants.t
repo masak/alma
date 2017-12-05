@@ -50,7 +50,7 @@ use _007::Test;
     parse-error
         $program,
         X::Syntax::Missing,
-        "constant declarations must have an assignment";
+        "constant declarations must have an assignment (#83)";
 }
 
 {
@@ -62,7 +62,7 @@ use _007::Test;
     parse-error
         $program,
         X::Assignment::RO,
-        "cannot assign to a constant";
+        "cannot assign to a constant (#68)";
 }
 
 {
@@ -76,7 +76,7 @@ use _007::Test;
     parse-error
         $program,
         X::Assignment::RO,
-        "cannot assign to a constant (assignment is in a nested block)";
+        "cannot assign to a constant (assignment is in a nested block) (#68)";
 }
 
 {
@@ -93,7 +93,7 @@ use _007::Test;
     outputs
         $program,
         "ok to assign\nso very constant\n",
-        "the 'cannot assign to constant' error is aware of lexical overrides";
+        "the 'cannot assign to constant' error is aware of lexical overrides (#68)";
 }
 
 done-testing;

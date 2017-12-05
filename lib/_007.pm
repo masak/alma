@@ -3,8 +3,8 @@ use _007::Parser;
 use _007::Linter;
 
 class _007 {
-    method runtime(:$output = $*OUT) {
-        _007::Runtime.new(:$output);
+    method runtime(:$input = $*IN, :$output = $*OUT) {
+        _007::Runtime.new(:$input, :$output);
     }
 
     method parser(:$runtime = $.runtime) {
@@ -12,7 +12,7 @@ class _007 {
     }
 
     method !parser-with-no-output {
-        my $output = my role NoOutput { method say($) {} };
+        my $output = my role NoOutput { method flush() {}; method print($) {} };
         my $runtime = self.runtime(:$output);
         self.parser(:$runtime);
     }

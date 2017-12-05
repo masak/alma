@@ -3,12 +3,12 @@ use _007::Parser::Actions;
 
 class _007::Parser {
     has $.runtime = die "Must supply a runtime";
-    has @!oplevels = $!runtime.builtin-opscope;
+    has @!opscopes = $!runtime.builtin-opscope;
     has @!checks;
 
-    method oplevel { @!oplevels[*-1] }
-    method push-oplevel { @!oplevels.push: @!oplevels[*-1].clone }
-    method pop-oplevel { @!oplevels.pop }
+    method opscope { @!opscopes[*-1] }
+    method push-opscope { @!opscopes.push: @!opscopes[*-1].clone }
+    method pop-opscope { @!opscopes.pop }
 
     method postpone(&check:()) { @!checks.push: &check }
 

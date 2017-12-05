@@ -1,13 +1,13 @@
 my n = 1;
 while n <= 100 {
     if n %% 15 {
-        say("fizzbuzz");
+        say("FizzBuzz");
     }
     else if n %% 3 {
-        say("fizz");
+        say("Fizz");
     }
     else if n %% 5 {
-        say("buzz");
+        say("Buzz");
     }
     else {
         say(n);

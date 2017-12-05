@@ -7,9 +7,8 @@ use _007::Test;
         say(quasi { 1 + 1 });
         .
 
-    my %*stringification-seen;
     my $expected = read(
-        "(statementlist (stexpr (infix:<+> (int 1) (int 1))))"
+        "(statementlist (stexpr (infix:+ (int 1) (int 1))))"
     ).block.statementlist.statements.elements[0].expr.Str;
     outputs $program, "$expected\n", "Basic quasi quoting";
 }
@@ -30,22 +29,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        constant greeting_ast = Q::Literal::Str { value: "Mr Bond!" };
-
-        macro foo() {
-            return quasi {
-                say({{{greeting_ast}}});
-            }
-        }
-
-        foo();
-        .
-
-    outputs $program, "Mr Bond!\n", "very basic unquote";
-}
-
-{
-    my $program = q:to/./;
         macro foo() {
             my x = 7;
             return quasi {
@@ -57,22 +40,6 @@ use _007::Test;
         .
 
     outputs $program, "7\n", "a variable is looked up in the quasi's environment";
-}
-
-{
-    my $program = q:to/./;
-        macro foo(expr) {
-            my x = "oh noes";
-            return quasi {
-                say({{{expr}}});
-            }
-        }
-
-        my x = "yay";
-        foo(x);
-        .
-
-    outputs $program, "yay\n", "macro arguments also carry their original environment";
 }
 
 {
@@ -229,7 +196,7 @@ use _007::Test;
         };
 
         say(type(q));
-        say(q.properties.elems());
+        say(q.properties.size());
         .
 
     outputs $program, "<type Q::PropertyList>\n4\n", "quasi @ Q::PropertyList";
@@ -241,7 +208,7 @@ use _007::Test;
         say(type(quasi @ Q::Term { None }));
         say(type(quasi @ Q::Term { "James Bond" }));
         say(type(quasi @ Q::Term { [0, 0, 7] }));
-        say(type(quasi @ Q::Term { Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term { new Object { james: "Bond" } }));
         say(type(quasi @ Q::Term { quasi { say("oh, james!") } }));
         say(type(quasi @ Q::Term { (0 + 0 + 7) }));
         .
@@ -264,7 +231,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Object { Object { james: "Bond" } }));
+        say(type(quasi @ Q::Term::Object { new Object { james: "Bond" } }));
         .
 
     outputs $program, "<type Q::Term::Object>\n", "quasi @ Q::Term::Object";
@@ -347,88 +314,84 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        macro moo() {
-            my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
-        }
-
-        moo();
+        my q1 = quasi @ Q::Statement { my x; };
+        my q2 = quasi @ Q::Statement { my x; };
+        say("alive");
         .
 
-    outputs $program, "4\n", "unquote @ Q::Infix";
+    outputs $program, "alive\n", "Q::Statement quasis don't leak (I)";
+}
+
+{
+    my $program = q:to/./;
+        my q1 = quasi @ Q::Statement { my x; };
+        say(x);
+        .
+
+    parse-error $program, X::Undeclared, "Q::Statement quasis don't leak (II)";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Term { "foo" };
-            return quasi { say(2 {{{q @ Q::Infix}}} 2) };
-        }
+            return quasi {
+                say(1);
+                say(2);
+            }
+        };
 
-        moo();
+        sub ignore(x) {}
+
+        ignore(moo());
         .
 
-    parse-error $program,
-        X::TypeCheck,
-        "can't put a non-infix in a Q::Infix unquote";
+    outputs $program, "1\n2\n", "the value of an injected quasi can be passed around the program";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{q @ Q::Term}}} 2) };
-        }
+            return quasi {
+                say(1);
+                "Bond";
+            }
+        };
 
-        moo();
+        say(moo());
         .
 
-    parse-error $program,
-        X::TypeCheck,
-        "can't put a non-infix unquote in infix operator position (explicit)";
+    outputs $program, "1\nBond\n", "the last statement of a quasi becomes the value of the quasi";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{q}}} 2) };
-        }
+            quasi {}
+        };
 
         moo();
         .
 
-    parse-error $program,
-        X::TypeCheck,
-        "can't put a non-infix unquote in infix operator position (implicit)";
+    outputs $program, "", "a quasi doesn't have to return a value";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Prefix { - };
-            return quasi { say({{{q @ Q::Prefix}}} 17) };
-        }
+            my y = "right";
+            return quasi {
+                say(y);
+                {
+                    my y = "wrong";
+                }
+                say(y);
+            };
+        };
 
         moo();
         .
 
-    outputs $program, "-17\n", "unquote @ Q::Prefix";
-}
-
-{
-    my $program = q:to/./;
-        macro moo() {
-            my q = quasi @ Q::Term { "foo" };
-            return quasi { say({{{q @ Q::Prefix}}} 17) };
-        }
-
-        moo();
-        .
-
-    parse-error $program,
-        X::TypeCheck,
-        "can't put a non-prefix in a Q::Prefix unquote";
+    outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
 }
 
 done-testing;

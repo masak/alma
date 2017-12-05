@@ -1,3 +1,4 @@
+use _007::Val;
 use _007::Q;
 
 role Lint {
@@ -84,10 +85,10 @@ class _007::Linter {
                 traverse($call.argumentlist);
             }
 
-            sub ref($name) {
+            sub ref(Str $name) {
                 for @blocks.reverse -> $block {
-                    my %pad = $block.static-lexpad;
-                    if %pad{$name} {
+                    my $pad = $block.static-lexpad;
+                    if $pad.properties{$name} {
                         return "{$block.WHICH.Str}|$name";
                     }
                 }
@@ -95,7 +96,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::Identifier $identifier) {
-                my $name = $identifier.name;
+                my $name = $identifier.name.value;
                 # XXX: what we should really do is whitelist all of he built-ins
                 return if $name eq "say";
                 my $ref = ref $name;
@@ -127,7 +128,7 @@ class _007::Linter {
                 my $name = $my.identifier.name;
                 my $ref = "{@blocks[*-1].WHICH.Str}|$name";
                 %declared{$ref} = L::VariableNotUsed;
-                if $my.expr !~~ Val::None {
+                if $my.expr !~~ NONE {
                     traverse($my.expr);
                     %assigned{$ref} = True;
                     if $my.expr ~~ Q::Identifier && $my.expr.name eq $name {
@@ -141,7 +142,7 @@ class _007::Linter {
                 traverse($infix.rhs);
                 die "LHS was not an identifier"
                     unless $infix.lhs ~~ Q::Identifier;
-                my $name = $infix.lhs.name;
+                my $name = $infix.lhs.name.value;
                 if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
                     @complaints.push: L::RedundantAssignment.new(:$name);
                 }

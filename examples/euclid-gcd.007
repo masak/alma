@@ -5,8 +5,8 @@ sub gcd(a, b) {
     return a.abs();
 }
 
-my bigger = int(prompt("Enter the bigger integer: "));
-my smaller = int(prompt("Enter the smaller integer: "));
+my bigger = +prompt("Enter the bigger integer: ");
+my smaller = +prompt("Enter the smaller integer: ");
 
 if bigger < smaller {
     my temp = bigger;
@@ -15,4 +15,4 @@ if bigger < smaller {
 }
 
 say("");
-say("Greatest common denominator: " ~ str(gcd(bigger, smaller)));
+say("Greatest common denominator: " ~ ~gcd(bigger, smaller));

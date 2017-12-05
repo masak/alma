@@ -1,0 +1,311 @@
+my ast;
+if !ast {
+    ast = new Q::CompUnit {
+        block: new Q::Block {
+            parameterlist: new Q::ParameterList {},
+            statementlist: new Q::StatementList {
+                statements: []
+            }
+        }
+    };
+}
+
+constant NO_OUTER = {};
+
+my Runtime = {
+    new() {
+        my frames = [];
+        sub enter(outer_frame, static_lexpad) {
+            my frame = { outer_frame, pad: {} };
+            frames.push(frame);
+            for static_lexpad.keys() -> name {
+                my value = static_lexpad[name];
+                my identifier = new Q::Identifier { name };
+                declare_var(identifier, value);
+            }
+        }
+        sub leave() {
+            frames.pop();
+        }
+        sub current_frame() {
+            if !frames {
+                return NO_OUTER;
+            }
+            return frames[frames.size() - 1];
+        }
+
+        sub find_pad(symbol) {
+            my frame = current_frame();
+            # The below check didn't work
+            # while frame.id != NO_OUTER.id {
+            # So trying this instead:
+            while frame.has("pad") {
+                if frame.pad.has(symbol) {
+                    return frame.pad;
+                }
+                frame = frame.outer_frame;
+            }
+            throw new Exception { message: "Cannot find variable '" ~ symbol ~ "'" };
+        }
+        sub get_var(name) {
+            my pad = find_pad(name);
+            return pad[name];
+        }
+        sub put_var(name, value) {
+            my pad = find_pad(name);
+            pad[name] = value;
+        }
+        sub declare_var(identifier, value) {
+            my name = identifier.name;
+            # XXX: don't know if we should expose identifier.frame in 007
+            # my frame = identifier.frame || current_frame();
+            my frame = current_frame();
+            frame.pad[name] = value;
+        }
+
+        sub sigbind(c, arguments) {
+            my paramcount = c.parameterlist.parameters.size();
+            my argcount = arguments.size();
+            if paramcount != argcount {
+                throw new Exception { message: "parameter mismatch" };
+            }
+            enter(c["outer-frame"], c["static-lexpad"]);
+            for ^argcount -> i {
+                my param = c.parameterlist.parameters[i];
+                my arg = arguments[i];
+                declare_var(param.identifier, arg);
+            }
+        }
+
+        sub call(c, arguments) {
+            sigbind(c, arguments);
+            my frame = current_frame();
+            run(c.statementlist);
+            leave();
+        }
+
+        my eval_of_type = {
+            Q::Identifier(ident) {
+                return get_var(ident.name);
+            },
+            Q::Infix::Addition(op) {
+                return eval(op.lhs) + eval(op.rhs);
+            },
+            Q::Infix::And(op) {
+                return eval(op.lhs) && eval(op.rhs);
+            },
+            Q::Infix::ArrayReplicate(op) {
+                return eval(op.lhs) xx eval(op.rhs);
+            },
+            Q::Infix::Assignment(op) {
+                my value = eval(op.rhs);
+                if op.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
+                    put_var(op.lhs.name, value);
+                }
+                return value;
+            },
+            Q::Infix::Concat(op) {
+                return eval(op.lhs) ~ eval(op.rhs);
+            },
+            Q::Infix::Cons(op) {
+                return eval(op.lhs) :: eval(op.rhs);
+            },
+            Q::Infix::Divisibility(op) {
+                return eval(op.lhs) %% eval(op.rhs);
+            },
+            Q::Infix::Eq(op) {
+                return eval(op.lhs) == eval(op.rhs);
+            },
+            Q::Infix::Ge(op) {
+                return eval(op.lhs) >= eval(op.rhs);
+            },
+            Q::Infix::Gt(op) {
+                return eval(op.lhs) > eval(op.rhs);
+            },
+            Q::Infix::Le(op) {
+                return eval(op.lhs) <= eval(op.rhs);
+            },
+            Q::Infix::Lt(op) {
+                return eval(op.lhs) < eval(op.rhs);
+            },
+            Q::Infix::Multiplication(op) {
+                return eval(op.lhs) * eval(op.rhs);
+            },
+            Q::Infix::Modulo(op) {
+                return eval(op.lhs) % eval(op.rhs);
+            },
+            Q::Infix::Ne(op) {
+                return eval(op.lhs) != eval(op.rhs);
+            },
+            Q::Infix::Or(op) {
+                return eval(op.lhs) || eval(op.rhs);
+            },
+            Q::Infix::Replicate(op) {
+                return eval(op.lhs) x eval(op.rhs);
+            },
+            Q::Infix::Subtraction(op) {
+                return eval(op.lhs) - eval(op.rhs);
+            },
+            Q::Infix::TypeMatch(op) {
+                return eval(op.lhs) ~~ eval(op.rhs);
+            },
+            Q::Literal::Int(lit_int) {
+                return lit_int.value;
+            },
+            Q::Literal::Str(lit_str) {
+                return lit_str.value;
+            },
+            Q::Postfix::Call(op) {
+                # XXX: short-term hack to get `say` early; needs to go away
+                if op.operand ~~ Q::Identifier && op.operand.name == "say" {
+                    return say(eval(op.argumentlist.arguments[0]));
+                }
+                my c = eval(op.operand);
+                if c ~~ Macro {
+                    throw new Exception { message: "macro is called at runtime" };
+                }
+                if c !~~ Sub {
+                    throw new Exception { message: "Trying to invoke a " ~ type(c).name };
+                }
+                my arguments = op.argumentlist.arguments.map(eval);
+                return call(c, arguments);
+            },
+            Q::Postfix::Index(op) {
+                return eval(op.operand)[eval(op.index)];
+            },
+            Q::Postfix::Property(op) {
+                return eval(op.operand)[eval(op.property)];
+            },
+            Q::Prefix::Minus(op) {
+                return -eval(op.operand);
+            },
+            Q::Prefix::So(op) {
+                return ?eval(op.operand);
+            },
+            Q::Prefix::Not(op) {
+                return !eval(op.operand);
+            },
+            Q::Prefix::Upto(op) {
+                return ^eval(op.operand);
+            },
+            Q::Term::Array(array) {
+                return array.elements.map(eval);
+            },
+            Q::Term::Sub(term) {
+                my name = term.identifier && term.identifier.name || "";
+                return new Sub {
+                    name,
+                    parameterlist: term.block.parameterlist,
+                    statementlist: term.block.statementlist,
+                    "static-lexpad": term.block["static-lexpad"],
+                    "outer-frame": current_frame(),
+                };
+            },
+
+            # these were added to be able to run more tests
+            # please move and implement as necessary
+            Q::Block(block) {
+            },
+            Q::Infix(op) {
+            },
+            Q::Postfix(op) {
+            },
+            Q::Prefix(op) {
+            },
+            Q::Term::Object(term) {
+            },
+            Q::Term::Quasi(term) {
+            },
+            Q::Expr::BlockAdapter(adapter) {
+            },
+        };
+        sub eval(q) { return eval_of_type[type(q).name](q); }
+
+        my run_of_type = {
+            Q::Statement::BEGIN(stmt) {
+                # no runtime behavior
+            },
+            Q::CompUnit(compunit) {
+                enter(current_frame(), compunit.block["static-lexpad"]);
+                run(compunit.block.statementlist);
+                leave();
+            },
+            Q::Statement::Constant(stmt) {
+                # no runtime behavior
+            },
+            Q::Statement::Block(stmt) {
+                enter(current_frame(), stmt.block["static-lexpad"]);
+                run(stmt.block.statementlist);
+                leave();
+            },
+            Q::Statement::Expr(stmt) {
+                eval(stmt.expr);
+            },
+            Q::Statement::For(stmt) {
+                my array = eval(stmt.expr);
+
+                for array -> arg {
+                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, arg);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
+            Q::Statement::If(stmt) {
+                my expr = eval(stmt.expr);
+                if expr {
+                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, expr);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
+            Q::Statement::Macro(stmt) {
+                # no runtime behavior
+            },
+            Q::Statement::My(stmt) {
+                my name = stmt.identifier.name;
+                if stmt.expr {
+                    put_var(name, eval(stmt.expr));
+                }
+            },
+            Q::Statement::Sub(stmt) {
+                # no runtime behavior
+            },
+            Q::Statement::While(stmt) {
+                my expr;
+                while expr = eval(stmt.expr) {
+                    enter(current_frame(), stmt.block["static-lexpad"]);
+                    my parameters = stmt.block.parameterlist.parameters;
+                    if parameters {
+                        declare_var(parameters[0].identifier, expr);
+                    }
+                    run(stmt.block.statementlist);
+                    leave();
+                }
+            },
+            Q::StatementList(stmtlist) {
+                for stmtlist.statements -> statement {
+                    run(statement);
+                }
+            },
+
+            # these were added to be able to run more tests
+            # please move and implement as necessary
+            Q::Statement::Return(stmt) {
+            },
+        };
+        sub run(q) { run_of_type[type(q).name](q); }
+
+        return { run, get_var, put_var };
+    }
+};
+
+my runtime = Runtime.new();
+runtime.run(ast);

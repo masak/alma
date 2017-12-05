@@ -10,7 +10,7 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "infix:<n>") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
+          (stsub (identifier "infix:n") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";
@@ -33,7 +33,7 @@ use _007::Test;
         say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<n> should not be defined unless we define it";
+    parse-error $program, X::AdHoc, "infix:n should not be defined unless we define it";
 }
 
 {
@@ -46,7 +46,7 @@ use _007::Test;
         say(4 n 5);
         .
 
-    parse-error $program, X::AdHoc, "infix:<n> should not be usable outside of its scope";
+    parse-error $program, X::AdHoc, "infix:n should not be usable outside of its scope";
 }
 
 {
@@ -325,11 +325,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return 42;
         }
 
-        say(?"forty-two");
+        say(¿"forty-two");
         .
 
     outputs $program, "42\n", "declaring and using a prefix op works";
@@ -349,7 +349,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return "prefix is looser";
         }
 
@@ -365,7 +365,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -374,11 +374,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(term) {
+        sub prefix:<¿>(term) {
             return "prefix is looser";
         }
 
-        sub postfix:<!>(term) is looser(prefix:<?>) {
+        sub postfix:<!>(term) is looser(prefix:<¿>) {
             return "postfix is looser";
         }
 
@@ -390,7 +390,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -403,7 +403,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        sub prefix:<?>(term) is tighter(postfix:<!>) {
+        sub prefix:<¿>(term) is tighter(postfix:<!>) {
             return "prefix is looser";
         }
 
@@ -415,7 +415,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        say(?[]!);
+        say(¿[]!);
         say(%[]$);
         .
 
@@ -428,7 +428,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        sub prefix:<?>(term) is equal(postfix:<¡>) {
+        sub prefix:<¿>(term) is equal(postfix:<¡>) {
             return "prefix is looser";
         }
 
@@ -440,7 +440,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        say(?[]¡);
+        say(¿[]¡);
         say(%[]$);
         .
 
@@ -450,13 +450,13 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<?>(left, right) is assoc("non") {
+        sub prefix:<¿>(left, right) is assoc("non") {
         }
 
-        sub postfix:<!>(left, right) is equal(prefix:<?>) {
+        sub postfix:<!>(left, right) is equal(prefix:<¿>) {
         }
 
-        say(?0!);
+        say(¿0!);
         .
 
     parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
@@ -478,6 +478,105 @@ use _007::Test;
         .
 
     parse-error $program, X::Precedence::Incompatible, "can't cross the infix/prepostfix prec barrier (II)";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:«!»(l, r) {
+            return "Mr. Bond";
+        }
+
+        say(-13 ! None);
+        .
+
+    outputs $program, "Mr. Bond\n", "can declare an operator with infix:«...»";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:<\>>(l, r) {
+            return "James";
+        }
+
+        say(0 > 7);
+        .
+
+    outputs $program, "James\n", "can declare an operator with a backslash in the name";
+}
+
+{
+    my $program = q:to/./;
+        sub postfix:<‡>(x) is looser(prefix:<^>) {
+            return [];
+        }
+
+        sub prefix:<$>(x) {
+            return x.size();
+        }
+
+        say($^5‡);
+        .
+
+    outputs $program, "[]\n", "Prepostfix boundaries are respected";
+}
+
+{
+    my $program = q:to/./;
+        sub prefix:<&>(x) {
+            return x ~ " prefix:<&>";
+        }
+
+        sub postfix:<‡>(x) is looser(prefix:<&>) {
+            return x ~ " postfix:<‡>";
+        }
+
+        {
+            sub prefix:<$>(x) {
+                return x ~ " prefix:<$>";
+            }
+
+            say($&"application order:"‡);
+        }
+        .
+
+    outputs $program, "application order: prefix:<&> prefix:<\$> postfix:<‡>\n", "Prepostfix boundaries are respected, #2";
+}
+
+{
+    my $program = q:to/./;
+        sub postfix:<&>(x) {
+            return 1;
+        }
+
+        sub prefix:<&>(x) {
+            return 2;
+        }
+
+        sub prefix:<@>(x) {
+            return 3;
+        }
+
+        # "I'm reminded of the day my daughter came in, looked over my
+        # shoulder at some Perl 4 code, and said, 'What is that, swearing?'"
+        #                                   -- Larry Wall, Usenet article
+        say(@0&);
+        .
+
+    outputs $program, "3\n",
+        "a postfix is looser than a prefix, even when it has a prefix of the same name (#190)";
+}
+
+{
+    my $program = q:to/./;
+        sub infix:«->»(lhs, rhs) {
+            return "Bond";
+        }
+
+        say(1 -> 2);
+        .
+
+    outputs $program, "Bond\n",
+        "defining infix:«->» correctly installs a -> operator (#175)";
 }
 
 done-testing;

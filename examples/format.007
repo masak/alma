@@ -1,17 +1,20 @@
 macro format(fmt, args) {
-    sub replaceAll(input, output, transform) {
-        if !input.contains("{") {
-            return output ~ input;
+    sub replaceAll(input, transform) {
+        sub helper(input, output) {
+            if !input.contains("{") {
+                return output ~ input;
+            }
+            my openBracePos = input.index("{");
+            if !input.suffix(openBracePos).contains("}") {
+                return output ~ input;
+            }
+            my closeBracePos = input.suffix(openBracePos).index("}");
+            return helper(
+                input.suffix(openBracePos + closeBracePos + 1),
+                output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)));
         }
-        my openBracePos = input.index("{");
-        if !input.suffix(openBracePos).contains("}") {
-            return output ~ input;
-        }
-        my closeBracePos = input.suffix(openBracePos).index("}");
-        return replaceAll(
-            input.suffix(openBracePos + closeBracePos + 1),
-            output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)),
-            transform);
+
+        return helper(input, "");
     }
 
     sub findHighestIndex(input) {
@@ -24,24 +27,29 @@ macro format(fmt, args) {
             return -1;
         }
 
-        my index = int(input.substr(openBracePos + 1, closeBracePos - 1));
+        my index = +input.substr(openBracePos + 1, closeBracePos - 1);
 
-        return max(index, findHighestIndex(
-            input.suffix(openBracePos + closeBracePos + 1)));
+        my h = findHighestIndex(input.suffix(openBracePos + closeBracePos + 1));
+        if h > index {
+            return h;
+        }
+        else {
+            return index;
+        }
     }
 
     if fmt ~~ Q::Literal::Str && args ~~ Q::Term::Array {
         my highestUsedIndex = findHighestIndex(fmt.value);
-        my argCount = args.elements.elems();
+        my argCount = args.elements.size();
         if argCount <= highestUsedIndex {
-            throw Exception { message: "Highest index was " ~ str(highestUsedIndex)
-                ~ " but got only " ~ str(argCount) ~ " arguments." };
+            throw new Exception { message: "Highest index was " ~ ~highestUsedIndex
+                ~ " but got only " ~ ~argCount ~ " arguments." };
         }
     }
 
     return quasi {
-        replaceAll({{{fmt}}}, "", sub transform(arg) {
-            return {{{args}}}[int(arg)];
+        replaceAll({{{fmt}}}, sub transform(arg) {
+            return {{{args}}}[+arg];
         });
     }
 }

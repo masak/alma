@@ -1,16 +1,6 @@
 use v6;
 use Test;
-
-sub find($dir, Regex $pattern) {
-    my @targets = dir($dir);
-    gather while @targets {
-        my $file = @targets.shift;
-        take $file if $file ~~ $pattern;
-        if $file.IO ~~ :d {
-            @targets.append: dir($file);
-        }
-    }
-}
+use _007::Test;
 
 my @taboo-words = <
     ident

@@ -1,0 +1,119 @@
+sub find($dir, Regex $pattern) {
+    my @targets = dir($dir);
+    my @files;
+    while @targets {
+        my $file = @targets.shift;
+        push @files, $file if $file ~~ $pattern;
+        if $file.IO ~~ :d {
+            @targets.append: dir($file);
+        }
+    }
+    return @files;
+}
+
+# Run the following script to re-calculate this constant:
+#
+# $ (for file in `find t/features t/integration -name \*.t`; do perl6 $file | grep '1\.\.'; done) |
+#       perl6 -ne'/\.\.(\d+)/; our $n += $0; END { say $n }'
+
+constant TOTAL = 489;
+
+sub MAIN() {
+    my $score = 0;
+    my %stats;
+    my $test-override = slurp("self-host/test-override");
+
+    for |find("t/features", /".t" $/), |find("t/integration", /".t" $/) -> $file {
+        say "== $file";
+        my $contents = slurp($file);
+        my $basename = $file.basename.subst(/".t" $/, "");
+        my $tempfile-name = "$basename-$*PID.t";
+        LEAVE { unlink $tempfile-name if $tempfile-name }
+        signal(SIGINT).act: { unlink $tempfile-name if $tempfile-name; exit 1 }
+        $contents.=subst(/^^ \h* "use _007::Test;" \h* $$/, $test-override);
+        spurt($tempfile-name, $contents);
+
+        my $proc = run("perl6", $tempfile-name, :out);
+        my $result = "";
+        for $proc.out.lines -> $line {
+            if $line ~~ /^ "ok "/ {
+                $score++;
+            }
+            if $line ~~ /^ ("not ")? "ok "/ {
+                $result ~= $0 ?? "x" !! ".";
+            }
+            if $line ~~ /^ "1.."/ {
+                $result ~= "#";
+            }
+            say $line;
+        }
+        my $failures = $proc.out.close;
+        %stats{$file.path} = $result;
+    }
+
+    say "";
+    say "Your score is {$score} ({($score/TOTAL*100).fmt("%d%%")}) out of a {TOTAL} possible points.";
+
+    given open("self-host/.latest-test-run", :w) -> $fh {
+        for %stats.keys.sort -> $path {
+            my $result = %stats{$path};
+            $fh.say: "$path: $result";
+        }
+        $fh.close;
+    }
+
+    if "self-host/.baseline".IO !~~ :e {
+        say "Run `self-host/establish-baseline` to register this run as the baseline.";
+        return;
+    }
+    my %baseline;
+    my ($better, $worse) = False, False;
+    for "self-host/.baseline".IO.lines {
+        next if /^ \h* $/;
+        /^ $<path>=(<-[:]>+) ":" \h* $<result>=(\S*) $/
+            or die "Unknown line format '$_'";
+        %baseline{~$<path>} = ~$<result>;
+    }
+    for %stats.keys.sort -> $path {
+        if %baseline{$path} :!exists {
+            say "New test file $path";
+            $better = True;
+            next;
+        }
+        my $results = %stats{$path};
+        my $baseline-results = %baseline{$path};
+        if $baseline-results.chars < $results.chars {
+            say "Running more tests in $path";
+            $better = True;
+        }
+        elsif $baseline-results.chars > $results.chars {
+            say "Running fewer tests in $path";
+            $worse = True;
+        }
+        for ^min($results.chars, $baseline-results.chars) -> $i {
+            given ($baseline-results.substr($i, 1), $results.substr($i, 1)) {
+                when ("x", ".") {
+                    say "Test #{$i + 1} now succeeds in $path";
+                    $better = True;
+                }
+                when (".", "x") {
+                    say "Test #{$i + 1} now fails in $path";
+                    $worse = True;
+                }
+            }
+        }
+    }
+
+    if $better && !$worse {
+        say "";
+        say "An improvement! Run `self-host/establish-baseline` as you commit.";
+    }
+    elsif $worse && !$better {
+        say "";
+        say "AUUGH! Some new tests fail now compared to the baseline.";
+    }
+    elsif $better && $worse {
+        say "";
+        say "Some tests now pass, some now fail. Life is like a box of chocolates.";
+    }
+}
