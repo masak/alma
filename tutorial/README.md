@@ -249,10 +249,9 @@ The following built-in types have methods associated with them:
 
 ## Q objects
 
-All the different Q types can be created by specifying the type before an
-object term:
+All the different Q types can be created with an object term:
 
-    my q = Q::Statement::My {
+    my q = new Q::Statement::My {
         identifier: Q::Identifier { name: "name" },
         expr: Q::Literal::Str { value: "Bond" }
     };
