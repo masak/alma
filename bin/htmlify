@@ -1,6 +1,8 @@
 #!/usr/bin/env perl6
 use v6;
 use _007;
+use _007::Q;
+use _007::Val;
 
 sub parse_007($program) {
     my $runtime = _007.runtime;
@@ -19,7 +21,7 @@ multi MAIN(Str :e($program)!) {
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
-sub arrow() { qq[<span class="arrow">&#25BC;</span>] }
+sub arrow() { qq[<span class="arrow">&#x25BC;</span>] }
 sub qtype-color($text) { qq[<span class="qtype">{$text}</span>] }
 sub attr-color($text) { qq[<span class="attr">{$text}</span>] }
 sub val-type-color($text) { qq[<span class="val-type">{$text}</span>] }
