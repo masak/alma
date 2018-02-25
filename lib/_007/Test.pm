@@ -33,8 +33,6 @@ sub read(Str $ast) is export {
         'infix:%'      => Q::Infix::Modulo,
         'infix:%%'     => Q::Infix::Divisibility,
         'infix:~'      => Q::Infix::Concat,
-        'infix:x'      => Q::Infix::Replicate,
-        'infix:xx'     => Q::Infix::ArrayReplicate,
         'infix:::'     => Q::Infix::Cons,
         'infix:='      => Q::Infix::Assignment,
         'infix:=='     => Q::Infix::Eq,

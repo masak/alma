@@ -278,28 +278,6 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             },
             :qtype(Q::Infix::Divisibility),
         ),
-        'infix:x' => op(
-            sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<x>, :got($lhs), :expected(Val::Str))
-                    unless $lhs ~~ Val::Str;
-                die X::TypeCheck.new(:operation<x>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
-                return wrap($lhs.value x $rhs.value);
-            },
-            :qtype(Q::Infix::Replicate),
-            :precedence{ equal => "infix:*" },
-        ),
-        'infix:xx' => op(
-            sub ($lhs, $rhs) {
-                die X::TypeCheck.new(:operation<xx>, :got($lhs), :expected(Val::Array))
-                    unless $lhs ~~ Val::Array;
-                die X::TypeCheck.new(:operation<xx>, :got($rhs), :expected(Val::Int))
-                    unless $rhs ~~ Val::Int;
-                return wrap(| $lhs.elements xx $rhs.value);
-            },
-            :qtype(Q::Infix::ArrayReplicate),
-            :precedence{ equal => "infix:*" },
-        ),
 
         # prefixes
         'prefix:~' => op(

@@ -513,20 +513,6 @@ class Q::Infix::Divisibility is Q::Infix {}
 ###
 class Q::Infix::Concat is Q::Infix {}
 
-### ### Q::Infix::Replicate
-###
-### A string replication operator. Returns a string which consists of `n`
-### copies of a string.
-###
-class Q::Infix::Replicate is Q::Infix {}
-
-### ### Q::Infix::ArrayReplicate
-###
-### An array replication operator. Returns an array which consists of
-### the original array's elements, repeated `n` times.
-###
-class Q::Infix::ArrayReplicate is Q::Infix {}
-
 ### ### Q::Infix::Cons
 ###
 ### A "cons" operator. Given a value and an array, returns a new

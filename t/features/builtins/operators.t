@@ -96,24 +96,6 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:x (str "hi ") (int 3))))))
-        .
-
-    is-result $ast, "hi hi hi \n", "string repetition works";
-}
-
-{
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:xx (array (int 1) (int 2)) (int 3))))))
-        .
-
-    is-result $ast, "[1, 2, 1, 2, 1, 2]\n", "array repetition works";
-}
-
-{
-    my $ast = q:to/./;
     (statementlist
      (stexpr (postfix:() (identifier "say")
        (argumentlist
@@ -524,26 +506,15 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say("Jim" x 2 ~ " Bond");
-        say("Jim " ~ "Bond" x 2);
-        .
-
-    outputs $program, "JimJim Bond\nJim BondBond\n", "string repetition is tighter than concatenation";
-}
-
-{
-    my $program = q:to/./;
         say(!0 :: []);
         say(-1 :: []);
         say(1+2 :: []);
         say(3-4 :: []);
         say(5*6 :: []);
-        say("B" x 2 :: []);
         say("Bo" ~ "nd" :: []);
-        say([0] xx 2 :: [7]);
         .
 
-    outputs $program, qq![True]\n[-1]\n[3]\n[-1]\n[30]\n["BB"]\n["Bond"]\n[[0, 0], 7]\n!,
+    outputs $program, qq![True]\n[-1]\n[3]\n[-1]\n[30]\n["Bond"]\n!,
         "cons is looser than even the additive infixes (+ - ~)";
 }
 

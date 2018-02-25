@@ -156,10 +156,9 @@ class Val::Int does Val {
 ### input/output. Since this language cares a lot about parsing, strings occur
 ### a lot.
 ###
-### A number of useful operators are defined to work with strings:
+### You can join together strings using the concatenation operator:
 ###
 ###     say("James" ~ " Bond"); # --> `James Bond`
-###     say("tap" x 3);         # --> `taptaptap`
 ###
 ### Besides which, the `Str` type also carries many useful methods:
 ###

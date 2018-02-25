@@ -94,9 +94,6 @@ my Runtime = {
             Q::Infix::And(op) {
                 return eval(op.lhs) && eval(op.rhs);
             },
-            Q::Infix::ArrayReplicate(op) {
-                return eval(op.lhs) xx eval(op.rhs);
-            },
             Q::Infix::Assignment(op) {
                 my value = eval(op.rhs);
                 if op.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
@@ -139,9 +136,6 @@ my Runtime = {
             },
             Q::Infix::Or(op) {
                 return eval(op.lhs) || eval(op.rhs);
-            },
-            Q::Infix::Replicate(op) {
-                return eval(op.lhs) x eval(op.rhs);
             },
             Q::Infix::Subtraction(op) {
                 return eval(op.lhs) - eval(op.rhs);
