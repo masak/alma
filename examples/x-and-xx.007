@@ -10,7 +10,13 @@ macro infix:<xx>(left, right) is equal(infix:<*>) {
         });
         my result = [];
         for allLists -> i {
-            result = result.concat(i);
+          if (type(i) == type([])) {
+              for i -> j {
+                  result.push(j);
+              }
+          } else {
+              result.push(i);
+          }
         }
         return result;
     }

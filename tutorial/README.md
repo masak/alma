@@ -186,15 +186,12 @@ this, the assignment in the `constant` declaration is mandatory.
 
 ## Setting
 
-There's a scope outside the program scope, containing a utility
+There's a scope outside the program scope, containing a few utility
 subroutines. These should be fairly self-explanatory.
 
     say(any)
+    prompt(any)
     type(any)
-    str(any)
-    int(any)
-    min(a, b)
-    max(a, b)
 
 ## Objects
 
@@ -233,19 +230,30 @@ The following built-in types have methods associated with them:
     .trim()
     .split(sep)
     .index(substr)
-    .charat(pos)
+    .contains(substr)
     .substr(pos, chars)
     .prefix(pos)
     .suffix(pos)
+    .charat(pos)
 
 ### `Array`
 
     .size()
     .reverse()
     .sort()
+    .shuffle()
+    .concat(array)
     .join(sep)
     .map(fn)
     .filter(fn)
+    .push(newelem)
+    .pop()
+    .shift()
+    .unshift(newelem)
+
+### `Object`
+
+    .size()
 
 ## Q objects
 
