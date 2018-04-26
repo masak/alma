@@ -3,13 +3,13 @@ macro infix:<xx>(left, right) is equal(infix:<*>) {
     sub flatten (inputList) {
         my result = [];
         for inputList -> i {
-          if (type(i) == type([])) {
-              for i -> j {
-                  result.push(j);
-              }
-          } else {
-              result.push(i);
-          }
+            if (type(i) == type([])) {
+                for i -> j {
+                    result.push(j);
+                }
+            } else {
+                result.push(i);
+            }
         }
         return result;
     }
