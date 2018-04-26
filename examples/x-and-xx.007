@@ -1,11 +1,4 @@
 macro infix:<xx>(left, right) is equal(infix:<*>) {
-    sub sum (l) {
-        my result = 0;
-        for l -> i {
-            result = result + i;
-        }
-        return result;
-    }
     # Flattens one layer.
     sub flatten (inputList) {
         my allLists = inputList.map(sub makeList(i) {
@@ -15,19 +8,11 @@ macro infix:<xx>(left, right) is equal(infix:<*>) {
                 return [i];
             }
         });
-        my resultItemCount = sum(allLists.map(sub size(i) {
-            return i.size();
-        }));
-        # Now here is an annoying messy bit of mutation.
-        my resultList = ^resultItemCount;
-        my index = 0;
+        my result = [];
         for allLists -> i {
-            for i -> j {
-                resultList[index] = j;
-                index = index + 1;
-            }
+            result = result.concat(i);
         }
-        return resultList;
+        return result;
     }
     return quasi {
         flatten((^{{{right}}}).map(sub getValue(ignore) {
