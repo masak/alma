@@ -1,0 +1,55 @@
+macro infix:<xx>(left, right) is equal(infix:<*>) {
+    sub sum (l) {
+        my result = 0;
+        for l -> i {
+            result = result + i;
+        }
+        return result;
+    }
+    # Flattens one layer.
+    sub flatten (inputList) {
+        my allLists = inputList.map(sub makeList(i) {
+            if (type(i) == type([])) {
+                return i;
+            } else {
+                return [i];
+            }
+        });
+        my resultItemCount = sum(allLists.map(sub size(i) {
+            return i.size();
+        }));
+        # Now here is an annoying messy bit of mutation.
+        my resultList = ^resultItemCount;
+        my index = 0;
+        for allLists -> i {
+            for i -> j {
+                resultList[index] = j;
+                index = index + 1;
+            }
+        }
+        return resultList;
+    }
+    return quasi {
+        flatten((^{{{right}}}).map(sub getValue(ignore) {
+            return {{{left}}};
+        }))
+    }
+}
+
+sub infix:<x>(left, right) is equal(infix:<*>) {
+    return (left xx right).join("");
+}
+
+# Test string x number.
+say("testing" x 2);
+
+# Test number xx number.
+my i = 0;
+say((i = i + 1) xx 3);
+
+# Test list xx number.
+say([1, 2, 3] xx 2);
+
+# Test (list or number) xx number.
+my j = 0;
+say((j = [1, [1, 2, 3]][j && 1]) xx 2);
