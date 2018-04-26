@@ -1,15 +1,8 @@
 macro infix:<xx>(left, right) is equal(infix:<*>) {
     # Flattens one layer.
     sub flatten (inputList) {
-        my allLists = inputList.map(sub makeList(i) {
-            if (type(i) == type([])) {
-                return i;
-            } else {
-                return [i];
-            }
-        });
         my result = [];
-        for allLists -> i {
+        for inputList -> i {
           if (type(i) == type([])) {
               for i -> j {
                   result.push(j);
