@@ -206,6 +206,32 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
+          (my (identifier "s1") (str "a"))
+          (my (identifier "s2") (str "b"))
+
+          (stexpr (postfix:() (identifier "say") (argumentlist (infix:< (identifier "s1") (identifier "s1")))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (infix:< (identifier "s1") (identifier "s2"))))))
+        .
+
+    is-result $ast, "False\nTrue\n", "string less-than";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (my (identifier "s1") (str "b"))
+          (my (identifier "s2") (str "a"))
+
+          (stexpr (postfix:() (identifier "say") (argumentlist (infix:> (identifier "s1") (identifier "s1")))))
+          (stexpr (postfix:() (identifier "say") (argumentlist (infix:> (identifier "s1") (identifier "s2"))))))
+        .
+
+    is-result $ast, "False\nTrue\n", "string greater-than";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
           (my (identifier "a1") (array (int 1) (int 2) (int 3)))
           (my (identifier "a2") (array (int 1) (int 2) (str "3")))
 

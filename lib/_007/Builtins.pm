@@ -70,7 +70,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             :expected(Val::Int));
     }
     multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
-    multi less-value(Val::Str $l, Val::Str $r) { $l.value le $r.value }
+    multi less-value(Val::Str $l, Val::Str $r) { $l.value lt $r.value }
     multi more-value($, $) {
         die X::TypeCheck.new(
             :operation<more>,
@@ -78,7 +78,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             :expected(Val::Int));
     }
     multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
-    multi more-value(Val::Str $l, Val::Str $r) { $l.value ge $r.value }
+    multi more-value(Val::Str $l, Val::Str $r) { $l.value gt $r.value }
 
     my role Placeholder {
         has $.qtype;
