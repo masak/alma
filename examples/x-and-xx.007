@@ -1,20 +1,18 @@
 macro infix:<xx>(left, right) is equal(infix:<*>) {
-    # Flattens one layer.
-    sub flatten (inputList) {
+    sub flatten(array) {
         my result = [];
-        for inputList -> i {
-            if (type(i) == type([])) {
-                for i -> j {
-                    result.push(j);
-                }
+        for array -> elem {
+            if elem ~~ Array {
+                result = result.concat(elem);
             } else {
-                result.push(i);
+                result.push(elem);
             }
         }
         return result;
     }
+
     return quasi {
-        flatten((^{{{right}}}).map(sub getValue(ignore) {
+        flatten((^{{{right}}}).map(sub(_) {
             return {{{left}}};
         }))
     }
