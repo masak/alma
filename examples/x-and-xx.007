@@ -1,0 +1,39 @@
+macro infix:<xx>(left, right) is equal(infix:<*>) {
+    # Flattens one layer.
+    sub flatten (inputList) {
+        my result = [];
+        for inputList -> i {
+            if (type(i) == type([])) {
+                for i -> j {
+                    result.push(j);
+                }
+            } else {
+                result.push(i);
+            }
+        }
+        return result;
+    }
+    return quasi {
+        flatten((^{{{right}}}).map(sub getValue(ignore) {
+            return {{{left}}};
+        }))
+    }
+}
+
+sub infix:<x>(left, right) is equal(infix:<*>) {
+    return (left xx right).join("");
+}
+
+# Test string x number.
+say("testing" x 2);
+
+# Test number xx number.
+my i = 0;
+say((i = i + 1) xx 3);
+
+# Test list xx number.
+say([1, 2, 3] xx 2);
+
+# Test (list or number) xx number.
+my j = 0;
+say((j = [1, [1, 2, 3]][j && 1]) xx 2);
