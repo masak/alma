@@ -137,12 +137,12 @@ class _007::Linter {
                 }
             }
 
-            multi traverse(Q::Infix::Assignment $infix) {
-                traverse($infix.rhs);
+            multi traverse(Q::Statement::Assign $stmt) {
+                traverse($stmt.rhs);
                 die "LHS was not an identifier"
-                    unless $infix.lhs ~~ Q::Identifier;
-                my $name = $infix.lhs.name.value;
-                if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
+                    unless $stmt.lhs ~~ Q::Identifier;
+                my $name = $stmt.lhs.name.value;
+                if $stmt.rhs ~~ Q::Identifier && $stmt.rhs.name eq $name {
                     @complaints.push: L::RedundantAssignment.new(:$name);
                 }
                 %assigned{ref $name} = True;

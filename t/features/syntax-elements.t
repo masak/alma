@@ -128,7 +128,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "u") (int 0))
-          (stexpr (infix:= (identifier "u") (infix:+ (identifier "u") (int 1)))))
+          (= (identifier "u") (infix:+ (identifier "u") (int 1))))
         .
 
     parses-to $program, $ast, "assignment and addition";
@@ -171,7 +171,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "x") (int 1))
-          (stexpr (infix:= (identifier "x") (int 2))))
+          (= (identifier "x") (int 2)))
         .
 
     parses-to $program, $ast, "assignment (outside of a declaration)";

@@ -107,12 +107,6 @@ my @builtins =
 
     # OPERATORS (from loosest to tightest within each category)
 
-    # assignment precedence
-    'infix:=' => macro-op(
-        :qtype(Q::Infix::Assignment),
-        :assoc<right>,
-    ),
-
     # disjunctive precedence
     'infix:||' => macro-op(
         :qtype(Q::Infix::Or),

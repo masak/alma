@@ -520,18 +520,6 @@ class Q::Infix::Concat is Q::Infix {}
 ###
 class Q::Infix::Cons is Q::Infix {}
 
-### ### Q::Infix::Assignment
-###
-### An assignment operator. Puts a value in a storage location.
-###
-class Q::Infix::Assignment is Q::Infix {
-    method eval($runtime) {
-        my $value = $.rhs.eval($runtime);
-        $.lhs.put-value($value, $runtime);
-        return $value;
-    }
-}
-
 ### ### Q::Infix::Eq
 ###
 ### An equality test operator.
@@ -912,6 +900,20 @@ class Q::Statement::Constant does Q::Statement does Q::Declaration {
 
     method run($runtime) {
         # value has already been assigned
+    }
+}
+
+### ### Q::Statement::Assign
+###
+### An assignment statement. Puts a value in a storage location.
+###
+class Q::Statement::Assign is Q::Statement {
+    has $.lhs;
+    has $.rhs;
+
+    method run($runtime) {
+        my $value = $.rhs.eval($runtime);
+        $.lhs.put-value($value, $runtime);
     }
 }
 

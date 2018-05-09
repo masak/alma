@@ -143,7 +143,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "x") (int 1))
-          (stexpr (infix:= (identifier "x") (int 2)))
+          (= (identifier "x") (int 2))
           (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x")))))
         .
 
@@ -260,7 +260,7 @@ use _007::Test;
         (statementlist
           (my (identifier "a3") (array (int 1) (int 2) (int 3)))
 
-          (stexpr (infix:= (postfix:[] (identifier "a3") (int 1)) (identifier "a3")))
+          (= (postfix:[] (identifier "a3") (int 1)) (identifier "a3"))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a3") (identifier "a3"))))))
         .
 
@@ -298,7 +298,7 @@ use _007::Test;
         (statementlist
           (my (identifier "o3") (object (identifier "Object") (propertylist (property "x" (int 7)))))
 
-          (stexpr (infix:= (postfix:. (identifier "o3") (identifier "y")) (identifier "o3")))
+          (= (postfix:. (identifier "o3") (identifier "y")) (identifier "o3"))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o3") (identifier "o3"))))))
         .
 

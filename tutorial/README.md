@@ -58,10 +58,10 @@ Arrays can be indexed. (Strings can't, but there's a builtin for that.)
 
     ar[3]               Q::Postfix::Index
 
-There's an assignment operator, and a comparison operator. These work on
+There's an assignment statement, and a comparison operator. These work on
 all types.
 
-    name = "Bond"       Q::Infix::Assignment
+    name = "Bond";      Q::Statement::Assign
     42 == 40 + 2        Q::Infix::Eq
 
 There is no boolean type; comparison yields `1` and `0`. Comparison is

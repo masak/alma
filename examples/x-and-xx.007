@@ -27,11 +27,8 @@ say("testing" x 2);
 
 # Test number xx number.
 my i = 0;
-say((i = i + 1) xx 3);
+func foo() { i = i + 1; return i }
+say(foo() xx 3);
 
 # Test list xx number.
 say([1, 2, 3] xx 2);
-
-# Test (list or number) xx number.
-my j = 0;
-say((j = [1, [1, 2, 3]][j && 1]) xx 2);

@@ -63,6 +63,12 @@ grammar _007::Parser::Syntax {
         }
         ['=' <EXPR>]?
     }
+    rule statement:assign {
+        <![{]>       # }], you're welcome vim
+        <termish> <?>
+        '='
+        <EXPR>
+    }
     token statement:expr {
         <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
         <EXPR>

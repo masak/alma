@@ -113,6 +113,23 @@ class _007::Parser::Actions {
         $<identifier>.ast.put-value($value, $*runtime);
     }
 
+    method statement:assign ($/) {
+        if $<termish>.ast ~~ Q::Identifier {
+            my $symbol = $<termish>.ast.name.value;
+            my $decltype = @*declstack[*-1]{$symbol};
+            my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
+            die X::Assignment::RO.new(:typename("$declname '$symbol'"))
+                unless $decltype.is-assignable;
+
+            my $frame = $*runtime.current-frame;
+            %*assigned{$frame.id ~ $symbol}++;
+        }
+
+        make Q::Statement::Assign.new(
+            :lhs($<termish>.ast),
+            :rhs($<EXPR>.ast));
+    }
+
     method statement:expr ($/) {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
@@ -380,18 +397,6 @@ class _007::Parser::Actions {
             }
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
-
-                if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
-                    my $frame = $*runtime.current-frame;
-                    my $symbol = $t1.name.value;
-                    die X::Undeclared.new(:$symbol)
-                        unless @*declstack[*-1]{$symbol} :exists;
-                    my $decltype = @*declstack[*-1]{$symbol};
-                    my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
-                    die X::Assignment::RO.new(:typename("$declname '$symbol'"))
-                        unless $decltype.is-assignable;
-                    %*assigned{$frame.id ~ $symbol}++;
-                }
             }
         }
 
@@ -875,6 +880,10 @@ sub check(Q::Block $ast, $runtime) is export {
         $runtime.declare-var($symbol);
 
         handle($constant.expr);
+    }
+
+    multi handle(Q::Statement::Assign $assign) {
+        handle($assign.rhs);
     }
 
     multi handle(Q::Statement::Block $block) {

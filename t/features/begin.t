@@ -150,13 +150,14 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my c = 3;
-        while c = c + -1 {
+        my c = 2;
+        while c {
             my k;
             BEGIN {
                 k = 1000;
             }
             say(k);
+            c = c - 1
         }
         .
 

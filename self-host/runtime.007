@@ -94,13 +94,6 @@ my Runtime = {
             Q::Infix::And(op) {
                 return eval(op.lhs) && eval(op.rhs);
             },
-            Q::Infix::Assignment(op) {
-                my value = eval(op.rhs);
-                if op.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
-                    put_var(op.lhs.name, value);
-                }
-                return value;
-            },
             Q::Infix::Concat(op) {
                 return eval(op.lhs) ~ eval(op.rhs);
             },
@@ -223,6 +216,13 @@ my Runtime = {
                 enter(current_frame(), compunit.block["static-lexpad"]);
                 run(compunit.block.statementlist);
                 leave();
+            },
+            Q::Statement::Assign(stmt) {
+                my value = eval(stmt.rhs);
+                if stmt.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
+                    put_var(stmt.lhs.name, value);
+                }
+                return value;
             },
             Q::Statement::Constant(stmt) {
                 # no runtime behavior

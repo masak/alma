@@ -33,7 +33,6 @@ sub read(Str $ast) is export {
         'infix:%%'     => Q::Infix::Divisibility,
         'infix:~'      => Q::Infix::Concat,
         'infix:::'     => Q::Infix::Cons,
-        'infix:='      => Q::Infix::Assignment,
         'infix:=='     => Q::Infix::Eq,
         'infix:!='     => Q::Infix::Ne,
         'infix:~~'     => Q::Infix::TypeMatch,
@@ -49,6 +48,7 @@ sub read(Str $ast) is export {
         'postfix:.'    => Q::Postfix::Property,
 
         my             => Q::Statement::My,
+        '='            => Q::Statement::Assign,
         stexpr         => Q::Statement::Expr,
         if             => Q::Statement::If,
         stblock        => Q::Statement::Block,
