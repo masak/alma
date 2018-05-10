@@ -148,4 +148,18 @@ use _007::Test;
     outputs $program, "<type Q::CompUnit>\n", "Q::CompUnit @ q";
 }
 
+{
+    my $program = q:to/./;
+        macro moo(a, b) {
+            return quasi { {{{a}}} = {{{b}}} }
+        }
+
+        my x = 5;
+        moo(x, "007");
+        say(x);
+        .
+
+    outputs $program, "007\n", "unquote parses first in statement";
+}
+
 done-testing;

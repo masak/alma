@@ -64,7 +64,7 @@ grammar _007::Parser::Syntax {
         ['=' <EXPR>]?
     }
     token statement:expr {
-        <![{]>       # }], you're welcome vim
+        <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
         <EXPR>
     }
     token statement:block { <pblock> }
