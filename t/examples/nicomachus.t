@@ -14,7 +14,7 @@ my class CannedInput {
         6
         EOF
 
-    my @lines = run-and-collect-output("examples/nicomachus.007", :$input);
+    my @lines = run-and-collect-lines("examples/nicomachus.007", :$input);
 
     is @lines[*-1], "Your number was 41.", "correct output when the secret number was 41";
 }
@@ -26,7 +26,7 @@ my class CannedInput {
         0
         EOF
 
-    my @lines = run-and-collect-output("examples/nicomachus.007", :$input);
+    my @lines = run-and-collect-lines("examples/nicomachus.007", :$input);
 
     is @lines[*-1], "Your number was 56.", "correct output when the secret number was 56";
 }
@@ -38,7 +38,7 @@ my class CannedInput {
         5
         EOF
 
-    my @lines = run-and-collect-output("examples/nicomachus.007", :$input);
+    my @lines = run-and-collect-lines("examples/nicomachus.007", :$input);
 
     is @lines[*-1], "Your number was 103.", "correct output when the secret number was 103";
 }

@@ -1,7 +1,7 @@
 use Test;
 use _007::Test;
 
-my @lines = run-and-collect-output("examples/hanoi.007");
+my @lines = run-and-collect-lines("examples/hanoi.007");
 
 sub parse-state(@lines) {
     my @state = [], [], [];

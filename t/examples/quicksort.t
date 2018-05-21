@@ -1,7 +1,7 @@
 use Test;
 use _007::Test;
 
-my @lines = run-and-collect-output("examples/quicksort.007");
+my @lines = run-and-collect-lines("examples/quicksort.007");
 
 is +@lines, 3, "correct number of lines of output";
 

@@ -13,7 +13,7 @@ my class CannedInput {
         105
         EOF
 
-    my @lines = run-and-collect-output("examples/euclid-gcd.007", :$input);
+    my @lines = run-and-collect-lines("examples/euclid-gcd.007", :$input);
 
     is @lines[*-1], "Greatest common denominator: 7", "gcd of 133 and 105 is 7";
 }
@@ -24,7 +24,7 @@ my class CannedInput {
         43
         EOF
 
-    my @lines = run-and-collect-output("examples/euclid-gcd.007", :$input);
+    my @lines = run-and-collect-lines("examples/euclid-gcd.007", :$input);
 
     is @lines[*-1], "Greatest common denominator: 1", "two primes are coprime";
 }
@@ -35,7 +35,7 @@ my class CannedInput {
         15
         EOF
 
-    my @lines = run-and-collect-output("examples/euclid-gcd.007", :$input);
+    my @lines = run-and-collect-lines("examples/euclid-gcd.007", :$input);
 
     is @lines[*-1], "Greatest common denominator: 5", "minus signs are ignored";
 }

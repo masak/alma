@@ -278,7 +278,11 @@ sub run-and-collect-output($filepath, :$input = $*IN) is export {
     my $ast = _007.parser(:$runtime).parse($program);
     $runtime.run($ast);
 
-    return $output.result.lines;
+    return $output.result;
+}
+
+sub run-and-collect-lines($filepath, :$input) is export {
+    return run-and-collect-output($filepath, :$input).lines;
 }
 
 sub run-and-collect-error-message($filepath) is export {

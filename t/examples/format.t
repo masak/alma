@@ -19,7 +19,7 @@ given open(MODIFIED_FORMAT_007_FILENAME, :w) -> $fh {
 ok $removed-line, "found a line to remove from format.007";
 
 {
-    my @lines = run-and-collect-output(MODIFIED_FORMAT_007_FILENAME);
+    my @lines = run-and-collect-lines(MODIFIED_FORMAT_007_FILENAME);
 
     is +@lines, 2, "correct number of lines";
 

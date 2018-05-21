@@ -1,7 +1,7 @@
 use Test;
 use _007::Test;
 
-my @lines = run-and-collect-output("examples/99-bottles.007");
+my @lines = run-and-collect-lines("examples/99-bottles.007");
 
 is +@lines, 4 * 99 + 98, "correct number of lines";
 
