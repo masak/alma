@@ -1,0 +1,10 @@
+use Test;
+use _007::Test;
+
+my @lines = run-and-collect-output("examples/quine.007");
+
+is @lines.map({ "$_\n" }).join,
+    slurp("examples/quine.007"),
+    "the quine outputs itself";
+
+done-testing;

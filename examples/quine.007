@@ -1,0 +1,25 @@
+my lines = [
+    "my lines = [",
+    "    ",
+    "];",
+    "for lines -> line {",
+    "    if line.chars() == 4 {",
+    "        for lines -> quotedLine {",
+    "            say(line ~ 34.chr() ~ quotedLine ~ 34.chr() ~ 44.chr());",
+    "        }",
+    "    }",
+    "    else {",
+    "        say(line);",
+    "    }",
+    "}",
+];
+for lines -> line {
+    if line.chars() == 4 {
+        for lines -> quotedLine {
+            say(line ~ 34.chr() ~ quotedLine ~ 34.chr() ~ 44.chr());
+        }
+    }
+    else {
+        say(line);
+    }
+}
