@@ -177,9 +177,8 @@ class _007::Parser::Actions {
         }
 
         if %precedence.keys > 1 {
-            my ($trait1, $trait2) = %precedence.keys.sort;
-            die X::Trait::Conflict.new(:$trait1, :$trait2)
-                if %precedence{$trait1} && %precedence{$trait2};
+            my ($t1, $t2) = %precedence.keys.sort;
+            die X::Trait::Conflict.new(:$t1, :$t2);
         }
 
         $*parser.opscope.install($type, $op, :%precedence, :$assoc);
