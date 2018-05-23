@@ -456,7 +456,7 @@ use _007::Test;
     is-error
         $ast,
         X::TypeCheck,
-        "Type check failed in +; expected Val::Int but got Val::Str (Val::Str.new(value =>...)",
+        q[Type check failed in +; expected Val::Int but got Val::Str (Val::Str.new(value => "4"))],
         "adding non-ints is an error";
 }
 
@@ -469,7 +469,7 @@ use _007::Test;
     is-error
         $ast,
         X::TypeCheck,
-        "Type check failed in ~; expected Val::Str but got Val::Int (Val::Int.new(value =>...)",
+        "Type check failed in ~; expected Val::Str but got Val::Int (Val::Int.new(value => 38))",
         "concatenating non-strs is an error";
 }
 
@@ -483,7 +483,7 @@ use _007::Test;
     is-error
         $ast,
         X::TypeCheck,
-        "Type check failed in indexing; expected Val::Array but got Val::Str (Val::Str.new(value =>...)",
+        q[Type check failed in indexing; expected Val::Array but got Val::Str (Val::Str.new(value => "Jim"))],
         "indexing a non-array is an error";
 }
 
@@ -621,7 +621,7 @@ use _007::Test;
     is-error
         $ast,
         X::TypeCheck,
-        "Type check failed in ^; expected Val::Int but got Val::Str (Val::Str.new(value =>...)",
+        q[Type check failed in ^; expected Val::Int but got Val::Str (Val::Str.new(value => "Mr Bond"))],
         "can't upto a string (or other non-integer types)";
 }
 
