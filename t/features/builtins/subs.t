@@ -54,11 +54,11 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist)))
+          (stfunc (identifier "f") (block (parameterlist) (statementlist)))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "f")))))))
         .
 
-    is-result $ast, "<type Sub>\n", "sub type() works";
+    is-result $ast, "<type Func>\n", "func type() works";
 }
 
 {
@@ -67,7 +67,7 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "say")))))))
         .
 
-    is-result $ast, "<type Sub>\n", "builtin sub type() returns the same as ordinary sub";
+    is-result $ast, "<type Func>\n", "builtin func type() returns the same as ordinary func";
 }
 
 done-testing;

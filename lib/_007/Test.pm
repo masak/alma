@@ -18,7 +18,7 @@ sub read(Str $ast) is export {
         array          => Q::Term::Array,
         object         => Q::Term::Object,
         regex          => Q::Term::Regex,
-        sub            => Q::Term::Sub,
+        func           => Q::Term::Func,
         quasi          => Q::Term::Quasi,
 
         'prefix:~'     => Q::Prefix::Str,
@@ -52,7 +52,7 @@ sub read(Str $ast) is export {
         stexpr         => Q::Statement::Expr,
         if             => Q::Statement::If,
         stblock        => Q::Statement::Block,
-        stsub          => Q::Statement::Sub,
+        stfunc         => Q::Statement::Func,
         macro          => Q::Statement::Macro,
         return         => Q::Statement::Return,
         for            => Q::Statement::For,

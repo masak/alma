@@ -122,7 +122,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub foo(a, b, c) {
+        func foo(a, b, c) {
             say(a);
             say(b);
             say(c);

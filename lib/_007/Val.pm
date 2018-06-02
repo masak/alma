@@ -32,7 +32,7 @@ role Val {
 ### It is also the value returned from a subroutine that didn't explicitly
 ### return a value:
 ###
-###     sub noreturn() {
+###     func noreturn() {
 ###     }
 ###     say(noreturn());    # --> `None`
 ###
@@ -78,7 +78,7 @@ constant NONE is export = Val::NoneType.new;
 ### or `while` loops. *Any* value can be used, and there's always a way
 ### for each type to convert any of its values to a boolean value:
 ###
-###     sub check(value) {
+###     func check(value) {
 ###         if value {
 ###             say("truthy");
 ###         }
@@ -341,8 +341,8 @@ class Val::Regex does Val {
 ### through a predicate function:
 ###
 ###     my numbers = [1, 2, 3, 4, 5];
-###     say(numbers.map(sub (e) { return e * 2 }));     # --> `[2, 4, 6, 8, 10]`
-###     say(numbers.filter(sub (e) { return e %% 2 })); # --> `[2, 4]`
+###     say(numbers.map(func (e) { return e * 2 }));     # --> `[2, 4, 6, 8, 10]`
+###     say(numbers.filter(func (e) { return e %% 2 })); # --> `[2, 4]`
 ###
 class Val::Array does Val {
     has @.elements;
@@ -378,7 +378,7 @@ our $global-object-id = 0;
 ###     say(o1 == o3);              # --> `True`
 ###
 ###     my o4 = {
-###         greet: sub () {
+###         greet: func () {
 ###             return "hi!";
 ###         }
 ###     };
@@ -558,25 +558,25 @@ class Val::Type does Val {
     }
 }
 
-### ### Sub
+### ### Func
 ###
-### A subroutine. When you define a subroutine in 007, the value of the
-### name bound is a `Sub` object.
+### A function. When you define a function in 007, the value of the
+### name bound is a `Func` object.
 ###
-###     sub agent() {
+###     func agent() {
 ###         return "Bond";
 ###     }
-###     say(agent);             # --> `<sub agent()>`
+###     say(agent);             # --> `<func agent()>`
 ###
 ### Subroutines are mostly distinguished by being *callable*, that is, they
 ### can be called at runtime by passing some values into them.
 ###
-###     sub add(x, y) {
+###     func add(x, y) {
 ###         return x + y;
 ###     }
 ###     say(add(2, 5));         # --> `7`
 ###
-class Val::Sub is Val {
+class Val::Func is Val {
     has Val::Str $.name;
     has &.hook = Callable;
     has $.parameterlist;
@@ -608,7 +608,7 @@ class Val::Sub is Val {
         sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
     }
 
-    method Str { "<sub {$.escaped-name}{$.pretty-parameters}>" }
+    method Str { "<func {$.escaped-name}{$.pretty-parameters}>" }
 }
 
 ### ### Macro
@@ -621,7 +621,7 @@ class Val::Sub is Val {
 ###     }
 ###     say(agent);             # --> `<macro agent()>`
 ###
-class Val::Macro is Val::Sub {
+class Val::Macro is Val::Func {
     method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
@@ -645,7 +645,7 @@ class Helper {
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
-        when Val::Sub { "<sub {.escaped-name}{.pretty-parameters}>" }
+        when Val::Func { "<sub {.escaped-name}{.pretty-parameters}>" }
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;

@@ -4,11 +4,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub A(k, x1, x2, x3, x4, x5) {
+        func A(k, x1, x2, x3, x4, x5) {
             if k <= 0 {
                 return x4() + x5();
             } else {
-                sub B() {
+                func B() {
                     k = k - 1;
                     return A(k, B, x1, x2, x3, x4);
                 }
@@ -16,11 +16,11 @@ use _007::Test;
             }
         }
 
-        sub x1() { return  1 }
-        sub x2() { return -1 }
-        sub x3() { return -1 }
-        sub x4() { return  1 }
-        sub x5() { return  0 }
+        func x1() { return  1 }
+        func x2() { return -1 }
+        func x3() { return -1 }
+        func x4() { return  1 }
+        func x5() { return  0 }
 
         say(A(10, x1, x2, x3, x4, x5))
         .

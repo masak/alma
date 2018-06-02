@@ -1,5 +1,5 @@
 macro infix:<xx>(left, right) is equal(infix:<*>) {
-    sub flatten(array) {
+    func flatten(array) {
         my result = [];
         for array -> elem {
             if elem ~~ Array {
@@ -12,13 +12,13 @@ macro infix:<xx>(left, right) is equal(infix:<*>) {
     }
 
     return quasi {
-        flatten((^{{{right}}}).map(sub(_) {
+        flatten((^{{{right}}}).map(func(_) {
             return {{{left}}};
         }))
     }
 }
 
-sub infix:<x>(left, right) is equal(infix:<*>) {
+func infix:<x>(left, right) is equal(infix:<*>) {
     return (left xx right).join("");
 }
 

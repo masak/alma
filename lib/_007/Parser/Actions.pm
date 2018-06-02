@@ -120,7 +120,7 @@ class _007::Parser::Actions {
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
                 :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
-                :operand(Q::Term::Sub.new(:identifier(NONE), :block($<EXPR>.ast))),
+                :operand(Q::Term::Func.new(:identifier(NONE), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
         }
@@ -184,7 +184,7 @@ class _007::Parser::Actions {
         $*parser.opscope.install($type, $op, :%precedence, :$assoc);
     }
 
-    method statement:sub-or-macro ($/) {
+    method statement:func-or-macro ($/) {
         my $identifier = $<identifier>.ast;
         my $name = $<identifier>.ast.name;
         my $parameterlist = $<parameterlist>.ast;
@@ -197,9 +197,9 @@ class _007::Parser::Actions {
 
         my $outer-frame = $*runtime.current-frame;
         my $val;
-        if $<routine> eq "sub" {
-            make Q::Statement::Sub.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+        if $<routine> eq "func" {
+            make Q::Statement::Func.new(:$identifier, :$traitlist, :$block);
+            $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         elsif $<routine> eq "macro" {
             make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
@@ -216,7 +216,7 @@ class _007::Parser::Actions {
 
     method statement:return ($/) {
         die X::ControlFlow::Return.new
-            unless $*insub;
+            unless $*in_routine;
         make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
     }
 
@@ -605,7 +605,7 @@ class _007::Parser::Actions {
                 die X::Macro::Postdeclared.new(:$name)
                     if $value ~~ Val::Macro;
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ Val::Sub;
+                    unless $value ~~ Val::Func;
             };
         }
     }
@@ -664,7 +664,7 @@ class _007::Parser::Actions {
         die "Got something in a quasi that we didn't expect: {$/.keys}";   # should never happen
     }
 
-    method term:sub ($/) {
+    method term:func ($/) {
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
@@ -674,7 +674,7 @@ class _007::Parser::Actions {
             my $name = $<identifier>.ast.name;
             my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
             my $static-lexpad = $*runtime.current-frame.properties<pad>;
-            my $val = Val::Sub.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            my $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $<identifier>.ast.put-value($val, $*runtime);
         }
         finish-block($block);
@@ -683,7 +683,7 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>
             ?? Q::Identifier.new(:$name)
             !! NONE;
-        make Q::Term::Sub.new(:$identifier, :$traitlist, :$block);
+        make Q::Term::Func.new(:$identifier, :$traitlist, :$block);
     }
 
     method unquote ($/) {
@@ -762,7 +762,7 @@ class _007::Parser::Actions {
         my $name = $<identifier>.ast.name;
         my $identifier = Q::Identifier.new(:$name);
         make Q::Property.new(:key($name), :value(
-            Q::Term::Sub.new(:$identifier, :$block)));
+            Q::Term::Func.new(:$identifier, :$block)));
         finish-block($block);
     }
 
@@ -891,19 +891,19 @@ sub check(Q::Block $ast, $runtime) is export {
         $runtime.leave();
     }
 
-    multi handle(Q::Statement::Sub $sub) {
+    multi handle(Q::Statement::Func $func) {
         my $outer-frame = $runtime.current-frame;
-        my $name = $sub.identifier.name;
-        my $val = Val::Sub.new(:$name,
-            :parameterlist($sub.block.parameterlist),
-            :statementlist($sub.block.statementlist),
+        my $name = $func.identifier.name;
+        my $val = Val::Func.new(:$name,
+            :parameterlist($func.block.parameterlist),
+            :statementlist($func.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Object.new, $sub.block.statementlist, $val);
-        handle($sub.block);
+        $runtime.enter($outer-frame, Val::Object.new, $func.block.statementlist, $val);
+        handle($func.block);
         $runtime.leave();
 
-        $runtime.declare-var($sub.identifier, $val);
+        $runtime.declare-var($func.identifier, $val);
     }
 
     multi handle(Q::Statement::Macro $macro) {

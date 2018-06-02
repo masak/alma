@@ -1,4 +1,4 @@
-sub quicksort(array) {
+func quicksort(array) {
     if array.size() > 1 {
         my pivot = array[0];
         my less = [];

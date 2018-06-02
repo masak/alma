@@ -360,30 +360,30 @@ use _007::Test;
 }
 
 {
-    outputs 'sub foo() {}; say(foo == foo)', "True\n", "a sub is equal to itself";
+    outputs 'func foo() {}; say(foo == foo)', "True\n", "a func is equal to itself";
     outputs 'macro foo() {}; say(foo == foo)', "True\n", "a macro is equal to itself";
-    outputs 'say(say == say)', "True\n", "a built-in sub is equal to itself";
+    outputs 'say(say == say)', "True\n", "a built-in func is equal to itself";
     outputs 'say(infix:<+> == infix:<+>)', "True\n", "a built-in operator is equal to itself";
     outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "foo" })', "True\n",
         "two Qtrees with equal content are equal";
-    outputs 'my a = []; for [1, 2] { sub fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
-        "True\n", "the same sub from two different frames compares favorably to itself";
-    outputs 'sub foo() {}; my x = foo; { sub foo() {}; say(x == foo) }', "True\n",
-        "subs with the same name and bodies are equal (I)";
-    outputs 'sub foo() { say("OH HAI") }; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }',
-        "True\n", "subs with the same name and bodies are equal (II)";
+    outputs 'my a = []; for [1, 2] { func fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
+        "True\n", "the same func from two different frames compares favorably to itself";
+    outputs 'func foo() {}; my x = foo; { func foo() {}; say(x == foo) }', "True\n",
+        "funcs with the same name and bodies are equal (I)";
+    outputs 'func foo() { say("OH HAI") }; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }',
+        "True\n", "funcs with the same name and bodies are equal (II)";
 
-    outputs 'sub foo() {}; sub bar() {}; say(foo == bar)', "False\n",
-        "distinct subs are unequal";
+    outputs 'func foo() {}; func bar() {}; say(foo == bar)', "False\n",
+        "distinct funcs are unequal";
     outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "False\n",
         "distinct macros are unequal";
-    outputs 'say(say == type)', "False\n", "distinct built-in subs are unequal";
+    outputs 'say(say == type)', "False\n", "distinct built-in funcs are unequal";
     outputs 'say(infix:<+> == prefix:<->)', "False\n",
         "distinct built-in operators are unequal";
-    outputs 'sub foo(y) {}; my x = foo; { sub foo(x) {}; say(x == foo) }', "False\n",
-        "subs with different parameters are unequal";
-    outputs 'sub foo() {}; my x = foo; { sub foo() { say("OH HAI") }; say(x == foo) }', "False\n",
-        "subs with different bodies are unequal";
+    outputs 'func foo(y) {}; my x = foo; { func foo(x) {}; say(x == foo) }', "False\n",
+        "funcs with different parameters are unequal";
+    outputs 'func foo() {}; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }', "False\n",
+        "funcs with different bodies are unequal";
     outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "bar" })', "False\n",
         "two Qtrees with distinct content are unequal";
 }
@@ -408,7 +408,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "empty") (block (parameterlist) (statementlist)))
+          (stfunc (identifier "empty") (block (parameterlist) (statementlist)))
           (my (identifier "none") (postfix:() (identifier "empty") (argumentlist)))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (identifier "none")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (int 0)))))
@@ -490,7 +490,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         my a = [1, 2, 3];
-        sub f() { return 7 };
+        func f() { return 7 };
         my o = { foo: 12 };
 
         say(-a[1]);
@@ -708,7 +708,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             say("I never get run, you know");
         }
         say(007 // f());

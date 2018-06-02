@@ -15,8 +15,8 @@ use _007::Test;
         '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
         '{a: 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:+ (int 1) (int 2)))))'
         '{a() {}}' '(object (identifier "Object") (propertylist
-          (property "a" (sub (identifier "a") (block (parameterlist) (statementlist))))))'
-        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (sub (identifier "a") (block
+          (property "a" (func (identifier "a") (block (parameterlist) (statementlist))))))'
+        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (func (identifier "a") (block
           (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist))))))'
     »;
 
@@ -231,7 +231,7 @@ use _007::Test;
     my $ast = q:to/./;
         (statementlist
           (my (identifier "obj") (object (identifier "Object") (propertylist
-            (property "meth" (sub (identifier "meth") (block (parameterlist) (statementlist
+            (property "meth" (func (identifier "meth") (block (parameterlist) (statementlist
               (return (int 7))))))))))
         .
 
@@ -242,7 +242,7 @@ use _007::Test;
     my $program = q:to/./;
         f();
         my o = { say };
-        sub f() { say("Mr. Bond") }
+        func f() { say("Mr. Bond") }
         .
 
     outputs

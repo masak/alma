@@ -4,13 +4,13 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<n>(left, right) {
+        func infix:<n>(left, right) {
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "infix:n") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
+          (stfunc (identifier "infix:n") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
         .
 
     parses-to $program, $ast, "custom operator parses to the right thing";
@@ -18,7 +18,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<n>(left, right) {
+        func infix:<n>(left, right) {
             return 20;
         }
 
@@ -39,7 +39,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         {
-            sub infix:<n>(left, right) {
+            func infix:<n>(left, right) {
                 return 7;
             }
         }
@@ -51,7 +51,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<+>(left, right) {
+        func infix:<+>(left, right) {
             return 14;
         }
 
@@ -63,11 +63,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<~~>(left, right) {
+        func infix:<~~>(left, right) {
             return "wrong";
         }
 
-        sub infix:<~~~>(left, right) {
+        func infix:<~~~>(left, right) {
             return "right";
         }
 
@@ -79,11 +79,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<***>(left, right) {
+        func infix:<***>(left, right) {
             return "right";
         }
 
-        sub infix:<**>(left, right) {
+        func infix:<**>(left, right) {
             return "wrong";
         }
 
@@ -95,7 +95,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!>(left, right) {
+        func infix:<!>(left, right) {
             say(left ~ " " ~ right);
         }
 
@@ -107,7 +107,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<*!>(left, right) {
+        func infix:<*!>(left, right) {
             return 10;
         }
 
@@ -119,7 +119,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<~?>(left, right) is looser(infix:<+>) {
+        func infix:<~?>(left, right) is looser(infix:<+>) {
             return 6;
         }
 
@@ -131,7 +131,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<~?>(left, right) is tighter(infix:<+>) {
+        func infix:<~?>(left, right) is tighter(infix:<+>) {
             return 6;
         }
 
@@ -143,11 +143,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<*>(left, right) {
+        func infix:<*>(left, right) {
             return 18;
         }
 
-        sub infix:<~@>(left, right) is tighter(infix:<+>) {
+        func infix:<~@>(left, right) is tighter(infix:<+>) {
             return 30;
         }
 
@@ -159,7 +159,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!?!>(left, right) is tighter(infix:<+>) is looser(infix:<+>) {
+        func infix:<!?!>(left, right) is tighter(infix:<+>) is looser(infix:<+>) {
         }
         .
 
@@ -168,7 +168,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!?!>(left, right) is equal(infix:<+>) is equal(infix:<*>) {
+        func infix:<!?!>(left, right) is equal(infix:<+>) is equal(infix:<*>) {
         }
         .
 
@@ -178,11 +178,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<@>(left, right) {
+        func infix:<@>(left, right) {
             return "@";
         }
 
-        sub infix:<!>(left, right) is equal(infix:<@>) {
+        func infix:<!>(left, right) is equal(infix:<@>) {
             return "!";
         }
 
@@ -195,7 +195,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!?!>(left, right) is tighter(infix:<+>) is equal(infix:<+>) {
+        func infix:<!?!>(left, right) is tighter(infix:<+>) is equal(infix:<+>) {
         }
         .
 
@@ -204,7 +204,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!++>(left, right) is looser(infix:<+>) is equal(infix:<+>) {
+        func infix:<!++>(left, right) is looser(infix:<+>) is equal(infix:<+>) {
         }
         .
 
@@ -213,7 +213,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<@>(left, right) is assoc("right") {
+        func infix:<@>(left, right) is assoc("right") {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -225,7 +225,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<%>(left, right) is assoc("left") {
+        func infix:<%>(left, right) is assoc("left") {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -237,7 +237,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:</>(left, right) {
+        func infix:</>(left, right) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -249,7 +249,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!>(left, right) is assoc("non") {
+        func infix:<!>(left, right) is assoc("non") {
             return "oh, James";
         }
 
@@ -261,7 +261,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!>(left, right) is assoc("non") {
+        func infix:<!>(left, right) is assoc("non") {
             return "oh, James";
         }
 
@@ -273,7 +273,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<&-&>(left, right) is assoc("salamander") {
+        func infix:<&-&>(left, right) is assoc("salamander") {
         }
         .
 
@@ -282,10 +282,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<@>(left, right) is assoc("right") {
+        func infix:<@>(left, right) is assoc("right") {
         }
 
-        sub infix:<@@>(left, right) is equal(infix:<@>) {
+        func infix:<@@>(left, right) is equal(infix:<@>) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -297,10 +297,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<@>(left, right) is assoc("non") {
+        func infix:<@>(left, right) is assoc("non") {
         }
 
-        sub infix:<@@>(left, right) is equal(infix:<@>) {
+        func infix:<@@>(left, right) is equal(infix:<@>) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -312,10 +312,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<%>(left, right) is assoc("left") {
+        func infix:<%>(left, right) is assoc("left") {
         }
 
-        sub infix:<%%>(left, right) is equal(infix:<%>) is assoc("right") {
+        func infix:<%%>(left, right) is equal(infix:<%>) is assoc("right") {
         }
         .
 
@@ -325,7 +325,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<¿>(term) {
+        func prefix:<¿>(term) {
             return 42;
         }
 
@@ -337,7 +337,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<!>(term) {
+        func postfix:<!>(term) {
             return 1;
         }
 
@@ -349,19 +349,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<¿>(term) {
+        func prefix:<¿>(term) {
             return "prefix is looser";
         }
 
-        sub postfix:<!>(term) {
+        func postfix:<!>(term) {
             return "postfix is looser";
         }
 
-        sub postfix:<$>(term) {
+        func postfix:<$>(term) {
             return "postfix is looser";
         }
 
-        sub prefix:<%>(term) {
+        func prefix:<%>(term) {
             return "prefix is looser";
         }
 
@@ -374,19 +374,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<¿>(term) {
+        func prefix:<¿>(term) {
             return "prefix is looser";
         }
 
-        sub postfix:<!>(term) is looser(prefix:<¿>) {
+        func postfix:<!>(term) is looser(prefix:<¿>) {
             return "postfix is looser";
         }
 
-        sub postfix:<$>(term) {
+        func postfix:<$>(term) {
             return "postfix is looser";
         }
 
-        sub prefix:<%>(term) is tighter(postfix:<$>) {
+        func prefix:<%>(term) is tighter(postfix:<$>) {
             return "prefix is looser";
         }
 
@@ -399,19 +399,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<!>(term) {
+        func postfix:<!>(term) {
             return "postfix is looser";
         }
 
-        sub prefix:<¿>(term) is tighter(postfix:<!>) {
+        func prefix:<¿>(term) is tighter(postfix:<!>) {
             return "prefix is looser";
         }
 
-        sub prefix:<%>(term) {
+        func prefix:<%>(term) {
             return "prefix is looser";
         }
 
-        sub postfix:<$>(term) is looser(prefix:<%>) {
+        func postfix:<$>(term) is looser(prefix:<%>) {
             return "postfix is looser";
         }
 
@@ -424,19 +424,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<¡>(term) is assoc("right") {
+        func postfix:<¡>(term) is assoc("right") {
             return "postfix is looser";
         }
 
-        sub prefix:<¿>(term) is equal(postfix:<¡>) {
+        func prefix:<¿>(term) is equal(postfix:<¡>) {
             return "prefix is looser";
         }
 
-        sub prefix:<%>(term) is assoc("left") {
+        func prefix:<%>(term) is assoc("left") {
             return "prefix is looser";
         }
 
-        sub postfix:<$>(term) is equal(prefix:<%>) {
+        func postfix:<$>(term) is equal(prefix:<%>) {
             return "postfix is looser";
         }
 
@@ -450,10 +450,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<¿>(left, right) is assoc("non") {
+        func prefix:<¿>(left, right) is assoc("non") {
         }
 
-        sub postfix:<!>(left, right) is equal(prefix:<¿>) {
+        func postfix:<!>(left, right) is equal(prefix:<¿>) {
         }
 
         say(¿0!);
@@ -464,7 +464,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<!>(left, right) is tighter(infix:<+>) {
+        func postfix:<!>(left, right) is tighter(infix:<+>) {
         }
         .
 
@@ -473,7 +473,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<!>(left, right) is tighter(prefix:<->) {
+        func infix:<!>(left, right) is tighter(prefix:<->) {
         }
         .
 
@@ -482,7 +482,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:«!»(l, r) {
+        func infix:«!»(l, r) {
             return "Mr. Bond";
         }
 
@@ -494,7 +494,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:<\>>(l, r) {
+        func infix:<\>>(l, r) {
             return "James";
         }
 
@@ -506,11 +506,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<‡>(x) is looser(prefix:<^>) {
+        func postfix:<‡>(x) is looser(prefix:<^>) {
             return [];
         }
 
-        sub prefix:<$>(x) {
+        func prefix:<$>(x) {
             return x.size();
         }
 
@@ -522,16 +522,16 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub prefix:<&>(x) {
+        func prefix:<&>(x) {
             return x ~ " prefix:<&>";
         }
 
-        sub postfix:<‡>(x) is looser(prefix:<&>) {
+        func postfix:<‡>(x) is looser(prefix:<&>) {
             return x ~ " postfix:<‡>";
         }
 
         {
-            sub prefix:<$>(x) {
+            func prefix:<$>(x) {
                 return x ~ " prefix:<$>";
             }
 
@@ -544,15 +544,15 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub postfix:<&>(x) {
+        func postfix:<&>(x) {
             return 1;
         }
 
-        sub prefix:<&>(x) {
+        func prefix:<&>(x) {
             return 2;
         }
 
-        sub prefix:<@>(x) {
+        func prefix:<@>(x) {
             return 3;
         }
 
@@ -568,7 +568,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub infix:«->»(lhs, rhs) {
+        func infix:«->»(lhs, rhs) {
             return "Bond";
         }
 

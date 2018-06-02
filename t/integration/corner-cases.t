@@ -137,7 +137,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f(X, Y, X) {
+        func f(X, Y, X) {
             say(X ~ Y);
         }
         .
@@ -168,7 +168,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub foo(x) {
+        func foo(x) {
             my x;
         }
         .
@@ -228,11 +228,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {}
+        func f() {}
         my f;
         .
 
-    parse-error $program, X::Redeclaration, "can't have a sub and a variable sharing a name";
+    parse-error $program, X::Redeclaration, "can't have a func and a variable sharing a name";
 }
 
 {
@@ -240,7 +240,7 @@ use _007::Test;
         my f;
         {
             f = 3;
-            sub f() {
+            func f() {
             }
         }
         .
@@ -271,7 +271,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub !() {}
+        func !() {}
         .
 
     parse-error $program, X::Syntax::Missing, "must have a valid identifier after `sub`";
@@ -330,18 +330,18 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub j(t) { for t -> x {} }
+        func j(t) { for t -> x {} }
         my t;
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "j") (block (parameterlist (param (identifier "t"))) (statementlist
+          (stfunc (identifier "j") (block (parameterlist (param (identifier "t"))) (statementlist
             (for (identifier "t") (block (parameterlist (param (identifier "x"))) (statementlist))))))
           (my (identifier "t")))
         .
 
-    parses-to $program, $ast, "a var outside a sub does not collide with a param inside used in a for loop";
+    parses-to $program, $ast, "a var outside a func does not collide with a param inside used in a for loop";
 }
 
 done-testing;
