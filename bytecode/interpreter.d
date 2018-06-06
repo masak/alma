@@ -6,6 +6,7 @@ enum Opcode {
     ADD_INT,
     PRINT,
     PRINT_NL,
+    POP_JUMP_IF_FALSE
 };
 
 void interpret(int[] input) {
@@ -35,6 +36,9 @@ void interpret(int[] input) {
             case Opcode.PRINT_NL:
                 writeln();
                 break;
+            case Opcode.POP_JUMP_IF_FALSE:
+                next_index = stack.back == 0 ? input[i + 1] : i + 3;
+                break;
             default: // Default case is required.
                 break;
         }
@@ -49,6 +53,11 @@ void main()
         cast(int) Opcode.CONST_INT, 1,
         cast(int) Opcode.CONST_INT, 41,
         cast(int) Opcode.ADD_INT,
+        cast(int) Opcode.PRINT,
+        cast(int) Opcode.PRINT_NL,
+        cast(int) Opcode.CONST_INT, 0,
+        cast(int) Opcode.POP_JUMP_IF_FALSE, 11,
+        cast(int) Opcode.CONST_INT, 7,
         cast(int) Opcode.PRINT,
         cast(int) Opcode.PRINT_NL
     ];
