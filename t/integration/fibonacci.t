@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "fib") (block (parameterlist (param (identifier "n"))) (statementlist
+          (stfunc (identifier "fib") (block (parameterlist (param (identifier "n"))) (statementlist
             (if (infix:== (identifier "n") (int 0)) (block (parameterlist) (statementlist
               (return (int 1)))))
             (if (infix:== (identifier "n") (int 1)) (block (parameterlist) (statementlist

@@ -4,39 +4,39 @@ use _007;
 use _007::Linter;
 
 {
-    my $program = 'sub f() {}';
+    my $program = 'func f() {}';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [L::SubNotUsed], "sub not used";
+    ok @complaints ~~ [L::SubNotUsed], "func not used";
 }
 
 {
-    my $program = 'sub f() {}; f()';
+    my $program = 'func f() {}; f()';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [], "sub is used; no complaint";
+    ok @complaints ~~ [], "func is used; no complaint";
 }
 
 {
-    my $program = 'sub f() {}; say(f)';
+    my $program = 'func f() {}; say(f)';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [], "sub is used as argument; no complaint";
+    ok @complaints ~~ [], "func is used as argument; no complaint";
 }
 
 {
-    my $program = '{ sub f() {} }; sub f() {}; f()';
+    my $program = '{ func f() {} }; func f() {}; f()';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [L::SubNotUsed], "outer sub used, but not inner";
+    ok @complaints ~~ [L::SubNotUsed], "outer func used, but not inner";
 }
 
 {
-    my $program = '{ sub f() {}; f() }; sub f() {}';
+    my $program = '{ func f() {}; f() }; func f() {}';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [L::SubNotUsed], "inner sub used, but not outer";
+    ok @complaints ~~ [L::SubNotUsed], "inner func used, but not outer";
 }
 
 {
-    my $program = 'sub f() {}; for [1, 2, 3] { f() }';
+    my $program = 'func f() {}; for [1, 2, 3] { f() }';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [], "using a sub from a more nested scope than it was defined";
+    ok @complaints ~~ [], "using a func from a more nested scope than it was defined";
 }
 
 done-testing;

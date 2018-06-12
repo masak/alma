@@ -37,7 +37,7 @@ Only double quotes are allowed. Strings don't have any form of
 interpolation.
 
 The `None` value is a singleton. It's the value of unassigned variables
-and subroutines that don't `return` anything.
+and function that don't `return` anything.
 
 ## Expressions
 
@@ -142,20 +142,20 @@ unconditionally, as if they were an `if 1 {}` statement.
 
     { say("hi") }       Q::Statement::Block
 
-## Subroutines
+## Functions
 
-Subroutines are similar to blocks, but they are declared with a name and
+Functions are similar to blocks, but they are declared with a name and
 a (non-optional) parameter list.
 
-    sub f(x) {}         Q::Statement::Sub
+    func f(x) {}         Q::Statement::Sub
 
-When calling a subroutine, the number of arguments must equal the number
+When calling a function, the number of arguments must equal the number
 of parameters.
 
 The parentheses in the call are mandatory. There is no `g "Mr. Bond";`
 listop form.
 
-Subroutines can return values.
+Functions can return values.
 
     return 42;          Q::Statement::Return
 
@@ -187,7 +187,7 @@ this, the assignment in the `constant` declaration is mandatory.
 ## Setting
 
 There's a scope outside the program scope, containing a few utility
-subroutines. These should be fairly self-explanatory.
+functions. These should be fairly self-explanatory.
 
     say(any)
     prompt(any)
@@ -209,7 +209,7 @@ making these two forms more or less equivalent:
 
     { quip() { say("I'd say one of their aircraft is missing") } }
 
-    sub quip() { say("I'd say one of their aircraft is missing") }
+    func quip() { say("I'd say one of their aircraft is missing") }
     { quip: quip }
 
 ## Methods on built-in types
@@ -270,7 +270,7 @@ All the different Q types can be created with an object term:
 > **Bond**: So where is this cutting edge stuff?  
 > **Q**: I'm trying to get to it!
 
-Macros are a form of routine, just like subs.
+Macros are a form of routine, just like functions.
 
     macro m(q) {}       Q::Statement::Macro
 

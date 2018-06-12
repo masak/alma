@@ -5,7 +5,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return (int 7)))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
         .
@@ -16,7 +16,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return (str "Bond. James Bond.")))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
         .
@@ -27,7 +27,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return (array (int 1) (int 2) (str "three"))))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
         .
@@ -38,7 +38,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return (int 1953))
             (stexpr (postfix:() (identifier "say") (argumentlist (str "Dead code. Should have returned by now.")))))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
@@ -50,7 +50,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
         .
@@ -61,7 +61,7 @@ use _007::Test;
 {
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (stexpr (int 7)))))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
         .

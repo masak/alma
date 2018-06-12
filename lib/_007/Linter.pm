@@ -70,8 +70,8 @@ class _007::Linter {
                 }
             }
 
-            multi traverse(Q::Statement::Sub $sub) {
-                my $name = $sub.identifier.name;
+            multi traverse(Q::Statement::Func $func) {
+                my $name = $func.identifier.name;
                 %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::SubNotUsed;
             }
 

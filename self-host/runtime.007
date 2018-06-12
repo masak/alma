@@ -15,7 +15,7 @@ constant NO_OUTER = {};
 my Runtime = {
     new() {
         my frames = [];
-        sub enter(outer_frame, static_lexpad) {
+        func enter(outer_frame, static_lexpad) {
             my frame = { outer_frame, pad: {} };
             frames.push(frame);
             for static_lexpad.keys() -> name {
@@ -24,17 +24,17 @@ my Runtime = {
                 declare_var(identifier, value);
             }
         }
-        sub leave() {
+        func leave() {
             frames.pop();
         }
-        sub current_frame() {
+        func current_frame() {
             if !frames {
                 return NO_OUTER;
             }
             return frames[frames.size() - 1];
         }
 
-        sub find_pad(symbol) {
+        func find_pad(symbol) {
             my frame = current_frame();
             # The below check didn't work
             # while frame.id != NO_OUTER.id {
@@ -47,15 +47,15 @@ my Runtime = {
             }
             throw new Exception { message: "Cannot find variable '" ~ symbol ~ "'" };
         }
-        sub get_var(name) {
+        func get_var(name) {
             my pad = find_pad(name);
             return pad[name];
         }
-        sub put_var(name, value) {
+        func put_var(name, value) {
             my pad = find_pad(name);
             pad[name] = value;
         }
-        sub declare_var(identifier, value) {
+        func declare_var(identifier, value) {
             my name = identifier.name;
             # XXX: don't know if we should expose identifier.frame in 007
             # my frame = identifier.frame || current_frame();
@@ -63,7 +63,7 @@ my Runtime = {
             frame.pad[name] = value;
         }
 
-        sub sigbind(c, arguments) {
+        func sigbind(c, arguments) {
             my paramcount = c.parameterlist.parameters.size();
             my argcount = arguments.size();
             if paramcount != argcount {
@@ -77,7 +77,7 @@ my Runtime = {
             }
         }
 
-        sub call(c, arguments) {
+        func call(c, arguments) {
             sigbind(c, arguments);
             my frame = current_frame();
             run(c.statementlist);
@@ -158,7 +158,7 @@ my Runtime = {
                 if c ~~ Macro {
                     throw new Exception { message: "macro is called at runtime" };
                 }
-                if c !~~ Sub {
+                if c !~~ Func {
                     throw new Exception { message: "Trying to invoke a " ~ type(c).name };
                 }
                 my arguments = op.argumentlist.arguments.map(eval);
@@ -185,9 +185,9 @@ my Runtime = {
             Q::Term::Array(array) {
                 return array.elements.map(eval);
             },
-            Q::Term::Sub(term) {
+            Q::Term::Func(term) {
                 my name = term.identifier && term.identifier.name || "";
-                return new Sub {
+                return new Func {
                     name,
                     parameterlist: term.block.parameterlist,
                     statementlist: term.block.statementlist,
@@ -213,7 +213,7 @@ my Runtime = {
             Q::Expr::BlockAdapter(adapter) {
             },
         };
-        sub eval(q) { return eval_of_type[type(q).name](q); }
+        func eval(q) { return eval_of_type[type(q).name](q); }
 
         my run_of_type = {
             Q::Statement::BEGIN(stmt) {
@@ -269,7 +269,7 @@ my Runtime = {
                     put_var(name, eval(stmt.expr));
                 }
             },
-            Q::Statement::Sub(stmt) {
+            Q::Statement::Func(stmt) {
                 # no runtime behavior
             },
             Q::Statement::While(stmt) {
@@ -295,7 +295,7 @@ my Runtime = {
             Q::Statement::Return(stmt) {
             },
         };
-        sub run(q) { run_of_type[type(q).name](q); }
+        func run(q) { run_of_type[type(q).name](q); }
 
         return { run, get_var, put_var };
     }

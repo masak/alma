@@ -41,13 +41,13 @@ class _007::Runtime {
             self.declare-var($identifier, $value);
         }
         for $statementlist.statements.elements.kv -> $i, $_ {
-            when Q::Statement::Sub {
+            when Q::Statement::Func {
                 my $name = .identifier.name;
                 my $parameterlist = .block.parameterlist;
                 my $statementlist = .block.statementlist;
                 my $static-lexpad = .block.static-lexpad;
                 my $outer-frame = $frame;
-                my $val = Val::Sub.new(
+                my $val = Val::Func.new(
                     :$name,
                     :$parameterlist,
                     :$statementlist,
@@ -148,7 +148,7 @@ class _007::Runtime {
         }
     }
 
-    method call(Val::Sub $c, @arguments) {
+    method call(Val::Func $c, @arguments) {
         my $paramcount = $c.parameterlist.parameters.elements.elems;
         my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
@@ -182,7 +182,7 @@ class _007::Runtime {
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
-            return Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            return Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
         }
 
         my $type = Val::Type.of($obj.WHAT).name;
@@ -419,7 +419,7 @@ class _007::Runtime {
                 $obj.create($properties.elements.map({ .elements[0].value => .elements[1] }));
             });
         }
-        elsif $obj ~~ Val::Sub && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+        elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
         elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {

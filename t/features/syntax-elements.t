@@ -213,14 +213,14 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             say("sub");
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (str "sub"))))))))
         .
 
@@ -229,46 +229,46 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f(name) {
+        func f(name) {
             say("Mr " ~ name);
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
+          (stfunc (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (str "Mr ") (identifier "name")))))))))
         .
 
-    parses-to $program, $ast, "sub with parameter";
+    parses-to $program, $ast, "func with parameter";
 }
 
 {
     my $program = q:to/./;
-        sub f(X, Y) {
+        func f(X, Y) {
             say(X ~ Y);
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
+          (stfunc (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (identifier "X") (identifier "Y")))))))))
         .
 
-    parses-to $program, $ast, "sub with two parameters";
+    parses-to $program, $ast, "func with two parameters";
 }
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             return 7;
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return (int 7))))))
         .
 
@@ -277,14 +277,14 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             return;
         }
         .
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (return)))))
         .
 
@@ -293,11 +293,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             say("OH HAI");
         }
-        sub g() {
-            sub h() { f() };
+        func g() {
+            func h() { f() };
             return h;
         }
         g()();
@@ -305,10 +305,10 @@ use _007::Test;
 
     my $ast = q:to/./;
         (statementlist
-          (stsub (identifier "f") (block (parameterlist) (statementlist
+          (stfunc (identifier "f") (block (parameterlist) (statementlist
             (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI")))))))
-          (stsub (identifier "g") (block (parameterlist) (statementlist
-            (stsub (identifier "h") (block (parameterlist) (statementlist
+          (stfunc (identifier "g") (block (parameterlist) (statementlist
+            (stfunc (identifier "h") (block (parameterlist) (statementlist
               (stexpr (postfix:() (identifier "f") (argumentlist))))))
             (return (identifier "h")))))
           (stexpr (postfix:() (postfix:() (identifier "g") (argumentlist)) (argumentlist))))

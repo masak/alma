@@ -97,7 +97,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub f() {
+        func f() {
             my k;
             BEGIN {
                 k = 2;
@@ -111,7 +111,7 @@ use _007::Test;
     outputs
         $program,
         "2\n",
-        "...same, but inside a sub";
+        "...same, but inside a func";
 }
 
 {
@@ -185,7 +185,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        sub foo() {
+        func foo() {
             say(7);
         }
 
@@ -195,7 +195,7 @@ use _007::Test;
     outputs
         $program,
         "7\n",
-        "calling a sub at BEGIN time works";
+        "calling a func at BEGIN time works";
 }
 
 done-testing;

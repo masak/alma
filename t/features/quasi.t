@@ -45,7 +45,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            sub infix:<**>(l, r) {
+            func infix:<**>(l, r) {
                 return l ~ " to the " ~ r;
             }
             return quasi {
@@ -69,7 +69,7 @@ use _007::Test;
         }
 
         {
-            sub infix:<+>(l, r) { return "lol, pwnd!" }
+            func infix:<+>(l, r) { return "lol, pwnd!" }
             gah()
         }
         .
@@ -340,7 +340,7 @@ use _007::Test;
             }
         };
 
-        sub ignore(x) {}
+        func ignore(x) {}
 
         ignore(moo());
         .

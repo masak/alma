@@ -68,12 +68,12 @@ grammar _007::Parser::Syntax {
         <EXPR>
     }
     token statement:block { <pblock> }
-    rule statement:sub-or-macro {
-        $<routine>=(sub|macro)» [<identifier> || <.panic("identifier")>]
-        :my $*insub = True;
+    rule statement:func-or-macro {
+        $<routine>=(func|macro)» [<identifier> || <.panic("identifier")>]
+        :my $*in_routine = True;
         {
-            declare($<routine> eq "sub"
-                        ?? Q::Statement::Sub
+            declare($<routine> eq "func"
+                        ?? Q::Statement::Func
                         !! Q::Statement::Macro,
                     $<identifier>.ast.name.value);
         }
@@ -256,13 +256,13 @@ grammar _007::Parser::Syntax {
     token term:identifier {
         <identifier>
     }
-    token term:sub {
-        sub <.ws> <identifier>?
-        :my $*insub = True;
+    token term:func {
+        func <.ws> <identifier>?
+        :my $*in_routine = True;
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Sub, $<identifier>.ast.name.value);
+                declare(Q::Term::Func, $<identifier>.ast.name.value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -287,7 +287,7 @@ grammar _007::Parser::Syntax {
     rule property:method {
         <identifier>
         '(' ~ ')' [
-            :my $*insub = True;
+            :my $*in_routine = True;
             <.newpad>
             <parameterlist>
         ]

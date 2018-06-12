@@ -49,7 +49,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
     multi equal-value(Val::Type $l, Val::Type $r) {
         $l.type === $r.type
     }
-    multi equal-value(Val::Sub $l, Val::Sub $r) {
+    multi equal-value(Val::Func $l, Val::Func $r) {
         $l.name eq $r.name
             && equal-value($l.parameterlist, $r.parameterlist)
             && equal-value($l.statementlist, $r.statementlist)
@@ -386,7 +386,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(.value, .key, $parameterlist, $statementlist);
+            .key => Val::Func.new-builtin(.value, .key, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::MacroOp {
             my $name = .key;
@@ -394,7 +394,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
+            .key => Val::Func.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
         }
         when .value ~~ Placeholder::Op {
             my $name = .key;
@@ -403,7 +403,7 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
-            .key => Val::Sub.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            .key => Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
         }
         default { die "Unknown type {.value.^name}" }
     };

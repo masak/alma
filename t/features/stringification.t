@@ -3,15 +3,15 @@ use Test;
 use _007::Test;
 
 {
-    outputs 'sub foo() {}; say(foo)', "<sub foo()>\n", "zero-param sub";
-    outputs 'sub fn(x, y, z) {}; say(fn)', "<sub fn(x, y, z)>\n", "sub with three parameters";
-    outputs 'say(say)', "<sub say(arg)>\n", "builtin sub";
-    outputs 'say(infix:<+>)', "<sub infix:<+>(lhs, rhs)>\n", "builtin sub (infix)";
-    outputs 'say(infix:<\>>)', "<sub infix:«>»(lhs, rhs)>\n", "builtin sub (infix) -- contains > (I)";
-    outputs 'say(infix:«>»)', "<sub infix:«>»(lhs, rhs)>\n", "builtin sub (infix) -- contains > (II)";
-    outputs 'sub infix:<\>»>(lhs, rhs) {}; say(infix:<\>»>)',
-        "<sub infix:<\>»>(lhs, rhs)>\n",
-        "builtin sub (infix) -- contains both > and »";
+    outputs 'func foo() {}; say(foo)', "<func foo()>\n", "zero-param sub";
+    outputs 'func fn(x, y, z) {}; say(fn)', "<func fn(x, y, z)>\n", "func with three parameters";
+    outputs 'say(say)', "<func say(arg)>\n", "builtin sub";
+    outputs 'say(infix:<+>)', "<func infix:<+>(lhs, rhs)>\n", "builtin func (infix)";
+    outputs 'say(infix:<\>>)', "<func infix:«>»(lhs, rhs)>\n", "builtin func (infix) -- contains > (I)";
+    outputs 'say(infix:«>»)', "<func infix:«>»(lhs, rhs)>\n", "builtin func (infix) -- contains > (II)";
+    outputs 'func infix:<\>»>(lhs, rhs) {}; say(infix:<\>»>)',
+        "<func infix:<\>»>(lhs, rhs)>\n",
+        "builtin func (infix) -- contains both > and »";
     outputs 'macro foo() {}; say(foo)', "<macro foo()>\n", "zero-param macro";
     outputs 'macro mc(x, y, z) {}; say(mc)', "<macro mc(x, y, z)>\n", "macro with three parameters";
 }

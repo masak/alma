@@ -1,6 +1,6 @@
 macro format(fmt, args) {
-    sub replaceAll(input, transform) {
-        sub helper(input, output) {
+    func replaceAll(input, transform) {
+        func helper(input, output) {
             if !input.contains("{") {
                 return output ~ input;
             }
@@ -17,7 +17,7 @@ macro format(fmt, args) {
         return helper(input, "");
     }
 
-    sub findHighestIndex(input) {
+    func findHighestIndex(input) {
         my openBracePos = input.index("{");
         if openBracePos == -1 {
             return -1;
@@ -48,7 +48,7 @@ macro format(fmt, args) {
     }
 
     return quasi {
-        replaceAll({{{fmt}}}, sub transform(arg) {
+        replaceAll({{{fmt}}}, func transform(arg) {
             return {{{args}}}[+arg];
         });
     }
