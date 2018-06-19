@@ -1,5 +1,29 @@
 use _007::Q;
 
+## The Matcher format is a shorthand description of expectations on a Qtree.
+#
+# The AST format used in the early 007 days was nice because it could very succinctly
+# describe a Qtree. Over time it became more intricate and more detailed, and lost
+# some of its sweet simplicity. This new matcher format brings that back by making
+# every token count.
+#
+# For example, here's how to match a "hello world" program:
+#
+#     CompUnit
+#         Statement::Expr
+#             say(...)
+#                 "Hello, world!"
+#
+# All the Qtypes are referred to without their `Q::` prefix, so `CompUnit`, not
+# `Q::CompUnit`.
+#
+# There are two *short forms* in the above snippet:
+#
+# * The `say(...)` is actually short for `Postfix [&call, @identifier = say]`. More
+#   about the property syntax below.
+# * The `"Hello, world!"` is short for `Literal::Str [@value = "Hello, world!"]`.
+#   Similar shorthands exist for Int, Bool, and NoneType values.
+
 my grammar Matcher::Syntax {
     regex TOP { <line>+ }
 
