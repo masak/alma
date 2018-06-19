@@ -22,3 +22,5 @@ See [#293](https://github.com/masak/007/issues/293).
 * In general the error messages should be *excellent*; the golden standard is http://elm-lang.org/blog/compilers-as-assistants
 * Most importantly, those error messages are often of the form "found A, but B expected it to be C".
 * Also, there are often hints. These have to be added gradually.
+* Control is handed back and forth with a `ParseState` object. It's sent into a new parser so it knows where to start, and it's returned back from a parser that's winding down so that the parent parser knows where to continue.
+* Provisionally, a `ParseState` contains the source string, the current position, and the category to parse next.
