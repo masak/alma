@@ -69,20 +69,21 @@ use _007::Q;
 my grammar Matcher::Syntax {
     token TOP { <line>+ }
 
-    token line { ^^ <indent> [<node> | <yadda> | <callsugar>] $$ \n? }
+    token line { ^^ <indent> <content> $$ \n? }
 
     token indent { " "* }
-    token node { <qname> \h* <proplist>? }
-    token yadda { "..." }
-    token callsugar { (\w+) "(...)" }
+
+    proto token content {*}
+    token content:<node> { <qname> \h* <proplist>? }
+    token content:<yadda> { "..." }
+    token content:<callsugar> { (\w+) "(...)" }
 
     token qname { [\w+]+ % "::" }
     token proplist { "[" ~ "]" [\h* <prop>+ % ["," \h*] \h*] }
 
-    token prop { <predicate> | <attribute> }
-
-    token predicate { "&" \w+ }
-    token attribute { "@" (\w+) \h* "=" \h* ([<!before "," | "]"> \S]+) }
+    proto token prop {*}
+    token prop:<predicate> { "&" \w+ }
+    token prop:<attribute> { "@" (\w+) \h* "=" \h* ([<!before "," | "]"> \S]+) }
 }
 
 my class Matcher::MoreChildren {
@@ -124,7 +125,7 @@ my class Matcher::Actions {
 
         @!stack.pop while @!stack.elems > $indent-level;
 
-        my $matcher = $<node>.ast || $<yadda>.ast || $<callsugar>.ast;
+        my $matcher = $<content>.ast;
         make $matcher;
 
         if @!stack.elems > 0 {
@@ -135,7 +136,7 @@ my class Matcher::Actions {
         @!stack.push($matcher);
     }
 
-    method node($/) {
+    method content:<node>($/) {
         my $qname = $<qname>.Str;
         die "Shouldn't write out the Q:: since it's implicit: '{$qname}'"
             if $qname.substr(0, 3) eq "Q::";
@@ -146,7 +147,7 @@ my class Matcher::Actions {
         make Matcher.bless(:$qtype, :@proplist);
     }
 
-    method yadda($/) {
+    method content:<yadda>($/) {
         die "Can't have a '...' on indentation level 0"
             if @!stack.elems == 0;
 
@@ -156,7 +157,7 @@ my class Matcher::Actions {
         make Matcher::MoreChildren.new();
     }
 
-    method callsugar($/) {
+    method content:<callsugar>($/) {
         my $value = ~$0;
         my $qtype = Q::Postfix;
         my @proplist =
@@ -173,11 +174,7 @@ my class Matcher::Actions {
         make $<prop>.map(*.ast);
     }
 
-    method prop($/) {
-        make $<predicate>.ast || $<attribute>.ast;
-    }
-
-    method predicate($/) {
+    method prop:<predicate>($/) {
         my $name = $/.Str;
         die "Unknown predicate '{$name}'"
             unless $name eq "&call";
@@ -185,7 +182,7 @@ my class Matcher::Actions {
         make PropMatcher::Predicate::Call.new();
     }
 
-    method attribute($/) {
+    method prop:<attribute>($/) {
         my $name = $0.Str;
         my $value = $1.Str;
 
