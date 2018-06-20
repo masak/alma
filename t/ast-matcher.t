@@ -153,7 +153,7 @@ given matcher(q:to ".") {
 
 given matcher(q:to ".") {
     Postfix [&call, @identifier = say]
-        Literal::Str [@value = 42]
+        Literal::Int [@value = 42]
     .
 
     my $say-fortytwo = Q::Postfix::Call.new(
@@ -178,7 +178,7 @@ given matcher(q:to ".") {
 
 given matcher(q:to ".") {
     say(...)
-        Literal::Str [@value = 42]
+        Literal::Int [@value = 42]
     .
 
     my $say-fortytwo = Q::Postfix::Call.new(
@@ -199,6 +199,31 @@ given matcher(q:to ".") {
         )),
     );
     ok .matches($say-fortytwo), "sugar `say(...)` for `Postfix [&call, @identifier = say]`";
+}
+
+given matcher(q:to ".") {
+    say(...)
+        42
+    .
+
+    my $say-fortytwo = Q::Postfix::Call.new(
+        :identifier(Q::Identifier.new(
+            :name(Val::Str.new(:value("postfix:()"))),
+        )),
+        :operand(Q::Identifier.new(
+            :name(Val::Str.new(:value("say"))),
+        )),
+        :argumentlist(Q::ArgumentList.new(
+            :arguments(Val::Array.new(
+                :elements([
+                    Q::Literal::Int.new(
+                        :value(Val::Int.new(:value(42))),
+                    )
+                ])
+            )),
+        )),
+    );
+    ok .matches($say-fortytwo), "sugar `42` for `Literal::Int [@value = 42]`";
 }
 
 done-testing;

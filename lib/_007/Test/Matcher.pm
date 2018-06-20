@@ -1,3 +1,4 @@
+use _007::Val;
 use _007::Q;
 
 ## The Matcher format is a shorthand description of expectations on a Qtree.
@@ -74,6 +75,7 @@ my grammar Matcher::Syntax {
     token indent { " "* }
 
     proto token content {*}
+    token content:<intsugar> { "-"? \d+ }
     token content:<node> { <qname> \h* <proplist>? }
     token content:<yadda> { "..." }
     token content:<callsugar> { (\w+) "(...)" }
@@ -164,6 +166,18 @@ my class Matcher::Actions {
             PropMatcher::Predicate::Call.new(),
             PropMatcher::Attribute.new(
                 :name("operand"),
+                :$value,
+            );
+
+        make Matcher.bless(:$qtype, :@proplist);
+    }
+
+    method content:<intsugar>($/) {
+        my $value = Val::Int.new(:value(+$/));
+        my $qtype = Q::Literal::Int;
+        my @proplist =
+            PropMatcher::Attribute.new(
+                :name("value"),
                 :$value,
             );
 
