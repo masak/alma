@@ -24,7 +24,7 @@ use _007::Q;
 #         ...
 #
 # The `...` syntax means "at least one (more) child node here". It can only be used
-# at a nonzero indent level.
+# at a nonzero indent level, and only last in a list of child matchers.
 #
 # A "hello world" program:
 #
@@ -35,8 +35,9 @@ use _007::Q;
 #
 # There are two *short forms* in the above snippet:
 #
-# * The `say(...)` is actually short for `Postfix [&call, @operand = say]`. More
+# * The `say(...)` is short for `Postfix [&call, @operand = say]`. More
 #   about the property syntax below.
+#
 # * The `"Hello, world!"` is short for `Literal::Str [@value = "Hello, world!"]`.
 #   Similar shorthands exist for Int, Bool, and NoneType values.
 #
