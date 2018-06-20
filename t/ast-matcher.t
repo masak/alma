@@ -8,7 +8,7 @@ sub matcher($description) {
 }
 
 given matcher(q:to ".") {
-    CompUnit [&empty]
+    CompUnit
     .
 
     my $empty-compunit = Q::CompUnit.new(
@@ -34,6 +34,36 @@ given matcher(q:to ".") {
         )),
     );
     ok !.matches($nonempty-compunit), "doesn't match a nonempty compunit";
+}
+
+given matcher(q:to ".") {
+    CompUnit
+        ...
+    .
+
+    my $empty-compunit = Q::CompUnit.new(
+        :block(Q::Block.new(
+            :parameterlist(Q::ParameterList.new()),
+            :statementlist(Q::StatementList.new()),
+        )),
+    );
+    ok !.matches($empty-compunit), "doesn't match an empty compunit";
+
+    my $nonempty-compunit = Q::CompUnit.new(
+        :block(Q::Block.new(
+            :parameterlist(Q::ParameterList.new()),
+            :statementlist(Q::StatementList.new(
+                :statements(Val::Array.new(
+                    :elements([
+                        Q::Statement::Expr.new(
+                            :expr(Q::Literal::None.new())
+                        ),
+                    ]),
+                )),
+            )),
+        )),
+    );
+    ok .matches($nonempty-compunit), "matches a nonempty compunit";
 }
 
 done-testing;

@@ -7,7 +7,22 @@ use _007::Q;
 # some of its sweet simplicity. This new matcher format brings that back by making
 # every token count.
 #
-# For example, here's how to match a "hello world" program:
+# For example, here's how to match an empty program:
+#
+#     CompUnit
+#
+# Besides matching the qtree as a `Q::CompUnit`, the absence of child nodes is used
+# to *assert* that the `Q::CompUnit` has an empty statement list.
+#
+# Here, on the other hand, is how to match a non-empty program:
+#
+#     CompUnit
+#         ...
+#
+# The `...` syntax means "at least one (more) child node here". It can only be used
+# at a nonzero indent level.
+#
+# A "hello world" program:
 #
 #     CompUnit
 #         Statement::Expr
@@ -27,34 +42,65 @@ use _007::Q;
 my grammar Matcher::Syntax {
     regex TOP { <line>+ }
 
-    regex line { ^^ <indent> <qname> \h* <proplist>? $$ \n? }
+    regex line { ^^ <indent> [<node> | <yadda>] $$ \n? }
 
-    regex indent { \h* }
+    regex indent { " "* }
+    regex node { <qname> \h* <proplist>? }
+    regex yadda { "..." }
+
     regex qname { [\w+]+ % "::" }
     regex proplist { "[" ~ "]" <prop>+ % ["," \h*] }
-
-    regex prop { "&empty" }
 }
 
-my class PropMatcher::Empty::CompUnit {
-    method matches(Q::CompUnit $compunit) {
-        return $compunit.block.statementlist.statements.elements.elems == 0;
-    }
+my class Matcher::MoreChildren {
 }
 
 class Matcher { ... }
 
 my class Matcher::Actions {
+    has @!stack;
+
     method TOP($/) {
         make $<line>[0].ast;
     }
 
     method line($/) {
+        my $indent = $<indent>.chars;
+        die "Indent needs to be a multiple of 4 (but is {$indent})"
+            unless $indent %% 4;
+
+        my $indent-level = $indent / 4;
+        die "Too much indent -- was level {$indent-level} but could be at most {@.stack.elems + 1}"
+            if $indent-level > @!stack.elems + 1;
+
+        @!stack.pop while @!stack.elems > $indent-level;
+
+        my $matcher = $<node>.ast || $<yadda>.ast;
+        make $matcher;
+
+        if @!stack.elems > 0 {
+            my $parent = @!stack[*-1];
+            $parent.childmatchers.push($matcher);
+        }
+
+        @!stack.push($matcher);
+    }
+
+    method node($/) {
         my $qname = $<qname>.Str;
         my $qtype = ::("Q::{$qname}");
-        my @propmatchers = $<proplist>.ast;
 
-        make Matcher.bless(:$qtype, :@propmatchers);
+        make Matcher.bless(:$qtype);
+    }
+
+    method yadda($/) {
+        die "Can't have a '...' on indentation level 0"
+            if @!stack.elems == 0;
+
+        my $parent = @!stack[*-1];
+        $parent.more-children = True;
+
+        make Matcher::MoreChildren.new();
     }
 
     method proplist($/) {
@@ -62,13 +108,21 @@ my class Matcher::Actions {
     }
 
     method prop($/) {
-        make PropMatcher::Empty::CompUnit.new();
+        die "Not handling props yet";
     }
+}
+
+sub is-empty($qtree) {
+    die "Unrecognized qtype: {$qtree.^name}"
+        unless $qtree ~~ Q::CompUnit;
+
+    return $qtree.block.statementlist.statements.elements.elems == 0;
 }
 
 class Matcher {
     has Q $.qtype is rw;
-    has @.propmatchers;
+    has @.childmatchers;
+    has $.more-children is rw = False;
 
     method new($description) {
         my $actions = Matcher::Actions.new();
@@ -79,6 +133,6 @@ class Matcher {
 
     method matches(Q $qtree) {
         return $qtree ~~ $.qtype
-            && ?all(@.propmatchers.map(*.matches($qtree)));
+            && ($.more-children ^^ is-empty($qtree));
     }
 }
