@@ -1,16 +1,27 @@
 use Test;
 use _007;
-use _007::Test::ASTMatcher;
+use _007::Test::Matcher;
 
-{
-    my $parser = _007.parser();
-    my $actual = $parser.parse("");
+sub parse($program, :$category = "compunit") {
+    return _007.parser.parse($program, :$category);
+}
 
-    my $expected = ASTMatcher.new(q:to "---");
-        CompUnit [empty]
+given parse('') -> $actual {
+    my $expected = Matcher.new(q:to "---");
+        CompUnit
         ---
 
     ok $expected.matches($actual), "empty program gives empty AST";
+}
+
+given parse('say(7)', :category("statement")) -> $actual {
+    my $expected = Matcher.new(q:to "---");
+        Statement::Expr
+            Postfix [&call, @operand = say]
+                7
+        ---
+
+#    ok $expected.matches($actual), "parse a simple say(7) statement";
 }
 
 done-testing;
