@@ -258,6 +258,13 @@ class _007::Parser::Actions {
         $identifier.put-value($val, $*runtime);
     }
 
+    method statement:custom ($/) {
+        my $macro = $*runtime.maybe-get-var("statement:whoa");
+        make expand($macro, [],
+            # XXX: this is rather doubtful -- but there's simply no right answer to "what's the unexpanded form?"
+            -> { });
+    }
+
     method traitlist($/) {
         my @traits = $<trait>».ast;
         if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {
@@ -315,7 +322,13 @@ class _007::Parser::Actions {
         if $*unexpanded {
             return &unexpanded-callback();
         }
-        else {
+        return $expansion;
+    }
+
+    sub expand-expr($macro, @arguments, &unexpanded-callback:()) {
+        my $expansion = expand($macro, @arguments, &unexpanded-callback);
+
+        if !$*unexpanded {
             if $expansion ~~ Q::Statement {
                 $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([$expansion]))));
             }
@@ -336,9 +349,9 @@ class _007::Parser::Actions {
                 check($expansion, $*runtime);
                 $expansion = Q::Expr::BlockAdapter.new(:block($expansion));
             }
-
-            return $expansion;
         }
+
+        return $expansion;
     }
 
     method EXPR($/) {
@@ -375,7 +388,7 @@ class _007::Parser::Actions {
             }
 
             if my $macro = is-macro($infix, Q::Infix, $infix.identifier) {
-                @termstack.push(expand($macro, [$t1, $t2],
+                @termstack.push(expand-expr($macro, [$t1, $t2],
                     -> { $infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)) }));
             }
             else {
@@ -447,7 +460,7 @@ class _007::Parser::Actions {
             }
 
             if my $macro = is-macro($prefix, Q::Prefix, $prefix.identifier) {
-                make expand($macro, [$/.ast],
+                make expand-expr($macro, [$/.ast],
                     -> { $prefix.new(:operand($/.ast), :identifier($prefix.identifier)) });
             }
             else {
@@ -459,7 +472,7 @@ class _007::Parser::Actions {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
             if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
-                make expand($macro, $postfix.argumentlist.arguments.elements,
+                make expand-expr($macro, $postfix.argumentlist.arguments.elements,
                     -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
             }
             elsif $postfix ~~ Q::Postfix::Index {
@@ -473,7 +486,7 @@ class _007::Parser::Actions {
             }
             else {
                 if my $macro = is-macro($postfix, Q::Postfix, $identifier) {
-                    make expand($macro, [$/.ast],
+                    make expand-expr($macro, [$/.ast],
                         -> { $postfix.new(:$identifier, :operand($/.ast)) });
                 }
                 else {
