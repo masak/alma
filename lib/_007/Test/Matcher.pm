@@ -11,6 +11,9 @@ use _007::Q;
 #
 #     CompUnit
 #
+# All the Qtypes are referred to without their `Q::` prefix, so `CompUnit`, not
+# `Q::CompUnit`.
+#
 # Besides matching the qtree as a `Q::CompUnit`, the absence of child nodes is used
 # to *assert* that the `Q::CompUnit` has an empty statement list.
 #
@@ -29,30 +32,75 @@ use _007::Q;
 #             say(...)
 #                 "Hello, world!"
 #
-# All the Qtypes are referred to without their `Q::` prefix, so `CompUnit`, not
-# `Q::CompUnit`.
-#
 # There are two *short forms* in the above snippet:
 #
-# * The `say(...)` is actually short for `Postfix [&call, @identifier = say]`. More
+# * The `say(...)` is actually short for `Postfix [&call, @operand = say]`. More
 #   about the property syntax below.
 # * The `"Hello, world!"` is short for `Literal::Str [@value = "Hello, world!"]`.
 #   Similar shorthands exist for Int, Bool, and NoneType values.
+#
+# A `Q::CompUnit` actually contains a `Q::Block` which in turn contains a
+# `Q::StatementList` which *then* contains a sequence of statements -- but these
+# levels are always there and are thus not of great interest. The format requires
+# you to skip mentioning them.
+#
+# After matching the Qtype itself, you can optionally specify a `[]`-enclosed list
+# of properties, that come in two forms:
+#
+# - Attributes, which are written like `@identifier = say`. The left-hand side starts
+#   with a `@` and corresponds to a property on the Qnode being matched. (If the
+#   property doesn't exist, an exception is thrown.) More below on what goes on the
+#   right-hand side.
+#
+# - Predicates, which are predefined one-word checks, usually against a small subset
+#   of Qtypes or even a single Qtype. For example, the `&call` example above is short
+#   for `@identifier = postfix:<()>`. In general, a predicate could check for
+#   anything on the Qnode, not just its properties.
+#
+# There are several possible formats/value types that go on the right side of an
+# attribute:
+#
+# * Identifiers. When we write `@operand = say` above, we mean that the property
+#   contains a Q::Identifier whose name is "say".
+#
+# * Int and Str values similarly denote Q::Literal::Int and Q::Literal::Str values,
+#   respectively.
 
 my grammar Matcher::Syntax {
-    regex TOP { <line>+ }
+    token TOP { <line>+ }
 
-    regex line { ^^ <indent> [<node> | <yadda>] $$ \n? }
+    token line { ^^ <indent> [<node> | <yadda>] $$ \n? }
 
-    regex indent { " "* }
-    regex node { <qname> \h* <proplist>? }
-    regex yadda { "..." }
+    token indent { " "* }
+    token node { <qname> \h* <proplist>? }
+    token yadda { "..." }
 
-    regex qname { [\w+]+ % "::" }
-    regex proplist { "[" ~ "]" <prop>+ % ["," \h*] }
+    token qname { [\w+]+ % "::" }
+    token proplist { "[" ~ "]" [\h* <prop>+ % ["," \h*] \h*] }
+
+    token prop { <predicate> | <attribute> }
+
+    token predicate { "&" \w+ }
+    token attribute { "@" (\w+) \h* "=" \h* ([<!before "," | "]"> \S]+) }
 }
 
 my class Matcher::MoreChildren {
+}
+
+my class PropMatcher::Predicate::Call {
+    method matches($qtree) {
+        return $qtree ~~ Q::Postfix::Call
+            && $qtree.identifier.name.value eq "postfix:()";
+    }
+}
+
+my class PropMatcher::Attribute {
+    has $.name;
+    has $.value;
+
+    method matches($qtree) {
+        return $qtree."$.name"() eq $.value;
+    }
 }
 
 class Matcher { ... }
@@ -88,9 +136,13 @@ my class Matcher::Actions {
 
     method node($/) {
         my $qname = $<qname>.Str;
-        my $qtype = ::("Q::{$qname}");
+        die "Shouldn't write out the Q:: since it's implicit: '{$qname}'"
+            if $qname.substr(0, 3) eq "Q::";
 
-        make Matcher.bless(:$qtype);
+        my $qtype = ::("Q::{$qname}");
+        my @proplist = $<proplist>.ast || [];
+
+        make Matcher.bless(:$qtype, :@proplist);
     }
 
     method yadda($/) {
@@ -108,19 +160,50 @@ my class Matcher::Actions {
     }
 
     method prop($/) {
-        die "Not handling props yet";
+        make $<predicate>.ast || $<attribute>.ast;
+    }
+
+    method predicate($/) {
+        my $name = $/.Str;
+        die "Unknown predicate '{$name}'"
+            unless $name eq "&call";
+
+        make PropMatcher::Predicate::Call.new();
+    }
+
+    method attribute($/) {
+        my $name = $0.Str;
+        my $value = $1.Str;
+
+        make PropMatcher::Attribute.new(:$name, :$value);
     }
 }
 
 sub is-empty($qtree) {
-    die "Unrecognized qtype: {$qtree.^name}"
-        unless $qtree ~~ Q::CompUnit;
+    return kids($qtree).elems == 0;
+}
 
-    return $qtree.block.statementlist.statements.elements.elems == 0;
+sub kids($qtree, Bool :$call) {
+    if $call {  # then it's a Q::Postfix::Call, and we want to return its arguments
+        return $qtree.argumentlist.arguments.elements;
+    }
+
+    given $qtree {
+        when Q::CompUnit {
+            return $qtree.block.statementlist.statements.elements;
+        }
+        when Q::Postfix {
+            die "Can't check children of Q::Postfix";
+        }
+        default {
+            die "Unrecognized qtype: {$qtree.^name}";
+        }
+    }
 }
 
 class Matcher {
     has Q $.qtype is rw;
+    has @.proplist;
     has @.childmatchers;
     has $.more-children is rw = False;
 
@@ -132,7 +215,10 @@ class Matcher {
     }
 
     method matches(Q $qtree) {
+        my $call = so any @.proplist »~~» PropMatcher::Predicate::Call;
         return $qtree ~~ $.qtype
-            && ($.more-children ^^ is-empty($qtree));
+            && ($.more-children
+                ?? kids($qtree, :$call) >= @.childmatchers
+                !! kids($qtree, :$call) == @.childmatchers);
     }
 }
