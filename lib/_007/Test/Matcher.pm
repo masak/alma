@@ -69,11 +69,12 @@ use _007::Q;
 my grammar Matcher::Syntax {
     token TOP { <line>+ }
 
-    token line { ^^ <indent> [<node> | <yadda>] $$ \n? }
+    token line { ^^ <indent> [<node> | <yadda> | <callsugar>] $$ \n? }
 
     token indent { " "* }
     token node { <qname> \h* <proplist>? }
     token yadda { "..." }
+    token callsugar { (\w+) "(...)" }
 
     token qname { [\w+]+ % "::" }
     token proplist { "[" ~ "]" [\h* <prop>+ % ["," \h*] \h*] }
@@ -123,7 +124,7 @@ my class Matcher::Actions {
 
         @!stack.pop while @!stack.elems > $indent-level;
 
-        my $matcher = $<node>.ast || $<yadda>.ast;
+        my $matcher = $<node>.ast || $<yadda>.ast || $<callsugar>.ast;
         make $matcher;
 
         if @!stack.elems > 0 {
@@ -153,6 +154,19 @@ my class Matcher::Actions {
         $parent.more-children = True;
 
         make Matcher::MoreChildren.new();
+    }
+
+    method callsugar($/) {
+        my $value = ~$0;
+        my $qtype = Q::Postfix;
+        my @proplist =
+            PropMatcher::Predicate::Call.new(),
+            PropMatcher::Attribute.new(
+                :name("operand"),
+                :$value,
+            );
+
+        make Matcher.bless(:$qtype, :@proplist);
     }
 
     method proplist($/) {

@@ -176,4 +176,29 @@ given matcher(q:to ".") {
     ok .matches($say-fortytwo), "matches say(42)";
 }
 
+given matcher(q:to ".") {
+    say(...)
+        Literal::Str [@value = 42]
+    .
+
+    my $say-fortytwo = Q::Postfix::Call.new(
+        :identifier(Q::Identifier.new(
+            :name(Val::Str.new(:value("postfix:()"))),
+        )),
+        :operand(Q::Identifier.new(
+            :name(Val::Str.new(:value("say"))),
+        )),
+        :argumentlist(Q::ArgumentList.new(
+            :arguments(Val::Array.new(
+                :elements([
+                    Q::Literal::Int.new(
+                        :value(Val::Int.new(:value(42))),
+                    )
+                ])
+            )),
+        )),
+    );
+    ok .matches($say-fortytwo), "sugar `say(...)` for `Postfix [&call, @identifier = say]`";
+}
+
 done-testing;
