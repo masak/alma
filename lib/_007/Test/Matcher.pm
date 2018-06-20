@@ -221,6 +221,9 @@ sub kids($qtree, Bool :$call) {
         when Q::Postfix {
             die "Can't check children of Q::Postfix";
         }
+        when Q::Statement::Expr {
+            return [$qtree.expr];
+        }
         default {
             die "Unrecognized qtype: {$qtree.^name}";
         }

@@ -21,7 +21,7 @@ given parse('say(7)', :category("statement")) -> $actual {
                 7
         ---
 
-#    ok $expected.matches($actual), "parse a simple say(7) statement";
+    ok $expected.matches($actual), "parse a simple say(7) statement";
 }
 
 done-testing;
