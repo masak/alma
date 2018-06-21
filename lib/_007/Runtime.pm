@@ -139,15 +139,9 @@ class _007::Runtime {
     }
 
     method load-builtins {
-        for builtins() -> Pair (:key($name), :$value) {
-            my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($name))),
-                :frame(NONE));
-            self.declare-var($identifier, $value);
-        }
-        my %builtins = %(builtins());
-        $!say-builtin = %builtins<say>;
-        $!prompt-builtin = %builtins<prompt>;
+        $!builtin-frame.properties<pad> = builtins-pad();
+        $!say-builtin = builtins-pad().properties<say>;
+        $!prompt-builtin = builtins-pad().properties<prompt>;
         $!builtin-opscope = opscope();
     }
 
