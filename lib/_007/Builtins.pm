@@ -220,11 +220,7 @@ my @builtins =
     ),
     'infix:~' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<~>, :got($lhs), :expected(Val::Str))
-                unless $lhs ~~ Val::Str;
-            die X::TypeCheck.new(:operation<~>, :got($rhs), :expected(Val::Str))
-                unless $rhs ~~ Val::Str;
-            return wrap($lhs.value ~ $rhs.value);
+            return wrap($lhs.Str ~ $rhs.Str);
         },
         :qtype(Q::Infix::Concat),
         :precedence{ equal => "infix:+" },
