@@ -650,18 +650,11 @@ class _007::Parser::Actions {
             }
         }
 
-        for <argumentlist block compunit EXPR infix parameter parameterlist
-            postfix prefix property propertylist statement statementlist
-            term trait traitlist unquote> -> $subrule {
+        die "Got something in a quasi that we didn't expect: {$/.keys}"    # should never happen
+            if !$/.hash.keys.grep({ $_ ne "qtype" });
 
-            if $/{$subrule} -> $submatch {
-                my $contents = $submatch.ast;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
-                return;
-            }
-        }
-
-        die "Got something in a quasi that we didn't expect: {$/.keys}";   # should never happen
+        my $contents = $/.hash.pairs.first({ .key ne "qtype" }).value.ast;
+        make Q::Term::Quasi.new(:$contents, :$qtype);
     }
 
     method term:func ($/) {
