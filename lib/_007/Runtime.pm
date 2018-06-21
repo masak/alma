@@ -140,7 +140,7 @@ class _007::Runtime {
 
     method load-builtins {
         my $opscope = $!builtin-opscope;
-        for builtins(:$.input, :$.output, :$opscope) -> Pair (:key($name), :$value) {
+        for builtins(:$opscope) -> Pair (:key($name), :$value) {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(NONE));
@@ -153,6 +153,15 @@ class _007::Runtime {
         my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
+        if $c === $!builtin-frame.properties<pad>.properties<say> {
+            $.output.print(@arguments[0].Str ~ "\n");
+            return NONE;
+        }
+        if $c === $!builtin-frame.properties<pad>.properties<prompt> {
+            $.output.print(@arguments[0].Str);
+            $.output.flush();
+            return Val::Str.new(:value($.input.get()));
+        }
         if $c.hook -> &hook {
             return &hook(|@arguments) || NONE;
         }
