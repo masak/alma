@@ -23,7 +23,7 @@ func quicksort(array) {
 }
 
 my unsorted = (^20).shuffle();
-say("Unsorted: " ~ ~unsorted);
+say("Unsorted: " ~ unsorted);
 say("Sorting...");
 my sorted = quicksort(unsorted);
-say("Sorted: " ~ ~sorted);
+say("Sorted: " ~ sorted);

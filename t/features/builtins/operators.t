@@ -466,11 +466,10 @@ use _007::Test;
           (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (int 38) (str "4"))))))
         .
 
-    is-error
+    is-result
         $ast,
-        X::TypeCheck,
-        "Type check failed in ~; expected Val::Str but got Val::Int (Val::Int.new(value => 38))",
-        "concatenating non-strs is an error";
+        "384\n",
+        "concatenating non-strs is OK (since #281)";
 }
 
 {

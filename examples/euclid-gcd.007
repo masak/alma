@@ -15,4 +15,4 @@ if bigger < smaller {
 }
 
 say("");
-say("Greatest common denominator: " ~ ~gcd(bigger, smaller));
+say("Greatest common denominator: " ~ gcd(bigger, smaller));

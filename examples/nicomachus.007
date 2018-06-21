@@ -10,4 +10,4 @@ say("");
 
 my solution = (70*m3 + 21*m5 + 15*m7) % 105;
 
-say("Your number was " ~ ~(solution) ~ ".");
+say("Your number was " ~ (solution) ~ ".");
