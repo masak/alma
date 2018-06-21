@@ -1,7 +1,7 @@
 use _007::Val;
 use _007::Q;
 
-sub builtins(:$input!, :$output!, :$opscope!) is export {
+sub builtins(:$opscope!) is export {
     sub wrap($_) {
         when Val | Q { $_ }
         when Nil  { NONE }
@@ -100,13 +100,10 @@ sub builtins(:$input!, :$output!, :$opscope!) is export {
 
     my @builtins =
         say => -> $arg {
-            $output.print($arg ~ "\n");
-            Nil;
+            # implementation in Runtime.pm
         },
         prompt => sub ($arg) {
-            $output.print($arg);
-            $output.flush();
-            return wrap($input.get());
+            # implementation in Runtime.pm
         },
         type => -> $arg { Val::Type.of($arg.WHAT) },
 
