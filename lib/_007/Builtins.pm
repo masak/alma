@@ -50,9 +50,7 @@ multi equal-value(Val::Type $l, Val::Type $r) {
     $l.type === $r.type
 }
 multi equal-value(Val::Func $l, Val::Func $r) {
-    $l.name eq $r.name
-        && equal-value($l.parameterlist, $r.parameterlist)
-        && equal-value($l.statementlist, $r.statementlist)
+    $l === $r
 }
 multi equal-value(Q $l, Q $r) {
     sub same-avalue($attr) {
