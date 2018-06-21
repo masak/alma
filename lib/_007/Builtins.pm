@@ -407,8 +407,13 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
     default { die "Unknown type {.value.^name}" }
 });
 
-sub builtins() is export {
-    return @builtins;
+my $builtins-pad = Val::Object.new;
+for @builtins -> Pair (:key($name), :$value) {
+    $builtins-pad.properties{$name} = $value;
+}
+
+sub builtins-pad() is export {
+    return $builtins-pad;
 }
 
 sub opscope() is export {
