@@ -1,10 +1,10 @@
 func verse(n) {
     func plural(n, thing) {
         if n == 1 {
-            return ~n ~ " " ~ thing;
+            return n ~ " " ~ thing;
         }
         else {
-            return ~n ~ " " ~ thing ~ "s";
+            return n ~ " " ~ thing ~ "s";
         }
     }
 

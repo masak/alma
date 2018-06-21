@@ -42,8 +42,8 @@ macro format(fmt, args) {
         my highestUsedIndex = findHighestIndex(fmt.value);
         my argCount = args.elements.size();
         if argCount <= highestUsedIndex {
-            throw new Exception { message: "Highest index was " ~ ~highestUsedIndex
-                ~ " but got only " ~ ~argCount ~ " arguments." };
+            throw new Exception { message: "Highest index was " ~ highestUsedIndex
+                ~ " but got only " ~ argCount ~ " arguments." };
         }
     }
 
