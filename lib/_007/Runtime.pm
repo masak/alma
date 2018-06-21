@@ -19,7 +19,10 @@ class _007::Runtime {
     submethod BUILD(:$!input, :$!output) {
         self.enter(NO_OUTER, Val::Object.new, Q::StatementList.new);
         $!builtin-frame = @!frames[*-1];
-        self.load-builtins;
+        $!builtin-frame.properties<pad> = builtins-pad();
+        $!say-builtin = builtins-pad().properties<say>;
+        $!prompt-builtin = builtins-pad().properties<prompt>;
+        $!builtin-opscope = opscope();
     }
 
     method run(Q::CompUnit $compunit) {
@@ -136,13 +139,6 @@ class _007::Runtime {
 
     method register-subhandler {
         self.declare-var(RETURN_TO, $.current-frame);
-    }
-
-    method load-builtins {
-        $!builtin-frame.properties<pad> = builtins-pad();
-        $!say-builtin = builtins-pad().properties<say>;
-        $!prompt-builtin = builtins-pad().properties<prompt>;
-        $!builtin-opscope = opscope();
     }
 
     method call(Val::Func $c, @arguments) {
