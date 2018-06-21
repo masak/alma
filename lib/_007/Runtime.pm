@@ -1,7 +1,6 @@
 use _007::Val;
 use _007::Q;
 use _007::Builtins;
-use _007::OpScope;
 
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
@@ -14,11 +13,12 @@ class _007::Runtime {
     has @!frames;
     has $.builtin-opscope;
     has $.builtin-frame;
+    has $!say-builtin;
+    has $!prompt-builtin;
 
     submethod BUILD(:$!input, :$!output) {
         self.enter(NO_OUTER, Val::Object.new, Q::StatementList.new);
         $!builtin-frame = @!frames[*-1];
-        $!builtin-opscope = _007::OpScope.new;
         self.load-builtins;
     }
 
@@ -139,13 +139,16 @@ class _007::Runtime {
     }
 
     method load-builtins {
-        my $opscope = $!builtin-opscope;
-        for builtins(:$opscope) -> Pair (:key($name), :$value) {
+        for builtins() -> Pair (:key($name), :$value) {
             my $identifier = Q::Identifier.new(
                 :name(Val::Str.new(:value($name))),
                 :frame(NONE));
             self.declare-var($identifier, $value);
         }
+        my %builtins = %(builtins());
+        $!say-builtin = %builtins<say>;
+        $!prompt-builtin = %builtins<prompt>;
+        $!builtin-opscope = opscope();
     }
 
     method call(Val::Func $c, @arguments) {
@@ -153,11 +156,11 @@ class _007::Runtime {
         my $argcount = @arguments.elems;
         die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
             unless $paramcount == $argcount;
-        if $c === $!builtin-frame.properties<pad>.properties<say> {
+        if $c === $!say-builtin {
             $.output.print(@arguments[0].Str ~ "\n");
             return NONE;
         }
-        if $c === $!builtin-frame.properties<pad>.properties<prompt> {
+        if $c === $!prompt-builtin {
             $.output.print(@arguments[0].Str);
             $.output.flush();
             return Val::Str.new(:value($.input.get()));
