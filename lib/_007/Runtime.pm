@@ -471,6 +471,53 @@ class _007::Runtime {
             # XXX: Make this work for Q-type objects, too.
             return Val::Int.new(:value($obj.id));
         }
+        elsif $obj ~~ Val::Tuple && $propname eq "size" {
+            return builtin(sub size() {
+                return Val::Int.new(:value($obj.elements.elems));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "reverse" {
+            return builtin(sub reverse() {
+                return Val::Tuple.new(:elements($obj.elements.reverse));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "sort" {
+            return builtin(sub sort() {
+                my $types = $obj.elements.map({ .^name }).unique;
+                die X::TypeCheck::HeterogeneousArray.new(:operation<sort>, :$types)
+                    if $types.elems > 1;
+                return Val::Tuple.new(:elements($obj.elements.sort));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "shuffle" {
+            return builtin(sub shuffle() {
+                return Val::Tuple.new(:elements($obj.elements.pick(*)));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "concat" {
+            return builtin(sub concat($array) {
+                die X::TypeCheck.new(:operation<concat>, :got($array), :expected(Val::Tuple))
+                    unless $array ~~ Val::Tuple;
+                return Val::Tuple.new(:elements([|$obj.elements , |$array.elements]));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "join" {
+            return builtin(sub join($sep) {
+                return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "filter" {
+            return builtin(sub filter($fn) {
+                my @elements = $obj.elements.grep({ self.call($fn, [$_]).truthy });
+                return Val::Tuple.new(:@elements);
+            });
+        }
+        elsif $obj ~~ Val::Tuple && $propname eq "map" {
+            return builtin(sub map($fn) {
+                my @elements = $obj.elements.map({ self.call($fn, [$_]) });
+                return Val::Tuple.new(:@elements);
+            });
+        }
         else {
             die X::Property::NotFound.new(:$propname, :$type);
         }

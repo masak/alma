@@ -288,6 +288,19 @@ class Q::Term::Array does Q::Term {
     }
 }
 
+### ### Q::Term::Tuple
+###
+### A tuple. Tuple terms consist of zero or more *elements*, each of which
+### can be an arbitrary expression.
+###
+class Q::Term::Tuple does Q::Term {
+    has Val::Tuple $.elements;
+
+    method eval($runtime) {
+        Val::Tuple.new(:elements($.elements.elements.map(*.eval($runtime))));
+    }
+}
+
 ### ### Q::Term::Object
 ###
 ### An object. Object terms consist of an optional *type*, and a property list
@@ -654,7 +667,7 @@ class Q::Postfix::Index is Q::Postfix {
 
     method eval($runtime) {
         given $.operand.eval($runtime) {
-            when Val::Array {
+            when Val::Array | Val::Tuple {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
                     if $index !~~ Val::Int;
