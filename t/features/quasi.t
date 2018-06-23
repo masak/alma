@@ -29,6 +29,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        macro moo() {
+            return quasi {
+            }
+        }
+
+        say(moo());
+        .
+
+    outputs $program, "None\n", "Empty quasiquote results in a None value";
+}
+
+{
+    my $program = q:to/./;
         macro foo() {
             my x = 7;
             return quasi {
