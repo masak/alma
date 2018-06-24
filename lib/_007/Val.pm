@@ -586,7 +586,7 @@ class Val::Type does Val {
         elsif $.type ~~ Val::Int | Val::Str {
             return $.type.new(:value(@properties[0].value.value));
         }
-        elsif $.type ~~ Val::Array {
+        elsif $.type ~~ Val::Array | Val::Tuple {
             return $.type.new(:elements(@properties[0].value.elements));
         }
         elsif $.type ~~ Val::Type {
