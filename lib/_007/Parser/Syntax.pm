@@ -205,7 +205,7 @@ grammar _007::Parser::Syntax {
     token term:int { \d+ }
     token term:array { '[' ~ ']' [[<.ws> <EXPR>]* %% [\h* ','] <.ws>] }
     token term:str { <str> }
-    token term:parens { '(' ~ ')' <EXPR> }
+    token term:tuple { '(' ~ ')' [[<.ws> <EXPR>]* %% $<commas>=[\h* ','] <.ws>] }
     token term:regex {
         '/' ~ '/'
         [

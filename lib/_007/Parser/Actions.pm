@@ -553,8 +553,13 @@ class _007::Parser::Actions {
         make Q::Term::Array.new(:elements(Val::Array.new(:elements($<EXPR>».ast))));
     }
 
-    method term:parens ($/) {
-        make $<EXPR>.ast;
+    method term:tuple ($/) {
+        if $<EXPR>.elems != 1 || $<commas>.elems == $<EXPR>.elems {
+            make Q::Term::Tuple.new(:elements(Val::Tuple.new(:elements($<EXPR>».ast))));
+        }
+        else {
+            make $<EXPR>[0].ast;
+        }
     }
 
     method regex-part($/) {
