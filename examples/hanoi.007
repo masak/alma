@@ -14,8 +14,7 @@ my state = [
 ];
 
 func tw(n, L) {
-    my e = state[n].size();
-    if L >= e {
+    if L >= state[n].size() {
         return PIN;
     }
     return state[n][L];
