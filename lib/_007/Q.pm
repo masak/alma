@@ -1162,6 +1162,7 @@ class Q::StatementList does Q {
                 return $value;
             }
         }
+        return NONE;
     }
 }
 
