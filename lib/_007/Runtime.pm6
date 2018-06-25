@@ -3,7 +3,7 @@ use _007::Q;
 use _007::Builtins;
 use _007::Equal;
 
-constant NO_OUTER = Val::Object.new;
+constant NO_OUTER = Val::Dict.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
     :frame(NONE));
@@ -23,7 +23,7 @@ class _007::Runtime {
 
     submethod BUILD(:$!input, :$!output, :@!arguments) {
         $!builtin-opscope = opscope();
-        $!builtin-frame = Val::Object.new(:properties(
+        $!builtin-frame = Val::Dict.new(:properties(
             :outer-frame(NO_OUTER),
             :pad(builtins-pad()))
         );
@@ -76,7 +76,7 @@ class _007::Runtime {
     }
 
     method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
-        my $frame = Val::Object.new(:properties(:$outer-frame, :pad(Val::Object.new)));
+        my $frame = Val::Dict.new(:properties(:$outer-frame, :pad(Val::Dict.new)));
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
             my $identifier = Q::Identifier.new(
@@ -162,7 +162,7 @@ class _007::Runtime {
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my Val::Object $frame = $identifier.frame ~~ Val::None
+        my Val::Dict $frame = $identifier.frame ~~ Val::None
             ?? self.current-frame
             !! $identifier.frame;
         $frame.properties<pad>.properties{$name} = $value // NONE;
@@ -258,7 +258,7 @@ class _007::Runtime {
                         if $thing ~~ Val::Array;
 
                     return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
-                        if $thing ~~ Val::Object;
+                        if $thing ~~ Val::Dict;
 
                     return $thing
                         if $thing ~~ Val;
@@ -376,7 +376,7 @@ class _007::Runtime {
                 return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
             });
         }
-        elsif $obj ~~ Val::Object && $propname eq "size" {
+        elsif $obj ~~ Val::Dict && $propname eq "size" {
             return builtin(sub size() {
                 return Val::Int.new(:value($obj.properties.elems));
             });
@@ -512,7 +512,7 @@ class _007::Runtime {
         elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
-        elsif $obj ~~ (Q | Val::Object) && ($obj.properties{$propname} :exists) {
+        elsif $obj ~~ (Q | Val::Dict) && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
         elsif $propname eq "get" {
@@ -532,7 +532,7 @@ class _007::Runtime {
                 # XXX: problem: we're not lying hard enough here. we're missing
                 #      both Q objects, which are still hard-coded into the
                 #      substrate, and the special-cased properties
-                #      <get has extend update id>
+                #      <get has extend update>
                 my $value = $obj.properties{$prop.value} :exists;
                 return Val::Bool.new(:$value);
             });
@@ -638,8 +638,8 @@ class _007::Runtime {
         if $obj ~~ Q {
             die "We don't handle assigning to Q object properties yet";
         }
-        elsif $obj !~~ Val::Object {
-            die "We don't handle assigning to non-Val::Object types yet";
+        elsif $obj !~~ Val::Dict {
+            die "We don't handle assigning to non-Val::Dict types yet";
         }
         else {
             $obj.properties{$propname} = $newvalue;

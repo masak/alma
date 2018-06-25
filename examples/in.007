@@ -7,7 +7,7 @@ func infix:<in>(value, container) {
         }
         return false;
     }
-    else if container ~~ Object {
+    else if container ~~ Dict {
         return container.has(value);
     }
     else if container ~~ Str {
@@ -15,7 +15,7 @@ func infix:<in>(value, container) {
     }
     else {
         throw new Exception {
-            message: "Wrong type to infix:<in>. Expected Array or Object or Str, was " ~ type(container),
+            message: "Wrong type to infix:<in>. Expected Array or Dict or Str, was " ~ type(container),
         };
     }
 }
@@ -29,7 +29,7 @@ func infix:<not in>(value, container) {
         }
         return true;
     }
-    else if container ~~ Object {
+    else if container ~~ Dict {
         return !container.has(value);
     }
     else if container ~~ Str {
@@ -37,7 +37,7 @@ func infix:<not in>(value, container) {
     }
     else {
         throw new Exception {
-            message: "Wrong type to infix:<not in>. Expected Array or Object or Str, was " ~ type(container),
+            message: "Wrong type to infix:<not in>. Expected Array or Dict or Str, was " ~ type(container),
         };
     }
 }

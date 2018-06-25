@@ -40,20 +40,20 @@ ensure-feature-flag("CLASS");
 
 {
     my $program = q:to/./;
-        my BuiltinObject;
+        my BuiltinDict;
         BEGIN {
-            BuiltinObject = Object;
+            BuiltinDict = Dict;
         }
         {
-            class Object {
+            class Dict {
             }
 
-            say({} ~~ BuiltinObject);
-            say({} ~~ Object);
+            say({} ~~ BuiltinDict);
+            say({} ~~ Dict);
         }
         .
 
-    outputs $program, "true\nfalse\n", "the `\{\}` syntax uses the built-in Object, even when overridden";
+    outputs $program, "true\nfalse\n", "the `\{\}` syntax uses the built-in Dict, even when overridden";
 }
 
 {

@@ -72,7 +72,7 @@ use _007::Test;
     parse-error
         $program,
         X::Property::Duplicate,
-        "can't have duplicate properties (#85)";
+        "can't have duplicate properties (#85) (II)";
 }
 
 {
@@ -87,14 +87,11 @@ use _007::Test;
         say(o.update({ bond: 8 }));
 
         say({ x: 1 }.extend({ y: 2 }));
-
-        my n = o.id;
-        say("id");
         .
 
     outputs
         $program,
-        qq[true\nfalse\n7\n\{bond: 8, james: "bond"\}\n\{x: 1, y: 2\}\nid\n],
+        qq[true\nfalse\n7\n\{bond: 8, james: "bond"\}\n\{x: 1, y: 2\}\n],
         "built-in pseudo-inherited methods on objects";
 }
 
@@ -137,7 +134,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Object { foo: 42 };
+        my q = new Dict { foo: 42 };
 
         say(q.foo);
         .
@@ -145,7 +142,7 @@ use _007::Test;
     outputs
         $program,
         qq[42\n],
-        "can create a Val::Object by explicitly naming 'Object'";
+        "can create a Val::Dict by explicitly naming 'Dict'";
 }
 
 {

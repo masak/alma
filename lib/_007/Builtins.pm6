@@ -358,7 +358,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
     default { die "Unknown type {.value.^name}" }
 });
 
-my $builtins-pad = Val::Object.new;
+my $builtins-pad = Val::Dict.new;
 for @builtins -> Pair (:key($name), :$value) {
     $builtins-pad.properties{$name} = $value;
 }

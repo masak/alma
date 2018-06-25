@@ -270,7 +270,7 @@ class _007::Parser::Actions {
             }
 
             if $expansion ~~ Q::StatementList {
-                $*runtime.enter($*runtime.current-frame, Val::Object.new, $expansion);
+                $*runtime.enter($*runtime.current-frame, Val::Dict.new, $expansion);
                 $expansion = Q::Block.new(
                     :parameterlist(Q::ParameterList.new())
                     :statementlist($expansion));
@@ -340,7 +340,7 @@ class _007::Parser::Actions {
                     my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
                     die X::Assignment::ReadOnly.new(:$declname, :$symbol)
                         unless $decltype.is-assignable;
-                    %*assigned{$frame.id ~ $symbol}++;
+                    %*assigned{$frame.WHICH ~ $symbol}++;
                 }
             }
         }
@@ -656,11 +656,10 @@ class _007::Parser::Actions {
         my $type-obj = $type.type;
         my $name = $type-obj.^name.subst("::", ".", :g);
 
-        if $type-obj !=== Val::Object {
+        if $type-obj !=== Val::Dict {
             if is-role($type-obj) {
                 die X::Uninstantiable.new(:$name);
             }
-
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
@@ -678,12 +677,16 @@ class _007::Parser::Actions {
             }
         }
 
-        make Q::Term::Object.new(:$type, :propertylist($<propertylist>.ast));
+        make Q::Term::Dict.new(
+            :$type,
+            :propertylist($<propertylist>.ast));
     }
 
-    method term:object ($/) {
-        make Q::Term::Object.new(
-            :type(Val::Type.of(Val::Object)),
+    method term:dict ($/) {
+        my $type = Val::Type.of(Val::Dict);
+
+        make Q::Term::Dict.new(
+            :$type,
             :propertylist($<propertylist>.ast));
     }
 
@@ -846,7 +849,7 @@ sub check(Q $ast, $runtime) is export {
             :statementlist($func.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Object.new, $func.block.statementlist, $val);
+        $runtime.enter($outer-frame, Val::Dict.new, $func.block.statementlist, $val);
         handle($func.block);
         $runtime.leave();
 
@@ -861,7 +864,7 @@ sub check(Q $ast, $runtime) is export {
             :statementlist($macro.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Object.new, $macro.block.statementlist, $val);
+        $runtime.enter($outer-frame, Val::Dict.new, $macro.block.statementlist, $val);
         handle($macro.block);
         $runtime.leave();
 
@@ -881,14 +884,14 @@ sub check(Q $ast, $runtime) is export {
     }
 
     multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
         $block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();
     }
 
-    multi handle(Q::Term::Object $object) {
+    multi handle(Q::Term::Dict $object) {
         handle($object.propertylist);
     }
 
