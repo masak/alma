@@ -399,5 +399,21 @@ use _007::Test;
     outputs $program, qq[Q::Identifier "Steve"\n], "Type.create() method to create a Q::Identifier";
 }
 
+{
+    my $program = q:to/./;
+        say(NoneType.create([]));
+        .
+
+    runtime-error $program, X::Uninstantiable, "can't instantiate a NoneType";
+}
+
+{
+    my $program = q:to/./;
+        say(Bool.create([["value", False]]));
+        .
+
+    runtime-error $program, X::Uninstantiable, "can't instantiate a Bool";
+}
+
 done-testing;
 

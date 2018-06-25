@@ -596,7 +596,7 @@ class Val::Type does Val {
                 method ^name(\$) \{ "{$name}" \}
             \}]));
         }
-        elsif is-role($.type) {
+        elsif $.type ~~ Val::NoneType || $.type ~~ Val::Bool || is-role($.type) {
             die X::Uninstantiable.new(:$.name);
         }
         else {
