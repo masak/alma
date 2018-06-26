@@ -34,7 +34,7 @@ Here's the current proposed order of macro examples to tackle:
 * A `swap` macro. Takes two lvalues and swaps their contents. The term
   "lvalue" here is significant, as these need to be assignable. (That's also
   why a simple sub wouldn't be enough in this case, since we have
-  call-by-value.) This macro needs the assignment protocol to be in place in
+  call-by-value.) This macro needs the location protocol to be in place in
   order to work fully. ([#218](https://github.com/masak/007/issues/218))
 
 * Reduction metaoperator, such as `[+](1, 2, 3)`. In 007, the `[+]` would
@@ -45,16 +45,16 @@ Here's the current proposed order of macro examples to tackle:
   generated code. ([#176](https://github.com/masak/007/issues/176))
 
 * `postfix:<++>` and family; a total of four operators. Also requires the
-  assignment protocol. ([#122](https://github.com/masak/007/issues/122))
+  location protocol. ([#122](https://github.com/masak/007/issues/122))
 
-* `+=` assignment operators and family. Requires both the assignment
+* `+=` assignment operators and family. Requires both the location
   protocol and `is parsed`. ([#152](https://github.com/masak/007/issues/152))
 
-* `.=` mutating method call. Also requires both the assignment protocol and
+* `.=` mutating method call. Also requires both the location protocol and
   `is parsed`. ([#203](https://github.com/masak/007/issues/203))
 
-* Unbound methods. Something like `unbound .abs()` to denote the longer
-  `sub (obj) { return obj.abs(); }`. ([#202](https://github.com/masak/007/issues/202))
+* Unbound methods. Something like `unbound .abs` to denote the longer
+  `sub (obj, ...args) { return obj.abs(...args); }`. ([#202](https://github.com/masak/007/issues/202))
 
 * Arrow functions. Something like `x => x * x` to denote the longer
   `sub (x) { return x * x; }`. ([#215](https://github.com/masak/007/issues/215))
@@ -67,7 +67,8 @@ Here's the current proposed order of macro examples to tackle:
 These are features/bug fixes that will need to be in place for the above to
 work:
 
-* The assignment protocol. (See below.) ([#214](https://github.com/masak/007/issues/214))
+* Some lingering injectile trouble. ([#212](https://github.com/masak/007/issues/212))
+* The location protocol. (See below.) ([#214](https://github.com/masak/007/issues/214))
 * `is parsed`, or at least enough of it. ([#177](https://github.com/masak/007/issues/177))
 * Various Qnode introspection and manipulation. (No issue for this yet.)
 
@@ -141,7 +142,7 @@ a language both extensible, introspectable, and bootstrappable all at once.
 
 * boolification protocol
 * equality protocol
-* assignment protocol
+* location protocol
 * loop protocol
 * declaration protocol
 * signature binder protocol
