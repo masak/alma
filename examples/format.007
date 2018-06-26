@@ -56,4 +56,4 @@ macro format(fmt, args) {
 
 say( format("{0}{1}{0}", ["abra", "cad"]) );        # abracadabra
 say( format("foo{0}bar", ["{1}"]) );                # foo{1}bar ({} things can occur in the arguments)
-say( format("foo{1}bar", ["foo"]) );                # throws an exception at compile time
+# say( format("foo{1}bar", ["foo"]) );                # throws an exception at compile time
