@@ -1,5 +1,7 @@
-my n = 1;
-while n <= 100 {
+my iterations = ^101;
+iterations.shift();
+
+for iterations -> n {
     if n %% 15 {
         say("FizzBuzz");
     }
@@ -12,5 +14,4 @@ while n <= 100 {
     else {
         say(n);
     }
-    n = n + 1;
 }
