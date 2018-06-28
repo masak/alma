@@ -526,13 +526,6 @@ class Q::Infix::Divisibility is Q::Infix {}
 ###
 class Q::Infix::Concat is Q::Infix {}
 
-### ### Q::Infix::Cons
-###
-### A "cons" operator. Given a value and an array, returns a new
-### array with the value added as the first element.
-###
-class Q::Infix::Cons is Q::Infix {}
-
 ### ### Q::Infix::Assignment
 ###
 ### An assignment operator. Puts a value in a storage location.

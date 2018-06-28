@@ -297,11 +297,10 @@ class Val::Regex does Val {
 ###     say(["a", "b", "c"]);   # --> `["a", "b", "c"]`
 ###     say(^3);                # --> `[0, 1, 2]`
 ###
-### Other array constructors which create entirely new arrays out of old ones
-### (and leave the old ones unchanged) are concatenation and consing:
+### Another array constructor which creates entirely new arrays out of old ones
+### (and leave the old ones unchanged) is concatenation:
 ###
 ###     say([1, 2].concat([3, 4])); # --> `[1, 2, 3, 4]`
-###     say(0 :: [0, 7]);           # --> `[0, 0, 7]`
 ###
 ### Sorting, shuffling, and reversing an array also leave the original
 ### array unchanged:

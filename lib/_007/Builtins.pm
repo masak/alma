@@ -194,17 +194,6 @@ my @builtins =
         :precedence{ equal => "infix:==" },
     ),
 
-    # cons precedence
-    'infix:::' => op(
-        sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<::>, :got($rhs), :expected(Val::Array))
-                unless $rhs ~~ Val::Array;
-            return wrap([$lhs, |$rhs.elements]);
-        },
-        :qtype(Q::Infix::Cons),
-        :assoc<right>,
-    ),
-
     # additive precedence
     'infix:+' => op(
         sub ($lhs, $rhs) {

@@ -104,9 +104,6 @@ my Runtime = {
             Q::Infix::Concat(op) {
                 return eval(op.lhs) ~ eval(op.rhs);
             },
-            Q::Infix::Cons(op) {
-                return eval(op.lhs) :: eval(op.rhs);
-            },
             Q::Infix::Divisibility(op) {
                 return eval(op.lhs) %% eval(op.rhs);
             },

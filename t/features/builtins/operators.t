@@ -96,31 +96,6 @@ use _007::Test;
 
 {
     my $ast = q:to/./;
-    (statementlist
-     (stexpr (postfix:() (identifier "say")
-       (argumentlist
-        (infix::: (int 0)
-        (infix::: (int 0)
-        (infix::: (int 7) (array))))))))
-    .
-
-    is-result $ast, "[0, 0, 7]\n", "cons works";
-}
-
-{
-    my $ast = q:to/./;
-    (statementlist
-     (stexpr (postfix:() (identifier "say")
-       (argumentlist
-        (infix::: (array (int 0) (int 0))
-        (array (int 7)))))))
-    .
-
-    is-result $ast, "[[0, 0], 7]\n", "cons works even on non-scalar values";
-}
-
-{
-    my $ast = q:to/./;
         (statementlist
           (my (identifier "ns") (array (str "Jim") (str "Bond")))
           (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 1))))))
@@ -527,20 +502,6 @@ use _007::Test;
         .
 
     outputs $program, "7\n10\n-5\n2\n", "multiplication is tighter than addition/subtraction";
-}
-
-{
-    my $program = q:to/./;
-        say(!0 :: []);
-        say(-1 :: []);
-        say(1+2 :: []);
-        say(3-4 :: []);
-        say(5*6 :: []);
-        say("Bo" ~ "nd" :: []);
-        .
-
-    outputs $program, qq![True]\n[-1]\n[3]\n[-1]\n[30]\n["Bond"]\n!,
-        "cons is looser than even the additive infixes (+ - ~)";
 }
 
 {
