@@ -579,4 +579,103 @@ use _007::Test;
         "defining infix:«->» correctly installs a -> operator (#175)";
 }
 
+{
+    my $program = q:to/./;
+        constant infix:<?> = func (lhs, rhs) {
+            return "?";
+        };
+
+        say(1 ? 2);
+        .
+
+    outputs $program, "?\n",
+        "installation of custom operators sits on the right peg (#173) (constant)";
+}
+
+{
+    my $program = q:to/./;
+        my infix:<?> = func (lhs, rhs) {
+            return "?";
+        };
+
+        say(1 ? 2);
+        .
+
+    outputs $program, "?\n",
+        "installation of custom operators sits on the right peg (#173) (my)";
+}
+
+{
+    my $program = q:to/./;
+        func foo(x, y, infix:<+>) {
+            return x + y;
+        }
+
+        say(foo(1, 2, func(l, r) { return l ~ r }));
+        .
+
+    outputs $program, "12\n",
+        "installation of custom operators sits on the right peg (#173) (parameter I)";
+}
+
+{
+    my $program = q:to/./;
+        func foo(x, y, infix:<?>) {
+            return x ? y;
+        }
+
+        say(foo(1, 2, func(l, r) { return l ~ r }));
+        .
+
+    outputs $program, "12\n",
+        "installation of custom operators sits on the right peg (#173) (parameter II)";
+}
+
+{
+    my $program = q:to/./;
+        my fns = [func(l, r) { return l ~ r }, func(l, r) { return l * r }];
+
+        for fns -> infix:<op> {
+            say(20 op 5);
+        }
+        .
+
+    outputs $program, "205\n100\n",
+        "installation of custom operators sits on the right peg (#173) ('for' loop parameter)";
+}
+
+{
+    my $program = q:to/./;
+        if func(l, r) { return l * r } -> infix:<op> {
+            say(20 op 5);
+        }
+        .
+
+    outputs $program, "100\n",
+        "installation of custom operators sits on the right peg (#173) ('if' statement parameter)";
+}
+
+{
+    my $program = q:to/./;
+        my c = 5;
+        my d = fn;
+
+        func fn(l, r) {
+            c = c - 1;
+            if !c {
+                return None;
+            }
+            return fn;
+        }
+
+        while d -> infix:<op> {
+            d = 1 op 2;
+            say(c);
+        }
+        .
+
+    outputs $program, "4\n3\n2\n1\n0\n",
+        "installation of custom operators sits on the right peg (#173) ('while' statement parameter)";
+}
+
 done-testing;

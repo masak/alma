@@ -96,21 +96,31 @@ class _007::Parser::Actions {
     }
 
     method statement:my ($/) {
+        my $identifier = $<identifier>.ast;
+        my $name = $identifier.name;
+
         make Q::Statement::My.new(
-            :identifier($<identifier>.ast),
+            :identifier($identifier),
             :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
+
+        maybe-install-operator($name, []);
     }
 
     method statement:constant ($/) {
         die X::Syntax::Missing.new(:what("initializer on constant declaration"))
             unless $<EXPR>;
 
+        my $identifier = $<identifier>.ast;
+        my $name = $identifier.name;
+
         make Q::Statement::Constant.new(
-            :identifier($<identifier>.ast),
+            :identifier($identifier),
             :expr($<EXPR>.ast));
 
         my $value = $<EXPR>.ast.eval($*runtime);
-        $<identifier>.ast.put-value($value, $*runtime);
+        $identifier.put-value($value, $*runtime);
+
+        maybe-install-operator($name, []);
     }
 
     method statement:expr ($/) {
@@ -186,7 +196,7 @@ class _007::Parser::Actions {
 
     method statement:func-or-macro ($/) {
         my $identifier = $<identifier>.ast;
-        my $name = $<identifier>.ast.name;
+        my $name = $identifier.name;
         my $parameterlist = $<parameterlist>.ast;
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
@@ -768,7 +778,6 @@ class _007::Parser::Actions {
         my $op = ~$/;
         my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value("infix:$op"))),
-            :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
     }
@@ -833,7 +842,12 @@ class _007::Parser::Actions {
     }
 
     method parameter($/) {
-        make Q::Parameter.new(:identifier($<identifier>.ast));
+        my $identifier = $<identifier>.ast;
+        my $name = $identifier.name;
+
+        make Q::Parameter.new(:$identifier);
+
+        maybe-install-operator($name, []);
     }
 }
 
