@@ -1,0 +1,83 @@
+func 0 ('prompt_mod') {
+    # return +prompt("Your number divided by " ~ n ~ " has a remainder of: ");
+    LOAD_BUILTIN        0 (prefix:+)
+    LOAD_BUILTIN        1 (prompt)
+    LOAD_CONST          0 ("Your number divided by ")
+    LOAD_LOCAL          0 (n)
+    BINARY_CONCAT
+    LOAD_CONST          1 (" has a reminder of: ")
+    BINARY_CONCAT
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    RETURN_VALUE
+}
+
+func 1 ('mainline') {
+    # func prompt_mod(n) { ... }
+    LOAD_CODE           0 (func 0 ('prompt_mod'))
+    LOAD_CONST          1 ("prompt_mod")
+    MAKE_FUNCTION       0
+    STORE_LOCAL         0 (prompt_mod)
+
+    # say("Please think of a number between 1 and 100.");
+    LOAD_BUILTIN        0 (say)
+    LOAD_CONST          2 ("Please think of a number between 1 and 100.")
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    POP_TOP
+
+    # say("")
+    LOAD_BUILTIN        0 (say)
+    LOAD_CONST          3 ("")
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    POP_TOP
+
+    # my m3 = prompt_mod(3);
+    LOAD_LOCAL          0 (prompt_mod)
+    LOAD_CONST          3 (3)
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    STORE_LOCAL         1 (m3)
+
+    # my m5 = prompt_mod(5);
+    LOAD_LOCAL          0 (prompt_mod)
+    LOAD_CONST          4 (5)
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    STORE_LOCAL         2 (m5)
+
+    # my m7 = prompt_mod(7);
+    LOAD_LOCAL          0 (prompt_mod)
+    LOAD_CONST          5 (7)
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    STORE_LOCAL         3 (m7)
+
+    # say("")
+    LOAD_BUILTIN        0 (say)
+    LOAD_CONST          3 ("")
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    POP_TOP
+
+    # my solution = (70*m3 + 21*m5 + 15*m7) % 105;
+    LOAD_CONST          6 (70)
+    LOAD_LOCAL          1 (m3)
+    BINARY_MULTIPLY
+    LOAD_CONST          7 (21)
+    LOAD_LOCAL          2 (m5)
+    BINARY_MULTIPLY
+    BINARY_ADD
+    LOAD_CONST          8 (15)
+    LOAD_LOCAL          3 (m7)
+    BINARY_MULTIPLY
+    BINARY_ADD
+    LOAD_CONST          9 (105)
+    BINARY_MODULO
+    STORE_LOCAL         4 (solution)
+
+    # say("Your number was " ~ solution ~ ".");
+    LOAD_BUILTIN        0 (say)
+    LOAD_CONST          10 ("Your number was ")
+    LOAD_LOCAL          4
+    BINARY_CONCAT
+    LOAD_CONST          11 (".")
+    BINARY_CONCAT
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    POP_TOP
+}
