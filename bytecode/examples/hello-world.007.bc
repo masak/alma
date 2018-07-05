@@ -1,0 +1,7 @@
+func 0 ('mainline') {
+    # say("Hello, world!");
+    LOAD_BUILTIN        0 (say)
+    LOAD_CONST          0 ("Hello, world!")
+    CALL_FUNCTION       1 (1 positional, 0 keyword pair)
+    POP_TOP
+}
