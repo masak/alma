@@ -1,4 +1,4 @@
-code 0 ('mainline') {
+code 0 mainline() {
     # say("Hello, world!");
     LOAD_BUILTIN        0 (say)
     LOAD_CONST          0 ("Hello, world!")

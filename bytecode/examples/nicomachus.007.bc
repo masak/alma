@@ -1,4 +1,4 @@
-code 0 ('prompt_mod') {
+code prompt_mod(n) {
     # return +prompt("Your number divided by " ~ n ~ " has a remainder of: ");
     LOAD_BUILTIN        0 (prefix:+)
     LOAD_BUILTIN        1 (prompt)
@@ -12,7 +12,7 @@ code 0 ('prompt_mod') {
     RETURN_VALUE
 }
 
-code 1 ('mainline') {
+code mainline() {
     # func prompt_mod(n) { ... }
     LOAD_CODE           0 (func 0 ('prompt_mod'))
     LOAD_CONST          1 ("prompt_mod")
