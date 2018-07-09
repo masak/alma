@@ -1,0 +1,46 @@
+code 0 mainline() {
+    # my lines = [
+    #     "my lines = [",
+    #     "    ",
+    #     "];",
+    #     "for lines -> line {",
+    #     "    if line.chars() == 4 {",
+    #     "        for lines -> quotedLine {",
+    #     "            say(line ~ 34.chr() ~ quotedLine ~ 34.chr() ~ 44.chr());",
+    #     "        }",
+    #     "    }",
+    #     "    else {",
+    #     "        say(line);",
+    #     "    }",
+    #     "}",
+    # ];
+    LOAD_CONST          0 ("my lines = [")
+    LOAD_CONST          1 ("    ")
+    LOAD_CONST          2 ("];")
+    LOAD_CONST          3 ("for lines -> line {")
+    LOAD_CONST          4 ("    if line.chars() == 4 {")
+    LOAD_CONST          5 ("        for lines -> quotedLine {")
+    LOAD_CONST          6 ("            say(line ~ 34.chr() ~ quotedLine ~ 34.chr() ~ 44.chr());")
+    LOAD_CONST          7 ("        }")
+    LOAD_CONST          8 ("    }")
+    LOAD_CONST          9 ("    else {")
+    LOAD_CONST          10 ("        say(line);")
+    LOAD_CONST          11 ("    }")
+    LOAD_CONST          12 ("}")
+    BUILD_ARRAY         13
+    STORE_LOCAL         0 (lines)
+
+    # for lines -> line {
+
+}
+
+for lines -> line {
+    if line.chars() == 4 {
+        for lines -> quotedLine {
+            say(line ~ 34.chr() ~ quotedLine ~ 34.chr() ~ 44.chr());
+        }
+    }
+    else {
+        say(line);
+    }
+}
