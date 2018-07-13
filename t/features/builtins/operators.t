@@ -735,4 +735,29 @@ use _007::Test;
         "+Val::Str outputs a Val::Int (regression)";
 }
 
+{
+    my $program = q:to/./;
+        say( 5 divmod 2 );
+        say( 5 divmod -2 );
+        .
+
+    outputs
+        $program,
+        "(2, 1)\n(-3, -1)\n",
+        "divmod operator (happy path)";
+}
+
+{
+    my $ast = q:to/./;
+        (statementlist
+          (stexpr (postfix:() (identifier "say") (argumentlist (infix:divmod (int 5) (int 0))))))
+        .
+
+    is-error
+        $ast,
+        X::Numeric::DivideByZero,
+        "Attempt to divide 5 by zero using divmod",
+        "divmodding by 0 is an error";
+}
+
 done-testing;

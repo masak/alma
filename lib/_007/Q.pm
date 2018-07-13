@@ -519,6 +519,12 @@ class Q::Infix::Modulo is Q::Infix {}
 ###
 class Q::Infix::Divisibility is Q::Infix {}
 
+### ### Q::Infix::Divmod
+###
+### A division/modulo operator. Returns a tuple with the quotient and reminder.
+###
+class Q::Infix::Divmod is Q::Infix {}
+
 ### ### Q::Infix::Concat
 ###
 ### A string concatenation operator. Returns a single string that is the
