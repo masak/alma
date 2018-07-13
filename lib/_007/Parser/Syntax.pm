@@ -54,15 +54,6 @@ grammar _007::Parser::Syntax {
         { declare(Q::Statement::My, $<identifier>.ast.name.value); }
         ['=' <EXPR>]?
     }
-    rule statement:constant {
-        constant <identifier>
-        {
-            my $symbol = $<identifier>.ast.name.value;
-            # XXX: a suspicious lack of redeclaration checks here
-            declare(Q::Statement::Constant, $symbol);
-        }
-        ['=' <EXPR>]?
-    }
     token statement:expr {
         <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
         <EXPR>
