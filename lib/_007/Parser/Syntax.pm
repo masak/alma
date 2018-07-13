@@ -1,77 +1,10 @@
 use _007::Val;
 use _007::Q;
 
-class X::Trait::IllegalValue is Exception {
-    has Str $.trait;
-    has Str $.value;
-
-    method message { "The value '$.value' is not compatible with the trait '$.trait'" }
-}
-
-class X::Trait::Conflict is Exception {
-    has Str $.trait1;
-    has Str $.trait2;
-
-    method message { "Traits '$.trait1' and '$.trait2' cannot coexist on the same routine" }
-}
-
-class X::Precedence::Incompatible is Exception {
-    method message { "Trying to relate a pre/postfix operator with an infix operator" }
-}
-
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
     die "{$feature} is experimental and requires \%*ENV<{$flag}> to be set"
         unless %*ENV{$flag};
-}
-
-sub maybe-install-operator($identname, @trait) {
-    return
-        unless $identname ~~ /^ (< prefix infix postfix >)
-                                ':' (.+) /;
-
-    my $type = ~$0;
-    my $op = ~$1;
-
-    my %precedence;
-    my @prec-traits = <equal looser tighter>;
-    my $assoc;
-    for @trait -> $trait {
-        my $name = $trait<identifier>.ast.name;
-        if $name eq any @prec-traits {
-            my $identifier = $trait<EXPR>.ast;
-            my $prep = $name eq "equal" ?? "to" !! "than";
-            die "The thing your op is $name $prep must be an identifier"
-                unless $identifier ~~ Q::Identifier;
-            sub check-if-op($s) {
-                die "Unknown thing in '$name' trait"
-                    unless $s ~~ /^ < pre in post > 'fix:' /;
-                die X::Precedence::Incompatible.new
-                    if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
-                    || $type eq 'infix' && $s ~~ /^ < pre post >/;
-                %precedence{$name} = $s;
-            }($identifier.name);
-        }
-        elsif $name eq "assoc" {
-            my $string = $trait<EXPR>.ast;
-            die "The associativity must be a string"
-                unless $string ~~ Q::Literal::Str;
-            my $value = $string.value.value;
-            die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
-                unless $value eq any "left", "non", "right";
-            $assoc = $value;
-        }
-        else {
-            die "Unknown trait '$name'";
-        }
-    }
-
-    if %precedence.keys > 1 {
-        my ($t1, $t2) = %precedence.keys.sort;
-        die X::Trait::Conflict.new(:$t1, :$t2);
-    }
-
-    $*parser.opscope.install($type, $op, :%precedence, :$assoc);
 }
 
 grammar _007::Parser::Syntax {
@@ -139,7 +72,7 @@ grammar _007::Parser::Syntax {
         '(' ~ ')' <parameterlist>
         <traitlist>
         {
-            maybe-install-operator($<identifier>.ast.name, $<traitlist><trait>);
+            $*parser.opscope.maybe-install($<identifier>.ast.name, $<traitlist><trait>);
         }
         [<blockoid>|| <.panic("block")>]:!s
         <.finishpad>
