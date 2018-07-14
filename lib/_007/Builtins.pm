@@ -19,6 +19,11 @@ sub assert-type(:$value, ValOrQ:U :$type, Str :$operation) {
         unless $value ~~ $type;
 }
 
+sub assert-nonzero(:$value, :$operation, :$numerator) {
+    die X::Numeric::DivideByZero.new(:using($operation), :$numerator)
+        if $value == 0;
+}
+
 # These multis are used below by infix:<==> and infix:<!=>
 multi equal-value($, $) { False }
 multi equal-value(Val::NoneType, Val::NoneType) { True }
@@ -234,9 +239,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($lhs), :type(Val::Int), :operation<%>);
             assert-type(:value($rhs), :type(Val::Int), :operation<%>);
-
-            die X::Numeric::DivideByZero.new(:using<%>, :numerator($lhs.value))
-                if $rhs.value == 0;
+            assert-nonzero(:value($rhs.value), :operation("infix:<%>"), :numerator($lhs.value));
 
             return wrap($lhs.value % $rhs.value);
         },
@@ -246,9 +249,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($lhs), :type(Val::Int), :operation<%%>);
             assert-type(:value($rhs), :type(Val::Int), :operation<%%>);
-
-            die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
-                if $rhs.value == 0;
+            assert-nonzero(:value($rhs.value), :operation("infix:<%%>"), :numerator($lhs.value));
 
             return wrap($lhs.value %% $rhs.value);
         },
@@ -256,12 +257,10 @@ my @builtins =
     ),
     'infix:divmod' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<%>, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
-            die X::Numeric::DivideByZero.new(:using<divmod>, :numerator($lhs.value))
-                if $rhs.value == 0;
+            assert-type(:value($lhs), :type(Val::Int), :operation<divmod>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<divmod>);
+            assert-nonzero(:value($rhs.value), :operation("infix:<divmod>"), :numerator($lhs.value));
+
             return Val::Tuple.new(:elements([
                 wrap($lhs.value div $rhs.value),
                 wrap($lhs.value % $rhs.value),
