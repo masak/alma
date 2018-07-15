@@ -145,4 +145,19 @@ use _007::Test;
         "if statement accepts only 0 or 1 argument";
 }
 
+{
+    my $program = q:to/./;
+        if 0 {
+        }
+        else -> v {
+            say("the value is falsy and it is " ~ v);
+        }
+        .
+
+    outputs
+        $program,
+        "the value is falsy and it is 0\n",
+        "else blocks can have a parameter, too (#323)";
+}
+
 done-testing;

@@ -964,7 +964,14 @@ class Q::Statement::If does Q::Statement {
                     $.else.run($runtime)
                 }
                 when Q::Block {
+                    my $paramcount = $.else.parameterlist.parameters.elements.elems;
+                    die X::ParameterMismatch.new(
+                        :type("Else block"), :$paramcount, :argcount("0 or 1"))
+                        if $paramcount > 1;
                     $runtime.enter($runtime.current-frame, $.else.static-lexpad, $.else.statementlist);
+                    for @($.else.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
+                        $runtime.declare-var($param.identifier, $arg);
+                    }
                     $.else.statementlist.run($runtime);
                     $runtime.leave;
                 }
