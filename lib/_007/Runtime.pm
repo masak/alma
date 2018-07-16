@@ -143,6 +143,15 @@ class _007::Runtime {
         self.declare-var(RETURN_TO, $.current-frame);
     }
 
+    method run-block(Q::Block $block, @arguments) {
+        self.enter(self.current-frame, $block.static-lexpad, $block.statementlist);
+        for @($block.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
+            self.declare-var($param.identifier, $arg);
+        }
+        $block.statementlist.run(self);
+        self.leave;
+    }
+
     method call(Val::Func $c, @arguments) {
         my $paramcount = $c.parameterlist.parameters.elements.elems;
         my $argcount = @arguments.elems;
