@@ -106,23 +106,6 @@ class _007::Parser::Actions {
         maybe-install-operator($name, []);
     }
 
-    method statement:constant ($/) {
-        die X::Syntax::Missing.new(:what("initializer on constant declaration"))
-            unless $<EXPR>;
-
-        my $identifier = $<identifier>.ast;
-        my $name = $identifier.name;
-
-        make Q::Statement::Constant.new(
-            :identifier($identifier),
-            :expr($<EXPR>.ast));
-
-        my $value = $<EXPR>.ast.eval($*runtime);
-        $identifier.put-value($value, $*runtime);
-
-        maybe-install-operator($name, []);
-    }
-
     method statement:expr ($/) {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
@@ -882,18 +865,6 @@ sub check(Q::Block $ast, $runtime) is export {
         if $my.expr !~~ Val::NoneType {
             handle($my.expr);
         }
-    }
-
-    multi handle(Q::Statement::Constant $constant) {
-        my $symbol = $constant.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($symbol);
-
-        handle($constant.expr);
     }
 
     multi handle(Q::Statement::Block $block) {

@@ -906,21 +906,6 @@ class Q::Statement::My does Q::Statement does Q::Declaration {
     }
 }
 
-### ### Q::Statement::Constant
-###
-### A `constant` declaration statement.
-###
-class Q::Statement::Constant does Q::Statement does Q::Declaration {
-    has $.identifier;
-    has $.expr;
-
-    method attribute-order { <identifier expr> }
-
-    method run($runtime) {
-        # value has already been assigned
-    }
-}
-
 ### ### Q::Statement::Expr
 ###
 ### A statement consisting of an expression.

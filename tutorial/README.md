@@ -168,22 +168,6 @@ parsed the ending brace (`}`) of the block.
 
 There is no statement form of `BEGIN`: you must put in the braces.
 
-There's also a `constant` declaration statement:
-
-    constant pi = 3;    Q::Statement::Constant
-
-The right-hand side of the `constant` declaration is evaluated at parse
-time, making it functionally similar to using a BEGIN block to do the
-assignment:
-
-    my pi;
-    BEGIN {
-        pi = 3;
-    }
-
-Constants cannot be assigned to after their declaration. Because of
-this, the assignment in the `constant` declaration is mandatory.
-
 ## Setting
 
 There's a scope outside the program scope, containing a few utility

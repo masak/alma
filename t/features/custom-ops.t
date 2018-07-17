@@ -581,19 +581,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        constant infix:<?> = func (lhs, rhs) {
-            return "?";
-        };
-
-        say(1 ? 2);
-        .
-
-    outputs $program, "?\n",
-        "installation of custom operators sits on the right peg (#173) (constant)";
-}
-
-{
-    my $program = q:to/./;
         my infix:<?> = func (lhs, rhs) {
             return "?";
         };

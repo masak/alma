@@ -1,6 +1,6 @@
-constant PIN   = "    |    ";
+my PIN   = "    |    ";
 
-constant DISK = {
+my DISK = {
     tiny:  "   ===   ",
     small: "  =====  ",
     large: " ======= ",
