@@ -1,9 +1,18 @@
 func infix:<**>(x, n) is tighter(infix:<*>) is assoc("right") {
-    my result = 1;
-    for ^n {
-        result = result * x;
+    if n == 0 {
+        return 1;
     }
-    return result;
+    if n == 1 {
+        return x;
+    }
+    my qr = n divmod 2;
+    my q = qr[0];
+    my r = qr[1];
+    my xs = x * x;
+    if r {
+        return x * xs ** q;
+    }
+    return xs ** q;
 }
 
 say(2 ** 3);        # 8
