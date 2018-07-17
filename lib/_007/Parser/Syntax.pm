@@ -71,6 +71,9 @@ grammar _007::Parser::Syntax {
         <.newpad>
         '(' ~ ')' <parameterlist>
         <traitlist>
+        {
+            $*parser.opscope.maybe-install($<identifier>.ast.name, $<traitlist><trait>);
+        }
         [<blockoid>|| <.panic("block")>]:!s
         <.finishpad>
     }

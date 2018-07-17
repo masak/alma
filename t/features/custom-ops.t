@@ -665,4 +665,21 @@ use _007::Test;
         "installation of custom operators sits on the right peg (#173) ('while' statement parameter)";
 }
 
+{
+    my $program = q:to/./;
+        func infix:<@->(a, b) is looser(infix:<+>) {
+            if b == 0 {
+                return a;
+            }
+            return a-1 @- b-1;
+        }
+
+        say(10 @- 3);
+        .
+
+    outputs $program, "7\n",
+        "can use custom operators already inside the body of the custom operator";
+}
+
+
 done-testing;
