@@ -258,6 +258,21 @@ my @builtins =
         },
         :qtype(Q::Infix::Divisibility),
     ),
+    'infix:divmod' => op(
+        sub ($lhs, $rhs) {
+            die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
+                unless $lhs ~~ Val::Int;
+            die X::TypeCheck.new(:operation<%>, :got($rhs), :expected(Val::Int))
+                unless $rhs ~~ Val::Int;
+            die X::Numeric::DivideByZero.new(:using<divmod>, :numerator($lhs.value))
+                if $rhs.value == 0;
+            return Val::Tuple.new(:elements([
+                wrap($lhs.value div $rhs.value),
+                wrap($lhs.value % $rhs.value),
+            ]));
+        },
+        :qtype(Q::Infix::Modulo),
+    ),
 
     # prefixes
     'prefix:~' => op(
