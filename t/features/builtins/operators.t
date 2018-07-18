@@ -581,7 +581,7 @@ use _007::Test;
     is-error
         $ast,
         X::TypeCheck,
-        q[Type check failed in ^; expected Val::Int but got Val::Str (Val::Str.new(value => "Mr Bond"))],
+        q[Type check failed in prefix:<^>; expected Val::Int but got Val::Str (Val::Str.new(value => "Mr Bond"))],
         "can't upto a string (or other non-integer types)";
 }
 

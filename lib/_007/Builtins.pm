@@ -12,6 +12,13 @@ sub wrap($_) {
     default { die "Got some unknown value of type ", .^name }
 }
 
+subset ValOrQ of Any where Val | Q;
+
+sub assert-type(:$value, ValOrQ:U :$type, Str :$operation) {
+    die X::TypeCheck.new(:$operation, :got($value), :expected($type))
+        unless $value ~~ $type;
+}
+
 # These multis are used below by infix:<==> and infix:<!=>
 multi equal-value($, $) { False }
 multi equal-value(Val::NoneType, Val::NoneType) { True }
@@ -61,19 +68,13 @@ multi equal-value(Q $l, Q $r) {
         |$l.attributes.map(&same-avalue);
 }
 
-multi less-value($, $) {
-    die X::TypeCheck.new(
-        :operation<less>,
-        :got($_),
-        :expected(Val::Int));
+multi less-value($l, $) {
+    assert-type(:value($l), :type(Val::Int), :operation<less>);
 }
 multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
 multi less-value(Val::Str $l, Val::Str $r) { $l.value lt $r.value }
-multi more-value($, $) {
-    die X::TypeCheck.new(
-        :operation<more>,
-        :got($_),
-        :expected(Val::Int));
+multi more-value($l, $) {
+    assert-type(:value($l), :type(Val::Int), :operation<more>);
 }
 multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
 multi more-value(Val::Str $l, Val::Str $r) { $l.value gt $r.value }
@@ -175,8 +176,7 @@ my @builtins =
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                unless $rhs ~~ Val::Type;
+            assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
             return wrap($lhs ~~ $rhs.type);
         },
@@ -185,8 +185,7 @@ my @builtins =
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<~~>, :got($rhs), :expected(Val::Type))
-                unless $rhs ~~ Val::Type;
+            assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
             return wrap($lhs !~~ $rhs.type);
         },
@@ -197,10 +196,9 @@ my @builtins =
     # additive precedence
     'infix:+' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<+>, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<+>, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
+            assert-type(:value($lhs), :type(Val::Int), :operation<+>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<+>);
+
             return wrap($lhs.value + $rhs.value);
         },
         :qtype(Q::Infix::Addition),
@@ -214,10 +212,9 @@ my @builtins =
     ),
     'infix:-' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<->, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<->, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
+            assert-type(:value($lhs), :type(Val::Int), :operation<->);
+            assert-type(:value($rhs), :type(Val::Int), :operation<->);
+
             return wrap($lhs.value - $rhs.value);
         },
         :qtype(Q::Infix::Subtraction),
@@ -226,34 +223,33 @@ my @builtins =
     # multiplicative precedence
     'infix:*' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<*>, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<*>, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
+            assert-type(:value($lhs), :type(Val::Int), :operation<*>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<*>);
+
             return wrap($lhs.value * $rhs.value);
         },
         :qtype(Q::Infix::Multiplication),
     ),
     'infix:%' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<%>, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<%>, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
+            assert-type(:value($lhs), :type(Val::Int), :operation<%>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<%>);
+
             die X::Numeric::DivideByZero.new(:using<%>, :numerator($lhs.value))
                 if $rhs.value == 0;
+
             return wrap($lhs.value % $rhs.value);
         },
         :qtype(Q::Infix::Modulo),
     ),
     'infix:%%' => op(
         sub ($lhs, $rhs) {
-            die X::TypeCheck.new(:operation<%%>, :got($lhs), :expected(Val::Int))
-                unless $lhs ~~ Val::Int;
-            die X::TypeCheck.new(:operation<%%>, :got($rhs), :expected(Val::Int))
-                unless $rhs ~~ Val::Int;
+            assert-type(:value($lhs), :type(Val::Int), :operation<%%>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<%%>);
+
             die X::Numeric::DivideByZero.new(:using<%%>, :numerator($lhs.value))
                 if $rhs.value == 0;
+
             return wrap($lhs.value %% $rhs.value);
         },
         :qtype(Q::Infix::Divisibility),
@@ -291,10 +287,7 @@ my @builtins =
             when Val::Int {
                 return $_;
             }
-            die X::TypeCheck.new(
-                :operation("prefix:<+>"),
-                :got($_),
-                :expected(Val::Int));
+            assert-type(:value($_), :type(Val::Int), :operation("prefix:<+>"));
         },
         :qtype(Q::Prefix::Plus),
     ),
@@ -308,10 +301,7 @@ my @builtins =
             when Val::Int {
                 return wrap(-.value);
             }
-            die X::TypeCheck.new(
-                :operation("prefix:<->"),
-                :got($_),
-                :expected(Val::Int));
+            assert-type(:value($_), :type(Val::Int), :operation("prefix:<->"));
         },
         :qtype(Q::Prefix::Minus),
     ),
@@ -329,8 +319,8 @@ my @builtins =
     ),
     'prefix:^' => op(
         sub ($n) {
-            die X::TypeCheck.new(:operation<^>, :got($n), :expected(Val::Int))
-                unless $n ~~ Val::Int;
+            assert-type(:value($n), :type(Val::Int), :operation("prefix:<^>"));
+
             return wrap([^$n.value]);
         },
         :qtype(Q::Prefix::Upto),
