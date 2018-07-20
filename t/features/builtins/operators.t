@@ -56,7 +56,7 @@ use _007::Test;
     is-error
         $ast,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using %",
+        "Attempt to divide 5 by zero using infix:<%>",
         "dividing by 0 is an error";
 }
 
@@ -81,7 +81,7 @@ use _007::Test;
     is-error
         $ast,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using %%",
+        "Attempt to divide 5 by zero using infix:<%%>",
         "checking divisibility by 0 is an error";
 }
 
@@ -756,7 +756,7 @@ use _007::Test;
     is-error
         $ast,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using divmod",
+        "Attempt to divide 5 by zero using infix:<divmod>",
         "divmodding by 0 is an error";
 }
 
