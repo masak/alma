@@ -942,12 +942,7 @@ class Q::Statement::If does Q::Statement {
             die X::ParameterMismatch.new(
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
-            $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-            for @($.block.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.identifier, $arg);
-            }
-            $.block.statementlist.run($runtime);
-            $runtime.leave;
+            $runtime.run-block($.block, [$expr]);
         }
         else {
             given $.else {
@@ -1014,12 +1009,7 @@ class Q::Statement::For does Q::Statement {
             unless $array ~~ Val::Array;
 
         for $array.elements -> $arg {
-            $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-            if $count == 1 {
-                $runtime.declare-var($.block.parameterlist.parameters.elements[0].identifier, $arg.list[0]);
-            }
-            $.block.statementlist.run($runtime);
-            $runtime.leave;
+            $runtime.run-block($.block, $count ?? [$arg] !! []);
         }
     }
 }
@@ -1040,12 +1030,7 @@ class Q::Statement::While does Q::Statement {
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
-            $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-            for @($.block.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                $runtime.declare-var($param.identifier, $arg);
-            }
-            $.block.statementlist.run($runtime);
-            $runtime.leave;
+            $runtime.run-block($.block, $paramcount ?? [$expr] !! []);0
         }
     }
 }
