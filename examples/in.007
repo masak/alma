@@ -1,0 +1,57 @@
+func infix:<in>(value, container) {
+    if container ~~ Array {
+        for container -> elem {
+            if elem == value {
+                return True;
+            }
+        }
+        return False;
+    }
+    else if container ~~ Object {
+        return container.has(value);
+    }
+    else if container ~~ Str {
+        return container.contains(~value);
+    }
+    else {
+        throw new Exception {
+            message: "Wrong type to infix:<in>. Expected Array or Object or Str, was " ~ type(container),
+        };
+    }
+}
+
+func infix:<not in>(value, container) {
+    if container ~~ Array {
+        for container -> elem {
+            if elem == value {
+                return False;
+            }
+        }
+        return True;
+    }
+    else if container ~~ Object {
+        return !container.has(value);
+    }
+    else if container ~~ Str {
+        return !container.contains(~value);
+    }
+    else {
+        throw new Exception {
+            message: "Wrong type to infix:<in>. Expected Array or Object or Str, was " ~ type(container),
+        };
+    }
+}
+
+say("foo" in { foo: 42 });              # True
+say("bar" in { foo: 42 });              # False
+say(3 in [1, 2, 3, 4]);                 # True
+say(8 in [1, 2, 3, 4]);                 # False
+say("foo" in "foolish");                # True
+say("I" in "team");                     # False
+
+say("job" not in { name: "James" });    # True
+say("name" not in { name: "James" });   # False
+say("d" not in ["a", "b", "c"]);        # True
+say("b" not in ["a", "b", "c"]);        # False
+say("we" not in "Kansas");              # True
+say("pi" not in "pie");                 # False
