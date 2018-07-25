@@ -1030,7 +1030,7 @@ class Q::Statement::While does Q::Statement {
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
-            $runtime.run-block($.block, $paramcount ?? [$expr] !! []);0
+            $runtime.run-block($.block, $paramcount ?? [$expr] !! []);
         }
     }
 }
