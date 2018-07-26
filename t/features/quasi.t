@@ -260,7 +260,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Trait { is equal(infix:<+>) }));
+        say(type(quasi @ Q::Trait { is equiv(infix:<+>) }));
         .
 
     outputs $program, "<type Q::Trait>\n", "quasi @ Q::Trait";
@@ -268,7 +268,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::TraitList { is equal(infix:<+>) is assoc("right") }));
+        say(type(quasi @ Q::TraitList { is equiv(infix:<+>) is assoc("right") }));
         .
 
     outputs $program, "<type Q::TraitList>\n", "quasi @ Q::TraitList";

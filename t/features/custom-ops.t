@@ -168,7 +168,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!?!>(left, right) is equal(infix:<+>) is equal(infix:<*>) {
+        func infix:<!?!>(left, right) is equiv(infix:<+>) is equiv(infix:<*>) {
         }
         .
 
@@ -182,7 +182,7 @@ use _007::Test;
             return "@";
         }
 
-        func infix:<!>(left, right) is equal(infix:<@>) {
+        func infix:<!>(left, right) is equiv(infix:<@>) {
             return "!";
         }
 
@@ -195,7 +195,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!?!>(left, right) is tighter(infix:<+>) is equal(infix:<+>) {
+        func infix:<!?!>(left, right) is tighter(infix:<+>) is equiv(infix:<+>) {
         }
         .
 
@@ -204,7 +204,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!++>(left, right) is looser(infix:<+>) is equal(infix:<+>) {
+        func infix:<!++>(left, right) is looser(infix:<+>) is equiv(infix:<+>) {
         }
         .
 
@@ -285,14 +285,14 @@ use _007::Test;
         func infix:<@>(left, right) is assoc("right") {
         }
 
-        func infix:<@@>(left, right) is equal(infix:<@>) {
+        func infix:<@@>(left, right) is equiv(infix:<@>) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
         say("A" @@ "B" @@ "C");
         .
 
-    outputs $program, "(A, (B, C))\n", "right associativity inherits through the 'is equal' trait";
+    outputs $program, "(A, (B, C))\n", "right associativity inherits through the 'is equiv' trait";
 }
 
 {
@@ -300,14 +300,14 @@ use _007::Test;
         func infix:<@>(left, right) is assoc("non") {
         }
 
-        func infix:<@@>(left, right) is equal(infix:<@>) {
+        func infix:<@@>(left, right) is equiv(infix:<@>) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
         say("A" @@ "B" @@ "C");
         .
 
-    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equiv' trait";
 }
 
 {
@@ -315,12 +315,12 @@ use _007::Test;
         func infix:<%>(left, right) is assoc("left") {
         }
 
-        func infix:<%%>(left, right) is equal(infix:<%>) is assoc("right") {
+        func infix:<%%>(left, right) is equiv(infix:<%>) is assoc("right") {
         }
         .
 
     parse-error $program, X::Associativity::Conflict,
-        "if you're using the 'is equal' trait, you can't contradict the associativity";
+        "if you're using the 'is equiv' trait, you can't contradict the associativity";
 }
 
 {
@@ -428,7 +428,7 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        func prefix:<¿>(term) is equal(postfix:<¡>) {
+        func prefix:<¿>(term) is equiv(postfix:<¡>) {
             return "prefix is looser";
         }
 
@@ -436,7 +436,7 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        func postfix:<$>(term) is equal(prefix:<%>) {
+        func postfix:<$>(term) is equiv(prefix:<%>) {
             return "postfix is looser";
         }
 
@@ -453,13 +453,13 @@ use _007::Test;
         func prefix:<¿>(left, right) is assoc("non") {
         }
 
-        func postfix:<!>(left, right) is equal(prefix:<¿>) {
+        func postfix:<!>(left, right) is equiv(prefix:<¿>) {
         }
 
         say(¿0!);
         .
 
-    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equal' trait";
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equiv' trait";
 }
 
 {

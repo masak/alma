@@ -1,4 +1,4 @@
-macro infix:<xx>(left, right) is equal(infix:<*>) {
+macro infix:<xx>(left, right) is equiv(infix:<*>) {
     func flatten(array) {
         my result = [];
         for array -> elem {
@@ -18,7 +18,7 @@ macro infix:<xx>(left, right) is equal(infix:<*>) {
     }
 }
 
-func infix:<x>(left, right) is equal(infix:<*>) {
+func infix:<x>(left, right) is equiv(infix:<*>) {
     return (left xx right).join("");
 }
 
