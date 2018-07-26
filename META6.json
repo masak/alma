@@ -7,19 +7,19 @@
     "depends"   : [],
     "license"   : "Artistic-2.0",
     "provides" : {
-        "_007" : "lib/_007.pm",
-        "_007::Backend::JavaScript" : "lib/_007/Backend/JavaScript.pm",
-        "_007::Linter" : "lib/_007/Linter.pm",
-        "_007::OpScope" : "lib/_007/OpScope.pm",
-        "_007::Parser" : "lib/_007/Parser.pm",
-        "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm",
-        "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm",
-        "_007::Precedence" : "lib/_007/Precedence.pm",
-        "_007::Q" : "lib/_007/Q.pm",
-        "_007::Runtime" : "lib/_007/Runtime.pm",
-        "_007::Builtins" : "lib/_007/Builtins.pm",
-        "_007::Test" : "lib/_007/Test.pm",
-        "_007::Val" : "lib/_007/Val.pm"
+        "_007" : "lib/_007.pm6",
+        "_007::Backend::JavaScript" : "lib/_007/Backend/JavaScript.pm6",
+        "_007::Linter" : "lib/_007/Linter.pm6",
+        "_007::OpScope" : "lib/_007/OpScope.pm6",
+        "_007::Parser" : "lib/_007/Parser.pm6",
+        "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm6",
+        "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm6",
+        "_007::Precedence" : "lib/_007/Precedence.pm6",
+        "_007::Q" : "lib/_007/Q.pm6",
+        "_007::Runtime" : "lib/_007/Runtime.pm6",
+        "_007::Builtins" : "lib/_007/Builtins.pm6",
+        "_007::Test" : "lib/_007/Test.pm6",
+        "_007::Val" : "lib/_007/Val.pm6"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }
 }

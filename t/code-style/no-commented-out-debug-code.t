@@ -2,7 +2,7 @@ use v6;
 use Test;
 use _007::Test;
 
-my $files = find(".", /[".pm" | ".t"] $/)\
+my $files = find(".", /[".pm6" | ".t"] $/)\
     .grep({ $_ !~~ / "no-commented-out-debug-code.t" / })\
     .join(" ");
 

@@ -3,7 +3,7 @@ use Test;
 use _007::Test;
 
 my @lines-with-unorthodox-indent;
-for find("lib/", /".pm" $/) -> $file {
+for find("lib/", /".pm6" $/) -> $file {
     for $file.IO.lines.kv -> $i, $line {
         next unless $line ~~ /^ \h+/;
 
