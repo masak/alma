@@ -1,0 +1,34 @@
+func infix:<^^>(lhs, rhs) is equal(infix:<||>) {
+    return lhs && !rhs || !lhs && rhs;
+}
+
+func infix:«>>»(value, n) is tighter(infix:<==>) {
+    for ^n {
+        value = (value divmod 2)[0];
+    }
+    return value;
+}
+
+func nth_bit(value, n) {
+    return (value >> n) % 2;
+}
+
+func infix:<⊕>(lhs, rhs) {
+    my n = 0;
+    my p = 1;
+    my result = 0;
+    while p <= lhs || p <= rhs {
+        if nth_bit(lhs, n) ^^ nth_bit(rhs, n) {
+            result = result + p;
+        }
+        n = n + 1;
+        p = p * 2;
+    }
+    return result;
+}
+
+say(1 ⊕ 1);
+say(1 ⊕ 2);
+say(2 ⊕ 2);
+say(5 ⊕ 4);
+say(7 ⊕ 15);
