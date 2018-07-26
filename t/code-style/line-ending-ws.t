@@ -3,7 +3,7 @@ use Test;
 use _007::Test;
 
 my @lines-ending-with-ws;
-for find(".", /".pm" $/) -> $file {
+for find(".", /".pm6" $/) -> $file {
     for $file.IO.lines.kv -> $i, $line {
         if $line ~~ /\h $/ {
             push @lines-ending-with-ws,

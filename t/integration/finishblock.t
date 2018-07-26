@@ -5,7 +5,7 @@ my $interested = False;
 my Int $blocks-minus-finishblocks;
 my Str $method;
 
-for "lib/_007/Parser/Actions.pm".IO.lines.kv -> $n, $line {
+for "lib/_007/Parser/Actions.pm6".IO.lines.kv -> $n, $line {
     if $interested && $line ~~ /^ "    " \} $/ {
         is $blocks-minus-finishblocks, 0, "method $method (line $n) has a self.finishblock for each Q::Block";
         $interested = False;

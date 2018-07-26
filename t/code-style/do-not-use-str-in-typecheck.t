@@ -4,7 +4,7 @@ use _007::Test;
 
 my @failing-typechecks;
 
-my @files = find(".", /".pm" $/);
+my @files = find(".", /".pm6" $/);
 for @files -> $file {
     given slurp($file.IO) -> $content {
         for $content.comb(/"X::TypeCheck.new" <-[;]>+ ";"/) -> $typecheck {
