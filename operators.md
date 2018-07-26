@@ -49,7 +49,7 @@ These simple rules have a number of consequences:
   and the (looser) infix layer.
 
 * When an operator is added, it specifies which precedence it has; either
-  tigher than, looser than, or equal to some existing operator within its
+  tigher than, looser than, or equivalent to some existing operator within its
   layer. Specifying precedence relative to an operator from the wrong layer
   is not allowed.
 
@@ -57,11 +57,21 @@ These simple rules have a number of consequences:
   within its layer.
 
 * Unless an operator specifies itself to be equal in precedence to another,
-  it ends up on a its own, new precedence level.
+  it ends up on its own, new precedence level. The new precedence level will
+  be as tight as it can given the operator type.
 
-* Infix operators have right or left associativity. An infix operator that
+* That last point means a new infix will be tighter than the tighest existing
+  infix (but still looser than the loosest prefix); a new prefix will be
+  tighter than the tightest existing prefix (but still looser than the loosest
+  postfix); and a new postfix will be the tightest, period.
+
+* Despite this you can *still* mix precedence levels of prefixes and postfixes,
+  because they are on the same layer. If you do that, then all bets are off
+  as to what precedence a new prefix gets.
+
+* Operators have right or left associativity. An operator that
   ends up on its own, new level also gets to specify its associativity. All
   later operators on that level get the same associativity.
 
-* If an infix operator on a new level doesn't specify associativity, it
-  automatically gets right associativity.
+* If an operator on a new level doesn't specify associativity, it
+  automatically gets left associativity.
