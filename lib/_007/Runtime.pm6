@@ -343,7 +343,7 @@ class _007::Runtime {
                     unless $substr ~~ Val::Str;
 
                 return Val::Int.new(:value(
-                        $obj.value.contains($substr.value);
+                        $obj.value.contains($substr.value)
                 ));
             });
         }
