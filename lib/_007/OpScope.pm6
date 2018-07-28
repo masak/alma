@@ -39,6 +39,12 @@ class _007::OpScope {
         my $category = ~$0;
         my $op = ~$1;
 
+        if $category eq "infix" | "postfix" {
+            my $other_category = $category eq "infix" ?? "postfix" !! "infix";
+            die X::Redeclaration.new(:symbol($op))
+                if $op eq any(%.ops{$other_category}.keys);
+        }
+
         my %precedence;
         my @prec-traits = <equiv looser tighter>;
         my $assoc;
