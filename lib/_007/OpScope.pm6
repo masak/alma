@@ -36,7 +36,7 @@ class _007::OpScope {
             unless $identname ~~ /^ (< prefix infix postfix >)
                                     ':' (.+) /;
 
-        my $type = ~$0;
+        my $category = ~$0;
         my $op = ~$1;
 
         my %precedence;
@@ -53,8 +53,8 @@ class _007::OpScope {
                 die "Unknown thing in '$name' trait"
                     unless $s ~~ /^ < pre in post > 'fix:' /;
                 die X::Precedence::Incompatible.new
-                    if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
-                    || $type eq 'infix' && $s ~~ /^ < pre post >/;
+                    if $category eq ('prefix' | 'postfix') && $s ~~ /^ in/
+                    || $category eq 'infix' && $s ~~ /^ < pre post >/;
                 %precedence{$name} = $s;
             }
             elsif $name eq "assoc" {
@@ -76,29 +76,29 @@ class _007::OpScope {
             die X::Trait::Conflict.new(:$t1, :$t2);
         }
 
-        self.install($type, $op, :%precedence, :$assoc);
+        self.install($category, $op, :%precedence, :$assoc);
     }
 
-    method install($type, $op, $q?, :%precedence, :$assoc) {
-        my $name = "$type:$op";
+    method install($category, $op, $q?, :%precedence, :$assoc) {
+        my $name = "$category:$op";
         my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
 
-        %!ops{$type}{$op} = $q !=== Any ?? $q !! {
+        %!ops{$category}{$op} = $q !=== Any ?? $q !! {
             prefix => Q::Prefix.new(:$identifier),
             infix => Q::Infix.new(:$identifier),
             postfix => Q::Postfix.new(:$identifier),
-        }{$type};
+        }{$category};
 
         sub prec {
             _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
-        my @namespace := $type eq 'infix' ?? @!infixprec !! @!prepostfixprec;
+        my @namespace := $category eq 'infix' ?? @!infixprec !! @!prepostfixprec;
         if %precedence<tighter> || %precedence<looser> -> $other-op {
             my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
             @namespace.splice($pos, 0, prec);
-            if $type eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
+            if $category eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
                 $!prepostfix-boundary++;
             }
         }
@@ -108,7 +108,7 @@ class _007::OpScope {
                 if $assoc !=== Any && $assoc ne $prec.assoc;
             $prec.ops{$name} = $q;
         }
-        elsif $type eq 'prefix' {
+        elsif $category eq 'prefix' {
             @namespace.splice($!prepostfix-boundary++, 0, prec);
         }
         else {
