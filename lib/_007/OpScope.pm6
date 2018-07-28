@@ -77,7 +77,7 @@ class _007::OpScope {
             die X::Trait::Conflict.new(:$t1, :$t2);
         }
 
-        $*parser.opscope.install($type, $op, :%precedence, :$assoc);
+        self.install($type, $op, :%precedence, :$assoc);
     }
 
     method install($type, $op, $q?, :%precedence, :$assoc) {
