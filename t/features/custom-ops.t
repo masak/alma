@@ -681,5 +681,18 @@ use _007::Test;
         "can use custom operators already inside the body of the custom operator";
 }
 
+{
+    my $program = q:to/./;
+        func postfix:<++>(x) {
+            x + 1
+        }
+
+        my y = 41;
+        say(y ++)
+        .
+
+    outputs $program, "42\n",
+        "it's OK to have whitespace before a postfix";
+}
 
 done-testing;
