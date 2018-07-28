@@ -49,14 +49,13 @@ class _007::OpScope {
                 my $prep = $name eq "equal" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
                     unless $identifier ~~ Q::Identifier;
-                sub check-if-op($s) {
-                    die "Unknown thing in '$name' trait"
-                        unless $s ~~ /^ < pre in post > 'fix:' /;
-                    die X::Precedence::Incompatible.new
-                        if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
-                        || $type eq 'infix' && $s ~~ /^ < pre post >/;
-                    %precedence{$name} = $s;
-                }($identifier.name);
+                my $s = $identifier.name;
+                die "Unknown thing in '$name' trait"
+                    unless $s ~~ /^ < pre in post > 'fix:' /;
+                die X::Precedence::Incompatible.new
+                    if $type eq ('prefix' | 'postfix') && $s ~~ /^ in/
+                    || $type eq 'infix' && $s ~~ /^ < pre post >/;
+                %precedence{$name} = $s;
             }
             elsif $name eq "assoc" {
                 my $string = $trait<EXPR>.ast;
