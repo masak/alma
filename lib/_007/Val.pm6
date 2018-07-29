@@ -704,13 +704,19 @@ class Helper {
                 unless $self.^name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
 
             sub aname($attr) { $attr.name.substr(2) }
-            sub avalue($attr, $obj) { $attr.get_value($obj) }
+            sub avalue($attr, $obj) {
+                my $value = $attr.get_value($obj);
+                # XXX: this is a temporary fix until we patch Q::Unquote's qtype to be an identifier
+                $value
+                    ?? $value.quoted-Str
+                    !! $value.^name;
+            }
 
             my @attrs = $self.attributes;
             if @attrs == 1 {
-                return "{.^name} { avalue(@attrs[0], $self).quoted-Str }";
+                return "{.^name} { avalue(@attrs[0], $self) }";
             }
-            sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $self).quoted-Str }
+            sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $self) }
             my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
             return "{$self.^name} \{\n$contents\n\}";
         }
