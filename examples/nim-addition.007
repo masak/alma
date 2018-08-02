@@ -1,0 +1,45 @@
+func pad_left(string, length, char) {
+    if string.chars() < length {
+        return pad_left(char ~ string, length, char);
+    }
+    else {
+        return string;
+    }
+}
+
+func binfmt(number) {
+    my result = "";
+    while number {
+        my qr = number divmod 2;
+        if qr[1] {
+            result = "1" ~ result;
+        }
+        else {
+            result = "0" ~ result;
+        }
+        number = qr[0];
+    }
+    return result || "0";
+}
+
+func infix:<⊕>(lhs, rhs) is equal(infix:<+>) {
+    my lb = binfmt(lhs);
+    my rb = binfmt(rhs);
+    lb = pad_left(lb, rb.chars(), "0");
+    rb = pad_left(rb, lb.chars(), "0");
+    my result = 0;
+    my p = 1;
+    for (^lb.chars()).reverse() -> i {
+        if lb.substr(i, 1) != rb.substr(i, 1) {
+            result = result + p;
+        }
+        p = p * 2;
+    }
+    return result;
+}
+
+say(1 ⊕ 1);
+say(1 ⊕ 2);
+say(2 ⊕ 2);
+say(5 ⊕ 4);
+say(7 ⊕ 15);
