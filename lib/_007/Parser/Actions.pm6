@@ -617,11 +617,20 @@ class _007::Parser::Actions {
         make Q::Unquote.new(:$qtype, :expr($<EXPR>.ast));
     }
 
+    sub is-role($type) {
+        my role R {};
+        return $type.HOW ~~ R.HOW.WHAT;
+    }
+
     method term:new-object ($/) {
         my $type = $<identifier>.ast.name.value;
         my $type-obj = $*runtime.get-var($type).type;
 
         if $type-obj !=== Val::Object {
+            if is-role($type-obj) {
+                die X::Uninstantiable.new(:name($type));
+            }
+
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
