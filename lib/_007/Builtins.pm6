@@ -125,7 +125,7 @@ my @builtins =
     ),
     'infix://' => macro-op(
         :qtype(Q::Infix::DefinedOr),
-        :precedence{ equal => "infix:||" },
+        :precedence{ equiv => "infix:||" },
     ),
 
     # conjunctive precedence
@@ -147,14 +147,14 @@ my @builtins =
             return wrap(!equal-value($lhs, $rhs))
         },
         :qtype(Q::Infix::Ne),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:<' => op(
         sub ($lhs, $rhs) {
             return wrap(less-value($lhs, $rhs))
         },
         :qtype(Q::Infix::Lt),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:<=' => op(
         sub ($lhs, $rhs) {
@@ -162,14 +162,14 @@ my @builtins =
             return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
         :qtype(Q::Infix::Le),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:>' => op(
         sub ($lhs, $rhs) {
             return wrap(more-value($lhs, $rhs) )
         },
         :qtype(Q::Infix::Gt),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:>=' => op(
         sub ($lhs, $rhs) {
@@ -177,7 +177,7 @@ my @builtins =
             return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
         :qtype(Q::Infix::Ge),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
@@ -186,7 +186,7 @@ my @builtins =
             return wrap($lhs ~~ $rhs.type);
         },
         :qtype(Q::Infix::TypeMatch),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
@@ -195,7 +195,7 @@ my @builtins =
             return wrap($lhs !~~ $rhs.type);
         },
         :qtype(Q::Infix::TypeNonMatch),
-        :precedence{ equal => "infix:==" },
+        :precedence{ equiv => "infix:==" },
     ),
 
     # additive precedence
@@ -213,7 +213,7 @@ my @builtins =
             return wrap($lhs.Str ~ $rhs.Str);
         },
         :qtype(Q::Infix::Concat),
-        :precedence{ equal => "infix:+" },
+        :precedence{ equiv => "infix:+" },
     ),
     'infix:-' => op(
         sub ($lhs, $rhs) {

@@ -40,13 +40,13 @@ class _007::OpScope {
         my $op = ~$1;
 
         my %precedence;
-        my @prec-traits = <equal looser tighter>;
+        my @prec-traits = <equiv looser tighter>;
         my $assoc;
         for @trait -> $trait {
             my $name = $trait<identifier>.ast.name;
             if $name eq any @prec-traits {
                 my $identifier = $trait<EXPR>.ast;
-                my $prep = $name eq "equal" ?? "to" !! "than";
+                my $prep = $name eq "equiv" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
                     unless $identifier ~~ Q::Identifier;
                 my $s = $identifier.name;
@@ -102,7 +102,7 @@ class _007::OpScope {
                 $!prepostfix-boundary++;
             }
         }
-        elsif %precedence<equal> -> $other-op {
+        elsif %precedence<equiv> -> $other-op {
             my $prec = @namespace.first(*.contains($other-op));
             die X::Associativity::Conflict.new
                 if $assoc !=== Any && $assoc ne $prec.assoc;
