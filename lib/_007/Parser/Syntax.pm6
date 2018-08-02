@@ -152,7 +152,7 @@ grammar _007::Parser::Syntax {
 
     rule EXPR { <termish> +% [<infix> | <infix=infix-unquote>] }
 
-    rule termish { [<prefix> | <prefix=prefix-unquote>]* [<term>|<term=unquote>] <postfix> * }
+    rule termish { [<prefix> | <prefix=prefix-unquote>] * [<term>|<term=unquote>] <postfix> * }
 
     method prefix {
         my @ops = $*parser.opscope.ops<prefix>.keys;
