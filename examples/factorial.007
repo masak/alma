@@ -1,0 +1,14 @@
+func postfix:<!>(N) {
+    my product = 1;
+    my n = 2;
+    while n <= N {
+        product = product * n;
+        n = n + 1;
+    }
+    return product;
+}
+
+say(0!);
+say(1!);
+say(5!);
+say(20!);
