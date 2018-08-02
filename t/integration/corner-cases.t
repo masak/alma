@@ -4,15 +4,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my n = 7
+        my n = 7;
+        say(n)
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n") (int 7)))
-        .
-
-    parses-to $program, $ast, "can skip the last semicolon";
+    outputs $program, "7\n", "can skip the last semicolon";
 }
 
 {
@@ -33,12 +29,7 @@ use _007::Test;
                 ;
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (int 4))))))
-        .
-
-    parses-to $program, $ast, "spaces are fine here and there";
+    outputs $program, "42\n", "spaces are fine here and there";
 }
 
 {
@@ -46,12 +37,7 @@ use _007::Test;
         say("A" ~ "B" ~ "C" ~ "D");
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (infix:~ (infix:~ (str "A") (str "B")) (str "C")) (str "D"))))))
-        .
-
-    parses-to $program, $ast, "concat works any number of times (and is left-associative)";
+    outputs $program, "ABCD\n", "concat works any number of times (and is left-associative)";
 }
 
 {
@@ -60,13 +46,7 @@ use _007::Test;
         say(aaa[0][0][0]);
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "aaa") (array (array (array (int 1)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (postfix:[] (postfix:[] (identifier "aaa") (int 0)) (int 0)) (int 0))))))
-        .
-
-    parses-to $program, $ast, "array indexing works any number of times";
+    outputs $program, "1\n", "array indexing works any number of times";
 }
 
 {
@@ -76,17 +56,10 @@ use _007::Test;
             say("inside");
         }
         x = 7;
+        say(x);
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "x") (int 5))
-          (stblock (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "inside")))))))
-          (stexpr (infix:= (identifier "x") (int 7))))
-        .
-
-    parses-to $program, $ast, "can have a statement after a block without a semicolon";
+    outputs $program, "inside\n7\n", "can have a statement after a block without a semicolon";
 }
 
 {
@@ -116,13 +89,7 @@ use _007::Test;
         }
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (stblock (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "immediate block"))))))))
-        .
-
-    parses-to $program, $ast, "can skip the last semicolon in a block, too";
+    outputs $program, "immediate block\n", "can skip the last semicolon in a block, too";
 }
 
 {
@@ -183,13 +150,7 @@ use _007::Test;
         }
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (if (str "James") (block (parameterlist (param (identifier "s"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "s"))))))))
-        .
-
-    parses-to $program, $ast, "if statement with a pointy block";
+    outputs $program, "James\n", "if statement with a pointy block";
 }
 
 {
@@ -205,25 +166,16 @@ use _007::Test;
         say("\"");
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (str "\"")))))
-        .
-
-    parses-to $program, $ast, "can escape quotes inside string";
+    outputs $program, qq["\n], "can escape quotes inside string";
 }
 
 {
     my $program = q:to/./;
         my n=7;
+        say(n);
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n") (int 7)))
-        .
-
-    parses-to $program, $ast, "don't have to have spaces around '=' in declaration";
+    outputs $program, "7\n", "don't have to have spaces around '=' in declaration";
 }
 
 {
@@ -318,14 +270,10 @@ use _007::Test;
 {
     my $program = q:to/./;
         my a = [ 1, 2];
+        say(a);
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2))))
-        .
-
-    parses-to $program, $ast, "assigning an array - space at the start of an array";
+    outputs $program, "[1, 2]\n", "assigning an array - space at the start of an array";
 }
 
 {
@@ -334,14 +282,7 @@ use _007::Test;
         my t;
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "j") (block (parameterlist (param (identifier "t"))) (statementlist
-            (for (identifier "t") (block (parameterlist (param (identifier "x"))) (statementlist))))))
-          (my (identifier "t")))
-        .
-
-    parses-to $program, $ast, "a var outside a func does not collide with a param inside used in a for loop";
+    outputs $program, "", "a var outside a func does not collide with a param inside used in a for loop";
 }
 
 done-testing;

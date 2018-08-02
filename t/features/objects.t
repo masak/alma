@@ -3,94 +3,65 @@ use Test;
 use _007::Test;
 
 {
-    my @exprs = «
-        '{}'  '(object (identifier "Object") (propertylist))'
-        '{"a": 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{"a": 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:+ (int 1) (int 2)))))'
-        '{"a": 1,}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{a}' '(object (identifier "Object") (propertylist (property "a" (identifier "a"))))'
-        '{a : 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{ a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{a: 1 }' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{a: 1}' '(object (identifier "Object") (propertylist (property "a" (int 1))))'
-        '{a: 1 + 2}' '(object (identifier "Object") (propertylist (property "a" (infix:+ (int 1) (int 2)))))'
-        '{a() {}}' '(object (identifier "Object") (propertylist
-          (property "a" (func (identifier "a") (block (parameterlist) (statementlist))))))'
-        '{a(a, b) {}}' '(object (identifier "Object") (propertylist (property "a" (func (identifier "a") (block
-          (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist))))))'
-    »;
-
-    for @exprs -> $expr, $frag {
-        my $ast = qq[(statementlist (my (identifier "a")) (stexpr {$frag}))];
-
-        parses-to "my a; ($expr)", $ast, $expr;
-    }
+    outputs 'say({})', qq[\{\}\n], "empty object";
+    outputs 'say({ "a": 1 })', qq[\{a: 1\}\n], "quoted key, literal value";
+    outputs 'say({ "a": 1 + 2 })', qq[\{a: 3\}\n], "quoted key, computed value";
+    outputs 'my a = "bond"; say({ a })', qq[\{a: "bond"\}\n], "object property shorthand";
+    outputs 'say({ a: 1 })', qq[\{a: 1\}\n], "unquoted key, literal value";
+    outputs 'say({a: 1})', qq[\{a: 1\}\n], "no space before and after";
+    outputs 'say({a: 1 + 2})', qq[\{a: 3\}\n], "unquoted key, computed value";
+    outputs 'say({a() {}})', qq[\{a: <func a()>\}\n], "object method shorthand";
+    outputs 'say({a(a, b) {}})', qq[\{a: <func a(a, b)>\}\n], "object method shorthand with parameters";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "o")
-            (object (identifier "Object") (propertylist (property "a" (int 1)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist
-            (postfix:. (identifier "o") (identifier "a"))))))
+    my $program = q:to/./;
+        my o = { a: 1 };
+        say(o.a);
         .
 
-    is-result $ast, "1\n", "can access an object's property (dot syntax)";
+    outputs $program, "1\n", "can access an object's property (dot syntax)";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "o")
-            (object (identifier "Object") (propertylist (property "b" (int 7)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist
-            (postfix:[] (identifier "o") (str "b"))))))
+    my $program = q:to/./;
+        my o = { b: 7 };
+        say(o["b"]);
         .
 
-    is-result $ast, "7\n", "can access an object's property (brackets syntax)";
+    outputs $program, "7\n", "can access an object's property (brackets syntax)";
 }
 
 {
-    my $ast = q:to/./;
-          (statementlist
-            (my (identifier "o") (object (identifier "Object") (propertylist)))
-            (stexpr (postfix:. (identifier "o") (identifier "a"))))
+    my $program = q:to/./;
+        my o = {};
+        say(o.a);
         .
 
-    is-error
-        $ast,
+    runtime-error $program,
         X::Property::NotFound,
-        "Property 'a' not found on object of type Object",
         "can't access non-existing property (dot syntax)";
 }
 
 {
-    my $ast = q:to/./;
-          (statementlist
-           (stexpr (postfix:. (int 42) (identifier "a"))))
+    my $program = q:to/./;
+        42.a
         .
 
-    is-error
-        $ast,
+    runtime-error $program,
         X::Property::NotFound,
-        "Property 'a' not found on object of type Int",
-        "can't access property on Val::Int (dot syntax)";
+        "can't access property on Int (dot syntax)";
 }
 
 {
-    my $ast = q:to/./;
-          (statementlist
-            (my (identifier "o") (object (identifier "Object") (propertylist
-              (property "foo" (int 1))
-              (property "foo" (int 2))))))
+    my $program = q:to/./;
+        my o = {};
+        say(o["b"]);
         .
 
-    is-error
-        $ast,
-        X::Property::Duplicate,
-        "The property 'foo' was declared more than once in a property list",
-        "can't have duplicate properties (#85) (I)";
+    runtime-error $program,
+        X::Property::NotFound,
+        "can't access non-existing property (brackets syntax)";
 }
 
 {
@@ -101,21 +72,7 @@ use _007::Test;
     parse-error
         $program,
         X::Property::Duplicate,
-        "can't have duplicate properties (#85) (II)";
-}
-
-{
-    my $ast = q:to/./;
-          (statementlist
-            (my (identifier "o") (object (identifier "Object") (propertylist)))
-            (stexpr (postfix:[] (identifier "o") (str "b"))))
-        .
-
-    is-error
-        $ast,
-        X::Property::NotFound,
-        "Property 'b' not found on object of type Object",
-        "can't access non-existing property (brackets syntax)";
+        "can't have duplicate properties (#85)";
 }
 
 {
@@ -226,16 +183,11 @@ use _007::Test;
                 return 007;
             }
         };
+
+        say(obj.meth());
         .
 
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "obj") (object (identifier "Object") (propertylist
-            (property "meth" (func (identifier "meth") (block (parameterlist) (statementlist
-              (return (int 7))))))))))
-        .
-
-    parses-to $program, $ast, "a `return` inside of a (short-form) method is fine";
+    outputs $program, "7\n", "a `return` inside of a (short-form) method is fine";
 }
 
 {

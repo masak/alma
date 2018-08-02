@@ -3,51 +3,49 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI from inside sub"))))))))
+    my $program = q:to/./;
+        func f() { say("OH HAI from inside sub") }
         .
 
-    is-result $ast, "", "subs are not immediate";
+    outputs $program, "", "subs are not immediate";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "x") (str "one"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x"))))
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (my (identifier "x") (str "two"))
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x")))))))
-          (stexpr (postfix:() (identifier "f") (argumentlist)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x")))))
+    my $program = q:to/./;
+        my x = "one";
+        say(x);
+        func f() {
+            my x = "two";
+            say(x);
+        }
+        f();
+        say(x);
         .
 
-    is-result $ast, "one\ntwo\none\n", "subs have their own variable scope";
+    outputs $program, "one\ntwo\none\n", "subs have their own variable scope";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (str "Good evening, Mr ") (identifier "name"))))))))
-          (stexpr (postfix:() (identifier "f") (argumentlist (str "Bond")))))
+    my $program = q:to/./;
+        func f(name) {
+            say("Good evening, Mr " ~ name);
+        }
+        f("Bond");
         .
 
-    is-result $ast, "Good evening, Mr Bond\n", "calling a func with parameters works";
+    outputs $program, "Good evening, Mr Bond\n", "calling a func with parameters works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist (param (identifier "X")) (param (identifier "Y"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (identifier "X") (identifier "Y"))))))))
-          (my (identifier "X") (str "y"))
-          (stexpr (postfix:() (identifier "f") (argumentlist (str "X") (infix:~ (identifier "X") (identifier "X"))))))
+    my $program = q:to/./;
+        func f(x, y) {
+            say(x ~ y);
+        }
+        my y = "y";
+        f("X", y ~ y);
         .
 
-    is-result $ast, "Xyy\n", "argumentlist are evaluated before parameters are bound";
+    outputs $program, "Xyy\n", "arguments are evaluated before parameters are bound";
 }
 
 {
@@ -64,26 +62,26 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "f") (argumentlist)))
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI from inside sub"))))))))
+    my $program = q:to/./;
+        f();
+        func f() {
+            say("OH HAI from inside sub");
+        }
         .
 
-    is-result $ast, "OH HAI from inside sub\n", "call a func before declaring it";
+    outputs $program, "OH HAI from inside sub\n", "call a func before declaring it";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "f") (argumentlist)))
-          (my (identifier "x") (str "X"))
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x"))))))))
+    my $program = q:to/./;
+        f();
+        my x = "X";
+        func f() {
+            say(x);
+        }
         .
 
-    is-result $ast, "None\n", "using an outer lexical in a func that's called before the outer lexical's declaration";
+    outputs $program, "None\n", "using an outer lexical in a func that's called before the outer lexical's declaration";
 }
 
 {
@@ -98,20 +96,9 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "f") (argumentlist (str "Bond"))))
-          (stfunc (identifier "f") (block (parameterlist (param (identifier "name"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (str "Good evening, Mr ") (identifier "name")))))))))
-        .
-
-    is-result $ast, "Good evening, Mr Bond\n", "calling a post-declared func works (I)";
-}
-
-{
     my $program = 'f("Bond"); func f(name) { say("Good evening, Mr " ~ name) }';
 
-    outputs $program, "Good evening, Mr Bond\n", "calling a post-declared func works (II)";
+    outputs $program, "Good evening, Mr Bond\n", "calling a post-declared func works";
 }
 
 {

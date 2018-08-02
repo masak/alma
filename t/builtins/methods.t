@@ -3,234 +3,201 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (prefix:- (int 1)) (identifier "abs")) (argumentlist)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (int 1) (identifier "abs")) (argumentlist))))))
+    my $program = q:to/./;
+        say((-1).abs());
+        say(1.abs());
         .
 
-    is-result $ast, "1\n1\n", "abs() works";
+    outputs $program, "1\n1\n", "abs() returns the absolute value";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (int 97) (identifier "chr")) (argumentlist))))))
+    my $program = q:to/./;
+        say(97.chr());
         .
 
-    is-result $ast, "a\n", "chr() works";
+    outputs $program, "a\n", "chr() returns the character corresponding to a codepoint";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "a") (identifier "ord")) (argumentlist))))))
+    my $program = q:to/./;
+        say("a".ord());
         .
 
-    is-result $ast, "97\n", "ord() works";
+    outputs $program, "97\n", "ord() returns the codepoint corresponding to a character";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "007") (identifier "chars")) (argumentlist))))))
+    my $program = q:to/./;
+        say("007".chars());
         .
 
-    is-result $ast, "3\n", "chars() works";
+    outputs $program, "3\n", "chars() returns the length (number of characters) of a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "test") (identifier "uc")) (argumentlist))))))
+    my $program = q:to/./;
+        say("test".uc());
         .
 
-    is-result $ast, "TEST\n", "uc() works";
+    outputs $program, "TEST\n", "uc() upper-cases a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "TEST") (identifier "lc")) (argumentlist))))))
+    my $program = q:to/./;
+        say("TEST".lc());
         .
 
-    is-result $ast, "test\n", "lc() works";
+    outputs $program, "test\n", "lc() lower-cases a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "  test  ") (identifier "trim")) (argumentlist))))))
+    my $program = q:to/./;
+        say("  test  ".trim());
         .
 
-    is-result $ast, "test\n", "trim() works";
+    outputs $program, "test\n", "trim() removes leading and trailing whitespace";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2)) (identifier "size")) (argumentlist))))))
+    my $program = q:to/./;
+        say([1, 2].size());
         .
 
-    is-result $ast, "2\n", "size() works -- Array";
+    outputs $program, "2\n", "size() returns the size of an Array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (object (identifier "Object") (propertylist)) (identifier "size")) (argumentlist))))))
+    my $program = q:to/./;
+        say({}.size());
         .
 
-    is-result $ast, "0\n", "size() works -- Object";
+    outputs $program, "0\n", "size() returns the size of an Object";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2)) (identifier "reverse")) (argumentlist))))))
+    my $program = q:to/./;
+        say([1, 2].reverse());
         .
 
-    is-result $ast, "[2, 1]\n", "reverse() works";
+    outputs $program, "[2, 1]\n", "reverse() returns an Array, reversed";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 2) (int 1)) (identifier "sort")) (argumentlist))))))
+    my $program = q:to/./;
+        say([2, 1].sort());
         .
 
-    is-result $ast, "[1, 2]\n", "sort() works";
+    outputs $program, "[1, 2]\n", "sort() returns an Array, sorted";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 2) (int 1) (str "A")) (identifier "sort")) (argumentlist))))))
+    my $program = q:to/./;
+        [2, 1, "A"].sort();
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::TypeCheck::HeterogeneousArray,
-        "Can't do 'sort' on heterogeneous array, types found: Val::Int Val::Str",
         "sort() on heterogeneous arrays should not work";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:()
-            (postfix:. (array (int 1) (int 2)) (identifier "concat"))
-            (argumentlist (array (int 3) (int 4))))))))
+    my $program = q:to/./;
+        say([1, 2].concat([3, 4]));
         .
 
-    is-result $ast, "[1, 2, 3, 4]\n", "concat() works";
+    outputs $program, "[1, 2, 3, 4]\n", "concat() returns two arrays joined into one";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:()
-            (postfix:. (array (int 1) (int 2)) (identifier "join"))
-            (argumentlist (str "|")))))))
+    my $program = q:to/./;
+        say([1, 2].join("|"));
         .
 
-    is-result $ast, "1|2\n", "join() works";
+    outputs $program, "1|2\n", "join() returns the elements of an array with a separator";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:()
-            (postfix:. (str "a|b") (identifier "split"))
-            (argumentlist (str "|")))))))
+    my $program = q:to/./;
+        say("a|b".split("|"));
         .
 
-    is-result $ast, qq|["a", "b"]\n|, "split() works";
+    outputs $program, qq|["a", "b"]\n|, "split() splits a string into elements separated by a separator";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "index")) (argumentlist (str "bc"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "index")) (argumentlist (str "a"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "index")) (argumentlist (str "d")))))))
+    my $program = q:to/./;
+        say("abc".index("bc"));
+        say("abc".index("a"));
+        say("abc".index("d"));
         .
 
-    is-result $ast, "1\n0\n-1\n", "index() works";
+    outputs $program, "1\n0\n-1\n", "index() returns the index of the first occurrence of a substring, if any";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "substr")) (argumentlist (int 0) (int 1))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "substr")) (argumentlist (int 0) (int 5)))))))
+    my $program = q:to/./;
+        say("abc".substr(0, 1));
+        say("abc".substr(0, 5));
         .
 
-    is-result $ast, "a\nabc\n", "substr() works";
+    outputs $program, "a\nabc\n", "substr() picks out a substring of a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "prefix")) (argumentlist (int 1)))))))
+    my $program = q:to/./;
+        say("abc".prefix(1));
         .
 
-    is-result $ast, "a\n", "prefix() works";
+    outputs $program, "a\n", "prefix() picks out a prefix of a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "suffix")) (argumentlist (int 1)))))))
+    my $program = q:to/./;
+        say("abc".suffix(1));
         .
 
-    is-result $ast, "bc\n", "suffix() works";
+    outputs $program, "bc\n", "suffix() picks out a suffix of a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "charat")) (argumentlist (int 0)))))))
+    my $program = q:to/./;
+        say("abc".charat(0));
         .
 
-    is-result $ast, "a\n", "charat() works";
+    outputs $program, "a\n", "charat() picks a character out of a string";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (str "abc") (identifier "charat")) (argumentlist (int 3)))))))
+    my $program = q:to/./;
+        "abc".charat(3);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Subscript::TooLarge,
-        "Subscript (3) too large (array length 3)",
-        "charat() dies";
+        "charat() can be out of range";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist (param (identifier "n"))) (statementlist
-              (return (infix:== (identifier "n") (int 2))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (array (int 1) (int 2) (int 3) (int 2)) (identifier "filter")) (argumentlist (identifier "f")))))))
+    my $program = q:to/./;
+        func f(n) { n == 2 }
+        say([1, 2, 3, 2].filter(f));
         .
 
-    is-result $ast, "[2, 2]\n", "filter() works";
+    outputs $program, "[2, 2]\n", "filter() returns the elements from an array matching a predicate";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist (param (identifier "n"))) (statementlist
-              (return (infix:+ (identifier "n") (int 1))))))
-          (my (identifier "a") (array (int 1) (int 2) (int 3)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "a") (identifier "map")) (argumentlist (identifier "f"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a")))))
+    my $program = q:to/./;
+        func f(n) { n + 1 }
+        my a = [1, 2, 3];
+        say(a.map(f));
+        say(a);
         .
 
-    is-result $ast, "[2, 3, 4]\n[1, 2, 3]\n", "map() works";
+    outputs $program, "[2, 3, 4]\n[1, 2, 3]\n", "map() returns the elements from an array, transformed";
 }
 
 {
@@ -259,88 +226,79 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2)))
-          (stexpr (postfix:() (postfix:. (identifier "a") (identifier "push")) (argumentlist (int 3))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a")))))
+    my $program = q:to/./;
+        my a = [1, 2];
+        a.push(3);
+        say(a);
         .
 
-    is-result $ast, "[1, 2, 3]\n", "Array.push() works";
+    outputs $program, "[1, 2, 3]\n", "push() adds an element to the end of an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2) (int 5)))
-          (my (identifier "x") (postfix:() (postfix:. (identifier "a") (identifier "pop")) (argumentlist)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x"))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a")))))
+    my $program = q:to/./;
+        my a = [1, 2, 5];
+        my x = a.pop();
+        say(x);
+        say(a);
         .
 
-    is-result $ast, "5\n[1, 2]\n", "Array.pop() works";
+    outputs $program, "5\n[1, 2]\n", "pop() removes an element from the end of an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array))
-          (stexpr (postfix:() (postfix:. (identifier "a") (identifier "pop")) (argumentlist))))
+    my $program = q:to/./;
+        my a = [];
+        a.pop();
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Cannot::Empty,
-        "Cannot pop from an empty Val::Array",
-        "cannot Array.pop() an empty array";
+        "cannot Array.pop() and empty array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2)))
-          (stexpr (postfix:() (postfix:. (identifier "a") (identifier "unshift")) (argumentlist (int 3))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a")))))
+    my $program = q:to/./;
+        my a = [1, 2];
+        a.unshift(3);
+        say(a);
         .
 
-    is-result $ast, "[3, 1, 2]\n", "Array.unshift() works";
+    outputs $program, "[3, 1, 2]\n", "unshift() adds an element to the beginning of an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2) (int 5)))
-          (my (identifier "x") (postfix:() (postfix:. (identifier "a") (identifier "shift")) (argumentlist)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x"))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a")))))
+    my $program = q:to/./;
+        my a = [1, 2, 5];
+        my x = a.shift();
+        say(x);
+        say(a);
         .
 
-    is-result $ast, "1\n[2, 5]\n", "Array.shift() works";
+    outputs $program, "1\n[2, 5]\n", "shift() removes an element from the beginning of an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array))
-          (stexpr (postfix:() (postfix:. (identifier "a") (identifier "shift")) (argumentlist))))
+    my $program = q:to/./;
+        my a = [];
+        a.shift();
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Cannot::Empty,
-        "Cannot pop from an empty Val::Array",
-        "cannot Array.shift() an empty array";
+        "cannot Array.shift() and empty array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (str "007"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "a") (identifier "contains")) (argumentlist (str "07"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (postfix:. (identifier "a") (identifier "contains")) (argumentlist (str "8")))))))
+    my $program = q:to/./;
+        my a = "007";
+        say(a.contains("07"));
+        say(a.contains("8"));
         .
 
-    is-result $ast, "True\nFalse\n", "String.contains() works";
+    outputs $program, "True\nFalse\n", "contains() returns whether a string contains another";
 }
 
 {
