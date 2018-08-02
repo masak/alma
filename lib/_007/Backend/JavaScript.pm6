@@ -48,20 +48,25 @@ class _007::Backend::JavaScript {
                 @main.push("say({@arguments.join(", ")});");
             }
 
-            die "Cannot handle this type of Q::Statement::Expr yet!";
-        }
-
-        multi emit-stmt(Q::Statement::My $stmt) {
-            my $name = $stmt.identifier.name.value;
-            if $stmt.expr !~~ NONE {
-                die "Cannot handle non-literal-Int rhs just yet!"
-                        unless $stmt.expr ~~ Q::Literal::Int;
-                my $expr = $stmt.expr.value.Str;
-                @main.push("let {$name} = {$expr};");
-            }
-            else {
+            when $expr ~~ Q::Term::My {
+                my $name = $expr.identifier.name.value;
                 @main.push("let {$name};");
             }
+
+            when $expr ~~ Q::Infix::Assignment
+                && $expr.lhs ~~ Q::Term::My {
+
+                my $lhs = $expr.lhs;
+                my $name = $lhs.identifier.name.value;
+                my $rhs = $expr.rhs;
+
+                die "Cannot handle non-literal-Int rhs just yet!"
+                        unless $rhs ~~ Q::Literal::Int;
+                my $int = $rhs.value.Str;
+                @main.push("let {$name} = {$int};");
+            }
+
+            die "Cannot handle this type of Q::Statement::Expr yet!";
         }
     }
 }

@@ -4,18 +4,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::My { identifier: new Q::Identifier { name: "foo" } };
-        say(q.expr);
-        .
-
-    outputs
-        $program,
-        "None\n",
-        "Q::Statement::My can be constructed without an 'expr' property (#84)";
-}
-
-{
-    my $program = q:to/./;
         my q = new Q::Statement::Return {};
         say(q.expr);
         .

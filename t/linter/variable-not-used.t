@@ -10,6 +10,12 @@ use _007::Linter;
 }
 
 {
+    my $program = 'my x = 7';
+    my @complaints = _007.linter.lint($program);
+    ok @complaints ~~ [L::VariableNotUsed], "variable assigned but not used";
+}
+
+{
     my $program = 'my x = 7; say(x)';
     my @complaints = _007.linter.lint($program);
     ok @complaints ~~ [], "variable is used; no complaint";

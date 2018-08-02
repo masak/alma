@@ -49,11 +49,6 @@ grammar _007::Parser::Syntax {
     }
 
     proto token statement {*}
-    rule statement:my {
-        my [<identifier> || <.panic("identifier")>]
-        { declare(Q::Statement::My, $<identifier>.ast.name.value); }
-        ['=' <EXPR>]?
-    }
     token statement:expr {
         <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
         <EXPR>
@@ -264,6 +259,11 @@ grammar _007::Parser::Syntax {
         <blockoid>:!s
         <.finishpad>
     }
+    token term:my {
+        my» <.ws> [<identifier> || <.panic("identifier")>]
+        { declare(Q::Term::My, $<identifier>.ast.name.value); }
+    }
+
 
     token propertylist { [<.ws> <property>]* %% [\h* ','] <.ws> }
 

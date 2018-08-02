@@ -37,13 +37,11 @@ role Val {
 ###     say(noreturn());    # --> `None`
 ###
 ### Finally, it's found in various places in the Q hierarchy to indicate that
-### a certain child element is not present. For example, a `my` declaration
-### can have an assignment attached to it, in which case its `expr` property
-### is a `Q::Expr` &mdash; but if no assignment is present, the `expr`
-### property is the value `None`.
+### a certain child element is not present. For example, an `if` statement
+### doesn't always have an `else` statement. When it doesn't, the `.else`
+### property is set to `None`.
 ###
-###     say(type((quasi @ Q::Statement { my x = 2 }).expr)); # --> `<type Q::Literal::Int>`
-###     say(type((quasi @ Q::Statement { my x; }).expr));    # --> `<type NoneType>`
+###     say(type((quasi @ Q::Statement { if 1 {} }).else)); # --> `<type NoneType>`
 ###
 ### The value `None` is falsy, stringifies to `None`, and doesn't numify.
 ###

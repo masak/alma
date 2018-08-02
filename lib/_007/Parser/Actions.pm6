@@ -77,17 +77,6 @@ class _007::Parser::Actions {
         make Q::StatementList.new(:statements(Val::Array.new(:elements($<statement>».ast))));
     }
 
-    method statement:my ($/) {
-        my $identifier = $<identifier>.ast;
-        my $name = $identifier.name;
-
-        make Q::Statement::My.new(
-            :identifier($identifier),
-            :expr($<EXPR> ?? $<EXPR>.ast !! NONE));
-
-        $*parser.opscope.maybe-install($name, []);
-    }
-
     method statement:expr ($/) {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
@@ -659,6 +648,15 @@ class _007::Parser::Actions {
             :propertylist($<propertylist>.ast));
     }
 
+    method term:my ($/) {
+        my $identifier = $<identifier>.ast;
+        my $name = $identifier.name;
+
+        make Q::Term::My.new(:identifier($identifier));
+
+        $*parser.opscope.maybe-install($name, []);
+    }
+
     method propertylist ($/) {
         my %seen;
         for $<property>».ast -> Q::Property $p {
@@ -779,10 +777,9 @@ sub check(Q::Block $ast, $runtime) is export {
     # a bunch of nodes we don't care about descending into
     multi handle(Q::ParameterList $) {}
     multi handle(Q::Statement::Return $) {}
-    multi handle(Q::Statement::Expr $) {}
     multi handle(Q::Statement::BEGIN $) {}
     multi handle(Q::Literal $) {}
-    multi handle(Q::Term $) {} # except Q::Term::Object, see below
+    multi handle(Q::Term $) {} # with two exceptions, see below
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
@@ -791,25 +788,15 @@ sub check(Q::Block $ast, $runtime) is export {
         }
     }
 
-    multi handle(Q::Statement::My $my) {
-        my $symbol = $my.identifier.name.value;
-        my $block = $runtime.current-frame();
-        die X::Redeclaration.new(:$symbol)
-            if $runtime.declared-locally($symbol);
-        die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$block ~ $symbol};
-        $runtime.declare-var($my.identifier);
-
-        if $my.expr !~~ Val::NoneType {
-            handle($my.expr);
-        }
-    }
-
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
         handle($block.block.statementlist);
         $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
         $runtime.leave();
+    }
+
+    multi handle(Q::Statement::Expr $expr) {
+        handle($expr.expr);
     }
 
     multi handle(Q::Statement::Func $func) {
@@ -866,6 +853,16 @@ sub check(Q::Block $ast, $runtime) is export {
         handle($object.propertylist);
     }
 
+    multi handle(Q::Term::My $my) {
+        my $symbol = $my.identifier.name.value;
+        my $block = $runtime.current-frame();
+        die X::Redeclaration.new(:$symbol)
+            if $runtime.declared-locally($symbol);
+        die X::Redeclaration::Outer.new(:$symbol)
+            if %*assigned{$block ~ $symbol};
+        $runtime.declare-var($my.identifier);
+    }
+
     multi handle(Q::PropertyList $propertylist) {
         my %seen;
         for $propertylist.properties.elements -> Q::Property $p {
@@ -873,5 +870,10 @@ sub check(Q::Block $ast, $runtime) is export {
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }
+    }
+
+    multi handle(Q::Infix $infix) {
+        handle($infix.lhs);
+        handle($infix.rhs);
     }
 }

@@ -118,34 +118,31 @@ class _007::Linter {
             multi traverse(Q::Term $term) {
             }
 
+            multi traverse(Q::Term::My $my) {
+                my $name = $my.identifier.name;
+                my $ref = "{@blocks[*-1].WHICH.Str}|$name";
+                %declared{$ref} = L::VariableNotUsed;
+            }
+
             multi traverse(Q::Statement::For $for) {
                 traverse($for.expr);
                 traverse($for.block);
             }
 
-            multi traverse(Q::Statement::My $my) {
-                my $name = $my.identifier.name;
-                my $ref = "{@blocks[*-1].WHICH.Str}|$name";
-                %declared{$ref} = L::VariableNotUsed;
-                if $my.expr !~~ NONE {
-                    traverse($my.expr);
-                    %assigned{$ref} = True;
-                    if $my.expr ~~ Q::Identifier && $my.expr.name eq $name {
-                        @complaints.push: L::RedundantAssignment.new(:$name);
-                        %readbeforeassigned{$ref} :delete;
-                    }
-                }
-            }
-
             multi traverse(Q::Infix::Assignment $infix) {
                 traverse($infix.rhs);
+                my $lhs = $infix.lhs;
+                if $lhs ~~ Q::Term::My {
+                    $lhs = $lhs.identifier;
+                }
                 die "LHS was not an identifier"
-                    unless $infix.lhs ~~ Q::Identifier;
-                my $name = $infix.lhs.name.value;
+                    unless $lhs ~~ Q::Identifier;
+                my $name = $lhs.name.value;
                 if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
                     @complaints.push: L::RedundantAssignment.new(:$name);
                 }
                 %assigned{ref $name} = True;
+                traverse($infix.lhs);
             }
 
             multi traverse(Q::Infix::Addition $infix) {
