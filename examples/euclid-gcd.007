@@ -14,5 +14,5 @@ if bigger < smaller {
     smaller = temp;
 }
 
-say("");
-say("Greatest common denominator: " ~ gcd(bigger, smaller));
+say();
+say("Greatest common denominator: ", gcd(bigger, smaller));

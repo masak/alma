@@ -22,13 +22,13 @@ func tw(n, L) {
 
 func show() {
     for (^5).reverse() -> L {
-        say(tw(0, L) ~ " " ~ tw(1, L) ~ " " ~ tw(2, L));
+        say(tw(0, L), " ", tw(1, L), " ", tw(2, L));
     }
 }
 
 func move(diskname, from, to) {
     say("");
-    say("Moving " ~ diskname ~ " from pile " ~ (from + 1) ~ " to pile " ~ (to + 1) ~ "...");
+    say("Moving ", diskname, " from pile ", from + 1, " to pile ", to + 1, "...");
     say("");
     my disk = state[from].pop();
     state[to].push(disk);
