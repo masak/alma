@@ -153,13 +153,18 @@ class _007::Runtime {
     }
 
     method call(Val::Func $c, @arguments) {
-        my $paramcount = $c.parameterlist.parameters.elements.elems;
-        my $argcount = @arguments.elems;
-        die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
-            unless $paramcount == $argcount;
         if $c === $!say-builtin {
-            $.output.print(@arguments[0].Str ~ "\n");
+            for @arguments -> $argument {
+                $.output.print($argument.Str);
+            }
+            $.output.print("\n");
             return NONE;
+        }
+        else {
+            my $paramcount = $c.parameterlist.parameters.elements.elems;
+            my $argcount = @arguments.elems;
+            die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
+                unless $paramcount == $argcount;
         }
         if $c === $!prompt-builtin {
             $.output.print(@arguments[0].Str);

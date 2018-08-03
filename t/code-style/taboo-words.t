@@ -8,7 +8,6 @@ my @taboo-words = <
     params
     stmtlist
     arglist
-    args
     proplist
     qx[find
     qx!find

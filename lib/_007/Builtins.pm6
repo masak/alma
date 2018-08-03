@@ -103,7 +103,7 @@ sub op(&fn, :$qtype, :$assoc?, :%precedence?) {
 }
 
 my @builtins =
-    say => -> $arg {
+    say => -> *$args {
         # implementation in Runtime.pm
     },
     prompt => sub ($arg) {
@@ -370,6 +370,9 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
     }
     when .value ~~ Block {
         my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
+        if .key eq "say" {
+            @elements = parameter("...args");
+        }
         my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
         my $statementlist = Q::StatementList.new();
         .key => Val::Func.new-builtin(.value, .key, $parameterlist, $statementlist);

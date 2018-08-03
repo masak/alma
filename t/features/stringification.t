@@ -5,7 +5,7 @@ use _007::Test;
 {
     outputs 'func foo() {}; say(foo)', "<func foo()>\n", "zero-param sub";
     outputs 'func fn(x, y, z) {}; say(fn)', "<func fn(x, y, z)>\n", "func with three parameters";
-    outputs 'say(say)', "<func say(arg)>\n", "builtin sub";
+    outputs 'say(say)', "<func say(...args)>\n", "builtin sub";
     outputs 'say(infix:<+>)', "<func infix:<+>(lhs, rhs)>\n", "builtin func (infix)";
     outputs 'say(infix:<\>>)', "<func infix:«>»(lhs, rhs)>\n", "builtin func (infix) -- contains > (I)";
     outputs 'say(infix:«>»)', "<func infix:«>»(lhs, rhs)>\n", "builtin func (infix) -- contains > (II)";
