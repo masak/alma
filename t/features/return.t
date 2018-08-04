@@ -3,69 +3,76 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (return (int 7)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            return 7;
+        }
+
+        say(f());
         .
 
-    is-result $ast, "7\n", "sub returning an Int";
+    outputs $program, "7\n", "sub returning an Int";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (return (str "Bond. James Bond.")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            return "Bond. James Bond.";
+        }
+
+        say(f());
         .
 
-    is-result $ast, "Bond. James Bond.\n", "sub returning a Str";
+    outputs $program, "Bond. James Bond.\n", "sub returning a Str";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (return (array (int 1) (int 2) (str "three"))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            return [1, 2, "three"];
+        }
+
+        say(f());
         .
 
-    is-result $ast, qq|[1, 2, "three"]\n|, "sub returning an Array";
+    outputs $program, qq<[1, 2, "three"]\n>, "sub returning a Str";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (return (int 1953))
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "Dead code. Should have returned by now.")))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            return 1953;
+            say("Dead code. Should have returned by now");
+        }
+
+        say(f());
         .
 
-    is-result $ast, "1953\n", "a return statement forces immediate exit of the subroutine";
+    outputs $program, "1953\n", "a return statement forces immediate exit of the subroutine";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (return))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            return;
+        }
+
+        say(f());
         .
 
-    is-result $ast, "None\n", "sub returning nothing";
+    outputs $program, "None\n", "sub returning nothing";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (int 7)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "f") (argumentlist))))))
+    my $program = q:to/./;
+        func f() {
+            7;
+        }
+
+        say(f());
         .
 
-    is-result $ast, "7\n", "sub returning implicitly";
+    outputs $program, "7\n", "sub returning implicitly";
 }
+
 done-testing;

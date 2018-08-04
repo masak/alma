@@ -3,23 +3,21 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n") (int 7))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "n")))))
+    my $program = q:to/./;
+        my n = 7;
+        say(n);
         .
 
-    is-result $ast, "7\n", "int type works";
+    outputs $program, "7\n", "int type works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s") (str "Bond"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "s")))))
+    my $program = q:to/./;
+        my s = "Bond";
+        say(s);
         .
 
-    is-result $ast, "Bond\n", "str type works";
+    outputs $program, "Bond\n", "str type works";
 }
 
 {
@@ -30,13 +28,12 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n") (array (int 1) (int 2)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "n")))))
+    my $program = q:to/./;
+        my a = [1, 2];
+        say(a);
         .
 
-    is-result $ast, "[1, 2]\n", "array type works";
+    outputs $program, "[1, 2]\n", "array type works";
 }
 
 {
@@ -62,15 +59,13 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (object (identifier "Q::Literal") (propertylist))))
+    my $program = q:to/./;
+        new Q::Literal {}
         .
 
-    is-error
-        $ast,
+    parse-error
+        $program,
         X::Uninstantiable,
-        "<type Q::Literal> is abstract and uninstantiable",
         "abstract Q types are uninstantiable (#140)";
 }
 

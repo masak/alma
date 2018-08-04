@@ -4,17 +4,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(quasi { 1 + 1 });
-        .
-
-    my $expected = read(
-        "(statementlist (stexpr (infix:+ (int 1) (int 1))))"
-    ).block.statementlist.statements.elements[0].expr.Str;
-    outputs $program, "$expected\n", "Basic quasi quoting";
-}
-
-{
-    my $program = q:to/./;
         macro foo() {
             return quasi {
                 say("OH HAI");

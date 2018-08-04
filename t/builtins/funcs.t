@@ -3,71 +3,63 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (int 1)))))
+    my $program = q:to/./;
+        say(1);
         .
 
-    is-result $ast, "1\n", "say() works";
+    outputs $program, "1\n", "say() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "n")))))))
+    my $program = q:to/./;
+        say(type(None));
         .
 
-    is-result $ast, "<type NoneType>\n", "none type() works";
+    outputs $program, "<type NoneType>\n", "None type() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "n") (int 7))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "n")))))))
+    my $program = q:to/./;
+        my n = 7;
+        say(type(n));
         .
 
-    is-result $ast, "<type Int>\n", "int type() works";
+    outputs $program, "<type Int>\n", "Int type() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s") (str "Bond"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "s")))))))
+    my $program = q:to/./;
+        my s = "Bond";
+        say(type(s));
         .
 
-    is-result $ast, "<type Str>\n", "str type() works";
+    outputs $program, "<type Str>\n", "Str type() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "a")))))))
+    my $program = q:to/./;
+        my a = [1, 2];
+        say(type(a));
         .
 
-    is-result $ast, "<type Array>\n", "array type() works";
+    outputs $program, "<type Array>\n", "Array type() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "f") (block (parameterlist) (statementlist)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "f")))))))
+    my $program = q:to/./;
+        func f() {}
+        say(type(f));
         .
 
-    is-result $ast, "<type Func>\n", "func type() works";
+    outputs $program, "<type Func>\n", "Func type() works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (identifier "say")))))))
+    my $program = q:to/./;
+        say(type(say));
         .
 
-    is-result $ast, "<type Func>\n", "builtin func type() returns the same as ordinary func";
+    outputs $program, "<type Func>\n", "builtin func type() returns the same as ordinary func";
 }
 
 done-testing;

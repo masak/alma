@@ -3,119 +3,99 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "u"))
-          (if (identifier "u") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy none")))))))
-          (if (int 0) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy int")))))))
-          (if (int 7) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy int")))))))
-          (if (str "") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy str")))))))
-          (if (str "James") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy str")))))))
-          (if (array) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy array")))))))
-          (if (array (str "")) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy array")))))))
-          (stfunc (identifier "foo") (block (parameterlist) (statementlist)))
-          (if (identifier "foo") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy sub")))))))
-          (macro (identifier "bar") (block (parameterlist) (statementlist)))
-          (if (identifier "bar") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy macro")))))))
-          (if (object (identifier "Object") (propertylist)) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "falsy object")))))))
-          (if (object (identifier "Object") (propertylist (property "a" (int 3)))) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy object")))))))
-          (if (object (identifier "Q::Literal::Int") (propertylist (property "value" (int 0))))
-            (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "truthy qnode"))))))))
+    my $program = q:to/./;
+        if None { say("falsy none") }
+        if 0 { say("falsy int") }
+        if 7 { say("truthy int") }
+        if "" { say("falsy str") }
+        if "James" { say("truthy str") }
+        if [] { say("falsy array") }
+        if [""] { say("truthy array") }
+        func foo() {}
+        if foo { say("truthy sub") }
+        macro moo() {}
+        if moo { say("truthy macro") }
+        if {} { say("falsy object") }
+        if { a: 3 } { say("truthy object") }
+        if Q::Literal::Int { say("truthy qnode") }
         .
 
-    is-result $ast,
+    outputs $program,
         <int str array sub macro object qnode>.map({"truthy $_\n"}).join,
         "if statements run truthy things";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (if (int 7) (block (parameterlist (param (identifier "a"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "a"))))))))
+    my $program = q:to/./;
+        if 7 -> a {
+            say(a);
+        }
         .
 
-    is-result $ast, "7\n", "if statements with parameters work as they should (#2)";
-}
-
-
-{
-    my $ast = q:to/./;
-        (statementlist
-         (if (int 1)
-           (block (parameterlist)
-             (statementlist
-              (stexpr (postfix:() (identifier "say") (argumentlist (str "if"))))))
-           (block (parameterlist)
-             (statementlist
-              (stexpr (postfix:() (identifier "say") (argumentlist (str "else"))))))))
-        .
-    is-result $ast, "if\n", "if-else statements run if-clause";
+    outputs $program, "7\n",
+        "if statements with parameters work as they should";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-         (if (int 0)
-           (block (parameterlist)
-             (statementlist
-              (stexpr (postfix:() (identifier "say") (argumentlist (str "if"))))))
-           (block (parameterlist)
-             (statementlist
-              (stexpr (postfix:() (identifier "say") (argumentlist (str "else"))))))))
+    my $program = q:to/./;
+        if 1 {
+            say("if");
+        }
+        else {
+            say("else");
+        }
         .
 
-    is-result $ast, "else\n", "if-else statements run else-clause";
+    outputs $program, "if\n",
+        "if-else statement run if clause";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-         (if (int 0)
-             (block (parameterlist)
-               (statementlist
-                (stexpr (postfix:() (identifier "say") (argumentlist (str "if"))))))
-           (if (int 0)
-               (block (parameterlist)
-                 (statementlist
-                  (stexpr (postfix:() (identifier "say") (argumentlist (str "else-if"))))))
-             (block (parameterlist)
-               (statementlist
-                (stexpr (postfix:() (identifier "say") (argumentlist (str "else")))))))))
+    my $program = q:to/./;
+        if 0 {
+            say("if");
+        }
+        else {
+            say("else");
+        }
         .
 
-    is-result $ast, "else\n", "if-else-if-else statements run else-clause";
+    outputs $program, "else\n",
+        "if-else statement run else clause";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-         (if (int 0)
-             (block (parameterlist)
-               (statementlist
-                (stexpr (postfix:() (identifier "say") (argumentlist (str "if"))))))
-           (if (int 1)
-               (block (parameterlist)
-                 (statementlist
-                  (stexpr (postfix:() (identifier "say") (argumentlist (str "else-if"))))))
-             (block (parameterlist)
-               (statementlist
-                (stexpr (postfix:() (identifier "say") (argumentlist (str "else")))))))))
+    my $program = q:to/./;
+        if 0 {
+            say("if");
+        }
+        else if 0 {
+            say("else if");
+        }
+        else {
+            say("else");
+        }
         .
 
-    is-result $ast, "else-if\n", "if-else-if-else statements run else-if-clause";
+    outputs $program, "else\n",
+        "if-else-if-else statement run else clause";
+}
+
+{
+    my $program = q:to/./;
+        if 0 {
+            say("if");
+        }
+        else if 1 {
+            say("else if");
+        }
+        else {
+            say("else");
+        }
+        .
+
+    outputs $program, "else if\n",
+        "if-else-if-else statement run else-if clause";
 }
 
 {
@@ -132,16 +112,15 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (if (int 1) (block (parameterlist (param (identifier "a")) (param (identifier "b"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "this should not work"))))))))
+    my $program = q:to/./;
+        if 1 -> a, b {
+            say("this should not work");
+        }
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::ParameterMismatch,
-        "If statement with 2 parameters called with 0 or 1 arguments",
         "if statement accepts only 0 or 1 argument";
 }
 

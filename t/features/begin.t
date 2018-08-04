@@ -3,16 +3,6 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (begin (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "won't get printed"))))))))
-        .
-
-    is-result $ast, "", "BEGIN blocks don't run at runtime";
-}
-
-{
     my $program = q:to/./;
         say("Why, the early bird gets the villain.");
 

@@ -3,60 +3,56 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (for (array (int 1) (int 2)) (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "i"))))))))
+    my $program = q:to/./;
+        for [1, 2] {
+            say("i");
+        }
         .
 
-    is-result $ast, "i\ni\n", "for-loops without parameters iterate over an array";
+    outputs $program, "i\ni\n", "for loops without parameters iterate over an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (for (array (int 1) (int 2)) (block (parameterlist (param (identifier "i"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "i"))))))))
+    my $program = q:to/./;
+        for [1, 2] -> i {
+            say(i);
+        }
         .
 
-    is-result $ast, "1\n2\n", "for-loops with 1 param iterate over an array";
+    outputs $program, "1\n2\n", "for loops with 1 param iterate over an array";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (for (array (int 1) (int 2) (int 3) (int 4)) (block (parameterlist (param (identifier "i")) (param (identifier "j"))) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "i"))))
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "j"))))))))
+    my $program = q:to/./;
+        for [1, 2, 3, 4] -> i, j {
+        }
         .
 
-    is-error
-        $ast,
+    runtime-error $program,
         X::ParameterMismatch,
-        "For loop with 2 parameters called with 0 or 1 arguments",
         "for-loops with more parameters are not supported";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (for (array (int 1) (int 2)) (block (parameterlist) (statementlist
-            (my (identifier "r") (int 3))
-            (stexpr (postfix:() (identifier "say") (argumentlist (identifier "r"))))))))
+    my $program = q:to/./;
+        for [1, 2] {
+            my r = 3;
+            say(r);
+        }
         .
 
-    is-result $ast, "3\n3\n", "variable declarations work inside of for loop without parameters";
+    outputs $program, "3\n3\n", "variable declarations work inside of for loop without parameters";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a") (array (int 1) (int 2) (int 3)))
-          (for (identifier "a") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "."))))))))
+    my $program = q:to/./;
+        my a = [1, 2, 3];
+        for a {
+            say(".");
+        }
         .
 
-    is-result $ast, ".\n.\n.\n", "can loop over variable, not just literal array";
+    outputs $program, ".\n.\n.\n", "can loop over variable, not just literal array";
 }
 
 done-testing;

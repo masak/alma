@@ -3,13 +3,16 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (macro (identifier "f") (block (parameterlist) (statementlist
-            (stexpr (postfix:() (identifier "say") (argumentlist (str "OH HAI from inside macro"))))))))
+    my $program = q:to/./;
+        macro f() {
+            say("OH HAI from inside macro");
+        }
         .
 
-    is-result $ast, "", "macro";
+    outputs
+        $program,
+        "",
+        "a macro does not invoke automatically";
 }
 
 {

@@ -5,20 +5,6 @@ use _007::Test;
 {
     my $program = q:to/./;
         func infix:<n>(left, right) {
-        }
-        .
-
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "infix:n") (block (parameterlist (param (identifier "left")) (param (identifier "right"))) (statementlist))))
-        .
-
-    parses-to $program, $ast, "custom operator parses to the right thing";
-}
-
-{
-    my $program = q:to/./;
-        func infix:<n>(left, right) {
             return 20;
         }
 

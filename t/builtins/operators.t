@@ -3,335 +3,290 @@ use Test;
 use _007::Test;
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (int 4))))))
+    my $program = q:to/./;
+        say(38 + 4);
         .
 
-    is-result $ast, "42\n", "numeric addition works";
+    outputs $program, "42\n", "addition works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:- (int 46) (int 4))))))
+    my $program = q:to/./;
+        say(46 - 4);
         .
 
-    is-result $ast, "42\n", "numeric subtraction works";
+    outputs $program, "42\n", "subtraction works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:* (int 6) (int 7))))))
+    my $program = q:to/./;
+        say(6 * 7);
         .
 
-    is-result $ast, "42\n", "numeric multiplication works";
+    outputs $program, "42\n", "multiplication works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:% (int 5) (int 2))))))
+    my $program = q:to/./;
+        say(5 % 2);
         .
 
-    is-result $ast, "1\n", "numeric modulo works";
+    outputs $program, "1\n", "modulo works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:% (int 5) (prefix:- (int 2)))))))
+    my $program = q:to/./;
+        say(5 % -2);
         .
 
-    is-result $ast, "-1\n", "sign of modulo operation follows sign of divisor (rhs)";
+    outputs $program, "-1\n", "sign of modulo operation follows sign of divisor (rhs)";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:% (int 5) (int 0))))))
+    my $program = q:to/./;
+        say(5 % 0);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using infix:<%>",
-        "dividing by 0 is an error";
+        "modulo by 0 is an error";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 5) (int 2)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 6) (int 2)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 5) (prefix:- (int 2))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 6) (prefix:- (int 2)))))))
+    my $program = q:to/./;
+        say(5 %% 2);
+        say(6 %% 2);
+        say(5 %% -2);
+        say(6 %% -2);
         .
 
-    is-result $ast, "False\nTrue\nFalse\nTrue\n", "numeric divisibility works";
+    outputs $program, "False\nTrue\nFalse\nTrue\n", "divisibility operator works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:%% (int 5) (int 0))))))
+    my $program = q:to/./;
+        say(5 %% 0);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using infix:<%%>",
         "checking divisibility by 0 is an error";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (str "Jame") (str "s Bond"))))))
+    my $program = q:to/./;
+        say("Jame" ~ "s Bond");
         .
 
-    is-result $ast, "James Bond\n", "string concatenation works";
+    outputs $program, "James Bond\n", "string concatenation works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 1))))))
+    my $program = q:to/./;
+        my ns = ["Jim", "Bond"];
+        say(ns[1]);
         .
 
-    is-result $ast, "Bond\n", "array indexing works";
+    outputs $program, "Bond\n", "array indexing works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "ns") (array (array (str "Auric") (str "Goldfinger"))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (postfix:[] (identifier "ns") (int 0)) (int 1))))))
+    my $program = q:to/./;
+        my ns = [["Auric", "Goldfinger"]];
+        say(ns[0][1]);
         .
 
-    is-result $ast, "Goldfinger\n", "array indexing works on something that is not a variable name";
+    outputs $program, "Goldfinger\n", "array indexing works on something that is not a variable name";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "x") (int 1))
-          (stexpr (infix:= (identifier "x") (int 2)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (identifier "x")))))
+    my $program = q:to/./;
+        my x = 1;
+        x = 2;
+        say(x);
         .
 
-    is-result $ast, "2\n", "assignment works";
+    outputs $program, "2\n", "assignment works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "i1") (int 10))
-          (my (identifier "i2") (int 11))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "i1") (identifier "i1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "i1") (identifier "i2"))))))
+    my $program = q:to/./;
+        my i1 = 10;
+        my i2 = 11;
+        say(i1 == i1);
+        say(i1 == i2);
         .
 
-    is-result $ast, "True\nFalse\n", "integer equality";
+    outputs $program, "True\nFalse\n", "integer equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "i1") (int 10))
-          (my (identifier "i2") (int 11))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "i1") (identifier "i1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "i1") (identifier "i2"))))))
+    my $program = q:to/./;
+        my i1 = 10;
+        my i2 = 11;
+        say(i1 != i1);
+        say(i1 != i2);
         .
 
-    is-result $ast, "False\nTrue\n", "integer inequality";
-}
-
-
-{
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s1") (str "10"))
-          (my (identifier "s2") (str "11"))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "s1") (identifier "s2"))))))
-        .
-
-    is-result $ast, "True\nFalse\n", "string equality";
+    outputs $program, "False\nTrue\n", "integer inequality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s1") (str "10"))
-          (my (identifier "s2") (str "11"))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "s1") (identifier "s2"))))))
+    my $program = q:to/./;
+        my s1 = "s1";
+        my s2 = "s2";
+        say(s1 == s1);
+        say(s1 == s2);
         .
 
-    is-result $ast, "False\nTrue\n", "string inequality";
+    outputs $program, "True\nFalse\n", "string equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s1") (str "a"))
-          (my (identifier "s2") (str "b"))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:< (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:< (identifier "s1") (identifier "s2"))))))
+    my $program = q:to/./;
+        my s1 = "s1";
+        my s2 = "s2";
+        say(s1 != s1);
+        say(s1 != s2);
         .
 
-    is-result $ast, "False\nTrue\n", "string less-than";
+    outputs $program, "False\nTrue\n", "string inequality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "s1") (str "b"))
-          (my (identifier "s2") (str "a"))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:> (identifier "s1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:> (identifier "s1") (identifier "s2"))))))
+    my $program = q:to/./;
+        my s1 = "a";
+        my s2 = "b";
+        say(s1 < s1);
+        say(s1 < s2);
         .
 
-    is-result $ast, "False\nTrue\n", "string greater-than";
+    outputs $program, "False\nTrue\n", "string less-than";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "a2") (array (int 1) (int 2) (str "3")))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a1") (identifier "a1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a1") (identifier "a2"))))))
+    my $program = q:to/./;
+        my s1 = "b";
+        my s2 = "a";
+        say(s1 > s1);
+        say(s1 > s2);
         .
 
-    is-result $ast, "True\nFalse\n", "array equality";
+    outputs $program, "False\nTrue\n", "string greater-than";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "a2") (array (int 1) (int 2) (str "3")))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "a1") (identifier "a1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "a1") (identifier "a2"))))))
+    my $program = q:to/./;
+        my a1 = [1, 2, 3];
+        my a2 = [1, 2, "3"];
+        say(a1 == a1);
+        say(a1 == a2);
         .
 
-    is-result $ast, "False\nTrue\n", "array inequality";
+    outputs $program, "True\nFalse\n", "array equality";
+}
+        
+{
+    my $program = q:to/./;
+        my a1 = [1, 2, 3];
+        my a2 = [1, 2, "3"];
+        say(a1 != a1);
+        say(a1 != a2);
+        .
+
+    outputs $program, "False\nTrue\n", "array inequality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "a3") (array (int 1) (int 2) (int 3)))
-
-          (stexpr (infix:= (postfix:[] (identifier "a3") (int 1)) (identifier "a3")))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a3") (identifier "a3"))))))
+    my $program = q:to/./;
+        my a3 = [1, 2, 3];
+        a3[1] = a3;
+        say(a3 == a3);
         .
 
-    is-result $ast, "True\n", "nested array equality";
+    outputs $program, "True\n", "nested array equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "o2"))))))
+    my $program = q:to/./;
+        my o1 = { x: 7 };
+        my o2 = { x: 9 };
+        say(o1 == o1);
+        say(o1 == o2);
         .
 
-    is-result $ast, "True\nFalse\n", "object equality";
+    outputs $program, "True\nFalse\n", "object equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-          (my (identifier "o2") (object (identifier "Object") (propertylist (property "x" (int 9)))))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "o2"))))))
+    my $program = q:to/./;
+        my o1 = { x: 7 };
+        my o2 = { x: 9 };
+        say(o1 != o1);
+        say(o1 != o2);
         .
 
-    is-result $ast, "False\nTrue\n", "object inequality";
+    outputs $program, "False\nTrue\n", "object inequality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "o3") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-
-          (stexpr (infix:= (postfix:. (identifier "o3") (identifier "y")) (identifier "o3")))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o3") (identifier "o3"))))))
+    my $program = q:to/./;
+        my o3 = { x: 7 };
+        o3.y = o3;
+        say(o3 == o3);
         .
 
-    is-result $ast, "True\n", "nested object equality";
+    outputs $program, "True\n", "nested object equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "Int") (identifier "Int")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "Int") (identifier "Str"))))))
+    my $program = q:to/./;
+        say(Int == Int);
+        say(Int == Str);
         .
 
-    is-result $ast, "True\nFalse\n", "type equality";
+    outputs $program, "True\nFalse\n", "type equality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "Int") (identifier "Int")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "Int") (identifier "Str"))))))
+    my $program = q:to/./;
+        say(Int != Int);
+        say(Int != Str);
         .
 
-    is-result $ast, "False\nTrue\n", "type inequality";
+    outputs $program, "False\nTrue\n", "type inequality";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "i1") (int 10))
-          (my (identifier "s1") (str "10"))
-          (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "i1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "s1") (identifier "a1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "a1") (identifier "i1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "o1") (identifier "i1"))))))
+    my $program = q:to/./;
+        my i1 = 10;
+        my s1 = "10";
+        my a1 = [1, 2, 3];
+        my o1 = { x: 7 };
+        say(i1 == s1);
+        say(s1 == a1);
+        say(a1 == i1);
+        say(o1 == i1);
         .
 
-    is-result $ast, "False\nFalse\nFalse\nFalse\n", "equality testing across types (always false)";
+    outputs $program, "False\n" x 4, "equality testing across types (always False)";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "i1") (int 10))
-          (my (identifier "s1") (str "10"))
-          (my (identifier "a1") (array (int 1) (int 2) (int 3)))
-          (my (identifier "o1") (object (identifier "Object") (propertylist (property "x" (int 7)))))
-
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "i1") (identifier "s1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "s1") (identifier "a1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "a1") (identifier "i1")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:!= (identifier "o1") (identifier "i1"))))))
+    my $program = q:to/./;
+        my i1 = 10;
+        my s1 = "10";
+        my a1 = [1, 2, 3];
+        my o1 = { x: 7 };
+        say(i1 != s1);
+        say(s1 != a1);
+        say(a1 != i1);
+        say(o1 != i1);
         .
 
-    is-result $ast, "True\nTrue\nTrue\nTrue\n", "inequality testing across types (always true)";
+    outputs $program, "True\n" x 4, "inequality testing across types (always True)";
 }
 
 {
@@ -381,83 +336,68 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stfunc (identifier "empty") (block (parameterlist) (statementlist)))
-          (my (identifier "none") (postfix:() (identifier "empty") (argumentlist)))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (identifier "none")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (int 0)))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (str "")))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:== (identifier "none") (array))))))
+    my $program = q:to/./;
+        say(None == None);
+        say(None == 0);
+        say(None == "");
+        say(None == []);
         .
 
-    is-result $ast, "True\nFalse\nFalse\nFalse\n", "equality testing with none matches itself but nothing else";
+    outputs $program, "True\nFalse\nFalse\nFalse\n", "equality testing with None matches only itself";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (prefix:- (int 2)))))))
+    my $program = q:to/./;
+        my ns = ["Jim", "Bond"];
+        say(ns[-2]);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Subscript::Negative,
-        "Calculated index (-2) is negative, but Array allows only 0-based indexing",
         "negative array indexing is an error";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "ns") (array (str "Jim") (str "Bond")))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 19))))))
+    my $program = q:to/./;
+        my ns = ["Jim", "Bond"];
+        say(ns[19]);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Subscript::TooLarge,
-        "Subscript (19) too large (array length 2)",
         "indexing beyond the last element is an error";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:+ (int 38) (str "4"))))))
+    my $program = q:to/./;
+        say(38 + "4");
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::TypeCheck,
-        q[Type check failed in +; expected Val::Int but got Val::Str (Val::Str.new(value => "4"))],
         "adding non-ints is an error";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:~ (int 38) (str "4"))))))
+    my $program = q:to/./;
+        say(38 ~ "4");
         .
 
-    is-result
-        $ast,
-        "384\n",
-        "concatenating non-strs is OK (since #281)";
+    outputs $program, "384\n", "concatenating non-strs is OK (since #281)";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (my (identifier "ns") (str "Jim"))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:[] (identifier "ns") (int 0))))))
+    my $program = q:to/./;
+        my ns = "Jim";
+        say(ns[0]);
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::TypeCheck,
-        q[Type check failed in indexing; expected Val::Array but got Val::Str (Val::Str.new(value => "Jim"))],
         "indexing a non-array is an error";
 }
 
@@ -477,19 +417,6 @@ use _007::Test;
         .
 
     outputs $program, "-2\n-7\n-12\nFalse\nFalse\nFalse\n", "all postfixes are tighter than both prefixes";
-}
-
-{
-    my $program = q:to/./;
-        -1 * 2;
-        .
-
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (infix:* (prefix:- (int 1)) (int 2))))
-        .
-
-    parses-to $program, $ast, "numeric negation is tighter than multiplication";
 }
 
 {
@@ -573,15 +500,13 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (prefix:^ (str "Mr Bond"))))
+    my $program = q:to/./;
+        ^"Mr Bond"
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::TypeCheck,
-        q[Type check failed in prefix:<^>; expected Val::Int but got Val::Str (Val::Str.new(value => "Mr Bond"))],
         "can't upto a string (or other non-integer types)";
 }
 
@@ -695,22 +620,20 @@ use _007::Test;
 }
 
 {
-     my $ast = q:to/./;
-         (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:+ (str "6")))))))
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:+ (str "-6"))))))))
+    my $program = q:to/./;
+        say(type(+"6"));
+        say(type(+"-6"));
         .
 
-    is-result $ast, "<type Int>\n<type Int>\n", "prefix:<+> works";
+    outputs $program, "<type Int>\n<type Int>\n", "prefix:<+> works";
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (postfix:() (identifier "type") (argumentlist (prefix:~ (int 6))))))))
+    my $program = q:to/./;
+        say(type(~6));
         .
 
-    is-result $ast, "<type Str>\n", "prefix:<~> works";
+    outputs $program, "<type Str>\n", "prefix:<~> works";
 }
 
 {
@@ -748,15 +671,13 @@ use _007::Test;
 }
 
 {
-    my $ast = q:to/./;
-        (statementlist
-          (stexpr (postfix:() (identifier "say") (argumentlist (infix:divmod (int 5) (int 0))))))
+    my $program = q:to/./;
+        say( 5 divmod 0 );
         .
 
-    is-error
-        $ast,
+    runtime-error
+        $program,
         X::Numeric::DivideByZero,
-        "Attempt to divide 5 by zero using infix:<divmod>",
         "divmodding by 0 is an error";
 }
 
