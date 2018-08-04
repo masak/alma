@@ -695,4 +695,13 @@ use _007::Test;
         "it's OK to have whitespace before a postfix";
 }
 
+{
+    my $program = q:to/./;
+        func infix:<+++>(lhs, rhs) {}
+        func postfix:<+++>(term) {}
+        .
+
+    parse-error $program, X::Redeclaration, "can't declare an infix and a postfix with the same name";
+}
+
 done-testing;
