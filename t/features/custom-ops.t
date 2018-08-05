@@ -678,7 +678,16 @@ use _007::Test;
         .
 
     outputs $program, "42\n",
-        "it's OK to have whitespace before a postfix";
+        "can have whitespace before a postfix";
+}
+
+{
+    my $program = q:to/./;
+        say(+ 7);
+        .
+
+    outputs $program, "7\n",
+        "can have whitespace after a prefix";
 }
 
 {
