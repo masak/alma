@@ -294,7 +294,7 @@ use _007::Test;
     outputs 'macro foo() {}; say(foo == foo)', "True\n", "a macro is equal to itself";
     outputs 'say(say == say)', "True\n", "a built-in func is equal to itself";
     outputs 'say(infix:<+> == infix:<+>)', "True\n", "a built-in operator is equal to itself";
-    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "foo" })', "True\n",
+    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "foo" })', "True\n",
         "two Qtrees with equal content are equal";
     outputs 'my a = []; for [1, 2] { func fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
         "False\n", "the same func from two different frames are different";
@@ -314,7 +314,7 @@ use _007::Test;
         "funcs with different parameters are unequal";
     outputs 'func foo() {}; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }', "False\n",
         "funcs with different bodies are unequal";
-    outputs 'say(new Q::Identifier { name: "foo" } == new Q::Identifier { name: "bar" })', "False\n",
+    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "bar" })', "False\n",
         "two Qtrees with distinct content are unequal";
 }
 
@@ -512,7 +512,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q::Infix { + }; say(q ~~ Q::Infix)
+        my q = quasi @ Q.Infix { + }; say(q ~~ Q.Infix)
         .
 
     outputs $program, "True\n", "successful typecheck";
@@ -520,7 +520,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q::Infix { + }; say(q ~~ Q::Prefix)
+        my q = quasi @ Q.Infix { + }; say(q ~~ Q.Prefix)
         .
 
     outputs $program, "False\n", "unsuccessful typecheck";
@@ -552,8 +552,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(quasi @ Q::Infix { + } !~~ Q::Infix);
-        say(quasi @ Q::Infix { + } !~~ Q::Prefix);
+        say(quasi @ Q.Infix { + } !~~ Q.Infix);
+        say(quasi @ Q.Infix { + } !~~ Q.Prefix);
         say(42 !~~ Int);
         say([4, 2] !~~ Array);
         say({} !~~ Object);

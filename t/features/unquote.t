@@ -6,7 +6,7 @@ use _007::Test;
     my $program = q:to/./;
         my greeting_ast;
         BEGIN {
-            greeting_ast = new Q::Literal::Str { value: "Mr Bond!" };
+            greeting_ast = new Q.Literal.Str { value: "Mr Bond!" };
         }
 
         macro foo() {
@@ -40,21 +40,21 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{Q::Infix @ q}}} 2) };
+            my q = quasi @ Q.Infix { + };
+            return quasi { say(2 {{{Q.Infix @ q}}} 2) };
         }
 
         moo();
         .
 
-    outputs $program, "4\n", "Q::Infix @ unquote";
+    outputs $program, "4\n", "Q.Infix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Term { "foo" };
-            return quasi { say(2 {{{Q::Infix @ q}}} 2) };
+            my q = quasi @ Q.Term { "foo" };
+            return quasi { say(2 {{{Q.Infix @ q}}} 2) };
         }
 
         moo();
@@ -62,14 +62,14 @@ use _007::Test;
 
     parse-error $program,
         X::TypeCheck,
-        "can't put a non-infix in a Q::Infix @ unquote";
+        "can't put a non-infix in a Q.Infix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Infix { + };
-            return quasi { say(2 {{{Q::Term @ q}}} 2) };
+            my q = quasi @ Q.Infix { + };
+            return quasi { say(2 {{{Q.Term @ q}}} 2) };
         }
 
         moo();
@@ -83,7 +83,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Infix { + };
+            my q = quasi @ Q.Infix { + };
             return quasi { say(2 {{{q}}} 2) };
         }
 
@@ -98,21 +98,21 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Prefix { - };
-            return quasi { say({{{Q::Prefix @ q}}} 17) };
+            my q = quasi @ Q.Prefix { - };
+            return quasi { say({{{Q.Prefix @ q}}} 17) };
         }
 
         moo();
         .
 
-    outputs $program, "-17\n", "Q::Prefix @ unquote";
+    outputs $program, "-17\n", "Q.Prefix @ unquote";
 }
 
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q::Term { "foo" };
-            return quasi { say({{{Q::Prefix @ q}}} 17) };
+            my q = quasi @ Q.Term { "foo" };
+            return quasi { say({{{Q.Prefix @ q}}} 17) };
         }
 
         moo();
@@ -120,7 +120,7 @@ use _007::Test;
 
     parse-error $program,
         X::TypeCheck,
-        "can't put a non-prefix in a Q::Prefix @ unquote";
+        "can't put a non-prefix in a Q.Prefix @ unquote";
 }
 
 {
@@ -132,23 +132,23 @@ use _007::Test;
         }
 
         macro moo() {
-            my q = quasi @ Q::ArgumentList { 1, "foo", [0, 0, 7] };
-            return quasi { foo({{{Q::ArgumentList @ q}}}) };
+            my q = quasi @ Q.ArgumentList { 1, "foo", [0, 0, 7] };
+            return quasi { foo({{{Q.ArgumentList @ q}}}) };
         }
 
         moo();
         .
 
-    outputs $program, "1\nfoo\n[0, 0, 7]\n", "Q::ArgumentList @ unquote";
+    outputs $program, "1\nfoo\n[0, 0, 7]\n", "Q.ArgumentList @ unquote";
 }
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q::CompUnit { say("James"); };
-        say(type(quasi @ Q::CompUnit { {{{Q::CompUnit @ q}}} }));
+        my q = quasi @ Q.CompUnit { say("James"); };
+        say(type(quasi @ Q.CompUnit { {{{Q.CompUnit @ q}}} }));
         .
 
-    outputs $program, "<type Q::CompUnit>\n", "Q::CompUnit @ q";
+    outputs $program, "<type Q.CompUnit>\n", "Q.CompUnit @ q";
 }
 
 {

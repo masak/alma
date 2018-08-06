@@ -1,8 +1,8 @@
 macro name(expr) {
-    if expr ~~ Q::Postfix::Property {
+    if expr ~~ Q.Postfix.Property {
         expr = expr.property;
     }
-    if expr !~~ Q::Identifier {
+    if expr !~~ Q.Identifier {
         throw new Exception {
             message: "Cannot turn a " ~ type(expr) ~ " into a name"
         };

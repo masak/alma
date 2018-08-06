@@ -8,20 +8,20 @@ my $parser = _007.parser;
     my $stringified-ast = $parser.parse($program).Str;
 
     my $expected = q:to/./.subst(/\n$/, "");
-        Q::CompUnit Q::Block {
-            parameterlist: Q::ParameterList [],
-            statementlist: Q::StatementList [Q::Statement::Expr Q::Term::Quasi {
+        Q.CompUnit Q.Block {
+            parameterlist: Q.ParameterList [],
+            statementlist: Q.StatementList [Q.Statement.Expr Q.Term.Quasi {
                 qtype: "",
-                contents: Q::Block {
-                    parameterlist: Q::ParameterList [],
-                    statementlist: Q::StatementList [Q::Statement::If {
-                        expr: Q::Unquote {
-                            qtype: Q::Term,
-                            expr: Q::Literal::Int 0
+                contents: Q.Block {
+                    parameterlist: Q.ParameterList [],
+                    statementlist: Q.StatementList [Q.Statement.If {
+                        expr: Q.Unquote {
+                            qtype: Q.Term,
+                            expr: Q.Literal.Int 0
                         },
-                        block: Q::Block {
-                            parameterlist: Q::ParameterList [],
-                            statementlist: Q::StatementList []
+                        block: Q.Block {
+                            parameterlist: Q.ParameterList [],
+                            statementlist: Q.StatementList []
                         },
                         else: None
                     }]

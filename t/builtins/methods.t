@@ -351,10 +351,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Q::Identifier.create([["name", "Steve"]]));
+        say(Q.Identifier.create([["name", "Steve"]]));
         .
 
-    outputs $program, qq[Q::Identifier "Steve"\n], "Type.create() method to create a Q::Identifier";
+    outputs $program, qq[Q.Identifier "Steve"\n], "Type.create() method to create a Q::Identifier";
 }
 
 {

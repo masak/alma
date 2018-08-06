@@ -41,7 +41,7 @@ role Val {
 ### doesn't always have an `else` statement. When it doesn't, the `.else`
 ### property is set to `None`.
 ###
-###     say(type((quasi @ Q::Statement { if 1 {} }).else)); # --> `<type NoneType>`
+###     say(type((quasi @ Q.Statement { if 1 {} }).else)); # --> `<type NoneType>`
 ###
 ### The value `None` is falsy, stringifies to `None`, and doesn't numify.
 ###
@@ -551,18 +551,18 @@ class Val::Object does Val {
 ### The `infix:<~~>` operator respects subtyping, so checking against a
 ### wider type also gives a `True` result:
 ###
-###     my q = new Q::Literal::Int { value: 42 };
-###     say(q ~~ Q::Literal::Int);  # --> `True`
-###     say(q ~~ Q::Literal);       # --> `True`
+###     my q = new Q.Literal.Int { value: 42 };
+###     say(q ~~ Q.Literal.Int);    # --> `True`
+###     say(q ~~ Q.Literal);        # --> `True`
 ###     say(q ~~ Q);                # --> `True`
 ###     say(q ~~ Int);              # --> `False`
 ###
 ### If you want *exact* type matching (which isn't a very OO thing to want),
 ### consider using infix:<==> on the respective type objects instead:
 ###
-###     my q = new Q::Literal::Str { value: "Bond" };
-###     say(type(q) == Q::Literal::Str);    # --> `True`
-###     say(type(q) == Q::Literal);         # --> `False`
+###     my q = new Q.Literal.Str { value: "Bond" };
+###     say(type(q) == Q.Literal.Str);      # --> `True`
+###     say(type(q) == Q.Literal);          # --> `False`
 ###
 class Val::Type does Val {
     has $.type;
@@ -602,7 +602,7 @@ class Val::Type does Val {
     }
 
     method name {
-        $.type.^name.subst(/^ "Val::"/, "");
+        $.type.^name.subst(/^ "Val::"/, "").subst(/"::"/, ".", :g);
     }
 }
 
@@ -698,8 +698,9 @@ class Helper {
         when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;
+            my $name = .^name;
             die "Unexpected type -- some invariant must be broken"
-                unless $self.^name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
+                unless $name ~~ /^ "Q::"/;    # type not introduced yet; can't typecheck
 
             sub aname($attr) { $attr.name.substr(2) }
             sub avalue($attr, $obj) {
@@ -707,16 +708,18 @@ class Helper {
                 # XXX: this is a temporary fix until we patch Q::Unquote's qtype to be an identifier
                 $value
                     ?? $value.quoted-Str
-                    !! $value.^name;
+                    !! $value.^name.subst(/"::"/, ".", :g);
             }
+
+            $name.=subst(/"::"/, ".", :g);
 
             my @attrs = $self.attributes;
             if @attrs == 1 {
-                return "{.^name} { avalue(@attrs[0], $self) }";
+                return "$name { avalue(@attrs[0], $self) }";
             }
             sub keyvalue($attr) { aname($attr) ~ ": " ~ avalue($attr, $self) }
             my $contents = @attrs.map(&keyvalue).join(",\n").indent(4);
-            return "{$self.^name} \{\n$contents\n\}";
+            return "$name \{\n$contents\n\}";
         }
     }
 }

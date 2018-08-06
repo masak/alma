@@ -17,7 +17,7 @@ use _007::Test;
         if moo { say("truthy macro") }
         if {} { say("falsy object") }
         if { a: 3 } { say("truthy object") }
-        if Q::Literal::Int { say("truthy qnode") }
+        if Q.Literal.Int { say("truthy qnode") }
         .
 
     outputs $program,

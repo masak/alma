@@ -60,7 +60,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        new Q::Literal {}
+        new Q.Literal {}
         .
 
     parse-error

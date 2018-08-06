@@ -532,7 +532,79 @@ class _007::Runtime {
                 return Val::Tuple.new(:@elements);
             });
         }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ArgumentList" {
+            return Val::Type.of(Q::ArgumentList);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Block" {
+            return Val::Type.of(Q::Block);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "CompUnit" {
+            return Val::Type.of(Q::CompUnit);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Identifier" {
+            return Val::Type.of(Q::Identifier);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Infix" {
+            return Val::Type.of(Q::Infix);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Literal" {
+            return Val::Type.of(Q::Literal);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ParameterList" {
+            return Val::Type.of(Q::ParameterList);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Postfix" {
+            return Val::Type.of(Q::Postfix);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Prefix" {
+            return Val::Type.of(Q::Prefix);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Statement" {
+            return Val::Type.of(Q::Statement);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "StatementList" {
+            return Val::Type.of(Q::StatementList);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Term" {
+            return Val::Type.of(Q::Term);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Int" {
+            return Val::Type.of(Q::Literal::Int);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "None" {
+            return Val::Type.of(Q::Literal::None);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Str" {
+            return Val::Type.of(Q::Literal::Str);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Call" {
+            return Val::Type.of(Q::Postfix::Call);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Property" {
+            return Val::Type.of(Q::Postfix::Property);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Func" {
+            return Val::Type.of(Q::Statement::Func);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "If" {
+            return Val::Type.of(Q::Statement::If);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Macro" {
+            return Val::Type.of(Q::Statement::Macro);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "My" {
+            return Val::Type.of(Q::Statement::My);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Return" {
+            return Val::Type.of(Q::Statement::Return);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Array" {
+            return Val::Type.of(Q::Term::Array);
+        }
         else {
+            if $obj ~~ Val::Type {
+                die X::Property::NotFound.new(:$propname, :type("$type ({$obj.type.^name})"));
+            }
             die X::Property::NotFound.new(:$propname, :$type);
         }
     }
