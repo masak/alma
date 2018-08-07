@@ -36,7 +36,7 @@ use _007::Linter;
 {
     my $program = 'my x = x';
     my @complaints = _007.linter.lint($program);
-    ok @complaints ~~ [L::RedundantAssignment], "assigning to self in declaration is redundant";
+    ok @complaints ~~ [L::RedundantAssignment, L::VariableReadBeforeAssigned], "assigning to self in declaration is redundant";
 }
 
 {

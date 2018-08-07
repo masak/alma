@@ -892,22 +892,20 @@ class Q::ArgumentList does Q {
 role Q::Statement does Q {
 }
 
-### ### Q::Statement::My
+### ### Q::Term::My
 ###
-### A `my` variable declaration statement.
+### A `my` variable declaration.
 ###
-class Q::Statement::My does Q::Statement does Q::Declaration {
+class Q::Term::My does Q::Term does Q::Declaration {
     has $.identifier;
-    has $.expr = NONE;
-
-    method attribute-order { <identifier expr> }
 
     method is-assignable { True }
 
-    method run($runtime) {
-        return
-            unless $.expr !~~ Val::NoneType;
-        my $value = $.expr.eval($runtime);
+    method eval($runtime) {
+        return $.identifier.eval($runtime);
+    }
+
+    method put-value($value, $runtime) {
         $.identifier.put-value($value, $runtime);
     }
 }
