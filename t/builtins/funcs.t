@@ -62,4 +62,13 @@ use _007::Test;
     outputs $program, "<type Func>\n", "builtin func type() returns the same as ordinary func";
 }
 
+{
+    my $program = q:to/./;
+        say(0, 0, 7);
+        say(say);
+        .
+
+    outputs $program, "007\n<func say(...args)>\n", "builtin func say() has varargs";
+}
+
 done-testing;

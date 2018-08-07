@@ -8,15 +8,15 @@ func verse(n) {
         }
     }
 
-    say(plural(n + 1, "bottle") ~ " of beer on the wall,");
-    say(plural(n + 1, "bottle") ~ " of beer.");
+    say(plural(n + 1, "bottle"), " of beer on the wall,");
+    say(plural(n + 1, "bottle"), " of beer.");
     say("Take one down, pass it around,");
-    say(plural(n, "bottle") ~ " of beer on the wall...");
+    say(plural(n, "bottle"), " of beer on the wall...");
 }
 
 for (^99).reverse() -> beerCount {
     verse(beerCount);
     if beerCount > 0 {
-        say("");
+        say();
     }
 }
