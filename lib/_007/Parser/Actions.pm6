@@ -544,18 +544,18 @@ class _007::Parser::Actions {
             # to the troubled musings in <https://github.com/masak/007/issues/7>, which aren't
             # completely solved yet.
 
-            if $qtype.value eq "Q::Statement" {
+            if $qtype.value eq "Q.Statement" {
                 # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
                 my $contents = $block.ast.statementlist.statements.elements[0];
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
-            elsif $qtype.value eq "Q::StatementList" {
+            elsif $qtype.value eq "Q.StatementList" {
                 my $contents = $block.ast.statementlist;
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
-            elsif $qtype.value ne "Q::Block"
+            elsif $qtype.value ne "Q.Block"
                 && $block.ast ~~ Q::Block
                 && $block.ast.statementlist.statements.elements.elems == 1
                 && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
@@ -596,9 +596,15 @@ class _007::Parser::Actions {
     }
 
     method unquote ($/) {
-        my $qtype = $<identifier>
-            ?? $*runtime.get-var($<identifier>.ast.name.value).type
-            !! Q::Term;
+        my $qtype = Q::Term;
+        if $<identifier> {
+            for $<identifier>.list -> $fragment {
+                my $identifier = ~$fragment;
+                $qtype = $++
+                    ?? $*runtime.property($qtype, $identifier)
+                    !! $*runtime.get-var($identifier);
+            }
+        }
         make Q::Unquote.new(:$qtype, :expr($<EXPR>.ast));
     }
 
@@ -608,19 +614,26 @@ class _007::Parser::Actions {
     }
 
     method term:new-object ($/) {
-        my $type = $<identifier>.ast.name.value;
-        my $type-obj = $*runtime.get-var($type).type;
+        my $type;
+        for $<identifier>.list -> $fragment {
+            my $identifier = ~$fragment;
+            $type = $++
+                ?? $*runtime.property($type, $identifier)
+                !! $*runtime.maybe-get-var($identifier);
+        }
+        my $type-obj = $type.type;
+        my $name = $type-obj.^name.subst("::", ".", :g);
 
         if $type-obj !=== Val::Object {
             if is-role($type-obj) {
-                die X::Uninstantiable.new(:name($type));
+                die X::Uninstantiable.new(:$name);
             }
 
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
                 my $property = $p.key.value;
-                die X::Property::NotDeclared.new(:$type, :$property)
+                die X::Property::NotDeclared.new(:type($name), :$property)
                     unless %known-properties{$property};
             }
             for %known-properties.keys -> $property {
@@ -628,23 +641,17 @@ class _007::Parser::Actions {
                 # passed, since it will get a sensible value anyway.
                 next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
-                die X::Property::Required.new(:$type, :$property)
+                die X::Property::Required.new(:type($name), :$property)
                     unless $property eq any($<propertylist>.ast.properties.elements».key».value);
             }
         }
 
-        make Q::Term::Object.new(
-            :type(Q::Identifier.new(:name(Val::Str.new(:value($type))))),
-            :propertylist($<propertylist>.ast));
+        make Q::Term::Object.new(:$type, :propertylist($<propertylist>.ast));
     }
 
     method term:object ($/) {
-        my $type = "Object";
-        my $name = Val::Str.new(:value($type));
-        my $frame = $*runtime.builtin-frame;
-
         make Q::Term::Object.new(
-            :type(Q::Identifier.new(:$name, :$frame)),
+            :type(Val::Type.of(Val::Object)),
             :propertylist($<propertylist>.ast));
     }
 
@@ -702,9 +709,9 @@ class _007::Parser::Actions {
     }
 
     method infix-unquote($/) {
-        my $got = ~($<unquote><identifier> // "Q::Term");
+        my $got = ~($<unquote><identifier>.join(".") // "Q.Term");
         die X::TypeCheck.new(:operation<parsing>, :$got, :expected(Q::Infix))
-            unless $got eq "Q::Infix";
+            unless $got eq "Q.Infix";
 
         make $<unquote>.ast;
     }

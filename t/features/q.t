@@ -4,25 +4,25 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::Return {};
+        my q = new Q.Statement.Return {};
         say(q.expr);
         .
 
     outputs
         $program,
         "None\n",
-        "Q::Statement::Return can be constructed without an 'expr' property (#84)";
+        "Q.Statement.Return can be constructed without an 'expr' property (#84)";
 }
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::If {
-            expr: new Q::Literal::None {},
-            block: new Q::Block {
-                parameterlist: new Q::ParameterList {
+        my q = new Q.Statement.If {
+            expr: new Q.Literal.None {},
+            block: new Q.Block {
+                parameterlist: new Q.ParameterList {
                     parameters: []
                 },
-                statementlist: new Q::StatementList {
+                statementlist: new Q.StatementList {
                     statements: []
                 }
             }
@@ -33,16 +33,16 @@ use _007::Test;
     outputs
         $program,
         "None\n",
-        "Q::Statement::If can be constructed without an 'else' property (#84)";
+        "Q.Statement.If can be constructed without an 'else' property (#84)";
 }
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::Func {
-            identifier: new Q::Identifier { name: "foo" },
-            block: new Q::Block {
-                parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
+        my q = new Q.Statement.Func {
+            identifier: new Q.Identifier { name: "foo" },
+            block: new Q.Block {
+                parameterlist: new Q.ParameterList { parameters: [] },
+                statementlist: new Q.StatementList { statements: [] }
             }
         };
         say(q.traitlist);
@@ -50,17 +50,17 @@ use _007::Test;
 
     outputs
         $program,
-        "Q::TraitList []\n",
-        "Q::Statement::Sub can be constructed without a 'traitlist' property (#84)";
+        "Q.TraitList []\n",
+        "Q.Statement.Sub can be constructed without a 'traitlist' property (#84)";
 }
 
 {
     my $program = q:to/./;
-        my q = new Q::Statement::Macro {
-            identifier: new Q::Identifier { name: "moo" },
-            block: new Q::Block {
-                parameterlist: new Q::ParameterList { parameters: [] },
-                statementlist: new Q::StatementList { statements: [] }
+        my q = new Q.Statement.Macro {
+            identifier: new Q.Identifier { name: "moo" },
+            block: new Q.Block {
+                parameterlist: new Q.ParameterList { parameters: [] },
+                statementlist: new Q.StatementList { statements: [] }
             }
         };
         say(q.traitlist);
@@ -68,8 +68,8 @@ use _007::Test;
 
     outputs
         $program,
-        "Q::TraitList []\n",
-        "Q::Statement::Macro can be constructed without a 'traitlist' property (#84)";
+        "Q.TraitList []\n",
+        "Q.Statement.Macro can be constructed without a 'traitlist' property (#84)";
 }
 
 done-testing;

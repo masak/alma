@@ -307,11 +307,11 @@ class Q::Term::Tuple does Q::Term {
 ### with zero or more key/value pairs.
 ###
 class Q::Term::Object does Q::Term {
-    has Q::Identifier $.type;
+    has Val::Type $.type;
     has $.propertylist;
 
     method eval($runtime) {
-        return $runtime.get-var($.type.name.value, $.type.frame).create(
+        return $.type.create(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
         );
     }
@@ -847,7 +847,7 @@ class Q::Term::Quasi does Q::Term {
             $thing.new(|%attributes);
         }
 
-        if $.qtype.value eq "Q::Unquote" && $.contents ~~ Q::Unquote {
+        if $.qtype.value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
         my $r = interpolate($.contents);

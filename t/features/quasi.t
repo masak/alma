@@ -84,113 +84,113 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Infix { + }));
+        say(type(quasi @ Q.Infix { + }));
         .
 
-    outputs $program, "<type Q::Infix::Addition>\n", "quasi @ Q::Infix";
+    outputs $program, "<type Q.Infix.Addition>\n", "quasi @ Q.Infix";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Prefix { - }));
+        say(type(quasi @ Q.Prefix { - }));
         .
 
-    outputs $program, "<type Q::Prefix::Minus>\n", "quasi @ Q::Prefix";
+    outputs $program, "<type Q.Prefix.Minus>\n", "quasi @ Q.Prefix";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Postfix { .foo }));
+        say(type(quasi @ Q.Postfix { .foo }));
         .
 
-    outputs $program, "<type Q::Postfix::Property>\n", "quasi @ Q::Postfix";
+    outputs $program, "<type Q.Postfix.Property>\n", "quasi @ Q.Postfix";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Expr { 2 + (2 + 2) + -2 + [2][2] }));
+        say(type(quasi @ Q.Expr { 2 + (2 + 2) + -2 + [2][2] }));
         .
 
-    outputs $program, "<type Q::Infix::Addition>\n", "quasi @ Q::Expr";
+    outputs $program, "<type Q.Infix.Addition>\n", "quasi @ Q.Expr";
 }
 
 {
     my $program = q:to/./;
         my foo;
-        say(type(quasi @ Q::Identifier { foo }));
+        say(type(quasi @ Q.Identifier { foo }));
         .
 
-    outputs $program, "<type Q::Identifier>\n", "quasi @ Q::Identifier";
+    outputs $program, "<type Q.Identifier>\n", "quasi @ Q.Identifier";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Block { { say("Bond") } }));
+        say(type(quasi @ Q.Block { { say("Bond") } }));
         .
 
-    outputs $program, "<type Q::Block>\n", "quasi @ Q::Block";
+    outputs $program, "<type Q.Block>\n", "quasi @ Q.Block";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::CompUnit { say("James"); }));
+        say(type(quasi @ Q.CompUnit { say("James"); }));
         .
 
-    outputs $program, "<type Q::CompUnit>\n", "quasi @ Q::CompUnit";
+    outputs $program, "<type Q.CompUnit>\n", "quasi @ Q.CompUnit";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Literal { 7 }));
-        say(type(quasi @ Q::Literal { None }));
-        say(type(quasi @ Q::Literal { "James Bond" }));
+        say(type(quasi @ Q.Literal { 7 }));
+        say(type(quasi @ Q.Literal { None }));
+        say(type(quasi @ Q.Literal { "James Bond" }));
         .
 
     outputs $program,
-        "<type Q::Literal::Int>\n<type Q::Literal::None>\n<type Q::Literal::Str>\n",
-        "quasi @ Q::Literal";
+        "<type Q.Literal.Int>\n<type Q.Literal.None>\n<type Q.Literal.Str>\n",
+        "quasi @ Q.Literal";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Literal::Int { 7 }));
+        say(type(quasi @ Q.Literal.Int { 7 }));
         .
 
-    outputs $program, "<type Q::Literal::Int>\n", "quasi @ Q::Literal::Int";
+    outputs $program, "<type Q.Literal.Int>\n", "quasi @ Q.Literal.Int";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Literal::None { None }));
+        say(type(quasi @ Q.Literal.None { None }));
         .
 
-    outputs $program, "<type Q::Literal::None>\n", "quasi @ Q::Literal::None";
+    outputs $program, "<type Q.Literal.None>\n", "quasi @ Q.Literal.None";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Literal::Str { "James Bond" }));
+        say(type(quasi @ Q.Literal.Str { "James Bond" }));
         .
 
-    outputs $program, "<type Q::Literal::Str>\n", "quasi @ Q::Literal::Str";
+    outputs $program, "<type Q.Literal.Str>\n", "quasi @ Q.Literal.Str";
 }
 
 {
     my $program = q:to/./;
         my prop;
-        say(type(quasi @ Q::Property { key: "value" }));
-        say(type(quasi @ Q::Property { "key": "value" }));
-        say(type(quasi @ Q::Property { fn() {} }));
-        say(type(quasi @ Q::Property { prop }));
+        say(type(quasi @ Q.Property { key: "value" }));
+        say(type(quasi @ Q.Property { "key": "value" }));
+        say(type(quasi @ Q.Property { fn() {} }));
+        say(type(quasi @ Q.Property { prop }));
         .
 
-    outputs $program, "<type Q::Property>\n" x 4, "quasi @ Q::Property";
+    outputs $program, "<type Q.Property>\n" x 4, "quasi @ Q.Property";
 }
 
 {
     my $program = q:to/./;
         my prop;
-        my q = quasi @ Q::PropertyList {
+        my q = quasi @ Q.PropertyList {
             key1: "value",
             "key2": "value",
             fn() {},
@@ -201,136 +201,136 @@ use _007::Test;
         say(q.properties.size());
         .
 
-    outputs $program, "<type Q::PropertyList>\n4\n", "quasi @ Q::PropertyList";
+    outputs $program, "<type Q.PropertyList>\n4\n", "quasi @ Q.PropertyList";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term { 7 }));
-        say(type(quasi @ Q::Term { None }));
-        say(type(quasi @ Q::Term { "James Bond" }));
-        say(type(quasi @ Q::Term { [0, 0, 7] }));
-        say(type(quasi @ Q::Term { new Object { james: "Bond" } }));
-        say(type(quasi @ Q::Term { quasi { say("oh, james!") } }));
-        say(type(quasi @ Q::Term { (0 + 0 + 7) }));
+        say(type(quasi @ Q.Term { 7 }));
+        say(type(quasi @ Q.Term { None }));
+        say(type(quasi @ Q.Term { "James Bond" }));
+        say(type(quasi @ Q.Term { [0, 0, 7] }));
+        say(type(quasi @ Q.Term { new Object { james: "Bond" } }));
+        say(type(quasi @ Q.Term { quasi { say("oh, james!") } }));
+        say(type(quasi @ Q.Term { (0 + 0 + 7) }));
         .
 
     outputs $program,
-        <Literal::Int Literal::None Literal::Str
-            Term::Array Term::Object Term::Quasi
-            Infix::Addition>\
-            .map({ "<type Q::$_>\n" }).join,
-        "quasi @ Q::Term";
+        <Literal.Int Literal.None Literal.Str
+            Term.Array Term.Object Term.Quasi
+            Infix.Addition>\
+            .map({ "<type Q.$_>\n" }).join,
+        "quasi @ Q.Term";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Array { [0, 0, 7] }));
+        say(type(quasi @ Q.Term.Array { [0, 0, 7] }));
         .
 
-    outputs $program, "<type Q::Term::Array>\n", "quasi @ Q::Term::Array";
+    outputs $program, "<type Q.Term.Array>\n", "quasi @ Q.Term.Array";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Object { new Object { james: "Bond" } }));
+        say(type(quasi @ Q.Term.Object { new Object { james: "Bond" } }));
         .
 
-    outputs $program, "<type Q::Term::Object>\n", "quasi @ Q::Term::Object";
+    outputs $program, "<type Q.Term.Object>\n", "quasi @ Q.Term.Object";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Term::Quasi { quasi { say("oh, james!") } }));
+        say(type(quasi @ Q.Term.Quasi { quasi { say("oh, james!") } }));
         .
 
-    outputs $program, "<type Q::Term::Quasi>\n", "quasi @ Q::Term::Quasi";
+    outputs $program, "<type Q.Term.Quasi>\n", "quasi @ Q.Term.Quasi";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Trait { is equiv(infix:<+>) }));
+        say(type(quasi @ Q.Trait { is equiv(infix:<+>) }));
         .
 
-    outputs $program, "<type Q::Trait>\n", "quasi @ Q::Trait";
+    outputs $program, "<type Q.Trait>\n", "quasi @ Q.Trait";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::TraitList { is equiv(infix:<+>) is assoc("right") }));
+        say(type(quasi @ Q.TraitList { is equiv(infix:<+>) is assoc("right") }));
         .
 
-    outputs $program, "<type Q::TraitList>\n", "quasi @ Q::TraitList";
+    outputs $program, "<type Q.TraitList>\n", "quasi @ Q.TraitList";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Statement { say("james") }));
-        say(type(quasi @ Q::Statement { say("bond"); }));
+        say(type(quasi @ Q.Statement { say("james") }));
+        say(type(quasi @ Q.Statement { say("bond"); }));
         .
 
-    outputs $program, "<type Q::Statement::Expr>\n" x 2, "quasi @ Q::Statement";
+    outputs $program, "<type Q.Statement.Expr>\n" x 2, "quasi @ Q.Statement";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::StatementList { say("james"); say("bond") }));
-        say(type(quasi @ Q::StatementList { say("james"); say("bond"); }));
+        say(type(quasi @ Q.StatementList { say("james"); say("bond") }));
+        say(type(quasi @ Q.StatementList { say("james"); say("bond"); }));
         .
 
-    outputs $program, "<type Q::StatementList>\n" x 2, "quasi @ Q::StatementList";
+    outputs $program, "<type Q.StatementList>\n" x 2, "quasi @ Q.StatementList";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::Parameter { foo }));
+        say(type(quasi @ Q.Parameter { foo }));
         .
 
-    outputs $program, "<type Q::Parameter>\n", "quasi @ Q::Parameter";
+    outputs $program, "<type Q.Parameter>\n", "quasi @ Q.Parameter";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::ParameterList { james, tiberius, bond }));
+        say(type(quasi @ Q.ParameterList { james, tiberius, bond }));
         .
 
-    outputs $program, "<type Q::ParameterList>\n", "quasi @ Q::ParameterList";
+    outputs $program, "<type Q.ParameterList>\n", "quasi @ Q.ParameterList";
 }
 
 {
     my $program = q:to/./;
-        say(type(quasi @ Q::ArgumentList { 1, "foo", [0, 0, 7] }));
+        say(type(quasi @ Q.ArgumentList { 1, "foo", [0, 0, 7] }));
         .
 
-    outputs $program, "<type Q::ArgumentList>\n", "quasi @ Q::ArgumentList";
+    outputs $program, "<type Q.ArgumentList>\n", "quasi @ Q.ArgumentList";
 }
 
 {
     my $program = q:to/./;
         my q = quasi { say("oh, james") };
-        say(type(quasi @ Q::Unquote { {{{q}}} }));
+        say(type(quasi @ Q.Unquote { {{{q}}} }));
         .
 
-    outputs $program, "<type Q::Unquote>\n", "quasi @ Q::Unquote";
+    outputs $program, "<type Q.Unquote>\n", "quasi @ Q.Unquote";
 }
 
 {
     my $program = q:to/./;
-        my q1 = quasi @ Q::Statement { my x; };
-        my q2 = quasi @ Q::Statement { my x; };
+        my q1 = quasi @ Q.Statement { my x; };
+        my q2 = quasi @ Q.Statement { my x; };
         say("alive");
         .
 
-    outputs $program, "alive\n", "Q::Statement quasis don't leak (I)";
+    outputs $program, "alive\n", "Q.Statement quasis don't leak (I)";
 }
 
 {
     my $program = q:to/./;
-        my q1 = quasi @ Q::Statement { my x; };
+        my q1 = quasi @ Q.Statement { my x; };
         say(x);
         .
 
-    parse-error $program, X::Undeclared, "Q::Statement quasis don't leak (II)";
+    parse-error $program, X::Undeclared, "Q.Statement quasis don't leak (II)";
 }
 
 {

@@ -1,9 +1,9 @@
 my ast;
 if !ast {
-    ast = new Q::CompUnit {
-        block: new Q::Block {
-            parameterlist: new Q::ParameterList {},
-            statementlist: new Q::StatementList {
+    ast = new Q.CompUnit {
+        block: new Q.Block {
+            parameterlist: new Q.ParameterList {},
+            statementlist: new Q.StatementList {
                 statements: []
             }
         }
@@ -20,7 +20,7 @@ my Runtime = {
             frames.push(frame);
             for static_lexpad.keys() -> name {
                 my value = static_lexpad[name];
-                my identifier = new Q::Identifier { name };
+                my identifier = new Q.Identifier { name };
                 declare_var(identifier, value);
             }
         }
@@ -85,70 +85,70 @@ my Runtime = {
         }
 
         my eval_of_type = {
-            Q::Identifier(ident) {
+            "Q.Identifier": func(ident) {
                 return get_var(ident.name);
             },
-            Q::Infix::Addition(op) {
+            "Q.Infix.Addition": func(op) {
                 return eval(op.lhs) + eval(op.rhs);
             },
-            Q::Infix::And(op) {
+            "Q.Infix.And": func(op) {
                 return eval(op.lhs) && eval(op.rhs);
             },
-            Q::Infix::Assignment(op) {
+            "Q.Infix.Assignment": func(op) {
                 my value = eval(op.rhs);
-                if op.lhs ~~ Q::Identifier {    # XXX: this assumption does not always hold
+                if op.lhs ~~ Q.Identifier {    # XXX: this assumption does not always hold
                     put_var(op.lhs.name, value);
                 }
                 return value;
             },
-            Q::Infix::Concat(op) {
+            "Q.Infix.Concat": func(op) {
                 return eval(op.lhs) ~ eval(op.rhs);
             },
-            Q::Infix::Divisibility(op) {
+            "Q.Infix.Divisibility": func(op) {
                 return eval(op.lhs) %% eval(op.rhs);
             },
-            Q::Infix::Eq(op) {
+            "Q.Infix.Eq": func(op) {
                 return eval(op.lhs) == eval(op.rhs);
             },
-            Q::Infix::Ge(op) {
+            "Q.Infix.Ge": func(op) {
                 return eval(op.lhs) >= eval(op.rhs);
             },
-            Q::Infix::Gt(op) {
+            "Q.Infix.Gt": func(op) {
                 return eval(op.lhs) > eval(op.rhs);
             },
-            Q::Infix::Le(op) {
+            "Q.Infix.Le": func(op) {
                 return eval(op.lhs) <= eval(op.rhs);
             },
-            Q::Infix::Lt(op) {
+            "Q.Infix.Lt": func(op) {
                 return eval(op.lhs) < eval(op.rhs);
             },
-            Q::Infix::Multiplication(op) {
+            "Q.Infix.Multiplication": func(op) {
                 return eval(op.lhs) * eval(op.rhs);
             },
-            Q::Infix::Modulo(op) {
+            "Q.Infix.Modulo": func(op) {
                 return eval(op.lhs) % eval(op.rhs);
             },
-            Q::Infix::Ne(op) {
+            "Q.Infix.Ne": func(op) {
                 return eval(op.lhs) != eval(op.rhs);
             },
-            Q::Infix::Or(op) {
+            "Q.Infix.Or": func(op) {
                 return eval(op.lhs) || eval(op.rhs);
             },
-            Q::Infix::Subtraction(op) {
+            "Q.Infix.Subtraction": func(op) {
                 return eval(op.lhs) - eval(op.rhs);
             },
-            Q::Infix::TypeMatch(op) {
+            "Q.Infix.TypeMatch": func(op) {
                 return eval(op.lhs) ~~ eval(op.rhs);
             },
-            Q::Literal::Int(lit_int) {
+            "Q.Literal.Int": func(lit_int) {
                 return lit_int.value;
             },
-            Q::Literal::Str(lit_str) {
+            "Q.Literal.Str": func(lit_str) {
                 return lit_str.value;
             },
-            Q::Postfix::Call(op) {
+            "Q.Postfix.Call": func(op) {
                 # XXX: short-term hack to get `say` early; needs to go away
-                if op.operand ~~ Q::Identifier && op.operand.name == "say" {
+                if op.operand ~~ Q.Identifier && op.operand.name == "say" {
                     return say(eval(op.argumentlist.arguments[0]));
                 }
                 my c = eval(op.operand);
@@ -161,28 +161,28 @@ my Runtime = {
                 my arguments = op.argumentlist.arguments.map(eval);
                 return call(c, arguments);
             },
-            Q::Postfix::Index(op) {
+            "Q.Postfix.Index": func(op) {
                 return eval(op.operand)[eval(op.index)];
             },
-            Q::Postfix::Property(op) {
+            "Q.Postfix.Property": func(op) {
                 return eval(op.operand)[eval(op.property)];
             },
-            Q::Prefix::Minus(op) {
+            "Q.Prefix.Minus": func(op) {
                 return -eval(op.operand);
             },
-            Q::Prefix::So(op) {
+            "Q.Prefix.So": func(op) {
                 return ?eval(op.operand);
             },
-            Q::Prefix::Not(op) {
+            "Q.Prefix.Not": func(op) {
                 return !eval(op.operand);
             },
-            Q::Prefix::Upto(op) {
+            "Q.Prefix.Upto": func(op) {
                 return ^eval(op.operand);
             },
-            Q::Term::Array(array) {
+            "Q.Term.Array": func(array) {
                 return array.elements.map(eval);
             },
-            Q::Term::Func(term) {
+            "Q.Term.Func": func(term) {
                 my name = term.identifier && term.identifier.name || "";
                 return new Func {
                     name,
@@ -195,41 +195,41 @@ my Runtime = {
 
             # these were added to be able to run more tests
             # please move and implement as necessary
-            Q::Block(block) {
+            "Q.Block": func(block) {
             },
-            Q::Infix(op) {
+            "Q.Infix": func(op) {
             },
-            Q::Postfix(op) {
+            "Q.Postfix": func(op) {
             },
-            Q::Prefix(op) {
+            "Q.Prefix": func(op) {
             },
-            Q::Term::Object(term) {
+            "Q.Term.Object": func(term) {
             },
-            Q::Term::Quasi(term) {
+            "Q.Term.Quasi": func(term) {
             },
-            Q::Expr::BlockAdapter(adapter) {
+            "Q.Expr.BlockAdapter": func(adapter) {
             },
         };
         func eval(q) { return eval_of_type[type(q).name](q); }
 
         my run_of_type = {
-            Q::Statement::BEGIN(stmt) {
+            "Q.Statement.BEGIN": func(stmt) {
                 # no runtime behavior
             },
-            Q::CompUnit(compunit) {
+            "Q.CompUnit": func(compunit) {
                 enter(current_frame(), compunit.block["static-lexpad"]);
                 run(compunit.block.statementlist);
                 leave();
             },
-            Q::Statement::Block(stmt) {
+            "Q.Statement.Block": func(stmt) {
                 enter(current_frame(), stmt.block["static-lexpad"]);
                 run(stmt.block.statementlist);
                 leave();
             },
-            Q::Statement::Expr(stmt) {
+            "Q.Statement.Expr": func(stmt) {
                 eval(stmt.expr);
             },
-            Q::Statement::For(stmt) {
+            "Q.Statement.For": func(stmt) {
                 my array = eval(stmt.expr);
 
                 for array -> arg {
@@ -242,7 +242,7 @@ my Runtime = {
                     leave();
                 }
             },
-            Q::Statement::If(stmt) {
+            "Q.Statement.If": func(stmt) {
                 my expr = eval(stmt.expr);
                 if expr {
                     enter(current_frame(), stmt.block["static-lexpad"]);
@@ -254,19 +254,19 @@ my Runtime = {
                     leave();
                 }
             },
-            Q::Statement::Macro(stmt) {
+            "Q.Statement.Macro": func(stmt) {
                 # no runtime behavior
             },
-            Q::Statement::My(stmt) {
+            "Q.Statement.My": func(stmt) {
                 my name = stmt.identifier.name;
                 if stmt.expr {
                     put_var(name, eval(stmt.expr));
                 }
             },
-            Q::Statement::Func(stmt) {
+            "Q.Statement.Func": func(stmt) {
                 # no runtime behavior
             },
-            Q::Statement::While(stmt) {
+            "Q.Statement.While": func(stmt) {
                 my expr;
                 while expr = eval(stmt.expr) {
                     enter(current_frame(), stmt.block["static-lexpad"]);
@@ -278,7 +278,7 @@ my Runtime = {
                     leave();
                 }
             },
-            Q::StatementList(stmtlist) {
+            "Q.StatementList": func(stmtlist) {
                 for stmtlist.statements -> statement {
                     run(statement);
                 }
@@ -286,7 +286,7 @@ my Runtime = {
 
             # these were added to be able to run more tests
             # please move and implement as necessary
-            Q::Statement::Return(stmt) {
+            "Q.Statement.Return": func(stmt) {
             },
         };
         func run(q) { run_of_type[type(q).name](q); }

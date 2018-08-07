@@ -100,7 +100,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier { name: "foo" };
+        my q = new Q.Identifier { name: "foo" };
 
         say(q.name);
         .
@@ -113,7 +113,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier { dunnexist: "foo" };
+        my q = new Q.Identifier { dunnexist: "foo" };
         .
 
     parse-error
@@ -124,14 +124,14 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier { name: "foo" };
+        my q = new Q.Identifier { name: "foo" };
 
         say(type(q));
         .
 
     outputs
         $program,
-        qq[<type Q::Identifier>\n],
+        qq[<type Q.Identifier>\n],
         "an object literal is of the declared type";
 }
 
@@ -167,7 +167,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = new Q::Identifier {};
+        my q = new Q.Identifier {};
         .
 
     parse-error
