@@ -63,6 +63,15 @@ class Val::None does Val {
 
 constant NONE is export = Val::None.new;
 
+### ### Object
+###
+### The top type of 007. A featureless object. Everything inherits from this type.
+class Val::Object does Val {
+    method truthy {
+        True
+    }
+}
+
 ### ### Bool
 ###
 ### A type with two values, `true` and `false`. These are often the result
@@ -583,6 +592,7 @@ class Val::Exception does Val {
 class Helper {
     our sub Str($_) {
         when Val::None { "none" }
+        when Val::Object { "<object>" }
         when Val::Bool { .value.lc }
         when Val::Int { .value.Str }
         when Val::Str { .value }

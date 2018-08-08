@@ -149,7 +149,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
-            return wrap($lhs ~~ $rhs.type);
+            return wrap($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
         },
         :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
@@ -158,7 +158,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
-            return wrap($lhs !~~ $rhs.type);
+            return wrap($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
         },
         :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
