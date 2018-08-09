@@ -16,15 +16,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my o = { a: 1 };
-        say(o.a);
-        .
-
-    outputs $program, "1\n", "can access an object's property (dot syntax)";
-}
-
-{
-    my $program = q:to/./;
         my o = { b: 7 };
         say(o["b"]);
         .
@@ -136,7 +127,7 @@ use _007::Test;
     my $program = q:to/./;
         my q = new Dict { foo: 42 };
 
-        say(q.foo);
+        say(q["foo"]);
         .
 
     outputs
@@ -181,7 +172,7 @@ use _007::Test;
             }
         };
 
-        say(obj.meth());
+        say(obj["meth"]());
         .
 
     outputs $program, "7\n", "a `return` inside of a (short-form) method is fine";

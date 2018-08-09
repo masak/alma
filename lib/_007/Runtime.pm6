@@ -512,22 +512,22 @@ class _007::Runtime {
         elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
             return $obj."$propname"();
         }
-        elsif $obj ~~ (Q | Val::Dict) && ($obj.properties{$propname} :exists) {
+        elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
-        elsif $propname eq "get" {
+        elsif $obj ~~ Val::Dict && $propname eq "get" {
             return builtin(sub get($prop) {
-                return self.property($obj, $prop.value);
+                return $obj.properties{$prop.value};
             });
         }
-        elsif $propname eq "keys" {
+        elsif $obj ~~ Val::Dict && $propname eq "keys" {
             return builtin(sub keys() {
                 return Val::Array.new(:elements($obj.properties.keys.map({
                     Val::Str.new(:$^value)
                 })));
             });
         }
-        elsif $propname eq "has" {
+        elsif $obj ~~ Val::Dict && $propname eq "has" {
             return builtin(sub has($prop) {
                 # XXX: problem: we're not lying hard enough here. we're missing
                 #      both Q objects, which are still hard-coded into the
@@ -537,7 +537,7 @@ class _007::Runtime {
                 return Val::Bool.new(:$value);
             });
         }
-        elsif $propname eq "update" {
+        elsif $obj ~~ Val::Dict && $propname eq "update" {
             return builtin(sub update($newprops) {
                 for $obj.properties.keys {
                     $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
@@ -545,7 +545,7 @@ class _007::Runtime {
                 return $obj;
             });
         }
-        elsif $propname eq "extend" {
+        elsif $obj ~~ Val::Dict && $propname eq "extend" {
             return builtin(sub extend($newprops) {
                 for $newprops.properties.keys {
                     $obj.properties{$_} = $newprops.properties{$_};

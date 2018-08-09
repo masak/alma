@@ -8,7 +8,7 @@ my DISK = {
 };
 
 my state = [
-    [DISK.huge, DISK.large, DISK.small, DISK.tiny],
+    [DISK["huge"], DISK["large"], DISK["small"], DISK["tiny"]],
     [],
     []
 ];

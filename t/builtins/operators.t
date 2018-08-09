@@ -405,18 +405,18 @@ use _007::Test;
     my $program = q:to/./;
         my a = [1, 2, 3];
         func f() { return 7 };
-        my o = { foo: 12 };
+        my d = { "foo": 1 };
 
         say(-a[1]);
         say(-f());
-        say(-o.foo);
+        say(-d.size());
 
         say(!a[2]);
         say(!f());
-        say(!o.foo);
+        say(!d.size());
         .
 
-    outputs $program, "-2\n-7\n-12\nfalse\nfalse\nfalse\n", "all postfixes are tighter than both prefixes";
+    outputs $program, "-2\n-7\n-1\nfalse\nfalse\nfalse\n", "all postfixes are tighter than both prefixes";
 }
 
 {

@@ -295,5 +295,5 @@ my Runtime = {
     }
 };
 
-my runtime = Runtime.new();
-runtime.run(ast);
+my runtime = Runtime["new"]();
+runtime["run"](ast);
