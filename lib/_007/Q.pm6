@@ -529,7 +529,16 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
-            when Val::Dict | Val::Func | Q {
+            when Val::Dict {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                die X::Property::NotFound.new(:$propname, :type(Val::Dict))
+                    if .properties{$propname} :!exists;
+                return .properties{$propname};
+            }
+            when Val::Func | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
