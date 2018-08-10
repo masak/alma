@@ -308,13 +308,12 @@ class Q::Term::Object does Q::Term {
 ### A dict. Dict terms consist of an entry list with zero or more key/value pairs.
 ###
 class Q::Term::Dict does Q::Term {
-    has Val::Type $.type;
     has $.propertylist;
 
     method eval($runtime) {
-        return $.type.create(
+        return Val::Dict.new(:properties(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
-        );
+        ));
     }
 }
 

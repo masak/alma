@@ -683,11 +683,7 @@ class _007::Parser::Actions {
     }
 
     method term:dict ($/) {
-        my $type = Val::Type.of(Val::Dict);
-
-        make Q::Term::Dict.new(
-            :$type,
-            :propertylist($<propertylist>.ast));
+        make Q::Term::Dict.new(:propertylist($<propertylist>.ast));
     }
 
     method term:my ($/) {
