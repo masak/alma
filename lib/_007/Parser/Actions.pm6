@@ -677,7 +677,7 @@ class _007::Parser::Actions {
             }
         }
 
-        make Q::Term::Dict.new(
+        make Q::Term::Object.new(
             :$type,
             :propertylist($<propertylist>.ast));
     }

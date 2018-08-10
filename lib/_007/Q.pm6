@@ -288,6 +288,21 @@ class Q::Term::Array does Q::Term {
     }
 }
 
+### ### Q::Term::Object
+###
+### An object.
+###
+class Q::Term::Object does Q::Term {
+    has Val::Type $.type;
+    has $.propertylist;
+
+    method eval($runtime) {
+        return $.type.create(
+            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+        );
+    }
+}
+
 ### ### Q::Term::Dict
 ###
 ### A dict. Dict terms consist of an entry list with zero or more key/value pairs.
