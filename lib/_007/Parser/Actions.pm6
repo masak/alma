@@ -244,10 +244,10 @@ class _007::Parser::Actions {
             }
 
             if $expansion ~~ Q::Block {
-                check($expansion, $*runtime);
                 $expansion = Q::Expr::BlockAdapter.new(:block($expansion));
             }
 
+            check($expansion, $*runtime);
             return $expansion;
         }
     }
@@ -777,7 +777,7 @@ class _007::Parser::Actions {
     }
 }
 
-sub check(Q::Block $ast, $runtime) is export {
+sub check(Q $ast, $runtime) is export {
     my %*assigned;
     handle($ast);
 
@@ -882,5 +882,9 @@ sub check(Q::Block $ast, $runtime) is export {
     multi handle(Q::Infix $infix) {
         handle($infix.lhs);
         handle($infix.rhs);
+    }
+
+    multi handle(Q::Expr::BlockAdapter $blockadapter) {
+        handle($blockadapter.block);
     }
 }

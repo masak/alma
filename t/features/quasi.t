@@ -396,4 +396,18 @@ use _007::Test;
     outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
 }
 
+{
+    my $program = q:to/./;
+        macro moo() {
+            return quasi {
+                my x = 1;
+            }
+        }
+
+        moo();
+        .
+
+    outputs $program, "", "a single declaration works in an injectile";
+}
+
 done-testing;
