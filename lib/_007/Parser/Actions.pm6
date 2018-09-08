@@ -887,4 +887,19 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Expr::BlockAdapter $blockadapter) {
         handle($blockadapter.block);
     }
+
+    multi handle(Q::Postfix::Call $call) {
+        handle($call.operand);
+        for $call.argumentlist.arguments.elements.list -> $e {
+            handle($e);
+        }
+    }
+
+    multi handle(Q::Term::Func $func) {
+        handle($func.block);
+    }
+
+    multi handle(Q::Prefix $prefix) {
+        handle($prefix.operand);
+    }
 }

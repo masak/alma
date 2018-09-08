@@ -410,4 +410,18 @@ use _007::Test;
     outputs $program, "", "a single declaration works in an injectile";
 }
 
+{
+    my $program = q:to/./;
+        macro moo(x) {
+            return quasi {
+                (func() { my y = {{{x}}} })()
+            }
+        }
+
+        say(moo(42));
+        .
+
+    outputs $program, "42\n", "a declaration works in a func term in an injectile";
+}
+
 done-testing;
