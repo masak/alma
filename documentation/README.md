@@ -210,7 +210,7 @@ probably won't look too surprising to anyone who has seen C-like syntax before:
     for array -> e {
         if e ~~ Int {
             while e > 0 {
-                say("Counting down: " ~ e);
+                say("Counting down: ", e);
                 e = e - 1;
             }
         }
@@ -218,7 +218,7 @@ probably won't look too surprising to anyone who has seen C-like syntax before:
             e();
         }
         else {
-            say("Unknown value: " ~ e);
+            say("Unknown value: ", e);
         }
     }
 
@@ -307,7 +307,7 @@ When declaring a function, we talk about function *parameters*. A parameter is
 a kind of variable scoped to the function.
 
     func goodnight(name) {
-        say("Goodnight " ~ name);
+        say("Goodnight ", name);
     }
 
 When calling a function, we instead talk about *arguments*. Arguments are
@@ -365,7 +365,7 @@ If you return a function from a certain environment, the function will
 physically leave that environment but still be able to find all its names.
 
     func goodnight(name) {
-        my fn = func() { say("Goodnight " ~ name) };
+        my fn = func() { say("Goodnight ", name) };
         return fn;
     }
 
