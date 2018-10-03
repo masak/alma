@@ -303,7 +303,57 @@ parse error and counts as Two Terms In A Row.
 
 ### Arguments and parameters
 
-XXX
+When declaring a function, we talk about function *parameters*. A parameter is
+a kind of variable scoped to the function.
+
+    func goodnight(name) {
+        say("Goodnight " ~ name);
+    }
+
+When calling a function, we instead talk about *arguments*. Arguments are
+expressions that we pass in with the function call.
+
+    goodnight("moon");
+
+As the function call happens, all the arguments are evaluated, and their
+resulting values are *bound* to the parameters. It's a (runtime) error for
+the number of arguments to differ from the number of parameters.
+
+> ### 🔮 Future feature: static checking
+>
+> In the cases where the function definition is known/visible from the
+> callsite, we could even give this error at compile time (like Perl 6 but
+> unlike Python or Perl 5). Flagging up the error during compilation makes
+> sense, since the call would definitely fail at runtime anyway.
+
+> ### 🔮 Future feature: optional parameter and parameter defaults
+>
+> 007 will at some point incorporate optional parameters and parameter default
+> values into the language. It's undecided whether these will require a pragma
+> to use or not. The number of arguments can of course go as low as the number
+> of non-optional parameters. Non-optional parameters can only occur before
+> optional ones.
+
+> ### 🔮 Future feature: rest parameters and spread arguments
+>
+> The syntax `...` will at some point work to denote a *rest parameter* (which
+> accepts any remaining arguments into an array), and a *spread argument*
+> (which turns an array of N arguments into N actual arguments). In the
+> presence of a rest parameter, the number of arguments accepted is of course
+> unbounded.
+
+> ### 🔮 Future feature: named arguments
+>
+> Borrowing from Python, it will at some point be possible to specify arguments
+> *by name*; the above call would for example be written as
+> `goodnight(name="moon")`. Whereas normal ("positional") arguments have to be
+> written in an order matching the parameters, named arguments can be written
+> in any desired order, and will still match their corresponding parameters
+> based on the name.
+>
+> It's as yet unclear whether there will be a rest parameter syntax for named
+> arguments (allowing named arguments without a corresponding parameter to be
+> slurped up into a dict.)
 
 ### Closures
 
