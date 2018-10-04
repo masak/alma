@@ -52,9 +52,8 @@ The explicit goal is to reach some level of feature completeness for macros in
 
 ## Useful links
 
-* [Tutorial](http://masak.github.io/007/)
+* [Documentation](http://masak.github.io/007/) (🔧  under construction 🔧 )
 * [examples/ directory](https://github.com/masak/007/tree/master/examples)
-* [Language guide](https://github.com/masak/007/tree/master/documentation#readme) (🔧  under construction 🔧 )
 * [Roadmap](https://github.com/masak/007/blob/master/ROADMAP.md)
 
 To learn more about macros:
