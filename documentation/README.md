@@ -792,8 +792,24 @@ of whether the already installed operator is a built-in or user-defined.
 >
 > This whole chapter is conjectural right now.
 
-Programs in 007 can be run directly as _scripts_, or they can be imported from
-other 007 programs as _modules_.
+007 files can be run directly as _scripts_, or they can be imported from other
+007 programs as _modules_.
+
+The purpose of modules is to break up a big program into multiple independent
+compilation units.
+
+* Each module can completely express a relatively small piece of functionality,
+  and is easier to understand and reason about in isolation. (Often referred
+  to as _separation of concerns_.)
+
+* Since each module decides exactly what to export to the outside world, a
+  module boundary also confers a means of _encapsulation_ and _information
+  hiding_. Some aspects of a module can be "public", others private and
+  internal.
+
+* The same module can be used in multiple places in a code base, or in several
+  different programs. This _re-use_ is often preferable to manually copying
+  the same solution into several programs.
 
 ### Example: `Range` as a module
 
@@ -803,11 +819,98 @@ just be able to write this in their program:
 
     import * from range;
 
-From that point on for the rest of the program (or the rest of the scope if the
-import was made in a smaller block somewhere), all the things related to ranges
+From that point on for the rest of the block, all the things related to ranges
 will be lexically available.
 
-XXX
+    for 2 .. 7 -> n {   # works because infix:<..> was imported
+        say(n);
+    }
+
+If we only wanted the `infix:<..>` operator, we could import only that:
+
+    import { infix:<..> } from range;
+
+The `range` module is in fact a `range.007` file in 007's lib path. We'd write
+it with the same definition as before, except we also export them:
+
+    export class Range { ... }
+
+    export func infix:<..>(lhs, rhs) # ...
+    export func infix:<..^>(lhs, rhs) # ...
+    export func prefix:<^>(expr) # ...
+
+### Forms of import
+
+There are three forms of the `import` statement.
+
+The *named import* form lists all the names we want to declare in the current
+scope:
+
+    import { nameA, nameB, nameC } from some.module;
+
+Each name imported counts as a declaration; it's a compile-time error import
+and otherwise declare the same name in the same scope.
+
+In the imported module, every export declaration exports a *name*, and together
+all the exported names make up the *export list*.
+
+The *star import* form imports the entire export list into the current scope:
+
+    import * from some.module;
+
+While this is convenient, it's also the only built-in construct in the language
+where *you can't see* from the syntactic form itself what names you're
+introducing into the scope.
+
+Finally, the *module object import* creates a module object with all the
+names from the export list as properties:
+
+    import m from some.module;
+    # m now has m.nameA, m.nameB, m.nameC, etc.
+
+Imports are *not* hoisted in 007.
+
+    foo();  # won't work
+    import { foo } from some.module;
+
+### Forms of export
+
+You're only allowed to `export` statements on the top level of a module file.
+
+There are two forms of export statement:
+
+The *exported declaration* form is an export plus one of the declaration
+statements:
+
+    export my someVar ...;
+    export func foo(...) ...;
+    export macro moo(...) ...;
+    export class SomeClass ...;
+
+The declared name is made available in the lexical scope, and put on the export
+list.
+
+The *export list* form lists existing names to export:
+
+    export { nameA, nameB, nameC };
+
+There can be several of these export statements in a module, but it's
+recommended to put one at the end.
+
+### The lib path
+
+If your program contains an import, you need to have an environment variable
+`007LIB` set:
+
+```sh
+$ export 007LIB=$(pwd)/lib
+```
+
+If you want, you can specify several paths, separated by colons. The module
+importer will search through all these paths, in order, when a module is
+imported. It will import the first one it finds, from left to right.
+
+If no module is found, a compile-time error is reported.
 
 # Macrology
 
