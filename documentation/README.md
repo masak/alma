@@ -13,7 +13,7 @@ in your path.
 Then, clone the 007 repository. (This step requires Git. There's also [a zip
 file](https://github.com/masak/007/archive/master.zip).)
 
-```
+```sh
 $ git clone https://github.com/masak/007.git
 [...]
 ```
@@ -23,7 +23,7 @@ $ git clone https://github.com/masak/007.git
 We're one step away from running our first 007 program. Before that, we need to
 set an environment variable `PERL6LIB`:
 
-```
+```sh
 $ cd 007
 $ export PERL6LIB=$(pwd)/lib
 ```
