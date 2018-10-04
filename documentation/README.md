@@ -537,6 +537,21 @@ same class can also be declared on the outside of the class `Range`: `class
 Range.Iterator`. Only if we declare it nested inside `Range` do we skip the
 full name.
 
+> ### 🔮 Future feature: generator functions
+>
+> Using generator functions, we could skip writing the `Range.Iterator` class,
+> and write the `iterator` method like this:
+>
+> method iterator() {
+>     return func*() {
+>         my currentValue = self.min;
+>         while currentValue <= self.max {
+>             yield currentValue;
+>             currentValue = currentValue + 1;
+>         }
+>     }
+> }
+
 ## Custom operators
 
 007 is built to give the programmer the power to add to and modify the
