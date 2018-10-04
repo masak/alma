@@ -928,7 +928,11 @@ If no module is found, a compile-time error is reported.
 
 # Macrology
 
+XXX state the overall goals of extending the language via macros
+
 ## The Q hierarchy
+
+XXX describe every program element having a Q type
 
 ## Quasi blocks
 
@@ -936,9 +940,15 @@ Describing a piece of code as nested `Q` objects will always be more cumbersome
 and lengthy than just writing the code as code. That's the problem quasi blocks
 solve: they allow you to express some code as code.
 
-XXX
+XXX example
+
+XXX show some unquotes
 
 ## Macros
+
+XXX describe the general process; compare macros to functions
+
+XXX give two examples: prefix:<exists> and swap, perhaps?
 
 ## Stateful macros
 
@@ -946,15 +956,48 @@ XXX hidden variables using Symbols
 
 ## Closures in macros
 
+XXX go through how name lookup works in general
+
+XXX Dylan quote about "the meaning of names"
+
+XXX macro hygiene
+
 ## Macros that parse
+
+XXX introduce the `@parsed` annotation
+
+XXX there must be dozens of good examples here... `?? !!`, `[*]` --
+just need to find a decent explanation order that will introduce
+things bit by bit
 
 ## Statement macros
 
+XXX these are macros in the statement category. important because we often want
+to introduce new statement types
+
+XXX examples: `loop {}`, `repeat while` loop, `for` loop
+
+## Grammatical categories
+
+XXX go through them all, with examples
+
 ## Contextual macros
+
+XXX examples: `each()`, junctions, class declarations
 
 ## Evaluating expressions
 
+XXX example: `+=`, `.=`
+
+XXX important here to state the single evaluation rule
+
 ## Interacting with control flow
+
+XXX example: `if` and `while`
+
+XXX example: `next` and `last`
+
+XXX example: `<-` (`amb`)
 
 ## Parsers and slangs
 
