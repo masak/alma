@@ -555,7 +555,7 @@ full name.
 ## Custom operators
 
 007 is built to give the programmer the power to add to and modify the
-language, to the point where everything that's already _in_ the language could
+language, to the point where everything in the language _could_
 have been added by the programmer. Macros are the prime example, but custom
 operators qualify too. This chapter is the longest in the guide so far; the
 reason is that whenever you get into the game of extending the language itself,
