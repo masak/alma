@@ -1,5 +1,19 @@
-This document is still being written. Paragraphs marked 🔮 represent future
-features of 007 that are planned but not yet implemented.
+This documentation has four parts:
+
+* The [language guide](#language-guide) describes how to author 007 programs.
+
+> #### 🔮 Future documentation:
+>
+> * The *macrology section* talks about how to extend and expand the language
+>   itself: its syntax, Q hierarchy, and semantics.
+>
+> * The *API reference* section documents each built-in types, functions and
+>   operators in detail.
+>
+> * Finally, there's a short section about how to contribute to 007.
+
+*This document is still being written. Paragraphs marked 🔮 represent future
+features of 007 that are planned but not yet implemented.*
 
 # Language guide
 
