@@ -1,0 +1,42 @@
+{
+  "name": "007",
+  "version": "0.0.1",
+  "description": "Small experimental language with a license to macro",
+  "main": "src/index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masak/007.git"
+  },
+  "keywords": [
+    "perl6",
+    "macros",
+    "dsl",
+    "grammar",
+    "parsing",
+    "slang",
+    "operator",
+    "experimental",
+    "macro"
+  ],
+  "author": "Carl Masak",
+  "license": "Artistic-2.0",
+  "bugs": {
+    "url": "https://github.com/masak/007/issues"
+  },
+  "homepage": "https://github.com/masak/007#readme",
+  "devDependencies": {
+    "@types/mocha": "^5.2.5",
+    "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "@types/node": "^10.11.3"
+  }
+}
