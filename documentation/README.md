@@ -741,11 +741,12 @@ defined earlier:
         return Range(lhs, rhs);
     }
 
-    func infix:<..^>(min, max1) is equiv(infix:<..>) {
+    func infix:<..^>(lhs, rhs) is equiv(infix:<..>) {
+        return Range(lhs, rhs - 1);
     }
 
-    func prefix:<^>(term) {     # overrides the builtin
-        return 0 ..^ term;
+    func prefix:<^>(expr) {     # overrides the builtin
+        return 0 ..^ expr;
     }
 
 > #### 🔮 Future feature: using custom iterable types in `for` loops
