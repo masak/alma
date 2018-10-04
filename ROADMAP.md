@@ -82,6 +82,10 @@ Work on 007 falls into two main tracks:
 The first track is still the *raison d'être* for 007. The second track rounds
 007 off as a nicer tool to work with.
 
+See also the [Reach Hacker News
+completeness](https://github.com/masak/007/issues/335) issue, which outlines
+some shorter-term plans.
+
 ### Macro track
 
 * The big focus is [quasi unquotes](https://github.com/masak/007/issues/30), a
