@@ -653,7 +653,7 @@ the factorial in a slightly shorter way:
 When you define an operator, you can also provide information about its
 precedence and associativity. (For an introduction to those concepts, see
 [built-in operators](#operators-and-expressions).) Here is an implementation of
-a right-associative cons operator:
+a right-associative [cons](https://en.wikipedia.org/wiki/Cons) operator:
 
     func infix:<::>(lhs, rhs) is tighter(infix:<==>) is assoc("right") {
         return (lhs, rhs);
