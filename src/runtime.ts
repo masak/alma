@@ -4,10 +4,10 @@ enum Type {
 }
 
 export function value<T>(v: T): RuntimeValue<T> {
-    if (typeof v == "number") {
+    if (typeof v === "number") {
         return { type: Type.Int, value: v };
     }
-    else if (typeof v == "string") {
+    else if (typeof v === "string") {
         return { type: Type.Str, value: v };
     }
     throw new Error("Unable to handle type " + typeof v);
