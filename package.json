@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "mocha -c"
+    "test": "mocha -c",
+    "lint": "tslint 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
