@@ -345,7 +345,6 @@ sub tree-walk(%package) {
     }
 }
 tree-walk(Val::);
-tree-walk(Q::);
 push @builtins, "Q" => Val::Type.of(Q);
 
 my $opscope = _007::OpScope.new();
