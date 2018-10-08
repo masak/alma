@@ -991,6 +991,8 @@ XXX example: `+=`, `.=`
 
 XXX important here to state the single evaluation rule
 
+XXX location protocol
+
 ## Interacting with control flow
 
 XXX example: `if` and `while`
