@@ -337,14 +337,10 @@ my @builtins =
     ),
 ;
 
-sub tree-walk(%package) {
-    for %package.keys.map({ %package ~ "::$_" }) -> $name {
-        my $type = ::($name);
-        push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
-        tree-walk($type.WHO);
-    }
+for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
+    my $type = ::($name);
+    push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-tree-walk(Val::);
 push @builtins, "Q" => Val::Type.of(Q);
 
 my $opscope = _007::OpScope.new();
