@@ -97,15 +97,15 @@ variables more finely, controlling exactly when to read and/or assign to them.
 
 In 007, these "scalar value" types are built in:
 
-    None        NoneType
-    False       Bool
-    42          Int
-    "Bond"      Str
+    None          NoneType
+    False         Bool
+    42            Int
+    "Bond"        Str
 
 And these "container" types:
 
-    [1, 2]      Array
-    ("x", "y")  Tuple
+    [1, 2]        Array
+    ("x", "y")    Tuple
     { "n": 42 }   Dict
 
 ## Operators and expressions
