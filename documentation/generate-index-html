@@ -56,6 +56,7 @@ pandoc -f markdown -t html5 |
         .=subst("<table>", q[<table class="table table-bordered">]);
         .=subst(/"<tr class=" <["]> \w+ <["]> ">"/, "<tr>");
         .=subst(q[<th style="text-align: left;">], "  <th                      >");
+        .=subst("\\|\\|", "||");
     ' |
     perl6 -e '
         $_ = slurp;
