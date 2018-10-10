@@ -67,9 +67,21 @@ sub runtime-error($program, $expected-error, $desc = $expected-error.^name) is e
     }
 }
 
-sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
+sub outputs($program, $expected, $desc = "MISSING TEST DESCRIPTION", :@indata = []) is export {
+    class InputFromData {
+        has @.indata;
+        has $!index = 0;
+
+        method get() {
+            return $!index < @.indata
+                ?? @.indata[$!index++]
+                !! Nil;
+        }
+    }
+
+    my $input = InputFromData.new(:@indata);
     my $output = StrOutput.new;
-    my $runtime = _007.runtime(:$output);
+    my $runtime = _007.runtime(:$input, :$output);
     my $parser = _007.parser(:$runtime);
     my $ast = $parser.parse($program);
     $runtime.run($ast);
