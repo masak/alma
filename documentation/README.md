@@ -556,6 +556,7 @@ full name.
 > Using generator functions, we could skip writing the `Range.Iterator` class,
 > and write the `iterator` method like this:
 >
+> ```
 > method iterator() {
 >     return func*() {
 >         my currentValue = self.min;
@@ -565,6 +566,7 @@ full name.
 >         }
 >     }
 > }
+> ```
 
 ## Custom operators
 
