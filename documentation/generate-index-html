@@ -11,6 +11,7 @@ cat <<HEADER > $OUTFILE
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <style>
       body {
+        font-size: 16pt;
         padding-top: 2em;
         padding-bottom: 15em;
       }
@@ -38,6 +39,16 @@ cat <<HEADER > $OUTFILE
 
       h4 {
         font-weight: bold;
+      }
+
+      pre {
+        font-size: 16pt;
+      }
+
+      pre._007 {
+        border: none;
+        background: #333;
+        color: white;
       }
     </style>
   </head>

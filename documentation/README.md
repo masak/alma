@@ -53,7 +53,7 @@ $ export PERL6LIB=$(pwd)/lib
 
 Now this should work:
 
-```
+```sh
 $ bin/007 -e='say("OH HAI")'
 OH HAI
 
@@ -67,24 +67,28 @@ foo{1}bar
 Variables are declared with `my`. You can read out their values in an ordinary
 expression, and you can assign to them.
 
-    my name = "James";
-    say("My name is ", name);      # "My name is James"
-    name = "Mr. Smith";
-    say("Now my name is ", name);  # "Now my name is Mr. Smith"
+```_007
+my name = "James";
+say("My name is ", name);      # "My name is James"
+name = "Mr. Smith";
+say("Now my name is ", name);  # "Now my name is Mr. Smith"
+```
 
 > ### 💡 Lexical scope
 >
 > Variables are *lexically scoped*. You can only use/see the variable in the
 > scope it was declared, after it's been declared.
 >
+> ```_007
+> # can't use x
+> {
 >     # can't use x
->     {
->         # can't use x
->         my x = "yay!";
->         say(x);
->         # can use x \o/
->     }
->     # can't use x
+>     my x = "yay!";
+>     say(x);
+>     # can use x \o/
+> }
+> # can't use x
+> ```
 >
 > You don't even need to run the program to find out if the use of a variable
 > is out-of-scope or not. You can just find out from the program text (and so
@@ -210,31 +214,35 @@ being on the same line or separated by a newline character. When a statement
 ends in a closing curly brace (`}`), you can omit the semicolon as long as you
 have a newline character instead.
 
-    func f1() {
-    }                               # OK
-    func f2() {};   say("hi!")      # OK
-    func f3() {}    say("oh noes")  # not ok
+```_007
+func f1() {
+}                               # OK
+func f2() {};   say("hi!")      # OK
+func f3() {}    say("oh noes")  # not ok
+```
 
 ### Block statements
 
 007 has `if` statements, `while` loops and `for` loops by default. This example
 probably won't look too surprising to anyone who has seen C-like syntax before:
 
-    my array = [5, func() { say("OH HAI") }, None];
-    for array -> e {
-        if e ~~ Int {
-            while e > 0 {
-                say("Counting down: ", e);
-                e = e - 1;
-            }
-        }
-        else if e ~~ Func {
-            e();
-        }
-        else {
-            say("Unknown value: ", e);
+```_007
+my array = [5, func() { say("OH HAI") }, None];
+for array -> e {
+    if e ~~ Int {
+        while e > 0 {
+            say("Counting down: ", e);
+            e = e - 1;
         }
     }
+    else if e ~~ Func {
+        e();
+    }
+    else {
+        say("Unknown value: ", e);
+    }
+}
+```
 
 The normal block statements all require blocks with curly braces (`{}`) &mdash;
 there's no blockless form. Unlike C/Java/JavaScript/C# but like Python,
@@ -277,11 +285,13 @@ control flow](#control-flow).
 Functions take parameters, can be called, and return a value. Definitions and
 calls look like this:
 
-    func add(n1, n2) {
-        return n1 + n2;
-    }
+```_007
+func add(n1, n2) {
+    return n1 + n2;
+}
 
-    say("3 + 4 = ", add(3, 4));
+say("3 + 4 = ", add(3, 4));
+```
 
 The `return` statement immediately returns out of a function, optionally with a
 value. If no value is supplied (as in `return;`), the value `None` is returned.
@@ -292,11 +302,13 @@ When defined using a function statement, it's also allowed to call the function
 _before_ its definition. (This is not true for any other type of defined thing
 in 007.)
 
-    whoa();     # Amazingly, this works!
+```_007
+whoa();     # Amazingly, this works!
 
-    func whoa() {
-        say("Amazingly, this works!");
-    }
+func whoa() {
+    say("Amazingly, this works!");
+}
+```
 
 All references to undeclared variables are postponed until CHECK time (after
 parsing the program), and an error message about the identifier not being found
@@ -304,8 +316,10 @@ is issued _only_ if it hasn't since been declared as a function.
 
 There's also a way to declare functions as terms, and they work just the same:
 
-    my id = func(x) { x };
-    say(id("OH HAI"));      # OH HAI
+```_007
+my id = func(x) { x };
+say(id("OH HAI"));      # OH HAI
+```
 
 Note that this form does not have the above advantage of being able to be used
 before its definition &mdash; the declaration in this case is a normal lexical
@@ -320,9 +334,11 @@ parse error and counts as Two Terms In A Row.
 When declaring a function, we talk about function *parameters*. A parameter is
 a kind of variable scoped to the function.
 
-    func goodnight(name) {
-        say("Goodnight ", name);
-    }
+```_007
+func goodnight(name) {
+    say("Goodnight ", name);
+}
+```
 
 When calling a function, we instead talk about *arguments*. Arguments are
 expressions that we pass in with the function call.
@@ -378,16 +394,18 @@ that point.
 If you return a function from a certain environment, the function will
 physically leave that environment but still be able to find all its names.
 
-    func goodnight(name) {
-        my fn = func() { say("Goodnight ", name) };
-        return fn;
-    }
+```_007
+func goodnight(name) {
+    my fn = func() { say("Goodnight ", name) };
+    return fn;
+}
 
-    my names = ["room", "moon", "cow jumping over the moon"];
-    my fns = names.map(goodnight);      # an array of 3 functions
-    for fns -> fn {
-        fn();       # Goodnight room, Goodnight moon, Goodnight cow jumping over the moon
-    }
+my names = ["room", "moon", "cow jumping over the moon"];
+my fns = names.map(goodnight);      # an array of 3 functions
+for fns -> fn {
+    fn();       # Goodnight room, Goodnight moon, Goodnight cow jumping over the moon
+}
+```
 
 This effect is referred to as the functions "closing over" their current
 environment. In the case above, the 3 function values in `fns` close over the
@@ -412,20 +430,26 @@ the need to import them.
 
 By far the most common builtin is `say`, a function for printing things.
 
-    say();                          # empty line
-    say("OH HAI");
-    say("The answer is: ", answer);
+```_007
+say();                          # empty line
+say("OH HAI");
+say("The answer is: ", answer);
+```
 
 For reading input, there's `prompt`:
 
-    my answer = prompt("Rock, paper, or scissors? ");
+```_007
+my answer = prompt("Rock, paper, or scissors? ");
+```
 
 The third important builtin allows you to get the type of a value:
 
-    type(42);           # <type Int>
-    type("hi");         # <type Str>
-    type(prompt);       # <type Func>
-    type(Bool);         # <type Type>
+```_007
+type(42);           # <type Int>
+type("hi");         # <type Str>
+type(prompt);       # <type Func>
+type(Bool);         # <type Type>
+```
 
 The biggest use for the `type` builtin is for printing the type of something
 during debugging. If you want to test for the type of a value in a program, you
@@ -442,27 +466,31 @@ builtins.
 
 You can declare classes in 007.
 
-    class Color {
-        has red;
-        has green;
-        has blue;
+```_007
+class Color {
+    has red;
+    has green;
+    has blue;
 
-        constructor(red, green, blue) {
-            self.red = red;
-            self.green = green;
-            self.blue = blue;
-        }
-
-        method show() {
-            format("rgb({}, {}, {})", self.red, self.green, self.blue);
-        }
+    constructor(red, green, blue) {
+        self.red = red;
+        self.green = green;
+        self.blue = blue;
     }
+
+    method show() {
+        format("rgb({}, {}, {})", self.red, self.green, self.blue);
+    }
+}
+```
 
 As you can see, classes in 007 look like in most other languages. They can have
 fields, a constructor, and methods. Fields can optionally have _initializers_,
 expressions that evaluate before the constructor runs.
 
-    has red = 0;
+```_007
+has red = 0;
+```
 
 The special name `self` is automatically available in initializers, the
 constructor, and methods.
@@ -475,9 +503,11 @@ field writable from the outside.
 
 Classes can inherit, using the `extends` keyword:
 
-    class AlphaColor extends Color {
-        has alpha;
-    }
+```_007
+class AlphaColor extends Color {
+    has alpha;
+}
+```
 
 All the public fields and methods from the base class are also available on the
 extending class. If a field or method has the same name as in a base class,
@@ -488,20 +518,22 @@ or constructors.
 Class declarations are _slangs_ in 007, so the above desugars to something very
 much like this:
 
-    BEGIN my Color = Type(
-        name: "Color",
-        fields: [{ name: "red" }, { name: "green" }, { name: "blue" }],
-        constructor: func(self, red, green, blue) { ... },
-        methods: {
-            show(self) { ... },
-        },
-    );
+```_007
+BEGIN my Color = Type(
+    name: "Color",
+    fields: [{ name: "red" }, { name: "green" }, { name: "blue" }],
+    constructor: func(self, red, green, blue) { ... },
+    methods: {
+        show(self) { ... },
+    },
+);
 
-    BEGIN my AlphaColor = Type(
-        name: "AlphaColor",
-        extends: Color,
-        fields: [{ name: "alpha" }],
-    );
+BEGIN my AlphaColor = Type(
+    name: "AlphaColor",
+    extends: Color,
+    fields: [{ name: "alpha" }],
+);
+```
 
 (Note how `self` has been made an explicit parameter along the way.)
 
@@ -513,38 +545,40 @@ structure. There are also a number of exception types, under the `X` hierarchy.
 Here's an example involving a custom `Range` class, which we'll use later to
 also declare custom range operators:
 
-    class Range {
-        @get has min;
-        @get has max;
+```_007
+class Range {
+    @get has min;
+    @get has max;
 
-        constructor(min, max) {
-            self.min = min;
-            self.max = max;
+    constructor(min, max) {
+        self.min = min;
+        self.max = max;
+    }
+
+    method iterator() {
+        return Range.Iterator(self);
+    }
+
+    class Iterator {
+        has range;
+        @set has currentValue;
+
+        constructor(range) {
+            self.range = range;
+            self.currentValue = range.min;
         }
 
-        method iterator() {
-            return Range.Iterator(self);
-        }
-
-        class Iterator {
-            has range;
-            @set has currentValue;
-
-            constructor(range) {
-                self.range = range;
-                self.currentValue = range.min;
+        method next() {
+            if self.currentValue > self.range.max {
+                throw StopIteration();
             }
-
-            method next() {
-                if self.currentValue > self.range.max {
-                    throw StopIteration();
-                }
-                my value = self.currentValue;
-                self.currentValue = self.currentValue + 1;
-                return value;
-            }
+            my value = self.currentValue;
+            self.currentValue = self.currentValue + 1;
+            return value;
         }
     }
+}
+```
 
 Note that the name of the inner class is `Range.Iterator`, not `Iterator`. The
 same class can also be declared on the outside of the class `Range`: `class
@@ -556,7 +590,7 @@ full name.
 > Using generator functions, we could skip writing the `Range.Iterator` class,
 > and write the `iterator` method like this:
 >
-> ```
+> ```_007
 > method iterator() {
 >     return func*() {
 >         my currentValue = self.min;
@@ -582,18 +616,20 @@ Besides the [built-in operators](#operators-and-expressions), you can supply
 your own operators. Here, for example, is an implementation of a factorial
 operator:
 
-    func postfix:<!>(N) {
-        my product = 1;
-        my n = 2;
-        while n <= N {
-            product = product * n;
-            n = n + 1;
-        }
-        return product;
+```_007
+func postfix:<!>(N) {
+    my product = 1;
+    my n = 2;
+    while n <= N {
+        product = product * n;
+        n = n + 1;
     }
+    return product;
+}
 
-    say(5!);                # 120
-    say(postfix:<!>(5));    # 120
+say(5!);                # 120
+say(postfix:<!>(5));    # 120
+```
 
 Operators are special in that they install themselves both as specially named
 functions, but also as _syntax_ &mdash; writing `5!` in a 007 program doesn't
@@ -610,7 +646,9 @@ it's defined).
 > Using the reduction metaoperator and a range operator, we can implement
 > `postfix:<!>` much shorter:
 >
->     func postfix:<!>(N) { [*](2..N) }
+> ```_007
+> func postfix:<!>(N) { [*](2..N) }
+> ```
 
 ### Built-in operators are built-in functions
 
@@ -618,8 +656,10 @@ Now that the truth is out about user-defined operators being fairly normal
 functions, it's time for another bombshell: built-in operators are normal
 functions too! These are two equivalent ways to add two numbers in 007:
 
-    3 + 4;              # 7
-    infix:<+>(3, 4);    # 7
+```_007
+3 + 4;              # 7
+infix:<+>(3, 4);    # 7
+```
 
 The function `infix:<+>` is defined among the built-ins, together with `say`
 and some other functions.
@@ -649,20 +689,24 @@ established naming convention for prefix and postfix operators.
 It's possible for operator functions to be recursive, so we can actually write
 the factorial in a slightly shorter way:
 
-    func postfix:<!>(N) {
-        if N < 2 {
-            return 1;
-        }
-        else {
-            return N * (N-1)!;
-        }
+```_007
+func postfix:<!>(N) {
+    if N < 2 {
+        return 1;
     }
+    else {
+        return N * (N-1)!;
+    }
+}
+```
 
 > ### 🔮 Future feature: ternary operator
 >
 > With the ternary operator macro imported, the solution becomes downright cute:
 >
->     func postfix:<!>(N) { N < 2 ?? 1 !! N * (N-1)! }
+> ```_007
+> func postfix:<!>(N) { N < 2 ?? 1 !! N * (N-1)! }
+> ```
 
 ### Infix precedence and associativity
 
@@ -671,9 +715,11 @@ precedence and associativity. (For an introduction to those concepts, see
 [built-in operators](#operators-and-expressions).) Here is an implementation of
 a right-associative [cons](https://en.wikipedia.org/wiki/Cons) operator:
 
-    func infix:<::>(lhs, rhs) is tighter(infix:<==>) is assoc("right") {
-        return (lhs, rhs);
-    }
+```_007
+func infix:<::>(lhs, rhs) is tighter(infix:<==>) is assoc("right") {
+    return (lhs, rhs);
+}
+```
 
 The traits `is looser(op)` and `is tighter(op)` both create a new precedence
 level, just next to the one of the specified operator. The trait `is equal(op)`
@@ -691,10 +737,12 @@ things when several operators of the exact same precedence follow one another:
 With the `"non"` value, it's illegal for two operators on the same level to
 occur next to each other without being parenthesized. Here is an example:
 
-    func infix:<^_^>(lhs, rhs) is assoc("non") {
-    }
+```_007
+func infix:<^_^>(lhs, rhs) is assoc("non") {
+}
 
-    2 ^_^ 3 ^_^ 4;          # parse error: "operator is nonassociative"
+2 ^_^ 3 ^_^ 4;          # parse error: "operator is nonassociative"
+```
 
 ### Prefix/postfix precedence and associativity
 
@@ -702,27 +750,31 @@ A postfix and a prefix can share a precedence level, and if it comes down to
 one being evaluated first or the other, associativity comes into play. This
 pair of operators associates to the left:
 
-    func prefix:<?>(term) is assoc("left") {
-        return "prefix:<?>(" ~ term ~ ")";
-    }
+```_007
+func prefix:<?>(term) is assoc("left") {
+    return "prefix:<?>(" ~ term ~ ")";
+}
 
-    func postfix:<!>(term) is equal(prefix:<?>) is assoc("left") {
-        return "postfix:<!>(" ~ term ~ ")";
-    }
+func postfix:<!>(term) is equal(prefix:<?>) is assoc("left") {
+    return "postfix:<!>(" ~ term ~ ")";
+}
 
-    say(?"term"!);       # postfix:<!>(prefix:<?>(term)) (left associativity) (default)
+say(?"term"!);       # postfix:<!>(prefix:<?>(term)) (left associativity) (default)
+```
 
 While this pair associates to the right:
 
-    func prefix:<¿>(term) is assoc("right") {
-        return term ~ " prefix:<?>";
-    }
+```_007
+func prefix:<¿>(term) is assoc("right") {
+    return term ~ " prefix:<?>";
+}
 
-    func postfix:<¡>(term) is equal(prefix:<?>) is assoc("right") {
-        return term ~ " postfix:<¡>";
-    }
+func postfix:<¡>(term) is equal(prefix:<?>) is assoc("right") {
+    return term ~ " postfix:<¡>";
+}
 
-    say(¿"term"¡);       # prefix:<¿>(postfix:<¡>(term)) (right associativity)
+say(¿"term"¡);       # prefix:<¿>(postfix:<¡>(term)) (right associativity)
+```
 
 Because `"left"` is the default associativity, both specifiers in the former
 example are unnecessary. The associativity for `postfix:<¡>` also doesn't need
@@ -753,24 +805,28 @@ infix, or vice versa, leads to a compile-time error.
 We can define operators that construct `Range` objects, using the class we
 defined earlier:
 
-    func infix:<..>(lhs, rhs) is looser(infix:<==>) {
-        return Range(lhs, rhs);
-    }
+```_007
+func infix:<..>(lhs, rhs) is looser(infix:<==>) {
+    return Range(lhs, rhs);
+}
 
-    func infix:<..^>(lhs, rhs) is equiv(infix:<..>) {
-        return Range(lhs, rhs - 1);
-    }
+func infix:<..^>(lhs, rhs) is equiv(infix:<..>) {
+    return Range(lhs, rhs - 1);
+}
 
-    func prefix:<^>(expr) {     # overrides the builtin
-        return 0 ..^ expr;
-    }
+func prefix:<^>(expr) {     # overrides the builtin
+    return 0 ..^ expr;
+}
+```
 
 > #### 🔮 Future feature: using custom iterable types in `for` loops
 >
 > Now we can use ranges in `for` loops:
 >
->     for 1..10 -> i { say(i) }
->     for ^100 { say("I shall never waste chalk again") }
+> ```_007
+> for 1..10 -> i { say(i) }
+> for ^100 { say("I shall never waste chalk again") }
+> ```
 
 ### Parsing concerns
 
@@ -833,27 +889,35 @@ Let's say we want to package up our `Range` class, and the custom operators
 that help construct ranges, as a module. That way, a user of our module will
 just be able to write this in their program:
 
-    import * from range;
+```_007
+import * from range;
+```
 
 From that point on for the rest of the block, all the things related to ranges
 will be lexically available.
 
-    for 2 .. 7 -> n {   # works because infix:<..> was imported
-        say(n);
-    }
+```_007
+for 2 .. 7 -> n {   # works because infix:<..> was imported
+    say(n);
+}
+```
 
 If we only wanted the `infix:<..>` operator, we could import only that:
 
-    import { infix:<..> } from range;
+```_007
+import { infix:<..> } from range;
+```
 
 The `range` module is in fact a `range.007` file in 007's lib path. We'd write
 it with the same definition as before, except we also export them:
 
-    export class Range { ... }
+```_007
+export class Range { ... }
 
-    export func infix:<..>(lhs, rhs) # ...
-    export func infix:<..^>(lhs, rhs) # ...
-    export func prefix:<^>(expr) # ...
+export func infix:<..>(lhs, rhs) # ...
+export func infix:<..^>(lhs, rhs) # ...
+export func prefix:<^>(expr) # ...
+```
 
 ### Forms of import
 
@@ -862,7 +926,9 @@ There are three forms of the `import` statement.
 The *named import* form lists all the names we want to declare in the current
 scope:
 
-    import { nameA, nameB, nameC } from some.module;
+```_007
+import { nameA, nameB, nameC } from some.module;
+```
 
 Each name imported counts as a declaration; it's a compile-time error import
 and otherwise declare the same name in the same scope.
@@ -872,7 +938,9 @@ all the exported names make up the *export list*.
 
 The *star import* form imports the entire export list into the current scope:
 
-    import * from some.module;
+```_007
+import * from some.module;
+```
 
 While this is convenient, it's also the only built-in construct in the language
 where *you can't see* from the syntactic form itself what names you're
@@ -881,13 +949,17 @@ introducing into the scope.
 Finally, the *module object import* creates a module object with all the
 names from the export list as properties:
 
-    import m from some.module;
-    # m now has m.nameA, m.nameB, m.nameC, etc.
+```_007
+import m from some.module;
+# m now has m.nameA, m.nameB, m.nameC, etc.
+```
 
 Imports are *not* hoisted in 007.
 
-    foo();  # won't work
-    import { foo } from some.module;
+```_007
+foo();  # won't work
+import { foo } from some.module;
+```
 
 ### Forms of export
 
@@ -898,17 +970,21 @@ There are two forms of export statement:
 The *exported declaration* form is an export plus one of the declaration
 statements:
 
-    export my someVar ...;
-    export func foo(...) ...;
-    export macro moo(...) ...;
-    export class SomeClass ...;
+```_007
+export my someVar ...;
+export func foo(...) ...;
+export macro moo(...) ...;
+export class SomeClass ...;
+```
 
 The declared name is made available in the lexical scope, and put on the export
 list.
 
 The *export list* form lists existing names to export:
 
-    export { nameA, nameB, nameC };
+```_007
+export { nameA, nameB, nameC };
+```
 
 There can be several of these export statements in a module, but it's
 recommended to put one at the end.
