@@ -41,7 +41,7 @@ role Val {
 ### doesn't always have an `else` statement. When it doesn't, the `.else`
 ### property is set to `None`.
 ###
-###     say(type((quasi @ Q.Statement { if 1 {} }).else)); # --> `<type NoneType>`
+###     say(type((quasi<Q.Statement> { if 1 {} }).else)); # --> `<type NoneType>`
 ###
 ### The value `None` is falsy, stringifies to `None`, and doesn't numify.
 ###

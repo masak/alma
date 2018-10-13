@@ -204,32 +204,32 @@ grammar _007::Parser::Syntax {
     }
     token term:quasi { quasi <.ws>
         [
-            || "@" <.ws> $<qtype>=["Q.Infix"] <.ws> '{' <.ws> <infix> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Prefix"] <.ws> '{' <.ws> <prefix> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Postfix"] <.ws> '{' <.ws> <postfix> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Expr"] <.ws> '{' <.ws> <EXPR> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Identifier"] <.ws> '{' <.ws> <term:identifier> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Block"] <.ws> '{' <.ws> <block> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.CompUnit"] <.ws> '{' <.ws> [<compunit=.unquote("Q.CompUnit")> || <compunit>] <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Literal"] <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Literal.Int"] <.ws> '{' <.ws> <term:int> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Literal.None"] <.ws> '{' <.ws> <term:none> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Literal.Str"] <.ws> '{' <.ws> <term:str> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Property"] <.ws> '{' <.ws> <property> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.PropertyList"] <.ws> '{' <.ws> <propertylist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Term"] <.ws> '{' <.ws> <term> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Term.Array"] <.ws> '{' <.ws> <term:array> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Term.Object"] <.ws> '{' <.ws> <term:object> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Term.Quasi"] <.ws> '{' <.ws> <term:quasi> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Trait"] <.ws> '{' <.ws> <trait> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.TraitList"] <.ws> '{' <.ws> <traitlist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Statement"] <.ws> <block>
-            || "@" <.ws> $<qtype>=["Q.StatementList"] <.ws> <block>
-            || "@" <.ws> $<qtype>=["Q.Parameter"] <.ws> '{' <.ws> <parameter> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.ParameterList"] <.ws> '{' <.ws> <parameterlist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.ArgumentList"] <.ws> '{' <.ws> <argumentlist> <.ws> '}'
-            || "@" <.ws> $<qtype>=["Q.Unquote"] <.ws> '{' <.ws> <unquote> <.ws> '}'
-            || "@" <.ws> (\S+) { die "Unknown Q type $0" } # XXX: turn into X::
+            || "<" <.ws> $<qtype>=["Q.Infix"] ">" <.ws> '{' <.ws> <infix> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Prefix"] ">" <.ws> '{' <.ws> <prefix> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Postfix"] ">" <.ws> '{' <.ws> <postfix> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Expr"] ">" <.ws> '{' <.ws> <EXPR> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Identifier"] ">" <.ws> '{' <.ws> <term:identifier> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Block"] ">" <.ws> '{' <.ws> <block> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.CompUnit"] ">" <.ws> '{' <.ws> [<compunit=.unquote("Q.CompUnit")> || <compunit>] <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Literal"] ">" <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Literal.Int"] ">" <.ws> '{' <.ws> <term:int> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Literal.None"] ">" <.ws> '{' <.ws> <term:none> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Literal.Str"] ">" <.ws> '{' <.ws> <term:str> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Property"] ">" <.ws> '{' <.ws> <property> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.PropertyList"] ">" <.ws> '{' <.ws> <propertylist> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Term"] ">" <.ws> '{' <.ws> <term> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Term.Array"] ">" <.ws> '{' <.ws> <term:array> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Term.Object"] ">" <.ws> '{' <.ws> <term:object> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Term.Quasi"] ">" <.ws> '{' <.ws> <term:quasi> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Trait"] ">" <.ws> '{' <.ws> <trait> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.TraitList"] ">" <.ws> '{' <.ws> <traitlist> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Statement"] ">" <.ws> <block>
+            || "<" <.ws> $<qtype>=["Q.StatementList"] ">" <.ws> <block>
+            || "<" <.ws> $<qtype>=["Q.Parameter"] ">" <.ws> '{' <.ws> <parameter> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.ParameterList"] ">" <.ws> '{' <.ws> <parameterlist> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.ArgumentList"] ">" <.ws> '{' <.ws> <argumentlist> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Unquote"] ">" <.ws> '{' <.ws> <unquote> <.ws> '}'
+            || "<" <.ws> (<[\S]-[>]>+) ">" { die "Unknown Q type $0" } # XXX: turn into X::
             || <block>
             || <.panic("quasi")>
         ]
