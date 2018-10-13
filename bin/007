@@ -30,6 +30,7 @@ sub run_007($program, Str $backend is copy) {
     my $unexpanded = $backend eq "unexpanded-ast";
     my $ast = _007.parser(:$runtime).parse($program, :$unexpanded);
     %BACKENDS{$backend}($ast, $runtime);
+    exit($runtime.exit-code);
 }
 
 multi MAIN($path, Str :$backend = "default") {

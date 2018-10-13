@@ -2,6 +2,10 @@ use _007::Val;
 use _007::Q;
 use _007::OpScope;
 
+class X::Control::Exit is Exception {
+    has Int $.exit-code;
+}
+
 sub wrap($_) {
     when Val | Q { $_ }
     when Nil  { NONE }
@@ -110,6 +114,11 @@ my @builtins =
         # implementation in Runtime.pm
     },
     type => -> $arg { Val::Type.of($arg.WHAT) },
+    exit => -> $int = Val::Int.new(:value(0)) {
+        assert-type(:value($int), :type(Val::Int), :operation<exit>);
+        my $exit-code = $int.value % 256;
+        die X::Control::Exit.new(:$exit-code);
+    },
 
     # OPERATORS (from loosest to tightest within each category)
 

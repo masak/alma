@@ -94,6 +94,16 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     flunk $desc;
 }
 
+sub has-exit-code($program, $expected-exit-code, $desc = "MISSING TEST DESCRIPTION") is export {
+    my $output = UnwantedOutput.new;
+    my $runtime = _007.runtime(:$output);
+    my $parser = _007.parser(:$runtime);
+    my $ast = $parser.parse($program);
+    $runtime.run($ast);
+
+    is $runtime.exit-code, $expected-exit-code, $desc;
+}
+
 sub emits-js($program, @expected-builtins, $expected, $desc = "MISSING TEST DESCRIPTION") is export {
     my $output = UnwantedOutput.new;
     my $runtime = _007.runtime(:$output);
