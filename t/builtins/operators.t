@@ -512,7 +512,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q.Infix { + }; say(q ~~ Q.Infix)
+        my q = quasi<Q.Infix> { + }; say(q ~~ Q.Infix)
         .
 
     outputs $program, "True\n", "successful typecheck";
@@ -520,7 +520,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q.Infix { + }; say(q ~~ Q.Prefix)
+        my q = quasi<Q.Infix> { + }; say(q ~~ Q.Prefix)
         .
 
     outputs $program, "False\n", "unsuccessful typecheck";
@@ -552,8 +552,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(quasi @ Q.Infix { + } !~~ Q.Infix);
-        say(quasi @ Q.Infix { + } !~~ Q.Prefix);
+        say(quasi<Q.Infix> { + } !~~ Q.Infix);
+        say(quasi<Q.Infix> { + } !~~ Q.Prefix);
         say(42 !~~ Int);
         say([4, 2] !~~ Array);
         say({} !~~ Object);

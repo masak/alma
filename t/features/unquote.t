@@ -40,7 +40,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Infix { + };
+            my q = quasi<Q.Infix> { + };
             return quasi { say(2 {{{Q.Infix @ q}}} 2) };
         }
 
@@ -53,7 +53,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Term { "foo" };
+            my q = quasi<Q.Term> { "foo" };
             return quasi { say(2 {{{Q.Infix @ q}}} 2) };
         }
 
@@ -68,7 +68,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Infix { + };
+            my q = quasi<Q.Infix> { + };
             return quasi { say(2 {{{Q.Term @ q}}} 2) };
         }
 
@@ -83,7 +83,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Infix { + };
+            my q = quasi<Q.Infix> { + };
             return quasi { say(2 {{{q}}} 2) };
         }
 
@@ -98,7 +98,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Prefix { - };
+            my q = quasi<Q.Prefix> { - };
             return quasi { say({{{Q.Prefix @ q}}} 17) };
         }
 
@@ -111,7 +111,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
-            my q = quasi @ Q.Term { "foo" };
+            my q = quasi<Q.Term> { "foo" };
             return quasi { say({{{Q.Prefix @ q}}} 17) };
         }
 
@@ -132,7 +132,7 @@ use _007::Test;
         }
 
         macro moo() {
-            my q = quasi @ Q.ArgumentList { 1, "foo", [0, 0, 7] };
+            my q = quasi<Q.ArgumentList> { 1, "foo", [0, 0, 7] };
             return quasi { foo({{{Q.ArgumentList @ q}}}) };
         }
 
@@ -144,8 +144,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = quasi @ Q.CompUnit { say("James"); };
-        say(type(quasi @ Q.CompUnit { {{{Q.CompUnit @ q}}} }));
+        my q = quasi<Q.CompUnit> { say("James"); };
+        say(type(quasi<Q.CompUnit> { {{{Q.CompUnit @ q}}} }));
         .
 
     outputs $program, "<type Q.CompUnit>\n", "Q.CompUnit @ q";
