@@ -81,7 +81,7 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:if {
-        if <.ws> <xblock>
+        if» <.ws> <xblock>
         [  <.ws> else <.ws>
             [
                 | <else=.pblock>

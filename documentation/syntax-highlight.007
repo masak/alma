@@ -1,0 +1,150 @@
+my OTHER = 0;
+my PRE_CODE_007 = 1;
+
+my CODE_PREFIX = "<pre class=\"_007\"><code>";
+my CODE_SUFFIX = "</code></pre>";
+
+my NL = 10.chr();
+
+func if_startsWith(string, prefix, thenFn, elseFn) {
+    my prefixLength = prefix.chars();
+    if string.chars() >= prefixLength && string.prefix(prefixLength) == prefix {
+        thenFn(string.suffix(prefixLength));
+    }
+    else {
+        elseFn();
+    }
+}
+
+func if_endsWith(string, suffix, thenFn, elseFn) {
+    my suffixStart = string.chars() - suffix.chars();
+    if suffixStart >= 0 && string.suffix(suffixStart) == suffix {
+        thenFn(string.prefix(suffixStart));
+    }
+    else {
+        elseFn();
+    }
+}
+
+func reWrapInCodeTags(string) {
+    return CODE_PREFIX ~ string ~ CODE_SUFFIX;
+}
+
+func hlSpanOpen(name) {
+    return "<span class=\"hl-" ~ name ~ "\">";
+}
+
+func hlSpanClose() {
+    return "</span>";
+}
+
+func isAlphabetic(c) {
+    return c >= "A" && c <= "Z" || c >= "a" && c <= "z";
+}
+
+func isNumeric(c) {
+    return c >= "0" && c <= "9";
+}
+
+func isIdentifier(string) {
+    for ^string.chars() -> i {
+        my c = string.substr(i, 1);
+        if !(isAlphabetic(c) || i > 0 && (isNumeric(c) || c == "_")) {
+            return False;
+        }
+    }
+    return string.chars() > 0;
+}
+
+func insert(string, inserts) {
+    my result = "";
+    my index = 0;
+    for inserts -> p {
+        my insertIndex = p[0];
+        my insertString = p[1];
+        result = result ~ string.substr(index, insertIndex - index) ~ insertString;
+        index = insertIndex;
+    }
+    return result ~ string.substr(index, string.chars() - index);
+}
+
+func syntaxHighlight(string) {
+    my index = 0;
+    my inserts = [];
+    # Each iteration of this loop promises to either progress `index` or to throw an exception
+    while index < string.chars() {
+        if string.substr(index, 1) == " " {
+            index = index + 1;
+        }
+        else {
+            if string.substr(index, 6) == "&quot;" {
+                my stringLength = 6;
+                while index + stringLength < string.chars() && string.substr(index + stringLength, 6) != "&quot;" {
+                    stringLength = stringLength + 1;
+                }
+                stringLength = stringLength + 6;
+                inserts.push( (index, hlSpanOpen("string")) );
+                inserts.push( (index + stringLength, hlSpanClose()) );
+                index = index + stringLength;
+            }
+            else {
+                my wordLength = 1;
+                while index + wordLength < string.chars() && (my c = string.substr(index + wordLength, 1)) != " " && c != NL {
+                    wordLength = wordLength + 1;
+                }
+                my word = string.substr(index, wordLength);
+                if word == "my" {
+                    inserts.push( (index, hlSpanOpen("keyword")) );
+                    inserts.push( (index + wordLength, hlSpanClose()) );
+                    index = index + wordLength;
+                }
+                else if isIdentifier(word) {
+                    inserts.push( (index, hlSpanOpen("identifier")) );
+                    inserts.push( (index + wordLength, hlSpanClose()) );
+                    index = index + wordLength;
+                }
+                else if word == "=" {
+                    inserts.push( (index, hlSpanOpen("operator")) );
+                    inserts.push( (index + wordLength, hlSpanClose()) );
+                    index = index + wordLength;
+                }
+                else if word == ";" {
+                    index = index + wordLength;
+                }
+                else {
+                    throw new Exception {
+                        message: "Unrecognized word: `" ~ word ~ "`"
+                    };
+                }
+            }
+        }
+    }
+    return insert(string, inserts);
+}
+
+my mode = OTHER;
+my codeLines;
+
+while (my line = prompt("")) != None {
+    if mode == PRE_CODE_007 {
+        if_endsWith(line, CODE_SUFFIX, func(lastCodeLine) {
+            codeLines.push(lastCodeLine);
+            say(reWrapInCodeTags(syntaxHighlight(codeLines.join(NL))));
+            mode = OTHER;
+        }, func() {
+            codeLines.push(line);
+        });
+    }
+    else {  # mode == OTHER
+        if_startsWith(line, CODE_PREFIX, func(firstCodeLine) {
+            if_endsWith(firstCodeLine, CODE_SUFFIX, func(middle) {
+                say(reWrapInCodeTags(syntaxHighlight(middle)));
+            }, func() {
+                mode = PRE_CODE_007;
+                codeLines = [firstCodeLine];
+            });
+        }, func() {
+            say(line);
+        });
+    }
+}
