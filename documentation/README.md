@@ -462,7 +462,9 @@ builtins.
 ## Classes and objects
 
 > ### 🔮 Future feature: classes
-> This whole chapter is conjectural right now.
+>
+> The implementation of classes has started behind a feature flag, but mostly,
+> classes are not implemented yet in 007.
 
 You can declare classes in 007.
 
@@ -862,7 +864,8 @@ of whether the already installed operator is a built-in or user-defined.
 
 > ### 🔮 Future feature: modules
 >
-> This whole chapter is conjectural right now.
+> Modules have not been implemented yet in 007. This whole chapter is a
+> best-guess at how they will work.
 
 007 files can be run directly as _scripts_, or they can be imported from other
 007 programs as _modules_.
