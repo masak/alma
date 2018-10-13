@@ -140,6 +140,7 @@ my @builtins =
             return wrap(equal-value($lhs, $rhs));
         },
         :qtype(Q::Infix::Eq),
+        :assoc<non>,
     ),
     'infix:!=' => op(
         sub ($lhs, $rhs) {

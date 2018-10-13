@@ -434,11 +434,12 @@ use _007::Test;
 {
     my $program = q:to/./;
         say(1 == 2 != 3);
-        say(4 != 5 == 6);
         .
 
-    outputs $program, "True\nFalse\n",
-        "comparison operators evaluate from left to right";
+    parse-error
+        $program,
+        X::Op::Nonassociative,
+        "comparison operators are nonassociative";
 }
 
 {
@@ -605,10 +606,11 @@ use _007::Test;
 {
     my $program = q:to/./;
         say("a" == "a" ~~ Bool);
-        say(7 ~~ Int == True);
         .
 
-    outputs $program, "True\nTrue\n", "infix:<~~> has the tightness of a comparison operator";
+    parse-error $program,
+        X::Op::Nonassociative,
+        "infix:<~~> has the tightness of a comparison operator (and so is nonassociative)";
 }
 
 {
