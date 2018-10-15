@@ -71,4 +71,46 @@ use _007::Test;
     outputs $program, "007\n<func say(...args)>\n", "builtin func say() has varargs";
 }
 
+{
+    my $program = q:to/./;
+        exit();
+        .
+
+    has-exit-code $program, 0, "exit without a parameter";
+}
+
+{
+    my $program = q:to/./;
+        exit(1);
+        .
+
+    has-exit-code $program, 1, "exit with a parameter";
+}
+
+{
+    my $program = q:to/./;
+        exit(-1);
+        .
+
+    has-exit-code $program, 255, "exit is modulo 256";
+}
+
+{
+    my $program = q:to/./;
+        func foo() {
+            exit();
+            say("foo");
+        }
+
+        func bar() {
+            foo();
+            say("bar");
+        }
+
+        bar();
+        .
+
+    outputs $program, "", "nothing is run after exit()";
+}
+
 done-testing;

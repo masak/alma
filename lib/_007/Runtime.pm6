@@ -6,6 +6,7 @@ constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
     :frame(NONE));
+constant EXIT_SUCCESS = 0;
 
 class _007::Runtime {
     has $.input;
@@ -15,8 +16,11 @@ class _007::Runtime {
     has $.builtin-frame;
     has $!say-builtin;
     has $!prompt-builtin;
+    has $!exit-builtin;
+    has $.exit-code;
 
     submethod BUILD(:$!input, :$!output) {
+        $!builtin-opscope = opscope();
         $!builtin-frame = Val::Object.new(:properties(
             :outer-frame(NO_OUTER),
             :pad(builtins-pad()))
@@ -24,7 +28,8 @@ class _007::Runtime {
         @!frames.push($!builtin-frame);
         $!say-builtin = builtins-pad().properties<say>;
         $!prompt-builtin = builtins-pad().properties<prompt>;
-        $!builtin-opscope = opscope();
+        $!exit-builtin = builtins-pad().properties<exit>;
+        $!exit-code = EXIT_SUCCESS;
     }
 
     method run(Q::CompUnit $compunit) {
@@ -32,6 +37,9 @@ class _007::Runtime {
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
+            }
+            when X::Control::Exit {
+                $!exit-code = .exit-code;
             }
         }
     }
@@ -164,7 +172,7 @@ class _007::Runtime {
             my $paramcount = $c.parameterlist.parameters.elements.elems;
             my $argcount = @arguments.elems;
             die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
-                unless $paramcount == $argcount;
+                unless $paramcount == $argcount || $c === $!exit-builtin && $argcount < 2;
         }
         if $c === $!prompt-builtin {
             $.output.print(@arguments[0].Str);
