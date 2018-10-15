@@ -6,6 +6,7 @@ constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
     :name(Val::Str.new(:value("--RETURN-TO--"))),
     :frame(NONE));
+constant EXIT_SUCCESS = 0;
 
 class _007::Runtime {
     has $.input;
@@ -28,7 +29,7 @@ class _007::Runtime {
         $!say-builtin = builtins-pad().properties<say>;
         $!prompt-builtin = builtins-pad().properties<prompt>;
         $!exit-builtin = builtins-pad().properties<exit>;
-        $!exit-code = 0;
+        $!exit-code = EXIT_SUCCESS;
     }
 
     method run(Q::CompUnit $compunit) {
