@@ -84,7 +84,7 @@ use _007::Test;
         exit(1);
         .
 
-    has-exit-code $program, 1, "exit with a paramter";
+    has-exit-code $program, 1, "exit with a parameter";
 }
 
 {
