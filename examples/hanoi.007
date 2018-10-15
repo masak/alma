@@ -35,15 +35,15 @@ func move(diskname, from, to) {
     show();
 }
 
-func solve_hanoi(n, from, helper, to) {
+func solveHanoi(n, from, helper, to) {
     if n >= 2 {
-        solve_hanoi(n - 1, from, to, helper);
+        solveHanoi(n - 1, from, to, helper);
     }
     move(["tiny disk", "small disk", "large disk", "huge disk"][n - 1], from, to);
     if n >= 2 {
-        solve_hanoi(n - 1, helper, from, to);
+        solveHanoi(n - 1, helper, from, to);
     }
 }
 
 show();
-solve_hanoi(4, 0, 1, 2);
+solveHanoi(4, 0, 1, 2);

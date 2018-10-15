@@ -1,6 +1,6 @@
-func pad_left(string, length, char) {
+func padLeft(string, length, char) {
     if string.chars() < length {
-        return pad_left(char ~ string, length, char);
+        return padLeft(char ~ string, length, char);
     }
     else {
         return string;
@@ -25,8 +25,8 @@ func binfmt(number) {
 func infix:<⊕>(lhs, rhs) is equiv(infix:<+>) {
     my lb = binfmt(lhs);
     my rb = binfmt(rhs);
-    lb = pad_left(lb, rb.chars(), "0");
-    rb = pad_left(rb, lb.chars(), "0");
+    lb = padLeft(lb, rb.chars(), "0");
+    rb = padLeft(rb, lb.chars(), "0");
     my result = 0;
     my p = 1;
     for (^lb.chars()).reverse() -> i {
