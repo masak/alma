@@ -50,12 +50,13 @@ grammar _007::Parser::Syntax {
 
     proto token statement {*}
     token statement:expr {
+        $<export>=(export \s+)?
         <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
         <EXPR>
     }
     token statement:block { <pblock> }
     rule statement:func-or-macro {
-        $<routine>=(func|macro)» [<identifier> || <.panic("identifier")>]
+        [export\s+]?$<routine>=(func|macro)» [<identifier> || <.panic("identifier")>]
         :my $*in_routine = True;
         {
             declare($<routine> eq "func"

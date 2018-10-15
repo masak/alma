@@ -54,6 +54,10 @@ class X::Property::Duplicate is Exception {
     method message { "The property '$.property' was declared more than once in a property list" }
 }
 
+class X::Export::Nothing is Exception {
+    method message { "Nothing to export" }
+}
+
 class _007::Parser::Actions {
     sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
@@ -78,6 +82,24 @@ class _007::Parser::Actions {
     }
 
     method statement:expr ($/) {
+        if $<export> {
+            # For now, we're just enforcing that there's a `my` at the far left, according to the
+            # rules in https://github.com/masak/007/issues/404#issuecomment-432176865 -- we're
+            # not actually doing anything with the information yet
+
+            sub panicExportNothing() {
+                die X::Export::Nothing.new;
+            }
+
+            multi enforce-leftmost-my(Q::Term::My $) {}     # everything's fine
+            multi enforce-leftmost-my(Q::Term $) { panicExportNothing() }
+            multi enforce-leftmost-my(Q::Prefix $) { panicExportNothing() }
+            multi enforce-leftmost-my(Q::Postfix $postfix) { enforce-leftmost-my($postfix.term) }
+            multi enforce-leftmost-my(Q::Infix $infix) { enforce-leftmost-my($infix.lhs) }
+
+            enforce-leftmost-my($<EXPR>.ast);
+        }
+
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
         #      in the expression tree
