@@ -1009,11 +1009,33 @@ If no module is found, a compile-time error is reported.
 
 # Macrology
 
-XXX state the overall goals of extending the language via macros
+007 is an extensible language. In a trivial sense, this is true of almost any
+language; defining a new variable or function introduces a new name into some
+environment, thus "extending" the language with the new name.
+
+Custom operators represent a more ambitious form of extension. Not only do they
+introduce the operator name into the local scope, they also lexically extend
+the _grammar_ in such a way that a new operator is recognized.
+
+007 is a _very_ extensible language. It lets you define the syntax and
+semantics not just for operators, but for terms and statements as well.
+
+The overriding goal is for things in the core language, as well as language
+extensions, to be _user-definable_.
+
+This extreme in-language definability happens largely through macros. In order
+to talk about those, we first need to talk about program elements.
 
 ## The Q hierarchy
 
-XXX describe every program element having a Q type
+Every part of your program, from large to small, is represented by an object of
+a subtype of the type `Q`. Your entire program is a `Q.CompUnit`; an integer
+term (for example) is a `Q.Term.Int`. Together, all these objects form a tree;
+an "abstract syntax tree" describing your code.
+
+You can read more about all the Q types in the API section, but what's most
+important is that each Q node contains enough property data to describe the
+corresponding part of the program text.
 
 ## Quasi blocks
 
