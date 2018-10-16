@@ -148,7 +148,7 @@ my @builtins =
             my %*equality-seen;
             return wrap(equal-value($lhs, $rhs));
         },
-        :qtype(Q::Infix::Eq),
+        :qtype(Q::Infix),
         :assoc<non>,
     ),
     'infix:!=' => op(
@@ -156,14 +156,14 @@ my @builtins =
             my %*equality-seen;
             return wrap(!equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix::Ne),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<' => op(
         sub ($lhs, $rhs) {
             return wrap(less-value($lhs, $rhs))
         },
-        :qtype(Q::Infix::Lt),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<=' => op(
@@ -171,14 +171,14 @@ my @builtins =
             my %*equality-seen;
             return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix::Le),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>' => op(
         sub ($lhs, $rhs) {
             return wrap(more-value($lhs, $rhs) )
         },
-        :qtype(Q::Infix::Gt),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>=' => op(
@@ -186,7 +186,7 @@ my @builtins =
             my %*equality-seen;
             return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix::Ge),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:~~' => op(
@@ -195,7 +195,7 @@ my @builtins =
 
             return wrap($lhs ~~ $rhs.type);
         },
-        :qtype(Q::Infix::TypeMatch),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
@@ -204,7 +204,7 @@ my @builtins =
 
             return wrap($lhs !~~ $rhs.type);
         },
-        :qtype(Q::Infix::TypeNonMatch),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
 
@@ -216,13 +216,13 @@ my @builtins =
 
             return wrap($lhs.value + $rhs.value);
         },
-        :qtype(Q::Infix::Addition),
+        :qtype(Q::Infix),
     ),
     'infix:~' => op(
         sub ($lhs, $rhs) {
             return wrap($lhs.Str ~ $rhs.Str);
         },
-        :qtype(Q::Infix::Concat),
+        :qtype(Q::Infix),
         :precedence{ equiv => "infix:+" },
     ),
     'infix:-' => op(
@@ -232,7 +232,7 @@ my @builtins =
 
             return wrap($lhs.value - $rhs.value);
         },
-        :qtype(Q::Infix::Subtraction),
+        :qtype(Q::Infix),
     ),
 
     # multiplicative precedence
@@ -243,7 +243,7 @@ my @builtins =
 
             return wrap($lhs.value * $rhs.value);
         },
-        :qtype(Q::Infix::Multiplication),
+        :qtype(Q::Infix),
     ),
     'infix:%' => op(
         sub ($lhs, $rhs) {
@@ -253,7 +253,7 @@ my @builtins =
 
             return wrap($lhs.value % $rhs.value);
         },
-        :qtype(Q::Infix::Modulo),
+        :qtype(Q::Infix),
     ),
     'infix:%%' => op(
         sub ($lhs, $rhs) {
@@ -263,7 +263,7 @@ my @builtins =
 
             return wrap($lhs.value %% $rhs.value);
         },
-        :qtype(Q::Infix::Divisibility),
+        :qtype(Q::Infix),
     ),
     'infix:divmod' => op(
         sub ($lhs, $rhs) {
@@ -276,7 +276,7 @@ my @builtins =
                 wrap($lhs.value % $rhs.value),
             ]));
         },
-        :qtype(Q::Infix::Modulo),
+        :qtype(Q::Infix),
     ),
 
     # prefixes
@@ -284,7 +284,7 @@ my @builtins =
         sub prefix-str($expr) {
             Val::Str.new(:value($expr.Str));
         },
-        :qtype(Q::Prefix::Str),
+        :qtype(Q::Prefix),
     ),
     'prefix:+' => op(
         sub prefix-plus($_) {
@@ -298,7 +298,7 @@ my @builtins =
             }
             assert-type(:value($_), :type(Val::Int), :operation("prefix:<+>"));
         },
-        :qtype(Q::Prefix::Plus),
+        :qtype(Q::Prefix),
     ),
     'prefix:-' => op(
         sub prefix-minus($_) {
@@ -312,19 +312,19 @@ my @builtins =
             }
             assert-type(:value($_), :type(Val::Int), :operation("prefix:<->"));
         },
-        :qtype(Q::Prefix::Minus),
+        :qtype(Q::Prefix),
     ),
     'prefix:?' => op(
         sub ($a) {
             return wrap(?$a.truthy)
         },
-        :qtype(Q::Prefix::So),
+        :qtype(Q::Prefix),
     ),
     'prefix:!' => op(
         sub ($a) {
             return wrap(!$a.truthy)
         },
-        :qtype(Q::Prefix::Not),
+        :qtype(Q::Prefix),
     ),
     'prefix:^' => op(
         sub ($n) {
@@ -332,7 +332,7 @@ my @builtins =
 
             return wrap([^$n.value]);
         },
-        :qtype(Q::Prefix::Upto),
+        :qtype(Q::Prefix),
     ),
 
     # postfixes
