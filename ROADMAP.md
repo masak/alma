@@ -67,7 +67,7 @@ Here's the current proposed order of macro examples to tackle:
 These are features/bug fixes that will need to be in place for the above to
 work:
 
-* Some lingering injectile trouble. ([#212](https://github.com/masak/007/issues/212))
+* Making hygienic lookups work. ([#387](https://github.com/masak/007/issues/387))
 * The location protocol. (See below.) ([#214](https://github.com/masak/007/issues/214))
 * `is parsed`, or at least enough of it. ([#177](https://github.com/masak/007/issues/177))
 * Various Qnode introspection and manipulation. (No issue for this yet.)
