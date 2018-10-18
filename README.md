@@ -64,5 +64,6 @@ To learn more about macros:
 
 To learn more about 007:
 
-* [Double oh seven](http://strangelyconsistent.org/blog/double-oh-seven)
-* [Has it been three years?](http://strangelyconsistent.org/blog/has-it-been-three-years)
+* [Double oh seven](http://strangelyconsistent.org/blog/double-oh-seven) blog post
+* [Has it been three years?](http://strangelyconsistent.org/blog/has-it-been-three-years) blog post
+* This README.md used to contain a [pastiche of the cold open in Casino Royale (2006)](https://github.com/masak/007/tree/master/documentation/bond-pastiche.md), which was entertaining for some and confusing for others
