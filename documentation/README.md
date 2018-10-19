@@ -1094,7 +1094,14 @@ This is analogous to how template strings allow interpolated expressions.
 
 ## Macros
 
-XXX describe the general process; compare macros to functions
+Macros, the central feature of 007, work a lot like functions do. You can call
+a macro just like you can call a function.
+
+The main way they differ is that _functions are invoked at runtime_, whereas
+_macro calls are expanded at compile time_.
+
+Of course, the main consequence of this is that functions accept and return
+normal runtime values, whereas macros accept and return syntax tree fragments.
 
 XXX give two examples: prefix:<exists> and swap, perhaps?
 
