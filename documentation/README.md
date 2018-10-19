@@ -1037,15 +1037,60 @@ You can read more about all the Q types in the API section, but what's most
 important is that each Q node contains enough property data to describe the
 corresponding part of the program text.
 
-## Quasi blocks
+## Quasiquotes
 
 Describing a piece of code as nested `Q` objects will always be more cumbersome
 and lengthy than just writing the code as code. That's the problem quasi blocks
 solve: they allow you to express some code as code.
 
-XXX example
+As an example, here's a statement:
 
-XXX show some unquotes
+```007
+say("Hello, world!");
+```
+
+The syntax tree that corresponds to that statement:
+
+```007
+my statement = new Q.Statement.Expr {
+    expr: new Q.Postfix.Call {
+        identifier: new Q.Identifier { name: "postfix:()" },
+        operand: new Q.Identifier { name: "say" },
+        argumentlist: new Q.ArgumentList {
+            arguments: [
+                new Q.Literal.Str { value: "Hello, world!" }
+            ]
+        }
+    }
+};
+```
+
+As you can see, writing out the syntax tree in 007 code is a fair amount of
+work, just to describe a single `say` statement.
+
+Maybe this conclusion can be summarized as "it's far shorter to _be_ code than
+to _describe_ code".
+
+That's why quasiquotes exist: they help you express code as _code_, not as
+syntax trees. But you still get the syntax tree.
+
+```007
+my statement = quasi {
+    say("Hello, world!");
+};
+```
+
+The reason they're called "quasiquotes" and not just "quotes" are that besides
+expressing fixed code, they also allow injecting interpolated bits of syntax
+trees ("unquotes"):
+
+```007
+quasi {
+    say( {{{expr}}} );
+};
+```
+
+This is analogous to how template strings allow interpolated expressions.
 
 ## Macros
 
