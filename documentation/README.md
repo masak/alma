@@ -1103,6 +1103,9 @@ _macro calls are expanded at compile time_.
 Of course, the main consequence of this is that functions accept and return
 normal runtime values, whereas macros accept and return syntax tree fragments.
 
+Because macros return syntax tree fragments, quasiquotes are a really good fit.
+Typically, a macro ends with `return quasi { ... };`.
+
 XXX give two examples: prefix:<exists> and swap, perhaps?
 
 ## Stateful macros
