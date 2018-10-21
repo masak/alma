@@ -200,7 +200,7 @@ The contact gets an abstracted look. "But wait, won't there be weird and interes
 
 *Restroom.*
 
-The scene fades in smoother this time. The contrasts aren't quite so bright, and the sharp light has dimmed a fraction. Both bond and the contact are busy each in one end of the room, filling the walls with scribbled notes about compilers, ASTs, and various macro transformations.
+The scene fades in smoother this time. The contrasts aren't quite so bright, and the sharp light has dimmed a fraction. Both Bond and the contact are busy each in one end of the room, filling the walls with scribbled notes about compilers, ASTs, and various macro transformations.
 
 "Ok, I think I'm getting the hang of Perl 6 macros. They're unorthodox, for sure," says the contact over his shoulder.
 
