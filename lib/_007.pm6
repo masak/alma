@@ -3,8 +3,8 @@ use _007::Parser;
 use _007::Linter;
 
 class _007 {
-    method runtime(:$input = $*IN, :$output = $*OUT) {
-        _007::Runtime.new(:$input, :$output);
+    method runtime(:$input = $*IN, :$output = $*OUT, :@arguments) {
+        _007::Runtime.new(:$input, :$output, :@arguments);
     }
 
     method parser(:$runtime = $.runtime) {
