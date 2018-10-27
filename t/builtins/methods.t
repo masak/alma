@@ -373,5 +373,32 @@ use _007::Test;
     runtime-error $program, X::Uninstantiable, "can't instantiate a Bool";
 }
 
+{
+    my $program = q:to/./;
+        say([1, 3, 3, 4].index(1));
+        say([1, 3, 3, 4].index(3));
+        say([1, 3, 3, 4].index(4));
+        .
+
+    outputs $program, "0\n1\n3\n", "index() returns the index of the first occurrence of an element";
+}
+
+{
+    my $program = q:to/./;
+        say([1, 3, 3, 4].index(2));
+        say([1, 3, 3, 4].index(7));
+        .
+
+    outputs $program, "-1\n-1\n", "index() returns -1 when a value is not an element";
+}
+
+{
+    my $program = q:to/./;
+        say([[1, 3], [1, 2]].index([1, 2]));
+        .
+
+    outputs $program, "1\n", "index() on Array uses infix:<==> semantics";
+}
+
 done-testing;
 
