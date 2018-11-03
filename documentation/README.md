@@ -1014,99 +1014,65 @@ language; defining a new variable or function introduces a new name into some
 environment, thus "extending" the language with the new name.
 
 Custom operators represent a more ambitious form of extension. Not only do they
-introduce the operator name into the local scope, they also lexically extend
-the _grammar_ in such a way that a new operator is recognized.
+introduce the operator name into the local scope, they also make the _grammar_
+recognize a new operator, thus extending the language's syntax.
 
 007 is a _very_ extensible language. It lets you define the syntax and
 semantics not just for operators, but for terms and statements as well.
 
 The overriding goal is for things in the core language, as well as language
-extensions, to be _user-definable_.
+extensions, to be _user-definable_. This largely happens thanks to macros.
 
-This extreme in-language definability happens largely through macros. In order
-to talk about those, we first need to talk about program elements.
+As we move into the macrology sections, it might be good to know more is
+required of you, the reader. In extending in the language's reach, you will
+need to relate to aspects of the parser, the object system, and the execution
+model at a higher fidelity than the average "end user" of the language.
 
-## The Q hierarchy
-
-Every part of your program, from large to small, is represented by an object of
-a subtype of the type `Q`. Your entire program is a `Q.CompUnit`; an integer
-term (for example) is a `Q.Term.Int`. Together, all these objects form a tree;
-an "abstract syntax tree" describing your code.
-
-You can read more about all the Q types in the API section, but what's most
-important is that each Q node contains enough property data to describe the
-corresponding part of the program text.
-
-## Quasiquotes
-
-Describing a piece of code as nested `Q` objects will always be more cumbersome
-and lengthy than just writing the code as code. That's the problem quasi blocks
-solve: they allow you to express some code as code.
-
-As an example, here's a statement:
-
-```007
-say("Hello, world!");
-```
-
-The syntax tree that corresponds to that statement:
-
-```007
-my statement = new Q.Statement.Expr {
-    expr: new Q.Postfix.Call {
-        identifier: new Q.Identifier { name: "postfix:()" },
-        operand: new Q.Identifier { name: "say" },
-        argumentlist: new Q.ArgumentList {
-            arguments: [
-                new Q.Literal.Str { value: "Hello, world!" }
-            ]
-        }
-    }
-};
-```
-
-As you can see, writing out the syntax tree in 007 code is a fair amount of
-work, just to describe a single `say` statement.
-
-Maybe this conclusion can be summarized as "it's far shorter to _be_ code than
-to _describe_ code".
-
-That's why quasiquotes exist: they help you express code as _code_, not as
-syntax trees. But you still get the syntax tree.
-
-```007
-my statement = quasi {
-    say("Hello, world!");
-};
-```
-
-The reason they're called "quasiquotes" and not just "quotes" are that besides
-expressing fixed code, they also allow injecting interpolated bits of syntax
-trees ("unquotes"):
-
-```007
-quasi {
-    say( {{{expr}}} );
-};
-```
-
-This is analogous to how template strings allow interpolated expressions.
+Moreover, in the crowded space of lanuage extension, you're being held at a
+higher-than-usual standard of care and empathy. Your particular extension might
+need to interoperate not just with the core language but with other people's
+(past, present, and future) extensions.
 
 ## Macros
 
-Macros, the central feature of 007, work a lot like functions do. You can call
-a macro just like you can call a function.
+Compare a normal function:
 
-The main way they differ is that _functions are called at runtime_, whereas
-_macros are called at compile time_.
+```_007
+func greet(name) {
+    say("Hello, ", name);
+}
+```
 
-Of course, the main consequence of this is that functions accept and return
-normal runtime values, whereas macros accept and return syntax tree fragments.
+To a macro:
 
-Because macros return syntax tree fragments, quasiquotes are a really good fit.
-Typically, a macro ends with `return quasi { ... };`.
+```_007
+macro greet(name) {
+    return quasi {
+        say("Hello ", {{{name}}});
+    }
+}
+```
+
+Even with these simple examples, there are three significant differences:
+
+1. In the function, `name` comes in as a runtime value, probably a `Str`. In
+the macro, `name` comes in as a program fragment, more exactly one denoting an
+expression, probably a `Q.Literal.Str`.
+
+2. In the function, we just execute some code directly. (The function doesn't
+return anything; it only has the side effect of printing.) In the macro, we
+_build_ the code that will then be inserted into the program somewhere, and
+later executed. (See more about this below in the [quasis section](#quasis).)
 
 XXX give two examples: prefix:<exists> and swap, perhaps?
+
+### Quasis
+
+XXX
+
+### The Q hierarchy
+
+XXX
 
 ## Stateful macros
 
