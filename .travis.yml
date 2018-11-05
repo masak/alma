@@ -2,3 +2,5 @@ language: perl6
 sudo: false
 perl6:
   - latest
+env:
+  - FLAG_007_REGEX=1 FLAG_007_CLASS=1
