@@ -1,4 +1,4 @@
-# 007 runtime
+# 007 runtime [![Build Status](https://secure.travis-ci.com/edumentab/007-runtime.svg?branch=master)](http://travis-ci.com/edumentab/007-runtime)
 
 Experimental new runtime/VM for the experimental language 007
 
@@ -12,6 +12,6 @@ Experimental new runtime/VM for the experimental language 007
 
 * make an AST->bytecode compilation step
 * make a source->AST parsing step
-* make a page like the try/play ones I linked above
+* [#14](https://github.com/edumentab/007-runtime/issues/14)
 
 Enjoy! :)
