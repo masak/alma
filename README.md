@@ -1,4 +1,4 @@
-# 007 runtime [![Build Status](https://secure.travis-ci.com/edumentab/007-runtime.svg?branch=master)](http://travis-ci.com/edumentab/007-runtime)
+# 007 runtime [![Build Status](https://travis-ci.com/edumentab/007-runtime.svg?token=qyz97SG4xZZNQxtzzJz4&branch=master)](https://travis-ci.com/edumentab/007-runtime/builds/87108965#)
 
 Experimental new runtime/VM for the experimental language 007
 
