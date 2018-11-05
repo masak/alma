@@ -1129,10 +1129,12 @@ XXX example: `<-` (`amb`)
 
 # API reference
 
-## Built-in types
+## Types
 
-## Built-in functions
+## Functions
 
-## Built-in operators
+## Operators
+
+## Exceptions
 
 # How to contribute to 007
