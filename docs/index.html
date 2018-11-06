@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>007 documentation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <style>
+      body {
+        font-size: 16pt;
+        padding-top: 2em;
+        padding-bottom: 15em;
+      }
+
+      blockquote {
+        border-radius: 5px;
+        padding-top: 1em;
+        padding-bottom: 1em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        border-left: solid 5px #666;
+      }
+
+      blockquote.info {
+        background: #fec;
+      }
+
+      blockquote.future {
+        background: #ccf;
+      }
+
+      blockquote > h3:first-child {
+        margin-top: 0;
+      }
+
+      h4 {
+        font-weight: bold;
+      }
+
+      pre {
+        font-size: 16pt;
+      }
+
+      pre._007 {
+        border: none;
+        background: #333;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+<a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+<div class="container">
+<p>This documentation has four parts:</p>
+<ul>
+<li>The <a href="#language-guide">language guide</a> describes how to author 007 programs.</li>
+</ul>
+<blockquote class="future">
+<h4 id="future-documentation">🔮 Future documentation:</h4>
+<ul>
+<li><p>The <em>macrology section</em> talks about how to extend and expand the language itself: its syntax, Q hierarchy, and semantics.</p></li>
+<li><p>The <em>API reference</em> section documents each built-in types, functions and operators in detail.</p></li>
+<li><p>Finally, there's a short section about how to contribute to 007.</p></li>
+</ul>
+</blockquote>
+<p><em>This document is still being written. Paragraphs marked 🔮 represent future features of 007 that are planned but not yet implemented.</em></p>
+<h1 id="language-guide">Language guide</h1>
+<h2 id="getting-started">Getting started</h2>
+<h3 id="installation">Installation</h3>
+<p>Make sure you have <a href="https://perl6.org/downloads/">Rakudo Perl 6</a> installed and in your path.</p>
+<p>Then, clone the 007 repository. (This step requires Git. There's also <a href="https://github.com/masak/007/archive/master.zip">a zip file</a>.)</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="fu">git</span> clone https://github.com/masak/007.git
+[<span class="ex">...</span>]</code></pre></div>
+<h3 id="setting-an-environment-variable">Setting an environment variable</h3>
+<p>We're one step away from running our first 007 program. Before that, we need to set an environment variable <code>PERL6LIB</code>:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="bu">cd</span> 007
+$ <span class="bu">export</span> <span class="va">PERL6LIB=$(</span><span class="bu">pwd</span><span class="va">)</span>/lib</code></pre></div>
+<blockquote class="info">
+<h4 id="perl6lib">💡 <code>PERL6LIB</code></h4>
+<p><code>PERL6LIB</code> is used to tell Rakudo Perl 6 which paths to look in whenever it sees a <code>use</code> module import in a program. Since <code>bin/007</code> imports some 007-specific modules, which in turn import other modules, we need to set this environment variable.</p>
+</blockquote>
+<h3 id="running-007">Running 007</h3>
+<p>Now this should work:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="ex">bin/007</span> -e=<span class="st">&#39;say(&quot;OH HAI&quot;)&#39;</span>
+<span class="ex">OH</span> HAI
+
+$ <span class="ex">bin/007</span> examples/format.007
+<span class="ex">abracadabra</span>
+<span class="ex">foo</span><span class="dt">{1}</span>bar</code></pre></div>
+<h2 id="variables-and-values">Variables and values</h2>
+<p>Variables are declared with <code>my</code>. You can read out their values in an ordinary expression, and you can assign to them.</p>
+<pre class="_007"><code>my name = &quot;James&quot;;
+say(&quot;My name is &quot;, name);      # &quot;My name is James&quot;
+name = &quot;Mr. Smith&quot;;
+say(&quot;Now my name is &quot;, name);  # &quot;Now my name is Mr. Smith&quot;</code></pre>
+<blockquote class="info">
+<h3 id="lexical-scope">💡 Lexical scope</h3>
+<p>Variables are <em>lexically scoped</em>. You can only use/see the variable in the scope it was declared, after it's been declared.</p>
+<pre class="_007"><code># can&#39;t use x
+{
+    # can&#39;t use x
+    my x = &quot;yay!&quot;;
+    say(x);
+    # can use x \o/
+}
+# can&#39;t use x</code></pre>
+<p>You don't even need to run the program to find out if the use of a variable is out-of-scope or not. You can just find out from the program text (and so can the compiler). We say that variable binding is <em>static</em>.</p>
+</blockquote>
+<p>That's all there is to variables; they are meant to be predictable and straightforward. Later, when writing macros has richer demands on variables, 007's <a href="#evaluating-expressions">location protocol</a> will allow us to manipulate variables more finely, controlling exactly when to read and/or assign to them.</p>
+<p>In 007, these &quot;scalar value&quot; types are built in:</p>
+<pre><code>None          NoneType
+False         Bool
+42            Int
+&quot;Bond&quot;        Str</code></pre>
+<p>And these &quot;container&quot; types:</p>
+<pre><code>[1, 2]        Array
+(&quot;x&quot;, &quot;y&quot;)    Tuple
+{ &quot;n&quot;: 42 }   Dict</code></pre>
+<h2 id="operators-and-expressions">Operators and expressions</h2>
+<p>Gramatically, a 007 expression always looks like this:</p>
+<pre><code>expr := &lt;termish&gt; +% &lt;infix&gt;
+termish := &lt;prefix&gt;* &lt;term&gt; &lt;postfix&gt;*</code></pre>
+<p>Unpacking what this means, a term may be preceded by prefix operators, and succeeded by postfix operators. (The combination of prefixes-term-postfixes is referred to as a <em>termish</em>.) Several termishes can occur in a row, separated by infix operators.</p>
+<p>You can have whitespace before or after terms and operators, and it largely doesn't change the meaning of the program. The recommended style is to use whitespace around infixes, but not after prefixes or before postfixes.</p>
+<p>007 has 28 built-in operators. Here we describe them by group. (These are just short descriptions. For more detail, see each individual operator in the API docs.)</p>
+<p><strong>Assignment</strong>. The <code>x = 42</code> expression assigns the value <code>42</code> to the variable <code>x</code>.</p>
+<p><strong>Arithmetic</strong>. The infix operators <code>+ - * %</code> work as you'd expect. <code>%%</code> tests for divisibility, so it returns <code>True</code> whenever <code>%</code> returns <code>0</code>. <code>divmod</code> does an integer division resulting in a tuple <code>(q, r)</code> where <code>q</code> is the quotient and <code>r</code> is the reminder.</p>
+<p><strong>String building</strong>. You can concatenate strings with <code>~</code>. (To concatenate arrays, use the Array method <code>.concat</code>.)</p>
+<p><strong>Equality, comparison and matching</strong>. The operators <code>==</code> and <code>!=</code> checks whether values are equal or unequal. <code>&lt; &lt;= &gt; &gt;=</code> compare ordered types like integers or strings. <code>~~ !~~</code> match a value against a type.</p>
+<p><strong>Logical connectives</strong>. The infixes <code>||</code> and <code>&amp;&amp;</code> allow you to combine boolean (or really, any) values. Furthermore, <code>//</code> allows you to replace <code>None</code> values with a default. (All of these operators are short-circuiting. See the individual operators for more information.)</p>
+<p><strong>Postfixes</strong>. The postfixes are <code>[]</code> for indexing, <code>()</code> for calls, and <code>.</code> for property lookup.</p>
+<p><strong>Conversion prefixes</strong>. The prefixes <code>+ -</code> convert to integers, <code>~</code> converts to a string, and <code>? !</code> convert to booleans. The prefix <code>^</code> turns an integer <code>n</code> into an array <code>[0, 1, 2, .., n - 1]</code>.</p>
+<p>Each operator has a built-in precedence which governs the order in which the operators are evaluated. This can be more clearly seen by pretending that the parser groups subexpressions by inserting parentheses around the tighter operators:</p>
+<pre><code>1 + 2 * 3         becomes         1 + (2 * 3)
+1 * 2 + 3         becomes         (1 * 2) + 3
+x || y &amp;&amp; z       becomes         x || (y &amp;&amp; z)
+x &amp;&amp; y || z       becomes         (x &amp;&amp; y) || z</code></pre>
+<p>In general, the precedence of an operator is set so as to minimize the use for explicit parentheses. For example, <code>*</code> binds tighter than <code>+</code> because in mathematical expressions terms conventionally consist of one or more factors.</p>
+<p>The built-in operators are grouped into precedence levels as follows — tightest operators at the top, loosest at the bottom.</p>
+<table class="table table-bordered">
+<tr>
+<th>Precedence level</th>
+<th>Assoc</th>
+<th>Category</th>
+<th>Operators</th>
+</tr>
+<tr>
+<td>(tightest)</td>
+<td>left</td>
+<td>postfix</td>
+<td><code>[] () .</code></td>
+</tr>
+<tr>
+<td></td>
+<td>left</td>
+<td>prefix</td>
+<td><code>+ - ~ ? ! ^</code></td>
+</tr>
+<tr>
+<td>Multiplicative</td>
+<td>left</td>
+<td>infix</td>
+<td><code>* % %% divmod</code></td>
+</tr>
+<tr>
+<td>Additive</td>
+<td>left</td>
+<td>infix</td>
+<td><code>+ - ~</code></td>
+</tr>
+<tr>
+<td>Comparison</td>
+<td>left</td>
+<td>infix</td>
+<td><code>== != &lt; &lt;= &gt; &gt;= ~~ !~~</code></td>
+</tr>
+<tr>
+<td>Conjuctive</td>
+<td>left</td>
+<td>infix</td>
+<td><code>&amp;&amp;</code></td>
+</tr>
+<tr>
+<td>Disjunctive</td>
+<td>left</td>
+<td>infix</td>
+<td><code>|| //</code></td>
+</tr>
+<tr>
+<td>Assignment (loosest)</td>
+<td>right</td>
+<td>infix</td>
+<td><code>=</code></td>
+</tr>
+</table>
+<p>007's precedence rules are a bit simpler than Perl 6's. In 007, the prefixes and postfixes <em>have</em> to bind tighter than the infixes.</p>
+<p>The table also shows the associativity of the different precedence levels. (Also unlike Perl 6, associativity belongs to the precedence <em>level</em>, not to individual operators.) Associativity makes sure to (conceptually) insert parentheses in a certain way for operators on the same level:</p>
+<pre><code>1 + 2 - 3 + 4          becomes        ((1 + 2) - 3) + 4    (associating to the left)
+x || y // z            becomes        (x || y) // z        (associating to the left)
+a = b = c = 0          becomes        a = (b = (c = 0))    (associating to the right)</code></pre>
+<p>Besides the built-in operators, you can also extend the 007 grammar by writing your own <a href="#custom-operators">custom operators</a>.</p>
+<h2 id="control-flow">Control flow</h2>
+<h3 id="sequencing">Sequencing</h3>
+<p><em>Sequencing</em> happens just by writing statements after each other.</p>
+<p>A statement can be terminated by a semicolon (<code>;</code>). The semicolon is mandatory when you have other statements coming after it, regardless of the statements being on the same line or separated by a newline character. When a statement ends in a closing curly brace (<code>}</code>), you can omit the semicolon as long as you have a newline character instead.</p>
+<pre class="_007"><code>func f1() {
+}                               # OK
+func f2() {};   say(&quot;hi!&quot;)      # OK
+func f3() {}    say(&quot;oh noes&quot;)  # not ok</code></pre>
+<h3 id="block-statements">Block statements</h3>
+<p>007 has <code>if</code> statements, <code>while</code> loops and <code>for</code> loops by default. This example probably won't look too surprising to anyone who has seen C-like syntax before:</p>
+<pre class="_007"><code>my array = [5, func() { say(&quot;OH HAI&quot;) }, None];
+for array -&gt; e {
+    if e ~~ Int {
+        while e &gt; 0 {
+            say(&quot;Counting down: &quot;, e);
+            e = e - 1;
+        }
+    }
+    else if e ~~ Func {
+        e();
+    }
+    else {
+        say(&quot;Unknown value: &quot;, e);
+    }
+}</code></pre>
+<p>The normal block statements all require blocks with curly braces (<code>{}</code>) — there's no blockless form. Unlike C/Java/JavaScript/C# but like Python, parentheses (<code>()</code>) are optional around expressions after <code>if</code>, <code>for</code> and <code>while</code>.</p>
+<p>The <code>if</code> and <code>while</code> statements evaluate their expression and runs their block if the resulting value is <code>True</code>, possibly after coercing to <code>Bool</code>. (We sometimes refer to a value that is <code>True</code> when coerced to <code>Bool</code> as <em>truthy</em>, and the other values as <em>falsy</em>.) Several other mechanisms in 007, such as <code>&amp;&amp;</code> and the <code>.filter</code> method, accept these &quot;generalized <code>Bool</code> values&quot;.</p>
+<p>The optional <code>-&gt; e</code> syntax is a <em>block parameter</em>, and is a way to pass each element as a lexical variable into the block. Although the most natural fit is a <code>for</code> loop, it also works consistently for <code>while</code> loops and <code>if</code> statements (including the <code>else if</code> and <code>else</code> blocks). All these blocks accept at most one parameter.</p>
+<h3 id="exceptional-control-flow">Exceptional control flow</h3>
+<blockquote class="future">
+<h4 id="future-feature-next-and-last">🔮 Future feature: <code>next</code> and <code>last</code></h4>
+<p>Inside a loop of any kind, it's possible to write a <code>next</code> statement to transfer immediately to the next iteration, or a <code>last</code> statement to terminate the loop immediately.</p>
+</blockquote>
+<p>In the next section we'll see <code>return</code> breaking out of a function or macro.</p>
+<p>There's also <code>throw</code> statement.</p>
+<h3 id="custom-statement-types">Custom statement types</h3>
+<p>007 allows you to add new statement forms for control flow if you want to — the three statements above are very common but don't form a closed set. For more information on how to do this, see the section <a href="#control-flow">interacting with control flow</a>.</p>
+<h2 id="functions">Functions</h2>
+<p>Functions take parameters, can be called, and return a value. Definitions and calls look like this:</p>
+<pre class="_007"><code>func add(n1, n2) {
+    return n1 + n2;
+}
+
+say(&quot;3 + 4 = &quot;, add(3, 4));</code></pre>
+<p>The <code>return</code> statement immediately returns out of a function, optionally with a value. If no value is supplied (as in <code>return;</code>), the value <code>None</code> is returned. Implicit returns are OK too; the statement in the <code>add</code> function above could have been written as just <code>n1 + n2;</code> because it's last in the function.</p>
+<p>When defined using a function statement, it's also allowed to call the function <em>before</em> its definition. (This is not true for any other type of defined thing in 007.)</p>
+<pre class="_007"><code>whoa();     # Amazingly, this works!
+
+func whoa() {
+    say(&quot;Amazingly, this works!&quot;);
+}</code></pre>
+<p>All references to undeclared variables are postponed until CHECK time (after parsing the program), and an error message about the identifier not being found is issued <em>only</em> if it hasn't since been declared as a function.</p>
+<p>There's also a way to declare functions as terms, and they work just the same:</p>
+<pre class="_007"><code>my id = func(x) { x };
+say(id(&quot;OH HAI&quot;));      # OH HAI</code></pre>
+<p>Note that this form does not have the above advantage of being able to be used before its definition — the declaration in this case is a normal lexical variable.</p>
+<p>Unlike in Perl 6 (but like Python), a function call must have the parentheses. You can write <code>say(42);</code> in 007, but not <code>say 42;</code> — the latter is a parse error and counts as Two Terms In A Row.</p>
+<h3 id="arguments-and-parameters">Arguments and parameters</h3>
+<p>When declaring a function, we talk about function <em>parameters</em>. A parameter is a kind of variable scoped to the function.</p>
+<pre class="_007"><code>func goodnight(name) {
+    say(&quot;Goodnight &quot;, name);
+}</code></pre>
+<p>When calling a function, we instead talk about <em>arguments</em>. Arguments are expressions that we pass in with the function call.</p>
+<pre><code>goodnight(&quot;moon&quot;);</code></pre>
+<p>As the function call happens, all the arguments are evaluated, and their resulting values are <em>bound</em> to the parameters. It's a (runtime) error for the number of arguments to differ from the number of parameters.</p>
+<blockquote class="future">
+<h3 id="future-feature-static-checking">🔮 Future feature: static checking</h3>
+<p>In the cases where the function definition is known/visible from the callsite, we could even give this error at compile time (like Perl 6 but unlike Python or Perl 5). Flagging up the error during compilation makes sense, since the call would definitely fail at runtime anyway.</p>
+</blockquote>
+<blockquote class="future">
+<h3 id="future-feature-optional-parameter-and-parameter-defaults">🔮 Future feature: optional parameter and parameter defaults</h3>
+<p>007 will at some point incorporate optional parameters and parameter default values into the language. It's undecided whether these will require a pragma to use or not. The number of arguments can of course go as low as the number of non-optional parameters. Non-optional parameters can only occur before optional ones.</p>
+</blockquote>
+<blockquote class="future">
+<h3 id="future-feature-rest-parameters-and-spread-arguments">🔮 Future feature: rest parameters and spread arguments</h3>
+<p>The syntax <code>...</code> will at some point work to denote a <em>rest parameter</em> (which accepts any remaining arguments into an array), and a <em>spread argument</em> (which turns an array of N arguments into N actual arguments). In the presence of a rest parameter, the number of arguments accepted is of course unbounded.</p>
+</blockquote>
+<blockquote class="future">
+<h3 id="future-feature-named-arguments">🔮 Future feature: named arguments</h3>
+<p>Borrowing from Python, it will at some point be possible to specify arguments <em>by name</em>; the above call would for example be written as <code>goodnight(name=&quot;moon&quot;)</code>. Whereas normal (&quot;positional&quot;) arguments have to be written in an order matching the parameters, named arguments can be written in any desired order, and will still match their corresponding parameters based on the name.</p>
+<p>It's as yet unclear whether there will be a rest parameter syntax for named arguments (allowing named arguments without a corresponding parameter to be slurped up into a dict.)</p>
+</blockquote>
+<h3 id="closures">Closures</h3>
+<p>At any point in a running program, the runtime is in a given <em>environment</em>, which is all the declared names and their values that can be looked up from that point.</p>
+<p>If you return a function from a certain environment, the function will physically leave that environment but still be able to find all its names.</p>
+<pre class="_007"><code>func goodnight(name) {
+    my fn = func() { say(&quot;Goodnight &quot;, name) };
+    return fn;
+}
+
+my names = [&quot;room&quot;, &quot;moon&quot;, &quot;cow jumping over the moon&quot;];
+my fns = names.map(goodnight);      # an array of 3 functions
+for fns -&gt; fn {
+    fn();       # Goodnight room, Goodnight moon, Goodnight cow jumping over the moon
+}</code></pre>
+<p>This effect is referred to as the functions &quot;closing over&quot; their current environment. In the case above, the 3 function values in <code>fns</code> close over the <code>name</code> parameter. Such functions are often referred to as <em>closures</em>. If we were to look at a snapshot of memory at that point, we would see three different <code>fn</code> function values, each one holding onto a <code>name</code> variable with a different string value in it.</p>
+<p>Technically it's extremely easy for a function to be a closure, since both built-in functions like <code>say</code> and (as we will see) built-in operators like <code>~</code> come from the lexical environment. In practice the term is reserved to the narrower use of closing over a relatively local variable (like <code>name</code>).</p>
+<p>A function closing over some variable is similar in spirit to an object having a private property. In fact, from a certain point of view <a href="http://wiki.c2.com/?ClosuresAndObjectsAreEquivalent">closures and objects are equivalent</a>.</p>
+<h2 id="builtins">Builtins</h2>
+<p><em>Builtins</em> are functions that are available by default in the language, without the need to import them.</p>
+<p>By far the most common builtin is <code>say</code>, a function for printing things.</p>
+<pre class="_007"><code>say();                          # empty line
+say(&quot;OH HAI&quot;);
+say(&quot;The answer is: &quot;, answer);</code></pre>
+<p>For reading input, there's <code>prompt</code>:</p>
+<pre class="_007"><code>my answer = prompt(&quot;Rock, paper, or scissors? &quot;);</code></pre>
+<p>The third important builtin allows you to get the type of a value:</p>
+<pre class="_007"><code>type(42);           # &lt;type Int&gt;
+type(&quot;hi&quot;);         # &lt;type Str&gt;
+type(prompt);       # &lt;type Func&gt;
+type(Bool);         # &lt;type Type&gt;</code></pre>
+<p>The biggest use for the <code>type</code> builtin is for printing the type of something during debugging. If you want to test for the type of a value in a program, you probably shouldn't test <code>type(value) == Array</code> but instead use the smartmatching operator: <code>value ~~ Array</code>.</p>
+<p>Technically, all the operators and types available by default in 007 are also builtins.</p>
+<h2 id="classes-and-objects">Classes and objects</h2>
+<blockquote class="future">
+<h3 id="future-feature-classes">🔮 Future feature: classes</h3>
+<p>The implementation of classes has started behind a feature flag, but mostly, classes are not implemented yet in 007.</p>
+</blockquote>
+<p>You can declare classes in 007.</p>
+<pre class="_007"><code>class Color {
+    has red;
+    has green;
+    has blue;
+
+    constructor(red, green, blue) {
+        self.red = red;
+        self.green = green;
+        self.blue = blue;
+    }
+
+    method show() {
+        format(&quot;rgb({}, {}, {})&quot;, self.red, self.green, self.blue);
+    }
+}</code></pre>
+<p>As you can see, classes in 007 look like in most other languages. They can have fields, a constructor, and methods. Fields can optionally have <em>initializers</em>, expressions that evaluate before the constructor runs.</p>
+<pre class="_007"><code>has red = 0;</code></pre>
+<p>The special name <code>self</code> is automatically available in initializers, the constructor, and methods.</p>
+<p>The annotations <code>@get</code> and <code>@set</code> can optionally be used to adorn field declarations. <code>@get</code> makes a field accessible from <em>outside</em> an object as a property, and not just on <code>self</code>. <code>@set</code> makes a field writable in situations outside initializers and the constructor. The combination <code>@get @set</code> makes the field writable from the outside.</p>
+<p>Classes can inherit, using the <code>extends</code> keyword:</p>
+<pre class="_007"><code>class AlphaColor extends Color {
+    has alpha;
+}</code></pre>
+<p>All the public fields and methods from the base class are also available on the extending class. If a field or method has the same name as in a base class, then it will <em>override</em> and effectively hide the field or method in the base class. 007 stops short of having a <code>super</code> mechanism to call overridden methods or constructors.</p>
+<p>Class declarations are <em>slangs</em> in 007, so the above desugars to something very much like this:</p>
+<pre class="_007"><code>BEGIN my Color = Type(
+    name: &quot;Color&quot;,
+    fields: [{ name: &quot;red&quot; }, { name: &quot;green&quot; }, { name: &quot;blue&quot; }],
+    constructor: func(self, red, green, blue) { ... },
+    methods: {
+        show(self) { ... },
+    },
+);
+
+BEGIN my AlphaColor = Type(
+    name: &quot;AlphaColor&quot;,
+    extends: Color,
+    fields: [{ name: &quot;alpha&quot; }],
+);</code></pre>
+<p>(Note how <code>self</code> has been made an explicit parameter along the way.)</p>
+<p><code>NoneType</code>, <code>Int</code>, <code>Str</code>, <code>Bool</code>, <code>Array</code>, <code>Tuple</code>, <code>Dict</code>, <code>Regex</code>, <code>Symbol</code>, and <code>Type</code> are all built-in types in 007. Besides that, there are all the types in <a href="#the-q-hierarchy">the <code>Q</code> hierarchy</a>, used to reasoning about program structure. There are also a number of exception types, under the <code>X</code> hierarchy.</p>
+<p>Here's an example involving a custom <code>Range</code> class, which we'll use later to also declare custom range operators:</p>
+<pre class="_007"><code>class Range {
+    @get has min;
+    @get has max;
+
+    constructor(min, max) {
+        self.min = min;
+        self.max = max;
+    }
+
+    method iterator() {
+        return Range.Iterator(self);
+    }
+
+    class Iterator {
+        has range;
+        @set has currentValue;
+
+        constructor(range) {
+            self.range = range;
+            self.currentValue = range.min;
+        }
+
+        method next() {
+            if self.currentValue &gt; self.range.max {
+                throw StopIteration();
+            }
+            my value = self.currentValue;
+            self.currentValue = self.currentValue + 1;
+            return value;
+        }
+    }
+}</code></pre>
+<p>Note that the name of the inner class is <code>Range.Iterator</code>, not <code>Iterator</code>. The same class can also be declared on the outside of the class <code>Range</code>: <code>class Range.Iterator</code>. Only if we declare it nested inside <code>Range</code> do we skip the full name.</p>
+<blockquote class="future">
+<h3 id="future-feature-generator-functions">🔮 Future feature: generator functions</h3>
+<p>Using generator functions, we could skip writing the <code>Range.Iterator</code> class, and write the <code>iterator</code> method like this:</p>
+<pre class="_007"><code>method iterator() {
+    return func*() {
+        my currentValue = self.min;
+        while currentValue &lt;= self.max {
+            yield currentValue;
+            currentValue = currentValue + 1;
+        }
+    }
+}</code></pre>
+</blockquote>
+<h2 id="custom-operators">Custom operators</h2>
+<p>007 is built to give the programmer the power to add to and modify the language, to the point where everything in the language <em>could</em> have been added by the programmer. Macros are the prime example, but custom operators qualify too. This chapter is the longest in the guide so far; the reason is that whenever you get into the game of extending the language itself, you're technically a language designer, and potentially you have to worry about some things a language designer has to worry about.</p>
+<p>Besides the <a href="#operators-and-expressions">built-in operators</a>, you can supply your own operators. Here, for example, is an implementation of a factorial operator:</p>
+<pre class="_007"><code>func postfix:&lt;!&gt;(N) {
+    my product = 1;
+    my n = 2;
+    while n &lt;= N {
+        product = product * n;
+        n = n + 1;
+    }
+    return product;
+}
+
+say(5!);                # 120
+say(postfix:&lt;!&gt;(5));    # 120</code></pre>
+<p>Operators are special in that they install themselves both as specially named functions, but also as <em>syntax</em> — writing <code>5!</code> in a 007 program doesn't work normally, but it does after you've defined <code>postfix:&lt;!&gt;</code>.</p>
+<p>Just like with ordinary identifiers, they go out of scope at the end of the block where they were defined. Like with other functions, you can call them before their definition, but you can <em>not</em> use the operator syntax before the definition (because the parser only does one pass, and adds the operator when it's defined).</p>
+<blockquote class="future">
+<h4 id="future-feature-reduction-metaoperator">🔮 Future feature: reduction metaoperator</h4>
+<p>Using the reduction metaoperator and a range operator, we can implement <code>postfix:&lt;!&gt;</code> much shorter:</p>
+<pre class="_007"><code>func postfix:&lt;!&gt;(N) { [*](2..N) }</code></pre>
+</blockquote>
+<h3 id="built-in-operators-are-built-in-functions">Built-in operators are built-in functions</h3>
+<p>Now that the truth is out about user-defined operators being fairly normal functions, it's time for another bombshell: built-in operators are normal functions too! These are two equivalent ways to add two numbers in 007:</p>
+<pre class="_007"><code>3 + 4;              # 7
+infix:&lt;+&gt;(3, 4);    # 7</code></pre>
+<p>The function <code>infix:&lt;+&gt;</code> is defined among the built-ins, together with <code>say</code> and some other functions.</p>
+<h3 id="operator-categories">Operator categories</h3>
+<p>The thing before the colon is called a <em>category</em>. For 007 operators, there are three categories:</p>
+<pre><code>prefix:&lt;!&gt;            !x
+infix:&lt;!&gt;           x ! y
+postfix:&lt;!&gt;          x!</code></pre>
+<p>(There are also other categories for non-operator things.)</p>
+<p>Prefix and postfix operators are defined as <em>unary</em> functions taking one parameter. Infix operators are defined as <em>binary</em> functions taking two parameters.</p>
+<p>Since we'll be defining a number of operators, it might be good to know that <code>lhs</code> and <code>rhs</code> are common parameter neames to infix operators. They stand for &quot;left-hand side&quot; and &quot;right-hand side&quot;, respectively. There's no corresponding established naming convention for prefix and postfix operators.</p>
+<h3 id="recursion">Recursion</h3>
+<p>It's possible for operator functions to be recursive, so we can actually write the factorial in a slightly shorter way:</p>
+<pre class="_007"><code>func postfix:&lt;!&gt;(N) {
+    if N &lt; 2 {
+        return 1;
+    }
+    else {
+        return N * (N-1)!;
+    }
+}</code></pre>
+<blockquote class="future">
+<h3 id="future-feature-ternary-operator">🔮 Future feature: ternary operator</h3>
+<p>With the ternary operator macro imported, the solution becomes downright cute:</p>
+<pre class="_007"><code>func postfix:&lt;!&gt;(N) { N &lt; 2 ?? 1 !! N * (N-1)! }</code></pre>
+</blockquote>
+<h3 id="infix-precedence-and-associativity">Infix precedence and associativity</h3>
+<p>When you define an operator, you can also provide information about its precedence and associativity. (For an introduction to those concepts, see <a href="#operators-and-expressions">built-in operators</a>.) Here is an implementation of a right-associative <a href="https://en.wikipedia.org/wiki/Cons">cons</a> operator:</p>
+<pre class="_007"><code>func infix:&lt;::&gt;(lhs, rhs) is tighter(infix:&lt;==&gt;) is assoc(&quot;right&quot;) {
+    return (lhs, rhs);
+}</code></pre>
+<p>The traits <code>is looser(op)</code> and <code>is tighter(op)</code> both create a new precedence level, just next to the one of the specified operator. The trait <code>is equal(op)</code> adds to the precedence level of an existing operator. If you don't specify either of these, your newly defined operator will be on its own maximally tight precedence level. (This is what happened with <code>postfix:&lt;!&gt;</code> above.)</p>
+<p>The <code>is assoc</code> trait has the allowed values <code>&quot;left&quot;</code>, <code>&quot;right&quot;</code>, and <code>&quot;non&quot;</code>. The <code>&quot;left&quot;</code> and <code>&quot;right&quot;</code> values determine how the syntax tree will group things when several operators of the exact same precedence follow one another:</p>
+<pre><code>x ! y ! z               (x ! y) ! z         left associativity
+x ! y ! z               x ! (y ! z)         right associativity</code></pre>
+<p>With the <code>&quot;non&quot;</code> value, it's illegal for two operators on the same level to occur next to each other without being parenthesized. Here is an example:</p>
+<pre class="_007"><code>func infix:&lt;^_^&gt;(lhs, rhs) is assoc(&quot;non&quot;) {
+}
+
+2 ^_^ 3 ^_^ 4;          # parse error: &quot;operator is nonassociative&quot;</code></pre>
+<h3 id="prefixpostfix-precedence-and-associativity">Prefix/postfix precedence and associativity</h3>
+<p>A postfix and a prefix can share a precedence level, and if it comes down to one being evaluated first or the other, associativity comes into play. This pair of operators associates to the left:</p>
+<pre class="_007"><code>func prefix:&lt;?&gt;(term) is assoc(&quot;left&quot;) {
+    return &quot;prefix:&lt;?&gt;(&quot; ~ term ~ &quot;)&quot;;
+}
+
+func postfix:&lt;!&gt;(term) is equal(prefix:&lt;?&gt;) is assoc(&quot;left&quot;) {
+    return &quot;postfix:&lt;!&gt;(&quot; ~ term ~ &quot;)&quot;;
+}
+
+say(?&quot;term&quot;!);       # postfix:&lt;!&gt;(prefix:&lt;?&gt;(term)) (left associativity) (default)</code></pre>
+<p>While this pair associates to the right:</p>
+<pre class="_007"><code>func prefix:&lt;¿&gt;(term) is assoc(&quot;right&quot;) {
+    return term ~ &quot; prefix:&lt;?&gt;&quot;;
+}
+
+func postfix:&lt;¡&gt;(term) is equal(prefix:&lt;?&gt;) is assoc(&quot;right&quot;) {
+    return term ~ &quot; postfix:&lt;¡&gt;&quot;;
+}
+
+say(¿&quot;term&quot;¡);       # prefix:&lt;¿&gt;(postfix:&lt;¡&gt;(term)) (right associativity)</code></pre>
+<p>Because <code>&quot;left&quot;</code> is the default associativity, both specifiers in the former example are unnecessary. The associativity for <code>postfix:&lt;¡&gt;</code> also doesn't need to be specified explicitly, since it was already specified for <code>prefix:&lt;¿&gt;</code> and all operators on a precedence level share the same associativity.</p>
+<h3 id="default-precedence">Default precedence</h3>
+<p>If you don't specify a precedence for your operator, it will get the tightest precedence for its category. For example, a new infix operator without a precedence specifier will get its own precedence level tighter than <code>infix:&lt;+&gt;</code> and friends. Further infix operators will get even tighter precedence levels.</p>
+<p>A small exception happens for prefixes and postfixes: while you <em>can</em> make these have any relative precedence, the convention is that postfixes be tigher and prefixes be looser. (This is true for <a href="#expressions-and-operators">the precedence table</a> of the built-in operators: postfix at the top, then prefix, then infix.) 007 tries to respect this convention by default; instead of making a new custom prefix maximally tight by default, it only makes it tighter than all other prefixes, but looser than all other postfixes.</p>
+<p>Infixes form precedence levels of their own, apart from the prefixes and postfixes. Trying to relate the precedence of a prefix or postfix to that of an infix, or vice versa, leads to a compile-time error.</p>
+<h3 id="an-example-range">An example: <code>Range</code></h3>
+<p>We can define operators that construct <code>Range</code> objects, using the class we defined earlier:</p>
+<pre class="_007"><code>func infix:&lt;..&gt;(lhs, rhs) is looser(infix:&lt;==&gt;) {
+    return Range(lhs, rhs);
+}
+
+func infix:&lt;..^&gt;(lhs, rhs) is equiv(infix:&lt;..&gt;) {
+    return Range(lhs, rhs - 1);
+}
+
+func prefix:&lt;^&gt;(expr) {     # overrides the builtin
+    return 0 ..^ expr;
+}</code></pre>
+<blockquote class="future">
+<h4 id="future-feature-using-custom-iterable-types-in-for-loops">🔮 Future feature: using custom iterable types in <code>for</code> loops</h4>
+<p>Now we can use ranges in <code>for</code> loops:</p>
+<pre class="_007"><code>for 1..10 -&gt; i { say(i) }
+for ^100 { say(&quot;I shall never waste chalk again&quot;) }</code></pre>
+</blockquote>
+<h3 id="parsing-concerns">Parsing concerns</h3>
+<p>In <code>infix:&lt;+&gt;</code>, the angle bracket symbols are a quoting construct to delimit the symbol of interest; the actual <em>internal</em> name is <code>infix:+</code>, but during parsing and stringification, it will always show up as <code>infix:&lt;+&gt;</code>.</p>
+<p>If your operator symbol contains <code>&gt;</code>, then you can use a backslash to escape the symbol: <code>infix:&lt;\&gt;&gt;</code>. Another way to avoid ambiguity is to use different angle brackets: <code>infix:«&gt;»</code>. (This is 007's default when it stringifies.)</p>
+<p>If two or more operators could all match a given piece of text, then the rule is that the <em>longest</em> operator wins. This is regardless of the order in which they were defined, and regardless of their category.</p>
+<pre><code>3 +++ 4     # is there an infix:&lt;+++&gt;? then it wins
+            # or maybe an postfix:&lt;++&gt; and an infix:&lt;+&gt;; then they win
+              # ...EVEN if there were an infix:&lt;+&gt; and a prefix:&lt;++&gt;, since infix:&lt;++&gt; is longer
+            # or maybe an infix:&lt;+&gt;, a prefix:&lt;+&gt;, and another prefix:&lt;+&gt;
+              # (these are all built-in operators, so that&#39;s what happens by default)</code></pre>
+<p>Whitespace does not enter into consideration when the parser tries to determine whether something is an infix, prefix, or postfix. At least in this regard, 007 is whitespace-agnostic.</p>
+<p>Given the above, if an infix and a postfix are defined with the exact same symbol, they <em>would</em> clash as soon as they were parsed. For this reason, if you try to install a postfix with the same symbol as an already installed infix, or vice versa, the compiler will give you an error. You'll get an error regardless of whether the already installed operator is a built-in or user-defined.</p>
+<h2 id="modules">Modules</h2>
+<blockquote class="future">
+<h3 id="future-feature-modules">🔮 Future feature: modules</h3>
+<p>Modules have not been implemented yet in 007. This whole chapter is a best-guess at how they will work.</p>
+</blockquote>
+<p>007 files can be run directly as <em>scripts</em>, or they can be imported from other 007 programs as <em>modules</em>.</p>
+<p>The purpose of modules is to break up a big program into multiple independent compilation units.</p>
+<ul>
+<li><p>Each module can completely express a relatively small piece of functionality, and is easier to understand and reason about in isolation. (Often referred to as <em>separation of concerns</em>.)</p></li>
+<li><p>Since each module decides exactly what to export to the outside world, a module boundary also confers a means of <em>encapsulation</em> and <em>information hiding</em>. Some aspects of a module can be &quot;public&quot;, others private and internal.</p></li>
+<li><p>The same module can be used in multiple places in a code base, or in several different programs. This <em>re-use</em> is often preferable to manually copying the same solution into several programs.</p></li>
+</ul>
+<h3 id="example-range-as-a-module">Example: <code>Range</code> as a module</h3>
+<p>Let's say we want to package up our <code>Range</code> class, and the custom operators that help construct ranges, as a module. That way, a user of our module will just be able to write this in their program:</p>
+<pre class="_007"><code>import * from range;</code></pre>
+<p>From that point on for the rest of the block, all the things related to ranges will be lexically available.</p>
+<pre class="_007"><code>for 2 .. 7 -&gt; n {   # works because infix:&lt;..&gt; was imported
+    say(n);
+}</code></pre>
+<p>If we only wanted the <code>infix:&lt;..&gt;</code> operator, we could import only that:</p>
+<pre class="_007"><code>import { infix:&lt;..&gt; } from range;</code></pre>
+<p>The <code>range</code> module is in fact a <code>range.007</code> file in 007's lib path. We'd write it with the same definition as before, except we also export them:</p>
+<pre class="_007"><code>export class Range { ... }
+
+export func infix:&lt;..&gt;(lhs, rhs) # ...
+export func infix:&lt;..^&gt;(lhs, rhs) # ...
+export func prefix:&lt;^&gt;(expr) # ...</code></pre>
+<h3 id="forms-of-import">Forms of import</h3>
+<p>There are three forms of the <code>import</code> statement.</p>
+<p>The <em>named import</em> form lists all the names we want to declare in the current scope:</p>
+<pre class="_007"><code>import { nameA, nameB, nameC } from some.module;</code></pre>
+<p>Each name imported counts as a declaration; it's a compile-time error import and otherwise declare the same name in the same scope.</p>
+<p>In the imported module, every export declaration exports a <em>name</em>, and together all the exported names make up the <em>export list</em>.</p>
+<p>The <em>star import</em> form imports the entire export list into the current scope:</p>
+<pre class="_007"><code>import * from some.module;</code></pre>
+<p>While this is convenient, it's also the only built-in construct in the language where <em>you can't see</em> from the syntactic form itself what names you're introducing into the scope.</p>
+<p>Finally, the <em>module object import</em> creates a module object with all the names from the export list as properties:</p>
+<pre class="_007"><code>import m from some.module;
+# m now has m.nameA, m.nameB, m.nameC, etc.</code></pre>
+<p>Imports are <em>not</em> hoisted in 007.</p>
+<pre class="_007"><code>foo();  # won&#39;t work
+import { foo } from some.module;</code></pre>
+<h3 id="forms-of-export">Forms of export</h3>
+<p>You're only allowed to <code>export</code> statements on the top level of a module file.</p>
+<p>There are two forms of export statement:</p>
+<p>The <em>exported declaration</em> form is an export plus one of the declaration statements:</p>
+<pre class="_007"><code>export my someVar ...;
+export func foo(...) ...;
+export macro moo(...) ...;
+export class SomeClass ...;</code></pre>
+<p>The declared name is made available in the lexical scope, and put on the export list.</p>
+<p>The <em>export list</em> form lists existing names to export:</p>
+<pre class="_007"><code>export { nameA, nameB, nameC };</code></pre>
+<p>There can be several of these export statements in a module, but it's recommended to put one at the end.</p>
+<h3 id="the-lib-path">The lib path</h3>
+<p>If your program contains an import, you need to have an environment variable <code>007LIB</code> set:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="bu">export</span> 007LIB<span class="va">=$(</span><span class="bu">pwd</span><span class="va">)</span>/lib</code></pre></div>
+<p>If you want, you can specify several paths, separated by colons. The module importer will search through all these paths, in order, when a module is imported. It will import the first one it finds, from left to right.</p>
+<p>If no module is found, a compile-time error is reported.</p>
+</div>
+  </body>
+</html>

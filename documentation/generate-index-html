@@ -1,6 +1,6 @@
 #! /bin/sh
 
-OUTFILE=index-gen.html
+OUTFILE=${1:-docs/index.html}
 
 cat <<HEADER > $OUTFILE
 <!DOCTYPE html>
