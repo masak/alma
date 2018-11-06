@@ -5,6 +5,6 @@ language: perl6
 sudo: false
 perl6:
   - latest
-#install:
-#  - rakudobrew build-panda
-#  - panda installdeps .
+before_install:
+  - sudo apt update
+  - sudo apt install -y pandoc
