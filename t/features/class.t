@@ -40,12 +40,15 @@ ensure-feature-flag("CLASS");
 
 {
     my $program = q:to/./;
-        constant Builtin::Object = Object;
+        my BuiltinObject;
+        BEGIN {
+            BuiltinObject = Object;
+        }
         {
             class Object {
             }
 
-            say({} ~~ Builtin::Object);
+            say({} ~~ BuiltinObject);
             say({} ~~ Object);
         }
         .
