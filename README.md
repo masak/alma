@@ -54,7 +54,7 @@ The explicit goal is to reach some level of feature completeness for macros in
 
 * [Documentation](http://masak.github.io/007/) (🔧  under construction 🔧 )
 * [examples/ directory](https://github.com/masak/007/tree/master/examples)
-* [Roadmap](https://github.com/masak/007/blob/master/ROADMAP.md)
+* The [Roadmap](https://github.com/masak/007/blob/master/ROADMAP.md) outlines short- and long-term goals of the 007 project
 
 To learn more about macros:
 
