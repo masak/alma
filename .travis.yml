@@ -5,6 +5,3 @@ language: perl6
 sudo: false
 perl6:
   - latest
-before_install:
-  - sudo apt update
-  - sudo apt install -y pandoc
