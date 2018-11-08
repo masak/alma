@@ -343,7 +343,9 @@ func goodnight(name) {
 When calling a function, we instead talk about *arguments*. Arguments are
 expressions that we pass in with the function call.
 
-    goodnight("moon");
+```_007
+goodnight("moon");
+```
 
 As the function call happens, all the arguments are evaluated, and their
 resulting values are *bound* to the parameters. It's a (runtime) error for
