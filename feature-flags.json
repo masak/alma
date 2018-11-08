@@ -1,0 +1,35 @@
+{
+    "CLASS": {
+        "issue": "https://github.com/masak/007/issues/32",
+        "tests": [
+            "t/features/class.t"
+        ],
+        "milestones": [
+            "field declarations",
+            "constructor",
+            "method declarations",
+            "self",
+            "inheritance",
+            "super",
+            "#32 merged"
+        ]
+    },
+    "REGEX": {
+        "issue": "https://github.com/masak/007/issues/174",
+        "tests": [
+            "t/features/regex.t"
+        ],
+        "milestones": [
+            "remove identifier fragments",
+            "<EXPR>",
+            "<.ws>",
+            "closure semantics",
+            "captures",
+            "#174 merged",
+            "\\d",
+            ".replace",
+            "improve examples/format.007",
+            "#183 merged"
+        ]
+    }
+}
