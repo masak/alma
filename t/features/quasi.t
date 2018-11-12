@@ -248,22 +248,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi<Q.Trait> { is equiv(infix:<+>) }));
-        .
-
-    outputs $program, "<type Q.Trait>\n", "quasi<Q.Trait>";
-}
-
-{
-    my $program = q:to/./;
-        say(type(quasi<Q.TraitList> { is equiv(infix:<+>) is assoc("right") }));
-        .
-
-    outputs $program, "<type Q.TraitList>\n", "quasi<Q.TraitList>";
-}
-
-{
-    my $program = q:to/./;
         say(type(quasi<Q.Statement> { say("james") }));
         say(type(quasi<Q.Statement> { say("bond"); }));
         .

@@ -368,38 +368,15 @@ role Q::Declaration {
     method is-assignable { False }
 }
 
-### ### Q::Trait
-###
-### A trait; a piece of metadata for a routine. A trait consists of an
-### identifier and an expression.
-###
-class Q::Trait does Q {
-    has $.identifier;
-    has $.expr;
-
-    method attribute-order { <identifier expr> }
-}
-
-### ### Q::TraitList
-###
-### A list of zero or more traits. Each routine has a traitlist.
-###
-class Q::TraitList does Q {
-    has Val::Array $.traits .= new;
-
-    method attribute-order { <traits> }
-}
-
 ### ### Q::Term::Func
 ###
 ### A subroutine.
 ###
 class Q::Term::Func does Q::Term does Q::Declaration {
     has $.identifier;
-    has $.traitlist = Q::TraitList.new;
     has $.block;
 
-    method attribute-order { <identifier traitlist block> }
+    method attribute-order { <identifier block> }
 
     method eval($runtime) {
         my $name = $.identifier ~~ Val::None
@@ -831,6 +808,15 @@ class Q::ArgumentList does Q {
     has Val::Array $.arguments .= new;
 }
 
+### ### Q::Decorator
+###
+### A decorator.
+###
+class Q::Decorator is Q {
+    has Q::Identifier $.identifier;
+    has $.argumentlist;
+}
+
 ### ### Q::Statement
 ###
 ### A statement.
@@ -999,10 +985,9 @@ class Q::Statement::Throw does Q::Statement {
 ###
 class Q::Statement::Func does Q::Statement does Q::Declaration {
     has $.identifier;
-    has $.traitlist = Q::TraitList.new;
     has Q::Block $.block;
 
-    method attribute-order { <identifier traitlist block> }
+    method attribute-order { <identifier block> }
 
     method run($runtime) {
     }
@@ -1014,10 +999,9 @@ class Q::Statement::Func does Q::Statement does Q::Declaration {
 ###
 class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.identifier;
-    has $.traitlist = Q::TraitList.new;
     has $.block;
 
-    method attribute-order { <identifier traitlist block> }
+    method attribute-order { <identifier block> }
 
     method run($runtime) {
     }

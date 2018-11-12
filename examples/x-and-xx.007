@@ -1,10 +1,12 @@
-macro infix:<xx>(left, right) is tighter(infix:<~>) {
+@tighter(infix:<~>)
+macro infix:<xx>(left, right) {
     return quasi {
         (^{{{right}}}).flatMap(func(_) { {{{left}}} })
     }
 }
 
-func infix:<x>(left, right) is equiv(infix:<xx>) {
+@equiv(infix:<xx>)
+func infix:<x>(left, right) {
     return (left xx right).join("");
 }
 

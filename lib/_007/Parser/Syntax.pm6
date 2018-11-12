@@ -28,7 +28,7 @@ grammar _007::Parser::Syntax {
     } }
 
     rule statementlist {
-        <.semicolon>* [<statement>[<.semicolon>+|<.eat_terminator>] ]*
+        <.semicolon>* [<possibly-decorated-statement>[<.semicolon>+|<.eat_terminator>] ]*
     }
 
     method panic($what) {
@@ -48,7 +48,12 @@ grammar _007::Parser::Syntax {
         @*declstack[*-1]{$symbol} = $decltype;
     }
 
-    proto token statement {*}
+    rule possibly-decorated-statement {
+        :my @*DECORATORS;
+        <decorator> *
+        <statement>}
+
+    proto rule statement {*}
     token statement:expr {
         $<export>=(export \s+)?
         <!before <!before '{{{'> '{'>   # } }}}, you're welcome vim
@@ -65,11 +70,10 @@ grammar _007::Parser::Syntax {
                     $<identifier>.ast.name.value);
         }
         <.newpad>
-        '(' ~ ')' <parameterlist>
-        <traitlist>
         {
-            $*parser.opscope.maybe-install($<identifier>.ast.name, $<traitlist><trait>);
+            $*parser.opscope.maybe-install($<identifier>.ast.name, @*DECORATORS);
         }
+        '(' ~ ')' <parameterlist>
         [<blockoid>|| <.panic("block")>]:!s
         <.finishpad>
     }
@@ -108,11 +112,9 @@ grammar _007::Parser::Syntax {
         <block>
     }
 
-    rule traitlist {
-        <trait> *
-    }
-    token trait {
-        is» <.ws> <identifier> '(' <EXPR> ')'
+    rule decorator {
+        '@'<identifier>
+        ['(' ~ ')' <argumentlist>]?
     }
 
     # requires a <.newpad> before invocation
@@ -227,8 +229,6 @@ grammar _007::Parser::Syntax {
             || "<" <.ws> $<qtype>=["Q.Term.Array"] ">" <.ws> '{' <.ws> <term:array> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Term.Dict"] ">" <.ws> '{' <.ws> <term:object> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Term.Quasi"] ">" <.ws> '{' <.ws> <term:quasi> <.ws> '}'
-            || "<" <.ws> $<qtype>=["Q.Trait"] ">" <.ws> '{' <.ws> <trait> <.ws> '}'
-            || "<" <.ws> $<qtype>=["Q.TraitList"] ">" <.ws> '{' <.ws> <traitlist> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Statement"] ">" <.ws> <block>
             || "<" <.ws> $<qtype>=["Q.StatementList"] ">" <.ws> <block>
             || "<" <.ws> $<qtype>=["Q.Parameter"] ">" <.ws> '{' <.ws> <parameter> <.ws> '}'
@@ -274,7 +274,7 @@ grammar _007::Parser::Syntax {
             }
         }
         '(' ~ ')' <parameterlist>
-        <traitlist>
+        <.ws>
         <blockoid>:!s
         <.finishpad>
     }
@@ -304,7 +304,6 @@ grammar _007::Parser::Syntax {
             <.newpad>
             <parameterlist>
         ]
-        <trait> *
         <blockoid>:!s
         <.finishpad>
     }

@@ -1,4 +1,5 @@
-macro infix:<ff>(lhs, rhs) is tighter(infix:<=>) {
+@tighter(infix:<=>)
+macro infix:<ff>(lhs, rhs) {
     my active = false;
     return quasi {
         if {{{lhs}}} {
@@ -24,7 +25,8 @@ for values -> v {
 
 say("");
 
-macro infix:<fff>(lhs, rhs) is equiv(infix:<ff>) {
+@equiv(infix:<ff>)
+macro infix:<fff>(lhs, rhs) {
     my active = false;
     return quasi {
         my result = active;

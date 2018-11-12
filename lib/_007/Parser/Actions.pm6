@@ -11,10 +11,10 @@ class X::PointyBlock::SinkContext is Exception {
     method message { "Pointy blocks cannot occur on the statement level" }
 }
 
-class X::Trait::Duplicate is Exception {
-    has Str $.trait;
+class X::Decorator::Duplicate is Exception {
+    has Str $.decorator;
 
-    method message { "Trait '$.trait' is used more than once" }
+    method message { "Decorator '$.decorator' is used more than once" }
 }
 
 class X::Macro::Postdeclared is Exception {
@@ -91,7 +91,11 @@ class _007::Parser::Actions {
     }
 
     method statementlist($/) {
-        make Q::StatementList.new(:statements(Val::Array.new(:elements($<statement>».ast))));
+        make Q::StatementList.new(:statements(Val::Array.new(:elements($<possibly-decorated-statement>».ast))));
+    }
+
+    method possibly-decorated-statement($/) {
+        make $<statement>.ast;
     }
 
     method statement:expr ($/) {
@@ -138,7 +142,6 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
         my $name = $identifier.name;
         my $parameterlist = $<parameterlist>.ast;
-        my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
@@ -148,11 +151,11 @@ class _007::Parser::Actions {
         my $outer-frame = $*runtime.current-frame;
         my $val;
         if $<routine> eq "func" {
-            make Q::Statement::Func.new(:$identifier, :$traitlist, :$block);
+            make Q::Statement::Func.new(:$identifier, :$block);
             $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         elsif $<routine> eq "macro" {
-            make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
+            make Q::Statement::Macro.new(:$identifier, :$block);
             $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
         }
         else {
@@ -161,7 +164,7 @@ class _007::Parser::Actions {
 
         $*runtime.put-var($identifier, $val);
 
-        $*parser.opscope.maybe-install($name, $<traitlist><trait>);
+        $*parser.opscope.maybe-install($name, @*DECORATORS);
     }
 
     method statement:return ($/) {
@@ -208,16 +211,16 @@ class _007::Parser::Actions {
         $*runtime.put-var($identifier, $val);
     }
 
-    method traitlist($/) {
-        my @traits = $<trait>».ast;
-        if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {
-            my $trait = $p.key;
-            die X::Trait::Duplicate.new(:$trait);
-        }
-        make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
-    }
-    method trait($/) {
-        make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
+    method decorator ($/) {
+        my $identifier = $<identifier>.ast;
+        # XXX: this ought to be not just by string name, but by declaration site of that name
+        my $name = $identifier.name.value;
+        die X::Decorator::Duplicate.new(:decorator($name))
+            if $name eq any(@*DECORATORS).identifier.name.value;
+        my $argumentlist = ast-if-any($<argumentlist>);
+        my $decorator = Q::Decorator.new(:$identifier, :$argumentlist);
+        make $decorator;
+        @*DECORATORS.push($decorator);
     }
 
     method blockoid ($/) {
@@ -608,7 +611,6 @@ class _007::Parser::Actions {
 
     method term:func ($/) {
         my $parameterlist = $<parameterlist>.ast;
-        my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
@@ -623,7 +625,7 @@ class _007::Parser::Actions {
 
         my $name = $<identifier>.ast.name;
         my $identifier = ast-if-any($<identifier>);
-        make Q::Term::Func.new(:$identifier, :$traitlist, :$block);
+        make Q::Term::Func.new(:$identifier, :$block);
     }
 
     method unquote ($/) {

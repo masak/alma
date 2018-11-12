@@ -2,18 +2,18 @@ use _007::Val;
 use _007::Q;
 use _007::Precedence;
 
-class X::Trait::IllegalValue is Exception {
-    has Str $.trait;
+class X::Decorator::IllegalValue is Exception {
+    has Str $.decorator;
     has Str $.value;
 
-    method message { "The value '$.value' is not compatible with the trait '$.trait'" }
+    method message { "The value '$.value' is not compatible with the trait '$.decorator'" }
 }
 
-class X::Trait::Conflict is Exception {
-    has Str $.trait1;
-    has Str $.trait2;
+class X::Decorator::Conflict is Exception {
+    has Str $.decorator1;
+    has Str $.decorator2;
 
-    method message { "Traits '$.trait1' and '$.trait2' cannot coexist on the same routine" }
+    method message { "Decorators '$.decorator1' and '$.decorator2' cannot coexist on the same routine" }
 }
 
 class X::Precedence::Incompatible is Exception {
@@ -37,7 +37,7 @@ class _007::OpScope {
     has @.prepostfixprec;
     has $.prepostfix-boundary = 0;
 
-    method maybe-install($identname, @trait) {
+    method maybe-install($identname, @decorators) {
         return unless $identname ~~ /^ (\w+) ':' (.+) /;
 
         my $category = ~$0;
@@ -55,10 +55,14 @@ class _007::OpScope {
         my %precedence;
         my @prec-traits = <equiv looser tighter>;
         my $assoc;
-        for @trait -> $trait {
-            my $name = $trait<identifier>.ast.name;
+        for @decorators -> $decorator {
+            # XXX: Shouldn't do lookup by name here, but lexically
+            my $name = $decorator.identifier.name.value;
             if $name eq any @prec-traits {
-                my $identifier = $trait<EXPR>.ast;
+                my $argcount = $decorator.argumentlist.arguments.elements.elems;
+                die X::ParameterMismatch.new(:type("Decorator"), :paramcount(1), :$argcount)
+                    unless $argcount == 1;
+                my $identifier = $decorator.argumentlist.arguments.elements[0];
                 my $prep = $name eq "equiv" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
                     unless $identifier ~~ Q::Identifier;
@@ -71,22 +75,26 @@ class _007::OpScope {
                 %precedence{$name} = $s;
             }
             elsif $name eq "assoc" {
-                my $string = $trait<EXPR>.ast;
+                my $argcount = $decorator.argumentlist.arguments.elements.elems;
+                die X::ParameterMismatch.new(:type("Decorator"), :paramcount(1), :$argcount)
+                    unless $argcount == 1;
+                my $string = $decorator.argumentlist.arguments.elements[0];
                 die "The associativity must be a string"
                     unless $string ~~ Q::Literal::Str;
                 my $value = $string.value.value;
-                die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
+                die X::Decorator::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
                 $assoc = $value;
             }
             else {
-                die "Unknown trait '$name'";
+                # XXX: should it still do this? we might decorate a function/macro for other reasons than op
+                die "Unknown decorator '$name'";
             }
         }
 
         if %precedence.keys > 1 {
             my ($t1, $t2) = %precedence.keys.sort;
-            die X::Trait::Conflict.new(:$t1, :$t2);
+            die X::Decorator::Conflict.new(:$t1, :$t2);
         }
 
         self.install($category, $op, :%precedence, :$assoc);
