@@ -1,14 +1,17 @@
 # Roadmap
 
+Stability and backwards compatibility stand in conflict with the need to 
+iterate on ideas and replace newly discovered better ideas with old
+worse ideas. 
+
 007 is still a v0.x.x product. There are no guarantees about backwards
 compatibility, as the need for inwards fluidity exceeds the need for
 outwards stability.
 
-Most of the forward-looking and thinking happens in the [issue
-queue](https://github.com/masak/007/issues), and that's still the place to go
-to for all the nitty-gritty details about planning and tradeoffs. But the
-picture given by the issue queue is conveys no sense of priorities or ordering.
-That's what this roadmap is for.
+The [issue queue](https://github.com/masak/007/issues), and that's still the
+place to go to for all the nitty-gritty details about planning and tradeoffs.
+But the picture given by the issue queue is conveys no sense of priorities or
+ordering. That's what this roadmap is for.
 
 ## Short-term priorities
 
