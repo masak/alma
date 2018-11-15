@@ -1,17 +1,14 @@
 # Inspired by http://www.atariarchives.org/basicgames/showpage.php?page=117
 
-func promptMod(n) {
-    return +prompt("Your number divided by " ~ n ~ " has a remainder of: ");
-}
-
 say("Please think of a number between 1 and 100.");
 say("");
 
-my m3 = promptMod(3);
-my m5 = promptMod(5);
-my m7 = promptMod(7);
+my m = {};
+for [3, 5, 7] -> n {
+    m[~n] = +prompt("Your number divided by " ~ n ~ " has a remainder of: ");
+}
 say("");
 
-my solution = (70*m3 + 21*m5 + 15*m7) % 105;
+my solution = (70*m["3"] + 21*m["5"] + 15*m["7"]) % 105;
 
 say("Your number was ", solution, ".");
