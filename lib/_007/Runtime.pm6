@@ -1,6 +1,7 @@
 use _007::Val;
 use _007::Q;
 use _007::Builtins;
+use _007::Equal;
 
 constant NO_OUTER = Val::Object.new;
 constant RETURN_TO = Q::Identifier.new(
@@ -330,6 +331,19 @@ class _007::Runtime {
         elsif $obj ~~ Val::Array && $propname eq "size" {
             return builtin(sub size() {
                 return Val::Int.new(:value($obj.elements.elems));
+            });
+        }
+        elsif $obj ~~ Val::Array && $propname eq "index" {
+            return builtin(sub index($value) {
+                return Val::Int.new(:value(sub () {
+                    for ^$obj.elements.elems -> $i {
+                        my %*equality-seen;
+                        if equal-value($obj.elements[$i], $value) {
+                            return $i;
+                        }
+                    }
+                    return -1;
+                }()));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "reverse" {
