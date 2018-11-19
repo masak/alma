@@ -145,7 +145,7 @@ class _007::Linter {
                 traverse($infix.lhs);
             }
 
-            multi traverse(Q::Infix::Addition $infix) {
+            multi traverse(Q::Infix $infix) {
                 traverse($infix.lhs);
                 traverse($infix.rhs);
             }

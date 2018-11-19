@@ -87,7 +87,7 @@ use _007::Test;
         say(type(quasi<Q.Infix> { + }));
         .
 
-    outputs $program, "<type Q.Infix.Addition>\n", "quasi<Q.Infix>";
+    outputs $program, "<type Q.Infix>\n", "quasi<Q.Infix>";
 }
 
 {
@@ -95,7 +95,7 @@ use _007::Test;
         say(type(quasi<Q.Prefix> { - }));
         .
 
-    outputs $program, "<type Q.Prefix.Minus>\n", "quasi<Q.Prefix>";
+    outputs $program, "<type Q.Prefix>\n", "quasi<Q.Prefix>";
 }
 
 {
@@ -111,7 +111,7 @@ use _007::Test;
         say(type(quasi<Q.Expr> { 2 + (2 + 2) + -2 + [2][2] }));
         .
 
-    outputs $program, "<type Q.Infix.Addition>\n", "quasi<Q.Expr>";
+    outputs $program, "<type Q.Infix>\n", "quasi<Q.Expr>";
 }
 
 {
@@ -218,7 +218,7 @@ use _007::Test;
     outputs $program,
         <Literal.Int Literal.None Literal.Str
             Term.Array Term.Object Term.Quasi
-            Infix.Addition>\
+            Infix>\
             .map({ "<type Q.$_>\n" }).join,
         "quasi<Q.Term>";
 }
