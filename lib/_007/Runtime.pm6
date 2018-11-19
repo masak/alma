@@ -177,7 +177,12 @@ class _007::Runtime {
         if $c === $!prompt-builtin {
             $.output.print(@arguments[0].Str);
             $.output.flush();
-            return Val::Str.new(:value($.input.get()));
+            my $value = $.input.get();
+            if !$value.defined {
+                $.output.print("\n");
+                return NONE;
+            }
+            return Val::Str.new(:$value);
         }
         if $c.hook -> &hook {
             return &hook(|@arguments) || NONE;

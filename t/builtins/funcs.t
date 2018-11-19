@@ -12,6 +12,14 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say(type(prompt(">>> ")));
+        .
+
+    outputs $program, ">>> \n<type NoneType>\n", "say() works";
+}
+
+{
+    my $program = q:to/./;
         say(type(None));
         .
 
