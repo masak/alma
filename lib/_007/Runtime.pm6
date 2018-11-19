@@ -11,6 +11,7 @@ constant EXIT_SUCCESS = 0;
 class _007::Runtime {
     has $.input;
     has $.output;
+    has @.arguments;
     has @!frames;
     has $.builtin-opscope;
     has $.builtin-frame;
@@ -19,7 +20,7 @@ class _007::Runtime {
     has $!exit-builtin;
     has $.exit-code;
 
-    submethod BUILD(:$!input, :$!output) {
+    submethod BUILD(:$!input, :$!output, :@!arguments) {
         $!builtin-opscope = opscope();
         $!builtin-frame = Val::Object.new(:properties(
             :outer-frame(NO_OUTER),
@@ -33,7 +34,10 @@ class _007::Runtime {
     }
 
     method run(Q::CompUnit $compunit) {
-        $compunit.run(self);
+        self.enter(self.current-frame, $compunit.block.static-lexpad, $compunit.block.statementlist);
+        $compunit.block.statementlist.run(self);
+        self.handle-main();
+        self.leave();
         CATCH {
             when X::Control::Return {
                 die X::ControlFlow::Return.new;
@@ -42,6 +46,32 @@ class _007::Runtime {
                 $!exit-code = .exit-code;
             }
         }
+    }
+
+    method handle-main() {
+        if self.maybe-get-var("MAIN") -> $main {
+            if $main ~~ Val::Func {
+                self.call($main, @!arguments.map(-> $value {
+                    Val::Str.new(:$value)
+                }));
+
+                CATCH {
+                    when X::ParameterMismatch {
+                        my @main-parameters = $main.parameterlist.parameters.elements.map(*.identifier.name.value);
+                        self.print-usage(@main-parameters);
+                        $!exit-code = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    method print-usage(@main-parameters) {
+        $.output.print("Usage:");
+        $.output.print("\n");
+        $.output.print("  bin/007 <script> ");
+        $.output.print(@main-parameters.map({ "<" ~ $_ ~ ">" }).join(" "));
+        $.output.print("\n");
     }
 
     method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
