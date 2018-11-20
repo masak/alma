@@ -392,8 +392,17 @@ class _007::Parser::Actions {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
             if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
-                make expand($macro, $postfix.argumentlist.arguments.elements,
-                    -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
+                # XXX: special case (because primitive); is there somewhere else we can define this logic?
+                if $macro === $*runtime.lvalue-builtin {
+                    make Q::Term::Object.new(
+                        :type(Val::Type.of(Val::Location)),
+                        :propertylist(Q::PropertyList.new())
+                    );
+                }
+                else {
+                    make expand($macro, $postfix.argumentlist.arguments.elements,
+                        -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
+                }
             }
             elsif $postfix ~~ Q::Postfix::Index {
                 make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));

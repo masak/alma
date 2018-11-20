@@ -19,6 +19,7 @@ class _007::Runtime {
     has $!say-builtin;
     has $!prompt-builtin;
     has $!exit-builtin;
+    has $.lvalue-builtin;
     has $.exit-code;
 
     submethod BUILD(:$!input, :$!output, :@!arguments) {
@@ -31,6 +32,7 @@ class _007::Runtime {
         $!say-builtin = builtins-pad().properties<say>;
         $!prompt-builtin = builtins-pad().properties<prompt>;
         $!exit-builtin = builtins-pad().properties<exit>;
+        $!lvalue-builtin = builtins-pad().properties<lvalue>;
         $!exit-code = EXIT_SUCCESS;
     }
 
@@ -587,6 +589,14 @@ class _007::Runtime {
             return builtin(sub map($fn) {
                 my @elements = $obj.elements.map({ self.call($fn, [$_]) });
                 return Val::Tuple.new(:@elements);
+            });
+        }
+        elsif $obj ~~ Val::Location && $propname eq "write" {
+            return builtin(sub write($value) {
+                self.put-var(
+                    Q::Identifier.new(:name(Val::Str.new(:value<x>))),
+                    $value
+                );
             });
         }
         elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ArgumentList" {

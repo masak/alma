@@ -60,10 +60,10 @@ sub op(&fn, :$qtype, :$assoc?, :%precedence?) {
 
 my @builtins =
     say => -> *$args {
-        # implementation in Runtime.pm
+        # implementation in Runtime.pm6
     },
     prompt => sub ($arg) {
-        # implementation in Runtime.pm
+        # implementation in Runtime.pm6
     },
     type => -> $arg { Val::Type.of($arg.WHAT) },
     exit => -> $int = Val::Int.new(:value(0)) {
@@ -71,6 +71,17 @@ my @builtins =
         my $exit-code = $int.value % 256;
         die X::Control::Exit.new(:$exit-code);
     },
+    lvalue => Val::Macro.new-builtin(
+        -> $expr {
+            # implementation in Actions.pm6
+        },
+        "lvalue",
+        Q::ParameterList.new(:parameters(Val::Array.new(:elements([
+            Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:value<lvalue>)))))
+        ])))),
+        Q::StatementList.new()
+    ),
+
 
     # OPERATORS (from loosest to tightest within each category)
 
@@ -322,7 +333,7 @@ my &ditch-sigil = { $^str.substr(1) };
 my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
 
 @builtins.=map({
-    when .value ~~ Val::Type {
+    when .value ~~ Val {
         .key => .value;
     }
     when .value ~~ Block {

@@ -624,7 +624,7 @@ class Val::Type does Val {
 ###     }
 ###     say(add(2, 5));         # --> `7`
 ###
-class Val::Func is Val {
+class Val::Func does Val {
     has Val::Str $.name;
     has &.hook = Callable;
     has $.parameterlist;
@@ -680,6 +680,13 @@ class Val::Macro is Val::Func {
 ###
 class Val::Exception does Val {
     has Val::Str $.message;
+}
+
+### ### Location
+###
+### A changeable piece of memory, typically corresponding to a lexical variable.
+###
+class Val::Location does Val {
 }
 
 class Helper {
