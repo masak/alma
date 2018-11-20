@@ -351,14 +351,14 @@ As the function call happens, all the arguments are evaluated, and their
 resulting values are *bound* to the parameters. It's a (runtime) error for
 the number of arguments to differ from the number of parameters.
 
-> ### 🔮 Future feature: static checking
+> #### 🔮 Future feature: static checking
 >
 > In the cases where the function definition is known/visible from the
 > callsite, we could even give this error at compile time (like Perl 6 but
 > unlike Python or Perl 5). Flagging up the error during compilation makes
 > sense, since the call would definitely fail at runtime anyway.
 
-> ### 🔮 Future feature: optional parameter and parameter defaults
+> #### 🔮 Future feature: optional parameter and parameter defaults
 >
 > 007 will at some point incorporate optional parameters and parameter default
 > values into the language. It's undecided whether these will require a pragma
@@ -366,7 +366,7 @@ the number of arguments to differ from the number of parameters.
 > of non-optional parameters. Non-optional parameters can only occur before
 > optional ones.
 
-> ### 🔮 Future feature: rest parameters and spread arguments
+> #### 🔮 Future feature: rest parameters and spread arguments
 >
 > The syntax `...` will at some point work to denote a *rest parameter* (which
 > accepts any remaining arguments into an array), and a *spread argument*
@@ -374,7 +374,7 @@ the number of arguments to differ from the number of parameters.
 > presence of a rest parameter, the number of arguments accepted is of course
 > unbounded.
 
-> ### 🔮 Future feature: named arguments
+> #### 🔮 Future feature: named arguments
 >
 > Borrowing from Python, it will at some point be possible to specify arguments
 > *by name*; the above call would for example be written as
@@ -463,7 +463,7 @@ builtins.
 
 ## Classes and objects
 
-> ### 🔮 Future feature: classes
+> #### 🔮 Future feature: classes
 >
 > The implementation of classes has started behind a feature flag, but mostly,
 > classes are not implemented yet in 007.
@@ -589,7 +589,7 @@ same class can also be declared on the outside of the class `Range`: `class
 Range.Iterator`. Only if we declare it nested inside `Range` do we skip the
 full name.
 
-> ### 🔮 Future feature: generator functions
+> #### 🔮 Future feature: generator functions
 >
 > Using generator functions, we could skip writing the `Range.Iterator` class,
 > and write the `iterator` method like this:
@@ -704,7 +704,7 @@ func postfix:<!>(N) {
 }
 ```
 
-> ### 🔮 Future feature: ternary operator
+> #### 🔮 Future feature: ternary operator
 >
 > With the ternary operator macro imported, the solution becomes downright cute:
 >
@@ -864,7 +864,7 @@ of whether the already installed operator is a built-in or user-defined.
 
 ## Modules
 
-> ### 🔮 Future feature: modules
+> #### 🔮 Future feature: modules
 >
 > Modules have not been implemented yet in 007. This whole chapter is a
 > best-guess at how they will work.
