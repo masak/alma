@@ -687,6 +687,7 @@ class Val::Exception does Val {
 ### A changeable piece of memory, typically corresponding to a lexical variable.
 ###
 class Val::Location does Val {
+    has $.expr;
 }
 
 class Helper {

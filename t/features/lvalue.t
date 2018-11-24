@@ -15,4 +15,17 @@ use _007::Test;
     outputs $program, "OH HAI\n", "the lvalue macro allows us to access a variable's Location";
 }
 
+{
+    my $program = q:to/./;
+        my y = "Mr. Bond";
+
+        my L = lvalue(y);
+        L.write("007");
+
+        say(y);
+        .
+
+    outputs $program, "007\n", "same but with a different variable";
+}
+
 done-testing;

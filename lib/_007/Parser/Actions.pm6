@@ -394,9 +394,18 @@ class _007::Parser::Actions {
             if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
                 # XXX: special case (because primitive); is there somewhere else we can define this logic?
                 if $macro === $*runtime.lvalue-builtin {
+                    # XXX: need to check there's exactly one argument
+                    # XXX: unify this argument checking with normal func/macro dispatch
                     make Q::Term::Object.new(
                         :type(Val::Type.of(Val::Location)),
-                        :propertylist(Q::PropertyList.new())
+                        :propertylist(Q::PropertyList.new(
+                            :properties(Val::Array.new(:elements([
+                                Q::Property.new(
+                                    :key(Val::Str.new(:value<expr>)),
+                                    :value($postfix.argumentlist.arguments.elements[0])
+                                )
+                            ])))
+                        ))
                     );
                 }
                 else {
