@@ -1037,34 +1037,54 @@ need to interoperate not just with the core language but with other people's
 
 ## Macros
 
-Compare a normal function:
+Function calls run at runtime:
 
 ```_007
-func greet(name) {
-    say("Hello, ", name);
+func foo() {
+    say("OH HAI");
 }
+
+say("before");
+foo();
+say("after");
 ```
 
-To a macro:
+This will output `before`, `OH HAI`, and `after`.
+
+Compare this to a macro call:
 
 ```_007
-macro greet(name) {
+macro moo() {
+    say("OH HAI");
+}
+
+say("before");
+moo();
+say("after");
+```
+
+This will output `OH HAI`, `before`, and `after`. In fact, the `moo` macro runs
+so early, it runs during the compilation process itself. (Macros run at `BEGIN`
+time.)
+
+Macros can return code, which will then be injected at the point of the macro
+call. Code that we return has to be *quoted*, so that it doesn't run
+immediately:
+
+```_007
+macro moo() {
     return quasi {
-        say("Hello ", {{{name}}});
+        say("OH HAI");
     }
 }
+
+say("before");
+moo();
+say("after");
 ```
 
-Even with these simple examples, there are three significant differences:
-
-1. In the function, `name` comes in as a runtime value, probably a `Str`. In
-the macro, `name` comes in as a program fragment, more exactly one denoting an
-expression, probably a `Q.Literal.Str`.
-
-2. In the function, we just execute some code directly. (The function doesn't
-return anything; it only has the side effect of printing.) In the macro, we
-_build_ the code that will then be inserted into the program somewhere, and
-later executed. (See more about this below in the [quasis section](#quasis).)
+This code, again, outputs `before`, `OH HAI`, and `after` &mdash; the code in
+the `quasi` block was injected at the point of the `moo()` call.
 
 XXX give two examples: prefix:<exists> and swap, perhaps?
 
