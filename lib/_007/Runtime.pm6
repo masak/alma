@@ -404,7 +404,7 @@ class _007::Runtime {
                 die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
                     unless $substr ~~ Val::Str;
 
-                return Val::Int.new(:value(
+                return Val::Bool.new(:value(
                         $obj.value.contains($substr.value)
                 ));
             });
