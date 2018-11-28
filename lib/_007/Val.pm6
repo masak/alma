@@ -624,7 +624,7 @@ class Val::Type does Val {
 ###     }
 ###     say(add(2, 5));         # --> `7`
 ###
-class Val::Func is Val {
+class Val::Func does Val {
     has Val::Str $.name;
     has &.hook = Callable;
     has $.parameterlist;
