@@ -1086,7 +1086,81 @@ say("after");
 This code, again, outputs `before`, `OH HAI`, and `after` &mdash; the code in
 the `quasi` block was injected at the point of the `moo()` call.
 
-XXX give two examples: prefix:<exists> and swap, perhaps?
+The above macros were not real examples, so let's do two macros that are
+actually potentially useful in your code:
+
+Let's say you want an operator for repeating an array. Let's call the new
+operator `infix:<xx>`:
+
+```_007
+[1] xx 5;                   # [1, 1, 1, 1, 1]
+[1, 2] xx 3;                # [1, 2, 1, 2, 1, 2]
+```
+
+The above is perfectly definable as an operator _function_, but... we could get
+a little bit of extra use out of the thing if the left-hand side was
+re-evaluated each time:
+
+```_007
+my i = 0;
+[i = i + 10] xx 4;          # [10, 20, 30, 40]
+```
+
+(For more on re-evaluation, see "thunky semantics" in the [Evaluating
+expressions](#evaluating-expressions) chapter.)
+
+Here's how an implementation of `infix:<xx>` might look:
+
+```_007
+macro infix:<xx>(left, right) is equiv(infix:<*>) {
+    func flatten(array) {
+        my result = [];
+        for array -> elem {
+            if elem ~~ Array {
+                result = result.concat(elem);
+            } else {
+                result.push(elem);
+            }
+        }
+        return result;
+    }
+
+    return quasi {
+        flatten((^{{{right}}}).map(func(_) {
+            return {{{left}}};
+        }))
+    }
+}
+```
+
+The second example comes from C#, which has a [`nameof`
+operator](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/nameof).
+This is a little helper that takes a variable, and returns its _name_. The
+benefit of using such an operator (over just writing the names as strings in
+the code directly) comes when renaming things using automatic refactor actions
+&mdash; the variable in the `nameof` expression will be renamed with everything
+else, but a name in a string won't be.
+
+Here's a 007 implementation of this operator:
+
+```_007
+macro prefix:<nameof>(expr) {
+    if expr !~~ Q.Identifier {
+        throw new Exception {
+            message: "Cannot turn a " ~ type(expr) ~ " into a name"
+        };
+    }
+    return quasi { expr.name };
+}
+```
+
+And here's how to use it:
+
+```_007
+my agents = ["Bond", "Nexus"];
+
+say(nameof agents);         # "agents"
+```
 
 ### Quasis
 
@@ -1136,6 +1210,8 @@ XXX examples: `each()`, junctions, class declarations
 XXX example: `+=`, `.=`
 
 XXX important here to state the single evaluation rule
+
+XXX thunky semantics
 
 XXX location protocol
 
