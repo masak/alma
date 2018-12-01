@@ -1145,11 +1145,7 @@ Here's a 007 implementation of this operator:
 
 ```_007
 macro prefix:<nameof>(expr) {
-    if expr !~~ Q.Identifier {
-        throw new Exception {
-            message: "Cannot turn a " ~ type(expr) ~ " into a name"
-        };
-    }
+    assertType(expr, Q.Identifier);
     return quasi { expr.name };
 }
 ```
