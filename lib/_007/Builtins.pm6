@@ -71,6 +71,10 @@ my @builtins =
         my $exit-code = $int.value % 256;
         die X::Control::Exit.new(:$exit-code);
     },
+    assertType => -> $value, $type {
+        assert-type(:value($type), :type(Val::Type), :operation("assertType (checking the Type parameter)"));
+        assert-type(:$value, :type($type.type), :operation<assertType>);
+    },
 
     # OPERATORS (from loosest to tightest within each category)
 
