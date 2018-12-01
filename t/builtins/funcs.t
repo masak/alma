@@ -136,7 +136,7 @@ use _007::Test;
         assertType(moo, Func);
         .
 
-    outputs $program, "", "assertType respects inheritance, so this will work since a Func is a Macro";
+    outputs $program, "", "assertType respects inheritance, so this will work since a Macro is a Func";
 }
 
 {
