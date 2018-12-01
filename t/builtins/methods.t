@@ -202,6 +202,28 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        func f(n) { [n * 2, n * 2 + 1] }
+        my a = [1, 2, 3];
+        say(a.flatMap(f));
+        say(a);
+        .
+
+    outputs $program, "[2, 3, 4, 5, 6, 7]\n[1, 2, 3]\n", "flatMap() works like map() but flattens one layer of array";
+}
+
+{
+    my $program = q:to/./;
+        func f(n) { ~n }
+        my a = [1, 2, 3];
+        say(a.flatMap(f));
+        say(a);
+        .
+
+    outputs $program, qq!["1", "2", "3"]\n[1, 2, 3]\n!, "flatMap() does nothing if there's no array to remove";
+}
+
+{
+    my $program = q:to/./;
         macro so_hygienic() {
             my x = "yay, clean!";
             return quasi {

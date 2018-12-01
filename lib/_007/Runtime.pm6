@@ -460,6 +460,21 @@ class _007::Runtime {
                 return Val::Array.new(:@elements);
             });
         }
+        elsif $obj ~~ Val::Array && $propname eq "flatMap" {
+            return builtin(sub flatMap($fn) {
+                my @elements;
+                for $obj.elements -> $e {
+                    my $r = self.call($fn, [$e]);
+                    if $r ~~ Val::Array {
+                        @elements.push(|$r.elements);
+                    }
+                    else {
+                        @elements.push($r);
+                    }
+                }
+                return Val::Array.new(:@elements);
+            });
+        }
         elsif $obj ~~ Val::Array && $propname eq "push" {
             return builtin(sub push($newelem) {
                 $obj.elements.push($newelem);
