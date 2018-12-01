@@ -2,11 +2,7 @@ macro name(expr) {
     if expr ~~ Q.Postfix.Property {
         expr = expr.property;
     }
-    if expr !~~ Q.Identifier {
-        throw new Exception {
-            message: "Cannot turn a " ~ type(expr) ~ " into a name"
-        };
-    }
+    assertType(expr, Q.Identifier);
     return quasi { expr.name };
 }
 
