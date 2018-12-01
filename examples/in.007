@@ -37,7 +37,7 @@ func infix:<not in>(value, container) {
     }
     else {
         throw new Exception {
-            message: "Wrong type to infix:<in>. Expected Array or Object or Str, was " ~ type(container),
+            message: "Wrong type to infix:<not in>. Expected Array or Object or Str, was " ~ type(container),
         };
     }
 }
