@@ -1168,7 +1168,11 @@ XXX
 
 ## Stateful macros
 
-XXX hidden variables using Symbols
+XXX a `tenTimes` macro, which contains hidden state
+
+XXX a naive implementation of infix:<ff>
+
+XXX a per-outer-frame implementation of infix:<ff>
 
 ## Closures in macros
 
