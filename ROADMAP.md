@@ -15,14 +15,6 @@ ordering. That's what this roadmap is for.
 
 ## Short-term priorities
 
-* **Get the lexical hygiene implementation in place.**
-
-  The model described in [#410](https://github.com/masak/007/issues/410)
-  should be implemented. It's the only thing currently standing in the
-  way of rudimentary implementations of `infix:<ff>`
-  ([#207](https://github.com/masak/007/issues/207)) and `swap`
-  ([#218](https://github.com/masak/007/issues/218)).
-
 * **Expose locations to userland and make them work in macros.**
 
   Each variable represents a *location* which can be read from and
@@ -33,6 +25,16 @@ ordering. That's what this roadmap is for.
   `swap` macro needs this for a correct implementation. We can also
   do `postfix:<++>` and family
   ([#122](https://github.com/masak/007/issues/122)).
+
+* **Get the lexical hygiene implementation in place.**
+
+  The model described in [#410](https://github.com/masak/007/issues/410)
+  should be implemented. It's the only thing currently standing in the
+  way of rudimentary implementations of `infix:<ff>`
+  ([#207](https://github.com/masak/007/issues/207)) and `swap`
+  ([#218](https://github.com/masak/007/issues/218)). (This item was
+  originally _first_ on this list, but has been moved to second, because
+  the lexical hygiene implementation depends on the notion of locations.)
 
 * **Implement stateful macros.**
 
