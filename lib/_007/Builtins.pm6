@@ -74,6 +74,10 @@ my @builtins =
         assert-type(:value($type), :type(Val::Type), :operation("assertType (checking the Type parameter)"));
         assert-type(:$value, :type($type.type), :operation<assertType>);
     },
+    tighter => -> $fn, $op { $fn },
+    looser => -> $fn, $op { $fn },
+    equiv => -> $fn, $op { $fn },
+    assoc => -> $fn, $direction { $fn },
 
     # OPERATORS (from loosest to tightest within each category)
 

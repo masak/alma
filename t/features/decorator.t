@@ -52,4 +52,15 @@ use _007::Test;
         "can't decorate with the wrong number of parameters (assoc)";
 }
 
+{
+    my $program = q:to/./;
+        say(tighter ~~ Func);
+        say(equiv ~~ Func);
+        say(looser ~~ Func);
+        say(assoc ~~ Func);
+        .
+
+    outputs $program, "true\n" x 4, "the custom op decorators are all built-in functions";
+}
+
 done-testing;
