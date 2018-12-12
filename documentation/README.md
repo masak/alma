@@ -1075,7 +1075,7 @@ immediately:
 macro moo() {
     return quasi {
         say("OH HAI");
-    }
+    };
 }
 
 say("before");
@@ -1160,11 +1160,80 @@ say(nameof agents);         # "agents"
 
 ### Quasis
 
-XXX
+A _`quasi`_ (or _`quasi` block_ or _quasiquote_) is a way to create a Qtree
+program fragment by simply typing out the code as you'd usually do.
+
+```_007
+macro moo() {
+    return quasi {
+        say("OH HAI");
+    };
+}
+```
+
+Whereas regular code runs directly, and code in a function runs only when the
+function is called, the code in a quasi isn't even in the program yet. It's
+waiting to be inserted somewhere.
+
+The typical way to insert code from a quasi into the regular code is via a
+macro. A macro contains one or more quasis, and the resulting bit of code is
+returned at the end. The compiler takes the resulting code and re-injects it in
+the place of the macro call.
+
+Sometimes the code where the macro is inserted is called the _mainline_ code,
+just to distinguish it from what happens within the macro. (The distinction is
+a bit bogus. Macros can call other macros.)
+
+By the way, the act of replacing a macro call by its returned code is
+traditionally called _macro expansion_.
+
+Together with the ability to represent code literally, quasis also allow you to
+_interpolate code_ into the `quasi` code:
+
+```_007
+macro doubleDo(stmt) {
+    return quasi {
+        {{{stmt}}};
+        {{{stmt}}};
+    };
+}
+
+doubleDo(
+    say("OH HAI")
+);                  # prints "OH HAI" twice
+```
+
+The interpolation capability is what makes quasiquotes interesting. (And also
+why they are called _quasi_quotes, and not just quotes.) It's a really neat way
+to switch between literal code that's the same between macro calls, and
+parameterized code that can vary from call to call.
 
 ### The Q hierarchy
 
-XXX
+What's the value of a `quasi` block? When a macro returns, what does it
+actually return?
+
+In 007, your entire program is a _document_, much like the HTML DOM treats an
+HTML page as a document. This document is made up of _nodes_, all subclasses of
+the `Q` class. (Usually referred to as _Qnodes_.)
+
+In other words, they are regular 007 values, instances of some subclass of `Q`.
+
+* Any statement is a `Q.Statement`.
+* Any expression or expression fragment is a `Q.Expr`.
+* Operators belong to `Q.Prefix`, `Q.Infix`, or `Q.Postfix`.
+
+And so on. The entire Q hierarchy is detailed in the API documentation.
+
+Philosophically, this is where 007 departs from Lisp. In Lisp, everything is
+nested lists, even the entire program structure. 007 instead exposes an
+object-oriented API to the program structure. It will never be as simple and
+uniform as the list interface, but it can have other strengths, such as the
+ability to strongly type the program structure, or access values in Qnodes
+through named properties.
+
+In the end, the essential point of Qnodes is that the compiler toolchain and
+the runtime are able to act on the same values without any fuss.
 
 ## Stateful macros
 
