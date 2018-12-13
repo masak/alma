@@ -20,6 +20,21 @@ constant %BACKENDS = hash
     "unexpanded-ast" => -> $ast, $ { say ~$ast },
 ;
 
+constant $REPL_PROGRAM = q:to/./;
+    use _007;
+    my $runtime = _007.runtime;
+
+    while defined my $program = prompt "> " {
+        my $ast = _007.parser(:$runtime).parse($program);
+        $runtime.run($ast);
+        CATCH {
+            default {
+                .say;
+            }
+        }
+    }
+    .
+
 sub run_007($program, Str $backend is copy, @arguments) {
     die "Unknown backend '$backend'"
         unless %BACKENDS{$backend} :exists;
@@ -33,8 +48,18 @@ sub run_007($program, Str $backend is copy, @arguments) {
     exit($runtime.exit-code);
 }
 
+multi MAIN(Str :$backend = "default") {
+    my $rlwrap-installed = "" ne qx[which rlwrap].trim;
+    if !$rlwrap-installed {
+        note "rlwrap not found in PATH. (Do you have it installed?)";
+        exit(1);
+    }
+
+    shell "rlwrap perl6 -e '{$REPL_PROGRAM}'";
+}
+
 multi MAIN($path, Str :$backend = "default", *@arguments) {
-    run_007(slurp($path), $backend, @arguments);
+    run_007(slurp($path), $backend);
 }
 
 multi MAIN(Str :e($program)!, Str :$backend = "default", *@arguments) {
