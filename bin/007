@@ -20,23 +20,23 @@ constant %BACKENDS = hash
     "unexpanded-ast" => -> $ast, $ { say ~$ast },
 ;
 
-sub run_007($program, Str $backend is copy) {
+sub run_007($program, Str $backend is copy, @arguments) {
     die "Unknown backend '$backend'"
         unless %BACKENDS{$backend} :exists;
     $backend = %BACKENDS{$backend}.deref
         while %BACKENDS{$backend} ~~ Ref;
 
-    my $runtime = _007.runtime;
+    my $runtime = _007.runtime(:@arguments);
     my $unexpanded = $backend eq "unexpanded-ast";
     my $ast = _007.parser(:$runtime).parse($program, :$unexpanded);
     %BACKENDS{$backend}($ast, $runtime);
     exit($runtime.exit-code);
 }
 
-multi MAIN($path, Str :$backend = "default") {
-    run_007(slurp($path), $backend);
+multi MAIN($path, Str :$backend = "default", *@arguments) {
+    run_007(slurp($path), $backend, @arguments);
 }
 
-multi MAIN(Str :e($program)!, Str :$backend = "default") {
-    run_007($program, $backend);
+multi MAIN(Str :e($program)!, Str :$backend = "default", *@arguments) {
+    run_007($program, $backend, @arguments);
 }
