@@ -1,0 +1,255 @@
+my HEIGHT = 25;
+my WIDTH = 80;
+
+my EMPTY = ".";
+my FILLED = "#";
+
+macro infix:<xx>(left, right) is equiv(infix:<*>) {
+    func flatten(array) {
+        my result = [];
+        for array -> elem {
+            if elem ~~ Array {
+                result = result.concat(elem);
+            } else {
+                result.push(elem);
+            }
+        }
+        return result;
+    }
+
+    return quasi {
+        flatten((^{{{right}}}).map(func(_) {
+            return {{{left}}};
+        }))
+    }
+}
+
+# XXX: Couldn't use infix:<..>, submitted as issue #449
+func infix:<to>(low, high) {
+    my result = [];
+    for ^(high - low + 1) -> i {
+        result.push(low + i);
+    }
+    return result;
+}
+
+func infix:</>(n, d) is equiv(infix:<*>) {
+    (n divmod d)[0];
+}
+
+func half(n) {
+    return (n divmod 2)[0];
+}
+
+func checkBounds(value, min, max) {
+    value = +value;
+    if value < min {
+        throw new Exception {
+            message: "Value is too small. " ~ value ~ " !~~ " ~ min ~ ".." ~ max,
+        };
+    }
+    if value > max {
+        throw new Exception {
+            message: "Value is too large. " ~ value ~ " !~~ " ~ min ~ ".." ~ max,
+        };
+    }
+    return value;
+}
+
+# Draws a line from (x1, y1) to (x2, y2).
+#
+# A coordinate space between (0, 0) (upper left) and (79, 24) (lower right)
+# is printed. The line is drawn within that space. The specified
+# coordinates must be within this space.
+func MAIN(x1, y1, x2, y2) {
+    my space = [[EMPTY] xx WIDTH] xx HEIGHT;
+
+    x1 = checkBounds(x1, 0, 79);
+    x2 = checkBounds(x2, 0, 79);
+    y1 = checkBounds(y1, 0, 24);
+    y2 = checkBounds(y2, 0, 24);
+
+    if (x2 - x1).abs() >= (y2 - y1).abs() {
+        if x1 <= x2 {
+            my dx = x2 - x1;
+
+            if y1 <= y2 {
+                # \ | /
+                #  \|/
+                # --XXX
+                #  /|XX
+                # / | X
+
+                my dy = y2 - y1;
+
+                # For each increase in x, we also increase y by dy/dx. Bresenham's
+                # algorithm finds the integer y coordinate which best fits this
+                # rational y coordinate.
+                #
+                # 007 doesn't have rationals. Fortunately, we can just multiply
+                # everything by dx, and things come out as integers again.
+
+                my y = y1;
+                my i = half(dy);
+                for x1 to x2 -> x {
+                    i = i + dy;
+                    if i >= dx {
+                        i = i - dx;
+                        y = y + 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+            else {
+                # \ | X
+                #  \|XX
+                # --*--
+                #  /|\
+                # / | \
+
+                my dy = y1 - y2;
+                my y = y1;
+                my i = half(dy);
+                for x1 to x2 -> x {
+                    i = i + dy;
+                    if i >= dx {
+                        i = i - dx;
+                        y = y - 1;
+                    }
+                }
+            }
+        }
+        else {
+            my dx = x1 - x2;
+
+            if y1 <= y2 {
+                # \ | /
+                #  \|/
+                # XX*--
+                # XX|\
+                # X | \
+
+                my dy = y2 - y1;
+                my y = y2;
+                my i = half(dy);
+                for x2 to x1 -> x {
+                    i = i + dy;
+                    if i >= dx {
+                        i = i - dx;
+                        y = y - 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+            else {
+                # X | /
+                # XX|/
+                # --*--
+                #  /|\
+                # / | \
+
+                my dy = y1 - y2;
+                my y = y2;
+                my i = half(dy);
+                for x2 to x1 -> x {
+                    i = i + dy;
+                    if i >= dx {
+                        i = i - dx;
+                        y = y + 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+        }
+    }
+    else {
+        if y1 <= y2 {
+            my dy = y2 - y1;
+
+            if x1 <= x2 {
+                # \ | /
+                #  \|/
+                # --*--
+                #  /|\
+                # / |X\
+
+                my dx = x2 - x1;
+                my x = x1;
+                my i = half(dx);
+                for y1 to y2 -> y {
+                    i = i + dx;
+                    if i >= dy {
+                        i = i - dy;
+                        x = x + 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+            else {
+                # \ | /
+                #  \|/
+                # --*--
+                #  /|\
+                # /X| \
+
+                my dx = x1 - x2;
+                my x = x1;
+                my i = half(dx);
+                for y1 to y2 -> y {
+                    i = i + dx;
+                    if i >= dy {
+                        i = i - dy;
+                        x = x - 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+        }
+        else {
+            my dy = y1 - y2;
+
+            if x1 <= x2 {
+                # \ |X/
+                #  \|/
+                # --*--
+                #  /|\
+                # / | \
+
+                my dx = x2 - x1;
+                my x = x2;
+                my i = half(dx);
+                for y2 to y1 -> y {
+                    i = i + dx;
+                    if i >= dy {
+                        i = i - dy;
+                        x = x - 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+            else {
+                # \X| /
+                #  \|/
+                # --*--
+                #  /|\
+                # / | \
+
+                my dx = x1 - x2;
+                my x = x2;
+                my i = half(dx);
+                for y2 to y1 -> y {
+                    i = i + dx;
+                    if i >= dy {
+                        i = i - dy;
+                        x = x + 1;
+                    }
+                    space[y][x] = FILLED;
+                }
+            }
+        }
+    }
+
+    for space -> row {
+        say(row.join(""));
+    }
+}
