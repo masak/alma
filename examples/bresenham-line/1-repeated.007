@@ -2,9 +2,9 @@
 #
 # Usage:
 #
-#   bin/007 examples/bresenham-line.007 10 12 69 12     # horizontal
-#   bin/007 examples/bresenham-line.007 40 5 40 19      # vertical
-#   bin/007 examples/bresenham-line.007 10 5 69 19      # slanted
+#   bin/007 examples/bresenham-line/1-repeated.007 10 12 69 12     # horizontal
+#   bin/007 examples/bresenham-line/1-repeated.007 40 5 40 19      # vertical
+#   bin/007 examples/bresenham-line/1-repeated.007 10 5 69 19      # slanted
 #
 # The four arguments `x1 y1 x2 y2` are mandatory. The range of the
 # x coordinates is (0, 79) inclusive, and of y (0, 24) inclusive.
