@@ -1237,11 +1237,129 @@ the runtime are able to act on the same values without any fuss.
 
 ## Stateful macros
 
-XXX a `tenTimes` macro, which contains hidden state
+Consider this macro:
 
-XXX a naive implementation of infix:<ff>
+```_007
+macro onlyOnce(expr) {
+    my alreadyRan = False;
+    return quasi {
+        if !alreadyRan {
+            {{{expr}}};
+            alreadyRan = True;
+        }
+    };
+}
 
-XXX a per-outer-frame implementation of infix:<ff>
+for [1, 2, 3] {
+    onlyOnce(say("OH HAI"));        # "OH HAI" once, not three times
+}
+for [1, 2] {
+    onlyOnce(say("OH HAI"));        # "OH HAI" once, not twice
+}
+```
+
+The above demonstrates two things:
+
+* Code in a quasi can read/modify variables defined in the macro. The values in
+  such variables will persist between runs of the quasi code.
+
+* Each macro _expasion_ (that is, each call to the macro in the code) gets its
+  own fresh copies of these variables, since the macro runs anew each time.
+
+We describe this by saying that the `alreadyRan` variable belongs to the
+macro's local _state_. Macros with local state are called _stateful_.
+
+As a prototypical example of a stateful macro, consider the `infix:<ff>`
+operator from Perl 6 (spelled `infix:<..>` in Perl 5):
+
+```_007
+my values = ["A", "B", "A", "B", "A"];
+for values -> v {
+    if v == "B" ff v == "B" {
+        say(v);
+    }
+    else {
+        say("x");
+    }
+}
+# Output: xBxBx
+```
+
+Here's how we can simply implement this macro:
+
+```_007
+macro infix:<ff>(lhs, rhs) {
+    my active = False;
+    return quasi {
+        if {{{lhs}}} {
+            active = True;
+        }
+        my result = active;
+        if {{{rhs}}} {
+            active = False;
+        }
+        result;
+    };
+}
+```
+
+This declaration works, but has one downside: the macro state is program-wide,
+but what we tend to expect/want is for the macro state to "reset" every time
+its surrounding block is re-entered.
+
+Here's an implementation that stores the state such that it's per block entry,
+not per program run:
+
+```_007
+macro infix:<ff>(lhs, rhs) {
+    my active = new Symbol { name: "active" };
+    return quasi {
+        my COMPILING.{{{Q.Identifier @ active}}};
+        once {
+            COMPILING.{{{Q.Identifier @ active}}} = False;
+        }
+        if {{{lhs}}} {
+            COMPILING.{{{Q.Identifier @ active}}} = True;
+        }
+        my result = COMPILING.{{{Q.Identifier @ active}}};
+        if {{{rhs}}} {
+            COMPILING.{{{Q.Identifier @ active}}} = False;
+        }
+        result;
+    };
+}
+```
+
+> #### 💡 Symbols
+>
+> Symbols can be used in place of strings as dictionary keys, and also as
+> names of variables in a scope. They're used when something unique,
+> unguessable, and hidden is called for. This tends to happen in macros.
+
+> #### 💡 `COMPILING`
+>
+> The `COMPILING` pseudomodule can be used inside of macro bodies (including
+> in quasis), and refers to the lexical scope from which the macro was called.
+> It's the only module one is allowed to declare variables in "at a distance".
+
+In this case, we're using the `active` symbol so that we can install it in the
+`COMPILING` scope. This protects us against collisions with:
+
+* A variable in the mainline scope called `active`.
+
+* Other macros which might also install a variable called `active` in the
+  mainline scope.
+
+* Other expansions of the _same_ macro (`infix:<ff>`) which would want to
+  install a variable called `active` in the mainline scope.
+
+As for the last point, each macro call gets its own fresh `active` symbol,
+and so they don't collide, even if they're in the same scope.
+
+> #### 💡 `once`
+>
+> The `once` macro runs a statement or block at most once per entry to the
+> surrounding block.
 
 ## Closures in macros
 
