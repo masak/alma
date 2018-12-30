@@ -63,7 +63,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro foo() {
-            return None;
+            return none;
         }
 
         foo();
@@ -73,7 +73,7 @@ use _007::Test;
     outputs
         $program,
         "OH HAI\n",
-        "a macro that returns `None` expands to nothing";
+        "a macro that returns `none` expands to nothing";
 }
 
 done-testing;

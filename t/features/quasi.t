@@ -26,7 +26,7 @@ use _007::Test;
         say(moo());
         .
 
-    outputs $program, "None\n", "Empty quasiquote results in a None value";
+    outputs $program, "none\n", "Empty quasiquote results in a none value";
 }
 
 {
@@ -142,7 +142,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         say(type(quasi<Q.Literal> { 7 }));
-        say(type(quasi<Q.Literal> { None }));
+        say(type(quasi<Q.Literal> { none }));
         say(type(quasi<Q.Literal> { "James Bond" }));
         .
 
@@ -161,7 +161,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi<Q.Literal.None> { None }));
+        say(type(quasi<Q.Literal.None> { none }));
         .
 
     outputs $program, "<type Q.Literal.None>\n", "quasi<Q.Literal.None>";
@@ -207,7 +207,7 @@ use _007::Test;
 {
     my $program = q:to/./;
         say(type(quasi<Q.Term> { 7 }));
-        say(type(quasi<Q.Term> { None }));
+        say(type(quasi<Q.Term> { none }));
         say(type(quasi<Q.Term> { "James Bond" }));
         say(type(quasi<Q.Term> { [0, 0, 7] }));
         say(type(quasi<Q.Term> { new Object { james: "Bond" } }));

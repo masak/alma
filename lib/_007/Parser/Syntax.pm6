@@ -189,7 +189,7 @@ grammar _007::Parser::Syntax {
     }
 
     proto token term {*}
-    token term:none { None» }
+    token term:none { none» }
     token term:false { false» }
     token term:true { true» }
     token term:int { \d+ }

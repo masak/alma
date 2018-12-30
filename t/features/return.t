@@ -60,7 +60,7 @@ use _007::Test;
         say(f());
         .
 
-    outputs $program, "None\n", "sub returning nothing";
+    outputs $program, "none\n", "sub returning nothing";
 }
 
 {

@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-7ee3b2">
+  <body class="checksum-c37908">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -107,7 +107,7 @@ say(&quot;Now my name is &quot;, name);  # &quot;Now my name is Mr. Smith&quot;<
 </blockquote>
 <p>That's all there is to variables; they are meant to be predictable and straightforward. Later, when writing macros has richer demands on variables, 007's <a href="#evaluating-expressions">location protocol</a> will allow us to manipulate variables more finely, controlling exactly when to read and/or assign to them.</p>
 <p>In 007, these &quot;scalar value&quot; types are built in:</p>
-<pre><code>None          NoneType
+<pre><code>none          NoneType
 false         Bool
 42            Int
 &quot;Bond&quot;        Str</code></pre>
@@ -126,7 +126,7 @@ termish := &lt;prefix&gt;* &lt;term&gt; &lt;postfix&gt;*</code></pre>
 <p><strong>Arithmetic</strong>. The infix operators <code>+ - * %</code> work as you'd expect. <code>%%</code> tests for divisibility, so it returns <code>true</code> whenever <code>%</code> returns <code>0</code>. <code>divmod</code> does an integer division resulting in a tuple <code>(q, r)</code> where <code>q</code> is the quotient and <code>r</code> is the reminder.</p>
 <p><strong>String building</strong>. You can concatenate strings with <code>~</code>. (To concatenate arrays, use the Array method <code>.concat</code>.)</p>
 <p><strong>Equality, comparison and matching</strong>. The operators <code>==</code> and <code>!=</code> checks whether values are equal or unequal. <code>&lt; &lt;= &gt; &gt;=</code> compare ordered types like integers or strings. <code>~~ !~~</code> match a value against a type.</p>
-<p><strong>Logical connectives</strong>. The infixes <code>||</code> and <code>&amp;&amp;</code> allow you to combine boolean (or really, any) values. Furthermore, <code>//</code> allows you to replace <code>None</code> values with a default. (All of these operators are short-circuiting. See the individual operators for more information.)</p>
+<p><strong>Logical connectives</strong>. The infixes <code>||</code> and <code>&amp;&amp;</code> allow you to combine boolean (or really, any) values. Furthermore, <code>//</code> allows you to replace <code>none</code> values with a default. (All of these operators are short-circuiting. See the individual operators for more information.)</p>
 <p><strong>Postfixes</strong>. The postfixes are <code>[]</code> for indexing, <code>()</code> for calls, and <code>.</code> for property lookup.</p>
 <p><strong>Conversion prefixes</strong>. The prefixes <code>+ -</code> convert to integers, <code>~</code> converts to a string, and <code>? !</code> convert to booleans. The prefix <code>^</code> turns an integer <code>n</code> into an array <code>[0, 1, 2, .., n - 1]</code>.</p>
 <p>Each operator has a built-in precedence which governs the order in which the operators are evaluated. This can be more clearly seen by pretending that the parser groups subexpressions by inserting parentheses around the tighter operators:</p>
@@ -208,7 +208,7 @@ func f2() {};   say(&quot;hi!&quot;)      # OK
 func f3() {}    say(&quot;oh noes&quot;)  # not ok</code></pre>
 <h3 id="block-statements">Block statements</h3>
 <p>007 has <code>if</code> statements, <code>while</code> loops and <code>for</code> loops by default. This example probably won't look too surprising to anyone who has seen C-like syntax before:</p>
-<pre class="_007"><code>my array = [5, func() { say(&quot;OH HAI&quot;) }, None];
+<pre class="_007"><code>my array = [5, func() { say(&quot;OH HAI&quot;) }, none];
 for array -&gt; e {
     if e ~~ Int {
         while e &gt; 0 {
@@ -242,7 +242,7 @@ for array -&gt; e {
 }
 
 say(&quot;3 + 4 = &quot;, add(3, 4));</code></pre>
-<p>The <code>return</code> statement immediately returns out of a function, optionally with a value. If no value is supplied (as in <code>return;</code>), the value <code>None</code> is returned. Implicit returns are OK too; the statement in the <code>add</code> function above could have been written as just <code>n1 + n2;</code> because it's last in the function.</p>
+<p>The <code>return</code> statement immediately returns out of a function, optionally with a value. If no value is supplied (as in <code>return;</code>), the value <code>none</code> is returned. Implicit returns are OK too; the statement in the <code>add</code> function above could have been written as just <code>n1 + n2;</code> because it's last in the function.</p>
 <p>When defined using a function statement, it's also allowed to call the function <em>before</em> its definition. (This is not true for any other type of defined thing in 007.)</p>
 <pre class="_007"><code>whoa();     # Amazingly, this works!
 

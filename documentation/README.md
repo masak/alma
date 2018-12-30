@@ -101,7 +101,7 @@ variables more finely, controlling exactly when to read and/or assign to them.
 
 In 007, these "scalar value" types are built in:
 
-    None          NoneType
+    none          NoneType
     false         Bool
     42            Int
     "Bond"        Str
@@ -148,7 +148,7 @@ whether values are equal or unequal. `< <= > >=` compare ordered types like
 integers or strings. `~~ !~~` match a value against a type.
 
 **Logical connectives**. The infixes `||` and `&&` allow you to combine boolean
-(or really, any) values. Furthermore, `//` allows you to replace `None` values
+(or really, any) values. Furthermore, `//` allows you to replace `none` values
 with a default. (All of these operators are short-circuiting. See the
 individual operators for more information.)
 
@@ -227,7 +227,7 @@ func f3() {}    say("oh noes")  # not ok
 probably won't look too surprising to anyone who has seen C-like syntax before:
 
 ```_007
-my array = [5, func() { say("OH HAI") }, None];
+my array = [5, func() { say("OH HAI") }, none];
 for array -> e {
     if e ~~ Int {
         while e > 0 {
@@ -294,7 +294,7 @@ say("3 + 4 = ", add(3, 4));
 ```
 
 The `return` statement immediately returns out of a function, optionally with a
-value. If no value is supplied (as in `return;`), the value `None` is returned.
+value. If no value is supplied (as in `return;`), the value `none` is returned.
 Implicit returns are OK too; the statement in the `add` function above could
 have been written as just `n1 + n2;` because it's last in the function.
 

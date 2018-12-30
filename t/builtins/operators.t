@@ -331,19 +331,19 @@ use _007::Test;
         "boolean operators give the values expected";
     outputs 'say(false && say("foo")); say(true || say("bar"))', "false\ntrue\n",
         "boolean operators short-circuit";
-    outputs 'say(1 && 2); say("" && 3); say(false || None); say([0, 0, 7] || false)', "2\n\nNone\n[0, 0, 7]\n",
+    outputs 'say(1 && 2); say("" && 3); say(false || none); say([0, 0, 7] || false)', "2\n\nnone\n[0, 0, 7]\n",
         "boolean operators return one of their operands";
 }
 
 {
     my $program = q:to/./;
-        say(None == None);
-        say(None == 0);
-        say(None == "");
-        say(None == []);
+        say(none == none);
+        say(none == 0);
+        say(none == "");
+        say(none == []);
         .
 
-    outputs $program, "true\nfalse\nfalse\nfalse\n", "equality testing with None matches only itself";
+    outputs $program, "true\nfalse\nfalse\nfalse\n", "equality testing with none matches only itself";
 }
 
 {
@@ -576,10 +576,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(None // "oh, James");
+        say(none // "oh, James");
         .
 
-    outputs $program, "oh, James\n", "defined-or with None as the lhs";
+    outputs $program, "oh, James\n", "defined-or with none as the lhs";
 }
 
 {

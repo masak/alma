@@ -23,7 +23,7 @@ my $parser = _007.parser;
                             parameterlist: Q.ParameterList [],
                             statementlist: Q.StatementList []
                         },
-                        else: None
+                        else: none
                     }]
                 }
             }]

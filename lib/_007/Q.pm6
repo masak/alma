@@ -112,7 +112,7 @@ role Q::Term does Q::Expr {
 ### ### Q::Literal
 ###
 ### A literal; a constant value written out explicitly in the program, such as
-### `None`, `true`, `5`, or `"James Bond"`.
+### `none`, `true`, `5`, or `"James Bond"`.
 ###
 ### Compound values such as arrays and objects are considered terms but not
 ### literals.
@@ -122,7 +122,7 @@ role Q::Literal does Q::Term {
 
 ### ### Q::Literal::None
 ###
-### The `None` literal.
+### The `none` literal.
 ###
 class Q::Literal::None does Q::Literal {
     method eval($) { NONE }
@@ -478,7 +478,7 @@ class Q::Infix::Or is Q::Infix {
 ### ### Q::Infix::DefinedOr
 ###
 ### A short-circuiting "defined-or" operator. Evaluates its
-### right-hand side only if the left-hand side is `None`.
+### right-hand side only if the left-hand side is `none`.
 ###
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {

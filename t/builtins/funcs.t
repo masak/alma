@@ -20,10 +20,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(None));
+        say(type(none));
         .
 
-    outputs $program, "<type NoneType>\n", "None type() works";
+    outputs $program, "<type NoneType>\n", "none type() works";
 }
 
 {

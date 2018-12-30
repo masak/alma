@@ -27,32 +27,32 @@ role Val {
 ### It is the value variables have that haven't been assigned to:
 ###
 ###     my empty;
-###     say(empty);         # --> `None`
+###     say(empty);         # --> `none`
 ###
 ### It is also the value returned from a subroutine that didn't explicitly
 ### return a value:
 ###
 ###     func noreturn() {
 ###     }
-###     say(noreturn());    # --> `None`
+###     say(noreturn());    # --> `none`
 ###
 ### Finally, it's found in various places in the Q hierarchy to indicate that
 ### a certain child element is not present. For example, an `if` statement
 ### doesn't always have an `else` statement. When it doesn't, the `.else`
-### property is set to `None`.
+### property is set to `none`.
 ###
 ###     say(type((quasi<Q.Statement> { if 1 {} }).else)); # --> `<type NoneType>`
 ###
-### The value `None` is falsy, stringifies to `None`, and doesn't numify.
+### The value `none` is falsy, stringifies to `none`, and doesn't numify.
 ###
-###     say(!!None);        # --> `false`
-###     say(~None);         # --> `None`
-###     say(+None);         # <ERROR X::TypeCheck>
+###     say(!!none);        # --> `false`
+###     say(~none);         # --> `none`
+###     say(+none);         # <ERROR X::TypeCheck>
 ###
-### Since `None` is often used as a default, there's an operator `infix:<//>`
-### that evaluates its right-hand side if it finds `None` on the left:
+### Since `none` is often used as a default, there's an operator `infix:<//>`
+### that evaluates its right-hand side if it finds `none` on the left:
 ###
-###     say(None // "default");     # --> `default`
+###     say(none // "default");     # --> `default`
 ###     say("value" // "default");  # --> `value`
 ###
 class Val::NoneType does Val {
@@ -84,7 +84,7 @@ constant NONE is export = Val::NoneType.new;
 ###             say("falsy");
 ###         }
 ###     }
-###     check(None);            # --> `falsy`
+###     check(none);            # --> `falsy`
 ###     check(false);           # --> `falsy`
 ###     check(0);               # --> `falsy`
 ###     check("");              # --> `falsy`
@@ -103,8 +103,8 @@ constant NONE is export = Val::NoneType.new;
 ###
 ###     say(1 || 2);            # --> `1`
 ###     say(1 && 2);            # --> `2`
-###     say(None && "!");       # --> `None`
-###     say(None || "!");       # --> `!`
+###     say(none && "!");       # --> `none`
+###     say(none || "!");       # --> `!`
 ###
 class Val::Bool does Val {
     has Bool $.value;
@@ -476,7 +476,7 @@ our $global-object-id = 0;
 ###
 ###     my o11 = {
 ###         foo: 42,
-###         bar: None
+###         bar: none
 ###     };
 ###     say(o11.has("foo"));        # --> `true`
 ###     say(o11.has("bar"));        # --> `true`
@@ -684,7 +684,7 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::NoneType { "None" }
+        when Val::NoneType { "none" }
         when Val::Bool { .value.lc }
         when Val::Int { .value.Str }
         when Val::Str { .value }
