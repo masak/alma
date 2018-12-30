@@ -870,7 +870,7 @@ of whether the already installed operator is a built-in or user-defined.
 > best-guess at how they will work.
 
 007 files can be run directly as _scripts_, or they can be imported from other
-007 programs as _modules_.
+007 files as _modules_.
 
 The purpose of modules is to break up a big program into multiple independent
 compilation units.
@@ -881,8 +881,8 @@ compilation units.
 
 * Since each module decides exactly what to export to the outside world, a
   module boundary also confers a means of _encapsulation_ and _information
-  hiding_. Some aspects of a module can be "public", others private and
-  internal.
+  hiding_. Some aspects of a module can be exported to the outside;, the ones
+  that aren't are completely private and internal.
 
 * The same module can be used in multiple places in a code base, or in several
   different programs. This _re-use_ is often preferable to manually copying
@@ -935,11 +935,11 @@ scope:
 import { nameA, nameB, nameC } from some.module;
 ```
 
-Each name imported counts as a declaration; it's a compile-time error import
-and otherwise declare the same name in the same scope.
+Each name imported counts as a declaration; importing and otherwise declaring
+the same name in the same scope is a compile-time error.
 
-In the imported module, every export declaration exports a *name*, and together
-all the exported names make up the *export list*.
+In the imported module, every export declaration exports an identifier, and
+together all the exported names make up the *export list*.
 
 The *star import* form imports the entire export list into the current scope:
 
@@ -968,7 +968,8 @@ import { foo } from some.module;
 
 ### Forms of export
 
-You're only allowed to `export` statements on the top level of a module file.
+You're only allowed to `export` statements outside of any block in a module
+file.
 
 There are two forms of export statement:
 
@@ -982,8 +983,8 @@ export macro moo(...) ...;
 export class SomeClass ...;
 ```
 
-The declared name is made available in the lexical scope, and put on the export
-list.
+Exactly as you'd think, this not only declares a new identifier in the local
+scope, but also exports it.
 
 The *export list* form lists existing names to export:
 
@@ -993,21 +994,6 @@ export { nameA, nameB, nameC };
 
 There can be several of these export statements in a module, but it's
 recommended to put one at the end.
-
-### The lib path
-
-If your program contains an import, you need to have an environment variable
-`007LIB` set:
-
-```sh
-$ export 007LIB=$(pwd)/lib
-```
-
-If you want, you can specify several paths, separated by colons. The module
-importer will search through all these paths, in order, when a module is
-imported. It will import the first one it finds, from left to right.
-
-If no module is found, a compile-time error is reported.
 
 # Macrology
 

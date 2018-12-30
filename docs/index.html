@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-8ff7a4">
+  <body class="checksum-dd911e">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -530,11 +530,11 @@ for ^100 { say(&quot;I shall never waste chalk again&quot;) }</code></pre>
 <h4 id="future-feature-modules">🔮 Future feature: modules</h4>
 <p>Modules have not been implemented yet in 007. This whole chapter is a best-guess at how they will work.</p>
 </blockquote>
-<p>007 files can be run directly as <em>scripts</em>, or they can be imported from other 007 programs as <em>modules</em>.</p>
+<p>007 files can be run directly as <em>scripts</em>, or they can be imported from other 007 files as <em>modules</em>.</p>
 <p>The purpose of modules is to break up a big program into multiple independent compilation units.</p>
 <ul>
 <li><p>Each module can completely express a relatively small piece of functionality, and is easier to understand and reason about in isolation. (Often referred to as <em>separation of concerns</em>.)</p></li>
-<li><p>Since each module decides exactly what to export to the outside world, a module boundary also confers a means of <em>encapsulation</em> and <em>information hiding</em>. Some aspects of a module can be &quot;public&quot;, others private and internal.</p></li>
+<li><p>Since each module decides exactly what to export to the outside world, a module boundary also confers a means of <em>encapsulation</em> and <em>information hiding</em>. Some aspects of a module can be exported to the outside;, the ones that aren't are completely private and internal.</p></li>
 <li><p>The same module can be used in multiple places in a code base, or in several different programs. This <em>re-use</em> is often preferable to manually copying the same solution into several programs.</p></li>
 </ul>
 <h3 id="example-range-as-a-module">Example: <code>Range</code> as a module</h3>
@@ -556,8 +556,8 @@ export func prefix:&lt;^&gt;(expr) # ...</code></pre>
 <p>There are three forms of the <code>import</code> statement.</p>
 <p>The <em>named import</em> form lists all the names we want to declare in the current scope:</p>
 <pre class="_007"><code>import { nameA, nameB, nameC } from some.module;</code></pre>
-<p>Each name imported counts as a declaration; it's a compile-time error import and otherwise declare the same name in the same scope.</p>
-<p>In the imported module, every export declaration exports a <em>name</em>, and together all the exported names make up the <em>export list</em>.</p>
+<p>Each name imported counts as a declaration; importing and otherwise declaring the same name in the same scope is a compile-time error.</p>
+<p>In the imported module, every export declaration exports an identifier, and together all the exported names make up the <em>export list</em>.</p>
 <p>The <em>star import</em> form imports the entire export list into the current scope:</p>
 <pre class="_007"><code>import * from some.module;</code></pre>
 <p>While this is convenient, it's also the only built-in construct in the language where <em>you can't see</em> from the syntactic form itself what names you're introducing into the scope.</p>
@@ -568,22 +568,17 @@ export func prefix:&lt;^&gt;(expr) # ...</code></pre>
 <pre class="_007"><code>foo();  # won&#39;t work
 import { foo } from some.module;</code></pre>
 <h3 id="forms-of-export">Forms of export</h3>
-<p>You're only allowed to <code>export</code> statements on the top level of a module file.</p>
+<p>You're only allowed to <code>export</code> statements outside of any block in a module file.</p>
 <p>There are two forms of export statement:</p>
 <p>The <em>exported declaration</em> form is an export plus one of the declaration statements:</p>
 <pre class="_007"><code>export my someVar ...;
 export func foo(...) ...;
 export macro moo(...) ...;
 export class SomeClass ...;</code></pre>
-<p>The declared name is made available in the lexical scope, and put on the export list.</p>
+<p>Exactly as you'd think, this not only declares a new identifier in the local scope, but also exports it.</p>
 <p>The <em>export list</em> form lists existing names to export:</p>
 <pre class="_007"><code>export { nameA, nameB, nameC };</code></pre>
 <p>There can be several of these export statements in a module, but it's recommended to put one at the end.</p>
-<h3 id="the-lib-path">The lib path</h3>
-<p>If your program contains an import, you need to have an environment variable <code>007LIB</code> set:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="bu">export</span> 007LIB<span class="va">=$(</span><span class="bu">pwd</span><span class="va">)</span>/lib</code></pre></div>
-<p>If you want, you can specify several paths, separated by colons. The module importer will search through all these paths, in order, when a module is imported. It will import the first one it finds, from left to right.</p>
-<p>If no module is found, a compile-time error is reported.</p>
 </div>
   </body>
 </html>
