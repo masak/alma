@@ -389,10 +389,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(NoneType.create([]));
+        say(None.create([]));
         .
 
-    runtime-error $program, X::Uninstantiable, "can't instantiate a NoneType";
+    runtime-error $program, X::Uninstantiable, "can't instantiate a None";
 }
 
 {

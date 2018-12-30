@@ -19,7 +19,7 @@ role Val {
     }
 }
 
-### ### NoneType
+### ### None
 ###
 ### A type with only one value, indicating the lack of a value where one was
 ### expected.
@@ -41,7 +41,7 @@ role Val {
 ### doesn't always have an `else` statement. When it doesn't, the `.else`
 ### property is set to `none`.
 ###
-###     say(type((quasi<Q.Statement> { if 1 {} }).else)); # --> `<type NoneType>`
+###     say(type((quasi<Q.Statement> { if 1 {} }).else)); # --> `<type None>`
 ###
 ### The value `none` is falsy, stringifies to `none`, and doesn't numify.
 ###
@@ -55,13 +55,13 @@ role Val {
 ###     say(none // "default");     # --> `default`
 ###     say("value" // "default");  # --> `value`
 ###
-class Val::NoneType does Val {
+class Val::None does Val {
     method truthy {
         False
     }
 }
 
-constant NONE is export = Val::NoneType.new;
+constant NONE is export = Val::None.new;
 
 ### ### Bool
 ###
@@ -527,7 +527,7 @@ class Val::Object does Val {
 ###     say(type({}));          # --> `<type Object>`
 ###     say(type(type({})));    # --> `<type Type>`
 ###
-### 007 comes with a number of built-in types: `NoneType`, `Bool`, `Int`,
+### 007 comes with a number of built-in types: `None`, `Bool`, `Int`,
 ### `Str`, `Array`, `Object`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
 ### and `Exception`.
 ###
@@ -593,7 +593,7 @@ class Val::Type does Val {
                 method ^name(\$) \{ "{$name}" \}
             \}]));
         }
-        elsif $.type ~~ Val::NoneType || $.type ~~ Val::Bool || is-role($.type) {
+        elsif $.type ~~ Val::None || $.type ~~ Val::Bool || is-role($.type) {
             die X::Uninstantiable.new(:$.name);
         }
         else {
@@ -684,7 +684,7 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::NoneType { "none" }
+        when Val::None { "none" }
         when Val::Bool { .value.lc }
         when Val::Int { .value.Str }
         when Val::Str { .value }

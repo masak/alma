@@ -101,7 +101,7 @@ variables more finely, controlling exactly when to read and/or assign to them.
 
 In 007, these "scalar value" types are built in:
 
-    none          NoneType
+    none          None
     false         Bool
     42            Int
     "Bond"        Str
@@ -541,7 +541,7 @@ BEGIN my AlphaColor = Type(
 
 (Note how `self` has been made an explicit parameter along the way.)
 
-`NoneType`, `Int`, `Str`, `Bool`, `Array`, `Tuple`, `Dict`, `Regex`, `Symbol`,
+`None`, `Int`, `Str`, `Bool`, `Array`, `Tuple`, `Dict`, `Regex`, `Symbol`,
 and `Type` are all built-in types in 007. Besides that, there are all the types
 in [the `Q` hierarchy](#the-q-hierarchy), used to reasoning about program
 structure. There are also a number of exception types, under the `X` hierarchy.

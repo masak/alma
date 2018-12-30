@@ -15,7 +15,7 @@ use _007::Test;
         say(type(prompt(">>> ")));
         .
 
-    outputs $program, ">>> \n<type NoneType>\n", "say() works";
+    outputs $program, ">>> \n<type None>\n", "say() works";
 }
 
 {
@@ -23,7 +23,7 @@ use _007::Test;
         say(type(none));
         .
 
-    outputs $program, "<type NoneType>\n", "none type() works";
+    outputs $program, "<type None>\n", "none type() works";
 }
 
 {

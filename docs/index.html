@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-c37908">
+  <body class="checksum-a04500">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -107,7 +107,7 @@ say(&quot;Now my name is &quot;, name);  # &quot;Now my name is Mr. Smith&quot;<
 </blockquote>
 <p>That's all there is to variables; they are meant to be predictable and straightforward. Later, when writing macros has richer demands on variables, 007's <a href="#evaluating-expressions">location protocol</a> will allow us to manipulate variables more finely, controlling exactly when to read and/or assign to them.</p>
 <p>In 007, these &quot;scalar value&quot; types are built in:</p>
-<pre><code>none          NoneType
+<pre><code>none          None
 false         Bool
 42            Int
 &quot;Bond&quot;        Str</code></pre>
@@ -357,7 +357,7 @@ BEGIN my AlphaColor = Type(
     fields: [{ name: &quot;alpha&quot; }],
 );</code></pre>
 <p>(Note how <code>self</code> has been made an explicit parameter along the way.)</p>
-<p><code>NoneType</code>, <code>Int</code>, <code>Str</code>, <code>Bool</code>, <code>Array</code>, <code>Tuple</code>, <code>Dict</code>, <code>Regex</code>, <code>Symbol</code>, and <code>Type</code> are all built-in types in 007. Besides that, there are all the types in <a href="#the-q-hierarchy">the <code>Q</code> hierarchy</a>, used to reasoning about program structure. There are also a number of exception types, under the <code>X</code> hierarchy.</p>
+<p><code>None</code>, <code>Int</code>, <code>Str</code>, <code>Bool</code>, <code>Array</code>, <code>Tuple</code>, <code>Dict</code>, <code>Regex</code>, <code>Symbol</code>, and <code>Type</code> are all built-in types in 007. Besides that, there are all the types in <a href="#the-q-hierarchy">the <code>Q</code> hierarchy</a>, used to reasoning about program structure. There are also a number of exception types, under the <code>X</code> hierarchy.</p>
 <p>Here's an example involving a custom <code>Range</code> class, which we'll use later to also declare custom range operators:</p>
 <pre class="_007"><code>class Range {
     @get has min;
