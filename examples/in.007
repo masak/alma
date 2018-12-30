@@ -2,10 +2,10 @@ func infix:<in>(value, container) {
     if container ~~ Array {
         for container -> elem {
             if elem == value {
-                return True;
+                return true;
             }
         }
-        return False;
+        return false;
     }
     else if container ~~ Object {
         return container.has(value);
@@ -24,10 +24,10 @@ func infix:<not in>(value, container) {
     if container ~~ Array {
         for container -> elem {
             if elem == value {
-                return False;
+                return false;
             }
         }
-        return True;
+        return true;
     }
     else if container ~~ Object {
         return !container.has(value);
@@ -42,16 +42,16 @@ func infix:<not in>(value, container) {
     }
 }
 
-say("foo" in { foo: 42 });              # True
-say("bar" in { foo: 42 });              # False
-say(3 in [1, 2, 3, 4]);                 # True
-say(8 in [1, 2, 3, 4]);                 # False
-say("foo" in "foolish");                # True
-say("I" in "team");                     # False
+say("foo" in { foo: 42 });              # true
+say("bar" in { foo: 42 });              # false
+say(3 in [1, 2, 3, 4]);                 # true
+say(8 in [1, 2, 3, 4]);                 # false
+say("foo" in "foolish");                # true
+say("I" in "team");                     # false
 
-say("job" not in { name: "James" });    # True
-say("name" not in { name: "James" });   # False
-say("d" not in ["a", "b", "c"]);        # True
-say("b" not in ["a", "b", "c"]);        # False
-say("we" not in "Kansas");              # True
-say("pi" not in "pie");                 # False
+say("job" not in { name: "James" });    # true
+say("name" not in { name: "James" });   # false
+say("d" not in ["a", "b", "c"]);        # true
+say("b" not in ["a", "b", "c"]);        # false
+say("we" not in "Kansas");              # true
+say("pi" not in "pie");                 # false

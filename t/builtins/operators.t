@@ -61,7 +61,7 @@ use _007::Test;
         say(6 %% -2);
         .
 
-    outputs $program, "False\nTrue\nFalse\nTrue\n", "divisibility operator works";
+    outputs $program, "false\ntrue\nfalse\ntrue\n", "divisibility operator works";
 }
 
 {
@@ -119,7 +119,7 @@ use _007::Test;
         say(i1 == i2);
         .
 
-    outputs $program, "True\nFalse\n", "integer equality";
+    outputs $program, "true\nfalse\n", "integer equality";
 }
 
 {
@@ -130,7 +130,7 @@ use _007::Test;
         say(i1 != i2);
         .
 
-    outputs $program, "False\nTrue\n", "integer inequality";
+    outputs $program, "false\ntrue\n", "integer inequality";
 }
 
 {
@@ -141,7 +141,7 @@ use _007::Test;
         say(s1 == s2);
         .
 
-    outputs $program, "True\nFalse\n", "string equality";
+    outputs $program, "true\nfalse\n", "string equality";
 }
 
 {
@@ -152,7 +152,7 @@ use _007::Test;
         say(s1 != s2);
         .
 
-    outputs $program, "False\nTrue\n", "string inequality";
+    outputs $program, "false\ntrue\n", "string inequality";
 }
 
 {
@@ -163,7 +163,7 @@ use _007::Test;
         say(s1 < s2);
         .
 
-    outputs $program, "False\nTrue\n", "string less-than";
+    outputs $program, "false\ntrue\n", "string less-than";
 }
 
 {
@@ -174,7 +174,7 @@ use _007::Test;
         say(s1 > s2);
         .
 
-    outputs $program, "False\nTrue\n", "string greater-than";
+    outputs $program, "false\ntrue\n", "string greater-than";
 }
 
 {
@@ -185,7 +185,7 @@ use _007::Test;
         say(a1 == a2);
         .
 
-    outputs $program, "True\nFalse\n", "array equality";
+    outputs $program, "true\nfalse\n", "array equality";
 }
         
 {
@@ -196,7 +196,7 @@ use _007::Test;
         say(a1 != a2);
         .
 
-    outputs $program, "False\nTrue\n", "array inequality";
+    outputs $program, "false\ntrue\n", "array inequality";
 }
 
 {
@@ -206,7 +206,7 @@ use _007::Test;
         say(a3 == a3);
         .
 
-    outputs $program, "True\n", "nested array equality";
+    outputs $program, "true\n", "nested array equality";
 }
 
 {
@@ -217,7 +217,7 @@ use _007::Test;
         say(o1 == o2);
         .
 
-    outputs $program, "True\nFalse\n", "object equality";
+    outputs $program, "true\nfalse\n", "object equality";
 }
 
 {
@@ -228,7 +228,7 @@ use _007::Test;
         say(o1 != o2);
         .
 
-    outputs $program, "False\nTrue\n", "object inequality";
+    outputs $program, "false\ntrue\n", "object inequality";
 }
 
 {
@@ -238,7 +238,7 @@ use _007::Test;
         say(o3 == o3);
         .
 
-    outputs $program, "True\n", "nested object equality";
+    outputs $program, "true\n", "nested object equality";
 }
 
 {
@@ -247,7 +247,7 @@ use _007::Test;
         say(Int == Str);
         .
 
-    outputs $program, "True\nFalse\n", "type equality";
+    outputs $program, "true\nfalse\n", "type equality";
 }
 
 {
@@ -256,7 +256,7 @@ use _007::Test;
         say(Int != Str);
         .
 
-    outputs $program, "False\nTrue\n", "type inequality";
+    outputs $program, "false\ntrue\n", "type inequality";
 }
 
 {
@@ -271,7 +271,7 @@ use _007::Test;
         say(o1 == i1);
         .
 
-    outputs $program, "False\n" x 4, "equality testing across types (always False)";
+    outputs $program, "false\n" x 4, "equality testing across types (always false)";
 }
 
 {
@@ -286,52 +286,52 @@ use _007::Test;
         say(o1 != i1);
         .
 
-    outputs $program, "True\n" x 4, "inequality testing across types (always True)";
+    outputs $program, "true\n" x 4, "inequality testing across types (always true)";
 }
 
 {
-    outputs 'func foo() {}; say(foo == foo)', "True\n", "a func is equal to itself";
-    outputs 'macro foo() {}; say(foo == foo)', "True\n", "a macro is equal to itself";
-    outputs 'say(say == say)', "True\n", "a built-in func is equal to itself";
-    outputs 'say(infix:<+> == infix:<+>)', "True\n", "a built-in operator is equal to itself";
-    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "foo" })', "True\n",
+    outputs 'func foo() {}; say(foo == foo)', "true\n", "a func is equal to itself";
+    outputs 'macro foo() {}; say(foo == foo)', "true\n", "a macro is equal to itself";
+    outputs 'say(say == say)', "true\n", "a built-in func is equal to itself";
+    outputs 'say(infix:<+> == infix:<+>)', "true\n", "a built-in operator is equal to itself";
+    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "foo" })', "true\n",
         "two Qtrees with equal content are equal";
     outputs 'my a = []; for [1, 2] { func fn() {}; a = [fn, a] }; say(a[1][0] == a[0])',
-        "False\n", "the same func from two different frames are different";
-    outputs 'func foo() {}; my x = foo; { func foo() {}; say(x == foo) }', "False\n",
+        "false\n", "the same func from two different frames are different";
+    outputs 'func foo() {}; my x = foo; { func foo() {}; say(x == foo) }', "false\n",
         "distinct funcs are unequal, even with the same name and bodies (I)";
     outputs 'func foo() { say("OH HAI") }; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }',
-        "False\n", "distinct funcs are unequal, even with the same name and bodies (II)";
+        "false\n", "distinct funcs are unequal, even with the same name and bodies (II)";
 
-    outputs 'func foo() {}; func bar() {}; say(foo == bar)', "False\n",
+    outputs 'func foo() {}; func bar() {}; say(foo == bar)', "false\n",
         "distinct funcs are unequal";
-    outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "False\n",
+    outputs 'macro foo() {}; macro bar() {}; say(foo == bar)', "false\n",
         "distinct macros are unequal";
-    outputs 'say(say == type)', "False\n", "distinct built-in funcs are unequal";
-    outputs 'say(infix:<+> == prefix:<->)', "False\n",
+    outputs 'say(say == type)', "false\n", "distinct built-in funcs are unequal";
+    outputs 'say(infix:<+> == prefix:<->)', "false\n",
         "distinct built-in operators are unequal";
-    outputs 'func foo(y) {}; my x = foo; { func foo(x) {}; say(x == foo) }', "False\n",
+    outputs 'func foo(y) {}; my x = foo; { func foo(x) {}; say(x == foo) }', "false\n",
         "funcs with different parameters are unequal";
-    outputs 'func foo() {}; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }', "False\n",
+    outputs 'func foo() {}; my x = foo; { func foo() { say("OH HAI") }; say(x == foo) }', "false\n",
         "funcs with different bodies are unequal";
-    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "bar" })', "False\n",
+    outputs 'say(new Q.Identifier { name: "foo" } == new Q.Identifier { name: "bar" })', "false\n",
         "two Qtrees with distinct content are unequal";
 }
 
 {
-    outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "True\nTrue\nTrue\nFalse\n",
+    outputs 'say(1 < 2); say(2 > 1); say(1 <= 2); say(2 <= 0)', "true\ntrue\ntrue\nfalse\n",
         "relational operators work on integers";
-    outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "True\nTrue\nTrue\nFalse\n",
+    outputs 'say("a" < "b"); say("b" > "a"); say("a" <= "c"); say("a" <= "B")', "true\ntrue\ntrue\nfalse\n",
         "relational operators work on strings";
 }
 
 {
-    outputs 'say(!False); say(!True); say(True || False); say(False || True); say(False && True)',
-        "True\nFalse\nTrue\nTrue\nFalse\n",
+    outputs 'say(!false); say(!true); say(true || false); say(false || true); say(false && true)',
+        "true\nfalse\ntrue\ntrue\nfalse\n",
         "boolean operators give the values expected";
-    outputs 'say(False && say("foo")); say(True || say("bar"))', "False\nTrue\n",
+    outputs 'say(false && say("foo")); say(true || say("bar"))', "false\ntrue\n",
         "boolean operators short-circuit";
-    outputs 'say(1 && 2); say("" && 3); say(False || None); say([0, 0, 7] || False)', "2\n\nNone\n[0, 0, 7]\n",
+    outputs 'say(1 && 2); say("" && 3); say(false || None); say([0, 0, 7] || false)', "2\n\nNone\n[0, 0, 7]\n",
         "boolean operators return one of their operands";
 }
 
@@ -343,7 +343,7 @@ use _007::Test;
         say(None == []);
         .
 
-    outputs $program, "True\nFalse\nFalse\nFalse\n", "equality testing with None matches only itself";
+    outputs $program, "true\nfalse\nfalse\nfalse\n", "equality testing with None matches only itself";
 }
 
 {
@@ -416,7 +416,7 @@ use _007::Test;
         say(!o.foo);
         .
 
-    outputs $program, "-2\n-7\n-12\nFalse\nFalse\nFalse\n", "all postfixes are tighter than both prefixes";
+    outputs $program, "-2\n-7\n-12\nfalse\nfalse\nfalse\n", "all postfixes are tighter than both prefixes";
 }
 
 {
@@ -448,16 +448,16 @@ use _007::Test;
         say(2 == 2 && 3 == 3);
         .
 
-    outputs $program, "Bond\nTrue\n", "&& binds looser than ==";
+    outputs $program, "Bond\ntrue\n", "&& binds looser than ==";
 }
 
 {
     my $program = q:to/./;
         say(0 && 1 || "James");
-        say(True || 0 && 0);
+        say(true || 0 && 0);
         .
 
-    outputs $program, "James\nTrue\n", "&& binds tighter than ||";
+    outputs $program, "James\ntrue\n", "&& binds tighter than ||";
 }
 
 {
@@ -474,7 +474,7 @@ use _007::Test;
         say(x);
         .
 
-    outputs $program, "False\nfoo\nbar\n", "assignment binds looser than all the other operators";
+    outputs $program, "false\nfoo\nbar\n", "assignment binds looser than all the other operators";
 }
 
 {
@@ -516,7 +516,7 @@ use _007::Test;
         my q = quasi<Q.Infix> { + }; say(q ~~ Q.Infix)
         .
 
-    outputs $program, "True\n", "successful typecheck";
+    outputs $program, "true\n", "successful typecheck";
 }
 
 {
@@ -524,7 +524,7 @@ use _007::Test;
         my q = quasi<Q.Infix> { + }; say(q ~~ Q.Prefix)
         .
 
-    outputs $program, "False\n", "unsuccessful typecheck";
+    outputs $program, "false\n", "unsuccessful typecheck";
 }
 
 {
@@ -532,7 +532,7 @@ use _007::Test;
         my q = 42; say(q ~~ Int)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Int";
+    outputs $program, "true\n", "typecheck works for Val::Int";
 }
 
 {
@@ -540,7 +540,7 @@ use _007::Test;
         my q = [4, 2]; say(q ~~ Array)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Array";
+    outputs $program, "true\n", "typecheck works for Val::Array";
 }
 
 {
@@ -548,7 +548,7 @@ use _007::Test;
         my q = {}; say(q ~~ Object)
         .
 
-    outputs $program, "True\n", "typecheck works for Val::Object";
+    outputs $program, "true\n", "typecheck works for Val::Object";
 }
 
 {
@@ -563,7 +563,7 @@ use _007::Test;
         say({} !~~ Int);
         .
 
-    outputs $program, "False\nTrue\nFalse\nFalse\nFalse\nTrue\nTrue\nTrue\n", "bunch of negative typechecks";
+    outputs $program, "false\ntrue\nfalse\nfalse\nfalse\ntrue\ntrue\ntrue\n", "bunch of negative typechecks";
 }
 
 {
@@ -645,7 +645,7 @@ use _007::Test;
 
     outputs
         $program,
-        "True\n",
+        "true\n",
         "+Val::Int outputs a Val::Int (regression)";
 }
 
@@ -656,7 +656,7 @@ use _007::Test;
 
     outputs
         $program,
-        "True\n",
+        "true\n",
         "+Val::Str outputs a Val::Int (regression)";
 }
 

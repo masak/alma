@@ -320,7 +320,7 @@ use _007::Test;
         say(a.contains("8"));
         .
 
-    outputs $program, "True\nFalse\n", "contains() returns whether a string contains another";
+    outputs $program, "true\nfalse\n", "contains() returns whether a string contains another";
 }
 
 {
@@ -328,7 +328,7 @@ use _007::Test;
         say("foobar".contains("foo") ~~ Bool);
         .
 
-    outputs $program, "True\n", "contains() returns a Bool value";
+    outputs $program, "true\n", "contains() returns a Bool value";
 }
 
 {
@@ -397,7 +397,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Bool.create([["value", False]]));
+        say(Bool.create([["value", false]]));
         .
 
     runtime-error $program, X::Uninstantiable, "can't instantiate a Bool";

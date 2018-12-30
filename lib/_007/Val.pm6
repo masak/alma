@@ -45,7 +45,7 @@ role Val {
 ###
 ### The value `None` is falsy, stringifies to `None`, and doesn't numify.
 ###
-###     say(!!None);        # --> `False`
+###     say(!!None);        # --> `false`
 ###     say(~None);         # --> `None`
 ###     say(+None);         # <ERROR X::TypeCheck>
 ###
@@ -65,14 +65,14 @@ constant NONE is export = Val::NoneType.new;
 
 ### ### Bool
 ###
-### A type with two values, `True` and `False`. These are often the result
+### A type with two values, `true` and `false`. These are often the result
 ### of comparisons or match operations, such as `infix:<==>` or `infix:<~~>`.
 ###
-###     say(2 + 2 == 5);        # --> `False`
-###     say(7 ~~ Int);          # --> `True`
+###     say(2 + 2 == 5);        # --> `false`
+###     say(7 ~~ Int);          # --> `true`
 ###
 ### In 007 as in many other dynamic languages, it's not necessary to use
-### `True` or `False` values directly in conditions such as `if` statements
+### `true` or `false` values directly in conditions such as `if` statements
 ### or `while` loops. *Any* value can be used, and there's always a way
 ### for each type to convert any of its values to a boolean value:
 ###
@@ -85,13 +85,13 @@ constant NONE is export = Val::NoneType.new;
 ###         }
 ###     }
 ###     check(None);            # --> `falsy`
-###     check(False);           # --> `falsy`
+###     check(false);           # --> `falsy`
 ###     check(0);               # --> `falsy`
 ###     check("");              # --> `falsy`
 ###     check([]);              # --> `falsy`
 ###     check({});              # --> `falsy`
 ###     # all other values are truthy
-###     check(True);            # --> `truthy`
+###     check(true);            # --> `truthy`
 ###     check(42);              # --> `truthy`
 ###     check("James");         # --> `truthy`
 ###     check([0, 0, 7]);       # --> `truthy`
@@ -171,7 +171,7 @@ class Val::Int does Val {
 ###     say("abcd".substr(1, 2));               # --> `bc`
 ###     say("abcd".prefix(3));                  # --> `abc`
 ###     say("abcd".suffix(2));                  # --> `cd`
-###     say("James Bond".contains("s B"));      # --> `True`
+###     say("James Bond".contains("s B"));      # --> `true`
 ###     say("James".charat(2));                 # --> `m`
 ###
 class Val::Str does Val {
@@ -191,15 +191,15 @@ class Val::Str does Val {
 ### A regex. As a runtime value, a regex is like a black box that can be put
 ### to work matching strings or parts of strings. Its main purpose is
 ### to let us know whether the string matches the pattern described in the
-### regex. In other words, it returns `True` or `False`.
+### regex. In other words, it returns `true` or `false`.
 ###
 ### (Regexes are currently under development, and are hidden behind a feature
 ### flag for the time being: `FLAG_007_REGEX`.)
 ###
 ### A few methods are defined on regexes:
 ###
-###     say(/"Bond"/.fullmatch("J. Bond"));     # --> `False`
-###     say(/"Bond"/.search("J. Bond"));        # --> `True`
+###     say(/"Bond"/.fullmatch("J. Bond"));     # --> `false`
+###     say(/"Bond"/.search("J. Bond"));        # --> `true`
 ###
 class Val::Regex does Val {
     # note: a regex should probably keep its lexpad or something to resolve calls&identifiers
@@ -420,10 +420,10 @@ our $global-object-id = 0;
 ###
 ###     my o1 = { foo: 42 };        # autoquoted key
 ###     my o2 = { "foo": 42 };      # string key
-###     say(o1 == o2);              # --> `True`
+###     say(o1 == o2);              # --> `true`
 ###     my foo = 42;
 ###     my o3 = { foo };            # property shorthand
-###     say(o1 == o3);              # --> `True`
+###     say(o1 == o3);              # --> `true`
 ###
 ###     my o4 = {
 ###         greet: func () {
@@ -435,7 +435,7 @@ our $global-object-id = 0;
 ###             return "hi!";
 ###         }
 ###     };
-###     say(o4.greet() == o5.greet());  # --> `True`
+###     say(o4.greet() == o5.greet());  # --> `true`
 ###
 ### All of the above will create objects of type `Object`, which is
 ### the topmost type in the type system. `Object` also has the special
@@ -478,9 +478,9 @@ our $global-object-id = 0;
 ###         foo: 42,
 ###         bar: None
 ###     };
-###     say(o11.has("foo"));        # --> `True`
-###     say(o11.has("bar"));        # --> `True`
-###     say(o11.has("bazinga"));    # --> `False`
+###     say(o11.has("foo"));        # --> `true`
+###     say(o11.has("bar"));        # --> `true`
+###     say(o11.has("bazinga"));    # --> `false`
 ###
 ### Note that the criterion is whether the *key* exists, not whether the
 ### corresponding value is defined.
@@ -492,8 +492,8 @@ our $global-object-id = 0;
 ###
 ###     my o12 = { foo: 5 };
 ###     my o13 = { foo: 5 };        # same key/value but different reference
-###     say(o12 == o13);            # --> `True`
-###     say(o12.id == o13.id);      # --> `False`
+###     say(o12 == o13);            # --> `true`
+###     say(o12.id == o13.id);      # --> `false`
 ###
 class Val::Object does Val {
     has %.properties{Str};
@@ -545,24 +545,24 @@ class Val::Object does Val {
 ### If you want to check whether a certain object is of a certain type,
 ### you can use the `infix:<~~>` operator:
 ###
-###     say(42 ~~ Int);         # --> `True`
-###     say(42 ~~ Str);         # --> `False`
+###     say(42 ~~ Int);         # --> `true`
+###     say(42 ~~ Str);         # --> `false`
 ###
 ### The `infix:<~~>` operator respects subtyping, so checking against a
-### wider type also gives a `True` result:
+### wider type also gives a `true` result:
 ###
 ###     my q = new Q.Literal.Int { value: 42 };
-###     say(q ~~ Q.Literal.Int);    # --> `True`
-###     say(q ~~ Q.Literal);        # --> `True`
-###     say(q ~~ Q);                # --> `True`
-###     say(q ~~ Int);              # --> `False`
+###     say(q ~~ Q.Literal.Int);    # --> `true`
+###     say(q ~~ Q.Literal);        # --> `true`
+###     say(q ~~ Q);                # --> `true`
+###     say(q ~~ Int);              # --> `false`
 ###
 ### If you want *exact* type matching (which isn't a very OO thing to want),
 ### consider using infix:<==> on the respective type objects instead:
 ###
 ###     my q = new Q.Literal.Str { value: "Bond" };
-###     say(type(q) == Q.Literal.Str);      # --> `True`
-###     say(type(q) == Q.Literal);          # --> `False`
+###     say(type(q) == Q.Literal.Str);      # --> `true`
+###     say(type(q) == Q.Literal);          # --> `false`
 ###
 class Val::Type does Val {
     has $.type;
@@ -685,7 +685,7 @@ class Val::Exception does Val {
 class Helper {
     our sub Str($_) {
         when Val::NoneType { "None" }
-        when Val::Bool { .value.Str }
+        when Val::Bool { .value.lc }
         when Val::Int { .value.Str }
         when Val::Str { .value }
         when Val::Regex { .quoted-Str }

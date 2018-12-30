@@ -112,7 +112,7 @@ role Q::Term does Q::Expr {
 ### ### Q::Literal
 ###
 ### A literal; a constant value written out explicitly in the program, such as
-### `None`, `True`, `5`, or `"James Bond"`.
+### `None`, `true`, `5`, or `"James Bond"`.
 ###
 ### Compound values such as arrays and objects are considered terms but not
 ### literals.
@@ -130,7 +130,7 @@ class Q::Literal::None does Q::Literal {
 
 ### ### Q::Literal::Bool
 ###
-### A boolean literal; either `True` or `False`.
+### A boolean literal; either `true` or `false`.
 ###
 class Q::Literal::Bool does Q::Literal {
     has Val::Bool $.value;

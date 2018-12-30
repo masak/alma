@@ -102,7 +102,7 @@ variables more finely, controlling exactly when to read and/or assign to them.
 In 007, these "scalar value" types are built in:
 
     None          NoneType
-    False         Bool
+    false         Bool
     42            Int
     "Bond"        Str
 
@@ -136,7 +136,7 @@ docs.)
 `x`.
 
 **Arithmetic**. The infix operators `+ - * %` work as you'd expect. `%%` tests
-for divisibility, so it returns `True` whenever `%` returns `0`. `divmod` does
+for divisibility, so it returns `true` whenever `%` returns `0`. `divmod` does
 an integer division resulting in a tuple `(q, r)` where `q` is the quotient and
 `r` is the reminder.
 
@@ -250,8 +250,8 @@ parentheses (`()`) are optional around expressions after `if`, `for` and
 `while`.
 
 The `if` and `while` statements evaluate their expression and runs their block
-if the resulting value is `True`, possibly after coercing to `Bool`. (We
-sometimes refer to a value that is `True` when coerced to `Bool` as _truthy_,
+if the resulting value is `true`, possibly after coercing to `Bool`. (We
+sometimes refer to a value that is `true` when coerced to `Bool` as _truthy_,
 and the other values as _falsy_.) Several other mechanisms in 007, such as `&&`
 and the `.filter` method, accept these "generalized `Bool` values".
 
@@ -1213,11 +1213,11 @@ Consider this macro:
 
 ```_007
 macro onlyOnce(expr) {
-    my alreadyRan = False;
+    my alreadyRan = false;
     return quasi {
         if !alreadyRan {
             {{{expr}}};
-            alreadyRan = True;
+            alreadyRan = true;
         }
     };
 }
@@ -1261,14 +1261,14 @@ Here's how we can simply implement this macro:
 
 ```_007
 macro infix:<ff>(lhs, rhs) {
-    my active = False;
+    my active = false;
     return quasi {
         if {{{lhs}}} {
-            active = True;
+            active = true;
         }
         my result = active;
         if {{{rhs}}} {
-            active = False;
+            active = false;
         }
         result;
     };
@@ -1288,14 +1288,14 @@ macro infix:<ff>(lhs, rhs) {
     return quasi {
         my COMPILING.{{{Q.Identifier @ active}}};
         once {
-            COMPILING.{{{Q.Identifier @ active}}} = False;
+            COMPILING.{{{Q.Identifier @ active}}} = false;
         }
         if {{{lhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = True;
+            COMPILING.{{{Q.Identifier @ active}}} = true;
         }
         my result = COMPILING.{{{Q.Identifier @ active}}};
         if {{{rhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = False;
+            COMPILING.{{{Q.Identifier @ active}}} = false;
         }
         result;
     };

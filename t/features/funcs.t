@@ -131,7 +131,7 @@ use _007::Test;
         .
 
     outputs $program,
-        "True\nFalse\n",
+        "true\nfalse\n",
         "can assign to a parameter which hides a subroutine (#68)";
 }
 
