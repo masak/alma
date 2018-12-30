@@ -285,4 +285,28 @@ use _007::Test;
     outputs $program, "", "a var outside a func does not collide with a param inside used in a for loop";
 }
 
+{
+    my $program = q:to/./;
+        ;
+        .
+
+    outputs $program, "", "a semicolon is a valid empty program";
+}
+
+{
+    my $program = q:to/./;
+        ;;;
+        .
+
+    outputs $program, "", "many semicolons are also a valid empty program";
+}
+
+{
+    my $program = q:to/./;
+        say("OH HAI");;;
+        .
+
+    outputs $program, "OH HAI\n", "can put many semicolons after a statement";
+}
+
 done-testing;

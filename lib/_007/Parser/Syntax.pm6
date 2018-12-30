@@ -28,7 +28,7 @@ grammar _007::Parser::Syntax {
     } }
 
     rule statementlist {
-        '' [<statement><.eat_terminator> ]*
+        <.semicolon>* [<statement>[<.semicolon>+|<.eat_terminator>] ]*
     }
 
     method panic($what) {
@@ -139,8 +139,11 @@ grammar _007::Parser::Syntax {
         <EXPR> <pblock>
     }
 
+    token semicolon {
+        <.ws> ';'
+    }
+
     token eat_terminator {
-        || <.ws> ';'
         || <?after '}'> $$
         || <.ws> <?before '}'>
         || <.ws> $
