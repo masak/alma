@@ -699,4 +699,32 @@ use _007::Test;
     parse-error $program, X::Redeclaration, "can't declare an infix and a postfix with the same name";
 }
 
+{
+    my $program = q:to/./;
+        {
+            func postfix:<!>(t) is assoc("right") {
+                "postfix:<!>(" ~ t ~ ")";
+            }
+            func prefix:<?>(t) is equiv(postfix:<!>) {
+                "prefix:<?>(" ~ t ~ ")";
+            }
+            say(?"term"!);
+        }
+        {
+            func prefix:<?>(t) is assoc("right") {
+                "prefix:<?>(" ~ t ~ ")";
+            }
+            func postfix:<!>(t) is equiv(prefix:<?>) {
+                "postfix:<!>(" ~ t ~ ")";
+            }
+            say(?"term"!);
+        }
+        .
+
+    outputs
+        $program,
+        "prefix:<?>(postfix:<!>(term))\nprefix:<?>(postfix:<!>(term))\n",
+        "with same-precedence right-associative prefix/postfix ops, the postfix evaluates first (no matter the order declared) (#372)";
+}
+
 done-testing;
