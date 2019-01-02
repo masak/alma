@@ -324,8 +324,12 @@ class _007::Parser::Actions {
                 if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
                     my $frame = $*runtime.current-frame;
                     my $symbol = $t1.name.value;
-                    die X::Undeclared.new(:$symbol)
-                        unless @*declstack[*-1]{$symbol} :exists;
+                    if @*declstack[*-1]{$symbol} :!exists {
+                        if $*runtime.maybe-get-var($symbol) {
+                            die X::Assignment::ReadOnly.new(:declname("builtin"), :$symbol);
+                        }
+                        die X::Undeclared.new(:$symbol)
+                    }
                     my $decltype = @*declstack[*-1]{$symbol};
                     my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
                     die X::Assignment::ReadOnly.new(:$declname, :$symbol)
