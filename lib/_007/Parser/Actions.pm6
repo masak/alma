@@ -58,6 +58,13 @@ class X::Export::Nothing is Exception {
     method message { "Nothing to export" }
 }
 
+class X::Assignment::ReadOnly is Exception {
+    has Str $.declname;
+    has Str $.symbol;
+
+    method message { "Cannot assign to $.declname $.symbol" }
+}
+
 class _007::Parser::Actions {
     sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
@@ -321,7 +328,7 @@ class _007::Parser::Actions {
                         unless @*declstack[*-1]{$symbol} :exists;
                     my $decltype = @*declstack[*-1]{$symbol};
                     my $declname = $decltype.^name.subst(/ .* '::'/, "").lc;
-                    die X::Assignment::RO.new(:typename("$declname '$symbol'"))
+                    die X::Assignment::ReadOnly.new(:$declname, :$symbol)
                         unless $decltype.is-assignable;
                     %*assigned{$frame.id ~ $symbol}++;
                 }

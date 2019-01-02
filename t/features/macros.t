@@ -56,7 +56,7 @@ use _007::Test;
 
     parse-error
         $program,
-        X::Assignment::RO,
+        X::Assignment::ReadOnly,
         "cannot assign to a macro (#68)";
 }
 
