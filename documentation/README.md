@@ -1099,22 +1099,8 @@ Here's how an implementation of `infix:<xx>` might look:
 
 ```_007
 macro infix:<xx>(left, right) is equiv(infix:<*>) {
-    func flatten(array) {
-        my result = [];
-        for array -> elem {
-            if elem ~~ Array {
-                result = result.concat(elem);
-            } else {
-                result.push(elem);
-            }
-        }
-        return result;
-    }
-
     return quasi {
-        flatten((^{{{right}}}).map(func(_) {
-            return {{{left}}};
-        }))
+        (^{{{right}}}).flatMap(func(_) { {{{left}}} })
     }
 }
 ```
