@@ -95,15 +95,20 @@ class _007::OpScope {
             postfix => Q::Postfix.new(:$identifier),
         }{$category};
 
-        sub prec {
+        my @namespace := $category eq 'infix' ?? @!infixprec !! @!prepostfixprec;
+
+        for @namespace {
+            .ops{$name} :delete;
+        }
+
+        sub new-prec {
             _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
-        my @namespace := $category eq 'infix' ?? @!infixprec !! @!prepostfixprec;
         if %precedence<tighter> || %precedence<looser> -> $other-op {
             my $pos = @namespace.first(*.contains($other-op), :k);
             $pos += %precedence<tighter> ?? 1 !! 0;
-            @namespace.splice($pos, 0, prec);
+            @namespace.splice($pos, 0, new-prec);
             if $category eq 'prefix' | 'postfix' && $pos <= $!prepostfix-boundary {
                 $!prepostfix-boundary++;
             }
@@ -115,10 +120,10 @@ class _007::OpScope {
             $prec.ops{$name} = $q;
         }
         elsif $category eq 'prefix' {
-            @namespace.splice($!prepostfix-boundary++, 0, prec);
+            @namespace.splice($!prepostfix-boundary++, 0, new-prec);
         }
         else {
-            @namespace.push(prec);
+            @namespace.push(new-prec);
         }
     }
 
