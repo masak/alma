@@ -452,7 +452,7 @@ class _007::Parser::Actions {
             :name(Val::Str.new(:value("prefix:$op"))),
             :frame($*runtime.current-frame),
         );
-        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::NoneType));
+        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
     }
 
     method prefix-unquote($/) {

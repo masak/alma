@@ -10,7 +10,7 @@ use _007::Test;
 
     outputs
         $program,
-        "None\n",
+        "none\n",
         "Q.Statement.Return can be constructed without an 'expr' property (#84)";
 }
 
@@ -32,7 +32,7 @@ use _007::Test;
 
     outputs
         $program,
-        "None\n",
+        "none\n",
         "Q.Statement.If can be constructed without an 'else' property (#84)";
 }
 

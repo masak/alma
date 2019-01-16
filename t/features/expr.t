@@ -23,7 +23,7 @@ use _007::Test;
         .
 
     outputs $program,
-        qq[1\n3\n6\n2\n2\n5\n5\n-1\n1\nFalse\nFalse\n["a", "b", "c"]\nc\n6\n],
+        qq[1\n3\n6\n2\n2\n5\n5\n-1\n1\nfalse\nfalse\n["a", "b", "c"]\nc\n6\n],
         "various expressions work";
 }
 

@@ -8,7 +8,7 @@ use _007::Test;
         say(u);
         .
 
-    outputs $program, "None\n", "variables can be declared without being assigned";
+    outputs $program, "none\n", "variables can be declared without being assigned";
 }
 
 done-testing;

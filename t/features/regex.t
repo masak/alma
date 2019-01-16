@@ -26,7 +26,7 @@ ensure-feature-flag("REGEX");
         say(!!/"hey"/);
         .
 
-    outputs $program, "True\n", "Regexes are truthy";
+    outputs $program, "true\n", "Regexes are truthy";
 }
 {
     my @programs =
@@ -60,7 +60,7 @@ ensure-feature-flag("REGEX");
 
     for @programs -> $program {
         my $code = $program.key;
-        my $expected = $program.value;
+        my $expected = $program.value.lc;
         outputs $code, "$expected\n", "Testing regex, program: $code";
     }
 }

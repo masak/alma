@@ -94,7 +94,7 @@ use _007::Test;
 
     outputs
         $program,
-        qq[True\nFalse\n7\n\{bond: 8, james: "bond"\}\n\{x: 1, y: 2\}\nid\n],
+        qq[true\nfalse\n7\n\{bond: 8, james: "bond"\}\n\{x: 1, y: 2\}\nid\n],
         "built-in pseudo-inherited methods on objects";
 }
 
@@ -161,7 +161,7 @@ use _007::Test;
 
     outputs
         $program,
-        qq[True\nTrue\nTrue\n],
+        qq[true\ntrue\ntrue\n],
         "can create normal Val:: objects using typed object literals";
 }
 

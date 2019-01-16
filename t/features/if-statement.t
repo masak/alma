@@ -4,7 +4,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        if None { say("falsy none") }
+        if none { say("falsy none") }
         if 0 { say("falsy int") }
         if 7 { say("truthy int") }
         if "" { say("falsy str") }

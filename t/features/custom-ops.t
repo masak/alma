@@ -472,7 +472,7 @@ use _007::Test;
             return "Mr. Bond";
         }
 
-        say(-13 ! None);
+        say(-13 ! none);
         .
 
     outputs $program, "Mr. Bond\n", "can declare an operator with infix:«...»";
@@ -636,7 +636,7 @@ use _007::Test;
         func fn(l, r) {
             c = c - 1;
             if !c {
-                return None;
+                return none;
             }
             return fn;
         }

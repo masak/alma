@@ -15,15 +15,15 @@ use _007::Test;
         say(type(prompt(">>> ")));
         .
 
-    outputs $program, ">>> \n<type NoneType>\n", "say() works";
+    outputs $program, ">>> \n<type None>\n", "say() works";
 }
 
 {
     my $program = q:to/./;
-        say(type(None));
+        say(type(none));
         .
 
-    outputs $program, "<type NoneType>\n", "None type() works";
+    outputs $program, "<type None>\n", "none type() works";
 }
 
 {

@@ -29,7 +29,7 @@ use _007::Test;
 
     outputs
         $program,
-        "None\n7\n",
+        "none\n7\n",
         "variables are declared already at parse time (but not assigned)";
 }
 
@@ -49,7 +49,7 @@ use _007::Test;
 
     outputs
         $program,
-        "None\n",
+        "none\n",
         "BEGIN blocks are scoped just like everything else";
 }
 

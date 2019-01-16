@@ -112,7 +112,7 @@ role Q::Term does Q::Expr {
 ### ### Q::Literal
 ###
 ### A literal; a constant value written out explicitly in the program, such as
-### `None`, `True`, `5`, or `"James Bond"`.
+### `none`, `true`, `5`, or `"James Bond"`.
 ###
 ### Compound values such as arrays and objects are considered terms but not
 ### literals.
@@ -122,7 +122,7 @@ role Q::Literal does Q::Term {
 
 ### ### Q::Literal::None
 ###
-### The `None` literal.
+### The `none` literal.
 ###
 class Q::Literal::None does Q::Literal {
     method eval($) { NONE }
@@ -130,7 +130,7 @@ class Q::Literal::None does Q::Literal {
 
 ### ### Q::Literal::Bool
 ###
-### A boolean literal; either `True` or `False`.
+### A boolean literal; either `true` or `false`.
 ###
 class Q::Literal::Bool does Q::Literal {
     has Val::Bool $.value;
@@ -378,7 +378,7 @@ class Q::Term::Func does Q::Term does Q::Declaration {
     method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
-        my $name = $.identifier ~~ Val::NoneType
+        my $name = $.identifier ~~ Val::None
             ?? Val::Str.new(:value(""))
             !! $.identifier.name;
         return Val::Func.new(
@@ -478,12 +478,12 @@ class Q::Infix::Or is Q::Infix {
 ### ### Q::Infix::DefinedOr
 ###
 ### A short-circuiting "defined-or" operator. Evaluates its
-### right-hand side only if the left-hand side is `None`.
+### right-hand side only if the left-hand side is `none`.
 ###
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return $l !~~ Val::NoneType
+        return $l !~~ Val::None
             ?? $l
             !! $.rhs.eval($runtime);
     }
@@ -908,7 +908,7 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::NoneType ?? $.expr !! $.expr.eval($runtime);
+        my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -922,7 +922,7 @@ class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::NoneType
+        my $value = $.expr ~~ Val::None
             ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))

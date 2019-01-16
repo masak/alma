@@ -101,8 +101,8 @@ variables more finely, controlling exactly when to read and/or assign to them.
 
 In 007, these "scalar value" types are built in:
 
-    None          NoneType
-    False         Bool
+    none          None
+    false         Bool
     42            Int
     "Bond"        Str
 
@@ -136,7 +136,7 @@ docs.)
 `x`.
 
 **Arithmetic**. The infix operators `+ - * %` work as you'd expect. `%%` tests
-for divisibility, so it returns `True` whenever `%` returns `0`. `divmod` does
+for divisibility, so it returns `true` whenever `%` returns `0`. `divmod` does
 an integer division resulting in a tuple `(q, r)` where `q` is the quotient and
 `r` is the reminder.
 
@@ -148,7 +148,7 @@ whether values are equal or unequal. `< <= > >=` compare ordered types like
 integers or strings. `~~ !~~` match a value against a type.
 
 **Logical connectives**. The infixes `||` and `&&` allow you to combine boolean
-(or really, any) values. Furthermore, `//` allows you to replace `None` values
+(or really, any) values. Furthermore, `//` allows you to replace `none` values
 with a default. (All of these operators are short-circuiting. See the
 individual operators for more information.)
 
@@ -227,7 +227,7 @@ func f3() {}    say("oh noes")  # not ok
 probably won't look too surprising to anyone who has seen C-like syntax before:
 
 ```_007
-my array = [5, func() { say("OH HAI") }, None];
+my array = [5, func() { say("OH HAI") }, none];
 for array -> e {
     if e ~~ Int {
         while e > 0 {
@@ -250,8 +250,8 @@ parentheses (`()`) are optional around expressions after `if`, `for` and
 `while`.
 
 The `if` and `while` statements evaluate their expression and runs their block
-if the resulting value is `True`, possibly after coercing to `Bool`. (We
-sometimes refer to a value that is `True` when coerced to `Bool` as _truthy_,
+if the resulting value is `true`, possibly after coercing to `Bool`. (We
+sometimes refer to a value that is `true` when coerced to `Bool` as _truthy_,
 and the other values as _falsy_.) Several other mechanisms in 007, such as `&&`
 and the `.filter` method, accept these "generalized `Bool` values".
 
@@ -294,7 +294,7 @@ say("3 + 4 = ", add(3, 4));
 ```
 
 The `return` statement immediately returns out of a function, optionally with a
-value. If no value is supplied (as in `return;`), the value `None` is returned.
+value. If no value is supplied (as in `return;`), the value `none` is returned.
 Implicit returns are OK too; the statement in the `add` function above could
 have been written as just `n1 + n2;` because it's last in the function.
 
@@ -541,7 +541,7 @@ BEGIN my AlphaColor = Type(
 
 (Note how `self` has been made an explicit parameter along the way.)
 
-`NoneType`, `Int`, `Str`, `Bool`, `Array`, `Tuple`, `Dict`, `Regex`, `Symbol`,
+`None`, `Int`, `Str`, `Bool`, `Array`, `Tuple`, `Dict`, `Regex`, `Symbol`,
 and `Type` are all built-in types in 007. Besides that, there are all the types
 in [the `Q` hierarchy](#the-q-hierarchy), used to reasoning about program
 structure. There are also a number of exception types, under the `X` hierarchy.
@@ -1213,11 +1213,11 @@ Consider this macro:
 
 ```_007
 macro onlyOnce(expr) {
-    my alreadyRan = False;
+    my alreadyRan = false;
     return quasi {
         if !alreadyRan {
             {{{expr}}};
-            alreadyRan = True;
+            alreadyRan = true;
         }
     };
 }
@@ -1261,14 +1261,14 @@ Here's how we can simply implement this macro:
 
 ```_007
 macro infix:<ff>(lhs, rhs) {
-    my active = False;
+    my active = false;
     return quasi {
         if {{{lhs}}} {
-            active = True;
+            active = true;
         }
         my result = active;
         if {{{rhs}}} {
-            active = False;
+            active = false;
         }
         result;
     };
@@ -1288,14 +1288,14 @@ macro infix:<ff>(lhs, rhs) {
     return quasi {
         my COMPILING.{{{Q.Identifier @ active}}};
         once {
-            COMPILING.{{{Q.Identifier @ active}}} = False;
+            COMPILING.{{{Q.Identifier @ active}}} = false;
         }
         if {{{lhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = True;
+            COMPILING.{{{Q.Identifier @ active}}} = true;
         }
         my result = COMPILING.{{{Q.Identifier @ active}}};
         if {{{rhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = False;
+            COMPILING.{{{Q.Identifier @ active}}} = false;
         }
         result;
     };
