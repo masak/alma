@@ -65,6 +65,12 @@ class X::Assignment::ReadOnly is Exception {
     method message { "Cannot assign to $.declname $.symbol" }
 }
 
+sub ast-if-any($submatch) {
+    $submatch
+        ?? $submatch.ast
+        !! NONE;
+}
+
 class _007::Parser::Actions {
     sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
@@ -161,18 +167,18 @@ class _007::Parser::Actions {
     method statement:return ($/) {
         die X::ControlFlow::Return.new
             unless $*in_routine;
-        make Q::Statement::Return.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
+        my $expr = ast-if-any($<EXPR>);
+        make Q::Statement::Return.new(:$expr);
     }
 
     method statement:throw ($/) {
-        make Q::Statement::Throw.new(:expr($<EXPR> ?? $<EXPR>.ast !! NONE));
+        my $expr = ast-if-any($<EXPR>);
+        make Q::Statement::Throw.new(:$expr);
     }
 
     method statement:if ($/) {
         my %parameters = $<xblock>.ast;
-        %parameters<else> = $<else> :exists
-            ?? $<else>.ast
-            !! NONE;
+        %parameters<else> = ast-if-any($<else>);
 
         make Q::Statement::If.new(|%parameters);
     }
@@ -622,9 +628,7 @@ class _007::Parser::Actions {
         finish-block($block);
 
         my $name = $<identifier>.ast.name;
-        my $identifier = $<identifier>
-            ?? Q::Identifier.new(:$name)
-            !! NONE;
+        my $identifier = ast-if-any($<identifier>);
         make Q::Term::Func.new(:$identifier, :$traitlist, :$block);
     }
 
