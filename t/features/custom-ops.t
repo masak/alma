@@ -749,4 +749,26 @@ use _007::Test;
     parse-error $program, X::Undeclared, "prefixes that end in an alphanumeric must also end in a word boundary (#408) (II)";
 }
 
+{
+    my $program = q:to/./;
+        func infix:<H>(x, y) {
+            "oops"
+        }
+        say(2 H40);
+    .
+
+    parse-error $program, X::AdHoc, "infixes that end in an alphanumeric must also end in a word boundary (I)";
+}
+
+{
+    my $program = q:to/./;
+        func infix:<H4>(x, y) {
+            "oops"
+        }
+        say(2 H40);
+    .
+
+    parse-error $program, X::AdHoc, "infixes that end in an alphanumeric must also end in a word boundary (II)";
+}
+
 done-testing;
