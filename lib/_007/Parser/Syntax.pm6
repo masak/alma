@@ -332,7 +332,7 @@ grammar _007::Parser::Syntax {
         }
 
         my @ops = $*parser.opscope.ops<postfix>.keys;
-        if /@ops/(self) -> $cur {
+        if /@ops [<!after \w> | <!before \w>]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         return /<!>/(self);

@@ -771,4 +771,13 @@ use _007::Test;
     parse-error $program, X::AdHoc, "infixes that end in an alphanumeric must also end in a word boundary (II)";
 }
 
+{
+    my $program = q:to/./;
+        func postfix:<P>(n) { "oops" }
+        say(2 PP)
+    .
+
+    parse-error $program, X::AdHoc, "postfixes that end in an alphanumeric must also end in a word boundary";
+}
+
 done-testing;
