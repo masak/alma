@@ -155,7 +155,7 @@ grammar _007::Parser::Syntax {
 
     method prefix {
         my @ops = $*parser.opscope.ops<prefix>.keys;
-        if /@ops/(self) -> $cur {
+        if /@ops [<!after \w> | <!before \w>]/(self) -> $cur {
             return $cur."!reduce"("prefix");
         }
         return /<!>/(self);
@@ -305,7 +305,7 @@ grammar _007::Parser::Syntax {
 
     method infix {
         my @ops = $*parser.opscope.ops<infix>.keys;
-        if /@ops/(self) -> $cur {
+        if /@ops [<!after \w> | <!before \w>]/(self) -> $cur {
             return $cur."!reduce"("infix");
         }
         return /<!>/(self);
@@ -332,7 +332,7 @@ grammar _007::Parser::Syntax {
         }
 
         my @ops = $*parser.opscope.ops<postfix>.keys;
-        if /@ops/(self) -> $cur {
+        if /@ops [<!after \w> | <!before \w>]/(self) -> $cur {
             return $cur."!reduce"("postfix");
         }
         return /<!>/(self);
