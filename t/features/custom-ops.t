@@ -727,4 +727,26 @@ use _007::Test;
         "with same-precedence right-associative prefix/postfix ops, the postfix evaluates first (no matter the order declared) (#372)";
 }
 
+{
+    my $program = q:to/./;
+        func prefix:<H>(n) {
+            "oops"
+        }
+        say(H50);
+    .
+
+    parse-error $program, X::Undeclared, "prefixes that end in an alphanumeric must also end in a word boundary (#408) (I)";
+}
+
+{
+    my $program = q:to/./;
+        func prefix:<H5>(n) {
+            "oops"
+        }
+        say(H50);
+    .
+
+    parse-error $program, X::Undeclared, "prefixes that end in an alphanumeric must also end in a word boundary (#408) (II)";
+}
+
 done-testing;

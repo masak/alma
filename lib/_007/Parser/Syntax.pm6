@@ -155,7 +155,7 @@ grammar _007::Parser::Syntax {
 
     method prefix {
         my @ops = $*parser.opscope.ops<prefix>.keys;
-        if /@ops/(self) -> $cur {
+        if /@ops [<!after \w> | <!before \w>]/(self) -> $cur {
             return $cur."!reduce"("prefix");
         }
         return /<!>/(self);
