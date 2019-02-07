@@ -32,6 +32,11 @@ In order to get the `zef` installer, you first need [Rakudo Perl
 6](https://perl6.org/downloads/). Instructions for how to install `zef` itself
 can be found in the [`zef` README](https://github.com/ugexe/zef#installation).
 
+> #### 💡 Using `zef`
+>
+> At any later point, you can use `zef upgrade` to get an up-to-date 007, or
+> `zef uninstall` to remove 007 from your system.
+
 ### Installation (from source)
 
 Make sure you have [Rakudo Perl 6](https://perl6.org/downloads/) installed and
