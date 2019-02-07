@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-a04500">
+  <body class="checksum-fbb5ae">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -65,13 +65,16 @@
 <p><em>This document is still being written. Paragraphs marked 🔮 represent future features of 007 that are planned but not yet implemented.</em></p>
 <h1 id="language-guide">Language guide</h1>
 <h2 id="getting-started">Getting started</h2>
-<h3 id="installation">Installation</h3>
+<h3 id="installation-with-zef">Installation (with zef)</h3>
+<p>If you're just planning to be a 007 end user, <code>zef</code> is the recommended way to install 007:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">zef</span> install 007</code></pre></div>
+<p>In order to get the <code>zef</code> installer, you first need <a href="https://perl6.org/downloads/">Rakudo Perl 6</a>. Instructions for how to install <code>zef</code> itself can be found in the <a href="https://github.com/ugexe/zef#installation"><code>zef</code> README</a>.</p>
+<h3 id="installation-from-source">Installation (from source)</h3>
 <p>Make sure you have <a href="https://perl6.org/downloads/">Rakudo Perl 6</a> installed and in your path.</p>
 <p>Then, clone the 007 repository. (This step requires Git. There's also <a href="https://github.com/masak/007/archive/master.zip">a zip file</a>.)</p>
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="fu">git</span> clone https://github.com/masak/007.git
 [<span class="ex">...</span>]</code></pre></div>
-<h3 id="setting-an-environment-variable">Setting an environment variable</h3>
-<p>We're one step away from running our first 007 program. Before that, we need to set an environment variable <code>PERL6LIB</code>:</p>
+<p>Finally, we need to set an environment variable <code>PERL6LIB</code>:</p>
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="bu">cd</span> 007
 $ <span class="bu">export</span> <span class="va">PERL6LIB=$(</span><span class="bu">pwd</span><span class="va">)</span>/lib</code></pre></div>
 <blockquote class="info">
