@@ -59,7 +59,7 @@ multi MAIN(Str :$backend = "default") {
 }
 
 multi MAIN($path, Str :$backend = "default", *@arguments) {
-    run_007(slurp($path), $backend);
+    run_007(slurp($path), $backend, @arguments);
 }
 
 multi MAIN(Str :e($program)!, Str :$backend = "default", *@arguments) {
