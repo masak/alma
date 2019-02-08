@@ -365,14 +365,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Tuple.create([["elements", (0, 0, 7)]]));
-        .
-
-    outputs $program, qq<(0, 0, 7)\n>, "Type.create() method to create a Tuple";
-}
-
-{
-    my $program = q:to/./;
         say(Type.create([["name", "MyType"]]));
         .
 

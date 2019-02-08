@@ -294,10 +294,10 @@ class Q::Term::Array does Q::Term {
 ### can be an arbitrary expression.
 ###
 class Q::Term::Tuple does Q::Term {
-    has Val::Tuple $.elements;
+    has Val::Array $.elements;
 
     method eval($runtime) {
-        Val::Tuple.new(:elements($.elements.elements.map(*.eval($runtime))));
+        Val::Array.new(:elements($.elements.elements.map(*.eval($runtime))));
     }
 }
 
@@ -533,7 +533,7 @@ class Q::Postfix::Index is Q::Postfix {
 
     method eval($runtime) {
         given $.operand.eval($runtime) {
-            when Val::Array | Val::Tuple {
+            when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
                     if $index !~~ Val::Int;
