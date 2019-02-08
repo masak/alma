@@ -373,22 +373,8 @@ class Val::Array does Val {
 ###     say( (1, 2) );          # --> `(1, 2)`
 ###     say( (1, 2, 3) );       # --> `(1, 2, 3)`
 ###
-### The `.size` method gives you the length (number of elements) of the
-### tuple:
-###
-###     say(().size());         # --> `0`
-###     say((1, 2, 3).size());  # --> `3`
-###
 ### Tuples are immutable, so the mutation methods supported for arrays
 ### (push, pop, shift, unshift) do not exist on tuples.
-###
-### You can also *transform* an entire tuple, either by mapping
-### each element through a function, or by filtering each element
-### through a predicate function:
-###
-###     my numbers = (1, 2, 3, 4, 5);
-###     say(numbers.map(func (e) { return e * 2 }));     # --> `(2, 4, 6, 8, 10)`
-###     say(numbers.filter(func (e) { return e %% 2 })); # --> `(2, 4)`
 ###
 class Val::Tuple does Val {
     has @.elements;

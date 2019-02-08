@@ -43,10 +43,9 @@ use _007::Test;
     my $program = q:to/./;
         say( (1, 2, 3) );
         say(type( (1, 2, 3) ));
-        say((1, 2, 3).size());
         .
 
-    outputs $program, "(1, 2, 3)\n<type Tuple>\n3\n", "a tuple with several elements";
+    outputs $program, "(1, 2, 3)\n<type Tuple>\n", "a tuple with several elements";
 }
 
 {
