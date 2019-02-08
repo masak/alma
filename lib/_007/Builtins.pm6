@@ -227,7 +227,7 @@ my @builtins =
             assert-type(:value($rhs), :type(Val::Int), :operation<divmod>);
             assert-nonzero(:value($rhs.value), :operation("infix:<divmod>"), :numerator($lhs.value));
 
-            return Val::Tuple.new(:elements([
+            return Val::Array.new(:elements([
                 wrap($lhs.value div $rhs.value),
                 wrap($lhs.value % $rhs.value),
             ]));

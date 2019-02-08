@@ -356,57 +356,6 @@ class Val::Array does Val {
     }
 }
 
-### ### Tuple
-###
-### An immutable sequence of values. A tuple contains zero or more elements,
-### indexed from `0` up to `size - 1`, where `size` is the number of
-### elements.
-###
-### The syntax for creating a tuple term consists of parentheses as delimiters
-### and commas as separators, but since `(value)` already means mathematical
-### grouping, you have to have a trailing comma if you want to make a
-### one-element tuple:
-###
-###     say( () );              # --> `()`
-###     say( (1) );             # --> `1`
-###     say( (1,) );            # --> `(1,)`
-###     say( (1, 2) );          # --> `(1, 2)`
-###     say( (1, 2, 3) );       # --> `(1, 2, 3)`
-###
-### The `.size` method gives you the length (number of elements) of the
-### tuple:
-###
-###     say(().size());         # --> `0`
-###     say((1, 2, 3).size());  # --> `3`
-###
-### Tuples are immutable, so the mutation methods supported for arrays
-### (push, pop, shift, unshift) do not exist on tuples.
-###
-### You can also *transform* an entire tuple, either by mapping
-### each element through a function, or by filtering each element
-### through a predicate function:
-###
-###     my numbers = (1, 2, 3, 4, 5);
-###     say(numbers.map(func (e) { return e * 2 }));     # --> `(2, 4, 6, 8, 10)`
-###     say(numbers.filter(func (e) { return e %% 2 })); # --> `(2, 4)`
-###
-class Val::Tuple does Val {
-    has @.elements;
-
-    method quoted-Str {
-        if %*stringification-seen{self.WHICH}++ {
-            return "(...)";
-        }
-        return @.elements == 1
-            ?? "(" ~ @.elements[0] ~ ",)"
-            !! "(" ~ @.elements>>.quoted-Str.join(", ") ~ ")";
-    }
-
-    method truthy {
-        ?$.elements;
-    }
-}
-
 our $global-object-id = 0;
 
 ### ### Object
@@ -583,7 +532,7 @@ class Val::Type does Val {
         elsif $.type ~~ Val::Int | Val::Str {
             return $.type.new(:value(@properties[0].value.value));
         }
-        elsif $.type ~~ Val::Array | Val::Tuple {
+        elsif $.type ~~ Val::Array {
             return $.type.new(:elements(@properties[0].value.elements));
         }
         elsif $.type ~~ Val::Type {
@@ -690,7 +639,6 @@ class Helper {
         when Val::Str { .value }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
-        when Val::Tuple { .quoted-Str }
         when Val::Object { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }

@@ -124,7 +124,6 @@ In 007, these "scalar value" types are built in:
 And these "container" types:
 
     [1, 2]        Array
-    ("x", "y")    Tuple
     { "n": 42 }   Dict
 
 ## Operators and expressions
@@ -152,8 +151,8 @@ docs.)
 
 **Arithmetic**. The infix operators `+ - * %` work as you'd expect. `%%` tests
 for divisibility, so it returns `true` whenever `%` returns `0`. `divmod` does
-an integer division resulting in a tuple `(q, r)` where `q` is the quotient and
-`r` is the reminder.
+an integer division resulting in a 2-element array `[q, r]` where `q` is the
+quotient and `r` is the reminder.
 
 **String building**. You can concatenate strings with `~`. (To concatenate
 arrays, use the Array method `.concat`.)
@@ -556,7 +555,7 @@ BEGIN my AlphaColor = Type(
 
 (Note how `self` has been made an explicit parameter along the way.)
 
-`None`, `Int`, `Str`, `Bool`, `Array`, `Tuple`, `Dict`, `Regex`, `Symbol`,
+`None`, `Int`, `Str`, `Bool`, `Array`, `Dict`, `Regex`, `Symbol`,
 and `Type` are all built-in types in 007. Besides that, there are all the types
 in [the `Q` hierarchy](#the-q-hierarchy), used to reasoning about program
 structure. There are also a number of exception types, under the `X` hierarchy.
