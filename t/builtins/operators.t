@@ -668,7 +668,7 @@ use _007::Test;
 
     outputs
         $program,
-        "(2, 1)\n(-3, -1)\n",
+        "[2, 1]\n[-3, -1]\n",
         "divmod operator (happy path)";
 }
 
