@@ -19,7 +19,25 @@ features of 007 that are planned but not yet implemented.*
 
 ## Getting started
 
-### Installation
+### Installation (with zef)
+
+If you're just planning to be a 007 end user, `zef` is the recommended way to
+install 007:
+
+```sh
+zef install 007
+```
+
+In order to get the `zef` installer, you first need [Rakudo Perl
+6](https://perl6.org/downloads/). Instructions for how to install `zef` itself
+can be found in the [`zef` README](https://github.com/ugexe/zef#installation).
+
+> #### 💡 Using `zef`
+>
+> At any later point, you can use `zef upgrade` to get an up-to-date 007, or
+> `zef uninstall` to remove 007 from your system.
+
+### Installation (from source)
 
 Make sure you have [Rakudo Perl 6](https://perl6.org/downloads/) installed and
 in your path.
@@ -32,10 +50,7 @@ $ git clone https://github.com/masak/007.git
 [...]
 ```
 
-### Setting an environment variable
-
-We're one step away from running our first 007 program. Before that, we need to
-set an environment variable `PERL6LIB`:
+Finally, we need to set an environment variable `PERL6LIB`:
 
 ```sh
 $ cd 007
