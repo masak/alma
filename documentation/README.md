@@ -375,8 +375,9 @@ the number of arguments to differ from the number of parameters.
 > #### 🔮 Future feature: optional parameter and parameter defaults
 >
 > 007 will at some point incorporate optional parameters and parameter default
-> values into the language. It's undecided whether these will require a pragma
-> to use or not. The number of arguments can of course go as low as the number
+> values into the language. (These are already supported in some of the
+> built-ins, albeit still inaccessible to the user.) The number of arguments
+> can of course go as low as the number
 > of non-optional parameters. Non-optional parameters can only occur before
 > optional ones.
 
