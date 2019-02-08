@@ -288,19 +288,6 @@ class Q::Term::Array does Q::Term {
     }
 }
 
-### ### Q::Term::Tuple
-###
-### A tuple. Tuple terms consist of zero or more *elements*, each of which
-### can be an arbitrary expression.
-###
-class Q::Term::Tuple does Q::Term {
-    has Val::Array $.elements;
-
-    method eval($runtime) {
-        Val::Array.new(:elements($.elements.elements.map(*.eval($runtime))));
-    }
-}
-
 ### ### Q::Term::Object
 ###
 ### An object. Object terms consist of an optional *type*, and a property list
