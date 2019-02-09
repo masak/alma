@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-12dd65">
+  <body class="checksum-0a770d">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -464,7 +464,7 @@ postfix:&lt;!&gt;          x!</code></pre>
 <h3 id="infix-precedence-and-associativity">Infix precedence and associativity</h3>
 <p>When you define an operator, you can also provide information about its precedence and associativity. (For an introduction to those concepts, see <a href="#operators-and-expressions">built-in operators</a>.) Here is an implementation of a right-associative <a href="https://en.wikipedia.org/wiki/Cons">cons</a> operator:</p>
 <pre class="_007"><code>func infix:&lt;::&gt;(lhs, rhs) is tighter(infix:&lt;==&gt;) is assoc(&quot;right&quot;) {
-    return (lhs, rhs);
+    return [lhs, rhs];
 }</code></pre>
 <p>The traits <code>is looser(op)</code> and <code>is tighter(op)</code> both create a new precedence level, just next to the one of the specified operator. The trait <code>is equal(op)</code> adds to the precedence level of an existing operator. If you don't specify either of these, your newly defined operator will be on its own maximally tight precedence level. (This is what happened with <code>postfix:&lt;!&gt;</code> above.)</p>
 <p>The <code>is assoc</code> trait has the allowed values <code>&quot;left&quot;</code>, <code>&quot;right&quot;</code>, and <code>&quot;non&quot;</code>. The <code>&quot;left&quot;</code> and <code>&quot;right&quot;</code> values determine how the syntax tree will group things when several operators of the exact same precedence follow one another:</p>

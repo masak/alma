@@ -736,7 +736,7 @@ a right-associative [cons](https://en.wikipedia.org/wiki/Cons) operator:
 
 ```_007
 func infix:<::>(lhs, rhs) is tighter(infix:<==>) is assoc("right") {
-    return (lhs, rhs);
+    return [lhs, rhs];
 }
 ```
 
