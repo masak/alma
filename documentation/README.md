@@ -662,11 +662,11 @@ it's defined).
 
 > #### 🔮 Future feature: reduction metaoperator
 >
-> Using the reduction metaoperator and a range operator, we can implement
-> `postfix:<!>` much shorter:
+> Using the reduction metaoperator, argument spread, and a range operator, we
+> can implement `postfix:<!>` much more succinctly:
 >
 > ```_007
-> func postfix:<!>(N) { [*](2..N) }
+> func postfix:<!>(N) { [*](...(2..N)) }
 > ```
 
 ### Built-in operators are built-in functions

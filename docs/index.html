@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-2dca1f">
+  <body class="checksum-12dd65">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -430,8 +430,8 @@ say(postfix:&lt;!&gt;(5));    # 120</code></pre>
 <p>Just like with ordinary identifiers, they go out of scope at the end of the block where they were defined. Like with other functions, you can call them before their definition, but you can <em>not</em> use the operator syntax before the definition (because the parser only does one pass, and adds the operator when it's defined).</p>
 <blockquote class="future">
 <h4 id="future-feature-reduction-metaoperator">🔮 Future feature: reduction metaoperator</h4>
-<p>Using the reduction metaoperator and a range operator, we can implement <code>postfix:&lt;!&gt;</code> much shorter:</p>
-<pre class="_007"><code>func postfix:&lt;!&gt;(N) { [*](2..N) }</code></pre>
+<p>Using the reduction metaoperator, argument spread, and a range operator, we can implement <code>postfix:&lt;!&gt;</code> much more succinctly:</p>
+<pre class="_007"><code>func postfix:&lt;!&gt;(N) { [*](...(2..N)) }</code></pre>
 </blockquote>
 <h3 id="built-in-operators-are-built-in-functions">Built-in operators are built-in functions</h3>
 <p>Now that the truth is out about user-defined operators being fairly normal functions, it's time for another bombshell: built-in operators are normal functions too! These are two equivalent ways to add two numbers in 007:</p>
