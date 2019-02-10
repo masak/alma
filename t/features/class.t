@@ -90,4 +90,16 @@ ensure-feature-flag("CLASS");
     outputs $program, "false\n", "two different classes are not type compatible";
 }
 
+{
+    my $program = q:to/./;
+        func class_7() {
+            say("OH HAI");
+        }
+
+        class_7();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'class'";
+}
+
 done-testing;
