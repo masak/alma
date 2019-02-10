@@ -309,4 +309,16 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can put many semicolons after a statement";
 }
 
+{
+    my $program = q:to/./;
+        func if_1() {
+            say("OH HAI");
+        }
+
+        if_1();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'if'";
+}
+
 done-testing;
