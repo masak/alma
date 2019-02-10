@@ -74,15 +74,15 @@ grammar _007::Parser::Syntax {
         <.finishpad>
     }
     token statement:return {
-        return [<.ws> <EXPR>]?
+        return» [<.ws> <EXPR>]?
     }
 
     token statement:throw {
-        throw [<.ws> <EXPR>]?
+        throw» [<.ws> <EXPR>]?
     }
 
     token statement:if {
-        if <.ws> <xblock>
+        if» <.ws> <xblock>
         [  <.ws> else <.ws>
             [
                 | <else=.pblock>
@@ -92,16 +92,16 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:for {
-        for <.ws> <xblock>
+        for» <.ws> <xblock>
     }
     token statement:while {
-        while <.ws> <xblock>
+        while» <.ws> <xblock>
     }
     token statement:BEGIN {
-        BEGIN <.ws> <block>
+        BEGIN» <.ws> <block>
     }
     token statement:class {
-        class <.ws>
+        class» <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
         <identifier> <.ws>
         { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
@@ -112,7 +112,7 @@ grammar _007::Parser::Syntax {
         <trait> *
     }
     token trait {
-        'is' <.ws> <identifier> '(' <EXPR> ')'
+        is» <.ws> <identifier> '(' <EXPR> ')'
     }
 
     # requires a <.newpad> before invocation
@@ -258,7 +258,7 @@ grammar _007::Parser::Syntax {
         <identifier>
     }
     token term:func {
-        func <.ws> <identifier>?
+        func» <.ws> <identifier>?
         :my $*in_routine = True;
         <.newpad>
         {
