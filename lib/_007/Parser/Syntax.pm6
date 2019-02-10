@@ -78,7 +78,7 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:throw {
-        throw [<.ws> <EXPR>]?
+        throw» [<.ws> <EXPR>]?
     }
 
     token statement:if {

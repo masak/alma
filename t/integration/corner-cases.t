@@ -333,4 +333,16 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'return'";
 }
 
+{
+    my $program = q:to/./;
+        func throw_3() {
+            say("OH HAI");
+        }
+
+        throw_3();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'throw'";
+}
+
 done-testing;
