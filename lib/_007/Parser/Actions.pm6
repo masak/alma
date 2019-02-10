@@ -192,9 +192,9 @@ class _007::Parser::Actions {
     }
 
     method statement:BEGIN ($/) {
-        my $block = $<block>.ast;
-        make Q::Statement::BEGIN.new(:$block);
-        $*runtime.run(Q::CompUnit.new(:$block));
+        my $statement = $<statement>.ast;
+        make Q::Statement::BEGIN.new(:$statement);
+        $statement.run($*runtime);
     }
 
     method statement:class ($/) {

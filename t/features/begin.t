@@ -19,6 +19,19 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say("Why, the early bird gets the villain.");
+
+        BEGIN say("So early, Mr. Bond");
+        .
+
+    outputs
+        $program,
+        "So early, Mr. Bond\nWhy, the early bird gets the villain.\n",
+        "the block is optional; a statement is fine";
+}
+
+{
+    my $program = q:to/./;
         my r = 7;
         say(r);
 
@@ -65,7 +78,20 @@ use _007::Test;
     outputs
         $program,
         "23\n",
-        "values survive from BEGIN time to runtime";
+        "values survive from BEGIN time to runtime (I)";
+}
+
+{
+    my $program = q:to/./;
+        my k;
+        BEGIN k = 42;
+        say(k);
+        .
+
+    outputs
+        $program,
+        "42\n",
+        "values survive from BEGIN time to runtime (II)";
 }
 
 {
@@ -186,6 +212,18 @@ use _007::Test;
         $program,
         "7\n",
         "calling a func at BEGIN time works";
+}
+
+{
+    my $program = q:to/./;
+        BEGIN my k = 5;
+        say(k);
+        .
+
+    outputs
+        $program,
+        "5\n",
+        "declarations (and values) survive out of a statement BEGIN";
 }
 
 done-testing;

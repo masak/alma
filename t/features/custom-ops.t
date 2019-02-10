@@ -93,6 +93,18 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        func infix:<!>(left, right) {
+            say(left ~ " " ~ right);
+        }
+
+        BEGIN "OH" ! "HAI";
+        .
+
+    outputs $program, "OH HAI\n", "defined operators work from within BEGIN statements";
+}
+
+{
+    my $program = q:to/./;
         func infix:<*!>(left, right) {
             return 10;
         }

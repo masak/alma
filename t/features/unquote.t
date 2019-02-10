@@ -4,10 +4,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my greeting_ast;
-        BEGIN {
-            greeting_ast = new Q.Literal.Str { value: "Mr Bond!" };
-        }
+        BEGIN my greeting_ast = new Q.Literal.Str { value: "Mr Bond!" };
 
         macro foo() {
             return quasi {

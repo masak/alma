@@ -98,7 +98,7 @@ grammar _007::Parser::Syntax {
         while» <.ws> <xblock>
     }
     token statement:BEGIN {
-        BEGIN» <.ws> <block>
+        BEGIN» <.ws> <statement>
     }
     token statement:class {
         class» <.ws>
