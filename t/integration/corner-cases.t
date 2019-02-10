@@ -381,4 +381,13 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'BEGIN'";
 }
 
+{
+    my $program = q:to/./;
+        func infix:<~?>(left, right) islooser(infix:<+>) {
+        }
+        .
+
+    parse-error $program, X::Syntax::Missing, "must have a space after 'is' in a trait";
+}
+
 done-testing;
