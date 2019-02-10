@@ -369,4 +369,16 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'while'";
 }
 
+{
+    my $program = q:to/./;
+        func BEGIN_6() {
+            say("OH HAI");
+        }
+
+        BEGIN_6();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'BEGIN'";
+}
+
 done-testing;
