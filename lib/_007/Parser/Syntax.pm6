@@ -74,7 +74,7 @@ grammar _007::Parser::Syntax {
         <.finishpad>
     }
     token statement:return {
-        return [<.ws> <EXPR>]?
+        return» [<.ws> <EXPR>]?
     }
 
     token statement:throw {

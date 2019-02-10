@@ -321,4 +321,16 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'if'";
 }
 
+{
+    my $program = q:to/./;
+        func return_2() {
+            say("OH HAI");
+        }
+
+        return_2();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'return'";
+}
+
 done-testing;
