@@ -258,7 +258,7 @@ grammar _007::Parser::Syntax {
         <identifier>
     }
     token term:func {
-        func <.ws> <identifier>?
+        func» <.ws> <identifier>?
         :my $*in_routine = True;
         <.newpad>
         {

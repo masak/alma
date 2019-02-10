@@ -390,4 +390,15 @@ use _007::Test;
     parse-error $program, X::Syntax::Missing, "must have a space after 'is' in a trait";
 }
 
+{
+    my $program = q:to/./;
+        func func_7() {
+            say("OH HAI");
+        }
+        my f = func_7();
+        .
+
+    outputs $program, "OH HAI\n", "an identifier prefixed 'func' is not confused with a function expression";
+}
+
 done-testing;
