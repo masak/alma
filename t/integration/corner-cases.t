@@ -345,4 +345,16 @@ use _007::Test;
     outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'throw'";
 }
 
+{
+    my $program = q:to/./;
+        func for_4() {
+            say("OH HAI");
+        }
+
+        for_4();
+        .
+
+    outputs $program, "OH HAI\n", "can start an expression with an identifier prefixed 'for'";
+}
+
 done-testing;

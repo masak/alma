@@ -92,7 +92,7 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:for {
-        for <.ws> <xblock>
+        for» <.ws> <xblock>
     }
     token statement:while {
         while <.ws> <xblock>
