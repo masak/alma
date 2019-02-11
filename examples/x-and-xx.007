@@ -1,10 +1,10 @@
-macro infix:<xx>(left, right) is equiv(infix:<*>) {
+macro infix:<xx>(left, right) is tighter(infix:<~>) {
     return quasi {
         (^{{{right}}}).flatMap(func(_) { {{{left}}} })
     }
 }
 
-func infix:<x>(left, right) is equiv(infix:<*>) {
+func infix:<x>(left, right) is equiv(infix:<xx>) {
     return (left xx right).join("");
 }
 
@@ -21,3 +21,6 @@ say([1, 2, 3] xx 2);
 # Test (list or number) xx number.
 my j = 0;
 say((j = [1, [1, 2, 3]][j && 1]) xx 2);
+
+# Precedence of x should be looser than +
+say(2 + 2 x 5);

@@ -683,4 +683,13 @@ use _007::Test;
         "divmodding by 0 is an error";
 }
 
+{
+    my $program = q:to/./;
+        say("foo" ~ 2 + 2);
+        say(2 + 2 ~ "bar");
+        .
+
+    outputs $program, "foo4\n4bar\n", "~ binds looser than +";
+}
+
 done-testing;
