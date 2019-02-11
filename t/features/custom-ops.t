@@ -792,4 +792,13 @@ use _007::Test;
     parse-error $program, X::AdHoc, "postfixes that end in an alphanumeric must also end in a word boundary";
 }
 
+{
+    my $program = q:to/./;
+        func cornflake:<!!>() { "this should not even compile" }
+        say(cornflake:<!!>);
+    .
+
+    parse-error $program, X::Category::Unknown, "can't use an unknown category when declaring a new op";
+}
+
 done-testing;
