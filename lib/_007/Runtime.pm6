@@ -549,10 +549,6 @@ class _007::Runtime {
                 return $obj;
             });
         }
-        elsif $propname eq "id" {
-            # XXX: Make this work for Q-type objects, too.
-            return Val::Int.new(:value($obj.id));
-        }
         elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ArgumentList" {
             return Val::Type.of(Q::ArgumentList);
         }
