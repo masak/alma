@@ -36,9 +36,6 @@ my Runtime = {
 
         func find_pad(symbol) {
             my frame = current_frame();
-            # The below check didn't work
-            # while frame.id != NO_OUTER.id {
-            # So trying this instead:
             while frame.has("pad") {
                 if frame.pad.has(symbol) {
                     return frame.pad;
