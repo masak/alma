@@ -529,10 +529,6 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Dict && $propname eq "has" {
             return builtin(sub has($prop) {
-                # XXX: problem: we're not lying hard enough here. we're missing
-                #      both Q objects, which are still hard-coded into the
-                #      substrate, and the special-cased properties
-                #      <get has extend update>
                 my $value = $obj.properties{$prop.value} :exists;
                 return Val::Bool.new(:$value);
             });
