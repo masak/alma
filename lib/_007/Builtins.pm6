@@ -164,6 +164,14 @@ my @builtins =
         :precedence{ equiv => "infix:==" },
     ),
 
+    # concatenation precedence
+    'infix:~' => op(
+        sub ($lhs, $rhs) {
+            return wrap($lhs.Str ~ $rhs.Str);
+        },
+        :qtype(Q::Infix),
+    ),
+
     # additive precedence
     'infix:+' => op(
         sub ($lhs, $rhs) {
@@ -173,13 +181,6 @@ my @builtins =
             return wrap($lhs.value + $rhs.value);
         },
         :qtype(Q::Infix),
-    ),
-    'infix:~' => op(
-        sub ($lhs, $rhs) {
-            return wrap($lhs.Str ~ $rhs.Str);
-        },
-        :qtype(Q::Infix),
-        :precedence{ equiv => "infix:+" },
     ),
     'infix:-' => op(
         sub ($lhs, $rhs) {
