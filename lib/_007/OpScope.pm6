@@ -20,6 +20,12 @@ class X::Precedence::Incompatible is Exception {
     method message { "Trying to relate a pre/postfix operator with an infix operator" }
 }
 
+class X::Category::Unknown is Exception {
+    has Str $.category;
+
+    method message { "Unknown category '$.category'" }
+}
+
 class _007::OpScope {
     has %.ops =
         prefix => {},
@@ -32,12 +38,13 @@ class _007::OpScope {
     has $.prepostfix-boundary = 0;
 
     method maybe-install($identname, @trait) {
-        return
-            unless $identname ~~ /^ (< prefix infix postfix >)
-                                    ':' (.+) /;
+        return unless $identname ~~ /^ (\w+) ':' (.+) /;
 
         my $category = ~$0;
         my $op = ~$1;
+
+        die X::Category::Unknown.new(:$category)
+            unless $category eq any(<prefix infix postfix>);
 
         if $category eq "infix" | "postfix" {
             my $other_category = $category eq "infix" ?? "postfix" !! "infix";
