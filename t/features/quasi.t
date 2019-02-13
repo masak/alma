@@ -31,59 +31,6 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        macro foo() {
-            my x = 7;
-            return quasi {
-                say(x);
-            }
-        }
-
-        foo();
-        .
-
-    outputs $program, "7\n", "a variable is looked up in the quasi's environment";
-}
-
-{
-    my $program = q:to/./;
-        macro moo() {
-            func infix:<**>(l, r) {
-                return l ~ " to the " ~ r;
-            }
-            return quasi {
-                say("pedal" ** "metal");
-            }
-        }
-
-        moo();
-        .
-
-    outputs
-        $program,
-        "pedal to the metal\n",
-        "operator used in quasi block carries its original environement";
-}
-
-{
-    my $program = q:to/./;
-        macro gah() {
-            return quasi { say(2 + 2) }
-        }
-
-        {
-            func infix:<+>(l, r) { return "lol, pwnd!" }
-            gah()
-        }
-        .
-
-    outputs
-        $program,
-        "4\n",
-        "operators in quasi aren't unhygienically overriden by mainline environment";
-}
-
-{
-    my $program = q:to/./;
         say(type(quasi<Q.Infix> { + }));
         .
 

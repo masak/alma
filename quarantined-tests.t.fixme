@@ -1,0 +1,129 @@
+use v6;
+use Test;
+use _007::Test;
+
+# --- from t/builtins/methods.t
+{
+    my $program = q:to/./;
+        macro so_hygienic() {
+            my x = "yay, clean!";
+            return quasi {
+                say(x);
+            };
+        }
+
+        macro so_unhygienic() {
+            my x = "something is implemented wrong";
+            return quasi {
+                say(x)
+            }.detach();
+        }
+
+        my x = "that's gross!";
+        so_hygienic();    # yay, clean!
+        so_unhygienic();  # that's gross!
+        .
+
+    outputs $program, "yay, clean!\nthat's gross!\n",
+        "detaching a qtree makes its identifiers unhygienic (#62)";
+}
+
+# --- from t/examples/format.t
+constant MODIFIED_FORMAT_007_FILENAME = "format-$*PID.007";
+LEAVE unlink MODIFIED_FORMAT_007_FILENAME;
+my $changed-line = False;
+
+given open(MODIFIED_FORMAT_007_FILENAME, :w) -> $fh {
+    for "examples/format.007".IO.lines -> $line {
+        if $line ~~ /^^ '# ' (.+) $$/ {
+            $changed-line = True;
+            $fh.say: ~$0;
+        }
+        else {
+            $fh.say: $line;
+        }
+    }
+    $fh.close;
+}
+
+ok $changed-line, "found a line to un-comment from format.007";
+
+{
+    my @lines = run-and-collect-lines("examples/format.007");
+
+    is +@lines, 2, "correct number of lines";
+
+    is @lines[0], "abracadabra", "first line";
+    is @lines[1], q[foo{1}bar], "second line";
+}
+
+{
+    my $message = run-and-collect-error-message(MODIFIED_FORMAT_007_FILENAME);
+
+    is $message, "Highest index was 1 but got only 1 arguments.", "got the right error";
+}
+
+# --- from t/examples/name.t
+my @lines = run-and-collect-lines("examples/name.007");
+
+is +@lines, 3, "correct number of lines of output";
+is @lines[0], "info", "line #1 correct";
+is @lines[1], "foo", "line #2 correct";
+is @lines[2], "baz", "line #3 correct";
+
+# --- from t/features/quasi.t
+{
+    my $program = q:to/./;
+        macro foo() {
+            my x = 7;
+            return quasi {
+                say(x);
+            }
+        }
+
+        foo();
+        .
+
+    outputs $program, "7\n", "a variable is looked up in the quasi's environment";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            func infix:<**>(l, r) {
+                return l ~ " to the " ~ r;
+            }
+            return quasi {
+                say("pedal" ** "metal");
+            }
+        }
+
+        moo();
+        .
+
+    outputs
+        $program,
+        "pedal to the metal\n",
+        "operator used in quasi block carries its original environement";
+}
+
+{
+    my $program = q:to/./;
+        macro gah() {
+            return quasi { say(2 + 2) }
+        }
+
+        {
+            func infix:<+>(l, r) { return "lol, pwnd!" }
+            gah()
+        }
+        .
+
+    outputs
+        $program,
+        "4\n",
+        "operators in quasi aren't unhygienically overriden by mainline environment";
+}
+
+done-testing;
+
