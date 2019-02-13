@@ -170,12 +170,11 @@ class Q::Literal::Str does Q::Literal {
 ###
 class Q::Identifier does Q::Term {
     has Val::Str $.name;
-    has $.frame = NONE;
 
     method attribute-order { <name> }
 
     method eval($runtime) {
-        return $runtime.get-var($.name.value, $.frame);
+        return $runtime.get-var($.name.value);
     }
 
     method put-value($value, $runtime) {

@@ -4,9 +4,7 @@ use _007::Builtins;
 use _007::Equal;
 
 constant NO_OUTER = Val::Dict.new;
-constant RETURN_TO = Q::Identifier.new(
-    :name(Val::Str.new(:value("--RETURN-TO--"))),
-    :frame(NONE));
+constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
 constant EXIT_SUCCESS = 0;
 
 class _007::Runtime {
@@ -79,9 +77,7 @@ class _007::Runtime {
         my $frame = Val::Dict.new(:properties(:$outer-frame, :pad(Val::Dict.new)));
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
-            my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($name))),
-                :frame(NONE));
+            my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
             self.declare-var($identifier, $value);
         }
         for $statementlist.statements.elements.kv -> $i, $_ {
@@ -103,7 +99,7 @@ class _007::Runtime {
         }
         if $routine {
             my $name = $routine.name;
-            my $identifier = Q::Identifier.new(:$name, :$frame);
+            my $identifier = Q::Identifier.new(:$name);
             self.declare-var($identifier, $routine);
         }
     }
@@ -142,15 +138,12 @@ class _007::Runtime {
 
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ Val::None
-            ?? self.current-frame
-            !! $identifier.frame;
-        my $pad = self!find-pad($name, $frame);
+        my $pad = self!find-pad($name, self.current-frame);
         $pad.properties{$name} = $value;
     }
 
-    method get-var(Str $name, $frame = self.current-frame) {
-        my $pad = self!find-pad($name, $frame);
+    method get-var(Str $name) {
+        my $pad = self!find-pad($name, self.current-frame);
         return $pad.properties{$name};
     }
 
@@ -162,10 +155,7 @@ class _007::Runtime {
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my Val::Dict $frame = $identifier.frame ~~ Val::None
-            ?? self.current-frame
-            !! $identifier.frame;
-        $frame.properties<pad>.properties{$name} = $value // NONE;
+        self.current-frame.properties<pad>.properties{$name} = $value // NONE;
     }
 
     method declared($name) {
@@ -173,9 +163,7 @@ class _007::Runtime {
     }
 
     method declared-locally($name) {
-        my $frame = self.current-frame;
-        return True
-            if $frame.properties<pad>.properties{$name} :exists;
+        return so (self.current-frame.properties<pad>.properties{$name} :exists);
     }
 
     method register-subhandler {
@@ -263,7 +251,7 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return $thing.new(:name($thing.name), :frame(NONE))
+                    return $thing.new(:name($thing.name))
                         if $thing ~~ Q::Identifier;
 
                     return $thing
