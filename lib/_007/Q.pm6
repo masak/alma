@@ -190,6 +190,23 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
     }
 }
 
+### ### Q::Term::Identifier::Direct
+###
+### A direct identifier; a name which directly identifies a storage location
+### in the program.
+###
+class Q::Term::Identifier::Direct is Q::Term::Identifier {
+    has Val::Dict $.frame;
+
+    method eval($runtime) {
+        return $runtime.get-direct($.frame, $.name.value);
+    }
+
+    method put-value($value, $runtime) {
+        $runtime.put-direct($.frame, $.name.value, $value);
+    }
+}
+
 ### ### Q::Regex::Fragment
 ###
 ### The parent role to all regex fragment types.
@@ -700,7 +717,10 @@ class Q::Term::Quasi does Q::Term {
             return $thing
                 if $thing ~~ Val;
 
-            return $thing.new(:name($thing.name), :frame($needs-displacement ?? $runtime.current-frame !! NONE))
+            return Q::Term::Identifier::Direct.new(:name($thing.name), :frame($runtime.lookup-frame($thing)))
+                if $thing ~~ Q::Term::Identifier;
+
+            return $thing.new(:name($thing.name))
                 if $thing ~~ Q::Identifier;
 
             if $thing ~~ Q::Unquote::Prefix {

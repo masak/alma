@@ -136,6 +136,17 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
+    method lookup-frame(Q::Term::Identifier $identifier) {
+        my Str $name = $identifier.name.value;
+        my $frame = self.current-frame;
+        repeat until $frame === NO_OUTER {
+            return $frame
+                if $frame.properties<pad>.properties{$name} :exists;
+            $frame = $frame.properties<outer-frame>;
+        }
+        die X::Undeclared.new(:symbol($name));
+    }
+
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
         my $pad = self!find-pad($name, self.current-frame);
@@ -151,6 +162,14 @@ class _007::Runtime {
         if self!maybe-find-pad($name, $frame) -> $pad {
             return $pad.properties{$name};
         }
+    }
+
+    method get-direct(Val::Dict $frame, Str $name) {
+        return $frame.properties<pad>.properties{$name};
+    }
+
+    method put-direct(Val::Dict $frame, Str $name, $value) {
+        $frame.properties<pad>.properties{$name} = $value;
     }
 
     method declare-var(Q::Identifier $identifier, $value?) {

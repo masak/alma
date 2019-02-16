@@ -1,0 +1,18 @@
+macro name(expr) {
+    if expr ~~ Q.Postfix.Property {
+        expr = expr.property;
+    }
+    assertType(expr, Q.Identifier);
+    return quasi { expr.name };
+}
+
+my info = {
+    foo: "Bond",
+    bar: {
+        baz: "James Bond"
+    },
+};
+
+say(name(info));           # info
+say(name(info.foo));       # foo
+say(name(info.bar.baz));   # baz

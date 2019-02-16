@@ -63,14 +63,6 @@ ok $changed-line, "found a line to un-comment from format.007";
     is $message, "Highest index was 1 but got only 1 arguments.", "got the right error";
 }
 
-# --- from t/examples/name.t
-my @lines = run-and-collect-lines("examples/name.007");
-
-is +@lines, 3, "correct number of lines of output";
-is @lines[0], "info", "line #1 correct";
-is @lines[1], "foo", "line #2 correct";
-is @lines[2], "baz", "line #3 correct";
-
 # --- from t/features/quasi.t
 {
     my $program = q:to/./;
@@ -123,6 +115,73 @@ is @lines[2], "baz", "line #3 correct";
         $program,
         "4\n",
         "operators in quasi aren't unhygienically overriden by mainline environment";
+}
+
+# --- more from t/features/quasi.t
+{
+    my $program = q:to/./;
+        my q1 = quasi<Q.Statement> { my x; };
+        my q2 = quasi<Q.Statement> { my x; };
+        say("alive");
+        .
+
+    outputs $program, "alive\n", "Q.Statement quasis don't leak (I)";
+}
+
+{
+    my $program = q:to/./;
+        my q1 = quasi<Q.Statement> { my x; };
+        say(x);
+        .
+
+    parse-error $program, X::Undeclared, "Q.Statement quasis don't leak (II)";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            my y = "right";
+            return quasi {
+                say(y);
+                {
+                    my y = "wrong";
+                }
+                say(y);
+            };
+        };
+
+        moo();
+        .
+
+    outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            return quasi {
+                my x = 1;
+            }
+        }
+
+        moo();
+        .
+
+    outputs $program, "", "a single declaration works in an injectile";
+}
+
+{
+    my $program = q:to/./;
+        macro moo(x) {
+            return quasi {
+                (func() { my y = {{{x}}} })()
+            }
+        }
+
+        say(moo(42));
+        .
+
+    outputs $program, "42\n", "a declaration works in a func term in an injectile";
 }
 
 done-testing;

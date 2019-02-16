@@ -31,6 +31,59 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        macro foo() {
+            my x = 7;
+            return quasi {
+                say(x);
+            }
+        }
+
+        foo();
+        .
+
+    outputs $program, "7\n", "a variable is looked up in the quasi's environment";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            func infix:<**>(l, r) {
+                return l ~ " to the " ~ r;
+            }
+            return quasi {
+                say("pedal" ** "metal");
+            }
+        }
+
+        moo();
+        .
+
+    outputs
+        $program,
+        "pedal to the metal\n",
+        "operator used in quasi block carries its original environement";
+}
+
+{
+    my $program = q:to/./;
+        macro gah() {
+            return quasi { say(2 + 2) }
+        }
+
+        {
+            func infix:<+>(l, r) { return "lol, pwnd!" }
+            gah()
+        }
+        .
+
+    outputs
+        $program,
+        "4\n",
+        "operators in quasi aren't unhygienically overriden by mainline environment";
+}
+
+{
+    my $program = q:to/./;
         say(type(quasi<Q.Infix> { + }));
         .
 
@@ -259,26 +312,6 @@ use _007::Test;
 
     outputs $program, "<type Q.Unquote>\n", "quasi<Q.Unquote>";
 }
-
-{
-    my $program = q:to/./;
-        my q1 = quasi<Q.Statement> { my x; };
-        my q2 = quasi<Q.Statement> { my x; };
-        say("alive");
-        .
-
-    outputs $program, "alive\n", "Q.Statement quasis don't leak (I)";
-}
-
-{
-    my $program = q:to/./;
-        my q1 = quasi<Q.Statement> { my x; };
-        say(x);
-        .
-
-    parse-error $program, X::Undeclared, "Q.Statement quasis don't leak (II)";
-}
-
 {
     my $program = q:to/./;
         macro moo() {
@@ -321,53 +354,6 @@ use _007::Test;
         .
 
     outputs $program, "", "a quasi doesn't have to return a value";
-}
-
-{
-    my $program = q:to/./;
-        macro moo() {
-            my y = "right";
-            return quasi {
-                say(y);
-                {
-                    my y = "wrong";
-                }
-                say(y);
-            };
-        };
-
-        moo();
-        .
-
-    outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
-}
-
-{
-    my $program = q:to/./;
-        macro moo() {
-            return quasi {
-                my x = 1;
-            }
-        }
-
-        moo();
-        .
-
-    outputs $program, "", "a single declaration works in an injectile";
-}
-
-{
-    my $program = q:to/./;
-        macro moo(x) {
-            return quasi {
-                (func() { my y = {{{x}}} })()
-            }
-        }
-
-        say(moo(42));
-        .
-
-    outputs $program, "42\n", "a declaration works in a func term in an injectile";
 }
 
 done-testing;
