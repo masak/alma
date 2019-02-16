@@ -159,7 +159,7 @@ class _007::Parser::Actions {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
         }
 
-        $identifier.put-value($val, $*runtime);
+        $*runtime.put-var($identifier, $val);
 
         $*parser.opscope.maybe-install($name, $<traitlist><trait>);
     }
@@ -205,7 +205,7 @@ class _007::Parser::Actions {
             method attributes \{ () \}
             method ^name(\$) \{ "{$identifier.name.value}" \}
         \}]);
-        $identifier.put-value($val, $*runtime);
+        $*runtime.put-var($identifier, $val);
     }
 
     method traitlist($/) {
@@ -458,9 +458,8 @@ class _007::Parser::Actions {
 
     method prefix($/) {
         my $op = ~$/;
-        my $identifier = Q::Identifier.new(
+        my $identifier = Q::Term::Identifier.new(
             :name(Val::Str.new(:value("prefix:$op"))),
-            :frame($*runtime.current-frame),
         );
         make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
     }
@@ -530,7 +529,7 @@ class _007::Parser::Actions {
     }
 
     method regex-fragment:identifier ($/) {
-        make Q::Regex::Identifier.new(:identifier($<identifier>.ast));
+        make Q::Regex::Identifier.new(:identifier($<term>.ast));
     }
 
     method regex-fragment:call ($/) {
@@ -546,7 +545,6 @@ class _007::Parser::Actions {
     }
 
     method term:identifier ($/) {
-        make $<identifier>.ast;
         my $name = $<identifier>.ast.name.value;
         if !$*runtime.declared($name) {
             my $frame = $*runtime.current-frame;
@@ -558,6 +556,7 @@ class _007::Parser::Actions {
                     unless $value ~~ Val::Func;
             };
         }
+        make Q::Term::Identifier.new(:name($<identifier>.ast.name));
     }
 
     method term:block ($/) {
@@ -618,7 +617,7 @@ class _007::Parser::Actions {
             my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
             my $static-lexpad = $*runtime.current-frame.properties<pad>;
             my $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
-            $<identifier>.ast.put-value($val, $*runtime);
+            $*runtime.put-var($<identifier>.ast, $val);
         }
         finish-block($block);
 
@@ -688,11 +687,12 @@ class _007::Parser::Actions {
 
     method term:my ($/) {
         my $identifier = $<identifier>.ast;
-        my $name = $identifier.name;
 
-        make Q::Term::My.new(:identifier($identifier));
+        make Q::Term::My.new(
+            :identifier(Q::Term::Identifier.new(:name($identifier.name)))
+        );
 
-        $*parser.opscope.maybe-install($name, []);
+        $*parser.opscope.maybe-install($identifier.name, []);
     }
 
     method propertylist ($/) {
@@ -716,8 +716,10 @@ class _007::Parser::Actions {
     }
 
     method property:identifier ($/) {
-        my $key = $<identifier>.ast.name;
-        make Q::Property.new(:$key, :value($<identifier>.ast));
+        self."term:identifier"($/);
+        my $value = $/.ast;
+        my $key = $value.name;
+        make Q::Property.new(:$key, :$value);
     }
 
     method property:method ($/) {
@@ -733,7 +735,7 @@ class _007::Parser::Actions {
 
     method infix($/) {
         my $op = ~$/;
-        my $identifier = Q::Identifier.new(
+        my $identifier = Q::Term::Identifier.new(
             :name(Val::Str.new(:value("infix:$op"))),
         );
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
@@ -758,9 +760,8 @@ class _007::Parser::Actions {
         elsif $<prop> {
             $op = ".";
         }
-        my $identifier = Q::Identifier.new(
+        my $identifier = Q::Term::Identifier.new(
             :name(Val::Str.new(:value("postfix:$op"))),
-            :frame($*runtime.current-frame),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough

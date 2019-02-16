@@ -93,6 +93,16 @@ role Q {
     }
 }
 
+### ### Q::Identifier
+###
+### An identifier; a name in code.
+###
+class Q::Identifier does Q {
+    has Val::Str $.name;
+
+    method attribute-order { <name> }
+}
+
 ### ### Q::Expr
 ###
 ### An expression; something that can be evaluated to a value.
@@ -161,18 +171,16 @@ class Q::Literal::Str does Q::Literal {
     method eval($) { $.value }
 }
 
-### ### Q::Identifier
+### ### Q::Term::Identifier
 ###
 ### An identifier; a name which identifies a storage location in the program.
 ###
-### Identifiers are subject to *scoping*: the same name can point to different
-### storage locations because they belong to different scopes.
+### Identifiers in expressions are subject to *scoping*: the same name can
+### point to different storage locations because they belong to different scopes.
+### The same name in the same scope might even point to different storage
+### locations at different times when accessed from different call frames.
 ###
-class Q::Identifier does Q::Term {
-    has Val::Str $.name;
-
-    method attribute-order { <name> }
-
+class Q::Term::Identifier is Q::Identifier does Q::Term {
     method eval($runtime) {
         return $runtime.get-var($.name.value);
     }

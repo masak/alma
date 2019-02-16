@@ -606,6 +606,9 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Array" {
             return Val::Type.of(Q::Term::Array);
         }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Identifier" {
+            return Val::Type.of(Q::Term::Identifier);
+        }
         else {
             if $obj ~~ Val::Type {
                 die X::Property::NotFound.new(:$propname, :type("$type ({$obj.type.^name})"));

@@ -35,15 +35,15 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    our sub declare(Q::Declaration $decltype, $symbol) {
+    our sub declare(Q::Declaration $decltype, Str $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.WHICH ~ $symbol};
         my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value($symbol))),
-            :$frame);
+            :name(Val::Str.new(:value($symbol)))
+        );
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
@@ -180,10 +180,12 @@ grammar _007::Parser::Syntax {
         <str>
     }
     token regex-fragment:identifier {
+        # XXX: should be term:identifier
         <identifier>
     }
     token regex-fragment:call {
         '<' ~ '>'
+        # XXX: should be term:identifier
         <identifier>
     }
     rule regex-fragment:group { ''
@@ -212,7 +214,7 @@ grammar _007::Parser::Syntax {
             || "<" <.ws> $<qtype>=["Q.Prefix"] ">" <.ws> '{' <.ws> <prefix> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Postfix"] ">" <.ws> '{' <.ws> <postfix> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Expr"] ">" <.ws> '{' <.ws> <EXPR> <.ws> '}'
-            || "<" <.ws> $<qtype>=["Q.Identifier"] ">" <.ws> '{' <.ws> <term:identifier> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Identifier"] ">" <.ws> '{' <.ws> <identifier> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Block"] ">" <.ws> '{' <.ws> <block> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.CompUnit"] ">" <.ws> '{' <.ws> [<compunit=.unquote("Q.CompUnit")> || <compunit>] <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Literal"] ">" <.ws> '{' <.ws> [<term:int> | <term:none> | <term:str>] <.ws> '}'
@@ -240,6 +242,11 @@ grammar _007::Parser::Syntax {
     }
     token term:new-object {
         new» <.ws>
+        # XXX: Deliberately introducing a bug here. Sorry!
+        # The first of the below identifiers should be a term:identifier, and the lookup
+        # should adapt to that fact. #250 would help sort this out. We're getting away
+        # with this because we're essentially missing a tricky-enough test, probably
+        # involving quasis and/or macros.
         <identifier>+ % [<.ws> "." <.ws>] <?{
             my $type;
             [&&] $<identifier>.map(&prefix:<~>).map(-> $identifier {
@@ -301,7 +308,9 @@ grammar _007::Parser::Syntax {
         <blockoid>:!s
         <.finishpad>
     }
-    token property:identifier { <identifier> }
+    token property:identifier {
+        <identifier>
+    }
 
     method infix {
         my @ops = $*parser.opscope.ops<infix>.keys;
