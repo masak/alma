@@ -38,4 +38,25 @@ use _007::Test;
         "variables can be declared as usual inside of a quasi (and survive)";
 }
 
+{
+    my $program = q:to/./;
+        my a = "OH";
+
+        macro moo(x) {
+            my a = "macro";
+            return quasi {
+                {{{x}}}
+            }
+        }
+
+        a = a ~ " HAI";
+        say(moo(a));
+        .
+
+    outputs
+        $program,
+        "OH HAI\n",
+        "mainline variable survive all the way through a macro/quasi expansion";
+}
+
 done-testing;
