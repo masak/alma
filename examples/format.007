@@ -1,0 +1,59 @@
+macro format(fmt, args) {
+    func replaceAll(input, transform) {
+        func helper(input, output) {
+            if !input.contains("{") {
+                return output ~ input;
+            }
+            my openBracePos = input.index("{");
+            if !input.suffix(openBracePos).contains("}") {
+                return output ~ input;
+            }
+            my closeBracePos = input.suffix(openBracePos).index("}");
+            return helper(
+                input.suffix(openBracePos + closeBracePos + 1),
+                output ~ input.prefix(openBracePos) ~ transform(input.substr(openBracePos + 1, closeBracePos - 1)));
+        }
+
+        return helper(input, "");
+    }
+
+    func findHighestIndex(input) {
+        my openBracePos = input.index("{");
+        if openBracePos == -1 {
+            return -1;
+        }
+        my closeBracePos = input.suffix(openBracePos).index("}");
+        if closeBracePos == -1 {
+            return -1;
+        }
+
+        my index = +input.substr(openBracePos + 1, closeBracePos - 1);
+
+        my h = findHighestIndex(input.suffix(openBracePos + closeBracePos + 1));
+        if h > index {
+            return h;
+        }
+        else {
+            return index;
+        }
+    }
+
+    if fmt ~~ Q.Literal.Str && args ~~ Q.Term.Array {
+        my highestUsedIndex = findHighestIndex(fmt.value);
+        my argCount = args.elements.size();
+        if argCount <= highestUsedIndex {
+            throw new Exception { message: "Highest index was " ~ highestUsedIndex
+                ~ " but got only " ~ argCount ~ " arguments." };
+        }
+    }
+
+    return quasi {
+        replaceAll({{{fmt}}}, func transform(arg) {
+            return {{{args}}}[+arg];
+        });
+    }
+}
+
+say( format("{0}{1}{0}", ["abra", "cad"]) );        # abracadabra
+say( format("foo{0}bar", ["{1}"]) );                # foo{1}bar ({} things can occur in the arguments)
+# say( format("foo{1}bar", ["foo"]) );                # throws an exception at compile time

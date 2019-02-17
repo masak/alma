@@ -144,7 +144,7 @@ class _007::Runtime {
                 if $frame.properties<pad>.properties{$name} :exists;
             $frame = $frame.properties<outer-frame>;
         }
-        die X::Undeclared.new(:symbol($name));
+        return;
     }
 
     method put-var(Q::Identifier $identifier, $value) {

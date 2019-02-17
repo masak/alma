@@ -717,8 +717,14 @@ class Q::Term::Quasi does Q::Term {
             return $thing
                 if $thing ~~ Val;
 
-            return Q::Term::Identifier::Direct.new(:name($thing.name), :frame($runtime.lookup-frame($thing)))
-                if $thing ~~ Q::Term::Identifier;
+            if $thing ~~ Q::Term::Identifier {
+                if $runtime.lookup-frame($thing) -> $frame {
+                    return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
+                }
+                else {
+                    return $thing;
+                }
+            }
 
             return $thing.new(:name($thing.name))
                 if $thing ~~ Q::Identifier;

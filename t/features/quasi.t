@@ -312,6 +312,26 @@ use _007::Test;
 
     outputs $program, "<type Q.Unquote>\n", "quasi<Q.Unquote>";
 }
+
+{
+    my $program = q:to/./;
+        my q1 = quasi<Q.Statement> { my x; };
+        my q2 = quasi<Q.Statement> { my x; };
+        say("alive");
+        .
+
+    outputs $program, "alive\n", "Q.Statement quasis don't leak (I)";
+}
+
+{
+    my $program = q:to/./;
+        my q1 = quasi<Q.Statement> { my x; };
+        say(x);
+        .
+
+    parse-error $program, X::Undeclared, "Q.Statement quasis don't leak (II)";
+}
+
 {
     my $program = q:to/./;
         macro moo() {
@@ -354,6 +374,34 @@ use _007::Test;
         .
 
     outputs $program, "", "a quasi doesn't have to return a value";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
+            return quasi {
+                my x = 1;
+            }
+        }
+
+        moo();
+        .
+
+    outputs $program, "", "a single declaration works in an injectile";
+}
+
+{
+    my $program = q:to/./;
+        macro moo(x) {
+            return quasi {
+                (func() { my y = {{{x}}} })()
+            }
+        }
+
+        say(moo(42));
+        .
+
+    outputs $program, "42\n", "a declaration works in a func term in an injectile";
 }
 
 done-testing;
