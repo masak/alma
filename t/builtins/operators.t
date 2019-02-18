@@ -405,18 +405,18 @@ use _007::Test;
     my $program = q:to/./;
         my a = [1, 2, 3];
         func f() { return 7 };
-        my o = { foo: 12 };
+        my d = { "foo": 1 };
 
         say(-a[1]);
         say(-f());
-        say(-o.foo);
+        say(-d.size());
 
         say(!a[2]);
         say(!f());
-        say(!o.foo);
+        say(!d.size());
         .
 
-    outputs $program, "-2\n-7\n-12\nfalse\nfalse\nfalse\n", "all postfixes are tighter than both prefixes";
+    outputs $program, "-2\n-7\n-1\nfalse\nfalse\nfalse\n", "all postfixes are tighter than both prefixes";
 }
 
 {
@@ -545,10 +545,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        my q = {}; say(q ~~ Object)
+        my q = {}; say(q ~~ Dict)
         .
 
-    outputs $program, "true\n", "typecheck works for Val::Object";
+    outputs $program, "true\n", "typecheck works for Val::Dict";
 }
 
 {
@@ -557,9 +557,9 @@ use _007::Test;
         say(quasi<Q.Infix> { + } !~~ Q.Prefix);
         say(42 !~~ Int);
         say([4, 2] !~~ Array);
-        say({} !~~ Object);
+        say({} !~~ Dict);
         say(42 !~~ Array);
-        say([4, 2] !~~ Object);
+        say([4, 2] !~~ Dict);
         say({} !~~ Int);
         .
 

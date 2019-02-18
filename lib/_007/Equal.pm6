@@ -21,7 +21,7 @@ multi equal-value(Val::Array $l, Val::Array $r) {
     [&&] $l.elements == $r.elements,
         |(^$l.elements).map(&equal-at-index);
 }
-multi equal-value(Val::Object $l, Val::Object $r) {
+multi equal-value(Val::Dict $l, Val::Dict $r) {
     if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
         return $l === $r;
     }

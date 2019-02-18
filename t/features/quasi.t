@@ -210,15 +210,14 @@ use _007::Test;
         say(type(quasi<Q.Term> { none }));
         say(type(quasi<Q.Term> { "James Bond" }));
         say(type(quasi<Q.Term> { [0, 0, 7] }));
-        say(type(quasi<Q.Term> { new Object { james: "Bond" } }));
+        say(type(quasi<Q.Term> { { james: "Bond" } }));
         say(type(quasi<Q.Term> { quasi { say("oh, james!") } }));
         say(type(quasi<Q.Term> { (0 + 0 + 7) }));
         .
 
     outputs $program,
         <Literal.Int Literal.None Literal.Str
-            Term.Array Term.Object Term.Quasi
-            Infix>\
+        Term.Array Term.Dict Term.Quasi Infix>\
             .map({ "<type Q.$_>\n" }).join,
         "quasi<Q.Term>";
 }
@@ -233,10 +232,10 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(type(quasi<Q.Term.Object> { new Object { james: "Bond" } }));
+        say(type(quasi<Q.Term.Dict> { { james: "Bond" } }));
         .
 
-    outputs $program, "<type Q.Term.Object>\n", "quasi<Q.Term.Object>";
+    outputs $program, "<type Q.Term.Dict>\n", "quasi<Q.Term.Dict>";
 }
 
 {

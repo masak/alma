@@ -63,6 +63,15 @@ class Val::None does Val {
 
 constant NONE is export = Val::None.new;
 
+### ### Object
+###
+### The top type of 007. A featureless object. Everything inherits from this type.
+class Val::Object does Val {
+    method truthy {
+        True
+    }
+}
+
 ### ### Bool
 ###
 ### A type with two values, `true` and `false`. These are often the result
@@ -358,95 +367,44 @@ class Val::Array does Val {
 
 our $global-object-id = 0;
 
-### ### Object
+### ### Dict
 ###
-### A mutable unordered collection of key/value properties. An object
-### contains zero or more such properties, each with a unique string
+### A mutable unordered collection of key/value entries. A dict
+### contains zero or more such entries, each with a unique string
 ### name.
 ###
-### The way to create an object from scratch is to use the object term
+### The way to create a dict from scratch is to use the dict term
 ### syntax:
 ###
-###     my o1 = { foo: 42 };        # autoquoted key
-###     my o2 = { "foo": 42 };      # string key
-###     say(o1 == o2);              # --> `true`
-###     my foo = 42;
-###     my o3 = { foo };            # property shorthand
-###     say(o1 == o3);              # --> `true`
+###     my d1 = { foo: 42 };        # autoquoted key
+###     my d2 = { "foo": 42 };      # string key
+###     say(d1 == d2);              # --> `true`
 ###
-###     my o4 = {
-###         greet: func () {
-###             return "hi!";
-###         }
-###     };
-###     my o5 = {
-###         greet() {               # method shorthand
-###             return "hi!";
-###         }
-###     };
-###     say(o4.greet() == o5.greet());  # --> `true`
-###
-### All of the above will create objects of type `Object`, which is
-### the topmost type in the type system. `Object` also has the special
-### property that it can accept any set of keys.
-###
-###     say(type({}));              # --> `<type Object>`
-###
-### There are also two ways to create a new, similar object from an old one.
-###
-###     my o6 = {
-###         name: "James",
-###         job: "librarian"
-###     };
-###     my o7 = o6.update({
-###         job: "secret agent"
-###     });
-###     say(o7);                    # --> `{job: "secret agent", name: "James"}`
-###
-###     my o8 = {
-###         name: "Blofeld"
-###     };
-###     my o9 = o8.extend({
-###         job: "supervillain"
-###     });
-###     say(o9);                    # --> `{job: "supervillain", name: "Blofeld"}`
-###
-### There's a way to extract an array of an object's keys. The order of the keys in
+### There's a way to extract an array of a dict's keys. The order of the keys in
 ### this list is not defined and may even change from call to call.
 ###
-###     my o10 = {
+###     my d3 = {
 ###         one: 1,
 ###         two: 2,
 ###         three: 3
 ###     };
-###     say(o10.keys().sort());     # --> `["one", "three", "two"]`
+###     say(d3.keys().sort());      # --> `["one", "three", "two"]`
 ###
-### You can also ask whether a key exists on an object.
+### You can also ask whether an entry exists in a dict.
 ###
-###     my o11 = {
+###     my d4 = {
 ###         foo: 42,
 ###         bar: none
 ###     };
-###     say(o11.has("foo"));        # --> `true`
-###     say(o11.has("bar"));        # --> `true`
-###     say(o11.has("bazinga"));    # --> `false`
+###     say(d4.has("foo"));        # --> `true`
+###     say(d4.has("bar"));        # --> `true`
+###     say(d4.has("bazinga"));    # --> `false`
 ###
-### Note that the criterion is whether the *key* exists, not whether the
+### Note that the criterion is whether the *entry* exists, not whether the
 ### corresponding value is defined.
 ###
-### Each object has a unique ID, corresponding to references in other
-### languages. Comparison of objects happens by comparing keys and values,
-### not by reference. If you want to do a reference comparison, you need
-### to use the `.id` property:
-###
-###     my o12 = { foo: 5 };
-###     my o13 = { foo: 5 };        # same key/value but different reference
-###     say(o12 == o13);            # --> `true`
-###     say(o12.id == o13.id);      # --> `false`
-###
-class Val::Object does Val {
+class Val::Dict does Val {
     has %.properties{Str};
-    has $.id = $global-object-id++;
 
     method quoted-Str {
         if %*stringification-seen{self.WHICH}++ {
@@ -473,11 +431,11 @@ class Val::Object does Val {
 ###
 ###     say(type(007));         # --> `<type Int>`
 ###     say(type("Bond"));      # --> `<type Str>`
-###     say(type({}));          # --> `<type Object>`
+###     say(type({}));          # --> `<type Dict>`
 ###     say(type(type({})));    # --> `<type Type>`
 ###
 ### 007 comes with a number of built-in types: `None`, `Bool`, `Int`,
-### `Str`, `Array`, `Object`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
+### `Str`, `Array`, `Dict`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
 ### and `Exception`.
 ###
 ### There's also a whole hierarchy of Q types, which describe parts of
@@ -526,7 +484,7 @@ class Val::Type does Val {
     }
 
     method create(@properties) {
-        if $.type ~~ Val::Object {
+        if $.type ~~ Val::Dict {
             return $.type.new(:@properties);
         }
         elsif $.type ~~ Val::Int | Val::Str {
@@ -578,8 +536,8 @@ class Val::Func does Val {
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
-    has Val::Object $.static-lexpad is rw = Val::Object.new;
-    has Val::Object $.outer-frame;
+    has Val::Dict $.static-lexpad is rw = Val::Dict.new;
+    has Val::Dict $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
@@ -634,12 +592,13 @@ class Val::Exception does Val {
 class Helper {
     our sub Str($_) {
         when Val::None { "none" }
+        when Val::Object { "<object>" }
         when Val::Bool { .value.lc }
         when Val::Int { .value.Str }
         when Val::Str { .value }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
-        when Val::Object { .quoted-Str }
+        when Val::Dict { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Func { "<sub {.escaped-name}{.pretty-parameters}>" }

@@ -36,9 +36,6 @@ my Runtime = {
 
         func find_pad(symbol) {
             my frame = current_frame();
-            # The below check didn't work
-            # while frame.id != NO_OUTER.id {
-            # So trying this instead:
             while frame.has("pad") {
                 if frame.pad.has(symbol) {
                     return frame.pad;
@@ -203,7 +200,7 @@ my Runtime = {
             },
             "Q.Prefix": func(op) {
             },
-            "Q.Term.Object": func(term) {
+            "Q.Term.Dict": func(term) {
             },
             "Q.Term.Quasi": func(term) {
             },
@@ -295,5 +292,5 @@ my Runtime = {
     }
 };
 
-my runtime = Runtime.new();
-runtime.run(ast);
+my runtime = Runtime["new"]();
+runtime["run"](ast);

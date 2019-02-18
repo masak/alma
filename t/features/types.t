@@ -74,4 +74,14 @@ use _007::Test;
         "Q is a built-in type (#201)";
 }
 
+{
+    outputs 'my o = new Object {}; say(o); say(type(o))', "<object>\n<type Object>\n",
+        "can create a new Object";
+}
+
+{
+    outputs 'for [42, [], "", Int, Array, Type, Object] -> x { say(x ~~ Object) }', "true\n" x 7,
+        "everything is an object";
+}
+
 done-testing;

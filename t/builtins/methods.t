@@ -333,7 +333,7 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(Object.create([["foo", 42]]));
+        say(Dict.create([["foo", 42]]));
         .
 
     outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create an Object";

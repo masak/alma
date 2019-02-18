@@ -149,7 +149,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
-            return wrap($lhs ~~ $rhs.type);
+            return wrap($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
         },
         :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
@@ -158,7 +158,7 @@ my @builtins =
         sub ($lhs, $rhs) {
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
-            return wrap($lhs !~~ $rhs.type);
+            return wrap($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
         },
         :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
@@ -359,7 +359,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
     default { die "Unknown type {.value.^name}" }
 });
 
-my $builtins-pad = Val::Object.new;
+my $builtins-pad = Val::Dict.new;
 for @builtins -> Pair (:key($name), :$value) {
     $builtins-pad.properties{$name} = $value;
 }

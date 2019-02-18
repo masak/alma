@@ -290,8 +290,7 @@ class Q::Term::Array does Q::Term {
 
 ### ### Q::Term::Object
 ###
-### An object. Object terms consist of an optional *type*, and a property list
-### with zero or more key/value pairs.
+### An object.
 ###
 class Q::Term::Object does Q::Term {
     has Val::Type $.type;
@@ -301,6 +300,20 @@ class Q::Term::Object does Q::Term {
         return $.type.create(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
         );
+    }
+}
+
+### ### Q::Term::Dict
+###
+### A dict. Dict terms consist of an entry list with zero or more key/value pairs.
+###
+class Q::Term::Dict does Q::Term {
+    has $.propertylist;
+
+    method eval($runtime) {
+        return Val::Dict.new(:properties(
+            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+        ));
     }
 }
 
@@ -391,7 +404,7 @@ class Q::Term::Func does Q::Term does Q::Declaration {
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
-    has Val::Object $.static-lexpad is rw = Val::Object.new;
+    has Val::Dict $.static-lexpad is rw = Val::Dict.new;
     # XXX
     has $.frame is rw;
 
@@ -530,7 +543,16 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 return .elements[$index.value];
             }
-            when Val::Object | Val::Func | Q {
+            when Val::Dict {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                die X::Property::NotFound.new(:$propname, :type(Val::Dict))
+                    if .properties{$propname} :!exists;
+                return .properties{$propname};
+            }
+            when Val::Func | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
@@ -553,7 +575,7 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.value < 0;
                 .elements[$index.value] = $value;
             }
-            when Val::Object | Q {
+            when Val::Dict | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     if $property !~~ Val::Str;
@@ -602,7 +624,7 @@ class Q::Postfix::Property is Q::Postfix {
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
-            when Val::Object | Q {
+            when Val::Dict | Q {
                 my $propname = $.property.name.value;
                 $runtime.put-property($_, $propname, $value);
             }
@@ -666,7 +688,7 @@ class Q::Term::Quasi does Q::Term {
                 if $thing ~~ Val::Array;
 
             return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
-                if $thing ~~ Val::Object;
+                if $thing ~~ Val::Dict;
 
             return $thing
                 if $thing ~~ Val;

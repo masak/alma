@@ -19,7 +19,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, Val::Object.new, Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, Val::Dict.new, Q::StatementList.new);
     } }
 
     token finishpad { <?> {
@@ -40,7 +40,7 @@ grammar _007::Parser::Syntax {
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
-            if %*assigned{$frame.id ~ $symbol};
+            if %*assigned{$frame.WHICH ~ $symbol};
         my $identifier = Q::Identifier.new(
             :name(Val::Str.new(:value($symbol))),
             :$frame);
@@ -223,7 +223,7 @@ grammar _007::Parser::Syntax {
             || "<" <.ws> $<qtype>=["Q.PropertyList"] ">" <.ws> '{' <.ws> <propertylist> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Term"] ">" <.ws> '{' <.ws> <term> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Term.Array"] ">" <.ws> '{' <.ws> <term:array> <.ws> '}'
-            || "<" <.ws> $<qtype>=["Q.Term.Object"] ">" <.ws> '{' <.ws> <term:object> <.ws> '}'
+            || "<" <.ws> $<qtype>=["Q.Term.Dict"] ">" <.ws> '{' <.ws> <term:object> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Term.Quasi"] ">" <.ws> '{' <.ws> <term:quasi> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.Trait"] ">" <.ws> '{' <.ws> <trait> <.ws> '}'
             || "<" <.ws> $<qtype>=["Q.TraitList"] ">" <.ws> '{' <.ws> <traitlist> <.ws> '}'
@@ -251,7 +251,7 @@ grammar _007::Parser::Syntax {
         }> <.ws>
         '{' ~ '}' <propertylist>
     }
-    token term:object {
+    token term:dict {
         '{' ~ '}' <propertylist>
     }
     token term:identifier {
