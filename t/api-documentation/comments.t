@@ -7,6 +7,8 @@ for <lib/_007/Val.pm6 lib/_007/Q.pm6> -> $file {
     my $state = Normal;
 
     for $file.IO.lines -> $line {
+        next if $line ~~ / \h '{ ... }' $/;
+
         if $line ~~ /^ < class role > \h+ (Q | < Val:: Q:: > \S+)/ {
             ok $state == ApiComment, "$0 is documented";
         }

@@ -136,15 +136,20 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
-    method lookup-frame(Q::Term::Identifier $identifier) {
+    method lookup-frame-outside(Q::Term::Identifier $identifier, $quasi-frame) {
         my Str $name = $identifier.name.value;
         my $frame = self.current-frame;
+        my $seen-quasi-frame = False;
         repeat until $frame === NO_OUTER {
-            return $frame
-                if $frame.properties<pad>.properties{$name} :exists;
+            if $frame.properties<pad>.properties{$name} :exists {
+                return $seen-quasi-frame ?? $frame !! Nil;
+            }
+            if $frame === $quasi-frame {
+                $seen-quasi-frame = True;
+            }
             $frame = $frame.properties<outer-frame>;
         }
-        return;
+        die "something is very off with lexical lookup ($name)";    # XXX: turn into X::
     }
 
     method put-var(Q::Identifier $identifier, $value) {

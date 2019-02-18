@@ -28,25 +28,5 @@ use _007::Test;
         "detaching a qtree makes its identifiers unhygienic (#62)";
 }
 
-# --- from t/features/quasi.t
-{
-    my $program = q:to/./;
-        macro moo() {
-            my y = "right";
-            return quasi {
-                say(y);
-                {
-                    my y = "wrong";
-                }
-                say(y);
-            };
-        };
-
-        moo();
-        .
-
-    outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
-}
-
 done-testing;
 

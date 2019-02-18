@@ -379,6 +379,25 @@ use _007::Test;
 {
     my $program = q:to/./;
         macro moo() {
+            my y = "right";
+            return quasi {
+                say(y);
+                {
+                    my y = "wrong";
+                }
+                say(y);
+            };
+        };
+
+        moo();
+        .
+
+    outputs $program, "right\nright\n", "an injectile gets the quasi's outer scope";
+}
+
+{
+    my $program = q:to/./;
+        macro moo() {
             return quasi {
                 my x = 1;
             }

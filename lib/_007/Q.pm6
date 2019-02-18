@@ -429,8 +429,6 @@ class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
     has Val::Dict $.static-lexpad is rw = Val::Dict.new;
-    # XXX
-    has $.frame is rw;
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -687,6 +685,26 @@ class Q::Unquote::Infix is Q::Unquote {
     has $.rhs;
 }
 
+### ### Q::Term::My
+###
+### A `my` variable declaration.
+###
+class Q::Term::My does Q::Term does Q::Declaration {
+    has $.identifier;
+
+    method is-assignable { True }
+
+    method eval($runtime) {
+        return $.identifier.eval($runtime);
+    }
+
+    method put-value($value, $runtime) {
+        $.identifier.put-value($value, $runtime);
+    }
+}
+
+class Q::StatementList { ... }
+
 ### ### Q::Term::Quasi
 ###
 ### A quasi; a piece of 007 code which evaluates to that code's Qtree
@@ -705,7 +723,7 @@ class Q::Term::Quasi does Q::Term {
     method attribute-order { <qtype contents> }
 
     method eval($runtime) {
-        my $needs-displacement = $.contents !~~ Q::Block;
+        my $quasi-frame;
 
         sub interpolate($thing) {
             return $thing.new(:elements($thing.elements.map(&interpolate)))
@@ -718,7 +736,7 @@ class Q::Term::Quasi does Q::Term {
                 if $thing ~~ Val;
 
             if $thing ~~ Q::Term::Identifier {
-                if $runtime.lookup-frame($thing) -> $frame {
+                if $runtime.lookup-frame-outside($thing, $quasi-frame) -> $frame {
                     return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
                 }
                 else {
@@ -749,9 +767,28 @@ class Q::Term::Quasi does Q::Term {
                 return $ast;
             }
 
+            if $thing ~~ Q::Term::My {
+                $runtime.declare-var($thing.identifier);
+            }
+
+            if $thing ~~ Q::Term::Func {
+                $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+                for $thing.block.parameterlist.parameters.elements.map(*.identifier) -> $identifier {
+                    $runtime.declare-var($identifier);
+                }
+            }
+
+            if $thing ~~ Q::Block {
+                $runtime.enter($runtime.current-frame, Val::Dict.new, $thing.statementlist);
+            }
+
             my %attributes = $thing.attributes.map: -> $attr {
                 aname($attr) => interpolate(avalue($attr, $thing))
             };
+
+            if $thing ~~ Q::Term::Func || $thing ~~ Q::Block {
+                $runtime.leave();
+            }
 
             $thing.new(|%attributes);
         }
@@ -759,10 +796,10 @@ class Q::Term::Quasi does Q::Term {
         if $.qtype.value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
+        $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+        $quasi-frame = $runtime.current-frame;
         my $r = interpolate($.contents);
-        if $r ~~ Q::Block {
-            $r.frame = $runtime.current-frame;
-        }
+        $runtime.leave();
         return $r;
     }
 }
@@ -799,24 +836,6 @@ class Q::ArgumentList does Q {
 ### A statement.
 ###
 role Q::Statement does Q {
-}
-
-### ### Q::Term::My
-###
-### A `my` variable declaration.
-###
-class Q::Term::My does Q::Term does Q::Declaration {
-    has $.identifier;
-
-    method is-assignable { True }
-
-    method eval($runtime) {
-        return $.identifier.eval($runtime);
-    }
-
-    method put-value($value, $runtime) {
-        $.identifier.put-value($value, $runtime);
-    }
 }
 
 ### ### Q::Statement::Expr
@@ -1067,7 +1086,7 @@ class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
 
     method eval($runtime) {
-        $runtime.enter($.block.frame, $.block.static-lexpad, $.block.statementlist);
+        $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
         my $result = $.block.statementlist.run($runtime);
         $runtime.leave;
         return $result;
