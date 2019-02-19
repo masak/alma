@@ -275,8 +275,8 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return $thing.new(:name($thing.name))
-                        if $thing ~~ Q::Identifier;
+                    return Q::Term::Identifier.new(:name($thing.name))
+                        if $thing ~~ Q::Term::Identifier;
 
                     return $thing
                         if $thing ~~ Q::Unquote;
