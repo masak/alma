@@ -1619,7 +1619,61 @@ details.)
 
 ## Grammatical categories
 
-XXX go through them all, with examples
+In a macro definition such as
+
+```_007
+@parsed(/ ... /)
+macro statement:loop(match) { ... }
+```
+
+The (grammatical) category is what comes before the colon in the name; in this
+case it's `statement`.
+
+While the `@parsed` annotation determines _how_ a macro should parse, a macro's
+grammatical category indicates _when_ it can parse. Statements, for example,
+can parse at the beginning of a block, or after another statement. They can not
+parse (say) right in the middle of an expression.
+
+The grammar rules in 007 form an open set &mdash; you can add new ones if you
+want &mdash; but the grammatical _categories_ form a closed set. They are as
+follows:
+
+* `prefix` and `term` (in term position)
+* `infix` and `postfix` (in operator position)
+* `statement` (at the start of a block or after another statement)
+* `property` (at the start or after a comma in a property list)
+* `argument` (at the start or after a comma in an argument list)
+* `parameter` (at the start or after a comma in a parameter list)
+
+The last four categories in the list are similar; they are so-called _list
+environments_; the last three are comma-separated, whereas statements are
+separated by semicolons (except when the semicolon can be skipped). The top
+four categories belong to the _expression environment_.
+
+A convenient way to "inject" operator-like grammar rules into the list
+environments is to extend these just like you would extend the expression
+environment. For example, the commas between parameters could be defined like
+this:
+
+```_007
+@trailing
+@assoc("list")
+macro parameter:infix:<,>(...parameters) {
+    return Q.ParameterList(parameters);
+}
+```
+
+The `@trailing` annotation allows a trailing comma in a parameter list, like
+so: `fn(1, 2, 3,)`. It's a bit more ergonomic when writing parameters each on
+one line.
+
+Similarly, the rest parameter syntax can be defined like this:
+
+```_007
+macro parameter:prefix:<...>(parameter) {
+    return Q.Parameter.Rest(parameter);
+}
+```
 
 ## Contextual macros
 
