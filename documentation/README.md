@@ -1633,13 +1633,143 @@ XXX examples: `each()`, junctions, class declarations
 
 ## Evaluating expressions
 
-XXX example: `+=`, `.=`
+A common rule-of-thumb for macros is that they typically only want to unquote
+their arguments _once_. An example will serve to show why. Let's start with
+this (insufficient) implementation of `prefix:<++>`:
 
-XXX important here to state the single evaluation rule
+```_007
+macro prefix:<++>(term) {
+    return quasi {
+        {{{term}}} = {{{term}}} + 1;
+    };
+}
+```
 
-XXX thunky semantics
+Why is this insufficient? Well, consider this contrived bit of code to tease
+out a behavior which breaks Least Surprise:
 
-XXX location protocol
+```_007
+my a = [0, 0, 0];
+
+func sideEffecty() {
+    say("double agent detected in passenger seat -- ejecting");
+    return a;
+}
+
+++sideEffecty()[1];
+```
+
+The user correctly expects this code to increase the middle element of the
+array in `a`, yielding `[0, 1, 0]`. However, the function has a side effect,
+and the user likely also expects `sideEffecty` to only run once.
+
+Unfortunately, since `{{{term}}}` was spelled out twice in the `quasi`, there
+are two `sideEffecty()` calls in the resulting expanded code:
+
+```_007
+sideEffecty()[1] = sideEffecty()[1] + 1;
+```
+
+Contrary to expectations, therefore, two double agents get ejected from the
+passenger seat.
+
+This is a really common mistake to make, and so we formulate this rule to
+combat it:
+
+> **The single evaluation rule**
+>
+> Typically, a variable should be unquoted at most once in a quasi.
+
+To this end, 007 also serves up a compile-time error if you break this rule.
+
+Since it's just a rule-of-thumb, though, you might want to suppress this error
+message. You do that by annotating the parameter or variable with `@many`.
+
+Also, the compiler is relatively clever in what it means by "more than one
+evaluation". For example, this macro doesn't get you in trouble:
+
+```_007
+macro fine(expr) {
+    return quasi {
+        if Bool.roll() {
+            {{{expr}}};
+        }
+        else {
+            {{{expr}}};
+        }
+    }
+}
+```
+
+Because even though `{{{expr}}}` occurs twice in there, it only gets evaluated
+at most _once_ on each path through the quasi code.
+
+Moreover, this macro is also fine:
+
+```_007
+macro alsoFine(expr) {
+    return quasi {
+        for ^10 {
+            {{{expr}}};
+        }
+    };
+}
+```
+
+Because if you put the interpolation of your variable in a loop, you probably
+_meant_ to evaluate it more than once anyway. We designate as a _thunk_ a
+seemingly normal expression which (through a macro) we make run either more
+than once, or (sometimes) not at all. In other words, both of these things are
+thunks:
+
+1. The left-hand side of `... xx N`, which evaluates (possibly differently)
+once for each of the `N` elements we requested.
+
+2. The right-hand side of a `&&` or `||` or `//`, which doesn't evaluate at all
+if the left-hand side was already falsy, truthy, or defined, respectively.
+
+You'll notice that the reason we naively wanted to unquote `{{{term}}}` twice
+above was that we wanted to first _get_ the value (the so-called rvalue), do
+some computation, and then _set_ the value (the lvalue). This comes up in many
+other cases, such as the `infix:<+=>` family of operators, or the
+`postfix:<.=>` mutating method calls, or the `swap` macro.
+
+Here's how we do that correctly, again using `prefix:<++>` as an example:
+
+```_007
+macro prefix:<++>(term) {
+    return quasi {
+        my L = location({{{term}}});
+        my value = L.get();
+        L.set(value + 1);
+    };
+}
+```
+
+The built-in `location` macro takes an _access path_ (anything that resolves to
+a modifiable bit of storage in memory) and gives back an opaque `Location`
+object, with a `.get` and a `.set` method.
+
+`Location` objects are an abstraction, to allow the macro author to talk about
+the same access path multiple times without evaluating it more than once. The
+compiler does its best to optimize away the location in the expanded code,
+replacing it with simpler code. For example, with this better definition of
+`prefix:<++>`, the expression `++sideEffecty()[1]` would result in something
+like this:
+
+```_007
+my _uniqueSymbol873643 = sideEffecty();
+_uniqueSymbol873643[1] = _uniqueSymbol873643[1] + 1;
+```
+
+(Where no amount of luck would allow you to guess the actual name of
+`_uniqueSymbol873643`.)
+
+`Location` objects are a bit of a two-edged sword &mdash; since they allow you
+to essentially act on a storage location at a distance, letting them escape
+from the quasi can cause the optimizer to become _very_ conservative in what it
+can assume when optimizing your program. In other words, try to use locations
+as locally as possible, on pain of getting a really slow program.
 
 ## Interacting with control flow
 
