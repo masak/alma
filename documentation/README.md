@@ -1290,6 +1290,22 @@ macro infix:<ff>(lhs, rhs) {
 }
 ```
 
+We can eliminate the `if` statements by using assignment operators instead:
+
+```_007
+import * from syntax.op.assign;
+
+macro infix:<ff>(lhs, rhs) {
+    my active = false;
+    return quasi {
+        active ||= {{{lhs}}};
+        my result = active;
+        active &&= {{{rhs}}};
+        result;
+    };
+}
+```
+
 This declaration works, but has one downside: the macro state is program-wide,
 but what we tend to expect/want is for the macro state to "reset" every time
 its surrounding block is re-entered.
@@ -1298,55 +1314,21 @@ Here's an implementation that stores the state such that it's per block entry,
 not per program run:
 
 ```_007
+import * from syntax.op.assign;
+import * from syntax.term.state;
+
 macro infix:<ff>(lhs, rhs) {
-    my active = new Symbol { name: "active" };
     return quasi {
-        my COMPILING.{{{Q.Identifier @ active}}};
-        once {
-            COMPILING.{{{Q.Identifier @ active}}} = false;
-        }
-        if {{{lhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = true;
-        }
-        my result = COMPILING.{{{Q.Identifier @ active}}};
-        if {{{rhs}}} {
-            COMPILING.{{{Q.Identifier @ active}}} = false;
-        }
+        state active = false;
+        my result = active;
+        active &&= {{{rhs}}};
         result;
     };
 }
 ```
 
-> #### 💡 Symbols
->
-> Symbols can be used in place of strings as dictionary keys, and also as
-> names of variables in a scope. They're used when something unique,
-> unguessable, and hidden is called for. This tends to happen in macros.
-
-> #### 💡 `COMPILING`
->
-> The `COMPILING` pseudomodule can be used inside of macro bodies (including
-> in quasis), and refers to the lexical scope from which the macro was called.
-> It's the only module one is allowed to declare variables in "at a distance".
-
-In this case, we're using the `active` symbol so that we can install it in the
-`COMPILING` scope. This protects us against collisions with:
-
-* A variable in the mainline scope called `active`.
-
-* Other macros which might also install a variable called `active` in the
-  mainline scope.
-
-* Other expansions of the _same_ macro (`infix:<ff>`) which would want to
-  install a variable called `active` in the mainline scope.
-
-As for the last point, each macro call gets its own fresh `active` symbol,
-and so they don't collide, even if they're in the same scope.
-
-> #### 💡 `once`
->
-> The `once` macro runs a statement or block at most once per entry to the
-> surrounding block.
+Pleasingly, stateful macros can often be expressed using the `state`
+declarator.
 
 ## Closures in macros
 
