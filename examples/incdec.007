@@ -1,0 +1,59 @@
+macro prefix:<++>(term) {
+    return quasi {
+        {{{term}}} = {{{term}}} + 1;
+    };
+}
+
+{
+    my value = 7;
+    say("== prefix:<++>");
+    say("before: ", value);
+    say("during: ", ++value);
+    say("after: ", value);
+}
+
+macro prefix:<-->(term) {
+    return quasi {
+        {{{term}}} = {{{term}}} - 1;
+    };
+}
+
+{
+    my value = 7;
+    say("== prefix:<-->");
+    say("before: ", value);
+    say("during: ", --value);
+    say("after: ", value);
+}
+
+macro postfix:<++>(term) {
+    return quasi {
+        my oldval = {{{term}}};
+        {{{term}}} = {{{term}}} + 1;
+        oldval;
+    };
+}
+
+{
+    my value = 7;
+    say("== postfix:<++>");
+    say("before: ", value);
+    say("during: ", value++);
+    say("after: ", value);
+}
+
+macro postfix:<-->(term) {
+    return quasi {
+        my oldval = {{{term}}};
+        {{{term}}} = {{{term}}} - 1;
+        oldval;
+    };
+}
+
+{
+    my value = 7;
+    say("== postfix:<-->");
+    say("before: ", value);
+    say("during: ", value--);
+    say("after: ", value);
+}
