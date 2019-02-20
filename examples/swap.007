@@ -1,0 +1,13 @@
+macro swap(a, b) {
+    return quasi {
+        my t = {{{a}}};
+        {{{a}}} = {{{b}}};
+        {{{b}}} = t;
+    };
+}
+
+my x = "HAI";
+my y = "OH ";
+
+swap(x, y);
+say(x, y);

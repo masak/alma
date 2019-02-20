@@ -1,3 +1,11 @@
+macro swap(a, b) {
+    return quasi {
+        my t = {{{a}}};
+        {{{a}}} = {{{b}}};
+        {{{b}}} = t;
+    };
+}
+
 func gcd(a, b) {
     if b {
         return gcd(b, a % b);
@@ -9,9 +17,7 @@ my bigger = +prompt("Enter the bigger integer: ");
 my smaller = +prompt("Enter the smaller integer: ");
 
 if bigger < smaller {
-    my temp = bigger;
-    bigger = smaller;
-    smaller = temp;
+    swap(bigger, smaller);
 }
 
 say();
