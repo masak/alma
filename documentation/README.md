@@ -1422,11 +1422,107 @@ _symbols_; see [a later section](#symbols) for more on these.
 
 ## Macros that parse
 
-XXX introduce the `@parsed` annotation
+A macro invocation usually looks like a function call, or possibly like an
+operator. If we want it to look like something else, we have to indicate to the
+language how it should be parsed. We do this using the `@parsed` annotation.
 
-XXX there must be dozens of good examples here... `?? !!`, `[*]` --
-just need to find a decent explanation order that will introduce
-things bit by bit
+As the `@parsed` annotation uses regexes, it's recommended you read [the
+section on regexes](#regexes) before reading this one.
+
+Here's how we would implement the `loop` statement:
+
+```_007
+@parsed(/ "loop"» :: <.ws> <block> /)
+macro statement:loop(match) {
+    my block = match["block"].ast;
+    return quasi {
+        while True {{{Q.Block @ block}}}
+    };
+}
+```
+
+The `loop` statement starts with the keyword `loop`. It's a good idea to
+require a word boundary (`»`) right after the keyword, otherwise other things
+starting with `loop` (for example a variable called `loopy`) would match as
+false positives.
+
+The `::` backtrack controller is also good form, to mark the end of the
+"declarative prefix" inside of the parse rule. See [the section on
+regexes](#regexes) for more on declarative prefixes.
+
+After the keyword, we accept some whitespace (which we don't care to capture)
+and a block. The block is made available inside of the macro through a `match`
+parameter. All `@parsed` macros need to declare an extra parameter where the
+matched result of the parse goes &mdash; even in cases where nothing was
+captured. This parameter can be called anything, but it's a strong convention
+to name it `match`. We index into `match["block"]` and fish out its `.ast`
+payload, which is guaranteed to be a `Q.Block`.
+
+Finally, inside the `quasi`, instead of writing the customary `{ ... }` block
+as literal code, we pass in `{{{Q.Block @ block}}}` &mdash; the `Q.Block` is
+both a guarantee to the `quasi` parser that the thing is syntactically
+`Q.Block`-shaped, and a runtime check (when the quasi gets interpolated) that
+the expression `block` is a subtype of `Q.Block`.
+
+Here's another example, one which involves macro hygiene. This macro defines a
+_reduction metaoperator_, allowing code such as `[+](1, 2, 3)` (getting a sum
+of 6) or `[~]("OH", " ", "HAI")` (concatenating to `"OH HAI"`):
+
+```_007
+import * from syntax.param.rest;
+
+@parsed(/ "[" :: <infix> "]" /)
+macro term:reduce(match) {
+    my infix = match["infix"].ast;
+    my fn = func(...values) {
+        values.reduce(infix.code);
+    };
+    return quasi { fn };
+}
+```
+
+Here we rely on the fact that every `Q.Infix` node has a `.code` attribute with
+the code behind that particular operator. From this, we can construct just the
+right anonymous function and return it inside the quasi block.
+
+(The reduce operator provided through `syntax.op.reduce`, is a little bit more
+intricate in that it also respects the associativity of the infix operator
+used.)
+
+As a final example in this section, let's define the `?? !!` operator:
+
+```_007
+@parsed(/ "??" :: <.ws> <expr> "!!" <rhs=expr> /)
+macro infix:cond(lhs, match) {
+    my expr = match["expr"].ast;
+    my rhs = match["rhs"].ast;
+    return quasi {
+        my result;
+        if {{{lhs}}} {
+            result = {{{expr}}};
+        }
+        else {
+            result = {{{rhs}}};
+        }
+        result;
+    }
+}
+```
+
+An infix operator macro has two paramters (the lhs and the rhs); for a
+`@parsed` infix macro, the `lhs` parameter is kept, but the `rhs` parameter is
+_replaced_ by the `match` parameter. Generally for operators, the operands
+coming before the operator are kept as regular parameters, whereas the ones
+occurring after are incorporated into the `match` parameter (and thus parsing
+them (or not) is completely up to the `@parsed` regex).
+
+Also, in this example, we make good use of renaming of captures (`<rhs=expr>`).
+If we hadn't renamed the second `<expr>` subrule call, we would have ended up
+with an array of submatches in `match["expr"]` rather than a single submatch.
+
+For brevity, the above example omits some error handling involving `=` (or even
+looser user-defined operators) occuring inside `<expr>`. See the source code of
+`syntax.op.conditional` for the gory details.
 
 ## Statement macros
 
