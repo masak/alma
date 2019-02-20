@@ -1526,10 +1526,102 @@ looser user-defined operators) occuring inside `<expr>`. See the source code of
 
 ## Statement macros
 
-XXX these are macros in the statement category. important because we often want
-to introduce new statement types
+We already saw an example of a statement macro in [the previous
+section](#macros-that-parse), but it's so common to want to define these that
+we might as well do a few more examples.
 
-XXX examples: `loop {}`, `repeat while` loop, `for` loop
+First, let's define the `repeat while` loop, whose main selling-point is that
+it evaluates its condition _after_ the first iteration through the loop (unlike
+`while` which does it before). Futhermore, the programmer gets to choose
+whether to write the condition before or after the loop (but the condition will
+always run after regardless).
+
+```_007
+@parsed(/"repeat" <.ws> [
+    | "while"» :: <.ws> <expr> <.ws> <block>
+    | :: <block> <.ws> "while"» <.ws> <expr>
+]/)
+macro statement:repeatWhile(match) {
+    my expr = match["expr"].ast;
+    my pblock = match["block"].ast;
+
+    return quasi {
+        while True {
+            {{{Q.Block @ block}}}
+            if {{{expr}}} {
+                last;
+            }
+        }
+    };
+}
+```
+
+No special handling is needed to distinguish between condition coming before or
+after the block.
+
+Just from the above, the consumer of the `repeat while` macro gets to declare a
+variable in the condition, and then use it in the loop block (or later in the
+surrounding block):
+
+```_007
+repeat while my line = prompt("> ") {
+    # do something with `line` here
+    # (first iteration `line` will have the value `none`)
+}
+
+# `line` is visible here too, until end of block
+```
+
+This falls out automatically from how `my` works. By the same token, if you
+declare a variable when the condition comes _after_ the block, that variable is
+_not_ visible inside the block:
+
+```_007
+repeat {
+    # now `line` isn't visible here
+} while my line = prompt("> ");
+
+# `line` is still visible here, though
+```
+
+(The real `repeat while` statement uses a pointy block instead of a regular
+block. The gory details have been omitted here.)
+
+As a last example, let's look at how the `for` loop can be defined:
+
+```_007
+import * from syntax.my.destructure;
+
+@parsed(/ "for"» <xblock> /)
+macro statement:for(match) {
+    my expr = match["expr"].ast;
+    my pblock = match["pblock"].ast;
+    my pfn = pblock.fn();
+
+    return quasi {
+        my iterator = {{{expr}}}.iterator();
+        while my [hasNext, value] = iterator.next() && hasNext {
+            pfn(value);
+        }
+    };
+}
+```
+
+Two things are going on here. First, under the hood what a `for` loop does is
+grab an iterator from its expression which it then iterates in a `while` loop.
+
+Second, the pointy block coming after the expression needs to be passed the
+current `value`. There's not really a way to syntactically call a pointy block
+(since it's not an expression), but we can ask a `Q.Block` to wrap itself into
+a function, and then we can call it from inside the `while` loop.
+
+To read more about `xblock`, check out the next section on [grammatical
+categories](#grammatical-categories).
+
+(We've omitted from this simple example some checking that the pointy block
+doesn't have more than one parameter, plus also the logic required to handle
+the zero-parameter case. See the `syntax.stmt.for` module for those details
+details.)
 
 ## Grammatical categories
 
