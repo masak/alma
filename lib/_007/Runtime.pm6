@@ -4,9 +4,7 @@ use _007::Builtins;
 use _007::Equal;
 
 constant NO_OUTER = Val::Dict.new;
-constant RETURN_TO = Q::Identifier.new(
-    :name(Val::Str.new(:value("--RETURN-TO--"))),
-    :frame(NONE));
+constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
 constant EXIT_SUCCESS = 0;
 
 class _007::Runtime {
@@ -79,9 +77,7 @@ class _007::Runtime {
         my $frame = Val::Dict.new(:properties(:$outer-frame, :pad(Val::Dict.new)));
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
-            my $identifier = Q::Identifier.new(
-                :name(Val::Str.new(:value($name))),
-                :frame(NONE));
+            my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
             self.declare-var($identifier, $value);
         }
         for $statementlist.statements.elements.kv -> $i, $_ {
@@ -103,7 +99,7 @@ class _007::Runtime {
         }
         if $routine {
             my $name = $routine.name;
-            my $identifier = Q::Identifier.new(:$name, :$frame);
+            my $identifier = Q::Identifier.new(:$name);
             self.declare-var($identifier, $routine);
         }
     }
@@ -140,17 +136,30 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
+    method lookup-frame-outside(Q::Term::Identifier $identifier, $quasi-frame) {
+        my Str $name = $identifier.name.value;
+        my $frame = self.current-frame;
+        my $seen-quasi-frame = False;
+        repeat until $frame === NO_OUTER {
+            if $frame.properties<pad>.properties{$name} :exists {
+                return $seen-quasi-frame ?? $frame !! Nil;
+            }
+            if $frame === $quasi-frame {
+                $seen-quasi-frame = True;
+            }
+            $frame = $frame.properties<outer-frame>;
+        }
+        die "something is very off with lexical lookup ($name)";    # XXX: turn into X::
+    }
+
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.value;
-        my $frame = $identifier.frame ~~ Val::None
-            ?? self.current-frame
-            !! $identifier.frame;
-        my $pad = self!find-pad($name, $frame);
+        my $pad = self!find-pad($name, self.current-frame);
         $pad.properties{$name} = $value;
     }
 
-    method get-var(Str $name, $frame = self.current-frame) {
-        my $pad = self!find-pad($name, $frame);
+    method get-var(Str $name) {
+        my $pad = self!find-pad($name, self.current-frame);
         return $pad.properties{$name};
     }
 
@@ -160,12 +169,17 @@ class _007::Runtime {
         }
     }
 
+    method get-direct(Val::Dict $frame, Str $name) {
+        return $frame.properties<pad>.properties{$name};
+    }
+
+    method put-direct(Val::Dict $frame, Str $name, $value) {
+        $frame.properties<pad>.properties{$name} = $value;
+    }
+
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.value;
-        my Val::Dict $frame = $identifier.frame ~~ Val::None
-            ?? self.current-frame
-            !! $identifier.frame;
-        $frame.properties<pad>.properties{$name} = $value // NONE;
+        self.current-frame.properties<pad>.properties{$name} = $value // NONE;
     }
 
     method declared($name) {
@@ -173,9 +187,7 @@ class _007::Runtime {
     }
 
     method declared-locally($name) {
-        my $frame = self.current-frame;
-        return True
-            if $frame.properties<pad>.properties{$name} :exists;
+        return so (self.current-frame.properties<pad>.properties{$name} :exists);
     }
 
     method register-subhandler {
@@ -263,8 +275,8 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return $thing.new(:name($thing.name), :frame(NONE))
-                        if $thing ~~ Q::Identifier;
+                    return Q::Term::Identifier.new(:name($thing.name))
+                        if $thing ~~ Q::Term::Identifier;
 
                     return $thing
                         if $thing ~~ Q::Unquote;
@@ -617,6 +629,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Array" {
             return Val::Type.of(Q::Term::Array);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Identifier" {
+            return Val::Type.of(Q::Term::Identifier);
         }
         else {
             if $obj ~~ Val::Type {

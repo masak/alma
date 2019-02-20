@@ -31,8 +31,8 @@ use _007::Test;
     my $program = q:to/./;
         macro foo() {
             return new Q.Postfix.Call {
-                identifier: new Q.Identifier { name: "postfix:()" },
-                operand: new Q.Identifier { name: "say" },
+                identifier: new Q.Term.Identifier { name: "postfix:()" },
+                operand: new Q.Term.Identifier { name: "say" },
                 argumentlist: new Q.ArgumentList {
                     arguments: [new Q.Literal.Str { value: "OH HAI" }]
                 }
