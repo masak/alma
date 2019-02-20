@@ -1012,29 +1012,23 @@ recommended to put one at the end.
 
 # Macrology
 
-007 is an extensible language. In a trivial sense, this is true of almost any
-language; defining a new variable or function introduces a new name into some
-environment, thus "extending" the language with the new name.
+007 has extensible syntax and semantics, to an extent not found in many other
+languages.  It lets you define the syntax and semantics not just for operators,
+but for terms and statements as well. This part of the documentation is about
+that.
 
-Custom operators represent a more ambitious form of extension. Not only do they
-introduce the operator name into the local scope, they also make the _grammar_
-recognize a new operator, thus extending the language's syntax.
-
-007 is a _very_ extensible language. It lets you define the syntax and
-semantics not just for operators, but for terms and statements as well.
-
-The overriding goal is for things in the core language, as well as language
+The overriding goal is for elements of the core language, as well as language
 extensions, to be _user-definable_. This largely happens thanks to macros.
 
-As we move into the macrology sections, it might be good to know more is
-required of you, the reader. In extending in the language's reach, you will
-need to relate to aspects of the parser, the object system, and the execution
+This section is intricate because being a language extender is more challenging
+than being a language consumer. In extending in the language's reach, you will
+need to relate to aspects of the parser, the code generation, and the execution
 model at a higher fidelity than the average "end user" of the language.
 
 Moreover, in the crowded space of lanuage extension, you're being held at a
 higher-than-usual standard of care and empathy. Your particular extension might
 need to interoperate not just with the core language but with other people's
-(past, present, and future) extensions.
+(past, present, and future) extensions. This requires tact and taste.
 
 ## Macros
 
