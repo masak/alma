@@ -1332,11 +1332,93 @@ declarator.
 
 ## Closures in macros
 
-XXX go through how name lookup works in general
+Lexical lookup means a "search" is carried out from where a variable occurs,
+outwards to where it was defined. Eventually, the definition is found &mdash;
+it can't not be found, since such cases have already been eliminated at
+runtime.
 
-XXX Dylan quote about "the meaning of names"
+When macros are thrown into the mix, the situation is different: code can be
+"copy-pasted" so that variables get separated from their definitions. Here's
+a simple example:
 
-XXX macro hygiene
+```_007
+import * from syntax.op.incdec;
+
+macro nth() {
+    my count = 0;
+    quasi {
+        say(++count);
+    };
+}
+
+nth();  # 1
+nth();  # 2
+nth();  # 3
+```
+
+The `nth();` invocations get expanded into code that looks like `say(++count);`
+&mdash; but a lexical look-up of `count` from that place in the code would
+_fail_.
+
+What's worse, if the code looked a little bit different:
+
+```_007
+# macro nth as before
+
+my count = "haha, busted!";
+nth();
+nth();
+nth();
+```
+
+Then a lexical lookup would find the _wrong_ `count` variable; the one from the
+mainline, not the one from the `nth` macro.
+
+An expectation would be broken here: that mainline variables never get mistaken
+for macro/quasi variables, or vice versa. As a consumer of a macro, you
+shouldn't ever have to be concerned about the names of your (mainline)
+variables colliding with names from inside the macro. This expectation is
+referred to as "macro hygiene".
+
+For this to work, variables inside of a quasi tied to outside definitions use a
+different kind of lookup: _direct_ lookup. No "search" is involved in this
+lookup; instead, the exact location of the variable is used. This is how the
+macro-expanded `count` in the examples above finds its way to the definition
+inside of the macro.
+
+Among the languages of the Lisp family, Scheme guarantees hygiene by default.
+In contrast, Common Lisp allows variables from macros and the mainline to
+intermix; proponents of this unhygienic approach point to greater macro
+expressivity as the main advantage.
+
+007 goes with Scheme's hygienic behavior by default, as this seems to adhere to
+Least Surprise for unwary users. But it also allows the macro author to opt
+into Common Lisp's unhygienic behavior, through the special namespace
+`COMPILING`, which denotes the block from which the macro was _invoked_:
+
+```_007
+macro moo(expr) {
+    return quasi {
+        say(COMPILING.x);       # prints "OH"
+        my COMPILING.y = "HAI";
+        {{{expr}}};
+    };
+}
+
+my x = "OH";
+moo(say(y));                    # prints "HAI"
+```
+
+Needless to say, unhygienic variables are weird and should be used sparingly.
+The good news is that they are safe, in the sense that attempting to expand the
+`moo` macro above in an environment where `x` is not defined will trigger an
+error. That is, the variables bind quite late, but still at compile time.
+
+Sometimes we want to have the cake and eat it: we want to punch a hole
+(unhygienically) into the mainline scope and place a variable there, but we
+also want its name (hygienically) to not collide with any other names, whether
+from the mainline or from other macro invocations. That's when we need
+_symbols_; see [a later section](#symbols) for more on these.
 
 ## Macros that parse
 
