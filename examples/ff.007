@@ -24,7 +24,7 @@ for values -> v {
 
 say("");
 
-macro infix:<fff>(lhs, rhs) is tighter(infix:<=>) {
+macro infix:<fff>(lhs, rhs) is equiv(infix:<ff>) {
     my active = false;
     return quasi {
         my result = active;
