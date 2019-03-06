@@ -1705,9 +1705,9 @@ import * from syntax.param.rest;
 @usesContext(Q.Statement.Expr)
 macro each(context, ...values) {
     my stmts = values.map(func (value) {
-        return context.root.cloneAndSubstitute(context.target, value);
+        return context.root.cloneAndReplace(context.target, value);
     });
-    return stmts;
+    context.root.replace(stmts);
 }
 ```
 
@@ -1717,6 +1717,10 @@ replacing _itself_ (the `each()` invocation) with just one particular value.
 The whole array of new statements is returned, and 007's macro expansion does
 the right thing expanding the entire old statement (containing the `each()`
 call) into those new statements (containing individual values).
+
+As demonstrated above, there are two important Qtrees available through the
+`context` parameter: `context.root`, the Qtree of the macro's host (the one
+providing the context), and `context.target`, the macro itself.
 
 The inquisitive reader might wonder what the above macro definition does if a
 statement has _two_ (or more) `each()` invocations. For example, this code:
