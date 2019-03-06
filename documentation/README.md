@@ -1244,7 +1244,7 @@ The above demonstrates two things:
 * Code in a quasi can read/modify variables defined in the macro. The values in
   such variables will persist between runs of the quasi code.
 
-* Each macro _expasion_ (that is, each call to the macro in the code) gets its
+* Each macro _expansion_ (that is, each call to the macro in the code) gets its
   own fresh copies of these variables, since the macro runs anew each time.
 
 We describe this by saying that the `alreadyRan` variable belongs to the
@@ -1677,7 +1677,79 @@ macro parameter:prefix:<...>(parameter) {
 
 ## Contextual macros
 
-XXX examples: `each()`, junctions, class declarations
+By default, macros only have influence over what code to expand in place of the
+macro call (or `@parsed` code). Also by default, expansion (that is, wholesale
+replacement of the old code with the new) is the only action possible.
+
+When that's not sufficient &mdash; when a macro needs to affect things in its
+surroundings and/or move, copy, and validate Qnodes rather than just replace
+them, a _contextual_ macro is used.
+
+A contextual macro is a macro which consumes a _context_, an object provided by
+a _host_ attached to some syntactically surrounding thing in the code. For
+example, there's an `each()` macro, which can turn a statement into several
+repeated statements with different data:
+
+```_007
+say(each(1, 2, 3), "testing");
+# 1 testing
+# 2 testing
+# 3 testing
+```
+
+The `each()` macro can be implemented like this:
+
+```_007
+import * from syntax.param.rest;
+
+@usesContext(Q.Statement.Expr)
+macro each(context, ...values) {
+    my stmts = values.map(func (value) {
+        return context.root.cloneAndSubstitute(context.target, value);
+    });
+    return stmts;
+}
+```
+
+The `each()` macro locates the whole statement (the AST of the surrounding
+context), and for each value in `values`, it clones a new statement while also
+replacing _itself_ (the `each()` invocation) with just one particular value.
+The whole array of new statements is returned, and 007's macro expansion does
+the right thing expanding the entire old statement (containing the `each()`
+call) into those new statements (containing individual values).
+
+The inquisitive reader might wonder what the above macro definition does if a
+statement has _two_ (or more) `each()` invocations. For example, this code:
+
+```_007
+say(my p = each(1, 2, 3), " * ", my q = each(4, 5, 6), " = ", p * q);
+```
+
+will print the following:
+
+```
+1 * 4 = 4
+1 * 5 = 5
+1 * 6 = 6
+2 * 4 = 8
+2 * 5 = 10
+2 * 6 = 12
+3 * 4 = 12
+3 * 5 = 15
+3 * 6 = 18
+```
+
+Intuitively, the second `each()` call can be seen as an "inner loop" and the
+first one an "outer loop".
+
+Concretely, the two `each()` calls fire in reverse order, so that `each(4, 5,
+6)` gets to transform the statement first, and `each(1, 2, 3)` second. Regular
+macros don't fire in reverse, they fire ASAP either as they are parsed, or as
+they are expanded into code. With contextual macros, the firing order is
+delayed until the whole contextual host has been parsed, and then it happens
+according to specific rules of precedence, explained below.
+
+XXX examples: junctions, amb, class declarations
 
 ## Evaluating expressions
 
