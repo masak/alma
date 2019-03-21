@@ -1524,11 +1524,13 @@ We already saw an example of a statement macro in [the previous
 section](#macros-that-parse), but it's so common to want to define these that
 we might as well do a few more examples.
 
-First, let's define the `repeat while` loop, whose main selling-point is that
-it evaluates its condition _after_ the first iteration through the loop (unlike
-`while` which does it before). Futhermore, the programmer gets to choose
-whether to write the condition before or after the loop (but the condition will
-always run after regardless).
+First, let's implement the `until` statement. XXX
+
+As a slightly more elaborate example, let's define the `repeat while` loop,
+whose main selling-point is that it evaluates its condition _after_ the first
+iteration through the loop (unlike `while` which does it before). Futhermore,
+the programmer gets to choose whether to write the condition before or after
+the loop (but the condition will always run after regardless).
 
 ```_007
 @parsed(/"repeat" <.ws> [
