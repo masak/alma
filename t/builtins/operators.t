@@ -383,6 +383,72 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say(38 - "4");
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "subtracting non-ints is an error (rhs)";
+}
+
+{
+    my $program = q:to/./;
+        say(true - 4);
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "subtracting non-ints is an error (lhs)";
+}
+
+{
+    my $program = q:to/./;
+        say(38 * "4");
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "multiplying non-ints is an error (rhs)";
+}
+
+{
+    my $program = q:to/./;
+        say(true * 4);
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "multiplying non-ints is an error (lhs)";
+}
+
+{
+    my $program = q:to/./;
+        say("four" % 4);
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "moduloing non-ints is an error (lhs)";
+}
+
+{
+    my $program = q:to/./;
+        say("four" %% 4);
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "checking divisibility of non-ints is an error (lhs)";
+}
+
+{
+    my $program = q:to/./;
         say(38 ~ "4");
         .
 
@@ -662,6 +728,28 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say( 7 ~~ "Int" );
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "rhs of ~~ must be of type Type";
+}
+
+{
+    my $program = q:to/./;
+        say( 7 !~~ "Int" );
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "rhs of !~~ must be of type Type";
+}
+
+{
+    my $program = q:to/./;
         say( 5 divmod 2 );
         say( 5 divmod -2 );
         .
@@ -690,6 +778,17 @@ use _007::Test;
         .
 
     outputs $program, "foo4\n4bar\n", "~ binds looser than +";
+}
+
+{
+    my $program = q:to/./;
+        say("30" divmod 5);
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "divmodding non-ints is an error (lhs)";
 }
 
 done-testing;
