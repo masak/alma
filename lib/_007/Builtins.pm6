@@ -103,7 +103,6 @@ my @builtins =
             my %*equality-seen;
             return wrap(equal-value($lhs, $rhs));
         },
-        :qtype(Q::Infix),
         :assoc<non>,
     ),
     'infix:!=' => op(
@@ -111,14 +110,12 @@ my @builtins =
             my %*equality-seen;
             return wrap(!equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<' => op(
         sub ($lhs, $rhs) {
             return wrap(less-value($lhs, $rhs))
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<=' => op(
@@ -126,14 +123,12 @@ my @builtins =
             my %*equality-seen;
             return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>' => op(
         sub ($lhs, $rhs) {
             return wrap(more-value($lhs, $rhs) )
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>=' => op(
@@ -141,7 +136,6 @@ my @builtins =
             my %*equality-seen;
             return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:~~' => op(
@@ -150,7 +144,6 @@ my @builtins =
 
             return wrap($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
@@ -159,7 +152,6 @@ my @builtins =
 
             return wrap($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
         },
-        :qtype(Q::Infix),
         :precedence{ equiv => "infix:==" },
     ),
 
@@ -168,7 +160,6 @@ my @builtins =
         sub ($lhs, $rhs) {
             return wrap($lhs.Str ~ $rhs.Str);
         },
-        :qtype(Q::Infix),
     ),
 
     # additive precedence
@@ -179,7 +170,6 @@ my @builtins =
 
             return wrap($lhs.value + $rhs.value);
         },
-        :qtype(Q::Infix),
     ),
     'infix:-' => op(
         sub ($lhs, $rhs) {
@@ -188,7 +178,6 @@ my @builtins =
 
             return wrap($lhs.value - $rhs.value);
         },
-        :qtype(Q::Infix),
     ),
 
     # multiplicative precedence
@@ -199,7 +188,6 @@ my @builtins =
 
             return wrap($lhs.value * $rhs.value);
         },
-        :qtype(Q::Infix),
     ),
     'infix:%' => op(
         sub ($lhs, $rhs) {
@@ -209,7 +197,6 @@ my @builtins =
 
             return wrap($lhs.value % $rhs.value);
         },
-        :qtype(Q::Infix),
     ),
     'infix:%%' => op(
         sub ($lhs, $rhs) {
@@ -219,7 +206,6 @@ my @builtins =
 
             return wrap($lhs.value %% $rhs.value);
         },
-        :qtype(Q::Infix),
     ),
     'infix:divmod' => op(
         sub ($lhs, $rhs) {
@@ -232,7 +218,6 @@ my @builtins =
                 wrap($lhs.value % $rhs.value),
             ]));
         },
-        :qtype(Q::Infix),
     ),
 
     # prefixes
@@ -240,7 +225,6 @@ my @builtins =
         sub prefix-str($expr) {
             Val::Str.new(:value($expr.Str));
         },
-        :qtype(Q::Prefix),
     ),
     'prefix:+' => op(
         sub prefix-plus($_) {
@@ -254,7 +238,6 @@ my @builtins =
             }
             assert-type(:value($_), :type(Val::Int), :operation("prefix:<+>"));
         },
-        :qtype(Q::Prefix),
     ),
     'prefix:-' => op(
         sub prefix-minus($_) {
@@ -268,19 +251,16 @@ my @builtins =
             }
             assert-type(:value($_), :type(Val::Int), :operation("prefix:<->"));
         },
-        :qtype(Q::Prefix),
     ),
     'prefix:?' => op(
         sub ($a) {
             return wrap(?$a.truthy)
         },
-        :qtype(Q::Prefix),
     ),
     'prefix:!' => op(
         sub ($a) {
             return wrap(!$a.truthy)
         },
-        :qtype(Q::Prefix),
     ),
     'prefix:^' => op(
         sub ($n) {
@@ -288,7 +268,6 @@ my @builtins =
 
             return wrap([^$n.value]);
         },
-        :qtype(Q::Prefix),
     ),
 
     # postfixes
