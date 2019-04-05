@@ -1,0 +1,8 @@
+#! /bin/bash
+
+NFA_DIR=$(dirname $0)
+for grammarfile in $NFA_DIR/???-*.grammar; do
+    echo "------ $grammarfile ------"
+    echo ""
+    $NFA_DIR/build-and-test-grammar $grammarfile
+done

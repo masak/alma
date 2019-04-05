@@ -1,0 +1,212 @@
+#! /usr/local/bin/perl6
+use Test;
+
+role Grammar {
+    token grammar {
+        'grammar' <.ws> '{'
+            <.ws>
+            <rule>*
+        '}'
+        <.ws>
+
+        {
+            die "There must be a 'TOP' rule defined"
+                unless 'TOP' ∈ $<rule>».ast»<name>;
+            make $<rule>».ast;
+        }
+    }
+
+    token rule {
+        'token' <.ws> <ident> <.ws> '{'
+            <.ws>
+            <atom>*
+        '}'
+        <.ws>
+
+        {
+            make {
+                name => ~$<ident>,
+                atoms => $<atom>».ast,
+            };
+        }
+    }
+
+    token atom {
+        <[']>
+            $<literal>=(<-[']>*)
+        <[']>
+        <.ws>
+
+        { make ~$<literal> }
+    }
+}
+
+role Spec {
+    token spec {
+        <section>*
+        { make $<section>».ast }
+    }
+
+    token section {
+        <heading> \n
+        [<.empty-line> | <section-line>]*
+        {
+            make {
+                heading => $<heading>.ast,
+                lines => $<section-line>».ast,
+            };
+        }
+    }
+
+    token heading {
+        ^^ '##' \h* $<heading>=(\N+) \n
+        {
+            my $heading = ~$<heading>;
+            die "Sorry, unrecognized heading `$heading`"
+                unless $heading eq "Happy parse" | "Sad parse";
+            make ~$<heading>;
+        }
+    }
+
+    token empty-line {
+        ^^ \h* \n
+    }
+
+    token section-line {
+        ^^ <[']> $<line>=(<-[']>*) <[']> \n
+        { make ~$<line> }
+    }
+}
+
+grammar GrammarSpec does Grammar does Spec {
+    token TOP {
+        <.ws>
+        <grammar>
+        <spec>
+
+        {
+            make {
+                grammar => $<grammar>.ast,
+                spec => $<spec>.ast,
+            }
+        }
+    }
+}
+
+class State {
+    has Int $.id;
+    has Bool $.goal = False;
+    has @.transitions;
+
+    method add-transition-to(State :$next-state, Str :$char) {
+        @.transitions.push(::<Transition>.new(:$char, :$next-state));
+    }
+
+    method mark-as-goal() {
+        $!goal = True;
+    }
+}
+
+class Transition {
+    has State $.next-state;
+    has Str $.char;
+}
+
+class NFA {
+    has Str $.name;
+    has State @.states;
+    has State $!current-state;
+    has Int $!next-unique-id;
+
+    submethod BUILD(:$!name!) {
+        $!next-unique-id = 0;
+        my $start-state = self!add-state();
+        $!current-state = $start-state;
+    }
+
+    method !add-state() {
+        my $state = State.new(id => $!next-unique-id++);
+        @!states.push($state);
+        return $state;
+    }
+
+    method add-char($char) {
+        my $next-state = self!add-state();
+        $!current-state.add-transition-to(:$next-state, :$char);
+        $!current-state = $next-state;
+        return;
+    }
+
+    method mark-current-state-as-goal() {
+        $!current-state.mark-as-goal();
+        return;
+    }
+
+    method start-state() {
+        return @!states[0];
+    }
+}
+
+sub dump-nfa(NFA $nfa) {
+    constant $INDENT = " " x 4;
+    say "# NFA for ", $nfa.name;
+    for $nfa.states -> $state {
+        say "# ", $INDENT, "STATE ", $state.id, ($state.goal ?? " (goal)" !! "");
+        for $state.transitions -> $t {
+            say "# ", $INDENT x 2, "---['", $t.char, "']---> ", $t.next-state.id;
+        }
+    }
+    say "";
+}
+
+sub run-nfa(NFA $nfa, Str $input) {
+    my $current-states = set($nfa.states[0]);
+    for $input.comb -> $char {
+        my $next-states = set();
+        for $current-states.keys -> $state {
+            for $state.transitions -> $t {
+                if $t.char eq $char {
+                    $next-states ∪= set($t.next-state);
+                }
+            }
+        }
+        $current-states = $next-states;
+    }
+    return ?any($current-states.keys».goal);
+}
+
+my (:$grammar, :$spec) := GrammarSpec.parse(slurp()).ast;
+my @rules = @$grammar;
+my %nfa-for-rule;
+
+for @rules -> $rule {
+    my $name = $rule<name>;
+    my $nfa = NFA.new(:$name);
+    for @($rule<atoms>) -> $atom {
+        if $atom ~~ Str {   # literal
+            # XXX: need to handle many-character literals
+            $nfa.add-char($atom);
+        }
+        else {              # unknown
+            die "Unrecognized atom type: ", $atom.^name;
+        }
+    }
+    $nfa.mark-current-state-as-goal();
+    dump-nfa($nfa);
+    %nfa-for-rule{$name} = $nfa;
+}
+my $top-nfa = %nfa-for-rule<TOP>;
+
+my @sections = @$spec;
+for @sections -> $section {
+    my $heading = $section<heading>;
+    my $expected-result = $heading eq "Happy parse";
+    my $expectation = $expected-result
+        ?? "should succeed"
+        !! "should fail";
+    for @($section<lines>) -> $line {
+        ok run-nfa($top-nfa, $line) == $expected-result, "$heading: parsing '$line' $expectation";
+    }
+}
+
+done-testing;
