@@ -1,0 +1,9 @@
+grammar {
+    token TOP { <[]> }
+}
+
+## Sad parse
+
+''
+'d'
+' '
