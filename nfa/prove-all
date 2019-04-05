@@ -1,5 +1,4 @@
 #! /bin/bash
 
 NFA_DIR=$(dirname $0)
-GRAMMAR_FILES=$NFA_DIR/???-*.grammar
-echo $GRAMMAR_FILES
+prove -e$NFA_DIR/build-and-test-grammar --color $NFA_DIR/???-*.grammar
