@@ -44,11 +44,27 @@ role Grammar {
 
     token atom:character-class {
         '<['
-            $<characters>=(<-[\]]>*)
+            <charclass-element>*
         ']>'
         <.ws>
 
-        { make $<characters>.Str.comb }
+        { make $<charclass-element>».ast }
+    }
+
+    proto token charclass-element {*}
+
+    token charclass-element:char {
+        <-[\]]>
+
+        { make ~$/ }
+    }
+
+    token charclass-element:range {
+        $<from>=<-[\]]>
+        '..'
+        $<to>=<-[\]]>
+
+        { make Range.new(~$<from>, ~$<to>) }
     }
 
     method panic($) { ... }
@@ -175,10 +191,20 @@ class NFA {
         return;
     }
 
-    method add-char-class(@characters) {
+    method add-char-class(@elements) {
         my $next-state = self!add-state();
-        for @characters -> $char {
-            $!current-state.add-transition-to(:$next-state, :$char);
+        for @elements -> $element {
+            if $element ~~ Str {
+                $!current-state.add-transition-to(:$next-state, char => $element);
+            }
+            elsif $element ~~ Range {
+                for @$element -> $char {
+                    $!current-state.add-transition-to(:$next-state, :$char);
+                }
+            }
+            else {
+                die "Unrecognized charclass element type: ", $element.^name;
+            }
         }
         $!current-state = $next-state;
         return;
@@ -235,7 +261,7 @@ for @rules -> $rule {
                 $nfa.add-char($char);
             }
         }
-        elsif $atom ~~ Seq {    # character class
+        elsif $atom ~~ List {   # character class
             $nfa.add-char-class($atom);
         }
         else {                  # unknown
