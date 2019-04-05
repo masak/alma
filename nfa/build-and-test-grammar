@@ -20,7 +20,7 @@ role Grammar {
         'token' <.ws> <ident> <.ws> '{'
             <.ws>
             <atom>*
-        '}'
+        ['}' || <panic("Expected regex atom or '}'")>]
         <.ws>
 
         {
@@ -31,7 +31,9 @@ role Grammar {
         }
     }
 
-    token atom {
+    proto token atom {*}
+
+    token atom:literal {
         <[']>
             $<literal>=(<-[']>*)
         <[']>
@@ -39,6 +41,15 @@ role Grammar {
 
         { make ~$<literal> }
     }
+
+    token atom:character-class {
+        '<['
+            $<characters>=(<-[\]]>*)
+        ']>'
+        <.ws>
+    }
+
+    method panic($) { ... }
 }
 
 role Spec {
@@ -90,6 +101,31 @@ grammar GrammarSpec does Grammar does Spec {
                 spec => $<spec>.ast,
             }
         }
+    }
+
+    method panic($message) {
+        my $pos = self.pos;
+        my $orig = self.orig;
+
+        sub de-nl($s) {
+            $s.subst(/\n/, "\x[2424]", :g);
+        }
+
+        my $before-length = 12;
+        my $before = de-nl $orig.substr( ($pos - $before-length max 0) ..^ $pos );
+        my $before-ellipsis = $pos - $before-length > 0
+            ?? "..."
+            !! "";
+
+        my $snippet-length = 12;
+        my $snippet = de-nl $orig.substr($pos, $snippet-length);
+        my $snippet-ellipsis = $pos < $orig.chars - $snippet-length
+            ?? "..."
+            !! "";
+
+        my $some-text = "$before-ellipsis$before⏏$snippet$snippet-ellipsis";
+        note "Parse failed: $message (`$some-text` at pos $pos)";
+        exit 1;
     }
 }
 
