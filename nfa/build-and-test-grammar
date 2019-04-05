@@ -255,13 +255,24 @@ class NFA {
     }
 }
 
+sub insert-at(Int $pos, Str $small, Str $big) {
+    return $big.substr(0, $pos)
+        ~ $small
+        ~ $big.substr($pos + $small.chars);
+}
+
 sub dump-nfa(NFA $nfa) {
     constant $INDENT = " " x 4;
     say "# NFA for token ", $nfa.name, " \{ ", $nfa.contents, " \} ";
     for $nfa.states -> $state {
         say "# ", $INDENT, "STATE ", $state.id, ($state.goal ?? " (goal)" !! "");
         for $state.transitions -> $t {
-            say "# ", $INDENT x 2, "---[", $t.Str, "]---> ", $t.next-state.id;
+            my $arrow = "-" x 14 ~ ">";
+            my $matcher = "[{$t.Str}]";
+            my $pos = floor($arrow.chars / 2 - $matcher.chars / 2);
+            my $matcher-arrow = insert-at($pos, $matcher, $arrow);
+
+            say "# {$INDENT x 2}{$matcher-arrow} {$t.next-state.id}";
         }
     }
     say "";
