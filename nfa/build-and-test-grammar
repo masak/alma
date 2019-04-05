@@ -152,8 +152,8 @@ class State {
     has Bool $.goal = False;
     has @.transitions;
 
-    method add-transition-to(State :$next-state, Str :$char) {
-        @.transitions.push(::<Transition>.new(:$char, :$next-state));
+    method add-transition-to(State :$next-state!, :$matcher!) {
+        @.transitions.push(transition(:$next-state, :$matcher));
     }
 
     method mark-as-goal() {
@@ -161,9 +161,36 @@ class State {
     }
 }
 
-class Transition {
+role Transition {
     has State $.next-state;
+
+    method matches(Str $char) { ... }
+}
+
+class Transition::Char does Transition {
     has Str $.char;
+
+    method Str { "'$.char'" }
+    method matches(Str $char) { $char eq $.char }
+}
+
+class Transition::Range does Transition {
+    has Range $.range;
+
+    method Str { $.range.min ~ ".." ~ $.range.max }
+    method matches(Str $char) { $char ~~ $.range }
+}
+
+multi transition(State :$next-state!, Str :$matcher!) {
+    Transition::Char.new(:$next-state, char => $matcher);
+}
+
+multi transition(State :$next-state!, Range :$matcher!) {
+    Transition::Range.new(:$next-state, range => $matcher);
+}
+
+multi transition(State :$next-state!, :$matcher!) {
+    die "Unrecognized charclass element type: ", $matcher.^name;
 }
 
 class NFA {
@@ -186,25 +213,15 @@ class NFA {
 
     method add-char($char) {
         my $next-state = self!add-state();
-        $!current-state.add-transition-to(:$next-state, :$char);
+        $!current-state.add-transition-to(:$next-state, matcher => $char);
         $!current-state = $next-state;
         return;
     }
 
     method add-char-class(@elements) {
         my $next-state = self!add-state();
-        for @elements -> $element {
-            if $element ~~ Str {
-                $!current-state.add-transition-to(:$next-state, char => $element);
-            }
-            elsif $element ~~ Range {
-                for @$element -> $char {
-                    $!current-state.add-transition-to(:$next-state, :$char);
-                }
-            }
-            else {
-                die "Unrecognized charclass element type: ", $element.^name;
-            }
+        for @elements -> $matcher {
+            $!current-state.add-transition-to(:$next-state, :$matcher);
         }
         $!current-state = $next-state;
         return;
@@ -226,7 +243,7 @@ sub dump-nfa(NFA $nfa) {
     for $nfa.states -> $state {
         say "# ", $INDENT, "STATE ", $state.id, ($state.goal ?? " (goal)" !! "");
         for $state.transitions -> $t {
-            say "# ", $INDENT x 2, "---['", $t.char, "']---> ", $t.next-state.id;
+            say "# ", $INDENT x 2, "---[", $t.Str, "]---> ", $t.next-state.id;
         }
     }
     say "";
@@ -238,7 +255,7 @@ sub run-nfa(NFA $nfa, Str $input) {
         my $next-states = set();
         for $current-states.keys -> $state {
             for $state.transitions -> $t {
-                if $t.char eq $char {
+                if $t.matches($char) {
                     $next-states ∪= set($t.next-state);
                 }
             }
