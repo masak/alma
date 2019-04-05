@@ -1,0 +1,5 @@
+#! /bin/bash
+
+NFA_DIR=$(dirname $0)
+GRAMMAR_FILES=$NFA_DIR/???-*.grammar
+echo $GRAMMAR_FILES
