@@ -1,0 +1,17 @@
+grammar {
+    token TOP { <[xyz]> }
+}
+
+## Happy parse
+
+'x'
+'y'
+'z'
+
+## Sad parse
+
+''
+'xyz'
+'xz'
+'xy'
+'d'

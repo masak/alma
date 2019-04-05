@@ -47,6 +47,8 @@ role Grammar {
             $<characters>=(<-[\]]>*)
         ']>'
         <.ws>
+
+        { make $<characters>.Str.comb }
     }
 
     method panic($) { ... }
@@ -173,6 +175,15 @@ class NFA {
         return;
     }
 
+    method add-char-class(@characters) {
+        my $next-state = self!add-state();
+        for @characters -> $char {
+            $!current-state.add-transition-to(:$next-state, :$char);
+        }
+        $!current-state = $next-state;
+        return;
+    }
+
     method mark-current-state-as-goal() {
         $!current-state.mark-as-goal();
         return;
@@ -219,12 +230,15 @@ for @rules -> $rule {
     my $name = $rule<name>;
     my $nfa = NFA.new(:$name);
     for @($rule<atoms>) -> $atom {
-        if $atom ~~ Str {   # literal
+        if $atom ~~ Str {       # literal
             for $atom.comb -> $char {
                 $nfa.add-char($char);
             }
         }
-        else {              # unknown
+        elsif $atom ~~ Seq {    # character class
+            $nfa.add-char-class($atom);
+        }
+        else {                  # unknown
             die "Unrecognized atom type: ", $atom.^name;
         }
     }
