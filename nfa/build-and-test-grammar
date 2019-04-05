@@ -53,7 +53,7 @@ role Grammar {
         ']>'
         <.ws>
 
-        { make $<charclass-element>».ast }
+        { make (my Range @ = $<charclass-element>».ast) }
     }
 
     token atom:charclass-shortcut {
@@ -69,7 +69,7 @@ role Grammar {
     token charclass-element:char {
         <-[\]]>
 
-        { make ~$/ }
+        { make Range.new(~$/, ~$/) }
     }
 
     token charclass-element:range {
@@ -191,19 +191,24 @@ class Transition::Char does Transition {
     method matches(Str $char) { $char eq $.char }
 }
 
-class Transition::Range does Transition {
-    has Range $.range;
+class Transition::Ranges does Transition {
+    has Range @.ranges;
 
-    method Str { escape($.range.min) ~ ".." ~ escape($.range.max) }
-    method matches(Str $char) { $char ~~ $.range }
+    sub format($r) {
+        $r.min eq $r.max
+            ?? qq["{escape($r.min)}"]
+            !! qq[{escape($r.min)}..{escape($r.max)}];
+    }
+    method Str { @.ranges.map(&format).join(", ") }
+    method matches(Str $char) { so $char ~~ any(@.ranges) }
 }
 
 multi transition(State :$next-state!, Str :$matcher!) {
     Transition::Char.new(:$next-state, char => $matcher);
 }
 
-multi transition(State :$next-state!, Range :$matcher!) {
-    Transition::Range.new(:$next-state, range => $matcher);
+multi transition(State :$next-state!, Range :@matcher!) {
+    Transition::Ranges.new(:$next-state, ranges => @matcher);
 }
 
 multi transition(State :$next-state!, :$matcher!) {
@@ -229,16 +234,9 @@ class NFA {
         return $state;
     }
 
-    method add-char($char) {
+    method add-state-with-transition($matcher) {
         my $next-state = self!add-state();
-        $!current-state.add-transition-to(:$next-state, matcher => $char);
-        $!current-state = $next-state;
-        return;
-    }
-
-    method add-char-class(@elements) {
-        my $next-state = self!add-state();
-        for @elements -> $matcher {
+        if $matcher !~~ Array[Range] || +$matcher { # no need to add an empty transition
             $!current-state.add-transition-to(:$next-state, :$matcher);
         }
         $!current-state = $next-state;
@@ -255,24 +253,15 @@ class NFA {
     }
 }
 
-sub insert-at(Int $pos, Str $small, Str $big) {
-    return $big.substr(0, $pos)
-        ~ $small
-        ~ $big.substr($pos + $small.chars);
-}
-
 sub dump-nfa(NFA $nfa) {
     constant $INDENT = " " x 4;
     say "# NFA for token ", $nfa.name, " \{ ", $nfa.contents, " \} ";
     for $nfa.states -> $state {
         say "# ", $INDENT, "STATE ", $state.id, ($state.goal ?? " (goal)" !! "");
         for $state.transitions -> $t {
-            my $arrow = "-" x 14 ~ ">";
-            my $matcher = "[{$t.Str}]";
-            my $pos = floor($arrow.chars / 2 - $matcher.chars / 2);
-            my $matcher-arrow = insert-at($pos, $matcher, $arrow);
+            my $arrow = "---[{$t.Str}]--->";
 
-            say "# {$INDENT x 2}{$matcher-arrow} {$t.next-state.id}";
+            say "# {$INDENT x 2}{$arrow} {$t.next-state.id}";
         }
     }
     say "";
@@ -303,24 +292,25 @@ for @rules -> $rule {
     my $contents = $rule<contents>;
     my $nfa = NFA.new(:$name, :$contents);
     for @($rule<atoms>) -> $atom {
-        if $atom ~~ Str {       # literal
+        if $atom ~~ Str {               # literal
             for $atom.comb -> $char {
-                $nfa.add-char($char);
+                $nfa.add-state-with-transition($char);
             }
         }
-        elsif $atom ~~ List {   # character class
-            $nfa.add-char-class($atom);
+        elsif $atom ~~ Array[Range] {   # character class
+            $nfa.add-state-with-transition($atom);
         }
         elsif $atom ~~ Shortcut {
-            my @elements = do given $atom.type {
+            sub r($c) { $c..$c }
+            my Range @elements = do given $atom.type {
                 when "d" { ("0".."9",) }
-                when "w" { "0".."9", "A".."Z", "a".."z", "_" }
-                when "s" { "\x[20]", "\x[09]".."\x[0D]" }
-                when "h" { "\x[20]", "\x[09]" }
+                when "w" { "0".."9", "A".."Z", "a".."z", r("_") }
+                when "s" { r("\x[20]"), "\x[09]".."\x[0D]" }
+                when "h" { r("\x[20]"), r("\x[09]") }
             };
-            $nfa.add-char-class(@elements);
+            $nfa.add-state-with-transition(@elements);
         }
-        else {                  # unknown
+        else {                          # unknown
             die "Unrecognized atom type: ", $atom.^name;
         }
     }
