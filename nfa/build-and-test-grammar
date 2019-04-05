@@ -165,8 +165,8 @@ class State {
     has Bool $.goal = False;
     has @.transitions;
 
-    method add-transition-to(State :$next-state!, :$matcher!) {
-        @.transitions.push(transition(:$next-state, :$matcher));
+    method add-transition-to(State :$next-state!, :$matcher!, Bool :$negated = False) {
+        @.transitions.push(transition(:$next-state, :$matcher, :$negated));
     }
 
     method mark-as-goal() {
@@ -193,6 +193,7 @@ class Transition::Char does Transition {
 
 class Transition::Ranges does Transition {
     has Range @.ranges;
+    has Bool $.negated;
 
     sub format($r) {
         $r.min eq $r.max
@@ -200,18 +201,18 @@ class Transition::Ranges does Transition {
             !! qq[{escape($r.min)}..{escape($r.max)}];
     }
     method Str { @.ranges.map(&format).join(", ") }
-    method matches(Str $char) { so $char ~~ any(@.ranges) }
+    method matches(Str $char) { $.negated ^^ so $char ~~ any(@.ranges) }
 }
 
-multi transition(State :$next-state!, Str :$matcher!) {
+multi transition(State :$next-state!, Str :$matcher!, :$negated) {
     Transition::Char.new(:$next-state, char => $matcher);
 }
 
-multi transition(State :$next-state!, Range :@matcher!) {
-    Transition::Ranges.new(:$next-state, ranges => @matcher);
+multi transition(State :$next-state!, Range :@matcher!, Bool :$negated = False) {
+    Transition::Ranges.new(:$next-state, ranges => @matcher, :$negated);
 }
 
-multi transition(State :$next-state!, :$matcher!) {
+multi transition(State :$next-state!, :$matcher!, :$negated) {
     die "Unrecognized charclass element type: ", $matcher.^name;
 }
 
@@ -234,10 +235,10 @@ class NFA {
         return $state;
     }
 
-    method add-state-with-transition($matcher) {
+    method add-state-with-transition($matcher, Bool :$negated) {
         my $next-state = self!add-state();
-        if $matcher !~~ Array[Range] || +$matcher { # no need to add an empty transition
-            $!current-state.add-transition-to(:$next-state, :$matcher);
+        if $matcher !~~ Array[Range] || +$matcher || $negated { # no need to add an empty transition
+            $!current-state.add-transition-to(:$next-state, :$matcher, :$negated);
         }
         $!current-state = $next-state;
         return;
@@ -302,13 +303,15 @@ for @rules -> $rule {
         }
         elsif $atom ~~ Shortcut {
             sub r($c) { $c..$c }
-            my Range @elements = do given $atom.type {
+            my Range @elements = do given $atom.type.lc {
                 when "d" { ("0".."9",) }
                 when "w" { "0".."9", "A".."Z", "a".."z", r("_") }
                 when "s" { r("\x[20]"), "\x[09]".."\x[0D]" }
                 when "h" { r("\x[20]"), r("\x[09]") }
+                default { die "Unknown type: ", $atom.type }
             };
-            $nfa.add-state-with-transition(@elements);
+            my $negated = so $atom.type ~~ /<+upper>/;
+            $nfa.add-state-with-transition(@elements, :$negated);
         }
         else {                          # unknown
             die "Unrecognized atom type: ", $atom.^name;

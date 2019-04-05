@@ -1,0 +1,17 @@
+grammar {
+    token TOP { \W\D\H\S }
+}
+
+## Happy parse
+
+'....'
+'@ Z!'
+
+## Sad parse
+
+''
+'a0'
+'a...'
+'.0..'
+'..\t.'
+'...\n'
