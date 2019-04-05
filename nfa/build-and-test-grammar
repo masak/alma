@@ -184,8 +184,9 @@ for @rules -> $rule {
     my $nfa = NFA.new(:$name);
     for @($rule<atoms>) -> $atom {
         if $atom ~~ Str {   # literal
-            # XXX: need to handle many-character literals
-            $nfa.add-char($atom);
+            for $atom.comb -> $char {
+                $nfa.add-char($char);
+            }
         }
         else {              # unknown
             die "Unrecognized atom type: ", $atom.^name;

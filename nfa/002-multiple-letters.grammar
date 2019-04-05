@@ -1,0 +1,16 @@
+grammar {
+    token TOP { 'abc' }
+}
+
+## Happy parse
+
+'abc'
+
+## Sad parse
+
+''
+'ab'
+'abcc'
+'abd'
+'abcd'
+'aabc'
