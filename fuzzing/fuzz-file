@@ -1,0 +1,85 @@
+sub remove-block($filepath, $n) {
+    shell(q[perl -i.bak -nle'
+        BEGIN { $p = 1 };
+        if ($. == ] ~ $n ~ q[) {
+            $p = 0;
+            /^ (\s*)/;
+            $spaces = length($1);
+        }
+        print if $p;
+        if (/^ (\s*) '}'/ ) {
+            $p = 1;
+        }' ] ~ $filepath);
+}
+
+sub remove-line($filepath, $n) {
+    shell("perl -i.bak -nle'print unless \$. == $n' $filepath");
+}
+
+sub clear-lib {
+    shell("git checkout lib/");
+    shell("git clean -xqdf lib/");
+}
+
+sub remove($filepath, $n, $line) {
+    if $line ~~ /'{' \h* ['#' \N]? $/ {
+        remove-block($filepath, $n);
+    }
+    else {
+        remove-line($filepath, $n);
+    }
+}
+
+sub status($filepath, $n, $line) {
+    if $line ~~ rx[^ \h* ['}' \h*]? $] || $line ~~ /^ \h* '#'/ {
+        return "";
+    }
+
+    remove($filepath, $n, $line);
+
+    if shell("perl6 $filepath 2> /dev/null").exitcode != 0 {
+        clear-lib();
+        return "";
+    }
+
+    return test-result($filepath, $n, $line);
+}
+
+sub test-result($filepath, $n, $line) {
+    remove($filepath, $n, $line);
+    my $passes = 0 == shell('timeout 10m prove -v -eperl6 -r t/ > prove-output 2>&1').exitcode;
+    shell("perl -i.bak -nle'print unless /^Files=/' prove-output");
+    clear-lib();
+
+    if !$passes {
+        my $sha1 = qx[sha1sum prove-output | cut -c 1-5].trim;
+        move("prove-output", "$sha1.prove");
+        return "[$sha1]";
+    }
+    return "[!!!!!]";
+}
+
+sub short($filepath) {
+    $filepath.subst(rx[^ .* \/], "");
+}
+
+sub MAIN($filepath, Int :$continue = 1) {
+    %*ENV<PERL6LIB> = "lib";
+    clear-lib();
+
+    my $shortname = short($filepath);
+    my $n = qqx[wc -l $filepath].words[0];
+    say $shortname, " ($n lines)";
+    say "=" x $shortname.chars;
+    given $filepath.IO.open -> $fh {
+        for $fh.lines.kv -> $index, $line {
+            my $linenumber = $index + 1;
+            next if $linenumber < $continue;
+
+            my $status = status($filepath, $linenumber, $line);
+            say sprintf "%3d %7s %s",
+                $linenumber, $status, $line;
+        }
+    }
+    say "";
+}
