@@ -1,0 +1,19 @@
+grammar {
+    token TOP { \w *% ':' }
+}
+
+## Happy parse
+
+''
+'a'
+'a:b'
+'a:b:c'
+'a:b:c:d:e:f:g'
+
+## Sad parse
+
+':'
+'12'
+'1:'
+':1'
+'1:2:'

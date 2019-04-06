@@ -417,27 +417,43 @@ for @rules -> $rule {
         }
 
         multi add-atom(Quant $quant) {
+            my $elem = $quant.atom;
+            my $sep = $quant.separator.?atom;
+
             given $quant.type {
                 when "?" {
                     $nfa.with-bypass: {
-                        add-atom($quant.atom);
+                        add-atom($elem);
                     }
                 }
                 when "*" {
-                    $nfa.with-bypass: {
-                        $nfa.with-backlink: {
-                            add-atom($quant.atom);
+                    if $sep {
+                        $nfa.with-bypass: {
+                            add-atom($elem);
+                            $nfa.with-bypass: {
+                                $nfa.with-backlink: {
+                                    add-atom($sep);
+                                    add-atom($elem);
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        $nfa.with-bypass: {
+                            $nfa.with-backlink: {
+                                add-atom($elem);
+                            }
                         }
                     }
                 }
                 when "+" {
-                    add-atom($quant.atom);
+                    add-atom($elem);
                     $nfa.with-bypass: {
                         $nfa.with-backlink: {
-                            if $quant.separator {
-                                add-atom($quant.separator.atom);
+                            if $sep {
+                                add-atom($sep);
                             }
-                            add-atom($quant.atom);
+                            add-atom($elem);
                         }
                     }
                 }
