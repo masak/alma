@@ -103,7 +103,7 @@ role Grammar {
     }
 
     token quant {
-        <[ ? * ]>
+        <[ ? * + ]>
 
         { make ~$/ }
     }
@@ -404,6 +404,14 @@ for @rules -> $rule {
                     }
                 }
                 when "*" {
+                    $nfa.with-bypass: {
+                        $nfa.with-backlink: {
+                            add-atom($quant.atom);
+                        }
+                    }
+                }
+                when "+" {
+                    add-atom($quant.atom);
                     $nfa.with-bypass: {
                         $nfa.with-backlink: {
                             add-atom($quant.atom);

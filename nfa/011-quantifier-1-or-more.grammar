@@ -1,0 +1,18 @@
+grammar {
+    token TOP { 'ba' 'na'+ }
+}
+
+## Happy parse
+
+'bana'
+'banana'
+'bananana'
+'banananana'
+
+## Sad parse
+
+'ba'
+'na'
+'ban'
+'banan'
+'nabana'
