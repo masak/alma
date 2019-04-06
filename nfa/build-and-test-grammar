@@ -8,6 +8,11 @@ class Shortcut {
 class Quant {
     has $.atom;
     has Str $.type;
+    has $.separator;
+}
+
+class Separator {
+    has $.atom;
 }
 
 role Grammar {
@@ -31,7 +36,7 @@ role Grammar {
             $<contents>=[
                 <quanted-atom>*
             ]
-        ['}' || <panic("Expected regex atom or quantifier or '}'")>]
+        ['}' || <panic("Expected atom or '}'")>]
         <.ws>
 
         {
@@ -45,15 +50,18 @@ role Grammar {
 
     token quanted-atom {
         <atom>
-        <.ws>
-        [<quant> <.ws>]?
+        [
+            <quant>
+            <separator>?
+        ]?
 
         {
             my $type = $<quant>.ast;
             my $atom = $<atom>.ast;
+            my $separator = $<separator>.?ast;
 
             make $<quant>
-                ?? Quant.new(:$type, :$atom)
+                ?? Quant.new(:$type, :$atom, :$separator)
                 !! $atom;
         }
     }
@@ -103,9 +111,21 @@ role Grammar {
     }
 
     token quant {
-        <[ ? * + ]>
+        $<type>=<[ ? * + ]>
+        <.ws>
 
-        { make ~$/ }
+        { make ~$<type> }
+    }
+
+    token separator {
+        '%'
+        <.ws>
+        <atom>
+
+        {
+            my $atom = $<atom>.ast;
+            make Separator.new(:$atom);
+        }
     }
 
     method panic($) { ... }
@@ -414,6 +434,9 @@ for @rules -> $rule {
                     add-atom($quant.atom);
                     $nfa.with-bypass: {
                         $nfa.with-backlink: {
+                            if $quant.separator {
+                                add-atom($quant.separator.atom);
+                            }
                             add-atom($quant.atom);
                         }
                     }
