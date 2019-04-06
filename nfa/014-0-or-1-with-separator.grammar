@@ -1,0 +1,17 @@
+grammar {
+    token TOP { 'x' ?% '_' }
+}
+
+## Happy parse
+
+''
+'x'
+
+## Sad parse
+
+'_'
+'x_'
+'_x'
+'y'
+'xx'
+'yx'
