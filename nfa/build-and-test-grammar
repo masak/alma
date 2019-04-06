@@ -193,6 +193,17 @@ class State {
         @.transitions.push(transition(:$next-state, :$matcher, :$negated));
     }
 
+    method copy-transitions-to-also-to($s1, $s2) {
+        die "Can't copy transitions to the same state"
+            if $s1 === $s2;
+
+        for @.transitions -> $t {
+            if $t.next-state === $s1 {
+                @.transitions.push($t.clone(next-state => $s2));
+            }
+        }
+    }
+
     method mark-as-goal() {
         $!goal = True;
     }
@@ -286,8 +297,9 @@ class NFA {
             $!start-states ∪= $s2;
         }
         else {
-            # XXX
-            die "We don't yet handle the case of inheriting the transitions to a non-start state";
+            for @.states -> $state {
+                $state.copy-transitions-to-also-to($s1, $s2);
+            }
         }
     }
 }

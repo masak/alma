@@ -1,0 +1,18 @@
+grammar {
+    token TOP { 'foo' 'l'? }
+}
+
+## Happy parse
+
+'foo'
+'fool'
+
+## Sad parse
+
+'l'
+'lfoo'
+'foot'
+'food'
+'foof'
+'fol'
+'fl'
