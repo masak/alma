@@ -13,6 +13,7 @@ class Quant {
 
 class Separator {
     has $.atom;
+    has Bool $.allow-trailing;
 }
 
 role Grammar {
@@ -118,13 +119,14 @@ role Grammar {
     }
 
     token separator {
-        '%'
+        $<percents>=[ '%' | '%%' ]
         <.ws>
         <atom>
 
         {
             my $atom = $<atom>.ast;
-            make Separator.new(:$atom);
+            my $allow-trailing = ~$<percents> eq "%%";
+            make Separator.new(:$atom, :$allow-trailing);
         }
     }
 
@@ -419,6 +421,7 @@ for @rules -> $rule {
         multi add-atom(Quant $quant) {
             my $elem = $quant.atom;
             my $sep = $quant.separator.?atom;
+            my $allow-trailing = $quant.separator.?allow-trailing;
 
             given $quant.type {
                 when "?" {
@@ -453,7 +456,14 @@ for @rules -> $rule {
                             if $sep {
                                 add-atom($sep);
                             }
-                            add-atom($elem);
+                            if $allow-trailing {
+                                $nfa.with-bypass: {
+                                    add-atom($elem);
+                                }
+                            }
+                            else {
+                                add-atom($elem);
+                            }
                         }
                     }
                 }
