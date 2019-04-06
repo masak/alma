@@ -7,6 +7,7 @@ class Shortcut {
 
 class Quant {
     has $.atom;
+    has Str $.type;
 }
 
 role Grammar {
@@ -30,7 +31,7 @@ role Grammar {
             $<contents>=[
                 <quanted-atom>*
             ]
-        ['}' || <panic("Expected regex atom or '}'")>]
+        ['}' || <panic("Expected regex atom or quantifier or '}'")>]
         <.ws>
 
         {
@@ -48,10 +49,11 @@ role Grammar {
         [<quant> <.ws>]?
 
         {
+            my $type = $<quant>.ast;
             my $atom = $<atom>.ast;
 
             make $<quant>
-                ?? Quant.new(:$atom)
+                ?? Quant.new(:$type, :$atom)
                 !! $atom;
         }
     }
@@ -101,7 +103,9 @@ role Grammar {
     }
 
     token quant {
-        '?'
+        <[ ? * ]>
+
+        { make ~$/ }
     }
 
     method panic($) { ... }
@@ -292,6 +296,12 @@ class NFA {
         self!inherit-transitions($before-state, $!current-state);
     }
 
+    method with-backlink(&cb) {
+        my $before-state = $!current-state;
+        &cb();
+        self!inherit-transitions($!current-state, $before-state);
+    }
+
     method !inherit-transitions($s1, $s2) {
         if $s1 ∈ $!start-states {
             $!start-states ∪= $s2;
@@ -372,8 +382,19 @@ for @rules -> $rule {
         }
 
         multi add-atom(Quant $quant) {
-            $nfa.with-bypass: {
-                add-atom($quant.atom);
+            given $quant.type {
+                when "?" {
+                    $nfa.with-bypass: {
+                        add-atom($quant.atom);
+                    }
+                }
+                when "*" {
+                    $nfa.with-bypass: {
+                        $nfa.with-backlink: {
+                            add-atom($quant.atom);
+                        }
+                    }
+                }
             }
         }
 
