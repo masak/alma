@@ -193,8 +193,19 @@ class State {
     has Bool $.goal = False;
     has @.transitions;
 
+    method add-transition($transition) {
+        return if self!already-added($transition);
+        @.transitions.push($transition);
+    }
+
+    method !already-added($transition) {
+        return so @.transitions.grep: {
+            .Str eq $transition.Str && .next-state === $transition.next-state
+        };
+    }
+
     method add-transition-to(State :$next-state!, :$matcher!, Bool :$negated = False) {
-        @.transitions.push(transition(:$next-state, :$matcher, :$negated));
+        self.add-transition(transition(:$next-state, :$matcher, :$negated));
     }
 
     method copy-transitions-to-also-to($s1, $s2) {
@@ -203,7 +214,7 @@ class State {
 
         for @.transitions -> $t {
             if $t.next-state === $s1 {
-                @.transitions.push($t.clone(next-state => $s2));
+                self.add-transition($t.clone(next-state => $s2));
             }
         }
     }
