@@ -224,7 +224,7 @@ class Transition::Ranges does Transition {
             ?? qq["{escape($r.min)}"]
             !! qq[{escape($r.min)}..{escape($r.max)}];
     }
-    method Str { @.ranges.map(&format).join(", ") }
+    method Str { ($.negated ?? "^" !! "") ~ @.ranges.map(&format).join(", ") }
     method matches(Str $char) { $.negated ^^ so $char ~~ any(@.ranges) }
 }
 
