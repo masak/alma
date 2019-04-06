@@ -36,7 +36,7 @@ role Grammar {
         {
             make {
                 name => ~$<ident>,
-                contents => ~$<contents>,
+                contents => $<contents>.Str.trim,
                 atoms => $<quanted-atom>».ast,
             };
         }
