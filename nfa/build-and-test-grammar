@@ -335,10 +335,14 @@ sub dump-nfa(NFA $nfa) {
             "STATE ", $state.id,
             ($state.goal ?? " (goal)" !! "");
 
+        my %state-for-arrow;
         for $state.transitions -> $t {
             my $arrow = "---[{$t.Str}]--->";
-
-            say "# {$INDENT x 2}{$arrow} {$t.next-state.id}";
+            %state-for-arrow{$arrow}.push($t.next-state.id);
+        }
+        for %state-for-arrow.keys.sort -> $arrow {
+            my $states = %state-for-arrow{$arrow}.sort.join(", ");
+            say "# {$INDENT x 2}{$arrow} {$states}";
         }
     }
     say "";
