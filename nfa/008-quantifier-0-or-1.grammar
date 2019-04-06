@@ -1,0 +1,14 @@
+grammar {
+    token TOP { 'x'? }
+}
+
+## Happy parse
+
+''
+'x'
+
+## Sad parse
+
+'y'
+'xx'
+'yx'

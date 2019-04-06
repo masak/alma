@@ -5,6 +5,10 @@ class Shortcut {
     has Str $.type;
 }
 
+class Quant {
+    has $.atom;
+}
+
 role Grammar {
     token grammar {
         'grammar' <.ws> '{'
@@ -23,7 +27,9 @@ role Grammar {
     token rule {
         'token' <.ws> <ident> <.ws> '{'
             <.ws>
-            $<contents>=[<atom>*]
+            $<contents>=[
+                <quanted-atom>*
+            ]
         ['}' || <panic("Expected regex atom or '}'")>]
         <.ws>
 
@@ -31,8 +37,22 @@ role Grammar {
             make {
                 name => ~$<ident>,
                 contents => ~$<contents>,
-                atoms => $<atom>».ast,
+                atoms => $<quanted-atom>».ast,
             };
+        }
+    }
+
+    token quanted-atom {
+        <atom>
+        <.ws>
+        [<quant> <.ws>]?
+
+        {
+            my $atom = $<atom>.ast;
+
+            make $<quant>
+                ?? Quant.new(:$atom)
+                !! $atom;
         }
     }
 
@@ -78,6 +98,10 @@ role Grammar {
         $<to>=<-[\]]>
 
         { make Range.new(~$<from>, ~$<to>) }
+    }
+
+    token quant {
+        '?'
     }
 
     method panic($) { ... }
@@ -220,12 +244,14 @@ class NFA {
     has Str $.name;
     has Str $.contents;
     has State @.states;
+    has Set[State] $.start-states;
     has State $!current-state;
     has Int $!next-unique-id;
 
     submethod BUILD(:$!name!, :$!contents!) {
         $!next-unique-id = 0;
         my $start-state = self!add-state();
+        $!start-states = Set[State].new($start-state);
         $!current-state = $start-state;
     }
 
@@ -249,8 +275,20 @@ class NFA {
         return;
     }
 
-    method start-state() {
-        return @!states[0];
+    method with-bypass(&cb) {
+        my $before-state = $!current-state;
+        &cb();
+        self!inherit-transitions($before-state, $!current-state);
+    }
+
+    method !inherit-transitions($s1, $s2) {
+        if $s1 ∈ $!start-states {
+            $!start-states ∪= $s2;
+        }
+        else {
+            # XXX
+            die "We don't yet handle the case of inheriting the transitions to a non-start state";
+        }
     }
 }
 
@@ -258,7 +296,12 @@ sub dump-nfa(NFA $nfa) {
     constant $INDENT = " " x 4;
     say "# NFA for token ", $nfa.name, " \{ ", $nfa.contents, " \} ";
     for $nfa.states -> $state {
-        say "# ", $INDENT, "STATE ", $state.id, ($state.goal ?? " (goal)" !! "");
+        say "# ",
+            $INDENT,
+            ($state ∈ $nfa.start-states ?? "(start) " !! ""),
+            "STATE ", $state.id,
+            ($state.goal ?? " (goal)" !! "");
+
         for $state.transitions -> $t {
             my $arrow = "---[{$t.Str}]--->";
 
@@ -269,10 +312,10 @@ sub dump-nfa(NFA $nfa) {
 }
 
 sub run-nfa(NFA $nfa, Str $input) {
-    my $current-states = set($nfa.states[0]);
+    my $current-states = $nfa.start-states;
     for $input.comb -> $char {
         my $next-states = set();
-        for $current-states.keys -> $state {
+        for $current-states.keys -> State $state {
             for $state.transitions -> $t {
                 if $t.matches($char) {
                     $next-states ∪= set($t.next-state);
@@ -293,29 +336,40 @@ for @rules -> $rule {
     my $contents = $rule<contents>;
     my $nfa = NFA.new(:$name, :$contents);
     for @($rule<atoms>) -> $atom {
-        if $atom ~~ Str {               # literal
-            for $atom.comb -> $char {
+        multi add-atom(Str $literal) {
+            for $literal.comb -> $char {
                 $nfa.add-state-with-transition($char);
             }
         }
-        elsif $atom ~~ Array[Range] {   # character class
+
+        multi add-atom(Array[Range] $charclass) {
             $nfa.add-state-with-transition($atom);
         }
-        elsif $atom ~~ Shortcut {
+
+        multi add-atom(Shortcut $shortcut) {
             sub r($c) { $c..$c }
-            my Range @elements = do given $atom.type.lc {
+            my Range @elements = do given $shortcut.type.lc {
                 when "d" { ("0".."9",) }
                 when "w" { "0".."9", "A".."Z", "a".."z", r("_") }
                 when "s" { r("\x[20]"), "\x[09]".."\x[0D]" }
                 when "h" { r("\x[20]"), r("\x[09]") }
                 default { die "Unknown type: ", $atom.type }
             };
-            my $negated = so $atom.type ~~ /<+upper>/;
+            my $negated = so $shortcut.type ~~ /<+upper>/;
             $nfa.add-state-with-transition(@elements, :$negated);
         }
-        else {                          # unknown
-            die "Unrecognized atom type: ", $atom.^name;
+
+        multi add-atom(Quant $quant) {
+            $nfa.with-bypass: {
+                add-atom($quant.atom);
+            }
         }
+
+        multi add-atom(Any $unknown-atom) {
+            die "Unrecognized atom type: ", $unknown-atom.^name;
+        }
+
+        add-atom($atom);
     }
     $nfa.mark-current-state-as-goal();
     dump-nfa($nfa);
