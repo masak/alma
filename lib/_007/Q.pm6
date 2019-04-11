@@ -64,7 +64,6 @@ class X::_007::RuntimeException is Exception {
 }
 
 sub aname($attr) { $attr.name.substr(2) }
-sub avalue($attr, $obj) { $attr.get_value($obj) }
 
 ### ### Q
 ###
@@ -109,7 +108,6 @@ class Q::Identifier does Q {
 ### An expression; something that can be evaluated to a value.
 ###
 role Q::Expr does Q {
-    method eval($runtime) { ... }
 }
 
 ### ### Q::Term
@@ -136,7 +134,6 @@ role Q::Literal does Q::Term {
 ### The `none` literal.
 ###
 class Q::Literal::None does Q::Literal {
-    method eval($) { NONE }
 }
 
 ### ### Q::Literal::Bool
@@ -145,8 +142,6 @@ class Q::Literal::None does Q::Literal {
 ###
 class Q::Literal::Bool does Q::Literal {
     has _007::Value $.value where &is-bool;
-
-    method eval($) { $.value }
 }
 
 ### ### Q::Literal::Int
@@ -158,8 +153,6 @@ class Q::Literal::Bool does Q::Literal {
 ###
 class Q::Literal::Int does Q::Literal {
     has _007::Value $.value where &is-int;
-
-    method eval($) { $.value }
 }
 
 ### ### Q::Literal::Str
@@ -168,8 +161,6 @@ class Q::Literal::Int does Q::Literal {
 ###
 class Q::Literal::Str does Q::Literal {
     has _007::Value $.value when &is-str;
-
-    method eval($) { $.value }
 }
 
 ### ### Q::Term::Identifier
@@ -182,10 +173,6 @@ class Q::Literal::Str does Q::Literal {
 ### locations at different times when accessed from different call frames.
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
-    method eval($runtime) {
-        return $runtime.get-var($.name.native-value);
-    }
-
     method put-value($value, $runtime) {
         $runtime.put-var(self, $value);
     }
@@ -198,10 +185,6 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
 ###
 class Q::Term::Identifier::Direct is Q::Term::Identifier {
     has _007::Value $.frame where &is-dict;
-
-    method eval($runtime) {
-        return $runtime.get-direct($.frame, $.name.native-value);
-    }
 
     method put-value($value, $runtime) {
         $runtime.put-direct($.frame, $.name.native-value, $value);
@@ -231,11 +214,6 @@ class Q::Regex::Str does Q::Regex::Fragment {
 ###
 class Q::Regex::Identifier does Q::Regex::Fragment {
     has Q::Identifier $.identifier;
-
-    method eval($runtime) {
-        # XXX check that the value is a string
-        return $.identifier.eval($runtime);
-    }
 }
 
 ### ### Q::Regex::Call
@@ -294,10 +272,6 @@ class Q::Regex::ZeroOrOne does Q::Regex::Fragment {
 ###
 class Q::Term::Regex does Q::Term {
     has Q::Regex::Fragment $.contents;
-
-    method eval($runtime) {
-        make-regex($.contents);
-    }
 }
 
 ### ### Q::Term::Array
@@ -307,10 +281,6 @@ class Q::Term::Regex does Q::Term {
 ###
 class Q::Term::Array does Q::Term {
     has _007::Value $.elements where &is-array;
-
-    method eval($runtime) {
-        make-array(get-all-array-elements($.elements).map(*.eval($runtime)).Array);
-    }
 }
 
 subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
@@ -322,44 +292,6 @@ subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
 class Q::Term::Object does Q::Term {
     has ToV $.type;
     has $.propertylist;
-
-    method eval($runtime) {
-        if is-type($.type) {
-            if $.type === TYPE<Int> {
-                my $native-value = get-array-element($.propertylist.properties, 0).value.eval($runtime).native-value;
-                return make-int($native-value);
-            }
-            elsif $.type === TYPE<Array> {
-                my $native-value = get-all-array-elements(
-                    get-array-element($.propertylist.properties, 0).value.eval($runtime)
-                );
-                return make-array($native-value);
-            }
-            elsif $.type === TYPE<Dict> {
-                my @properties = get-all-array-elements($.propertylist.properties).map({
-                    .key.native-value => .value.eval($runtime)
-                });
-                return make-dict(@properties);
-            }
-            elsif $.type === TYPE<Str> {
-                my $native-value = get-array-element($.propertylist.properties, 0).value.eval($runtime).native-value;
-                return make-str($native-value);
-            }
-            elsif $.type === TYPE<Exception> {
-                my $message = get-array-element($.propertylist.properties, 0).value.eval($runtime);
-                return make-exception($message);
-            }
-            elsif $.type === TYPE<Object> {
-                return make-object();
-            }
-            else {
-                die "Don't know how to create an object of type ", $.type.slots<name>;
-            }
-        }
-        return $.type.create(
-            get-all-array-elements($.propertylist.properties).map({.key.native-value => .value.eval($runtime)})
-        );
-    }
 }
 
 ### ### Q::Term::Dict
@@ -368,12 +300,6 @@ class Q::Term::Object does Q::Term {
 ###
 class Q::Term::Dict does Q::Term {
     has $.propertylist;
-
-    method eval($runtime) {
-        return make-dict(
-            get-all-array-elements($.propertylist.properties).map({ .key.native-value => .value.eval($runtime) })
-        );
-    }
 }
 
 ### ### Q::Property
@@ -435,19 +361,6 @@ class Q::Term::Func does Q::Term does Q::Declaration {
     has $.block;
 
     method attribute-order { <identifier traitlist block> }
-
-    method eval($runtime) {
-        my $name = is-none($.identifier)
-            ?? make-str("")
-            !! $.identifier.name;
-        make-func(
-            $name,
-            $.block.parameterlist,
-            $.block.statementlist,
-            $runtime.current-frame,
-            $.block.static-lexpad
-        );
-    }
 }
 
 ### ### Q::Block
@@ -478,12 +391,6 @@ class Q::Prefix does Q::Expr {
     has $.operand;
 
     method attribute-order { <identifier operand> }
-
-    method eval($runtime) {
-        my $e = $.operand.eval($runtime);
-        my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$e]);
-    }
 }
 
 ### ### Q::Infix
@@ -497,13 +404,6 @@ class Q::Infix does Q::Expr {
     has $.rhs;
 
     method attribute-order { <identifier lhs rhs> }
-
-    method eval($runtime) {
-        my $l = $.lhs.eval($runtime);
-        my $r = $.rhs.eval($runtime);
-        my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$l, $r]);
-    }
 }
 
 ### ### Q::Infix::Assignment
@@ -511,11 +411,6 @@ class Q::Infix does Q::Expr {
 ### An assignment operator. Puts a value in a storage location.
 ###
 class Q::Infix::Assignment is Q::Infix {
-    method eval($runtime) {
-        my $value = $.rhs.eval($runtime);
-        $.lhs.put-value($value, $runtime);
-        return $value;
-    }
 }
 
 ### ### Q::Infix::Or
@@ -524,12 +419,6 @@ class Q::Infix::Assignment is Q::Infix {
 ### side only if the left-hand side is falsy.
 ###
 class Q::Infix::Or is Q::Infix {
-    method eval($runtime) {
-        my $l = $.lhs.eval($runtime);
-        return $l.truthy
-            ?? $l
-            !! $.rhs.eval($runtime);
-    }
 }
 
 ### ### Q::Infix::DefinedOr
@@ -538,12 +427,6 @@ class Q::Infix::Or is Q::Infix {
 ### right-hand side only if the left-hand side is `none`.
 ###
 class Q::Infix::DefinedOr is Q::Infix {
-    method eval($runtime) {
-        my $l = $.lhs.eval($runtime);
-        return !is-none($l)
-            ?? $l
-            !! $.rhs.eval($runtime);
-    }
 }
 
 ### ### Q::Infix::And
@@ -552,12 +435,6 @@ class Q::Infix::DefinedOr is Q::Infix {
 ### right-hand side only if the left-hand side is truthy.
 ###
 class Q::Infix::And is Q::Infix {
-    method eval($runtime) {
-        my $l = $.lhs.eval($runtime);
-        return !$l.truthy
-            ?? $l
-            !! $.rhs.eval($runtime);
-    }
 }
 
 ### ### Q::Postfix
@@ -570,12 +447,6 @@ class Q::Postfix does Q::Expr {
     has $.operand;
 
     method attribute-order { <identifier operand> }
-
-    method eval($runtime) {
-        my $e = $.operand.eval($runtime);
-        my $c = $.identifier.eval($runtime);
-        return $runtime.call($c, [$e]);
-    }
 }
 
 ### ### Q::Postfix::Index
@@ -588,50 +459,10 @@ class Q::Postfix::Index is Q::Postfix {
 
     method attribute-order { <identifier operand index> }
 
-    method eval($runtime) {
-        given $.operand.eval($runtime) {
-            when &is-array {
-                my $index = $.index.eval($runtime);
-                die X::Subscript::NonInteger.new
-                    unless is-int($index);
-                my $length = get-array-length($_);
-                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
-                    if $index.native-value >= $length;
-                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
-                    if $index.native-value < 0;
-                return get-array-element($_, $index.native-value);
-            }
-            when &is-dict {
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                die X::Property::NotFound.new(:$propname, :type({}))
-                    unless dict-property-exists($_, $propname);
-                return get-dict-property($_, $propname);
-            }
-            when &is-func {
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                return $runtime.property($_, $propname);
-            }
-            when Q {
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                return $runtime.property($_, $propname);
-            }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected([]));
-        }
-    }
-
     method put-value($value, $runtime) {
-        given $.operand.eval($runtime) {
+        given $runtime.eval-q($.operand) {
             when &is-array {
-                my $index = $.index.eval($runtime);
+                my $index = $runtime.eval-q($.index);
                 die X::Subscript::NonInteger.new
                     unless is-int($index);
                 my $length = get-array-length($_);
@@ -642,14 +473,14 @@ class Q::Postfix::Index is Q::Postfix {
                 return set-array-element($_, $index.native-value, $value);
             }
             when &is-dict {
-                my $property = $.index.eval($runtime);
+                my $property = $runtime.eval-q($.index);
                 die X::Subscript::NonString.new
                     unless is-str($property);
                 my $propname = $property.native-value;
                 set-dict-property($_, $propname, $value);
             }
             when Q {
-                my $property = $.index.eval($runtime);
+                my $property = $runtime.eval-q($.index);
                 die X::Subscript::NonString.new
                     unless is-str($property);
                 my $propname = $property.native-value;
@@ -668,16 +499,6 @@ class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
     method attribute-order { <identifier operand argumentlist> }
-
-    method eval($runtime) {
-        my $c = $.operand.eval($runtime);
-        die "macro is called at runtime"
-            if is-macro($c);
-        die "Trying to invoke a {$c.type.slots<name>}" # XXX: make this into an X::
-            unless is-func($c);
-        my @arguments = get-all-array-elements($.argumentlist.arguments).map(*.eval($runtime));
-        return $runtime.call($c, @arguments);
-    }
 }
 
 ### ### Q::Postfix::Property
@@ -689,14 +510,8 @@ class Q::Postfix::Property is Q::Postfix {
 
     method attribute-order { <identifier operand property> }
 
-    method eval($runtime) {
-        my $obj = $.operand.eval($runtime);
-        my $propname = $.property.name.native-value;
-        $runtime.property($obj, $propname);
-    }
-
     method put-value($value, $runtime) {
-        given $.operand.eval($runtime) {
+        given $runtime.eval-q($.operand) {
             when &is-dict {
                 my $propname = $.property.name.native-value;
                 set-dict-property($_, $propname, $value);
@@ -717,10 +532,6 @@ class Q::Postfix::Property is Q::Postfix {
 class Q::Unquote does Q {
     has $.qtype;
     has $.expr;
-
-    method eval($runtime) {
-        die "Should never hit an unquote at runtime"; # XXX: turn into X::
-    }
 }
 
 ### ### Q::Unquote::Prefix
@@ -749,10 +560,6 @@ class Q::Term::My does Q::Term does Q::Declaration {
 
     method is-assignable { True }
 
-    method eval($runtime) {
-        return $.identifier.eval($runtime);
-    }
-
     method put-value($value, $runtime) {
         $.identifier.put-value($value, $runtime);
     }
@@ -776,96 +583,6 @@ class Q::Term::Quasi does Q::Term {
     has $.contents;
 
     method attribute-order { <qtype contents> }
-
-    method eval($runtime) {
-        my $quasi-frame;
-
-        sub interpolate($thing) {
-            return make-array(get-all-array-elements($thing).map(&interpolate).Array)
-                if is-array($thing);
-
-            return make-dict(get-all-dict-properties($thing).map({ .key => interpolate(.value) }).Array)
-                if is-dict($thing);
-
-            return $thing
-                if $thing ~~ _007::Value::Backed;
-
-            return $thing
-                if $thing === TRUE | FALSE | NONE;
-
-            die "Unknown ", $thing.type.Str
-                if $thing ~~ _007::Value;
-
-            return $thing
-                if $thing ~~ Val;
-
-            if $thing ~~ Q::Term::Identifier {
-                if $runtime.lookup-frame-outside($thing, $quasi-frame) -> $frame {
-                    return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
-                }
-                else {
-                    return $thing;
-                }
-            }
-
-            return $thing.new(:name($thing.name))
-                if $thing ~~ Q::Identifier;
-
-            if $thing ~~ Q::Unquote::Prefix {
-                my $prefix = $thing.expr.eval($runtime);
-                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(Q::Prefix))
-                    unless $prefix ~~ Q::Prefix;
-                return $prefix.new(:identifier($prefix.identifier), :operand($thing.operand));
-            }
-            elsif $thing ~~ Q::Unquote::Infix {
-                my $infix = $thing.expr.eval($runtime);
-                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(Q::Infix))
-                    unless $infix ~~ Q::Infix;
-                return $infix.new(:identifier($infix.identifier), :lhs($thing.lhs), :rhs($thing.rhs));
-            }
-
-            if $thing ~~ Q::Unquote {
-                my $ast = $thing.expr.eval($runtime);
-                die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                    unless $ast ~~ Q;
-                return $ast;
-            }
-
-            if $thing ~~ Q::Term::My {
-                $runtime.declare-var($thing.identifier);
-            }
-
-            if $thing ~~ Q::Term::Func {
-                $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
-                for get-all-array-elements($thing.block.parameterlist.parameters).map(*.identifier) -> $identifier {
-                    $runtime.declare-var($identifier);
-                }
-            }
-
-            if $thing ~~ Q::Block {
-                $runtime.enter($runtime.current-frame, make-dict(), $thing.statementlist);
-            }
-
-            my %attributes = $thing.attributes.map: -> $attr {
-                aname($attr) => interpolate(avalue($attr, $thing))
-            };
-
-            if $thing ~~ Q::Term::Func || $thing ~~ Q::Block {
-                $runtime.leave();
-            }
-
-            $thing.new(|%attributes);
-        }
-
-        if $.qtype.native-value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
-            return $.contents;
-        }
-        $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
-        $quasi-frame = $runtime.current-frame;
-        my $r = interpolate($.contents);
-        $runtime.leave();
-        return $r;
-    }
 }
 
 ### ### Q::Parameter
@@ -910,7 +627,7 @@ class Q::Statement::Expr does Q::Statement {
     has $.expr;
 
     method run($runtime) {
-        $.expr.eval($runtime);
+        $runtime.eval-q($.expr);
     }
 }
 
@@ -926,7 +643,7 @@ class Q::Statement::If does Q::Statement {
     method attribute-order { <expr block else> }
 
     method run($runtime) {
-        my $expr = $.expr.eval($runtime);
+        my $expr = $runtime.eval-q($.expr);
         if $expr.truthy {
             my $paramcount = get-array-length($.block.parameterlist.parameters);
             die X::ParameterMismatch.new(
@@ -987,7 +704,7 @@ class Q::Statement::For does Q::Statement {
             :type("For loop"), :paramcount($count), :argcount("0 or 1"))
             if $count > 1;
 
-        my $array = $.expr.eval($runtime);
+        my $array = $runtime.eval-q($.expr);
         die X::TypeCheck.new(:operation("for loop"), :got($array), :expected([]))
             unless is-array($array);
 
@@ -1011,7 +728,7 @@ class Q::Statement::While does Q::Statement {
     method attribute-order { <expr block> }
 
     method run($runtime) {
-        while (my $expr = $.expr.eval($runtime)).truthy {
+        while (my $expr = $runtime.eval-q($.expr)).truthy {
             my $paramcount = get-array-length($.block.parameterlist.parameters);
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
@@ -1032,7 +749,7 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = is-none($.expr) ?? $.expr !! $.expr.eval($runtime);
+        my $value = is-none($.expr) ?? $.expr !! $runtime.eval-q($.expr);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -1048,7 +765,7 @@ class Q::Statement::Throw does Q::Statement {
     method run($runtime) {
         my $value = is-none($.expr)
             ?? make-exception(make-str("Died"))
-            !! $.expr.eval($runtime);
+            !! $runtime.eval-q($.expr);
         die X::TypeCheck.new(:got($value), :excpected(_007::Value))
             unless is-exception($value);
 
@@ -1168,11 +885,4 @@ class Q::StatementList does Q {
 ###
 class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
-
-    method eval($runtime) {
-        $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-        my $result = $.block.statementlist.run($runtime);
-        $runtime.leave;
-        return $result;
-    }
 }

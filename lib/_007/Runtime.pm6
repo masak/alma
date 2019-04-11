@@ -22,6 +22,9 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
+sub aname($attr) { $attr.name.substr(2) }
+sub avalue($attr, $obj) { $attr.get_value($obj) }
+
 class _007::Runtime {
     has $.input;
     has $.output;
@@ -292,8 +295,6 @@ class _007::Runtime {
         my $type = Val::Type.of($obj.WHAT).name;
         if $obj ~~ Q {
             if $propname eq "detach" {
-                sub aname($attr) { $attr.name.substr(2) }
-                sub avalue($attr, $obj) { $attr.get_value($obj) }
 
                 sub interpolate($thing) {
                     return make-array(get-all-array-elements($thing).map(&interpolate).Array)
@@ -323,7 +324,6 @@ class _007::Runtime {
                 });
             }
 
-            sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
             # XXX: hack
             if $obj ~~ Q::Block {
@@ -686,5 +686,310 @@ class _007::Runtime {
         else {
             $obj.properties{$propname} = $newvalue;
         }
+    }
+
+    multi method eval-q(Q::Expr $expr) {
+        die "Unhandled Q::Expr type ", $expr.^name;
+    }
+
+    multi method eval-q(Q::Literal::None $) {
+        NONE;
+    }
+
+    multi method eval-q(Q::Literal::Bool $bool) {
+        $bool.value;
+    }
+
+    multi method eval-q(Q::Literal::Int $int) {
+        $int.value;
+    }
+
+    multi method eval-q(Q::Literal::Str $str) {
+        $str.value;
+    }
+
+    multi method eval-q(Q::Term::Identifier $identifier) {
+        self.get-var($identifier.name.native-value);
+    }
+
+    multi method eval-q(Q::Term::Identifier::Direct $direct) {
+        self.get-direct($direct.frame, $direct.name.native-value);
+    }
+
+    multi method eval-q(Q::Regex::Identifier $identifier) {
+        # XXX check that the value is a string
+        self.eval-q($identifier.identifier);
+    }
+
+    multi method eval-q(Q::Term::Regex $regex) {
+        make-regex($regex.contents);
+    }
+
+    multi method eval-q(Q::Term::Array $array) {
+        make-array(get-all-array-elements($array.elements).map({ self.eval-q($_) }).Array);
+    }
+
+    multi method eval-q(Q::Term::Object $object) {
+        if is-type($object.type) {
+            if $object.type === TYPE<Int> {
+                my $native-value = self.eval-q(get-array-element($object.propertylist.properties, 0).value).native-value;
+                return make-int($native-value);
+            }
+            elsif $object.type === TYPE<Array> {
+                my $native-value = get-all-array-elements(
+                    self.eval-q(get-array-element($object.propertylist.properties, 0).value)
+                );
+                return make-array($native-value);
+            }
+            elsif $object.type === TYPE<Dict> {
+                my @properties = get-all-array-elements($object.propertylist.properties).map({
+                    .key.native-value => self.eval-q(.value)
+                });
+                return make-dict(@properties);
+            }
+            elsif $object.type === TYPE<Str> {
+                my $native-value = self.eval-q(get-array-element($object.propertylist.properties, 0).value).native-value;
+                return make-str($native-value);
+            }
+            elsif $object.type === TYPE<Exception> {
+                my $message = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+                return make-exception($message);
+            }
+            elsif $object.type === TYPE<Object> {
+                return make-object();
+            }
+            else {
+                die "Don't know how to create an object of type ", $object.type.slots<name>;
+            }
+        }
+        $object.type.create(
+            get-all-array-elements($object.propertylist.properties).map({.key.native-value => self.eval-q(.value)})
+        );
+    }
+
+    multi method eval-q(Q::Term::Dict $dict) {
+        make-dict(
+            get-all-array-elements($dict.propertylist.properties).map({.key.native-value => self.eval-q(.value)}).Array
+        );
+    }
+
+    multi method eval-q(Q::Term::Func $func) {
+        my $name = is-none($func.identifier)
+            ?? make-str("")
+            !! $func.identifier.name;
+        return make-func(
+            $name,
+            $func.block.parameterlist,
+            $func.block.statementlist,
+            self.current-frame,
+            $func.block.static-lexpad,
+        );
+    }
+
+    multi method eval-q(Q::Prefix $prefix) {
+        my $e = self.eval-q($prefix.operand);
+        my $c = self.eval-q($prefix.identifier);
+        return self.call($c, [$e]);
+    }
+
+    multi method eval-q(Q::Infix $infix) {
+        my $l = self.eval-q($infix.lhs);
+        my $r = self.eval-q($infix.rhs);
+        my $c = self.eval-q($infix.identifier);
+        return self.call($c, [$l, $r]);
+    }
+
+    multi method eval-q(Q::Infix::Assignment $assignment) {
+        my $value = self.eval-q($assignment.rhs);
+        $assignment.lhs.put-value($value, self);
+        return $value;
+    }
+
+    multi method eval-q(Q::Infix::Or $or) {
+        my $l = self.eval-q($or.lhs);
+        return $l.truthy
+            ?? $l
+            !! self.eval-q($or.rhs);
+    }
+
+    multi method eval-q(Q::Infix::DefinedOr $defined-or) {
+        my $l = self.eval-q($defined-or.lhs);
+        return $l !=== NONE
+            ?? $l
+            !! self.eval-q($defined-or.rhs);
+    }
+
+    multi method eval-q(Q::Infix::And $and) {
+        my $l = self.eval-q($and.lhs);
+        return !$l.truthy
+            ?? $l
+            !! self.eval-q($and.rhs);
+    }
+
+    multi method eval-q(Q::Postfix $postfix) {
+        my $e = self.eval-q($postfix.operand);
+        my $c = self.eval-q($postfix.identifier);
+        return self.call($c, [$e]);
+    }
+
+    multi method eval-q(Q::Postfix::Index $op) {
+        given self.eval-q($op.operand) {
+            when &is-array {
+                my $index = self.eval-q($op.index);
+                die X::Subscript::NonInteger.new
+                    unless is-int($index);
+                my $length = get-array-length($_);
+                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
+                    if $index.native-value >= $length;
+                die X::Subscript::Negative.new(:$index, :type([]))
+                    if $index.native-value < 0;
+                return get-array-element($_, $index.native-value);
+            }
+            when &is-dict {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                die X::Property::NotFound.new(:$propname, :type(_007::Value))
+                    unless dict-property-exists($_, $propname);
+                return get-dict-property($_, $propname);
+            }
+            when &is-func {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                return self.property($_, $propname);
+            }
+            when Q {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                return self.property($_, $propname);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(_007::Value));
+        }
+    }
+
+    multi method eval-q(Q::Postfix::Call $call) {
+        my $c = self.eval-q($call.operand);
+        die "macro is called at runtime"
+            if is-macro($c);
+        die "Trying to invoke a {$c.type.slots<name>}" # XXX: make this into an X::
+            unless is-func($c);
+        my @arguments = get-all-array-elements($call.argumentlist.arguments).map({ self.eval-q($_) });
+        return self.call($c, @arguments);
+    }
+
+    multi method eval-q(Q::Postfix::Property $property) {
+        my $obj = self.eval-q($property.operand);
+        my $propname = $property.property.name.native-value;
+        self.property($obj, $propname);
+    }
+
+    multi method eval-q(Q::Unquote $) {
+        die "Should never hit an unquote at runtime"; # XXX: turn into X::
+    }
+
+    multi method eval-q(Q::Term::My $my) {
+        return self.eval-q($my.identifier);
+    }
+
+    multi method eval-q(Q::Term::Quasi $quasi) {
+        my $quasi-frame;
+
+        sub interpolate($thing) {
+            return make-array(get-all-array-elements($thing).map(&interpolate).Array)
+                if is-array($thing);
+
+            return make-dict(get-all-dict-properties($thing).map({ .key => interpolate(.value) }).Array)
+                if is-dict($thing);
+
+            return $thing
+                if $thing ~~ _007::Value::Backed;
+
+            return $thing
+                if $thing === TRUE | FALSE | NONE;
+
+            die "Unknown ", $thing.type.Str
+                if $thing ~~ _007::Value;
+
+            return $thing
+                if $thing ~~ Val;
+
+            if $thing ~~ Q::Term::Identifier {
+                if self.lookup-frame-outside($thing, $quasi-frame) -> $frame {
+                    return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
+                }
+                else {
+                    return $thing;
+                }
+            }
+
+            return $thing.new(:name($thing.name))
+                if $thing ~~ Q::Identifier;
+
+            if $thing ~~ Q::Unquote::Prefix {
+                my $prefix = self.eval-q($thing.expr);
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(Q::Prefix))
+                    unless $prefix ~~ Q::Prefix;
+                return $prefix.new(:identifier($prefix.identifier), :operand($thing.operand));
+            }
+            elsif $thing ~~ Q::Unquote::Infix {
+                my $infix = self.eval-q($thing.expr);
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(Q::Infix))
+                    unless $infix ~~ Q::Infix;
+                return $infix.new(:identifier($infix.identifier), :lhs($thing.lhs), :rhs($thing.rhs));
+            }
+
+            if $thing ~~ Q::Unquote {
+                my $ast = self.eval-q($thing.expr);
+                die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
+                    unless $ast ~~ Q;
+                return $ast;
+            }
+
+            if $thing ~~ Q::Term::My {
+                self.declare-var($thing.identifier);
+            }
+
+            if $thing ~~ Q::Term::Func {
+                self.enter(self.current-frame, make-dict(), Q::StatementList.new);
+                for get-all-array-elements($thing.block.parameterlist.parameters).map(*.identifier) -> $identifier {
+                    self.declare-var($identifier);
+                }
+            }
+
+            if $thing ~~ Q::Block {
+                self.enter(self.current-frame, make-dict(), $thing.statementlist);
+            }
+
+            my %attributes = $thing.attributes.map: -> $attr {
+                aname($attr) => interpolate(avalue($attr, $thing))
+            };
+
+            if $thing ~~ Q::Term::Func || $thing ~~ Q::Block {
+                self.leave();
+            }
+
+            $thing.new(|%attributes);
+        }
+
+        if $quasi.qtype.native-value eq "Q.Unquote" && $quasi.contents ~~ Q::Unquote {
+            return $quasi.contents;
+        }
+        self.enter(self.current-frame, make-dict(), Q::StatementList.new);
+        $quasi-frame = self.current-frame;
+        my $r = interpolate($quasi.contents);
+        self.leave();
+        return $r;
+    }
+
+    multi method eval-q(Q::Expr::BlockAdapter $block-adapter) {
+        self.enter(self.current-frame, $block-adapter.block.static-lexpad, $block-adapter.block.statementlist);
+        my $result = $block-adapter.block.statementlist.run(self);
+        self.leave;
+        return $result;
     }
 }
