@@ -7,6 +7,9 @@ constant NO_OUTER = Val::Dict.new;
 constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
 constant EXIT_SUCCESS = 0;
 
+sub aname($attr) { $attr.name.substr(2) }
+sub avalue($attr, $obj) { $attr.get_value($obj) }
+
 class _007::Runtime {
     has $.input;
     has $.output;
@@ -262,8 +265,6 @@ class _007::Runtime {
         my $type = Val::Type.of($obj.WHAT).name;
         if $obj ~~ Q {
             if $propname eq "detach" {
-                sub aname($attr) { $attr.name.substr(2) }
-                sub avalue($attr, $obj) { $attr.get_value($obj) }
 
                 sub interpolate($thing) {
                     return $thing.new(:elements($thing.elements.map(&interpolate)))
@@ -293,7 +294,6 @@ class _007::Runtime {
                 });
             }
 
-            sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
             # XXX: hack
             if $obj ~~ Q::Block {
@@ -651,5 +651,261 @@ class _007::Runtime {
         else {
             $obj.properties{$propname} = $newvalue;
         }
+    }
+
+    multi method eval-q(Q::Expr $expr) {
+        die "Unhandled Q::Expr type ", $expr.^name;
+    }
+
+    multi method eval-q(Q::Literal::None $) {
+        NONE;
+    }
+
+    multi method eval-q(Q::Literal::Bool $bool) {
+        $bool.value;
+    }
+
+    multi method eval-q(Q::Literal::Int $int) {
+        $int.value;
+    }
+
+    multi method eval-q(Q::Literal::Str $str) {
+        $str.value;
+    }
+
+    multi method eval-q(Q::Term::Identifier $identifier) {
+        self.get-var($identifier.name.value);
+    }
+
+    multi method eval-q(Q::Term::Identifier::Direct $direct) {
+        self.get-direct($direct.frame, $direct.name.value);
+    }
+
+    multi method eval-q(Q::Regex::Identifier $identifier) {
+        # XXX check that the value is a string
+        self.eval-q($identifier.identifier);
+    }
+
+    multi method eval-q(Q::Term::Regex $regex) {
+        Val::Regex.new(contents => $regex.contents);
+    }
+
+    multi method eval-q(Q::Term::Array $array) {
+        Val::Array.new(:elements($array.elements.elements.map({ self.eval-q($_) })));
+    }
+
+    multi method eval-q(Q::Term::Object $object) {
+        $object.type.create(
+            $object.propertylist.properties.elements.map({.key.value => self.eval-q(.value)})
+        );
+    }
+
+    multi method eval-q(Q::Term::Dict $dict) {
+        Val::Dict.new(:properties(
+            $dict.propertylist.properties.elements.map({.key.value => self.eval-q(.value)})
+        ));
+    }
+
+    multi method eval-q(Q::Term::Func $func) {
+        my $name = $func.identifier ~~ Val::None
+            ?? Val::Str.new(:value(""))
+            !! $func.identifier.name;
+        return Val::Func.new(
+            :$name,
+            :parameterlist($func.block.parameterlist),
+            :statementlist($func.block.statementlist),
+            :static-lexpad($func.block.static-lexpad),
+            :outer-frame(self.current-frame),
+        );
+    }
+
+    multi method eval-q(Q::Prefix $prefix) {
+        my $e = self.eval-q($prefix.operand);
+        my $c = self.eval-q($prefix.identifier);
+        return self.call($c, [$e]);
+    }
+
+    multi method eval-q(Q::Infix $infix) {
+        my $l = self.eval-q($infix.lhs);
+        my $r = self.eval-q($infix.rhs);
+        my $c = self.eval-q($infix.identifier);
+        return self.call($c, [$l, $r]);
+    }
+
+    multi method eval-q(Q::Infix::Assignment $assignment) {
+        my $value = self.eval-q($assignment.rhs);
+        $assignment.lhs.put-value($value, self);
+        return $value;
+    }
+
+    multi method eval-q(Q::Infix::Or $or) {
+        my $l = self.eval-q($or.lhs);
+        return $l.truthy
+            ?? $l
+            !! self.eval-q($or.rhs);
+    }
+
+    multi method eval-q(Q::Infix::DefinedOr $defined-or) {
+        my $l = self.eval-q($defined-or.lhs);
+        return $l !=== NONE
+            ?? $l
+            !! self.eval-q($defined-or.rhs);
+    }
+
+    multi method eval-q(Q::Infix::And $and) {
+        my $l = self.eval-q($and.lhs);
+        return !$l.truthy
+            ?? $l
+            !! self.eval-q($and.rhs);
+    }
+
+    multi method eval-q(Q::Postfix $postfix) {
+        my $e = self.eval-q($postfix.operand);
+        my $c = self.eval-q($postfix.identifier);
+        return self.call($c, [$e]);
+    }
+
+    multi method eval-q(Q::Postfix::Index $op) {
+        given self.eval-q($op.operand) {
+            when Val::Array {
+                my $index = self.eval-q($op.index);
+                die X::Subscript::NonInteger.new
+                    if $index !~~ Val::Int;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
+                    if $index.value >= .elements;
+                die X::Subscript::Negative.new(:$index, :type([]))
+                    if $index.value < 0;
+                return .elements[$index.value];
+            }
+            when Val::Dict {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                die X::Property::NotFound.new(:$propname, :type(Val::Dict))
+                    if .properties{$propname} :!exists;
+                return .properties{$propname};
+            }
+            when Val::Func | Q {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                return self.property($_, $propname);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+        }
+    }
+
+    multi method eval-q(Q::Postfix::Call $call) {
+        my $c = self.eval-q($call.operand);
+        die "macro is called at runtime"
+            if $c ~~ Val::Macro;
+        die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
+            unless $c ~~ Val::Func;
+        my @arguments = $call.argumentlist.arguments.elements.map({ self.eval-q($_) });
+        return self.call($c, @arguments);
+    }
+
+    multi method eval-q(Q::Postfix::Property $property) {
+        my $obj = self.eval-q($property.operand);
+        my $propname = $property.property.name.value;
+        self.property($obj, $propname);
+    }
+
+    multi method eval-q(Q::Unquote $) {
+        die "Should never hit an unquote at runtime"; # XXX: turn into X::
+    }
+
+    multi method eval-q(Q::Term::My $my) {
+        return self.eval-q($my.identifier);
+    }
+
+    multi method eval-q(Q::Term::Quasi $quasi) {
+        my $quasi-frame;
+
+        sub interpolate($thing) {
+            return $thing.new(:elements($thing.elements.map(&interpolate)))
+                if $thing ~~ Val::Array;
+
+            return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
+                if $thing ~~ Val::Dict;
+
+            return $thing
+                if $thing ~~ Val;
+
+            if $thing ~~ Q::Term::Identifier {
+                if self.lookup-frame-outside($thing, $quasi-frame) -> $frame {
+                    return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
+                }
+                else {
+                    return $thing;
+                }
+            }
+
+            return $thing.new(:name($thing.name))
+                if $thing ~~ Q::Identifier;
+
+            if $thing ~~ Q::Unquote::Prefix {
+                my $prefix = self.eval-q($thing.expr);
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($prefix), :expected(Q::Prefix))
+                    unless $prefix ~~ Q::Prefix;
+                return $prefix.new(:identifier($prefix.identifier), :operand($thing.operand));
+            }
+            elsif $thing ~~ Q::Unquote::Infix {
+                my $infix = self.eval-q($thing.expr);
+                die X::TypeCheck.new(:operation("interpolating an unquote"), :got($infix), :expected(Q::Infix))
+                    unless $infix ~~ Q::Infix;
+                return $infix.new(:identifier($infix.identifier), :lhs($thing.lhs), :rhs($thing.rhs));
+            }
+
+            if $thing ~~ Q::Unquote {
+                my $ast = self.eval-q($thing.expr);
+                die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
+                    unless $ast ~~ Q;
+                return $ast;
+            }
+
+            if $thing ~~ Q::Term::My {
+                self.declare-var($thing.identifier);
+            }
+
+            if $thing ~~ Q::Term::Func {
+                self.enter(self.current-frame, Val::Dict.new, Q::StatementList.new);
+                for $thing.block.parameterlist.parameters.elements.map(*.identifier) -> $identifier {
+                    self.declare-var($identifier);
+                }
+            }
+
+            if $thing ~~ Q::Block {
+                self.enter(self.current-frame, Val::Dict.new, $thing.statementlist);
+            }
+
+            my %attributes = $thing.attributes.map: -> $attr {
+                aname($attr) => interpolate(avalue($attr, $thing))
+            };
+
+            if $thing ~~ Q::Term::Func || $thing ~~ Q::Block {
+                self.leave();
+            }
+
+            $thing.new(|%attributes);
+        }
+
+        if $quasi.qtype.value eq "Q.Unquote" && $quasi.contents ~~ Q::Unquote {
+            return $quasi.contents;
+        }
+        self.enter(self.current-frame, Val::Dict.new, Q::StatementList.new);
+        $quasi-frame = self.current-frame;
+        my $r = interpolate($quasi.contents);
+        self.leave();
+        return $r;
+    }
+
+    multi method eval-q(Q::Expr::BlockAdapter $block-adapter) {
+        self.enter(self.current-frame, $block-adapter.block.static-lexpad, $block-adapter.block.statementlist);
+        my $result = $block-adapter.block.statementlist.run(self);
+        self.leave;
+        return $result;
     }
 }
