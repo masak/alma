@@ -1,0 +1,59 @@
+role Gra {}
+
+enum Shortcut does Gra <
+    whitespace digit wordchar
+>;
+
+enum RulNam does Gra <
+    TOP statementlist statement statement-expr statement-block statement-if
+    statement-while xblock block expr term term-int term-identifier term-my
+    identifier op op-add op-assign
+>;
+
+class Sta does Gra { has ($.elem, $.sep, $.trailing) }
+sub sta(Gra $elem, Gra $sep?, Bool :$trailing) { Sta.new(:$elem, :$sep, :$trailing) }
+
+class Plu does Gra { has ($.elem, $.sep) }
+sub plu(Gra $elem, Gra $sep?) { Plu.new(:$elem, :$sep) }
+
+class Lit does Gra { has $.str }
+sub lit(Str $str) { Lit.new(:$str) }
+
+class _Seq does Gra { has @.items }
+sub seq(*@items where { all(@$_) ~~ Gra }) { _Seq.new(:@items) }
+
+class Ran { has ($.min, $.max) }
+sub ran(Str $min, Str $max) { Ran.new(:$min, :$max) }
+
+class Cla does Gra { has @.items }
+sub cla(*@items where { all(@$_) ~~ Ran }) { Cla.new(:@items) }
+
+class Alt does Gra { has @.alts }
+sub alt(*@alts where { all(@$_) ~~ Gra }) { Alt.new(:@alts) }
+
+my Gra %grammar{RulNam} =
+    (TOP) => statementlist,
+    (statementlist) => sta(statement, lit(";"), :trailing),
+
+    (statement) => alt(statement-expr, statement-block, statement-if, statement-while),
+    (statement-expr) => expr,
+    (statement-block) => block,
+    (statement-if) => seq(lit("if"), plu(whitespace), xblock),
+    (statement-while) => seq(lit("while"), plu(whitespace), xblock),
+
+    (xblock) => seq(expr, block),
+    (block) => seq(lit("\{"), statementlist, lit("\}")),
+    (expr) => plu(term, op),
+
+    (term) => alt(term-int, term-identifier, term-my),
+    (term-int) => plu(digit),
+    (term-identifier) => identifier,
+    (term-my) => seq(lit("my"), plu(whitespace), identifier),
+    (identifier) => seq(cla(ran("a", "z"), ran("A", "Z")), sta(wordchar)),
+
+    (op) => alt(op-add, op-assign),
+    (op-add) => lit("+"),
+    (op-assign) => lit("="),
+;
+
+say %grammar.perl;
