@@ -625,10 +625,6 @@ role Q::Statement does Q {
 ###
 class Q::Statement::Expr does Q::Statement {
     has $.expr;
-
-    method run($runtime) {
-        $runtime.eval-q($.expr);
-    }
 }
 
 ### ### Q::Statement::If
@@ -641,31 +637,6 @@ class Q::Statement::If does Q::Statement {
     has $.else = NONE;
 
     method attribute-order { <expr block else> }
-
-    method run($runtime) {
-        my $expr = $runtime.eval-q($.expr);
-        if $expr.truthy {
-            my $paramcount = get-array-length($.block.parameterlist.parameters);
-            die X::ParameterMismatch.new(
-                :type("If statement"), :$paramcount, :argcount("0 or 1"))
-                if $paramcount > 1;
-            $runtime.run-block($.block, [$expr]);
-        }
-        else {
-            given $.else {
-                when Q::Statement::If {
-                    $.else.run($runtime)
-                }
-                when Q::Block {
-                    my $paramcount = get-array-length($.else.parameterlist.parameters);
-                    die X::ParameterMismatch.new(
-                        :type("Else block"), :$paramcount, :argcount("0 or 1"))
-                        if $paramcount > 1;
-                    $runtime.run-block($.else, [$expr]);
-                }
-            }
-        }
-    }
 }
 
 ### ### Q::Statement::Block
@@ -674,10 +645,6 @@ class Q::Statement::If does Q::Statement {
 ###
 class Q::Statement::Block does Q::Statement {
     has $.block;
-
-    method run($runtime) {
-        $runtime.run-block($.block, []);
-    }
 }
 
 ### ### Q::CompUnit
@@ -697,24 +664,6 @@ class Q::Statement::For does Q::Statement {
     has $.block;
 
     method attribute-order { <expr block> }
-
-    method run($runtime) {
-        my $count = get-array-length($.block.parameterlist.parameters);
-        die X::ParameterMismatch.new(
-            :type("For loop"), :paramcount($count), :argcount("0 or 1"))
-            if $count > 1;
-
-        my $array = $runtime.eval-q($.expr);
-        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected([]))
-            unless is-array($array);
-
-        for get-all-array-elements($array) -> $arg {
-            $runtime.run-block($.block, $count ?? [$arg] !! []);
-            last if $runtime.last-triggered;
-            $runtime.reset-triggers();
-        }
-        $runtime.reset-triggers();
-    }
 }
 
 ### ### Q::Statement::While
@@ -726,19 +675,6 @@ class Q::Statement::While does Q::Statement {
     has $.block;
 
     method attribute-order { <expr block> }
-
-    method run($runtime) {
-        while (my $expr = $runtime.eval-q($.expr)).truthy {
-            my $paramcount = get-array-length($.block.parameterlist.parameters);
-            die X::ParameterMismatch.new(
-                :type("While loop"), :$paramcount, :argcount("0 or 1"))
-                if $paramcount > 1;
-            $runtime.run-block($.block, [$expr]);
-            last if $runtime.last-triggered;
-            $runtime.reset-triggers();
-        }
-        $runtime.reset-triggers();
-    }
 }
 
 ### ### Q::Statement::Return
@@ -747,12 +683,6 @@ class Q::Statement::While does Q::Statement {
 ###
 class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
-
-    method run($runtime) {
-        my $value = is-none($.expr) ?? $.expr !! $runtime.eval-q($.expr);
-        my $frame = $runtime.get-var("--RETURN-TO--");
-        die X::Control::Return.new(:$value, :$frame);
-    }
 }
 
 ### ### Q::Statement::Throw
@@ -761,16 +691,6 @@ class Q::Statement::Return does Q::Statement {
 ###
 class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
-
-    method run($runtime) {
-        my $value = is-none($.expr)
-            ?? make-exception(make-str("Died"))
-            !! $runtime.eval-q($.expr);
-        die X::TypeCheck.new(:got($value), :excpected(_007::Value))
-            unless is-exception($value);
-
-        die X::_007::RuntimeException.new(:msg($value.slots<message>.native-value));
-    }
 }
 
 ### ### Q::Statement::Next
@@ -803,9 +723,6 @@ class Q::Statement::Func does Q::Statement does Q::Declaration {
     has Q::Block $.block;
 
     method attribute-order { <identifier traitlist block> }
-
-    method run($runtime) {
-    }
 }
 
 ### ### Q::Statement::Macro
@@ -818,9 +735,6 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.block;
 
     method attribute-order { <identifier traitlist block> }
-
-    method run($runtime) {
-    }
 }
 
 ### ### Q::Statement::BEGIN
@@ -829,10 +743,6 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
 ###
 class Q::Statement::BEGIN does Q::Statement {
     has $.block;
-
-    method run($runtime) {
-        # a BEGIN block does not run at runtime
-    }
 }
 
 ### ### Q::Statement::Class
@@ -841,10 +751,6 @@ class Q::Statement::BEGIN does Q::Statement {
 ###
 class Q::Statement::Class does Q::Statement does Q::Declaration {
     has $.block;
-
-    method run($runtime) {
-        # a class block does not run at runtime
-    }
 }
 
 ### ### Q::StatementList
@@ -856,17 +762,6 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
 ###
 class Q::StatementList does Q {
     has _007::Value $.statements where &is-array = make-array([]);
-
-    method run($runtime) {
-        for get-all-array-elements($.statements) -> $statement {
-            my $value = $statement.run($runtime);
-            last if $runtime.next-triggered || $runtime.last-triggered;
-            LAST if $statement ~~ Q::Statement::Expr {
-                return $value;
-            }
-        }
-        return NONE;
-    }
 }
 
 ### ### Q::Expr::BlockAdapter

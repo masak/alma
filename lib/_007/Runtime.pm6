@@ -54,7 +54,7 @@ class _007::Runtime {
 
     method run(Q::CompUnit $compunit) {
         self.enter(self.current-frame, $compunit.block.static-lexpad, $compunit.block.statementlist);
-        $compunit.block.statementlist.run(self);
+        self.run-q($compunit.block.statementlist);
         self.handle-main();
         self.leave();
         CATCH {
@@ -216,7 +216,7 @@ class _007::Runtime {
         for @(get-all-array-elements($block.parameterlist.parameters)) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }
-        $block.statementlist.run(self);
+        self.run-q($block.statementlist);
         self.leave;
     }
 
@@ -257,7 +257,7 @@ class _007::Runtime {
             }
             self.register-subhandler;
             my $frame = self.current-frame;
-            $value = $c.slots<statementlist>.run(self);
+            $value = self.run-q($c.slots<statementlist>);
             self.leave;
             CATCH {
                 when X::Control::Return {
@@ -988,8 +988,129 @@ class _007::Runtime {
 
     multi method eval-q(Q::Expr::BlockAdapter $block-adapter) {
         self.enter(self.current-frame, $block-adapter.block.static-lexpad, $block-adapter.block.statementlist);
-        my $result = $block-adapter.block.statementlist.run(self);
+        my $result = self.run-q($block-adapter.block.statementlist);
         self.leave;
         return $result;
+    }
+
+    multi method run-q(Q::Statement::Expr $statement) {
+        self.eval-q($statement.expr);
+    }
+
+    multi method run-q(Q::Statement::If $statement) {
+        my $expr = self.eval-q($statement.expr);
+        if $expr.truthy {
+            my $paramcount = get-array-length($statement.block.parameterlist.parameters);
+            die X::ParameterMismatch.new(
+                :type("If statement"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
+            self.run-block($statement.block, [$expr]);
+        }
+        else {
+            given $statement.else {
+                when Q::Statement::If {
+                    self.run-q($statement.else);
+                }
+                when Q::Block {
+                    my $paramcount = get-array-length($statement.else.parameterlist.parameters);
+                    die X::ParameterMismatch.new(
+                        :type("Else block"), :$paramcount, :argcount("0 or 1"))
+                        if $paramcount > 1;
+                    self.enter(self.current-frame, $statement.else.static-lexpad, $statement.else.statementlist);
+                    for @(get-all-array-elements($statement.else.parameterlist.parameters)) Z $expr -> ($param, $arg) {
+                        self.declare-var($param.identifier, $arg);
+                    }
+                    self.run-q($statement.else.statementlist);
+                    self.leave;
+                }
+            }
+        }
+    }
+
+    multi method run-q(Q::Statement::Block $statement) {
+        self.enter(self.current-frame, $statement.block.static-lexpad, $statement.block.statementlist);
+        self.run-q($statement.block.statementlist);
+        self.leave;
+    }
+
+    multi method run-q(Q::Statement::For $statement) {
+        my $count = get-array-length($statement.block.parameterlist.parameters);
+        die X::ParameterMismatch.new(
+            :type("For loop"), :paramcount($count), :argcount("0 or 1"))
+            if $count > 1;
+
+        my $array = self.eval-q($statement.expr);
+        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(_007::Value))
+            unless is-array($array);
+
+        for get-all-array-elements($array) -> $arg {
+            self.run-block($statement.block, $count ?? [$arg] !! []);
+            last if self.last-triggered;
+            self.reset-triggers();
+        }
+        self.reset-triggers();
+    }
+
+    multi method run-q(Q::Statement::While $statement) {
+        while (my $expr = self.eval-q($statement.expr)).truthy {
+            my $paramcount = get-array-length($statement.block.parameterlist.parameters);
+            die X::ParameterMismatch.new(
+                :type("While loop"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
+            self.run-block($statement.block, $paramcount ?? [$expr] !! []);
+            last if self.last-triggered;
+            self.reset-triggers();
+        }
+    }
+
+    multi method run-q(Q::Statement::Return $statement) {
+        my $value = is-none($statement.expr) ?? $statement.expr !! self.eval-q($statement.expr);
+        my $frame = self.get-var("--RETURN-TO--");
+        die X::Control::Return.new(:$value, :$frame);
+    }
+
+    multi method run-q(Q::Statement::Throw $statement) {
+        my $value = is-none($statement.expr)
+            ?? make-exception(make-str("Died"))
+            !! self.eval-q($statement.expr);
+        die X::TypeCheck.new(:got($value), :excpected(_007::Value))
+            unless is-exception($value);
+
+        die X::_007::RuntimeException.new(:msg($value.slots<message>.native-value));
+    }
+
+    multi method run-q(Q::Statement::Next $) {
+        self.trigger-next();
+    }
+
+    multi method run-q(Q::Statement::Last $) {
+        self.trigger-last();
+    }
+
+    multi method run-q(Q::Statement::Func $) {
+        # this is just the function definition; does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::Macro $) {
+        # this is just the macro definition; does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::BEGIN $) {
+        # a BEGIN block does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::Class $) {
+        # a class block does not run at runtime
+    }
+
+    multi method run-q(Q::StatementList $statementlist) {
+        for get-all-array-elements($statementlist.statements) -> $statement {
+            my $value = self.run-q($statement);
+            last if self.next-triggered || self.last-triggered;
+            LAST if $statement ~~ Q::Statement::Expr {
+                return $value;
+            }
+        }
+        return NONE;
     }
 }
