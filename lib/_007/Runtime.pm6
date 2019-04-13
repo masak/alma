@@ -37,7 +37,7 @@ class _007::Runtime {
 
     method run(Q::CompUnit $compunit) {
         self.enter(self.current-frame, $compunit.block.static-lexpad, $compunit.block.statementlist);
-        $compunit.block.statementlist.run(self);
+        self.run-q($compunit.block.statementlist);
         self.handle-main();
         self.leave();
         CATCH {
@@ -202,7 +202,7 @@ class _007::Runtime {
         for @($block.parameterlist.parameters.elements) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
         }
-        $block.statementlist.run(self);
+        self.run-q($block.statementlist);
         self.leave;
     }
 
@@ -239,7 +239,7 @@ class _007::Runtime {
         }
         self.register-subhandler;
         my $frame = self.current-frame;
-        my $value = $c.statementlist.run(self);
+        my $value = self.run-q($c.statementlist);
         self.leave;
         CATCH {
             when X::Control::Return {
@@ -904,8 +904,115 @@ class _007::Runtime {
 
     multi method eval-q(Q::Expr::BlockAdapter $block-adapter) {
         self.enter(self.current-frame, $block-adapter.block.static-lexpad, $block-adapter.block.statementlist);
-        my $result = $block-adapter.block.statementlist.run(self);
+        my $result = self.run-q($block-adapter.block.statementlist);
         self.leave;
         return $result;
+    }
+
+    multi method run-q(Q::Statement::Expr $statement) {
+        self.eval-q($statement.expr);
+    }
+
+    multi method run-q(Q::Statement::If $statement) {
+        my $expr = self.eval-q($statement.expr);
+        if $expr.truthy {
+            my $paramcount = $statement.block.parameterlist.parameters.elements.elems;
+            die X::ParameterMismatch.new(
+                :type("If statement"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
+            self.run-block($statement.block, [$expr]);
+        }
+        else {
+            given $statement.else {
+                when Q::Statement::If {
+                    self.run-q($statement.else);
+                }
+                when Q::Block {
+                    my $paramcount = $statement.else.parameterlist.parameters.elements.elems;
+                    die X::ParameterMismatch.new(
+                        :type("Else block"), :$paramcount, :argcount("0 or 1"))
+                        if $paramcount > 1;
+                    self.enter(self.current-frame, $statement.else.static-lexpad, $statement.else.statementlist);
+                    for @($statement.else.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
+                        self.declare-var($param.identifier, $arg);
+                    }
+                    self.run-q($statement.else.statementlist);
+                    self.leave;
+                }
+            }
+        }
+    }
+
+    multi method run-q(Q::Statement::Block $statement) {
+        self.enter(self.current-frame, $statement.block.static-lexpad, $statement.block.statementlist);
+        self.run-q($statement.block.statementlist);
+        self.leave;
+    }
+
+    multi method run-q(Q::Statement::For $statement) {
+        my $paramcount = $statement.block.parameterlist.parameters.elements.elems;
+        die X::ParameterMismatch.new(
+            :type("For loop"), :$paramcount, :argcount("0 or 1"))
+            if $paramcount > 1;
+
+        my $got = self.eval-q($statement.expr);
+        die X::TypeCheck.new(:operation("for loop"), :$got, :expected(Val::Array))
+            unless $got ~~ Val::Array;
+
+        for $got.elements -> $arg {
+            self.run-block($statement.block, $paramcount ?? [$arg] !! []);
+        }
+    }
+
+    multi method run-q(Q::Statement::While $statement) {
+        while (my $expr = self.eval-q($statement.expr)).truthy {
+            my $paramcount = $statement.block.parameterlist.parameters.elements.elems;
+            die X::ParameterMismatch.new(
+                :type("While loop"), :$paramcount, :argcount("0 or 1"))
+                if $paramcount > 1;
+            self.run-block($statement.block, $paramcount ?? [$expr] !! []);
+        }
+    }
+
+    multi method run-q(Q::Statement::Return $statement) {
+        my $value = $statement.expr ~~ Val::None ?? $statement.expr !! self.eval-q($statement.expr);
+        my $frame = self.get-var("--RETURN-TO--");
+        die X::Control::Return.new(:$value, :$frame);
+    }
+
+    multi method run-q(Q::Statement::Throw $statement) {
+        my $value = $statement.expr ~~ Val::None
+            ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
+            !! self.eval-q($statement.expr);
+        die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
+            if $value !~~ Val::Exception;
+
+        die X::_007::RuntimeException.new(:msg($value.message.value));
+    }
+
+    multi method run-q(Q::Statement::Func $) {
+        # this is just the function definition; does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::Macro $) {
+        # this is just the macro definition; does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::BEGIN $) {
+        # a BEGIN block does not run at runtime
+    }
+
+    multi method run-q(Q::Statement::Class $) {
+        # a class block does not run at runtime
+    }
+
+    multi method run-q(Q::StatementList $statementlist) {
+        for $statementlist.statements.elements -> $statement {
+            my $value = self.run-q($statement);
+            LAST if $statement ~~ Q::Statement::Expr {
+                return $value;
+            }
+        }
+        return NONE;
     }
 }

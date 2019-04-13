@@ -194,7 +194,7 @@ class _007::Parser::Actions {
     method statement:BEGIN ($/) {
         my $statement = $<statement>.ast;
         make Q::Statement::BEGIN.new(:$statement);
-        $statement.run($*runtime);
+        $*runtime.run-q($statement);
     }
 
     method statement:class ($/) {
