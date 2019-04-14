@@ -801,7 +801,7 @@ class _007::Runtime {
 
     multi method eval-q(Q::Infix::Assignment $assignment) {
         my $value = self.eval-q($assignment.rhs);
-        $assignment.lhs.put-value($value, self);
+        self.put-value($assignment.lhs, $value);
         return $value;
     }
 
@@ -1112,5 +1112,63 @@ class _007::Runtime {
             }
         }
         return NONE;
+    }
+
+    multi method put-value(Q::Term::Identifier $identifier, $value) {
+        self.put-var($identifier, $value);
+    }
+
+    multi method put-value(Q::Term::Identifier::Direct $identifier, $value) {
+        self.put-direct($identifier.frame, $identifier.name.native-value, $value);
+    }
+
+    multi method put-value(Q::Postfix::Index $op, $value) {
+        given self.eval-q($op.operand) {
+            when &is-array {
+                my $index = self.eval-q($op.index);
+                die X::Subscript::NonInteger.new
+                    unless is-int($index);
+                my $length = get-array-length($_);
+                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
+                    if $index.native-value >= $length;
+                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
+                    if $index.native-value < 0;
+                return set-array-element($_, $index.native-value, $value);
+            }
+            when &is-dict {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                set-dict-property($_, $propname, $value);
+            }
+            when Q {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                self.put-property($_, $propname, $value);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+        }
+    }
+
+    multi method put-value(Q::Postfix::Property $op, $value) {
+        given self.eval-q($op.operand) {
+            when &is-dict {
+                my $propname = $op.property.name.native-value;
+                set-dict-property($_, $propname, $value);
+            }
+            when Q {
+                my $propname = $op.property.name.native-value;
+                self.put-property($_, $propname, $value);
+            }
+
+            die "We don't handle this case yet"; # XXX: think more about this case
+        }
+    }
+
+    multi method put-value(Q::Term::My $my, $value) {
+        self.put-value($my.identifier, $value);
     }
 }

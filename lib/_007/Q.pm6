@@ -173,9 +173,6 @@ class Q::Literal::Str does Q::Literal {
 ### locations at different times when accessed from different call frames.
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
-    method put-value($value, $runtime) {
-        $runtime.put-var(self, $value);
-    }
 }
 
 ### ### Q::Term::Identifier::Direct
@@ -185,10 +182,6 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
 ###
 class Q::Term::Identifier::Direct is Q::Term::Identifier {
     has _007::Value $.frame where &is-dict;
-
-    method put-value($value, $runtime) {
-        $runtime.put-direct($.frame, $.name.native-value, $value);
-    }
 }
 
 ### ### Q::Regex::Fragment
@@ -458,37 +451,6 @@ class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
     method attribute-order { <identifier operand index> }
-
-    method put-value($value, $runtime) {
-        given $runtime.eval-q($.operand) {
-            when &is-array {
-                my $index = $runtime.eval-q($.index);
-                die X::Subscript::NonInteger.new
-                    unless is-int($index);
-                my $length = get-array-length($_);
-                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
-                    if $index.native-value >= $length;
-                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
-                    if $index.native-value < 0;
-                return set-array-element($_, $index.native-value, $value);
-            }
-            when &is-dict {
-                my $property = $runtime.eval-q($.index);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                set-dict-property($_, $propname, $value);
-            }
-            when Q {
-                my $property = $runtime.eval-q($.index);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                $runtime.put-property($_, $propname, $value);
-            }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected([]));
-        }
-    }
 }
 
 ### ### Q::Postfix::Call
@@ -509,20 +471,6 @@ class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
     method attribute-order { <identifier operand property> }
-
-    method put-value($value, $runtime) {
-        given $runtime.eval-q($.operand) {
-            when &is-dict {
-                my $propname = $.property.name.native-value;
-                set-dict-property($_, $propname, $value);
-            }
-            when Q {
-                my $propname = $.property.name.native-value;
-                $runtime.put-property($_, $propname, $value);
-            }
-            die "We don't handle this case yet"; # XXX: think more about this case
-        }
-    }
 }
 
 ### ### Q::Unquote
@@ -559,10 +507,6 @@ class Q::Term::My does Q::Term does Q::Declaration {
     has $.identifier;
 
     method is-assignable { True }
-
-    method put-value($value, $runtime) {
-        $.identifier.put-value($value, $runtime);
-    }
 }
 
 class Q::StatementList { ... }
