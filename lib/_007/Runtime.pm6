@@ -734,7 +734,7 @@ class _007::Runtime {
 
     multi method eval-q(Q::Infix::Assignment $assignment) {
         my $value = self.eval-q($assignment.rhs);
-        $assignment.lhs.put-value($value, self);
+        self.put-value($assignment.lhs, $value);
         return $value;
     }
 
@@ -1014,5 +1014,50 @@ class _007::Runtime {
             }
         }
         return NONE;
+    }
+
+    multi method put-value(Q::Term::Identifier $identifier, $value) {
+        self.put-var($identifier, $value);
+    }
+
+    multi method put-value(Q::Term::Identifier::Direct $identifier, $value) {
+        self.put-direct($identifier.frame, $identifier.name.value, $value);
+    }
+
+    multi method put-value(Q::Postfix::Index $op, $value) {
+        given self.eval-q($op.operand) {
+            when Val::Array {
+                my $index = self.eval-q($op.index);
+                die X::Subscript::NonInteger.new
+                    if $index !~~ Val::Int;
+                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
+                    if $index.value >= .elements;
+                die X::Subscript::Negative.new(:$index, :type([]))
+                    if $index.value < 0;
+                .elements[$index.value] = $value;
+            }
+            when Val::Dict | Q {
+                my $property = self.eval-q($op.index);
+                die X::Subscript::NonString.new
+                    if $property !~~ Val::Str;
+                my $propname = $property.value;
+                self.put-property($_, $propname, $value);
+            }
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+        }
+    }
+
+    multi method put-value(Q::Postfix::Property $op, $value) {
+        given self.eval-q($op.operand) {
+            when Val::Dict | Q {
+                my $propname = $op.property.name.value;
+                self.put-property($_, $propname, $value);
+            }
+            die "We don't handle this case yet"; # XXX: think more about this case
+        }
+    }
+
+    multi method put-value(Q::Term::My $my, $value) {
+        self.put-value($my.identifier, $value);
     }
 }

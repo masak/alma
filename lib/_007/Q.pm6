@@ -172,9 +172,6 @@ class Q::Literal::Str does Q::Literal {
 ### locations at different times when accessed from different call frames.
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
-    method put-value($value, $runtime) {
-        $runtime.put-var(self, $value);
-    }
 }
 
 ### ### Q::Term::Identifier::Direct
@@ -184,10 +181,6 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
 ###
 class Q::Term::Identifier::Direct is Q::Term::Identifier {
     has Val::Dict $.frame;
-
-    method put-value($value, $runtime) {
-        $runtime.put-direct($.frame, $.name.value, $value);
-    }
 }
 
 ### ### Q::Regex::Fragment
@@ -455,29 +448,6 @@ class Q::Postfix::Index is Q::Postfix {
     has $.index;
 
     method attribute-order { <identifier operand index> }
-
-    method put-value($value, $runtime) {
-        given $runtime.eval-q($.operand) {
-            when Val::Array {
-                my $index = $runtime.eval-q($.index);
-                die X::Subscript::NonInteger.new
-                    if $index !~~ Val::Int;
-                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.value >= .elements;
-                die X::Subscript::Negative.new(:$index, :type([]))
-                    if $index.value < 0;
-                .elements[$index.value] = $value;
-            }
-            when Val::Dict | Q {
-                my $property = $runtime.eval-q($.index);
-                die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
-                my $propname = $property.value;
-                $runtime.put-property($_, $propname, $value);
-            }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
-        }
-    }
 }
 
 ### ### Q::Postfix::Call
@@ -498,16 +468,6 @@ class Q::Postfix::Property is Q::Postfix {
     has $.property;
 
     method attribute-order { <identifier operand property> }
-
-    method put-value($value, $runtime) {
-        given $runtime.eval-q($.operand) {
-            when Val::Dict | Q {
-                my $propname = $.property.name.value;
-                $runtime.put-property($_, $propname, $value);
-            }
-            die "We don't handle this case yet"; # XXX: think more about this case
-        }
-    }
 }
 
 ### ### Q::Unquote
@@ -544,10 +504,6 @@ class Q::Term::My does Q::Term does Q::Declaration {
     has $.identifier;
 
     method is-assignable { True }
-
-    method put-value($value, $runtime) {
-        $.identifier.put-value($value, $runtime);
-    }
 }
 
 class Q::StatementList { ... }
