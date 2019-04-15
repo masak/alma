@@ -1,0 +1,34 @@
+for ^10 -> D {
+    for ^10 -> E {
+        if D != E {
+            my Y = (D + E) % 10;
+            if D != Y && E != Y {
+                my C_1 = ((D + E) divmod 10)[0];
+                for ^10 -> N {
+                    if D != N && E != N && Y != N {
+                        for ^10 -> R {
+                            if D != R && E != R && Y != R && N != R && (C_1 + N + R) % 10 == E {
+                                my C_2 = ((C_1 + N + R) divmod 10)[0];
+                                for ^10 -> O {
+                                    if D != O && E != O && Y != O && N != O && R != O && (C_2 + E + O) % 10 == N {
+                                        my C_3 = ((C_2 + E + O) divmod 10)[0];
+                                        for ^10 -> S {
+                                            if S != 0 && D != S && E != S && Y != S && N != S && R != S && O != S {
+                                                for ^10 -> M {
+                                                    my C_4 = ((C_3 + S + M) divmod 10)[0];
+                                                    if M != 0 && D != M && E != M && Y != M && N != M && R != M && O != M && S != M && (C_3 + S + M) % 10 == O && C_4 == M {
+                                                        say(S, E, N, D, " + ", M, O, R, E, " == ", M, O, N, E, Y);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
