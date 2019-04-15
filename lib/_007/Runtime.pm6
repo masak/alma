@@ -570,6 +570,9 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "CompUnit" {
             return Val::Type.of(Q::CompUnit);
         }
+        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Expr" {
+            return Val::Type.of(Q::Expr);
+        }
         elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Identifier" {
             return Val::Type.of(Q::Identifier);
         }
@@ -597,6 +600,9 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Term" {
             return Val::Type.of(Q::Term);
         }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Expr && $propname eq "BlockAdapter" {
+            return Val::Type.of(Q::Expr::BlockAdapter);
+        }
         elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Int" {
             return Val::Type.of(Q::Literal::Int);
         }
@@ -611,6 +617,12 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Property" {
             return Val::Type.of(Q::Postfix::Property);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Block" {
+            return Val::Type.of(Q::Statement::Block);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Expr" {
+            return Val::Type.of(Q::Statement::Expr);
         }
         elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Func" {
             return Val::Type.of(Q::Statement::Func);
@@ -632,6 +644,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Identifier" {
             return Val::Type.of(Q::Term::Identifier);
+        }
+        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "My" {
+            return Val::Type.of(Q::Term::My);
         }
         else {
             if $obj ~~ Val::Type {

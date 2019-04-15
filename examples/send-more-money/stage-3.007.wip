@@ -1,0 +1,90 @@
+func infix:«<-»(l, r) is equiv(infix:<==>) {
+}
+
+macro range(min, max) {
+    my elements = [];
+    my value = min.value;
+    while value <= max.value {
+        elements.push(new Q.Literal.Int { value });
+        value = value + 1;
+    }
+    return new Q.Term.Array { elements };
+}
+
+func assert(expr) {
+}
+
+func infix:<!=any>(n, xs) is equiv(infix:<!=>) {
+}
+
+func div10(n) is equiv(infix:<%>) {
+    return (n divmod 10)[0];
+}
+
+macro solve(fn) {
+    my statements = fn.block.statementlist.statements.reverse();
+    my result = [];
+    for statements -> stmt {
+        if stmt ~~ Q.Statement.Expr && stmt.expr ~~ Q.Postfix.Call && stmt.expr.operand.name == "assert" {
+            my condition = stmt.expr.argumentlist.arguments[0];
+            result = [
+                quasi {
+                    if {{{condition}}} {
+                        {{{result}}}
+                    }
+                }
+            ];
+        }
+        else if stmt ~~ Q.Statement.Expr && stmt.expr ~~ Q.Infix && stmt.expr.identifier.name == "infix:<-" {
+            if stmt.expr.lhs !~~ Q.Term.My {
+                throw new Exception { message: "lhs needs to be a `my`" };
+            }
+            my variable = stmt.expr.lhs.identifier;
+            my values = stmt.expr.rhs;
+            result = [
+                quasi {
+                    for {{{values}}} -> {{{Q.Identifier @ variable}}} {
+                        {{{result}}}
+                    }
+                }
+            ];
+        }
+    }
+    return result[0].statementlist.statements[0];   # XXX
+}
+
+solve(func() {
+    my D <- range(0, 9);
+
+    my E <- range(0, 9);
+    assert(E !=any [D]);
+
+    my Y = (D + E) % 10;
+    assert(Y !=any [D, E]);
+
+    my C_1 = div10(D + E);
+    my N <- range(0, 9);
+    assert(N !=any [D, E, Y]);
+
+    my R <- range(0, 9);
+    assert(R !=any [D, E, Y, N]);
+    assert((C_1 + N + R) % 10 == E);
+
+    my C_2 = div10(C_1 + N + R);
+    my O <- range(0, 9);
+    assert(O !=any [D, E, Y, N, R]);
+    assert((C_2 + E + O) % 10 == N);
+
+    my C_3 = div10(C_2 + E + O);
+    my S <- range(1, 9);
+    assert(S !=any [D, E, Y, N, R, O]);
+
+    my M <- range(1, 9);
+    assert(M !=any [D, E, Y, N, R, O, S]);
+    assert((C_3 + S + M) % 10 == O);
+
+    my C_4 = div10(C_3 + S + M);
+    assert(C_4 == M);
+
+    say(S, E, N, D, " + ", M, O, R, E, " == ", M, O, N, E, Y);
+});
