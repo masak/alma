@@ -1,0 +1,51 @@
+func infix:<⊕>(l, r) is equiv(infix:<+>) {
+    return (l + r) % 10;
+}
+
+func div10(n) is equiv(infix:<%>) {
+    return (n divmod 10)[0];
+}
+
+func infix:<!=any>(n, xs) is equiv(infix:<!=>) {
+    for xs -> x {
+        if n == x {
+            return false;
+        }
+    }
+    return true;
+}
+
+for ^10 -> D {
+    for ^10 -> E {
+        if E !=any [D] {
+            my Y = D ⊕ E;
+            if Y !=any [D, E] {
+                my C_1 = div10(D + E);
+                for ^10 -> N {
+                    if N !=any [D, E, Y] {
+                        for ^10 -> R {
+                            if R !=any [D, E, Y, N] && C_1 ⊕ N ⊕ R == E {
+                                my C_2 = div10(C_1 + N + R);
+                                for ^10 -> O {
+                                    if O !=any [D, E, Y, N, R] && C_2 ⊕ E ⊕ O == N {
+                                        my C_3 = div10(C_2 + E + O);
+                                        for ^10 -> S {
+                                            if S !=any [0, D, E, Y, N, R, O] {
+                                                for ^10 -> M {
+                                                    my C_4 = div10(C_3 + S + M);
+                                                    if M !=any [0, D, E, Y, N, R, O, S] && C_3 ⊕ S ⊕ M == O && C_4 == M {
+                                                        say(S, E, N, D, " + ", M, O, R, E, " == ", M, O, N, E, Y);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
