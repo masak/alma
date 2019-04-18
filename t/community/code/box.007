@@ -1,0 +1,157 @@
+# tests and examples array, string and integer:
+# boxify("hej", 4);
+# boxify(text, 4);
+# boxify(3, 4);
+
+# tests if width works:
+boxify(["hej","på dig", "GRUFFALON!"], 2, 1);
+boxify(["hej","på dig", "GRUFFALON!"], 3, 2);
+boxify(["hej","på dig", "GRUFFALON!"], 4, 0);
+boxify(["hej","på dig", "GRUFFALON!"], 5, 1);
+boxify(["hej","på dig", "GRUFFALON!"], 6, 3);
+
+
+func boxify(stringsToBox, wOnSides, hFreeSpace) {
+
+    my index = 0;
+    my longestStrLen = 0;
+
+    if !isEven(wOnSides) {
+      wOnSides = wOnSides + 1;
+    }
+
+    my tempHWS = hFreeSpace;
+
+    if stringsToBox !~~ Array {
+      if stringsToBox ~~ Str {
+        my tempStr = stringsToBox;
+        stringsToBox = [];
+        stringsToBox.push(tempStr);
+      } else if stringsToBox ~~ Int {
+        my tempStr = ~stringsToBox;
+        stringsToBox = [];
+        stringsToBox.push(tempStr);
+      }
+    }
+
+    for stringsToBox -> string {
+        my strLength = string.chars();
+        if strLength > longestStrLen {
+            longestStrLen = strLength;
+        }
+    }
+
+    if(!isEven(longestStrLen)) {
+      longestStrLen = longestStrLen + 1;
+    }
+
+    my boxWidth = longestStrLen + (wOnSides * 2) - 2;
+
+    say(generateTop(boxWidth));
+
+    generateHorizontalSpace(tempHWS, boxWidth);
+
+    for stringsToBox -> printLn {
+
+        my ln = "║";
+
+        my thisLineLen = printLn.chars();
+
+        if !isEven(thisLineLen) {
+          thisLineLen = thisLineLen + 1;
+        }
+
+        ln = ln ~ generateWSpaceBefore(wOnSides);
+        ln = ln ~ printLn;
+        ln = ln ~ generateWSpaceAfter(wOnSides, thisLineLen, longestStrLen, printLn);
+        ln = ln ~ "║";
+        say(ln);
+    }
+
+    generateHorizontalSpace(tempHWS, boxWidth);
+
+    say(generateBottom(boxWidth));
+}
+
+func generateHorizontalSpace(tempHWS, boxWidth) {
+  my w = boxWidth + 2;
+
+  for ^tempHWS {
+    my ln = "║";
+
+    for ^w {
+        ln = ln ~ " ";
+    }
+
+    ln = ln ~ "║";
+    say(ln);
+  }
+
+}
+
+func generateTop(w) {
+    my top = "╔";
+    my line = "";
+    my counter = 0;
+
+    while (counter < (w + 2)) {
+        line = line ~ "═";
+        counter = counter + 1;
+    }
+    my topLine = ~ top ~ line ~ "╗";
+    return topLine;
+}
+
+func generateBottom(w) {
+    my top = "╚";
+    my line = "";
+    my counter = 0;
+    while (counter < (w + 2)) {
+        line = line ~ "═";
+        counter = counter + 1;
+    }
+    my topLine = ~ top ~ line ~ "╝";
+    return topLine;
+}
+
+func generateWSpaceBefore(w) {
+
+    my spacesLn = "";
+    for ^w {
+        spacesLn = spacesLn ~ " ";
+    }
+    return spacesLn;
+}
+
+func generateWSpaceAfter(w, thisLnLength, longestStrLength, str) {
+
+    my diffBetweenLongestAndThisLn = longestStrLength - thisLnLength;
+
+    my spacesAfter = diffBetweenLongestAndThisLn + w;
+
+    if !isEven(str.chars()) {
+      spacesAfter = spacesAfter + 1;
+    }
+
+    my spacesLn = "";
+    for ^spacesAfter {
+        spacesLn = spacesLn ~ " ";
+    }
+    return spacesLn;
+}
+
+func isEven(value) {
+  return value %% 2;
+}
+
+# this function will - I guess - be needed in the future centering feature
+func half(value) {
+  my tempVal = value;
+  my count = 0;
+
+  while (tempVal > 2) {
+    tempVal = tempVal - 2;
+    count = count + 1;
+  }
+  return count;
+}

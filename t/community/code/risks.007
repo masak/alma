@@ -1,0 +1,896 @@
+# ------------------------------------------------------------------------------
+#
+#
+#                          .: CONSCIOUS RISKS :.
+#
+#           By Claes-Magnus Bernson <cmbernson@gmail.com>, 2018
+#
+#
+# ------------------------------------------------------------------------------
+
+# global vars
+
+my letters = [
+    { letter: "A", v: [
+    "     e     ",
+    "    d8b    ",
+    "   /Y88b   ",
+    "  /  Y88b  ",
+    " /____Y88b ",
+    "/      Y88b",
+    "           "
+    ] },
+    { letter: "B", v: [
+    "888~~\ ",
+    "888   |",
+    "888 _/ ",
+    "888  \ ",
+    "888   |",
+    "888__/ ",
+    "       "
+    ] },
+    { letter: "C", v: [
+    " e88~-_  ",
+    "d888   \ ",
+    "8888     ",
+    "8888     ",
+    "Y888   / ",
+    "  88_-~  ",
+    "         "
+    ] },
+    { letter: "D", v: [
+    "888~-_  ",
+    "888   \ ",
+    "888    |",
+    "888    |",
+    "888   / ",
+    "888_-~  ",
+    "        "
+    ] },
+    { letter: "E", v: [
+    "888~~ ",
+    "888___",
+    "888   ",
+    "888   ",
+    "888   ",
+    "888___",
+    "       "
+    ] },
+    { letter: "F", v: [
+    "888~~ ",
+    "888___",
+    "888   ",
+    "888   ",
+    "888   ",
+    "888   ",
+    "      "
+    ] },
+    { letter: "G", v: [
+    " e88~~\ ",
+    "d888    ",
+    "8888 __ ",
+    "8888   |",
+    "Y888   |",
+    " 88___/ ",
+    "        "
+    ] },
+    { letter: "H", v: [
+    "888   |",
+    "888___|",
+    "888   |",
+    "888   |",
+    "888   |",
+    "888   |",
+    "       "
+    ] },
+    { letter: "I", v: [
+    "888",
+    "888",
+    "888",
+    "888",
+    "888",
+    "888",
+    "   "
+    ] },
+    { letter: "J", v: [
+    "    888",
+    "    888",
+    "    888",
+    "    888",
+    "|   88P",
+    " \__8  ",
+    "       "
+    ] },
+    { letter: "K", v: [
+    "888  /   ",
+    "888 /    ",
+    "888/\    ",
+    "888  \   ",
+    "888   \  ",
+    "888    \ ",
+    "        "
+    ] },
+    { letter: "L", v: [
+    "888    ",
+    "888    ",
+    "888    ",
+    "888    ",
+    "888    ",
+    "888____"
+    ] },
+    { letter: "M", v: [
+    "     e    e     ",
+    "    d8b  d8b    ",
+    "   d888bdY88b   ",
+    "  / Y88Y Y888b  ",
+    " /   YY   Y888b ",
+    "/          Y888b",
+    "                "
+    ] },
+    { letter: "N", v: [
+    "888b    |",
+    "|Y88b   |",
+    "| Y88b  |",
+    "|  Y88b |",
+    "|   Y88b|",
+    "|    Y888",
+    "         "
+        ] },
+    { letter: "O", v: [
+    "  ,88~-_  ",
+    " d888   \ ",
+    "88888    |",
+    "88888    |",
+    " Y888   / ",
+    "   88_-~  ",
+    "          "
+    ] },
+    { letter: "P", v: [
+    "888~-_  ",
+    "888   \ ",
+    "888    |",
+    "888   / ",
+    "888_-~  ",
+    "888     ",
+    "        "
+    ] },
+    { letter: "Q", v: [
+    "  ,88~-_  ",
+    " d888   \ ",
+    "88888    |",
+    "88888    |",
+    " Y888 \ / ",
+    "   88__X  ",
+    "        \ "
+    ] },
+    { letter: "R", v: [
+    "888~-_  ",
+    "888   \ ",
+    "888    |",
+    "888   / ",
+    "888_-~  ",
+    "888 ~-_ ",
+    "        "
+    ] },
+    { letter: "S", v: [
+    ",d88~~\ ",
+    "8888   ",
+    " Y88b  ",
+    "  Y88b,",
+    "   8888",
+    "\__88P ",
+    "        "
+    ] },
+    { letter: "T", v: [
+    "~~~888~~~",
+    "   888   ",
+    "   888   ",
+    "   888   ",
+    "   888   ",
+    "   888   ",
+    "         "
+    ] },
+    { letter: "U", v: [
+    "888   |",
+    "888   |",
+    "888   |",
+    "888   |",
+    "Y88   |",
+    " 78__/ ",
+    "       "
+    ] },
+    { letter: "V", v: [
+    "Y88b      / ",
+    " Y88b    /  ",
+    "  Y88b  /   ",
+    "   Y888/    ",
+    "    Y8/     ",
+    "     Y      ",
+    "            "
+    ] },
+    { letter: "W", v: [
+    "Y88b         / ",
+    " Y88b       /  ",
+    "  Y88b  e  /   ",
+    "   Y88bd8b/    ",
+    "    Y88Y8Y     ",
+    "     Y  Y      ",
+    "               "
+    ] },
+    { letter: "X", v: [
+    "Y88b    / ",
+    " Y88b  /  ",
+    "  Y88b/   ",
+    "  /Y88b   ",
+    " /  Y88b  ",
+    "/    Y88b ",
+    "          "
+    ] },
+    { letter: "Y", v: [
+    "Y88b    / ",
+    " Y88b  /  ",
+    "  Y88b/   ",
+    "   Y8Y    ",
+    "    Y     ",
+    "   /      ",
+    "          "
+    ] },
+    { letter: "Z", v: [
+    "~~~~d88P",
+    "    d88P",
+    "   d88P ",
+    "  d88P  ",
+    " d88P   ",
+    "d88P____",
+    "        "
+    ] },
+    { letter: " ", v: [
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   "
+    ] }
+];
+
+
+
+my seed = 1299;
+my is_game_active = 1;
+
+my agent = {
+    alias: "",
+    time_spent: 0,
+    cash: 500,
+    current_room: 0
+};
+
+my scenes = [
+    {
+        name: "Kabul",
+        header: ["K","A","B","U","L"],
+        description: [
+            "You are outside a casino in a luxurious part of Kabul. In 20 minutes you're supposed to meet Aqela",
+            "(last name: unknown, known aliases: Shewolf) and buy some information. All you know about this ",
+            "person is that she made a fortune after the war with the Soviets, trading 'lost' weapons. ",
+            "She holds 2 PhD degrees, and is lethal with a blade."
+          ],
+        image: [
+            "                           ,-.^._                 _",
+            "                     .'      `-.            ,' ;",
+            "          /`-.  ,----'         `-.   _  ,-.,'  `",
+            "       _.'   `--'                 `-' '-'      ;",
+            "      :                         o             ;    __,-.",
+            "      ,'    o            Mazar-i-Sharif       ;_,-',.__'--.",
+            "     :    Herat                              ,--```    `--'",
+            "     :                                      ;",
+            "     :                                      :",
+            "     ;                                      :",
+            "    (                                       ;",
+            "     `-.                           *      ,'",
+            "       ;                         Kabul   :",
+            "     .'                             .-._,'",
+            "   .'                               `.",
+            "_.'                                .__;",
+            "`._                  o            ;",
+            "   `.             Kandahar       :    ,---------------------.",
+            "     `.               ,..__,---._;    |    AFGHANISTAN      |",
+            "       `-.__         :                | Capital: Kabul      |",
+            "            `.--.____;      Gr        | Pop: 12700000       |",
+            "                                      | Area: 250000 sq.mi. |",
+            "                                      |      (647500 sq.km.)|",
+            "                                      `---------------------'"
+            ],
+        metadata_number_of_options: 1,
+        options: [
+            {msg: "1. Enter the casino.", room: 1}
+            ]
+    },
+    {
+        name: "casino entrance",
+        header: ["E","N","T","R","A","N","C","E"],
+        description: [
+          "As always the best way to survey a new site is without a doubt from the bar. ",
+          "You order a drink and must now decide how to spend your time, before your appointment with Aqela."
+          ],
+        image: [
+            "   . ",
+            "  . ",
+            " . . ",
+            "  ... ",
+            "\~~~~~/ ",
+            " \   / ",
+            "  \ / ",
+            "   V ",
+            "   | ",
+            "   | ",
+            "  --- "
+            ],
+        metadata_number_of_options: 3,
+        options: [
+            {msg: "1. Leave the casino.", room: 0},
+            {msg: "2. Take a look around", room: 2},
+            {msg: "3. Play dice", room: 3}
+            ]
+    },
+    {
+        name: "casino overview",
+        header: ["O","V","E","R","V","I","E","W"],
+        description: [
+            "overview... text text text"
+            ],
+        image: [
+            "    _ (___) _ I_|_ ;;;*;;@;;;;@;;;;;*;;;;;;;;; _|__I___  (___)",
+            "  ,-' )   (   ~~~~~ `;;;;;;*;;;;;;;;;;;*;;;;'  ~~~~~     )   (`-.",
+            ",-____=====_______________________________________________=====___`.",
+            "|~~|  _________________________________________________/o\___   |~~|",
+            "|_||  ||____|____|____|____|____|____|____|____|____|_/ /,\__|  ||_|",
+            "|__|  |___|____|____|____|____|____|____|____|____|__/ /,,,\||  ||_|",
+            "|_||__||____|____|____|____|____|____|____|____|____|\/,,,,,\|__|__|",
+            "|____|____|____|____|____|____|____|____|____|____|___\,,,,,,\___|_|",
+            "|_|____|__I####I..........  /%%%%%%%%%%%\ ..........I##\,,,,( )|___|",
+            "|____|____I####I.......... .%%%%%( )%%%%%. .........I###\,,,,\/__|_|",
+            "|_|____|__I####I..........  /%%%%%%%%%%%\ ..........I##\,,,,( )|___|",
+            "|____|____I####I.......... .%%%%%( )%%%%%. .........I###\,,,,\/__|_|",
+            "|_|____|__I####I.......... @@%%%%0%0%%%%@@  ........I## /,,,,/_|___|",
+            "|____|____I####I.......... `@@@@@@@@@@@@@@' ........I# /,,,,/____|_|",
+            "|_|____|__I####I............ \\\\\\\\\\\\\) ........I ( \,,/___|___|",
+            "|____|____I####I.............  `\\\\\\\\\\) ........I  \_)/_|____|_|",
+            "|_|____|__I####I............  A   `\\\\\\\' ..   .. I#  :_|____|___|",
+            "|____|____I####I.........    AAA  .. `\\\' ..  A.  .I###I___|____|_|",
+            "|_|____|__I####I......   .A  `AAA ....  *  ..  AAA. I ##I_|____|___|",
+            "|____|____I####I....    AAA  AA;AA  ...   ...  `AAA.I ##I___|____|_|",
+            "|_|____|__I####/~~~,-.A;;A'-A;;;;;A-----A-----,A;;;A  ##I_|____|___|",
+            "|____|____I###/    I.;;;;;  ;;;;;;;   AAA     I;;;A'\###I___|____|_|",
+            "|_|____|__I##/     I;;;;;; ;;;;;;;   A;;;A    I;;;;  \##I_|____|___|",
+            "|____|____I#/     !~;;;;;;~~~~~~~~~~~;;;;;;~~~~~!;'   \#I___|____|_|",
+            "|_|____|__I/______!  ::::;;           ;;;;;;    !______\I_|____|___|",
+            "~~~~~~~~~/       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       \~~~~~~~~~~  ",
+            "        /_______________________________________________\ "
+            ],
+        metadata_number_of_options: 1,
+        options: [
+            {msg: "1. Go back to the casino entrance", room: 1}
+            ]
+    },
+    {
+        name: "game room",
+        header: ["G","A","M","E"," ", "R", "O", "O", "M"],
+        description: [
+            "dices"
+            ],
+        image: [
+            "    _______      ",
+            "  /\       \       ",
+            " /()\   ()  \        ",
+            "/    \_______\         ",
+            "\    /()     /         ",
+            " \()/   ()  /          ",
+            "  \/_____()/  "
+            ],
+        metadata_number_of_options: 2,
+        options: [
+            {msg: "1. Go back to the casino entrance", room: 1},
+            {msg: "2. Sit down at a table.", room: 666}
+            ]
+    },
+ {
+        name: "secret meeting",
+        header: ["M","E","E","T","I","N","G"],
+        description: [
+            "Aqela..."
+            ],
+        image: [
+            ""
+            ],
+        metadata_number_of_options: 1,
+        options: [
+            { msg: "1. Leave Aqela.", room: 666 }
+            ]
+    }
+];
+
+# ------------------------------------------------------------------------------
+func prefix:<H>(n_spaces) {
+  my horizontal_alignment = "";
+  for (^n_spaces) {
+    horizontal_alignment = horizontal_alignment ~ " ";
+  }
+  return horizontal_alignment;
+}
+
+# ------------------------------------------------------------------------------
+func main() {
+
+  # intro
+  clear_screen();
+  draw_007_logo();
+  delay(4);
+  clear_screen();
+  draw_game_logo();
+  delay(3);
+  clear_screen();
+  load_heavy_assets();
+
+  # enquire about name
+  agent.alias = enquire_about_name();
+
+  # more intro
+  clear_screen();
+  change_prompt_vert(15);
+  say(H 15,"Are you ready? Are you really ready, ", agent.alias, "?");
+  change_prompt_vert(5);
+  msg_here_we_go();
+  change_prompt_vert(30);
+  delay(3);
+  clear_screen();
+
+  # ENTER THE WORLD OF INTERNATIONAL INTRIGUES:
+  enter_room(agent.current_room);
+}
+
+# inits game (origin)
+main();
+
+# ------------------------------------------------------------------------------
+func enter_room(n) {
+    seed = seed * 3;
+    agent.time_spent = agent.time_spent + 5;
+
+    if (agent.time_spent >= 15) {
+      scenes[1].metadata_number_of_options = scenes[1].metadata_number_of_options + 1;
+      scenes[1].options.push({msg: "4. Meet up with Aqela", room: 4});
+    }
+
+    clear_screen();
+    change_prompt_vert(40);
+
+    my option_quit = scenes[n].metadata_number_of_options + 1;
+
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+    say(H 25,"Current scene: ");
+    print_header(scenes[n].header);
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+    change_prompt_vert(3);
+    draw_image(scenes[n].image);
+
+    for (scenes[n].description) -> line {
+      say(H 25,line);
+    }
+
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+    for(scenes[n].options) -> option {
+      say(H 25,option.msg);
+    }
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+
+    say(H 25, option_quit, ". Quit");
+
+    my is_choice_valid = true;
+
+    while(is_game_active != 0) {
+        say(H 25,"What do you want do? ");
+        my choice = prompt(H 25);
+
+        for(^scenes[n].metadata_number_of_options) -> i {
+            my i_as_string = ~(i + 1);
+            if(choice == i_as_string) {
+                is_choice_valid = true;
+                seed = seed * 3;
+
+                if(scenes[n].options[i].room != 666) {
+                  enter_room(scenes[n].options[i].room);
+                } else {
+                    if(scenes[n].name == "game room") {
+                        aside_function("play dice");
+                    }
+                }
+            }
+            if(choice == ~option_quit) {
+                is_game_active = 0;
+                game_over();
+            }
+        }
+        if(!is_choice_valid) {
+            say(H 25,"Agent X, please consider using your intellect. Make an valid choice.");
+            seed = seed * 3;
+        }
+    }
+}
+
+# ------------------------------------------------------------------------------
+func aside_function(special_scene) {
+
+  if (special_scene == "play dice") {
+
+    my dices = [
+    "               (( _______ ",
+    "     _______     /\O    O\ ",
+    "    /O     /\   /  \      \ ",
+    "   /   O  /O \ / O  \O____O\ )) ",
+    "((/_____O/    \\    /O     / ",
+    "  \O    O\    / \  /   O  / ",
+    "   \O    O\ O/   \/_____O/ ",
+    "    \O____O\/ ))         )) ",
+    "  (( "
+    ];
+
+    clear_screen();
+    change_prompt_vert(40);
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+    change_prompt_vert(3);
+    draw_image(dices);
+    change_prompt_vert(3);
+
+    say(H 25,"CASH: ", agent.cash, "$");
+
+    my is_choice_valid = false;
+
+      while(!is_choice_valid) {
+
+        agent.time_spent = agent.time_spent + 5;
+
+        boxify(["Each round cost 100$. Do you want to play or leave?"],4);
+        change_prompt_vert(2);
+        say(H 25,"1. Play");
+        say(H 25,"2. Leave");
+
+        my choice = prompt(H 25);
+
+        if (choice == "1") {
+
+          if(agent.cash >= 100) {
+            seed = seed * 3;
+            my dice_number1 = seed % 6;
+            seed = seed * 3;
+            my dice_number2 = seed % 6;
+
+            my total_d_num = dice_number1 + dice_number2;
+
+            say(H 25, "You hit ", dice_number1, " and " , dice_number2 , ": ", total_d_num);
+
+            if (total_d_num <= 5) {
+                say(H 25, "Bad luck! You've lost 100$");
+                agent.cash = agent.cash - 100;
+            } else if (total_d_num > 5 && total_d_num < 10) {
+                say(H 25, "Good... But not good enough! You've lost 100$");
+                agent.cash = agent.cash - 100;
+            } else {
+                say(H 25, "Nice. You won 100$");
+                agent.cash = agent.cash + 100;
+            }
+          }
+
+          else if (agent.cash < 100) {
+            say(H 25, "Sorry. You can't afford to play!");
+          }
+        }
+
+        else if (choice == "2") {
+          enter_room(3);
+        }
+
+      }
+      if(!is_choice_valid) {
+        say(H 25,"Agent X, please consider using your intellect. Make a valid choice.");
+      }
+    say(H 25,"-------------------------------------------------------------------------------------------------------");
+  }
+}
+
+# ------------------------------------------------------------------------------
+func enquire_about_name() {
+  say(H 15,"Your real name is of no importance, but your agent alias is. This is true even though your chosen alias is unique and only");
+  say(H 15,"applicable for this one mission.");
+  say("");
+  my alias = prompt("               Enter a name to be used on this mission: ");
+  return alias;
+}
+
+# ------------------------------------------------------------------------------
+func change_prompt_vert(n_lines) {
+  for (^n_lines) {
+    say("");
+  }
+}
+
+# ------------------------------------------------------------------------------
+func load_heavy_assets() {
+
+  my init_counter = 0;
+  my counter_end = 20;
+  my time_right = 0;
+  my time_left = 3;
+  my time_display = ["◐","◓","◑","◒"];
+
+  my fake_loader = H 75;
+
+  while init_counter < 20 {
+
+    for (^init_counter) {
+      fake_loader = fake_loader ~ " █";
+    }
+
+    for(^counter_end) {
+      fake_loader = fake_loader ~ " ░";
+    }
+
+    say(H 55,time_display[time_right], "  LOADING VERY ADVANCED GRAPHICS AND OTHER ASSETS. PLEASE HOLD... (IT'S WORTH WHILE!) ", time_display[time_left]);
+    say("");
+    say(fake_loader);
+
+    fake_loader = H 75;
+    init_counter = init_counter + 1;
+    counter_end = counter_end - 1;
+    time_right = time_right + 1;
+    time_left = time_left - 1;
+    if(time_right > 3) {
+      time_right = 0;
+      time_left = 3;
+    }
+
+    delay(1);
+    clear_screen();
+  }
+}
+
+# ------------------------------------------------------------------------------
+func clear_screen() {
+  for (^99) {
+    say("");
+  }
+}
+
+# ------------------------------------------------------------------------------
+func delay(approximately_n_seconds) {
+
+  my count = 0;
+  my count_limit = approximately_n_seconds * 1500;
+
+  while count < count_limit {
+    count = count + 1;
+  }
+}
+
+# ------------------------------------------------------------------------------
+func draw_image(img) {
+
+  change_prompt_vert(1);
+  for (img) -> n {
+    say(H 45, n);
+  }
+  change_prompt_vert(1);
+}
+
+# ------------------------------------------------------------------------------
+func print_header(arr_of_letters) {
+
+    my header = ["","","","","",""];
+    my current_l_n = 0; # may not be needed
+
+    for(header) -> l_n {
+        for (arr_of_letters) -> letter {
+
+            my index = find_index_of_letter(letter);
+
+            l_n = l_n ~ letters[index].v[current_l_n];
+            l_n = l_n ~ "   ";
+        }
+         # may need mod
+        header[current_l_n] = l_n;
+        current_l_n = current_l_n + 1;
+
+        say(H 25,l_n);
+    }
+}
+
+# ------------------------------------------------------------------------------
+func find_index_of_letter(search_term) {
+    my i = 0;
+    for (letters) -> item {
+        if(search_term == item.letter) {
+            return i;
+        }
+        i = i + 1;
+    }
+}
+
+# ------------------------------------------------------------------------------
+func boxify(strings_to_box, w_on_sides) {
+
+    my index = 0;
+    my longest_str_len = 0;
+
+    for(strings_to_box) -> string {
+        my str_len = string.chars();
+        if(str_len > longest_str_len) {
+            longest_str_len = str_len;
+        }
+    }
+
+    my box_w = longest_str_len + w_on_sides;
+
+    say(H 25,generate_top(box_w));
+
+    for(strings_to_box) -> print_ln {
+        my ln = "║";
+
+        ln = ln ~generate_w_space_before(w_on_sides);
+        ln = ln ~print_ln;
+        ln = ln ~generate_w_space_after(w_on_sides,print_ln.chars(),longest_str_len);
+        ln = ln ~"║";
+        say(H 25,ln);
+    }
+
+    say(H 25,generate_bottom(box_w));
+
+}
+
+func generate_top(w) {
+    my top = "╔";
+    my line = "";
+    my counter = 0;
+    while (counter < (w+2)) {
+        line = line ~ "═";
+        counter = counter + 1;
+    }
+    my top_line = ~top ~line ~"╗";
+    return top_line;
+}
+
+func generate_bottom(w) {
+    my top = "╚";
+    my line = "";
+    my counter = 0;
+    while (counter < (w+2)) {
+        line = line ~ "═";
+        counter = counter + 1;
+    }
+    my top_line = ~top ~line ~"╝";
+    return top_line;
+}
+
+func generate_w_space_before(w) {
+    my spaces = w-1;
+    my spaces_ln = "";
+    for(^spaces) {
+        spaces_ln = spaces_ln ~" ";
+    }
+    return spaces_ln;
+}
+
+func generate_w_space_after(w,this,max) {
+
+    my spaces = max - this + (w-1);
+
+    my spaces_ln = "";
+    for(^spaces) {
+        spaces_ln = spaces_ln ~" ";
+    }
+    return spaces_ln;
+}
+
+# ------------------------------------------------------------------------------
+func draw_007_logo() {
+  my lang_logo = [
+"A GAME MADE WITH THE PROGRAMMING LANGUAGE",
+"",
+"",
+"     0000             0000        7777777777777777/========___________",
+"   00000000         00000000      7777^^^^^^^7777/ || ||   ___________",
+"  000    000       000    000     777       7777/=========//",
+" 000      000     000      000             7777// ((     //",
+"0000      0000   0000      0000           7777//   \\   //",
+"0000      0000   0000      0000          7777//========//",
+"0000      0000   0000      0000         7777",
+"0000      0000   0000      0000        7777",
+" 000      000     000      000        7777",
+"  000    000       000    000       77777",
+"   00000000         00000000       7777777",
+"     0000             0000        777777777"
+];
+
+  for (lang_logo) -> n {
+    say(H 25,n);
+  }
+  change_prompt_vert(20);
+}
+
+# ------------------------------------------------------------------------------
+func draw_game_logo() {
+
+my logo = [
+"",
+"",
+"   ,o888888o.         ,o888888o.     b.             8    d888888o.       ,o888888o.     8 8888     ,o888888o.     8 8888      88    d888888o.             ",
+"   8888     `88.   . 8888     `88.   888o.          8  .`8888:' `88.    8888     `88.   8 8888  . 8888     `88.   8 8888      88  .`8888:' `88.           ",
+",8 8888       `8. ,8 8888       `8b  Y88888o.       8  8.`8888.   Y8 ,8 8888       `8.  8 8888 ,8 8888       `8b  8 8888      88  8.`8888.   Y8           ",
+"88 8888           88 8888        `8b .`Y888888o.    8  `8.`8888.     88 8888            8 8888 88 8888        `8b 8 8888      88  `8.`8888.               ",
+"88 8888           88 8888         88 8o. `Y888888o. 8   `8.`8888.    88 8888            8 8888 88 8888         88 8 8888      88   `8.`8888.            ",
+"88 8888           88 8888         88 8`Y8o. `Y88888o8    `8.`8888.   88 8888            8 8888 88 8888         88 8 8888      88    `8.`8888.         ",
+"88 8888           88 8888        ,8P 8   `Y8o. `Y8888     `8.`8888.  88 8888            8 8888 88 8888        ,8P 8 8888      88     `8.`8888.      ",
+"`8 8888       .8' `8 8888       ,8P  8      `Y8o. `Y8 8b   `8.`8888. `8 8888       .8'  8 8888 `8 8888       ,8P  ` 8888     ,8P 8b   `8.`8888.       ",
+"   8888     ,88'   ` 8888     ,88'   8         `Y8o.` `8b.  ;8.`8888    8888     ,88'   8 8888  ` 8888     ,88'     8888   ,d8P  `8b.  ;8.`8888     ",
+"    `8888888P'        `8888888P'     8            `Yo  `Y8888P ,88P'     `8888888P'     8 8888     `8888888P'        `Y88888P'    `Y8888P ,88P'   ",
+"",
+"",
+"8 888888888o.    8 8888    d888888o.   8 8888     ,88'   d888888o.   ",
+"8 8888    `88.   8 8888  .`8888:' `88. 8 8888    ,88'  .`8888:' `88. ",
+"8 8888     `88   8 8888  8.`8888.   Y8 8 8888   ,88'   8.`8888.   Y8 ",
+"8 8888     ,88   8 8888  `8.`8888.     8 8888  ,88'    `8.`8888.     ",
+"8 8888.   ,88'   8 8888   `8.`8888.    8 8888 ,88'      `8.`8888.    ",
+"8 888888888P'    8 8888    `8.`8888.   8 8888 88'        `8.`8888.   ",
+"8 8888`8b        8 8888     `8.`8888.  8 888888<          `8.`8888.  ",
+"8 8888 `8b.      8 8888 8b   `8.`8888. 8 8888 `Y8.    8b   `8.`8888. ",
+"8 8888   `8b.    8 8888 `8b.  ;8.`8888 8 8888   `Y8.  `8b.  ;8.`8888 ",
+"8 8888     `88.  8 8888  `Y8888P ,88P' 8 8888     `Y8. `Y8888P ,88P' "
+];
+  for (logo) -> n {
+    say(H 20,n);
+  }
+  change_prompt_vert(20);
+}
+
+# ------------------------------------------------------------------------------
+func msg_here_we_go() {
+
+  my msg = [
+    "#     # ####### ######  #######    #     # #######     #####  #######                ",
+    "#     # #       #     # #          #  #  # #          #     # #     #                  ",
+    "#     # #       #     # #          #  #  # #          #       #     #                   ",
+    "####### #####   ######  #####      #  #  # #####      #  #### #     #                   ",
+    "#     # #       #   #   #          #  #  # #          #     # #     # ###    ###    ### ",
+    "#     # #       #    #  #          #  #  # #          #     # #     # ###    ###    ### ",
+    "#     # ####### #     # #######     ## ##  #######     #####  ####### ###    ###    ### "
+    ];
+
+    for (msg) -> n {
+    say(H 30,n);
+    }
+}
+
+# ------------------------------------------------------------------------------
+func game_over() {
+  my msg = [
+"████████╗██╗  ██╗███████╗    ███████╗███╗   ██╗██████╗",
+"╚══██╔══╝██║  ██║██╔════╝    ██╔════╝████╗  ██║██╔══██╗",
+"   ██║   ███████║█████╗      █████╗  ██╔██╗ ██║██║  ██║",
+"   ██║   ██╔══██║██╔══╝      ██╔══╝  ██║╚██╗██║██║  ██║",
+"   ██║   ██║  ██║███████╗    ███████╗██║ ╚████║██████╔╝",
+"   ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═══╝╚═════╝"
+];
+
+clear_screen();
+change_prompt_vert(30);
+for (msg) -> n {
+  say(H 50,n);
+}
+change_prompt_vert(4);
+say(H 50,"THANK YOU FOR PLAYING!");
+change_prompt_vert(4);
+say(H 50,"Graphics: <https://www.asciiart.eu/>");
+say(H 50,"007: <https://github.com/masak/007>");
+change_prompt_vert(20);
+}
