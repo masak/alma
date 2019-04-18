@@ -2,7 +2,7 @@
     "name"      : "007",
     "perl"      : "6.c",
     "version"   : "*",
-    "authors"   : [ "github:masak" ],
+    "auth"      : "github:masak",
     "description"   : "Small experimental language with a license to macro",
     "depends"   : [],
     "license"   : "Artistic-2.0",
