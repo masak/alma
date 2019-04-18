@@ -133,6 +133,18 @@ sub emits-js($program, @expected-builtins, $expected, $desc = "MISSING TEST DESC
     empty-diff $expected, $actual, $desc;
 }
 
+sub compile-and-check-success(Str $program) is export {
+    my $input = $*IN;
+    my $output = StrOutput.new;
+    my $runtime = _007.runtime(:$input, :$output);
+    my $success = False;
+    try {
+        my $ast = _007.parser(:$runtime).parse($program);
+        $success = True;
+    }
+    return $success;
+}
+
 sub run-and-collect-output($filepath, :$input = $*IN) is export {
     my $program = slurp($filepath);
     my $output = StrOutput.new;
