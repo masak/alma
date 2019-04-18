@@ -18,10 +18,12 @@ my class UnwantedOutput {
     method print($s) { die "Program printed '$s'; was not expected to print anything" }
 }
 
+my $tmpdir = IO::Spec.select().tmpdir();
+
 sub empty-diff($text1 is copy, $text2 is copy, $desc) {
     s/<!after \n> $/\n/ for $text1, $text2;  # get rid of "no newline" warnings
-    spurt("/tmp/t1", $text1);
-    spurt("/tmp/t2", $text2);
+    spurt("$tmpdir/t1", $text1);
+    spurt("$tmpdir/t2", $text2);
     my $diff = qx[diff -U2 /tmp/t1 /tmp/t2];
     $diff.=subst(/^\N+\n\N+\n/, '');  # remove uninformative headers
     is $diff, "", $desc;
