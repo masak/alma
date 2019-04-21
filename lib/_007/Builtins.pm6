@@ -11,7 +11,6 @@ class X::Control::Exit is Exception {
 sub wrap($_) {
     when Nil  { NONE }
     when Bool { Val::Bool.new(:value($_)) }
-    when Int  { Val::Int.new(:value($_)) }
     when Str  { Val::Str.new(:value($_)) }
     when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
     default { die "Got some unknown value of type ", .^name }
@@ -44,7 +43,6 @@ sub assert-nonzero(:$value, :$operation, :$numerator) {
 multi less-value($l, $) {
     assert-new-type(:value($l), :type<Int>, :operation<less>);
 }
-multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
 multi less-value(_007::Value::Backed $l, _007::Value::Backed $r) {
     is-int($l) && is-int($r) && $l.native-value < $r.native-value;
 }
@@ -53,7 +51,6 @@ multi less-value(Val::Str $l, Val::Str $r) { $l.value lt $r.value }
 multi more-value($l, $) {
     assert-new-type(:value($l), :type<Int>, :operation<more>);
 }
-multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
 multi more-value(Val::Str $l, Val::Str $r) { $l.value gt $r.value }
 multi more-value(_007::Value::Backed $l, _007::Value::Backed $r) {
     is-int($l) && is-int($r) && $l.native-value > $r.native-value;
@@ -341,14 +338,10 @@ my @builtins =
 ;
 
 for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
-    if $name eq "Val::Int" {
-        push @builtins, "Int" => TYPE<Int>;
-    }
-    else {
-        my $type = ::($name);
-        push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
-    }
+    my $type = ::($name);
+    push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
+push @builtins, "Int" => TYPE<Int>;
 push @builtins, "Q" => Val::Type.of(Q);
 
 my $opscope = _007::OpScope.new();

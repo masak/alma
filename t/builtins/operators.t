@@ -598,7 +598,7 @@ use _007::Test;
         my q = 42; say(q ~~ Int)
         .
 
-    outputs $program, "true\n", "typecheck works for Val::Int";
+    outputs $program, "true\n", "typecheck works for Int";
 }
 
 {
@@ -712,7 +712,7 @@ use _007::Test;
     outputs
         $program,
         "true\n",
-        "+Val::Int outputs a Val::Int (regression)";
+        "+some_int outputs an Int (regression)";
 }
 
 {
@@ -723,7 +723,7 @@ use _007::Test;
     outputs
         $program,
         "true\n",
-        "+Val::Str outputs a Val::Int (regression)";
+        "+some_str outputs an Int (regression)";
 }
 
 {
