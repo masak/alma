@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 
 # These multis are used below by infix:<==> and infix:<!=>
@@ -48,4 +49,9 @@ multi equal-value(Q $l, Q $r) {
 
     [&&] $l.WHAT === $r.WHAT,
         |$l.attributes.map(&same-avalue);
+}
+
+multi equal-value(_007::Value $l, _007::Value $r) {
+    return is-int($l) && is-int($r) && $l.native-value == $r.native-value
+        || is-type($l) && is-type($r) && $l === $r;
 }

@@ -1,3 +1,4 @@
+use _007::Value;
 use MONKEY-SEE-NO-EVAL;
 
 class X::Uninstantiable is Exception {
@@ -151,6 +152,10 @@ class Val::Bool does Val {
 ###
 class Val::Int does Val {
     has Int $.value;
+
+    submethod BUILD {
+        die "Old class Val::Int -- do not use anymore";
+    }
 
     method truthy {
         ?$.value;
