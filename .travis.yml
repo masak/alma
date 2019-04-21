@@ -1,17 +1,6 @@
-language: perl
-os:
-  - linux
+language: perl6
+sudo: false
+perl6:
+  - latest
 env:
   - FLAG_007_REGEX=1 FLAG_007_CLASS=1
-sudo: false
-before_install:
-  - git clone https://github.com/rakudo/rakudo.git $HOME/rakudo
-  - cd $HOME/rakudo
-  - perl Configure.pl --gen-moar --gen-nqp --backends=moar
-  - make install
-  - export PATH=$HOME/rakudo/install/bin:$PATH
-  - cd $TRAVIS_BUILD_DIR
-install:
-  - perl6 -v
-script:
-  - prove -v -e "perl6 -Ilib" t/
