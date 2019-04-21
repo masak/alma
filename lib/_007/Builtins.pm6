@@ -189,22 +189,13 @@ my @builtins =
             return wrap($lhs.value * $rhs.value);
         },
     ),
-    'infix:%' => op(
+    'infix:div' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<%>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<%>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<%>"), :numerator($lhs.value));
+            assert-type(:value($lhs), :type(Val::Int), :operation<div>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<div>);
+            assert-nonzero(:value($rhs.value), :operation("infix:<div>"), :numerator($lhs.value));
 
-            return wrap($lhs.value % $rhs.value);
-        },
-    ),
-    'infix:%%' => op(
-        sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<%%>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<%%>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<%%>"), :numerator($lhs.value));
-
-            return wrap($lhs.value %% $rhs.value);
+            return Val::Int.new(:value($lhs.value div $rhs.value));
         },
     ),
     'infix:divmod' => op(
@@ -218,6 +209,27 @@ my @builtins =
                 wrap($lhs.value % $rhs.value),
             ]));
         },
+        :precedence{ equiv => "infix:div" },
+    ),
+    'infix:%' => op(
+        sub ($lhs, $rhs) {
+            assert-type(:value($lhs), :type(Val::Int), :operation<%>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<%>);
+            assert-nonzero(:value($rhs.value), :operation("infix:<%>"), :numerator($lhs.value));
+
+            return wrap($lhs.value % $rhs.value);
+        },
+        :precedence{ equiv => "infix:div" },
+    ),
+    'infix:%%' => op(
+        sub ($lhs, $rhs) {
+            assert-type(:value($lhs), :type(Val::Int), :operation<%%>);
+            assert-type(:value($rhs), :type(Val::Int), :operation<%%>);
+            assert-nonzero(:value($rhs.value), :operation("infix:<%%>"), :numerator($lhs.value));
+
+            return wrap($lhs.value %% $rhs.value);
+        },
+        :precedence{ equiv => "infix:div" },
     ),
 
     # prefixes
