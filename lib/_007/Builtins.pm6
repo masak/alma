@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 use _007::OpScope;
 use _007::Equal;
@@ -23,21 +24,40 @@ sub assert-type(:$value, ValOrQ:U :$type, Str :$operation) {
         unless $value ~~ $type;
 }
 
+sub assert-new-type(:$value, :$type, Str :$operation) {
+    my $type-obj = $type ~~ Str
+        ?? (TYPE{$type} or die "Type not found: {$type}")
+        !! is-type($type)
+            ?? $type
+            !! $type ~~ _007::Value
+                ?? die X::TypeCheck.new(:$operation, :got($value.type), :expected($type))
+                !! die X::TypeCheck.new(:$operation, :got($value), :expected($type));
+    die X::TypeCheck.new(:$operation, :got($value), :expected($type-obj))
+        unless $value ~~ _007::Value && $value.type === $type-obj;
+}
+
 sub assert-nonzero(:$value, :$operation, :$numerator) {
     die X::Numeric::DivideByZero.new(:using($operation), :$numerator)
         if $value == 0;
 }
 
 multi less-value($l, $) {
-    assert-type(:value($l), :type(Val::Int), :operation<less>);
+    assert-new-type(:value($l), :type<Int>, :operation<less>);
 }
 multi less-value(Val::Int $l, Val::Int $r) { $l.value < $r.value }
+multi less-value(_007::Value::Backed $l, _007::Value::Backed $r) {
+    is-int($l) && is-int($r) && $l.native-value < $r.native-value;
+}
 multi less-value(Val::Str $l, Val::Str $r) { $l.value lt $r.value }
+
 multi more-value($l, $) {
-    assert-type(:value($l), :type(Val::Int), :operation<more>);
+    assert-new-type(:value($l), :type<Int>, :operation<more>);
 }
 multi more-value(Val::Int $l, Val::Int $r) { $l.value > $r.value }
 multi more-value(Val::Str $l, Val::Str $r) { $l.value gt $r.value }
+multi more-value(_007::Value::Backed $l, _007::Value::Backed $r) {
+    is-int($l) && is-int($r) && $l.native-value > $r.native-value;
+}
 
 my role Placeholder {
     has $.qtype;
@@ -64,15 +84,25 @@ my @builtins =
     prompt => sub ($arg) {
         # implementation in Runtime.pm
     },
-    type => -> $arg { Val::Type.of($arg.WHAT) },
-    exit => -> $int = Val::Int.new(:value(0)) {
-        assert-type(:value($int), :type(Val::Int), :operation<exit>);
-        my $exit-code = $int.value % 256;
+    type => -> $arg {
+        $arg ~~ _007::Value
+            ?? $arg.type
+            !! Val::Type.of($arg.WHAT);
+    },
+    exit => -> $int = make-int(0) {
+        assert-new-type(:value($int), :type<Int>, :operation<exit>);
+        my $exit-code = $int.native-value % 256;
         die X::Control::Exit.new(:$exit-code);
     },
     assertType => -> $value, $type {
-        assert-type(:value($type), :type(Val::Type), :operation("assertType (checking the Type parameter)"));
-        assert-type(:$value, :type($type.type), :operation<assertType>);
+        if $type ~~ _007::Value {
+            assert-new-type(:value($type), :type<Type>, :operation("assertType (checking the Type parameter)"));
+            assert-new-type(:$value, :type($type), :operation<assertType>);
+        }
+        else {
+            assert-type(:value($type), :type(Val::Type), :operation("assertType (checking the Type parameter)"));
+            assert-type(:$value, :type($type.type), :operation<assertType>);
+        }
     },
 
     # OPERATORS (from loosest to tightest within each category)
@@ -140,6 +170,9 @@ my @builtins =
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
+            if is-type($rhs) {
+                return wrap($lhs ~~ _007::Value && $lhs.type === $rhs);
+            }
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
             return wrap($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
@@ -148,6 +181,9 @@ my @builtins =
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
+            if is-type($rhs) {
+                return wrap($lhs !~~ _007::Value || $lhs.type !=== $rhs);
+            }
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
             return wrap($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
@@ -165,69 +201,69 @@ my @builtins =
     # additive precedence
     'infix:+' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<+>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<+>);
+            assert-new-type(:value($lhs), :type<Int>, :operation<+>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<+>);
 
-            return wrap($lhs.value + $rhs.value);
+            return make-int($lhs.native-value + $rhs.native-value);
         },
     ),
     'infix:-' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<->);
-            assert-type(:value($rhs), :type(Val::Int), :operation<->);
+            assert-new-type(:value($lhs), :type<Int>, :operation<->);
+            assert-new-type(:value($rhs), :type<Int>, :operation<->);
 
-            return wrap($lhs.value - $rhs.value);
+            return make-int($lhs.native-value - $rhs.native-value);
         },
     ),
 
     # multiplicative precedence
     'infix:*' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<*>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<*>);
+            assert-new-type(:value($lhs), :type<Int>, :operation<*>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<*>);
 
-            return wrap($lhs.value * $rhs.value);
+            return make-int($lhs.native-value * $rhs.native-value);
         },
     ),
     'infix:div' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<div>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<div>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<div>"), :numerator($lhs.value));
+            assert-new-type(:value($lhs), :type<Int>, :operation<div>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<div>);
+            assert-nonzero(:value($rhs.native-value), :operation("infix:<div>"), :numerator($lhs.native-value));
 
-            return Val::Int.new(:value($lhs.value div $rhs.value));
+            return make-int($lhs.native-value div $rhs.native-value);
         },
     ),
     'infix:divmod' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<divmod>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<divmod>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<divmod>"), :numerator($lhs.value));
+            assert-new-type(:value($lhs), :type<Int>, :operation<divmod>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<divmod>);
+            assert-nonzero(:value($rhs.native-value), :operation("infix:<divmod>"), :numerator($lhs.native-value));
 
             return Val::Array.new(:elements([
-                wrap($lhs.value div $rhs.value),
-                wrap($lhs.value % $rhs.value),
+                make-int($lhs.native-value div $rhs.native-value),
+                make-int($lhs.native-value % $rhs.native-value),
             ]));
         },
         :precedence{ equiv => "infix:div" },
     ),
     'infix:%' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<%>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<%>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<%>"), :numerator($lhs.value));
+            assert-new-type(:value($lhs), :type<Int>, :operation<%>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<%>);
+            assert-nonzero(:value($rhs.native-value), :operation("infix:<%>"), :numerator($lhs.native-value));
 
-            return wrap($lhs.value % $rhs.value);
+            return make-int($lhs.native-value % $rhs.native-value);
         },
         :precedence{ equiv => "infix:div" },
     ),
     'infix:%%' => op(
         sub ($lhs, $rhs) {
-            assert-type(:value($lhs), :type(Val::Int), :operation<%%>);
-            assert-type(:value($rhs), :type(Val::Int), :operation<%%>);
-            assert-nonzero(:value($rhs.value), :operation("infix:<%%>"), :numerator($lhs.value));
+            assert-new-type(:value($lhs), :type<Int>, :operation<%%>);
+            assert-new-type(:value($rhs), :type<Int>, :operation<%%>);
+            assert-nonzero(:value($rhs.native-value), :operation("infix:<%%>"), :numerator($lhs.native-value));
 
-            return wrap($lhs.value %% $rhs.value);
+            return wrap($lhs.native-value %% $rhs.native-value);
         },
         :precedence{ equiv => "infix:div" },
     ),
@@ -241,27 +277,37 @@ my @builtins =
     'prefix:+' => op(
         sub prefix-plus($_) {
             when Val::Str {
-                return wrap(.value.Int)
+                return make-int(.value.Int)
                     if .value ~~ /^ '-'? \d+ $/;
                 proceed;
             }
-            when Val::Int {
-                return $_;
+            when _007::Value {
+                if is-int($_) {
+                    return make-int(.native-value);
+                }
+                else {
+                    proceed;
+                }
             }
-            assert-type(:value($_), :type(Val::Int), :operation("prefix:<+>"));
+            assert-new-type(:value($_), :type<Int>, :operation("prefix:<+>"));
         },
     ),
     'prefix:-' => op(
         sub prefix-minus($_) {
             when Val::Str {
-                return wrap(-.value.Int)
+                return make-int(-.value.Int)
                     if .value ~~ /^ '-'? \d+ $/;
                 proceed;
             }
-            when Val::Int {
-                return wrap(-.value);
+            when _007::Value {
+                if is-int($_) {
+                    return make-int(-.native-value);
+                }
+                else {
+                    proceed;
+                }
             }
-            assert-type(:value($_), :type(Val::Int), :operation("prefix:<->"));
+            assert-new-type(:value($_), :type<Int>, :operation("prefix:<->"));
         },
     ),
     'prefix:?' => op(
@@ -276,9 +322,9 @@ my @builtins =
     ),
     'prefix:^' => op(
         sub ($n) {
-            assert-type(:value($n), :type(Val::Int), :operation("prefix:<^>"));
+            assert-new-type(:value($n), :type<Int>, :operation("prefix:<^>"));
 
-            return wrap([^$n.value]);
+            return Val::Array.new(:elements((^$n.native-value).map(&make-int)));
         },
     ),
 
@@ -295,8 +341,13 @@ my @builtins =
 ;
 
 for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
-    my $type = ::($name);
-    push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
+    if $name eq "Val::Int" {
+        push @builtins, "Int" => TYPE<Int>;
+    }
+    else {
+        my $type = ::($name);
+        push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
+    }
 }
 push @builtins, "Q" => Val::Type.of(Q);
 
@@ -318,6 +369,9 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
 
 @builtins.=map({
     when .value ~~ Val::Type {
+        .key => .value;
+    }
+    when is-type(.value) {
         .key => .value;
     }
     when .value ~~ Block {
@@ -346,7 +400,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.
         my $statementlist = Q::StatementList.new();
         .key => Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
     }
-    default { die "Unknown type {.value.^name}" }
+    default { die "Unknown type {.value.^name} installed in builtins" }
 });
 
 my $builtins-pad = Val::Dict.new;

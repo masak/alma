@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 use _007::Builtins;
 use _007::Equal;
@@ -334,24 +335,24 @@ class _007::Runtime {
 
             return $obj."$propname"();
         }
-        elsif $obj ~~ Val::Int && $propname eq "abs" {
+        elsif is-int($obj) && $propname eq "abs" {
             return builtin(sub abs() {
-                return Val::Int.new(:value($obj.value.abs));
+                return make-int($obj.native-value.abs);
             });
         }
-        elsif $obj ~~ Val::Int && $propname eq "chr" {
+        elsif is-int($obj) && $propname eq "chr" {
             return builtin(sub chr() {
-                return Val::Str.new(:value($obj.value.chr));
+                return Val::Str.new(:value($obj.native-value.chr));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "ord" {
             return builtin(sub ord() {
-                return Val::Int.new(:value($obj.value.ord));
+                return make-int($obj.value.ord);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "chars" {
             return builtin(sub chars() {
-                return Val::Int.new(:value($obj.value.chars));
+                return make-int($obj.value.chars);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "uc" {
@@ -371,12 +372,12 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "size" {
             return builtin(sub size() {
-                return Val::Int.new(:value($obj.elements.elems));
+                return make-int($obj.elements.elems);
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "index" {
             return builtin(sub index($value) {
-                return Val::Int.new(:value(sub () {
+                return make-int(sub () {
                     for ^$obj.elements.elems -> $i {
                         my %*equality-seen;
                         if equal-value($obj.elements[$i], $value) {
@@ -384,7 +385,7 @@ class _007::Runtime {
                         }
                     }
                     return -1;
-                }()));
+                }());
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "reverse" {
@@ -419,7 +420,7 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Dict && $propname eq "size" {
             return builtin(sub size() {
-                return Val::Int.new(:value($obj.properties.elems));
+                return make-int($obj.properties.elems);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "split" {
@@ -430,20 +431,22 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Str && $propname eq "index" {
             return builtin(sub index($substr) {
-                return Val::Int.new(:value($obj.value.index($substr.value) // -1));
+                return make-int($obj.value.index($substr.value) // -1);
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
                 my $s = $obj.value;
 
-                die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
-                    if $pos.value >= $s.chars + 1;
+                die X::Subscript::TooLarge.new(:value($pos.native-value), :length($s.chars))
+                    if $pos.native-value >= $s.chars + 1;
 
-                die X::Subscript::Negative.new(:value($pos.value))
-                    if $pos.value < 0;
+                die X::Subscript::Negative.new(:value($pos.native-value))
+                    if $pos.native-value < 0;
 
-                return Val::Str.new(:value($s.substr($pos.value, $chars.value)));
+                return Val::Str.new(:value($s.substr(
+                    $pos.native-value,
+                    $chars.native-value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "contains" {
@@ -460,23 +463,23 @@ class _007::Runtime {
             return builtin(sub prefix($pos) {
                 return Val::Str.new(:value($obj.value.substr(
                     0,
-                    $pos.value)));
+                    $pos.native-value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "suffix" {
             return builtin(sub suffix($pos) {
                 return Val::Str.new(:value($obj.value.substr(
-                    $pos.value)));
+                    $pos.native-value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "charat" {
             return builtin(sub charat($pos) {
                 my $s = $obj.value;
 
-                die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
-                    if $pos.value >= $s.chars;
+                die X::Subscript::TooLarge.new(:value($pos.native-value), :length($s.chars))
+                    if $pos.native-value >= $s.chars;
 
-                return Val::Str.new(:value($s.substr($pos.value, 1)));
+                return Val::Str.new(:value($s.substr($pos.native-value, 1)));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
@@ -551,9 +554,18 @@ class _007::Runtime {
         elsif $obj ~~ Val::Type && $propname eq "name" {
             return Val::Str.new(:value($obj.name));
         }
+        elsif is-type($obj) && $propname eq "name" {
+            return Val::Str.new(:value($obj.slots<name>));
+        }
         elsif $obj ~~ Val::Type && $propname eq "create" {
             return builtin(sub create($properties) {
                 $obj.create($properties.elements.map({ .elements[0].value => .elements[1] }));
+            });
+        }
+        elsif is-type($obj) && $propname eq "create" {
+            return builtin(sub create($properties) {
+                # XXX: Only works for Int
+                make-int($properties.elements[0].elements[1].native-value);
             });
         }
         elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {

@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 
 class X::Control::Return is Exception {
     has $.frame;
@@ -156,7 +157,7 @@ class Q::Literal::Bool does Q::Literal {
 ### like `-5` is parsed as a `prefix:<->` containing a literal `5`.
 ###
 class Q::Literal::Int does Q::Literal {
-    has Val::Int $.value;
+    has _007::Value $.value where &is-int;
 
     method eval($) { $.value }
 }
@@ -312,15 +313,22 @@ class Q::Term::Array does Q::Term {
     }
 }
 
+subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
+
 ### ### Q::Term::Object
 ###
 ### An object.
 ###
 class Q::Term::Object does Q::Term {
-    has Val::Type $.type;
+    has ToV $.type;
     has $.propertylist;
 
     method eval($runtime) {
+        if is-type($.type) {
+            # XXX: only works for Int
+            my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
+            return make-int($native-value);
+        }
         return $.type.create(
             $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
         );
@@ -558,12 +566,12 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ Val::Int;
-                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.value >= .elements;
-                die X::Subscript::Negative.new(:$index, :type([]))
-                    if $index.value < 0;
-                return .elements[$index.value];
+                    unless is-int($index);
+                die X::Subscript::TooLarge.new(:value($index.native-value), :length(+.elements))
+                    if $index.native-value >= .elements;
+                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
+                    if $index.native-value < 0;
+                return .elements[$index.native-value];
             }
             when Val::Dict {
                 my $property = $.index.eval($runtime);
@@ -590,12 +598,12 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Array {
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
-                    if $index !~~ Val::Int;
+                    unless is-int($index);
                 die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.value >= .elements;
+                    if $index.native-value >= .elements;
                 die X::Subscript::Negative.new(:$index, :type([]))
-                    if $index.value < 0;
-                .elements[$index.value] = $value;
+                    if $index.native-value < 0;
+                .elements[$index.native-value] = $value;
             }
             when Val::Dict | Q {
                 my $property = $.index.eval($runtime);
@@ -726,6 +734,9 @@ class Q::Term::Quasi does Q::Term {
         my $quasi-frame;
 
         sub interpolate($thing) {
+            return $thing
+                if $thing ~~ _007::Value::Backed;
+
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;
 

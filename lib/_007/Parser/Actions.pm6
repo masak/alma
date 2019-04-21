@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 use _007::Parser::Syntax;
 use MONKEY-SEE-NO-EVAL;
@@ -509,7 +510,10 @@ class _007::Parser::Actions {
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(Val::Int.new(:value(+$/))));
+        make Q::Literal::Int.new(:value(_007::Value::Backed.new(
+            :type(TYPE<Int>),
+            :native-value(+$/),
+        )));
     }
 
     method term:str ($/) {
@@ -678,7 +682,9 @@ class _007::Parser::Actions {
                 die X::Uninstantiable.new(:$name);
             }
             sub aname($attr) { $attr.name.substr(2) }
-            my %known-properties = $type-obj.attributes.map({ aname($_) => 1 });
+            my %known-properties = $type-obj === TYPE<Type>
+                ?? (value => 1)
+                !! $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
                 my $property = $p.key.value;
                 die X::Property::NotDeclared.new(:type($name), :$property)

@@ -72,7 +72,7 @@ use _007::Test;
         say({}.size());
         .
 
-    outputs $program, "0\n", "size() returns the size of an Object";
+    outputs $program, "0\n", "size() returns the size of an Dict";
 }
 
 {

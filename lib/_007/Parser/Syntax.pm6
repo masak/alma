@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 
 class X::Syntax::WhitespaceInIdentifier is Exception {
@@ -272,7 +273,7 @@ grammar _007::Parser::Syntax {
                 $type = $++
                     ?? $*runtime.property($type, $identifier)
                     !! $*runtime.maybe-get-var($identifier);
-                $type ~~ Val::Type;
+                $type ~~ Val::Type || is-type($type);
             });
         }> <.ws>
         '{' ~ '}' <propertylist>
