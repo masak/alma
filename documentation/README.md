@@ -150,9 +150,9 @@ docs.)
 `x`.
 
 **Arithmetic**. The infix operators `+ - * div %` work as you'd expect. (The
-division operator is spelled `div` instead of `/` in order to temper
-expectations about non-integer division.) `%%` tests for divisibility, so it
-returns `true` whenever `%` returns `0`. `divmod` does an integer division
+`div` operator does integer division, truncating the result so that `5 div 2 ==
+2`. This is the reason it isn't spelled `/`.) `%%` tests for divisibility, so
+it returns `true` whenever `%` returns `0`. `divmod` does an integer division
 resulting in a 2-element array `[q, r]` where `q` is the quotient and `r` is
 the reminder.
 
