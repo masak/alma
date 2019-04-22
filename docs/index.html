@@ -47,7 +47,7 @@
       }
     </style>
   </head>
-  <body class="checksum-18e54a">
+  <body class="checksum-900ccb">
 <a href="https://github.com/masak/007"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 <div class="container">
 <p>This documentation has four parts:</p>
@@ -129,7 +129,7 @@ termish := &lt;prefix&gt;* &lt;term&gt; &lt;postfix&gt;*</code></pre>
 <p>You can have whitespace before or after terms and operators, and it largely doesn't change the meaning of the program. The recommended style is to use whitespace around infixes, but not after prefixes or before postfixes.</p>
 <p>007 has 28 built-in operators. Here we describe them by group. (These are just short descriptions. For more detail, see each individual operator in the API docs.)</p>
 <p><strong>Assignment</strong>. The <code>x = 42</code> expression assigns the value <code>42</code> to the variable <code>x</code>.</p>
-<p><strong>Arithmetic</strong>. The infix operators <code>+ - * %</code> work as you'd expect. <code>%%</code> tests for divisibility, so it returns <code>true</code> whenever <code>%</code> returns <code>0</code>. <code>divmod</code> does an integer division resulting in a 2-element array <code>[q, r]</code> where <code>q</code> is the quotient and <code>r</code> is the reminder.</p>
+<p><strong>Arithmetic</strong>. The infix operators <code>+ - * div %</code> work as you'd expect. (The <code>div</code> operator does integer division, truncating the result so that <code>5 div 2 == 2</code>. This is the reason it isn't spelled <code>/</code>.) <code>%%</code> tests for divisibility, so it returns <code>true</code> whenever <code>%</code> returns <code>0</code>. <code>divmod</code> does an integer division resulting in a 2-element array <code>[q, r]</code> where <code>q</code> is the quotient and <code>r</code> is the reminder.</p>
 <p><strong>String building</strong>. You can concatenate strings with <code>~</code>. (To concatenate arrays, use the Array method <code>.concat</code>.)</p>
 <p><strong>Equality, comparison and matching</strong>. The operators <code>==</code> and <code>!=</code> checks whether values are equal or unequal. <code>&lt; &lt;= &gt; &gt;=</code> compare ordered types like integers or strings. <code>~~ !~~</code> match a value against a type.</p>
 <p><strong>Logical connectives</strong>. The infixes <code>||</code> and <code>&amp;&amp;</code> allow you to combine boolean (or really, any) values. Furthermore, <code>//</code> allows you to replace <code>none</code> values with a default. (All of these operators are short-circuiting. See the individual operators for more information.)</p>

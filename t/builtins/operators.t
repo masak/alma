@@ -773,6 +773,29 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say( 5 div 2 );
+        say( 5 div -2 );
+        .
+
+    outputs
+        $program,
+        "2\n-3\n",
+        "div operator (happy path)";
+}
+
+{
+    my $program = q:to/./;
+        say( 5 div 0 );
+        .
+
+    runtime-error
+        $program,
+        X::Numeric::DivideByZero,
+        "dividing by 0 is an error";
+}
+
+{
+    my $program = q:to/./;
         say("foo" ~ 2 + 2);
         say(2 + 2 ~ "bar");
         .

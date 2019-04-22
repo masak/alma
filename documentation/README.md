@@ -149,10 +149,12 @@ docs.)
 **Assignment**. The `x = 42` expression assigns the value `42` to the variable
 `x`.
 
-**Arithmetic**. The infix operators `+ - * %` work as you'd expect. `%%` tests
-for divisibility, so it returns `true` whenever `%` returns `0`. `divmod` does
-an integer division resulting in a 2-element array `[q, r]` where `q` is the
-quotient and `r` is the reminder.
+**Arithmetic**. The infix operators `+ - * div %` work as you'd expect. (The
+`div` operator does integer division, truncating the result so that `5 div 2 ==
+2`. This is the reason it isn't spelled `/`.) `%%` tests for divisibility, so
+it returns `true` whenever `%` returns `0`. `divmod` does an integer division
+resulting in a 2-element array `[q, r]` where `q` is the quotient and `r` is
+the reminder.
 
 **String building**. You can concatenate strings with `~`. (To concatenate
 arrays, use the Array method `.concat`.)
