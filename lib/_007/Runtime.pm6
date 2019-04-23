@@ -5,7 +5,7 @@ use _007::Builtins;
 use _007::Equal;
 
 constant NO_OUTER = Val::Dict.new;
-constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
+constant RETURN_TO = Q::Identifier.new(:name(make-str("--RETURN-TO--")));
 constant EXIT_SUCCESS = 0;
 
 my %q-mappings{Any};
@@ -67,13 +67,11 @@ class _007::Runtime {
     method handle-main() {
         if self.maybe-get-var("MAIN") -> $main {
             if $main ~~ Val::Func {
-                self.call($main, @!arguments.map(-> $value {
-                    Val::Str.new(:$value)
-                }));
+                self.call($main, @!arguments.map(&make-str));
 
                 CATCH {
                     when X::ParameterMismatch {
-                        my @main-parameters = $main.parameterlist.parameters.elements.map(*.identifier.name.value);
+                        my @main-parameters = $main.parameterlist.parameters.elements.map(*.identifier.name.native-value);
                         self.print-usage(@main-parameters);
                         $!exit-code = 1;
                     }
@@ -94,7 +92,7 @@ class _007::Runtime {
         my $frame = Val::Dict.new(:properties(:$outer-frame, :pad(Val::Dict.new)));
         @!frames.push($frame);
         for $static-lexpad.properties.kv -> $name, $value {
-            my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
+            my $identifier = Q::Identifier.new(:name(make-str($name)));
             self.declare-var($identifier, $value);
         }
         for $statementlist.statements.elements.kv -> $i, $_ {
@@ -154,7 +152,7 @@ class _007::Runtime {
     }
 
     method lookup-frame-outside(Q::Term::Identifier $identifier, $quasi-frame) {
-        my Str $name = $identifier.name.value;
+        my Str $name = $identifier.name.native-value;
         my $frame = self.current-frame;
         my $seen-quasi-frame = False;
         repeat until $frame === NO_OUTER {
@@ -170,7 +168,7 @@ class _007::Runtime {
     }
 
     method put-var(Q::Identifier $identifier, $value) {
-        my $name = $identifier.name.value;
+        my $name = $identifier.name.native-value;
         my $pad = self!find-pad($name, self.current-frame);
         $pad.properties{$name} = $value;
     }
@@ -195,7 +193,7 @@ class _007::Runtime {
     }
 
     method declare-var(Q::Identifier $identifier, $value?) {
-        my $name = $identifier.name.value;
+        my $name = $identifier.name.native-value;
         self.current-frame.properties<pad>.properties{$name} = $value // NONE;
     }
 
@@ -242,7 +240,7 @@ class _007::Runtime {
                 $.output.print("\n");
                 return NONE;
             }
-            return Val::Str.new(:$value);
+            return make-str($value);
         }
         if $c.hook -> &hook {
             return &hook(|@arguments) || NONE;
@@ -282,7 +280,7 @@ class _007::Runtime {
         sub builtin(&fn) {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
-            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
+            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str($^value))))) };
             my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
             my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
             my $statementlist = Q::StatementList.new();
@@ -342,32 +340,32 @@ class _007::Runtime {
         }
         elsif is-int($obj) && $propname eq "chr" {
             return builtin(sub chr() {
-                return Val::Str.new(:value($obj.native-value.chr));
+                return make-str($obj.native-value.chr);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "ord" {
+        elsif is-str($obj) && $propname eq "ord" {
             return builtin(sub ord() {
-                return make-int($obj.value.ord);
+                return make-int($obj.native-value.ord);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "chars" {
+        elsif is-str($obj) && $propname eq "chars" {
             return builtin(sub chars() {
-                return make-int($obj.value.chars);
+                return make-int($obj.native-value.chars);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "uc" {
+        elsif is-str($obj) && $propname eq "uc" {
             return builtin(sub uc() {
-                return Val::Str.new(:value($obj.value.uc));
+                return make-str($obj.native-value.uc);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "lc" {
+        elsif is-str($obj) && $propname eq "lc" {
             return builtin(sub lc() {
-                return Val::Str.new(:value($obj.value.lc));
+                return make-str($obj.native-value.lc);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "trim" {
+        elsif is-str($obj) && $propname eq "trim" {
             return builtin(sub trim() {
-                return Val::Str.new(:value($obj.value.trim));
+                return make-str($obj.native-value.trim);
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "size" {
@@ -395,7 +393,11 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "sort" {
             return builtin(sub sort() {
-                my $types = $obj.elements.map({ .^name }).unique;
+                my $types = $obj.elements.map({
+                    $_ ~~ _007::Value
+                        ?? .type
+                        !! .^name
+                }).unique;
                 die X::TypeCheck::HeterogeneousArray.new(:operation<sort>, :$types)
                     if $types.elems > 1;
                 return Val::Array.new(:elements($obj.elements.sort));
@@ -415,7 +417,8 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "join" {
             return builtin(sub join($sep) {
-                return Val::Str.new(:value($obj.elements.join($sep.value.Str)));
+                # XXX: needs typecheck of $sep
+                return make-str($obj.elements.join($sep.native-value.Str));
             });
         }
         elsif $obj ~~ Val::Dict && $propname eq "size" {
@@ -423,71 +426,72 @@ class _007::Runtime {
                 return make-int($obj.properties.elems);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "split" {
+        elsif is-str($obj) && $propname eq "split" {
             return builtin(sub split($sep) {
-                my @elements = (Val::Str.new(:value($_)) for $obj.value.split($sep.value));
+                # XXX: needs typecheck of $sep
+                my @elements = $obj.native-value.split($sep.native-value).map(&make-str);
                 return Val::Array.new(:@elements);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "index" {
+        elsif is-str($obj) && $propname eq "index" {
             return builtin(sub index($substr) {
-                return make-int($obj.value.index($substr.value) // -1);
+                # XXX: needs typecheck of $substr
+                return make-int($obj.native-value.index($substr.native-value) // -1);
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "substr" {
+        elsif is-str($obj) && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
-                return Val::Str.new(:value($obj.value.substr(
-                    $pos.native-value,
-                    $chars.native-value)));
+                # XXX: needs typechecks of $pos and $chars
+                return make-str($obj.native-value.substr($pos.native-value, $chars.native-value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "contains" {
+        elsif is-str($obj) && $propname eq "contains" {
             return builtin(sub contains($substr) {
-                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Val::Str))
-                    unless $substr ~~ Val::Str;
+                die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Str))
+                    unless is-str($substr);
 
                 return Val::Bool.new(:value(
-                        $obj.value.contains($substr.value)
+                        $obj.native-value.contains($substr.native-value)
                 ));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "prefix" {
+        elsif is-str($obj) && $propname eq "prefix" {
             return builtin(sub prefix($pos) {
-                return Val::Str.new(:value($obj.value.substr(
+                return make-str($obj.native-value.substr(
                     0,
-                    $pos.native-value)));
+                    $pos.native-value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "suffix" {
+        elsif is-str($obj) && $propname eq "suffix" {
             return builtin(sub suffix($pos) {
-                return Val::Str.new(:value($obj.value.substr(
-                    $pos.native-value)));
+                return make-str($obj.native-value.substr(
+                    $pos.native-value));
             });
         }
-        elsif $obj ~~ Val::Str && $propname eq "charat" {
+        elsif is-str($obj) && $propname eq "charat" {
             return builtin(sub charat($pos) {
-                my $s = $obj.value;
+                my $s = $obj.native-value;
 
                 die X::Subscript::TooLarge.new(:value($pos.native-value), :length($s.chars))
                     if $pos.native-value >= $s.chars;
 
-                return Val::Str.new(:value($s.substr($pos.native-value, 1)));
+                return make-str($s.substr($pos.native-value, 1));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ Val::Str;
+                    unless is-str($str);
 
-                return Val::Bool.new(:value($obj.fullmatch($str.value)));
+                return Val::Bool.new(:value($obj.fullmatch($str.native-value)));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
             return builtin(sub search($str) {
                 die X::Regex::InvalidMatchType.new
-                    unless $str ~~ Val::Str;
+                    unless is-str($str);
 
-                return Val::Bool.new(:value($obj.search($str.value)));
+                return Val::Bool.new(:value($obj.search($str.native-value)));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {
@@ -544,20 +548,27 @@ class _007::Runtime {
             });
         }
         elsif $obj ~~ Val::Type && $propname eq "name" {
-            return Val::Str.new(:value($obj.name));
+            return make-str($obj.name);
         }
         elsif is-type($obj) && $propname eq "name" {
-            return Val::Str.new(:value($obj.slots<name>));
+            return make-str($obj.slots<name>);
         }
         elsif $obj ~~ Val::Type && $propname eq "create" {
             return builtin(sub create($properties) {
-                $obj.create($properties.elements.map({ .elements[0].value => .elements[1] }));
+                $obj.create($properties.elements.map({ .elements[0].native-value => .elements[1] }));
             });
         }
         elsif is-type($obj) && $propname eq "create" {
             return builtin(sub create($properties) {
-                # XXX: Only works for Int
-                make-int($properties.elements[0].elements[1].native-value);
+                if $obj === TYPE<Int> {
+                    make-int($properties.elements[0].elements[1].native-value);
+                }
+                elsif $obj === TYPE<Str> {
+                    make-str($properties.elements[0].elements[1].native-value);
+                }
+                else {
+                    die "Unknown type ", $obj.slots<name>;
+                }
             });
         }
         elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
@@ -568,19 +579,17 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Dict && $propname eq "get" {
             return builtin(sub get($prop) {
-                return $obj.properties{$prop.value};
+                return $obj.properties{$prop.native-value};
             });
         }
         elsif $obj ~~ Val::Dict && $propname eq "keys" {
             return builtin(sub keys() {
-                return Val::Array.new(:elements($obj.properties.keys.map({
-                    Val::Str.new(:$^value)
-                })));
+                return Val::Array.new(:elements($obj.properties.keys.map(&make-str)));
             });
         }
         elsif $obj ~~ Val::Dict && $propname eq "has" {
             return builtin(sub has($prop) {
-                my $value = $obj.properties{$prop.value} :exists;
+                my $value = $obj.properties{$prop.native-value} :exists;
                 return Val::Bool.new(:$value);
             });
         }

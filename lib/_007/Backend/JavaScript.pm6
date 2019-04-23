@@ -37,7 +37,7 @@ class _007::Backend::JavaScript {
             my $expr = $stmt.expr;
             when $expr ~~ Q::Postfix::Call
                 && $expr.operand ~~ Q::Identifier
-                && $expr.operand.name.value eq "say" {
+                && $expr.operand.name.native-value eq "say" {
 
                 @builtins.push(%builtins<say>);
                 my @arguments = $expr.argumentlist.arguments.elements.map: {
@@ -49,7 +49,7 @@ class _007::Backend::JavaScript {
             }
 
             when $expr ~~ Q::Term::My {
-                my $name = $expr.identifier.name.value;
+                my $name = $expr.identifier.name.native-value;
                 @main.push("let {$name};");
             }
 
@@ -57,7 +57,7 @@ class _007::Backend::JavaScript {
                 && $expr.lhs ~~ Q::Term::My {
 
                 my $lhs = $expr.lhs;
-                my $name = $lhs.identifier.name.value;
+                my $name = $lhs.identifier.name.native-value;
                 my $rhs = $expr.rhs;
 
                 die "Cannot handle non-literal-Int rhs just yet!"

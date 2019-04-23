@@ -25,7 +25,9 @@ class _007::Value::Backed is _007::Value {
 
     method Str { ~$.native-value }
 
-    method quoted-Str { self.Str }
+    method quoted-Str {
+        return stringify-quoted(self);
+    }
 
     method truthy { ?$.native-value }
 }
@@ -39,6 +41,12 @@ sub make-type(Str $name, Bool :$backed) {
 BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
     TYPE<Int> = make-type "Int", :backed;
+    TYPE<Str> = make-type "Str", :backed;
+}
+
+sub is-type($v) is export {
+    # XXX: exact type should be subtype
+    $v ~~ _007::Value && $v.type === TYPE<Type>;
 }
 
 sub make-int(Int $native-value) is export {
@@ -50,9 +58,13 @@ sub is-int($v) is export {
     $v ~~ _007::Value::Backed && $v.type === TYPE<Int>;
 }
 
-sub is-type($v) is export {
+sub make-str(Str $native-value) is export {
+    _007::Value::Backed.new(:type(TYPE<Str>), :$native-value);
+}
+
+sub is-str($v) is export {
     # XXX: exact type should be subtype
-    $v ~~ _007::Value && $v.type === TYPE<Type>;
+    $v ~~ _007::Value::Backed && $v.type === TYPE<Str>;
 }
 
 sub stringify(_007::Value $value) {
@@ -63,4 +75,11 @@ sub stringify(_007::Value $value) {
     if $value.type === TYPE<Type> {
         return "<type {$value.slots<name>}>";
     }
+}
+
+sub stringify-quoted(_007::Value::Backed $value) {
+    if is-str($value) {
+        return q["] ~ $value.native-value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
+    }
+    return stringify($value);
 }

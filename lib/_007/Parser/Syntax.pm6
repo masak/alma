@@ -42,9 +42,7 @@ grammar _007::Parser::Syntax {
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.WHICH ~ $symbol};
-        my $identifier = Q::Identifier.new(
-            :name(Val::Str.new(:value($symbol)))
-        );
+        my $identifier = Q::Identifier.new(:name(make-str($symbol)));
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
@@ -64,7 +62,7 @@ grammar _007::Parser::Syntax {
             declare($<routine> eq "func"
                         ?? Q::Statement::Func
                         !! Q::Statement::Macro,
-                    $<identifier>.ast.name.value);
+                    $<identifier>.ast.name.native-value);
         }
         <.newpad>
         '(' ~ ')' <parameterlist>
@@ -118,7 +116,7 @@ grammar _007::Parser::Syntax {
         class» <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
         <identifier> <.ws>
-        { declare(Q::Statement::Class, $<identifier>.ast.name.value); }
+        { declare(Q::Statement::Class, $<identifier>.ast.name.native-value); }
         <block>
     }
 
@@ -284,7 +282,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Func, $<identifier>.ast.name.value);
+                declare(Q::Term::Func, $<identifier>.ast.name.native-value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -294,7 +292,7 @@ grammar _007::Parser::Syntax {
     }
     token term:my {
         my» <.ws> [<identifier> || <.panic("identifier")>]
-        { declare(Q::Term::My, $<identifier>.ast.name.value); }
+        { declare(Q::Term::My, $<identifier>.ast.name.native-value); }
     }
 
 
@@ -375,7 +373,7 @@ grammar _007::Parser::Syntax {
     rule parameterlist {
         [
             <parameter>
-            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.value); }
+            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.native-value); }
         ]* %% ','
     }
 

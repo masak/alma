@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 use _007::Precedence;
 
@@ -74,7 +75,7 @@ class _007::OpScope {
                 my $string = $trait<EXPR>.ast;
                 die "The associativity must be a string"
                     unless $string ~~ Q::Literal::Str;
-                my $value = $string.value.value;
+                my $value = $string.value.native-value;
                 die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
                 $assoc = $value;
@@ -94,7 +95,7 @@ class _007::OpScope {
 
     method install($category, $op, $q?, :%precedence, :$assoc) {
         my $name = "$category:$op";
-        my $identifier = Q::Identifier.new(:name(Val::Str.new(:value($name))));
+        my $identifier = Q::Identifier.new(:name(make-str($name)));
 
         %!ops{$category}{$op} = $q !=== Any ?? $q !! {
             prefix => Q::Prefix.new(:$identifier),
