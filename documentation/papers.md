@@ -1,3 +1,10 @@
+## Dylan
+
+<dl>
+  <dt>D-Expressions: Lisp Power, Dylan Style</dt>
+  <dd><a href="http://people.csail.mit.edu/jrb/Projects/dexprs.pdf">A 2001 paper about procedural macros in Dylan</a></dd>
+</dl>
+
 ## PLOT
 
 David Moon (Common Lisp contributor, inventor of ephemeral garbage collection, co-author of Flavors and Emacs, and co-designer of Dylan) is/was working on a language with goals that seem similar to 007's.
@@ -59,4 +66,11 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
   <dd><a href="http://silo.cs.indiana.edu:8346/c211/impatient/cacm-draft.pdf">a 2017 draft of a paper</a></dd>
   <dt>Macros as Multi-Stage Computations: Type-Safe, Generative, Binding Macros in MacroML</dt>
   <dd><a href="https://www.researchgate.net/profile/Walid_Taha2/publication/2359751_Macros_as_Multi-Stage_Computations_Type-Safe_Generative_Binding_Macros_in_MacroML/links/0c960539d76f3e44a5000000.pdf">a 2001 paper</a></dd>
+</dl>
+
+## Oleg Kiselyov
+
+<dl>
+  <dt>Systematic Macro programming</dt>
+  <dd><a href="http://okmij.org/ftp/Scheme/macros.html#Macro-CPS-programming">Macros compose better if written in a continuation-passing style</a></dd>
 </dl>
