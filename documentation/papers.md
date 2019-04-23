@@ -66,6 +66,8 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
   <dd><a href="http://silo.cs.indiana.edu:8346/c211/impatient/cacm-draft.pdf">a 2017 draft of a paper</a></dd>
   <dt>Macros as Multi-Stage Computations: Type-Safe, Generative, Binding Macros in MacroML</dt>
   <dd><a href="https://www.researchgate.net/profile/Walid_Taha2/publication/2359751_Macros_as_Multi-Stage_Computations_Type-Safe_Generative_Binding_Macros_in_MacroML/links/0c960539d76f3e44a5000000.pdf">a 2001 paper</a></dd>
+  <dt>Safely Composable Type-Specific Languages</dt>
+  <dd><a href="https://apps.dtic.mil/dtic/tr/fulltext/u2/1057425.pdf">a 2014 paper</a></dd>
 </dl>
 
 ## Oleg Kiselyov
