@@ -99,7 +99,7 @@ role Q {
 ### An identifier; a name in code.
 ###
 class Q::Identifier does Q {
-    has Val::Str $.name;
+    has _007::Value $.name where &is-str;
 
     method attribute-order { <name> }
 }
@@ -167,7 +167,7 @@ class Q::Literal::Int does Q::Literal {
 ### A string literal.
 ###
 class Q::Literal::Str does Q::Literal {
-    has Val::Str $.value;
+    has _007::Value $.value when &is-str;
 
     method eval($) { $.value }
 }
@@ -183,7 +183,7 @@ class Q::Literal::Str does Q::Literal {
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
     method eval($runtime) {
-        return $runtime.get-var($.name.value);
+        return $runtime.get-var($.name.native-value);
     }
 
     method put-value($value, $runtime) {
@@ -200,11 +200,11 @@ class Q::Term::Identifier::Direct is Q::Term::Identifier {
     has Val::Dict $.frame;
 
     method eval($runtime) {
-        return $runtime.get-direct($.frame, $.name.value);
+        return $runtime.get-direct($.frame, $.name.native-value);
     }
 
     method put-value($value, $runtime) {
-        $runtime.put-direct($.frame, $.name.value, $value);
+        $runtime.put-direct($.frame, $.name.native-value, $value);
     }
 }
 
@@ -221,7 +221,7 @@ role Q::Regex::Fragment {
 ### Corresponds to the `"..."` regex syntax.
 ###
 class Q::Regex::Str does Q::Regex::Fragment {
-    has Val::Str $.contents;
+    has _007::Value $.contents where &is-str;
 }
 
 ### ### Q::Regex::Identifier
@@ -325,12 +325,20 @@ class Q::Term::Object does Q::Term {
 
     method eval($runtime) {
         if is-type($.type) {
-            # XXX: only works for Int
-            my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
-            return make-int($native-value);
+            if $.type === TYPE<Int> {
+                my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
+                return make-int($native-value);
+            }
+            elsif $.type === TYPE<Str> {
+                my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
+                return make-str($native-value);
+            }
+            else {
+                die "Don't know how to create an object of type ", $.type.slots<name>;
+            }
         }
         return $.type.create(
-            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+            $.propertylist.properties.elements.map({.key.native-value => .value.eval($runtime)})
         );
     }
 }
@@ -344,7 +352,7 @@ class Q::Term::Dict does Q::Term {
 
     method eval($runtime) {
         return Val::Dict.new(:properties(
-            $.propertylist.properties.elements.map({.key.value => .value.eval($runtime)})
+            $.propertylist.properties.elements.map({.key.native-value => .value.eval($runtime)})
         ));
     }
 }
@@ -354,7 +362,7 @@ class Q::Term::Dict does Q::Term {
 ### An object property. Properties have a key and a value.
 ###
 class Q::Property does Q {
-    has Val::Str $.key;
+    has _007::Value $.key where &is-str;
     has $.value;
 }
 
@@ -411,7 +419,7 @@ class Q::Term::Func does Q::Term does Q::Declaration {
 
     method eval($runtime) {
         my $name = $.identifier ~~ Val::None
-            ?? Val::Str.new(:value(""))
+            ?? make-str("")
             !! $.identifier.name;
         return Val::Func.new(
             :$name,
@@ -576,8 +584,8 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Dict {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
-                my $propname = $property.value;
+                    unless is-str($property);
+                my $propname = $property.native-value;
                 die X::Property::NotFound.new(:$propname, :type(Val::Dict))
                     if .properties{$propname} :!exists;
                 return .properties{$propname};
@@ -585,8 +593,8 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Func | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
-                my $propname = $property.value;
+                    unless is-str($property);
+                my $propname = $property.native-value;
                 return $runtime.property($_, $propname);
             }
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
@@ -608,8 +616,8 @@ class Q::Postfix::Index is Q::Postfix {
             when Val::Dict | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
-                    if $property !~~ Val::Str;
-                my $propname = $property.value;
+                    unless is-str($property);
+                my $propname = $property.native-value;
                 $runtime.put-property($_, $propname, $value);
             }
             die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
@@ -648,14 +656,14 @@ class Q::Postfix::Property is Q::Postfix {
 
     method eval($runtime) {
         my $obj = $.operand.eval($runtime);
-        my $propname = $.property.name.value;
+        my $propname = $.property.name.native-value;
         $runtime.property($obj, $propname);
     }
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
             when Val::Dict | Q {
-                my $propname = $.property.name.value;
+                my $propname = $.property.name.native-value;
                 $runtime.put-property($_, $propname, $value);
             }
             die "We don't handle this case yet"; # XXX: think more about this case
@@ -804,7 +812,7 @@ class Q::Term::Quasi does Q::Term {
             $thing.new(|%attributes);
         }
 
-        if $.qtype.value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
+        if $.qtype.native-value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
         $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
@@ -994,12 +1002,12 @@ class Q::Statement::Throw does Q::Statement {
 
     method run($runtime) {
         my $value = $.expr ~~ Val::None
-            ?? Val::Exception.new(:message(Val::Str.new(:value("Died"))))
+            ?? Val::Exception.new(:message(make-str("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die X::_007::RuntimeException.new(:msg($value.message.value));
+        die X::_007::RuntimeException.new(:msg($value.message.native-value));
     }
 }
 

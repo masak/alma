@@ -9,10 +9,7 @@ class X::Control::Exit is Exception {
 }
 
 sub wrap($_) {
-    when Nil  { NONE }
     when Bool { Val::Bool.new(:value($_)) }
-    when Str  { Val::Str.new(:value($_)) }
-    when Array | Seq | List { Val::Array.new(:elements(.map(&wrap))) }
     default { die "Got some unknown value of type ", .^name }
 }
 
@@ -44,16 +41,16 @@ multi less-value($l, $) {
     assert-new-type(:value($l), :type<Int>, :operation<less>);
 }
 multi less-value(_007::Value::Backed $l, _007::Value::Backed $r) {
-    is-int($l) && is-int($r) && $l.native-value < $r.native-value;
+    is-int($l) && is-int($r) && $l.native-value < $r.native-value ||
+        is-str($l) && is-str($r) && $l.native-value lt $r.native-value;
 }
-multi less-value(Val::Str $l, Val::Str $r) { $l.value lt $r.value }
 
 multi more-value($l, $) {
     assert-new-type(:value($l), :type<Int>, :operation<more>);
 }
-multi more-value(Val::Str $l, Val::Str $r) { $l.value gt $r.value }
 multi more-value(_007::Value::Backed $l, _007::Value::Backed $r) {
-    is-int($l) && is-int($r) && $l.native-value > $r.native-value;
+    is-int($l) && is-int($r) && $l.native-value > $r.native-value ||
+        is-str($l) && is-str($r) && $l.native-value gt $r.native-value;
 }
 
 my role Placeholder {
@@ -191,7 +188,7 @@ my @builtins =
     # concatenation precedence
     'infix:~' => op(
         sub ($lhs, $rhs) {
-            return wrap($lhs.Str ~ $rhs.Str);
+            return make-str($lhs.Str ~ $rhs.Str);
         },
     ),
 
@@ -268,41 +265,31 @@ my @builtins =
     # prefixes
     'prefix:~' => op(
         sub prefix-str($expr) {
-            Val::Str.new(:value($expr.Str));
+            make-str($expr.Str);
         },
     ),
     'prefix:+' => op(
         sub prefix-plus($_) {
-            when Val::Str {
-                return make-int(.value.Int)
-                    if .value ~~ /^ '-'? \d+ $/;
+            when is-str($_) {
+                return make-int(.native-value.Int)
+                    if .native-value ~~ /^ '-'? \d+ $/;
                 proceed;
             }
-            when _007::Value {
-                if is-int($_) {
-                    return make-int(.native-value);
-                }
-                else {
-                    proceed;
-                }
+            when is-int($_) {
+                return make-int(.native-value);
             }
             assert-new-type(:value($_), :type<Int>, :operation("prefix:<+>"));
         },
     ),
     'prefix:-' => op(
         sub prefix-minus($_) {
-            when Val::Str {
-                return make-int(-.value.Int)
-                    if .value ~~ /^ '-'? \d+ $/;
+            when is-str($_) {
+                return make-int(-.native-value.Int)
+                    if .native-value ~~ /^ '-'? \d+ $/;
                 proceed;
             }
-            when _007::Value {
-                if is-int($_) {
-                    return make-int(-.native-value);
-                }
-                else {
-                    proceed;
-                }
+            when is-int($_) {
+                return make-int(-.native-value);
             }
             assert-new-type(:value($_), :type<Int>, :operation("prefix:<->"));
         },
@@ -341,7 +328,9 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-push @builtins, "Int" => TYPE<Int>;
+for <Int Str> -> $name {
+    push @builtins, $name => TYPE{$name};
+}
 push @builtins, "Q" => Val::Type.of(Q);
 
 my $opscope = _007::OpScope.new();
@@ -358,7 +347,7 @@ sub install-op($name, $placeholder) {
 }
 
 my &ditch-sigil = { $^str.substr(1) };
-my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(Val::Str.new(:$^value))))) };
+my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str($^value))))) };
 
 @builtins.=map({
     when .value ~~ Val::Type {

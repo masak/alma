@@ -52,5 +52,6 @@ multi equal-value(Q $l, Q $r) {
 
 multi equal-value(_007::Value $l, _007::Value $r) {
     return is-int($l) && is-int($r) && $l.native-value == $r.native-value
+        || is-str($l) && is-str($r) && $l.native-value eq $r.native-value
         || is-type($l) && is-type($r) && $l === $r;
 }

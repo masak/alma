@@ -119,7 +119,7 @@ class _007::Parser::Actions {
         #      in the expression tree
         if $<EXPR>.ast ~~ Q::Block {
             make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(Val::Str.new(:value("postfix:()"))))),
+                :identifier(Q::Identifier.new(:name(make-str("postfix:()")))),
                 :operand(Q::Term::Func.new(:identifier(NONE), :block($<EXPR>.ast))),
                 :argumentlist(Q::ArgumentList.new)
             )));
@@ -222,14 +222,14 @@ class _007::Parser::Actions {
         make Q::Statement::Class.new(:$block);
         my $val = Val::Type.of(EVAL qq[class :: \{
             method attributes \{ () \}
-            method ^name(\$) \{ "{$identifier.name.value}" \}
+            method ^name(\$) \{ "{$identifier.name.native-value}" \}
         \}]);
         $*runtime.put-var($identifier, $val);
     }
 
     method traitlist($/) {
         my @traits = $<trait>».ast;
-        if bag( @traits.map: *.identifier.name.value ).grep( *.value > 1 )[0] -> $p {
+        if bag( @traits.map: *.identifier.name.native-value ).grep( *.value > 1 )[0] -> $p {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
@@ -270,7 +270,7 @@ class _007::Parser::Actions {
     sub is-macro($q, $qtype, $identifier) {
         $q ~~ $qtype
             && $identifier ~~ Q::Identifier
-            && (my $macro = $*runtime.maybe-get-var($identifier.name.value)) ~~ Val::Macro
+            && (my $macro = $*runtime.maybe-get-var($identifier.name.native-value)) ~~ Val::Macro
             && $macro;
     }
 
@@ -308,7 +308,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.identifier.name.value;
+            $op.identifier.name.native-value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.infixprec) {
@@ -348,7 +348,7 @@ class _007::Parser::Actions {
 
                 if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
                     my $frame = $*runtime.current-frame;
-                    my $symbol = $t1.name.value;
+                    my $symbol = $t1.name.native-value;
                     if @*declstack[*-1]{$symbol} :!exists {
                         if $*runtime.maybe-get-var($symbol) {
                             die X::Assignment::ReadOnly.new(:declname("builtin"), :$symbol);
@@ -369,7 +369,7 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.value), :op2($infix.identifier.name.value))
+            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.native-value), :op2($infix.identifier.name.native-value))
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -383,7 +383,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.identifier.name.value;
+            $op.identifier.name.native-value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {
@@ -478,7 +478,7 @@ class _007::Parser::Actions {
     method prefix($/) {
         my $op = ~$/;
         my $identifier = Q::Term::Identifier.new(
-            :name(Val::Str.new(:value("prefix:$op"))),
+            :name(make-str("prefix:$op")),
         );
         make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
     }
@@ -492,8 +492,7 @@ class _007::Parser::Actions {
             die X::String::Newline.new
                 if $s ~~ /\n/;
         }(~$0);
-        my $value = (~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g);
-        $value = Val::Str.new(:$value);
+        my $value = make-str((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
         make Q::Literal::Str.new(:$value);
     }
 
@@ -567,7 +566,7 @@ class _007::Parser::Actions {
     }
 
     method term:identifier ($/) {
-        my $name = $<identifier>.ast.name.value;
+        my $name = $<identifier>.ast.name.native-value;
         if !$*runtime.declared($name) {
             my $frame = $*runtime.current-frame;
             $*parser.postpone: sub checking-postdeclared {
@@ -586,7 +585,7 @@ class _007::Parser::Actions {
     }
 
     method term:quasi ($/) {
-        my $qtype = Val::Str.new(:value(~($<qtype> // "")));
+        my $qtype = make-str(~($<qtype> // ""));
 
         if $<block> -> $block {
             # If the quasi consists of a block with a single expression statement, it's very
@@ -599,18 +598,18 @@ class _007::Parser::Actions {
             # to the troubled musings in <https://github.com/masak/007/issues/7>, which aren't
             # completely solved yet.
 
-            if $qtype.value eq "Q.Statement" {
+            if $qtype.native-value eq "Q.Statement" {
                 # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
                 my $contents = $block.ast.statementlist.statements.elements[0];
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
-            elsif $qtype.value eq "Q.StatementList" {
+            elsif $qtype.native-value eq "Q.StatementList" {
                 my $contents = $block.ast.statementlist;
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
-            elsif $qtype.value ne "Q.Block"
+            elsif $qtype.native-value ne "Q.Block"
                 && $block.ast ~~ Q::Block
                 && $block.ast.statementlist.statements.elements.elems == 1
                 && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
@@ -686,7 +685,7 @@ class _007::Parser::Actions {
                 ?? (value => 1)
                 !! $type-obj.attributes.map({ aname($_) => 1 });
             for $<propertylist>.ast.properties.elements -> $p {
-                my $property = $p.key.value;
+                my $property = $p.key.native-value;
                 die X::Property::NotDeclared.new(:type($name), :$property)
                     unless %known-properties{$property};
             }
@@ -696,7 +695,7 @@ class _007::Parser::Actions {
                 next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
                 die X::Property::Required.new(:type($name), :$property)
-                    unless $property eq any($<propertylist>.ast.properties.elements».key».value);
+                    unless $property eq any($<propertylist>.ast.properties.elements».key».native-value);
             }
         }
 
@@ -722,7 +721,7 @@ class _007::Parser::Actions {
     method propertylist ($/) {
         my %seen;
         for $<property>».ast -> Q::Property $p {
-            my Str $property = $p.key.value;
+            my Str $property = $p.key.native-value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }
@@ -760,7 +759,7 @@ class _007::Parser::Actions {
     method infix($/) {
         my $op = ~$/;
         my $identifier = Q::Term::Identifier.new(
-            :name(Val::Str.new(:value("infix:$op"))),
+            :name(make-str("infix:$op")),
         );
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
     }
@@ -785,7 +784,7 @@ class _007::Parser::Actions {
             $op = ".";
         }
         my $identifier = Q::Term::Identifier.new(
-            :name(Val::Str.new(:value("postfix:$op"))),
+            :name(make-str("postfix:$op")),
         );
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
@@ -812,7 +811,7 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';
         }();
-        make Q::Identifier.new(:name(Val::Str.new(:$value)));
+        make Q::Identifier.new(:name(make-str($value)));
     }
 
     method argumentlist($/) {
@@ -917,7 +916,7 @@ sub check(Q $ast, $runtime) is export {
     }
 
     multi handle(Q::Term::My $my) {
-        my $symbol = $my.identifier.name.value;
+        my $symbol = $my.identifier.name.native-value;
         my $block = $runtime.current-frame();
         die X::Redeclaration.new(:$symbol)
             if $runtime.declared-locally($symbol);
@@ -929,7 +928,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::PropertyList $propertylist) {
         my %seen;
         for $propertylist.properties.elements -> Q::Property $p {
-            my Str $property = $p.key.value;
+            my Str $property = $p.key.native-value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }

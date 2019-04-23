@@ -153,6 +153,10 @@ class Val::Bool does Val {
 class Val::Str does Val {
     has Str $.value;
 
+    submethod BUILD {
+        die "Old class Val::Str -- do not use anymore";
+    }
+
     method quoted-Str {
         q["] ~ $.value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["]
     }
@@ -194,7 +198,7 @@ class Val::Regex does Val {
 
     sub parse($str, $fragment, Int $last-index is copy) {
         when $fragment.^name eq "Q::Regex::Str" {
-            my $value = $fragment.contents.value;
+            my $value = $fragment.contents.native-value;
             my $slice = $str.substr($last-index, $value.chars);
             return Nil if $slice ne $value;
             return $last-index + $value.chars;
@@ -380,7 +384,7 @@ class Val::Dict does Val {
         return '{' ~ %.properties.map({
             my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
                 ?? .key
-                !! Val::Str.new(value => .key).quoted-Str;
+                !! make-str(.key).quoted-Str;
             "{$key}: {.value.quoted-Str}"
         }).sort.join(', ') ~ '}';
     }
@@ -454,9 +458,6 @@ class Val::Type does Val {
         if $.type ~~ Val::Dict {
             return $.type.new(:@properties);
         }
-        elsif $.type ~~ Val::Str {
-            return $.type.new(:value(@properties[0].value.value));
-        }
         elsif $.type ~~ Val::Array {
             return $.type.new(:elements(@properties[0].value.elements));
         }
@@ -499,7 +500,7 @@ class Val::Type does Val {
 ###     say(add(2, 5));         # --> `7`
 ###
 class Val::Func does Val {
-    has Val::Str $.name;
+    has _007::Value $.name where &is-str;
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
@@ -507,15 +508,15 @@ class Val::Func does Val {
     has Val::Dict $.outer-frame;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
-        self.bless(:name(Val::Str.new(:value($name))), :&hook, :$parameterlist, :$statementlist);
+        self.bless(:name(make-str($name)), :&hook, :$parameterlist, :$statementlist);
     }
 
     method escaped-name {
         sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
         sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
 
-        return $.name.value
-            unless $.name.value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+        return $.name.native-value
+            unless $.name.native-value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
 
         return "{$0}:<{escape-less-thans escape-backslashes $1}>"
             if $1.contains(">") && $1.contains("»");
@@ -553,7 +554,7 @@ class Val::Macro is Val::Func {
 ### flow couldn't continue normally.
 ###
 class Val::Exception does Val {
-    has Val::Str $.message;
+    has _007::Value $.message where &is-str;
 }
 
 class Helper {
@@ -561,7 +562,6 @@ class Helper {
         when Val::None { "none" }
         when Val::Object { "<object>" }
         when Val::Bool { .value.lc }
-        when Val::Str { .value }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
         when Val::Dict { .quoted-Str }

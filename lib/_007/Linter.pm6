@@ -95,7 +95,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::Identifier $identifier) {
-                my $name = $identifier.name.value;
+                my $name = $identifier.name.native-value;
                 # XXX: what we should really do is whitelist all of he built-ins
                 return if $name eq "say";
                 my $ref = ref $name;
@@ -137,7 +137,7 @@ class _007::Linter {
                 }
                 die "LHS was not an identifier"
                     unless $lhs ~~ Q::Identifier;
-                my $name = $lhs.name.value;
+                my $name = $lhs.name.native-value;
                 if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
                     @complaints.push: L::RedundantAssignment.new(:$name);
                 }
