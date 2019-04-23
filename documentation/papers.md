@@ -16,6 +16,8 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
 <dl>
   <dt>Scala Macros: Let Our Powers Combine!</dt>
   <dd><a href="https://infoscience.epfl.ch/record/186844/files/2013-04-22-LetOurPowersCombine.pdf">On How Rich Syntax and Static Types Work with Metaprogramming</a></dd>
+  <dt>Rethinking Scala macros</dt>
+  <dd><a href="http://scalamacros.org/paperstalks/2014-03-02-RethinkingScalaMacros.pdf">a 2014 talk</a></dd>
 </dl>
 
 ## Julia
@@ -30,6 +32,15 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
 <dl>
   <dt>A Love Letter to Rust Macros</dt>
   <dd><a href="https://happens.lol/posts/a-love-letter-to-rust-macros/">Blog post by Hilmar Wiegand (happens)</a></dd>
+</dl>
+
+## Racket
+
+<dl>
+  <dt>Macros</dt>
+  <dd><a href="https://docs.racket-lang.org/guide/macros.html">From the Racket Guide</a></dd>
+  <dt>Fear of Macros</dt>
+  <dd><a href="http://www.greghendershott.com/fear-of-macros/">A practical guide to Racket macros</a></dd>
 </dl>
 
 ## Macro hygiene
