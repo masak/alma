@@ -8,11 +8,6 @@ class X::Control::Exit is Exception {
     has Int $.exit-code;
 }
 
-sub wrap($_) {
-    when Bool { Val::Bool.new(:value($_)) }
-    default { die "Got some unknown value of type ", .^name }
-}
-
 subset ValOrQ of Any where Val | Q;
 
 sub assert-type(:$value, ValOrQ:U :$type, Str :$operation) {
@@ -125,62 +120,62 @@ my @builtins =
     'infix:==' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return wrap(equal-value($lhs, $rhs));
+            return Val::Bool.new(:value(equal-value($lhs, $rhs)));
         },
         :assoc<non>,
     ),
     'infix:!=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return wrap(!equal-value($lhs, $rhs))
+            return Val::Bool.new(:value(!equal-value($lhs, $rhs)));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<' => op(
         sub ($lhs, $rhs) {
-            return wrap(less-value($lhs, $rhs))
+            return Val::Bool.new(:value(less-value($lhs, $rhs)));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return wrap(less-value($lhs, $rhs) || equal-value($lhs, $rhs))
+            return Val::Bool.new(:value(less-value($lhs, $rhs) || equal-value($lhs, $rhs)));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>' => op(
         sub ($lhs, $rhs) {
-            return wrap(more-value($lhs, $rhs) )
+            return Val::Bool.new(:value(more-value($lhs, $rhs)));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return wrap(more-value($lhs, $rhs) || equal-value($lhs, $rhs))
+            return Val::Bool.new(:value(more-value($lhs, $rhs) || equal-value($lhs, $rhs)));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return wrap($lhs ~~ _007::Value && $lhs.type === $rhs);
+                return Val::Bool.new(:value($lhs ~~ _007::Value && $lhs.type === $rhs));
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
-            return wrap($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
+            return Val::Bool.new(:value($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return wrap($lhs !~~ _007::Value || $lhs.type !=== $rhs);
+                return Val::Bool.new(:value($lhs !~~ _007::Value || $lhs.type !=== $rhs));
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
-            return wrap($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
+            return Val::Bool.new(:value($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type));
         },
         :precedence{ equiv => "infix:==" },
     ),
@@ -257,7 +252,7 @@ my @builtins =
             assert-new-type(:value($rhs), :type<Int>, :operation<%%>);
             assert-nonzero(:value($rhs.native-value), :operation("infix:<%%>"), :numerator($lhs.native-value));
 
-            return wrap($lhs.native-value %% $rhs.native-value);
+            return Val::Bool.new(:value($lhs.native-value %% $rhs.native-value));
         },
         :precedence{ equiv => "infix:div" },
     ),
@@ -296,12 +291,12 @@ my @builtins =
     ),
     'prefix:?' => op(
         sub ($a) {
-            return wrap(?$a.truthy)
+            return Val::Bool.new(:value(?$a.truthy));
         },
     ),
     'prefix:!' => op(
         sub ($a) {
-            return wrap(!$a.truthy)
+            return Val::Bool.new(:value(!$a.truthy));
         },
     ),
     'prefix:^' => op(
