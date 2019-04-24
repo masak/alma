@@ -120,10 +120,32 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say([1, 2].join(0));
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "separator argument to join must be a Str";
+}
+
+{
+    my $program = q:to/./;
         say("a|b".split("|"));
         .
 
     outputs $program, qq|["a", "b"]\n|, "split() splits a string into elements separated by a separator";
+}
+
+{
+    my $program = q:to/./;
+        say("a100b".split(100));
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "separator argument to split must be a Str";
 }
 
 {
@@ -138,11 +160,44 @@ use _007::Test;
 
 {
     my $program = q:to/./;
+        say("123".index(2));
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "substr argument to index must be a Str";
+}
+
+{
+    my $program = q:to/./;
         say("abc".substr(0, 1));
         say("abc".substr(0, 5));
         .
 
     outputs $program, "a\nabc\n", "substr() picks out a substring of a string";
+}
+
+{
+    my $program = q:to/./;
+        say("abc".substr("0", 1));
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "pos argument to substr must be an Int";
+}
+
+{
+    my $program = q:to/./;
+        say("abc".substr(0, "1"));
+        .
+
+    runtime-error
+        $program,
+        X::TypeCheck,
+        "chars argument to substr must be an Int";
 }
 
 {
