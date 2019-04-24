@@ -139,7 +139,7 @@ class _007::Runtime {
     }
 
     method !maybe-find-pad(Str $symbol, $frame is copy) {
-        if $frame ~~ Val::None {    # XXX: make a `defined` method on None so we can use `//`
+        if $frame === NONE {
             $frame = self.current-frame;
         }
         repeat until $frame === NO_OUTER {
@@ -417,7 +417,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Array && $propname eq "join" {
             return builtin(sub join($sep) {
-                # XXX: needs typecheck of $sep
+                die X::TypeCheck.new(:operation<join>, :got($sep), :expected(Str))
+                    unless is-str($sep);
+
                 return make-str($obj.elements.join($sep.native-value.Str));
             });
         }
@@ -428,19 +430,28 @@ class _007::Runtime {
         }
         elsif is-str($obj) && $propname eq "split" {
             return builtin(sub split($sep) {
-                # XXX: needs typecheck of $sep
+                die X::TypeCheck.new(:operation<split>, :got($sep), :expected(Str))
+                    unless is-str($sep);
+
                 my @elements = $obj.native-value.split($sep.native-value).map(&make-str);
                 return Val::Array.new(:@elements);
             });
         }
         elsif is-str($obj) && $propname eq "index" {
             return builtin(sub index($substr) {
-                # XXX: needs typecheck of $substr
+                die X::TypeCheck.new(:operation<index>, :got($substr), :expected(Str))
+                    unless is-str($substr);
+
                 return make-int($obj.native-value.index($substr.native-value) // -1);
             });
         }
         elsif is-str($obj) && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
+                die X::TypeCheck.new(:operation<substr>, :got($pos), :expected(Str))
+                    unless is-int($pos);
+                die X::TypeCheck.new(:operation<substr>, :got($chars), :expected(Str))
+                    unless is-int($chars);
+
                 my $s = $obj.native-value;
 
                 die X::Subscript::TooLarge.new(:value($pos.native-value), :length($s.chars))
