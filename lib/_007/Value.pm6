@@ -39,6 +39,7 @@ sub make-type(Str $name, Bool :$backed) {
 BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
     TYPE<Bool> = make-type "Bool";
+    TYPE<Exception> = make-type "Exception";
     TYPE<Int> = make-type "Int", :backed;
     TYPE<None> = make-type "None";
     TYPE<Str> = make-type "Str", :backed;
@@ -58,6 +59,14 @@ sub make-bool(Bool $value) is export {
 
 sub is-bool($v) is export {
     $v ~~ _007::Value && $v.type === TYPE<Bool>;
+}
+
+sub make-exception(_007::Value $message where &is-str) is export {
+    _007::Value.new(:type(TYPE<Exception>), slots => { :$message });
+}
+
+sub is-exception($v) is export {
+    $v ~~ _007::Value && $v.type === TYPE<Exception>;
 }
 
 sub make-int(Int $native-value) is export {

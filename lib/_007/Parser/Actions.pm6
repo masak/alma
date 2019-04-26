@@ -676,7 +676,7 @@ class _007::Parser::Actions {
         my $type-obj = $type.type;
         my $name = $type-obj.^name.subst("::", ".", :g);
 
-        if $type-obj !=== Val::Dict {
+        if $type-obj !=== Val::Dict && !is-type($type-obj) {
             if is-role($type-obj) {
                 die X::Uninstantiable.new(:$name);
             }

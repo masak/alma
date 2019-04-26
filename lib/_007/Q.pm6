@@ -333,6 +333,10 @@ class Q::Term::Object does Q::Term {
                 my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
                 return make-str($native-value);
             }
+            elsif $.type === TYPE<Exception> {
+                my $message = $.propertylist.properties.elements[0].value.eval($runtime);
+                return make-exception($message);
+            }
             else {
                 die "Don't know how to create an object of type ", $.type.slots<name>;
             }
@@ -1008,12 +1012,12 @@ class Q::Statement::Throw does Q::Statement {
 
     method run($runtime) {
         my $value = is-none($.expr)
-            ?? Val::Exception.new(:message(make-str("Died")))
+            ?? make-exception(make-str("Died"))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
-            if $value !~~ Val::Exception;
+            unless is-exception($value);
 
-        die X::_007::RuntimeException.new(:msg($value.message.native-value));
+        die X::_007::RuntimeException.new(:msg($value.slots<message>.native-value));
     }
 }
 
