@@ -25,6 +25,10 @@ role Val {
 ###
 ### The top type of 007. A featureless object. Everything inherits from this type.
 class Val::Object does Val {
+    submethod BUILD {
+        die "Old class Val::Object -- do not use anymore";
+    }
+
     method truthy {
         True
     }

@@ -337,6 +337,9 @@ class Q::Term::Object does Q::Term {
                 my $message = $.propertylist.properties.elements[0].value.eval($runtime);
                 return make-exception($message);
             }
+            elsif $.type === TYPE<Object> {
+                return make-object();
+            }
             else {
                 die "Don't know how to create an object of type ", $.type.slots<name>;
             }

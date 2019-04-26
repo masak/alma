@@ -160,22 +160,22 @@ my @builtins =
     'infix:~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return make-bool($lhs ~~ _007::Value && $lhs.type === $rhs);
+                return make-bool($rhs === TYPE<Object> || $lhs ~~ _007::Value && $lhs.type === $rhs);
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
-            return make-bool($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
+            return make-bool($lhs ~~ $rhs.type);
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return make-bool($lhs !~~ _007::Value || $lhs.type !=== $rhs);
+                return make-bool($rhs !=== TYPE<Object> && ($lhs !~~ _007::Value || $lhs.type !=== $rhs));
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
-            return make-bool($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
+            return make-bool($lhs !~~ $rhs.type);
         },
         :precedence{ equiv => "infix:==" },
     ),
@@ -323,7 +323,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Bool Exception Int None Str> -> $name {
+for <Bool Exception Int None Object Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
