@@ -501,11 +501,11 @@ class _007::Parser::Actions {
     }
 
     method term:false ($/) {
-        make Q::Literal::Bool.new(:value(Val::Bool.new(:value(False))));
+        make Q::Literal::Bool.new(:value(make-bool(False)));
     }
 
     method term:true ($/) {
-        make Q::Literal::Bool.new(:value(Val::Bool.new(:value(True))));
+        make Q::Literal::Bool.new(:value(make-bool(True)));
     }
 
     method term:int ($/) {

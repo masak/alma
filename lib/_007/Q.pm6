@@ -144,7 +144,7 @@ class Q::Literal::None does Q::Literal {
 ### A boolean literal; either `true` or `false`.
 ###
 class Q::Literal::Bool does Q::Literal {
-    has Val::Bool $.value;
+    has _007::Value $.value where &is-bool;
 
     method eval($) { $.value }
 }
@@ -744,6 +744,12 @@ class Q::Term::Quasi does Q::Term {
         sub interpolate($thing) {
             return $thing
                 if $thing ~~ _007::Value::Backed;
+
+            return $thing
+                if $thing === TRUE || $thing === FALSE;
+
+            die "Unknown ", $thing.type.Str
+                if $thing ~~ _007::Value;
 
             return $thing.new(:elements($thing.elements.map(&interpolate)))
                 if $thing ~~ Val::Array;

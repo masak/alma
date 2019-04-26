@@ -460,9 +460,7 @@ class _007::Runtime {
                 die X::TypeCheck.new(:operation<contains>, :got($substr), :expected(Str))
                     unless is-str($substr);
 
-                return Val::Bool.new(:value(
-                        $obj.native-value.contains($substr.native-value)
-                ));
+                return make-bool($obj.native-value.contains($substr.native-value));
             });
         }
         elsif is-str($obj) && $propname eq "prefix" {
@@ -493,7 +491,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless is-str($str);
 
-                return Val::Bool.new(:value($obj.fullmatch($str.native-value)));
+                return make-bool($obj.fullmatch($str.native-value));
             });
         }
         elsif $obj ~~ Val::Regex && $propname eq "search" {
@@ -501,7 +499,7 @@ class _007::Runtime {
                 die X::Regex::InvalidMatchType.new
                     unless is-str($str);
 
-                return Val::Bool.new(:value($obj.search($str.native-value)));
+                return make-bool($obj.search($str.native-value));
             });
         }
         elsif $obj ~~ Val::Array && $propname eq "filter" {
@@ -570,7 +568,10 @@ class _007::Runtime {
         }
         elsif is-type($obj) && $propname eq "create" {
             return builtin(sub create($properties) {
-                if $obj === TYPE<Int> {
+                if $obj === TYPE<Bool> {
+                    die X::Uninstantiable.new(:name<Bool>);
+                }
+                elsif $obj === TYPE<Int> {
                     make-int($properties.elements[0].elements[1].native-value);
                 }
                 elsif $obj === TYPE<Str> {
@@ -600,7 +601,7 @@ class _007::Runtime {
         elsif $obj ~~ Val::Dict && $propname eq "has" {
             return builtin(sub has($prop) {
                 my $value = $obj.properties{$prop.native-value} :exists;
-                return Val::Bool.new(:$value);
+                return make-bool($value);
             });
         }
         elsif $obj ~~ Val::Dict && $propname eq "update" {

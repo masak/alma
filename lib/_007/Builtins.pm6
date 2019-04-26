@@ -120,62 +120,62 @@ my @builtins =
     'infix:==' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return Val::Bool.new(:value(equal-value($lhs, $rhs)));
+            return make-bool(equal-value($lhs, $rhs));
         },
         :assoc<non>,
     ),
     'infix:!=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return Val::Bool.new(:value(!equal-value($lhs, $rhs)));
+            return make-bool(!equal-value($lhs, $rhs));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<' => op(
         sub ($lhs, $rhs) {
-            return Val::Bool.new(:value(less-value($lhs, $rhs)));
+            return make-bool(less-value($lhs, $rhs));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:<=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return Val::Bool.new(:value(less-value($lhs, $rhs) || equal-value($lhs, $rhs)));
+            return make-bool(less-value($lhs, $rhs) || equal-value($lhs, $rhs));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>' => op(
         sub ($lhs, $rhs) {
-            return Val::Bool.new(:value(more-value($lhs, $rhs)));
+            return make-bool(more-value($lhs, $rhs));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:>=' => op(
         sub ($lhs, $rhs) {
             my %*equality-seen;
-            return Val::Bool.new(:value(more-value($lhs, $rhs) || equal-value($lhs, $rhs)));
+            return make-bool(more-value($lhs, $rhs) || equal-value($lhs, $rhs));
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return Val::Bool.new(:value($lhs ~~ _007::Value && $lhs.type === $rhs));
+                return make-bool($lhs ~~ _007::Value && $lhs.type === $rhs);
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
 
-            return Val::Bool.new(:value($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type));
+            return make-bool($rhs.type ~~ Val::Object || $lhs ~~ $rhs.type);
         },
         :precedence{ equiv => "infix:==" },
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
-                return Val::Bool.new(:value($lhs !~~ _007::Value || $lhs.type !=== $rhs));
+                return make-bool($lhs !~~ _007::Value || $lhs.type !=== $rhs);
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
 
-            return Val::Bool.new(:value($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type));
+            return make-bool($rhs.type !~~ Val::Object && $lhs !~~ $rhs.type);
         },
         :precedence{ equiv => "infix:==" },
     ),
@@ -252,7 +252,7 @@ my @builtins =
             assert-new-type(:value($rhs), :type<Int>, :operation<%%>);
             assert-nonzero(:value($rhs.native-value), :operation("infix:<%%>"), :numerator($lhs.native-value));
 
-            return Val::Bool.new(:value($lhs.native-value %% $rhs.native-value));
+            return make-bool($lhs.native-value %% $rhs.native-value);
         },
         :precedence{ equiv => "infix:div" },
     ),
@@ -291,12 +291,12 @@ my @builtins =
     ),
     'prefix:?' => op(
         sub ($a) {
-            return Val::Bool.new(:value(?$a.truthy));
+            return make-bool(?$a.truthy);
         },
     ),
     'prefix:!' => op(
         sub ($a) {
-            return Val::Bool.new(:value(!$a.truthy));
+            return make-bool(!$a.truthy);
         },
     ),
     'prefix:^' => op(
@@ -323,7 +323,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Int Str> -> $name {
+for <Bool Int Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
