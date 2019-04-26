@@ -21,19 +21,6 @@ role Val {
     }
 }
 
-### ### Object
-###
-### The top type of 007. A featureless object. Everything inherits from this type.
-class Val::Object does Val {
-    submethod BUILD {
-        die "Old class Val::Object -- do not use anymore";
-    }
-
-    method truthy {
-        True
-    }
-}
-
 ### ### Regex
 ###
 ### A regex. As a runtime value, a regex is like a black box that can be put
@@ -418,7 +405,6 @@ class Val::Macro is Val::Func {
 
 class Helper {
     our sub Str($_) {
-        when Val::Object { "<object>" }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
         when Val::Dict { .quoted-Str }
