@@ -412,19 +412,6 @@ class Val::Macro is Val::Func {
     method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
 }
 
-### ### Exception
-###
-### An exception. Represents an error condition, or some other way control
-### flow couldn't continue normally.
-###
-class Val::Exception does Val {
-    submethod BUILD {
-        die "Old class Val::Exception -- do not use anymore";
-    }
-
-    has _007::Value $.message where &is-str;
-}
-
 class Helper {
     our sub Str($_) {
         when Val::Object { "<object>" }
@@ -434,7 +421,6 @@ class Helper {
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Func { "<sub {.escaped-name}{.pretty-parameters}>" }
-        when Val::Exception { "Exception \{message: {.message.quoted-Str}\}" }
         default {
             my $self = $_;
             my $name = .^name;
