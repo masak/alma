@@ -3,8 +3,9 @@ use MONKEY-SEE-NO-EVAL;
 
 class X::Uninstantiable is Exception {
     has Str $.name;
+    has Bool $.abstract;
 
-    method message() { "<type {$.name}> is abstract and uninstantiable"; }
+    method message() { "<type {$.name}> is {$.abstract ?? "abstract and " !! ""}uninstantiable" }
 }
 
 class Helper { ... }
@@ -17,52 +18,6 @@ role Val {
     method Str {
         my %*stringification-seen;
         Helper::Str(self);
-    }
-}
-
-### ### None
-###
-### A type with only one value, indicating the lack of a value where one was
-### expected.
-###
-### It is the value variables have that haven't been assigned to:
-###
-###     my empty;
-###     say(empty);         # --> `none`
-###
-### It is also the value returned from a subroutine that didn't explicitly
-### return a value:
-###
-###     func noreturn() {
-###     }
-###     say(noreturn());    # --> `none`
-###
-### Finally, it's found in various places in the Q hierarchy to indicate that
-### a certain child element is not present. For example, an `if` statement
-### doesn't always have an `else` statement. When it doesn't, the `.else`
-### property is set to `none`.
-###
-###     say(type((quasi<Q.Statement> { if 1 {} }).else)); # --> `<type None>`
-###
-### The value `none` is falsy, stringifies to `none`, and doesn't numify.
-###
-###     say(!!none);        # --> `false`
-###     say(~none);         # --> `none`
-###     say(+none);         # <ERROR X::TypeCheck>
-###
-### Since `none` is often used as a default, there's an operator `infix:<//>`
-### that evaluates its right-hand side if it finds `none` on the left:
-###
-###     say(none // "default");     # --> `default`
-###     say("value" // "default");  # --> `value`
-###
-class Val::None does Val {
-    submethod BUILD {
-        die "Old class Val::None -- do not use anymore";
-    }
-
-    method truthy {
-        False
     }
 }
 
@@ -377,7 +332,7 @@ class Val::Type does Val {
                 method ^name(\$) \{ "{$name}" \}
             \}]));
         }
-        elsif $.type ~~ Val::None || is-role($.type) {
+        elsif is-role($.type) {
             die X::Uninstantiable.new(:$.name);
         }
         else {
@@ -468,7 +423,6 @@ class Val::Exception does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::None { "none" }
         when Val::Object { "<object>" }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }

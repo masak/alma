@@ -4,7 +4,6 @@ use _007::Q;
 
 # These multis are used below by infix:<==> and infix:<!=>
 multi equal-value($, $) is export { False }
-multi equal-value(Val::None, Val::None) { True }
 multi equal-value(Val::Array $l, Val::Array $r) {
     if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
         return $l === $r;
