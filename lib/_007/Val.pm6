@@ -418,6 +418,10 @@ class Val::Macro is Val::Func {
 ### flow couldn't continue normally.
 ###
 class Val::Exception does Val {
+    submethod BUILD {
+        die "Old class Val::Exception -- do not use anymore";
+    }
+
     has _007::Value $.message where &is-str;
 }
 

@@ -323,7 +323,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Bool Int None Str> -> $name {
+for <Bool Exception Int None Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
