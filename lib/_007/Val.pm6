@@ -57,12 +57,14 @@ role Val {
 ###     say("value" // "default");  # --> `value`
 ###
 class Val::None does Val {
+    submethod BUILD {
+        die "Old class Val::None -- do not use anymore";
+    }
+
     method truthy {
         False
     }
 }
-
-constant NONE is export = Val::None.new;
 
 ### ### Object
 ###

@@ -418,7 +418,7 @@ class Q::Term::Func does Q::Term does Q::Declaration {
     method attribute-order { <identifier traitlist block> }
 
     method eval($runtime) {
-        my $name = $.identifier ~~ Val::None
+        my $name = is-none($.identifier)
             ?? make-str("")
             !! $.identifier.name;
         return Val::Func.new(
@@ -521,7 +521,7 @@ class Q::Infix::Or is Q::Infix {
 class Q::Infix::DefinedOr is Q::Infix {
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
-        return $l !~~ Val::None
+        return !is-none($l)
             ?? $l
             !! $.rhs.eval($runtime);
     }
@@ -746,7 +746,7 @@ class Q::Term::Quasi does Q::Term {
                 if $thing ~~ _007::Value::Backed;
 
             return $thing
-                if $thing === TRUE || $thing === FALSE;
+                if $thing === TRUE | FALSE | NONE;
 
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;
@@ -993,7 +993,7 @@ class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::None ?? $.expr !! $.expr.eval($runtime);
+        my $value = is-none($.expr) ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
         die X::Control::Return.new(:$value, :$frame);
     }
@@ -1007,7 +1007,7 @@ class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
 
     method run($runtime) {
-        my $value = $.expr ~~ Val::None
+        my $value = is-none($.expr)
             ?? Val::Exception.new(:message(make-str("Died")))
             !! $.expr.eval($runtime);
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))

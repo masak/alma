@@ -40,6 +40,7 @@ BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
     TYPE<Bool> = make-type "Bool";
     TYPE<Int> = make-type "Int", :backed;
+    TYPE<None> = make-type "None";
     TYPE<Str> = make-type "Str", :backed;
 }
 
@@ -68,6 +69,16 @@ sub is-int($v) is export {
     $v ~~ _007::Value::Backed && $v.type === TYPE<Int>;
 }
 
+constant NONE is export = _007::Value.new(:type(TYPE<None>));
+
+sub make-none() is export {
+    NONE;
+}
+
+sub is-none($v) is export {
+    $v ~~ _007::Value && $v.type === TYPE<None>;
+}
+
 sub make-str(Str $native-value) is export {
     _007::Value::Backed.new(:type(TYPE<Str>), :$native-value);
 }
@@ -89,6 +100,9 @@ sub stringify(_007::Value $value) {
             ?? "true"
             !! "false";
     }
+    elsif $value.type === TYPE<None> {
+        return "none";
+    }
     else {
         die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;
     }
@@ -104,5 +118,5 @@ sub stringify-quoted(_007::Value::Backed $value) {
 sub truth-value(_007::Value $value) {
     $value ~~ _007::Value::Backed
         ?? ?$value.native-value
-        !! $value.type !=== TYPE<Bool> || $value === TRUE;
+        !! !is-none($value) && !is-bool($value) || $value === TRUE;
 }
