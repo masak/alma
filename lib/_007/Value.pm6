@@ -38,6 +38,7 @@ sub make-type(Str $name, Bool :$backed) {
 
 BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
+    TYPE<Object> = make-type "Object";
     TYPE<Bool> = make-type "Bool";
     TYPE<Exception> = make-type "Exception";
     TYPE<Int> = make-type "Int", :backed;
@@ -48,6 +49,15 @@ BEGIN {
 sub is-type($v) is export {
     # XXX: exact type should be subtype
     $v ~~ _007::Value && $v.type === TYPE<Type>;
+}
+
+sub make-object() is export {
+    _007::Value.new(:type(TYPE<Object>));
+}
+
+sub is-object($v) is export {
+    # XXX: exact type should be subtype
+    $v ~~ _007::Value && $v.type === TYPE<Object>;
 }
 
 constant FALSE is export = _007::Value.new(:type(TYPE<Bool>));
@@ -111,6 +121,9 @@ sub stringify(_007::Value $value) {
     }
     elsif $value.type === TYPE<None> {
         return "none";
+    }
+    elsif $value.type === TYPE<Object> {
+        return "<object>";
     }
     else {
         die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;
