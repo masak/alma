@@ -277,7 +277,7 @@ use _007::Test;
     runtime-error
         $program,
         X::Cannot::Empty,
-        "cannot Array.pop() and empty array";
+        "cannot Array.pop() an empty array";
 }
 
 {
@@ -310,7 +310,7 @@ use _007::Test;
     runtime-error
         $program,
         X::Cannot::Empty,
-        "cannot Array.shift() and empty array";
+        "cannot Array.shift() an empty array";
 }
 
 {
