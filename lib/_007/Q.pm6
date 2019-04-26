@@ -1014,7 +1014,7 @@ class Q::Statement::Throw does Q::Statement {
         my $value = is-none($.expr)
             ?? make-exception(make-str("Died"))
             !! $.expr.eval($runtime);
-        die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
+        die X::TypeCheck.new(:got($value), :excpected(_007::Value))
             unless is-exception($value);
 
         die X::_007::RuntimeException.new(:msg($value.slots<message>.native-value));
