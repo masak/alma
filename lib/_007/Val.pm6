@@ -119,6 +119,10 @@ class Val::Object does Val {
 class Val::Bool does Val {
     has Bool $.value;
 
+    submethod BUILD {
+        die "Old class Val::Bool -- do not use anymore";
+    }
+
     method truthy {
         $.value;
     }

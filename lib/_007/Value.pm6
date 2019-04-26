@@ -17,7 +17,7 @@ class _007::Value {
 
     method attributes { () }
 
-    method truthy { True }
+    method truthy { truth-value(self) }
 }
 
 class _007::Value::Backed is _007::Value {
@@ -28,8 +28,6 @@ class _007::Value::Backed is _007::Value {
     method quoted-Str {
         return stringify-quoted(self);
     }
-
-    method truthy { ?$.native-value }
 }
 
 constant TYPE is export = {};
@@ -40,6 +38,7 @@ sub make-type(Str $name, Bool :$backed) {
 
 BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
+    TYPE<Bool> = make-type "Bool";
     TYPE<Int> = make-type "Int", :backed;
     TYPE<Str> = make-type "Str", :backed;
 }
@@ -47,6 +46,17 @@ BEGIN {
 sub is-type($v) is export {
     # XXX: exact type should be subtype
     $v ~~ _007::Value && $v.type === TYPE<Type>;
+}
+
+constant FALSE is export = _007::Value.new(:type(TYPE<Bool>));
+constant TRUE is export = _007::Value.new(:type(TYPE<Bool>));
+
+sub make-bool(Bool $value) is export {
+    $value ?? TRUE !! FALSE;
+}
+
+sub is-bool($v) is export {
+    $v ~~ _007::Value && $v.type === TYPE<Bool>;
 }
 
 sub make-int(Int $native-value) is export {
@@ -71,9 +81,16 @@ sub stringify(_007::Value $value) {
     if $value ~~ _007::Value::Backed {
         return ~$value.native-value;
     }
-
-    if $value.type === TYPE<Type> {
+    elsif $value.type === TYPE<Type> {
         return "<type {$value.slots<name>}>";
+    }
+    elsif $value.type === TYPE<Bool> {
+        return $value === TRUE
+            ?? "true"
+            !! "false";
+    }
+    else {
+        die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;
     }
 }
 
@@ -82,4 +99,10 @@ sub stringify-quoted(_007::Value::Backed $value) {
         return q["] ~ $value.native-value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
     }
     return stringify($value);
+}
+
+sub truth-value(_007::Value $value) {
+    $value ~~ _007::Value::Backed
+        ?? ?$value.native-value
+        !! $value.type !=== TYPE<Bool> || $value === TRUE;
 }
