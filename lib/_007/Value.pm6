@@ -33,12 +33,18 @@ class _007::Value::Backed is _007::Value {
 constant TYPE is export = {};
 
 sub make-type(Str $name, Bool :$backed) {
-    _007::Value.new(:type(TYPE<Type>), slots => { :$name, :$backed });
+    my $base = TYPE<Object>;
+    _007::Value.new(:type(TYPE<Type>), slots => { :$name, :$backed, :$base });
 }
 
 BEGIN {
     TYPE<Type> = _007::Value.new(:type(__ITSELF__), slots => { name => "Type" });
     TYPE<Object> = make-type "Object";
+    {
+        # Bootstrap: now that we have Object, let's make it the base of Type and Object
+        TYPE<Type>.slots<base> = TYPE<Object>;
+        TYPE<Object>.slots<base> = TYPE<Object>;
+    }
     TYPE<Bool> = make-type "Bool";
     TYPE<Exception> = make-type "Exception";
     TYPE<Int> = make-type "Int", :backed;
@@ -46,9 +52,19 @@ BEGIN {
     TYPE<Str> = make-type "Str", :backed;
 }
 
+# XXX: Not using &is-type in the `where` clause because that leads to a circularity.
+# At some point we'll actually want subtypes of TYPE<Type> to be allowable as type
+# objects, and then we'll want something like that to actually work.
+sub is-instance(_007::Value $v, _007::Value $type where { .type === TYPE<Type> }) is export {
+    my $t = $v.type;
+    until $t === $type | TYPE<Object> {
+        $t = $t.slots<base>;
+    }
+    return $t === $type;
+}
+
 sub is-type($v) is export {
-    # XXX: exact type should be subtype
-    $v ~~ _007::Value && $v.type === TYPE<Type>;
+    $v ~~ _007::Value && is-instance($v, TYPE<Type>);
 }
 
 sub make-object() is export {
@@ -56,8 +72,9 @@ sub make-object() is export {
 }
 
 sub is-object($v) is export {
-    # XXX: exact type should be subtype
-    $v ~~ _007::Value && $v.type === TYPE<Object>;
+    # is-instance($v, TYPE<Object>) is tautological,
+    # but we're consistent and make the right check
+    $v ~~ _007::Value && is-instance($v, TYPE<Object>);
 }
 
 constant FALSE is export = _007::Value.new(:type(TYPE<Bool>));
@@ -68,7 +85,7 @@ sub make-bool(Bool $value) is export {
 }
 
 sub is-bool($v) is export {
-    $v ~~ _007::Value && $v.type === TYPE<Bool>;
+    $v ~~ _007::Value && is-instance($v, TYPE<Bool>);
 }
 
 sub make-exception(_007::Value $message where &is-str) is export {
@@ -76,7 +93,7 @@ sub make-exception(_007::Value $message where &is-str) is export {
 }
 
 sub is-exception($v) is export {
-    $v ~~ _007::Value && $v.type === TYPE<Exception>;
+    $v ~~ _007::Value && is-instance($v, TYPE<Exception>);
 }
 
 sub make-int(Int $native-value) is export {
@@ -84,8 +101,7 @@ sub make-int(Int $native-value) is export {
 }
 
 sub is-int($v) is export {
-    # XXX: exact type should be subtype
-    $v ~~ _007::Value::Backed && $v.type === TYPE<Int>;
+    $v ~~ _007::Value::Backed && is-instance($v, TYPE<Int>);
 }
 
 constant NONE is export = _007::Value.new(:type(TYPE<None>));
@@ -95,7 +111,7 @@ sub make-none() is export {
 }
 
 sub is-none($v) is export {
-    $v ~~ _007::Value && $v.type === TYPE<None>;
+    $v ~~ _007::Value && is-instance($v, TYPE<None>);
 }
 
 sub make-str(Str $native-value) is export {
@@ -103,8 +119,7 @@ sub make-str(Str $native-value) is export {
 }
 
 sub is-str($v) is export {
-    # XXX: exact type should be subtype
-    $v ~~ _007::Value::Backed && $v.type === TYPE<Str>;
+    $v ~~ _007::Value::Backed && is-instance($v, TYPE<Str>);
 }
 
 sub stringify(_007::Value $value) {
