@@ -73,61 +73,6 @@ class Val::Object does Val {
     }
 }
 
-### ### Bool
-###
-### A type with two values, `true` and `false`. These are often the result
-### of comparisons or match operations, such as `infix:<==>` or `infix:<~~>`.
-###
-###     say(2 + 2 == 5);        # --> `false`
-###     say(7 ~~ Int);          # --> `true`
-###
-### In 007 as in many other dynamic languages, it's not necessary to use
-### `true` or `false` values directly in conditions such as `if` statements
-### or `while` loops. *Any* value can be used, and there's always a way
-### for each type to convert any of its values to a boolean value:
-###
-###     func check(value) {
-###         if value {
-###             say("truthy");
-###         }
-###         else {
-###             say("falsy");
-###         }
-###     }
-###     check(none);            # --> `falsy`
-###     check(false);           # --> `falsy`
-###     check(0);               # --> `falsy`
-###     check("");              # --> `falsy`
-###     check([]);              # --> `falsy`
-###     check({});              # --> `falsy`
-###     # all other values are truthy
-###     check(true);            # --> `truthy`
-###     check(42);              # --> `truthy`
-###     check("James");         # --> `truthy`
-###     check([0, 0, 7]);       # --> `truthy`
-###     check({ name: "Jim" }); # --> `truthy`
-###
-### Similarly, when applying the `infix:<||>` and `infix:<&&>` macros to
-### some expressions, the result isn't coerced to a boolean value, but
-### instead the last value that needed to be evaluated is returned as-is:
-###
-###     say(1 || 2);            # --> `1`
-###     say(1 && 2);            # --> `2`
-###     say(none && "!");       # --> `none`
-###     say(none || "!");       # --> `!`
-###
-class Val::Bool does Val {
-    has Bool $.value;
-
-    submethod BUILD {
-        die "Old class Val::Bool -- do not use anymore";
-    }
-
-    method truthy {
-        $.value;
-    }
-}
-
 ### ### Regex
 ###
 ### A regex. As a runtime value, a regex is like a black box that can be put
@@ -430,7 +375,7 @@ class Val::Type does Val {
                 method ^name(\$) \{ "{$name}" \}
             \}]));
         }
-        elsif $.type ~~ Val::None || $.type ~~ Val::Bool || is-role($.type) {
+        elsif $.type ~~ Val::None || is-role($.type) {
             die X::Uninstantiable.new(:$.name);
         }
         else {
@@ -523,7 +468,6 @@ class Helper {
     our sub Str($_) {
         when Val::None { "none" }
         when Val::Object { "<object>" }
-        when Val::Bool { .value.lc }
         when Val::Regex { .quoted-Str }
         when Val::Array { .quoted-Str }
         when Val::Dict { .quoted-Str }
