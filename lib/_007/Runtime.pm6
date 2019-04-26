@@ -579,6 +579,9 @@ class _007::Runtime {
                 if $obj === TYPE<Bool> {
                     die X::Uninstantiable.new(:name<Bool>);
                 }
+                if $obj === TYPE<None> {
+                    die X::Uninstantiable.new(:name<None>);
+                }
                 elsif $obj === TYPE<Int> {
                     make-int($properties.elements[0].elements[1].native-value);
                 }
