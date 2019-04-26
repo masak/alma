@@ -480,7 +480,7 @@ class _007::Parser::Actions {
         my $identifier = Q::Term::Identifier.new(
             :name(make-str("prefix:$op")),
         );
-        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(Val::None));
+        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(NONE));
     }
 
     method prefix-unquote($/) {
