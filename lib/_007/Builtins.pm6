@@ -160,6 +160,9 @@ my @builtins =
     'infix:~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
+                # XXX: Once we drop Val::Type, we should turn the type test below into an assert.
+                # XXX: Once everything is ported over to _007::Value, the test against _007::Value
+                #      will be unnecessary.
                 return make-bool($rhs === TYPE<Object> || $lhs ~~ _007::Value && $lhs.type === $rhs);
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<~~>);
@@ -171,6 +174,9 @@ my @builtins =
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
             if is-type($rhs) {
+                # XXX: Once we drop Val::Type, we should turn the type test below into an assert.
+                # XXX: Once everything is ported over to _007::Value, the test against _007::Value
+                #      will be unnecessary.
                 return make-bool($rhs !=== TYPE<Object> && ($lhs !~~ _007::Value || $lhs.type !=== $rhs));
             }
             assert-type(:value($rhs), :type(Val::Type), :operation<!~~>);
