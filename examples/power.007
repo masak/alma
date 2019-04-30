@@ -16,6 +16,7 @@ func infix:<**>(x, n) is tighter(infix:<*>) is assoc("right") {
 }
 
 say(2 ** 3);        # 8
+say(3 ** 2);        # 9
 say(100 ** 0);      # 1
 say(42 ** 1);       # 42
 say(2 ** 2 ** 3);   # 256, not 64 (right-associative)
