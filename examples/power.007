@@ -2,9 +2,6 @@ func infix:<**>(x, n) is tighter(infix:<*>) is assoc("right") {
     if n == 0 {
         return 1;
     }
-    if n == 1 {
-        return x;
-    }
     my qr = n divmod 2;
     my q = qr[0];
     my r = qr[1];
