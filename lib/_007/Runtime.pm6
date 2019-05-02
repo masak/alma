@@ -297,9 +297,6 @@ class _007::Runtime {
                     return make-array(get-all-array-elements($thing).map(&interpolate).Array)
                         if is-array($thing);
 
-                    die "We found an array after all"
-                        if $thing ~~ Val::Array;
-
                     return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
                         if $thing ~~ Val::Dict;
 
