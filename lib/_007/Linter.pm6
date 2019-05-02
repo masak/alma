@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 
 role Lint {
@@ -65,7 +66,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::StatementList $statementlist) {
-                for $statementlist.statements.elements -> $stmt {
+                for get-all-array-elements($statementlist.statements) -> $stmt {
                     traverse($stmt);
                 }
             }
@@ -107,7 +108,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::ArgumentList $argumentlist) {
-                for $argumentlist.arguments.elements -> $expr {
+                for get-all-array-elements($argumentlist.arguments) -> $expr {
                     traverse($expr);
                 }
             }

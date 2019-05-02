@@ -11,9 +11,15 @@ class _007::Value {
         %!slots = %slots;
     }
 
-    method Str { stringify(self) }
+    method Str {
+        my %*stringification-seen;
+        stringify(self);
+    }
 
-    method quoted-Str { stringify(self) }
+    method quoted-Str {
+        my %*stringification-seen;
+        stringify-quoted(self);
+    }
 
     method attributes { () }
 
@@ -23,9 +29,13 @@ class _007::Value {
 class _007::Value::Backed is _007::Value {
     has $.native-value;
 
-    method Str { ~$.native-value }
+    method Str {
+        my %*stringification-seen;
+        return stringify(self);
+    }
 
     method quoted-Str {
+        my %*stringification-seen;
         return stringify-quoted(self);
     }
 }
@@ -45,6 +55,9 @@ BEGIN {
         TYPE<Type>.slots<base> = TYPE<Object>;
         TYPE<Object>.slots<base> = TYPE<Object>;
     }
+    # XXX: Should replace the (Perl 6 Bool/Str) values in slots with _007::Value instances
+
+    TYPE<Array> = make-type "Array", :backed;
     TYPE<Bool> = make-type "Bool";
     TYPE<Exception> = make-type "Exception";
     TYPE<Int> = make-type "Int", :backed;
@@ -75,6 +88,30 @@ sub is-object($v) is export {
     # is-instance($v, TYPE<Object>) is tautological,
     # but we're consistent and make the right check
     $v ~~ _007::Value && is-instance($v, TYPE<Object>);
+}
+
+sub make-array(Array $native-value) is export {
+    _007::Value::Backed.new(:type(TYPE<Array>), :$native-value);
+}
+
+sub is-array($v) is export {
+    $v ~~ _007::Value::Backed && is-instance($v, TYPE<Array>);
+}
+
+sub get-array-element($v, Int $i) is export {
+    $v.native-value[$i];
+}
+
+sub set-array-element($v, Int $i, $new-value) is export {
+    $v.native-value[$i] = $new-value;
+}
+
+sub get-all-array-elements($v) is export {
+    $v.native-value;
+}
+
+sub get-array-length($v) is export {
+    $v.native-value.elems;
 }
 
 constant FALSE is export = _007::Value.new(:type(TYPE<Bool>));
@@ -123,7 +160,15 @@ sub is-str($v) is export {
 }
 
 sub stringify(_007::Value $value) {
-    if $value ~~ _007::Value::Backed {
+    if $value.type === TYPE<Array> {
+        if %*stringification-seen{$value.WHICH}++ {
+            return "[...]";
+        }
+        return "[" ~ get-all-array-elements($value).map({
+            $_ ~~ _007::Value ?? stringify-quoted($_) !! .quoted-Str
+        }).join(', ') ~ "]";
+    }
+    elsif $value ~~ _007::Value::Backed {
         return ~$value.native-value;
     }
     elsif $value.type === TYPE<Type> {
@@ -145,7 +190,7 @@ sub stringify(_007::Value $value) {
     }
 }
 
-sub stringify-quoted(_007::Value::Backed $value) {
+sub stringify-quoted(_007::Value $value) {
     if is-str($value) {
         return q["] ~ $value.native-value.subst("\\", "\\\\", :g).subst(q["], q[\\"], :g) ~ q["];
     }

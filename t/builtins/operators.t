@@ -606,7 +606,7 @@ use _007::Test;
         my q = [4, 2]; say(q ~~ Array)
         .
 
-    outputs $program, "true\n", "typecheck works for Val::Array";
+    outputs $program, "true\n", "typecheck works for Array";
 }
 
 {

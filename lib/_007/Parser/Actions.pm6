@@ -92,7 +92,7 @@ class _007::Parser::Actions {
     }
 
     method statementlist($/) {
-        make Q::StatementList.new(:statements(Val::Array.new(:elements($<statement>».ast))));
+        make Q::StatementList.new(:statements(make-array($<statement>».ast)));
     }
 
     method statement:expr ($/) {
@@ -233,7 +233,7 @@ class _007::Parser::Actions {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
-        make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
+        make Q::TraitList.new(:traits(make-array(@traits)));
     }
     method trait($/) {
         make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
@@ -282,10 +282,10 @@ class _007::Parser::Actions {
         }
         else {
             if $expansion ~~ Q::Statement {
-                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([$expansion]))));
+                $expansion = Q::StatementList.new(:statements(make-array([$expansion])));
             }
             elsif $expansion === NONE {
-                $expansion = Q::StatementList.new(:statements(Val::Array.new(:elements([]))));
+                $expansion = Q::StatementList.new(:statements(make-array([])));
             }
 
             if $expansion ~~ Q::StatementList {
@@ -428,7 +428,7 @@ class _007::Parser::Actions {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
             if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
-                make expand($macro, $postfix.argumentlist.arguments.elements,
+                make expand($macro, get-all-array-elements($postfix.argumentlist.arguments),
                     -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
             }
             elsif $postfix ~~ Q::Postfix::Index {
@@ -520,7 +520,7 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        make Q::Term::Array.new(:elements(Val::Array.new(:elements($<EXPR>».ast))));
+        make Q::Term::Array.new(:elements(make-array($<EXPR>».ast)));
     }
 
     method term:parens ($/) {
@@ -600,7 +600,7 @@ class _007::Parser::Actions {
 
             if $qtype.native-value eq "Q.Statement" {
                 # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
-                my $contents = $block.ast.statementlist.statements.elements[0];
+                my $contents = get-array-element($block.ast.statementlist.statements, 0);
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
@@ -611,10 +611,10 @@ class _007::Parser::Actions {
             }
             elsif $qtype.native-value ne "Q.Block"
                 && $block.ast ~~ Q::Block
-                && $block.ast.statementlist.statements.elements.elems == 1
-                && $block.ast.statementlist.statements.elements[0] ~~ Q::Statement::Expr {
+                && get-array-length($block.ast.statementlist.statements) == 1
+                && get-array-element($block.ast.statementlist.statements, 0) ~~ Q::Statement::Expr {
 
-                my $contents = $block.ast.statementlist.statements.elements[0].expr;
+                my $contents = get-array-element($block.ast.statementlist.statements, 0).expr;
                 make Q::Term::Quasi.new(:$contents, :$qtype);
                 return;
             }
@@ -684,7 +684,7 @@ class _007::Parser::Actions {
             my %known-properties = $type-obj === TYPE<Type>
                 ?? (value => 1)
                 !! $type-obj.attributes.map({ aname($_) => 1 });
-            for $<propertylist>.ast.properties.elements -> $p {
+            for get-all-array-elements($<propertylist>.ast.properties) -> $p {
                 my $property = $p.key.native-value;
                 die X::Property::NotDeclared.new(:type($name), :$property)
                     unless %known-properties{$property};
@@ -695,7 +695,7 @@ class _007::Parser::Actions {
                 next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
                 die X::Property::Required.new(:type($name), :$property)
-                    unless $property eq any($<propertylist>.ast.properties.elements».key».native-value);
+                    unless $property eq any(get-all-array-elements($<propertylist>.ast.properties)».key».native-value);
             }
         }
 
@@ -726,7 +726,7 @@ class _007::Parser::Actions {
                 if %seen{$property}++;
         }
 
-        make Q::PropertyList.new(:properties(Val::Array.new(:elements($<property>».ast))));
+        make Q::PropertyList.new(:properties(make-array($<property>».ast)));
     }
 
     method property:str-expr ($/) {
@@ -815,11 +815,11 @@ class _007::Parser::Actions {
     }
 
     method argumentlist($/) {
-        make Q::ArgumentList.new(:arguments(Val::Array.new(:elements($<EXPR>».ast))));
+        make Q::ArgumentList.new(:arguments(make-array($<EXPR>».ast)));
     }
 
     method parameterlist($/) {
-        make Q::ParameterList.new(:parameters(Val::Array.new(:elements($<parameter>».ast))));
+        make Q::ParameterList.new(:parameters(make-array($<parameter>».ast)));
     }
 
     method parameter($/) {
@@ -845,7 +845,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Postfix $) {}
 
     multi handle(Q::StatementList $statementlist) {
-        for $statementlist.statements.elements -> $statement {
+        for get-all-array-elements($statementlist.statements) -> $statement {
             handle($statement);
         }
     }
@@ -945,7 +945,7 @@ sub check(Q $ast, $runtime) is export {
 
     multi handle(Q::Postfix::Call $call) {
         handle($call.operand);
-        for $call.argumentlist.arguments.elements.list -> $e {
+        for get-all-array-elements($call.argumentlist.arguments) -> $e {
             handle($e);
         }
     }

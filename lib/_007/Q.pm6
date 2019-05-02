@@ -306,10 +306,10 @@ class Q::Term::Regex does Q::Term {
 ### can be an arbitrary expression.
 ###
 class Q::Term::Array does Q::Term {
-    has Val::Array $.elements;
+    has _007::Value $.elements where &is-array;
 
     method eval($runtime) {
-        Val::Array.new(:elements($.elements.elements.map(*.eval($runtime))));
+        make-array(get-all-array-elements($.elements).map(*.eval($runtime)).Array);
     }
 }
 
@@ -326,15 +326,21 @@ class Q::Term::Object does Q::Term {
     method eval($runtime) {
         if is-type($.type) {
             if $.type === TYPE<Int> {
-                my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
+                my $native-value = get-array-element($.propertylist.properties, 0).value.eval($runtime).native-value;
                 return make-int($native-value);
             }
+            elsif $.type === TYPE<Array> {
+                my $native-value = get-all-array-elements(
+                    get-array-element($.propertylist.properties, 0).value.eval($runtime)
+                );
+                return make-array($native-value);
+            }
             elsif $.type === TYPE<Str> {
-                my $native-value = $.propertylist.properties.elements[0].value.eval($runtime).native-value;
+                my $native-value = get-array-element($.propertylist.properties, 0).value.eval($runtime).native-value;
                 return make-str($native-value);
             }
             elsif $.type === TYPE<Exception> {
-                my $message = $.propertylist.properties.elements[0].value.eval($runtime);
+                my $message = get-array-element($.propertylist.properties, 0).value.eval($runtime);
                 return make-exception($message);
             }
             elsif $.type === TYPE<Object> {
@@ -345,7 +351,7 @@ class Q::Term::Object does Q::Term {
             }
         }
         return $.type.create(
-            $.propertylist.properties.elements.map({.key.native-value => .value.eval($runtime)})
+            get-all-array-elements($.propertylist.properties).map({.key.native-value => .value.eval($runtime)})
         );
     }
 }
@@ -359,7 +365,7 @@ class Q::Term::Dict does Q::Term {
 
     method eval($runtime) {
         return Val::Dict.new(:properties(
-            $.propertylist.properties.elements.map({.key.native-value => .value.eval($runtime)})
+            get-all-array-elements($.propertylist.properties).map({.key.native-value => .value.eval($runtime)})
         ));
     }
 }
@@ -380,7 +386,7 @@ class Q::Property does Q {
 ### a specified order: the order the properties occur in the program text.
 ###
 class Q::PropertyList does Q {
-    has Val::Array $.properties .= new;
+    has _007::Value $.properties where &is-array = make-array([]);
 }
 
 ### ### Q::Declaration
@@ -408,7 +414,7 @@ class Q::Trait does Q {
 ### A list of zero or more traits. Each routine has a traitlist.
 ###
 class Q::TraitList does Q {
-    has Val::Array $.traits .= new;
+    has _007::Value $.traits where &is-array = make-array([]);
 
     method attribute-order { <traits> }
 }
@@ -578,7 +584,19 @@ class Q::Postfix::Index is Q::Postfix {
 
     method eval($runtime) {
         given $.operand.eval($runtime) {
+            when &is-array {
+                my $index = $.index.eval($runtime);
+                die X::Subscript::NonInteger.new
+                    unless is-int($index);
+                my $length = get-array-length($_);
+                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
+                    if $index.native-value >= $length;
+                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
+                    if $index.native-value < 0;
+                return get-array-element($_, $index.native-value);
+            }
             when Val::Array {
+                die "We don't index into Val::Array anymore";
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
                     unless is-int($index);
@@ -604,13 +622,25 @@ class Q::Postfix::Index is Q::Postfix {
                 my $propname = $property.native-value;
                 return $runtime.property($_, $propname);
             }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected([]));
         }
     }
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
+            when &is-array {
+                my $index = $.index.eval($runtime);
+                die X::Subscript::NonInteger.new
+                    unless is-int($index);
+                my $length = get-array-length($_);
+                die X::Subscript::TooLarge.new(:value($index.native-value), :$length)
+                    if $index.native-value >= $length;
+                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
+                    if $index.native-value < 0;
+                return set-array-element($_, $index.native-value, $value);
+            }
             when Val::Array {
+                die "We don't set-index into Val::Array anymore";
                 my $index = $.index.eval($runtime);
                 die X::Subscript::NonInteger.new
                     unless is-int($index);
@@ -627,7 +657,7 @@ class Q::Postfix::Index is Q::Postfix {
                 my $propname = $property.native-value;
                 $runtime.put-property($_, $propname, $value);
             }
-            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected(Val::Array));
+            die X::TypeCheck.new(:operation<indexing>, :got($_), :expected([]));
         }
     }
 }
@@ -647,7 +677,7 @@ class Q::Postfix::Call is Q::Postfix {
             if $c ~~ Val::Macro;
         die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
             unless $c ~~ Val::Func;
-        my @arguments = $.argumentlist.arguments.elements.map(*.eval($runtime));
+        my @arguments = get-all-array-elements($.argumentlist.arguments).map(*.eval($runtime));
         return $runtime.call($c, @arguments);
     }
 }
@@ -749,6 +779,9 @@ class Q::Term::Quasi does Q::Term {
         my $quasi-frame;
 
         sub interpolate($thing) {
+            return make-array(get-all-array-elements($thing).map(&interpolate).Array)
+                if is-array($thing);
+
             return $thing
                 if $thing ~~ _007::Value::Backed;
 
@@ -805,7 +838,7 @@ class Q::Term::Quasi does Q::Term {
 
             if $thing ~~ Q::Term::Func {
                 $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
-                for $thing.block.parameterlist.parameters.elements.map(*.identifier) -> $identifier {
+                for get-all-array-elements($thing.block.parameterlist.parameters).map(*.identifier) -> $identifier {
                     $runtime.declare-var($identifier);
                 }
             }
@@ -852,7 +885,7 @@ class Q::Parameter does Q does Q::Declaration {
 ### A list of zero or more parameters.
 ###
 class Q::ParameterList does Q {
-    has Val::Array $.parameters .= new;
+    has _007::Value $.parameters where &is-array = make-array([]);
 }
 
 ### ### Q::ArgumentList
@@ -860,7 +893,7 @@ class Q::ParameterList does Q {
 ### A list of zero or more arguments.
 ###
 class Q::ArgumentList does Q {
-    has Val::Array $.arguments .= new;
+    has _007::Value $.arguments where &is-array = make-array([]);
 }
 
 ### ### Q::Statement
@@ -896,7 +929,7 @@ class Q::Statement::If does Q::Statement {
     method run($runtime) {
         my $expr = $.expr.eval($runtime);
         if $expr.truthy {
-            my $paramcount = $.block.parameterlist.parameters.elements.elems;
+            my $paramcount = get-array-length($.block.parameterlist.parameters);
             die X::ParameterMismatch.new(
                 :type("If statement"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
@@ -908,7 +941,7 @@ class Q::Statement::If does Q::Statement {
                     $.else.run($runtime)
                 }
                 when Q::Block {
-                    my $paramcount = $.else.parameterlist.parameters.elements.elems;
+                    my $paramcount = get-array-length($.else.parameterlist.parameters);
                     die X::ParameterMismatch.new(
                         :type("Else block"), :$paramcount, :argcount("0 or 1"))
                         if $paramcount > 1;
@@ -950,17 +983,17 @@ class Q::Statement::For does Q::Statement {
     method attribute-order { <expr block> }
 
     method run($runtime) {
-        my $count = $.block.parameterlist.parameters.elements.elems;
+        my $count = get-array-length($.block.parameterlist.parameters);
         die X::ParameterMismatch.new(
             :type("For loop"), :paramcount($count), :argcount("0 or 1"))
             if $count > 1;
 
         my $array = $.expr.eval($runtime);
-        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected(Val::Array))
-            unless $array ~~ Val::Array;
+        die X::TypeCheck.new(:operation("for loop"), :got($array), :expected([]))
+            unless is-array($array);
 
-        for $array.elements -> $arg {
-            $runtime.run-block($.block, [$arg]);
+        for get-all-array-elements($array) -> $arg {
+            $runtime.run-block($.block, $count ?? [$arg] !! []);
             last if $runtime.last-triggered;
             $runtime.reset-triggers();
         }
@@ -980,7 +1013,7 @@ class Q::Statement::While does Q::Statement {
 
     method run($runtime) {
         while (my $expr = $.expr.eval($runtime)).truthy {
-            my $paramcount = $.block.parameterlist.parameters.elements.elems;
+            my $paramcount = get-array-length($.block.parameterlist.parameters);
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
@@ -1106,10 +1139,10 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
 ### denote a statement list without any surrounding block.
 ###
 class Q::StatementList does Q {
-    has Val::Array $.statements .= new;
+    has _007::Value $.statements where &is-array = make-array([]);
 
     method run($runtime) {
-        for $.statements.elements -> $statement {
+        for get-all-array-elements($.statements) -> $statement {
             my $value = $statement.run($runtime);
             last if $runtime.next-triggered || $runtime.last-triggered;
             LAST if $statement ~~ Q::Statement::Expr {

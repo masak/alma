@@ -48,6 +48,22 @@ multi equal-value(Q $l, Q $r) {
 }
 
 multi equal-value(_007::Value $l, _007::Value $r) {
+    if is-array($l) && is-array($r) {
+        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+            return $l === $r;
+        }
+        %*equality-seen{$l.WHICH}++;
+        %*equality-seen{$r.WHICH}++;
+
+        sub equal-at-index($i) {
+            equal-value(get-array-element($l, $i), get-array-element($r, $i));
+        }
+
+        my $L = get-array-length($l);
+        my $R = get-array-length($r);
+        return [&&] $L == $R, |(^$L).map(&equal-at-index);
+    }
+
     return is-int($l) && is-int($r) && $l.native-value == $r.native-value
         || is-str($l) && is-str($r) && $l.native-value eq $r.native-value
         || is-none($l) && is-none($r)

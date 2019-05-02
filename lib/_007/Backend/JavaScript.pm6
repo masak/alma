@@ -1,4 +1,5 @@
 use _007::Val;
+use _007::Value;
 use _007::Q;
 
 my %builtins =
@@ -12,12 +13,12 @@ my %builtins =
 class _007::Backend::JavaScript {
     method emit(Q::CompUnit $compunit) {
         return ""
-            unless $compunit.block.statementlist.statements.elements;
+            unless ?get-array-length($compunit.block.statementlist.statements);
 
         my @builtins;
         my @main;
 
-        for $compunit.block.statementlist.statements.elements -> $stmt {
+        for get-all-array-elements($compunit.block.statementlist.statements) -> $stmt {
             emit-stmt($stmt);
         }
 
@@ -40,7 +41,7 @@ class _007::Backend::JavaScript {
                 && $expr.operand.name.native-value eq "say" {
 
                 @builtins.push(%builtins<say>);
-                my @arguments = $expr.argumentlist.arguments.elements.map: {
+                my @arguments = get-all-array-elements($expr.argumentlist.arguments).map: {
                     die "Cannot handle non-literal-Str arguments just yet!"
                         unless $_ ~~ Q::Literal::Str;
                     .value.quoted-Str;

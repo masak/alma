@@ -179,6 +179,10 @@ class Val::Regex does Val {
 class Val::Array does Val {
     has @.elements;
 
+    submethod BUILD {
+        die "Old class Val::Array -- do not use anymore";
+    }
+
     method quoted-Str {
         if %*stringification-seen{self.WHICH}++ {
             return "[...]";
@@ -314,6 +318,7 @@ class Val::Type does Val {
             return $.type.new(:@properties);
         }
         elsif $.type ~~ Val::Array {
+            die "We tried to create a Val::Array, oh no";
             return $.type.new(:elements(@properties[0].value.elements));
         }
         elsif $.type ~~ Val::Type {
@@ -383,7 +388,7 @@ class Val::Func does Val {
     }
 
     method pretty-parameters {
-        sprintf "(%s)", $.parameterlist.parameters.elements».identifier».name.join(", ");
+        sprintf "(%s)", get-all-array-elements($.parameterlist.parameters)».identifier».name.join(", ");
     }
 
     method Str { "<func {$.escaped-name}{$.pretty-parameters}>" }
