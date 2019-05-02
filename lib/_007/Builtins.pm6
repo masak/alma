@@ -235,10 +235,10 @@ my @builtins =
             assert-new-type(:value($rhs), :type<Int>, :operation<divmod>);
             assert-nonzero(:value($rhs.native-value), :operation("infix:<divmod>"), :numerator($lhs.native-value));
 
-            return Val::Array.new(:elements([
+            return make-array([
                 make-int($lhs.native-value div $rhs.native-value),
                 make-int($lhs.native-value % $rhs.native-value),
-            ]));
+            ]);
         },
         :precedence{ equiv => "infix:div" },
     ),
@@ -309,7 +309,7 @@ my @builtins =
         sub ($n) {
             assert-new-type(:value($n), :type<Int>, :operation("prefix:<^>"));
 
-            return Val::Array.new(:elements((^$n.native-value).map(&make-int)));
+            return make-array((^$n.native-value).map(&make-int).Array);
         },
     ),
 
@@ -329,7 +329,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Bool Exception Int None Object Str> -> $name {
+for <Array Bool Exception Int None Object Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
@@ -362,7 +362,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str(
         if .key eq "say" {
             @elements = parameter("...args");
         }
-        my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
         my $statementlist = Q::StatementList.new();
         .key => Val::Func.new-builtin(.value, .key, $parameterlist, $statementlist);
     }
@@ -370,7 +370,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str(
         my $name = .key;
         install-op($name, .value);
         my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
-        my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
         my $statementlist = Q::StatementList.new();
         .key => Val::Func.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
     }
@@ -379,7 +379,7 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str(
         install-op($name, .value);
         my &fn = .value.fn;
         my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-        my $parameterlist = Q::ParameterList.new(:parameters(Val::Array.new(:@elements)));
+        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
         my $statementlist = Q::StatementList.new();
         .key => Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
     }
