@@ -4,20 +4,6 @@ use _007::Q;
 
 # These multis are used below by infix:<==> and infix:<!=>
 multi equal-value($, $) is export { False }
-multi equal-value(Val::Array $l, Val::Array $r) {
-    if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
-        return $l === $r;
-    }
-    %*equality-seen{$l.WHICH}++;
-    %*equality-seen{$r.WHICH}++;
-
-    sub equal-at-index($i) {
-        equal-value($l.elements[$i], $r.elements[$i]);
-    }
-
-    [&&] $l.elements == $r.elements,
-        |(^$l.elements).map(&equal-at-index);
-}
 multi equal-value(Val::Dict $l, Val::Dict $r) {
     if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
         return $l === $r;

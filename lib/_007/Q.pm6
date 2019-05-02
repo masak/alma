@@ -595,17 +595,6 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.native-value < 0;
                 return get-array-element($_, $index.native-value);
             }
-            when Val::Array {
-                die "We don't index into Val::Array anymore";
-                my $index = $.index.eval($runtime);
-                die X::Subscript::NonInteger.new
-                    unless is-int($index);
-                die X::Subscript::TooLarge.new(:value($index.native-value), :length(+.elements))
-                    if $index.native-value >= .elements;
-                die X::Subscript::Negative.new(:index($index.native-value), :type([]))
-                    if $index.native-value < 0;
-                return .elements[$index.native-value];
-            }
             when Val::Dict {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
@@ -638,17 +627,6 @@ class Q::Postfix::Index is Q::Postfix {
                 die X::Subscript::Negative.new(:index($index.native-value), :type([]))
                     if $index.native-value < 0;
                 return set-array-element($_, $index.native-value, $value);
-            }
-            when Val::Array {
-                die "We don't set-index into Val::Array anymore";
-                my $index = $.index.eval($runtime);
-                die X::Subscript::NonInteger.new
-                    unless is-int($index);
-                die X::Subscript::TooLarge.new(:value($index.value), :length(+.elements))
-                    if $index.native-value >= .elements;
-                die X::Subscript::Negative.new(:$index, :type([]))
-                    if $index.native-value < 0;
-                .elements[$index.native-value] = $value;
             }
             when Val::Dict | Q {
                 my $property = $.index.eval($runtime);
@@ -790,9 +768,6 @@ class Q::Term::Quasi does Q::Term {
 
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;
-
-            return $thing.new(:elements($thing.elements.map(&interpolate)))
-                if $thing ~~ Val::Array;
 
             return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
                 if $thing ~~ Val::Dict;

@@ -117,84 +117,6 @@ class Val::Regex does Val {
     }
 }
 
-### ### Array
-###
-### A mutable sequence of values. An array contains zero or more elements,
-### indexed from `0` up to `size - 1`, where `size` is the number of
-### elements.
-###
-### Besides creating an array using an array term, one can also use the
-### "upto" prefix operator, which creates an array where the elemens equal the
-### indices:
-###
-###     say(["a", "b", "c"]);   # --> `["a", "b", "c"]`
-###     say(^3);                # --> `[0, 1, 2]`
-###
-### Another array constructor which creates entirely new arrays out of old ones
-### (and leave the old ones unchanged) is concatenation:
-###
-###     say([1, 2].concat([3, 4])); # --> `[1, 2, 3, 4]`
-###
-### Sorting, shuffling, and reversing an array also leave the original
-### array unchanged:
-###
-###     my a = [6, 4, 5];
-###     say(a.reverse());           # --> `[5, 4, 6]`
-###     say(a);                     # --> `[6, 4, 5]`
-###     say(a.sort());              # --> `[4, 5, 6]`
-###     say(a);                     # --> `[6, 4, 5]`
-###     say(a.shuffle().sort());    # --> `[4, 5, 6]`
-###     say(a);                     # --> `[6, 4, 5]`
-###
-### The `.size` method gives you the length (number of elements) of the
-### array:
-###
-###     say([].size());         # --> `0`
-###     say([1, 2, 3].size());  # --> `3`
-###
-### Some common methods use the fact that the array is mutable:
-###
-###     my a = [1, 2, 3];
-###     a.push(4);
-###     say(a);                 # --> `[1, 2, 3, 4]`
-###     my x = a.pop();
-###     say(x);                 # --> `4`
-###     say(a);                 # --> `[1, 2, 3]`
-###
-###     my a = ["a", "b", "c"];
-###     my y = a.shift();
-###     say(y);                 # --> `a`
-###     say(a);                 # --> `["b", "c"]`
-###     a.unshift(y);
-###     say(a);                 # --> `["a", "b", "c"]`
-###
-### You can also *transform* an entire array, either by mapping
-### each element through a function, or by filtering each element
-### through a predicate function:
-###
-###     my numbers = [1, 2, 3, 4, 5];
-###     say(numbers.map(func (e) { return e * 2 }));     # --> `[2, 4, 6, 8, 10]`
-###     say(numbers.filter(func (e) { return e %% 2 })); # --> `[2, 4]`
-###
-class Val::Array does Val {
-    has @.elements;
-
-    submethod BUILD {
-        die "Old class Val::Array -- do not use anymore";
-    }
-
-    method quoted-Str {
-        if %*stringification-seen{self.WHICH}++ {
-            return "[...]";
-        }
-        return "[" ~ @.elements>>.quoted-Str.join(', ') ~ "]";
-    }
-
-    method truthy {
-        ?$.elements
-    }
-}
-
 our $global-object-id = 0;
 
 ### ### Dict
@@ -317,10 +239,6 @@ class Val::Type does Val {
         if $.type ~~ Val::Dict {
             return $.type.new(:@properties);
         }
-        elsif $.type ~~ Val::Array {
-            die "We tried to create a Val::Array, oh no";
-            return $.type.new(:elements(@properties[0].value.elements));
-        }
         elsif $.type ~~ Val::Type {
             my $name = @properties[0].value;
             return $.type.new(:type(EVAL qq[class :: \{
@@ -411,7 +329,6 @@ class Val::Macro is Val::Func {
 class Helper {
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
-        when Val::Array { .quoted-Str }
         when Val::Dict { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
