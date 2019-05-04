@@ -112,7 +112,7 @@ grammar _007::Parser::Syntax {
         <trait> *
     }
     token trait {
-        is» <.ws> <identifier> '(' <EXPR> ')'
+        is» <.ws> <identifier> [<.ws> '(' <.ws> <EXPR> ')']?
     }
 
     # requires a <.newpad> before invocation
