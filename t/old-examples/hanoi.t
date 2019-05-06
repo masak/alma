@@ -31,9 +31,9 @@ my $program = q:to/EOF/;
     }
 
     func move(diskname, from, to) {
-        say("");
+        say();
         say("Moving ", diskname, " from pile ", from + 1, " to pile ", to + 1, "...");
-        say("");
+        say();
         my disk = state[from].pop();
         state[to].push(disk);
         show();

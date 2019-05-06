@@ -22,7 +22,7 @@ for values -> v {
     }
 }
 
-say("");
+say();
 
 macro infix:<fff>(lhs, rhs) is equiv(infix:<ff>) {
     my active = false;

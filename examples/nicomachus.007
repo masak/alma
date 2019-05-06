@@ -1,13 +1,13 @@
 # Inspired by http://www.atariarchives.org/basicgames/showpage.php?page=117
 
 say("Please think of a number between 1 and 100.");
-say("");
+say();
 
 my m = {};
 for [3, 5, 7] -> n {
     m[~n] = +prompt("Your number divided by " ~ n ~ " has a remainder of: ");
 }
-say("");
+say();
 
 my solution = (70*m["3"] + 21*m["5"] + 15*m["7"]) % 105;
 
