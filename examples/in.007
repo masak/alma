@@ -1,4 +1,4 @@
-func infix:<in>(value, container) {
+func infix:<in>(value, container) is equiv(infix:<~~>) {
     if container ~~ Array {
         for container -> elem {
             if elem == value {
@@ -20,7 +20,7 @@ func infix:<in>(value, container) {
     }
 }
 
-func infix:<not in>(value, container) {
+func infix:<not in>(value, container) is equiv(infix:<!~~>) {
     if container ~~ Array {
         for container -> elem {
             if elem == value {
