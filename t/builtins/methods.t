@@ -414,7 +414,7 @@ use _007::Test;
         say(Dict.create([["foo", 42]]));
         .
 
-    outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create an Object";
+    outputs $program, qq[\{foo: 42\}\n], "Type.create() method to create a Dict";
 }
 
 {

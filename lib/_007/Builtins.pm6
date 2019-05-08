@@ -329,7 +329,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Array Bool Exception Int None Object Str> -> $name {
+for <Array Bool Dict Exception Int None Object Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
@@ -386,9 +386,9 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str(
     default { die "Unknown type {.value.^name} installed in builtins" }
 });
 
-my $builtins-pad = Val::Dict.new;
+my $builtins-pad = make-dict();
 for @builtins -> Pair (:key($name), :$value) {
-    $builtins-pad.properties{$name} = $value;
+    set-dict-property($builtins-pad, $name, $value);
 }
 
 sub builtins-pad() is export {

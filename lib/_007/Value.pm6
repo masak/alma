@@ -28,16 +28,6 @@ class _007::Value {
 
 class _007::Value::Backed is _007::Value {
     has $.native-value;
-
-    method Str {
-        my %*stringification-seen;
-        return stringify(self);
-    }
-
-    method quoted-Str {
-        my %*stringification-seen;
-        return stringify-quoted(self);
-    }
 }
 
 constant TYPE is export = {};
@@ -59,6 +49,7 @@ BEGIN {
 
     TYPE<Array> = make-type "Array", :backed;
     TYPE<Bool> = make-type "Bool";
+    TYPE<Dict> = make-type "Dict", :backed;
     TYPE<Exception> = make-type "Exception";
     TYPE<Int> = make-type "Int", :backed;
     TYPE<None> = make-type "None";
@@ -125,6 +116,44 @@ sub is-bool($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Bool>);
 }
 
+sub make-dict(@properties = []) is export {
+    my %native-value;
+    for @properties -> $p {
+        %native-value{$p.key} = $p.value;
+    }
+    _007::Value::Backed.new(:type(TYPE<Dict>), :%native-value);
+}
+
+sub is-dict($v) is export {
+    $v ~~ _007::Value::Backed && is-instance($v, TYPE<Dict>);
+}
+
+sub get-dict-property($v, Str $key) is export {
+    $v.native-value{$key};
+}
+
+sub set-dict-property($v, Str $key, $new-value) is export {
+    $v.native-value{$key} = $new-value;
+}
+
+sub dict-property-exists($v, Str $key) is export {
+    $v.native-value{$key} :exists;
+}
+
+sub get-all-dict-properties($v) is export {
+    my %h := $v.native-value;
+    %h.keys.map({ $_ => %h{$_} }).Array;
+}
+
+sub get-all-dict-keys($v) is export {
+    my %h := $v.native-value;
+    %h.keys;
+}
+
+sub get-dict-size($v) is export {
+    $v.native-value.elems;
+}
+
 sub make-exception(_007::Value $message where &is-str) is export {
     _007::Value.new(:type(TYPE<Exception>), slots => { :$message });
 }
@@ -167,6 +196,17 @@ sub stringify(_007::Value $value) {
         return "[" ~ get-all-array-elements($value).map({
             $_ ~~ _007::Value ?? stringify-quoted($_) !! .quoted-Str
         }).join(', ') ~ "]";
+    }
+    elsif $value.type === TYPE<Dict> {
+        if %*stringification-seen{$value.WHICH}++ {
+            return "\{...\}";
+        }
+        return '{' ~ get-all-dict-properties($value).map({
+            my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
+                ?? .key
+                !! make-str(.key).quoted-Str;
+            "{$key}: {.value ~~ _007::Value ?? stringify-quoted(.value) !! .value.quoted-Str}"
+        }).sort.join(', ') ~ '}';
     }
     elsif $value ~~ _007::Value::Backed {
         return ~$value.native-value;

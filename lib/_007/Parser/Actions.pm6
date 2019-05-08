@@ -74,7 +74,7 @@ sub ast-if-any($submatch) {
 
 class _007::Parser::Actions {
     sub finish-block($block) {
-        $block.static-lexpad = $*runtime.current-frame.properties<pad>;
+        $block.static-lexpad = get-dict-property($*runtime.current-frame, "pad");
         $*runtime.leave;
     }
 
@@ -143,7 +143,7 @@ class _007::Parser::Actions {
         my $statementlist = $<blockoid>.ast;
 
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
-        my $static-lexpad = $*runtime.current-frame.properties<pad>;
+        my $static-lexpad = get-dict-property($*runtime.current-frame, "pad");
         finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
@@ -289,7 +289,7 @@ class _007::Parser::Actions {
             }
 
             if $expansion ~~ Q::StatementList {
-                $*runtime.enter($*runtime.current-frame, Val::Dict.new, $expansion);
+                $*runtime.enter($*runtime.current-frame, make-dict(), $expansion);
                 $expansion = Q::Block.new(
                     :parameterlist(Q::ParameterList.new())
                     :statementlist($expansion));
@@ -635,8 +635,8 @@ class _007::Parser::Actions {
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         if $<identifier> {
             my $name = $<identifier>.ast.name;
-            my $outer-frame = $*runtime.current-frame.properties<outer-frame>;
-            my $static-lexpad = $*runtime.current-frame.properties<pad>;
+            my $outer-frame = get-dict-property($*runtime.current-frame, "outer-frame");
+            my $static-lexpad = get-dict-property($*runtime.current-frame, "pad");
             my $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
             $*runtime.put-var($<identifier>.ast, $val);
         }
@@ -676,7 +676,7 @@ class _007::Parser::Actions {
         my $type-obj = $type.type;
         my $name = $type-obj.^name.subst("::", ".", :g);
 
-        if $type-obj !=== Val::Dict && !is-type($type-obj) {
+        if $type-obj !=== TYPE<Dict> && !is-type($type-obj) {
             if is-role($type-obj) {
                 die X::Uninstantiable.new(:$name);
             }
@@ -853,7 +853,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Statement::Block $block) {
         $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
         handle($block.block.statementlist);
-        $block.block.static-lexpad = $runtime.current-frame.properties<pad>;
+        $block.block.static-lexpad = get-dict-property($runtime.current-frame, "pad");
         $runtime.leave();
     }
 
@@ -869,7 +869,7 @@ sub check(Q $ast, $runtime) is export {
             :statementlist($func.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Dict.new, $func.block.statementlist, $val);
+        $runtime.enter($outer-frame, make-dict(), $func.block.statementlist, $val);
         handle($func.block);
         $runtime.leave();
 
@@ -884,7 +884,7 @@ sub check(Q $ast, $runtime) is export {
             :statementlist($macro.block.statementlist),
             :$outer-frame
         );
-        $runtime.enter($outer-frame, Val::Dict.new, $macro.block.statementlist, $val);
+        $runtime.enter($outer-frame, make-dict(), $macro.block.statementlist, $val);
         handle($macro.block);
         $runtime.leave();
 
@@ -904,10 +904,10 @@ sub check(Q $ast, $runtime) is export {
     }
 
     multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+        $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.properties<pad>;
+        $block.static-lexpad = get-dict-property($runtime.current-frame, "pad");
         $runtime.leave();
     }
 

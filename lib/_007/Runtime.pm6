@@ -4,7 +4,7 @@ use _007::Q;
 use _007::Builtins;
 use _007::Equal;
 
-constant NO_OUTER = Val::Dict.new;
+constant NO_OUTER = make-dict();
 constant RETURN_TO = Q::Identifier.new(:name(make-str("--RETURN-TO--")));
 constant EXIT_SUCCESS = 0;
 
@@ -38,14 +38,14 @@ class _007::Runtime {
 
     submethod BUILD(:$!input, :$!output, :@!arguments) {
         $!builtin-opscope = opscope();
-        $!builtin-frame = Val::Dict.new(:properties(
-            :outer-frame(NO_OUTER),
-            :pad(builtins-pad()))
-        );
+        $!builtin-frame = make-dict([
+            "outer-frame" => NO_OUTER,
+            "pad" => builtins-pad(),
+        ]);
         @!frames.push($!builtin-frame);
-        $!say-builtin = builtins-pad().properties<say>;
-        $!prompt-builtin = builtins-pad().properties<prompt>;
-        $!exit-builtin = builtins-pad().properties<exit>;
+        $!say-builtin = get-dict-property(builtins-pad(), "say");
+        $!prompt-builtin = get-dict-property(builtins-pad(), "prompt");
+        $!exit-builtin = get-dict-property(builtins-pad(), "exit");
         $!exit-code = EXIT_SUCCESS;
     }
 
@@ -89,10 +89,13 @@ class _007::Runtime {
     }
 
     method enter($outer-frame, $static-lexpad, $statementlist, $routine?) {
-        my $frame = Val::Dict.new(:properties(:$outer-frame, :pad(Val::Dict.new)));
+        my $frame = make-dict([
+            "outer-frame" => $outer-frame,
+            "pad" => make-dict(),
+        ]);
         @!frames.push($frame);
-        for $static-lexpad.properties.kv -> $name, $value {
-            my $identifier = Q::Identifier.new(:name(make-str($name)));
+        for get-all-dict-properties($static-lexpad) -> Pair (:$key, :$value) {
+            my $identifier = Q::Identifier.new(:name(make-str($key)));
             self.declare-var($identifier, $value);
         }
         for get-all-array-elements($statementlist.statements).kv -> $i, $_ {
@@ -143,9 +146,9 @@ class _007::Runtime {
             $frame = self.current-frame;
         }
         repeat until $frame === NO_OUTER {
-            return $frame.properties<pad>
-                if $frame.properties<pad>.properties{$symbol} :exists;
-            $frame = $frame.properties<outer-frame>;
+            return my $pad
+                if dict-property-exists($pad = get-dict-property($frame, "pad"), $symbol);
+            $frame = get-dict-property($frame, "outer-frame");
         }
         die X::ControlFlow::Return.new
             if $symbol eq RETURN_TO;
@@ -156,13 +159,13 @@ class _007::Runtime {
         my $frame = self.current-frame;
         my $seen-quasi-frame = False;
         repeat until $frame === NO_OUTER {
-            if $frame.properties<pad>.properties{$name} :exists {
+            if dict-property-exists(get-dict-property($frame, "pad"), $name) {
                 return $seen-quasi-frame ?? $frame !! Nil;
             }
             if $frame === $quasi-frame {
                 $seen-quasi-frame = True;
             }
-            $frame = $frame.properties<outer-frame>;
+            $frame = get-dict-property($frame, "outer-frame");
         }
         die "something is very off with lexical lookup ($name)";    # XXX: turn into X::
     }
@@ -170,31 +173,31 @@ class _007::Runtime {
     method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.native-value;
         my $pad = self!find-pad($name, self.current-frame);
-        $pad.properties{$name} = $value;
+        set-dict-property($pad, $name, $value);
     }
 
     method get-var(Str $name) {
         my $pad = self!find-pad($name, self.current-frame);
-        return $pad.properties{$name};
+        get-dict-property($pad, $name);
     }
 
     method maybe-get-var(Str $name, $frame = self.current-frame) {
         if self!maybe-find-pad($name, $frame) -> $pad {
-            return $pad.properties{$name};
+            get-dict-property($pad, $name);
         }
     }
 
-    method get-direct(Val::Dict $frame, Str $name) {
-        return $frame.properties<pad>.properties{$name};
+    method get-direct(_007::Value $frame where &is-dict, Str $name) {
+        return get-dict-property(get-dict-property($frame, "pad"), $name);
     }
 
-    method put-direct(Val::Dict $frame, Str $name, $value) {
-        $frame.properties<pad>.properties{$name} = $value;
+    method put-direct(_007::Value $frame where &is-dict, Str $name, $value) {
+        set-dict-property(get-dict-property($frame, "pad"), $name, $value);
     }
 
     method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.native-value;
-        self.current-frame.properties<pad>.properties{$name} = $value // NONE;
+        set-dict-property(get-dict-property(self.current-frame, "pad"), $name, $value // NONE);
     }
 
     method declared($name) {
@@ -202,7 +205,7 @@ class _007::Runtime {
     }
 
     method declared-locally($name) {
-        return so (self.current-frame.properties<pad>.properties{$name} :exists);
+        return dict-property-exists(get-dict-property(self.current-frame, "pad"), $name);
     }
 
     method register-subhandler {
@@ -296,6 +299,9 @@ class _007::Runtime {
                 sub interpolate($thing) {
                     return make-array(get-all-array-elements($thing).map(&interpolate).Array)
                         if is-array($thing);
+
+                    return make-dict(get-all-dict-properties($thing).map({ .key => interpolate(.value) }).Array)
+                        if is-dict($thing);
 
                     return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
                         if $thing ~~ Val::Dict;
@@ -424,9 +430,9 @@ class _007::Runtime {
                 return make-str(get-all-array-elements($obj).join($sep.native-value.Str));
             });
         }
-        elsif $obj ~~ Val::Dict && $propname eq "size" {
+        elsif is-dict($obj) && $propname eq "size" {
             return builtin(sub size() {
-                return make-int($obj.properties.elems);
+                return make-int(get-dict-size($obj));
             });
         }
         elsif is-str($obj) && $propname eq "split" {
@@ -579,17 +585,24 @@ class _007::Runtime {
         }
         elsif is-type($obj) && $propname eq "create" {
             return builtin(sub create($properties) {
-                if $obj === TYPE<Bool> {
+                if $obj === TYPE<Array> {
+                    make-array(get-all-array-elements(get-array-element(get-array-element($properties, 0), 1)));
+                }
+                elsif $obj === TYPE<Bool> {
                     die X::Uninstantiable.new(:name<Bool>);
                 }
-                elsif $obj === TYPE<None> {
-                    die X::Uninstantiable.new(:name<None>);
-                }
-                elsif $obj === TYPE<Array> {
-                    make-array(get-all-array-elements(get-array-element(get-array-element($properties, 0), 1)));
+                elsif $obj === TYPE<Dict> {
+                    make-dict(
+                        get-all-array-elements($properties).map({
+                            get-array-element($_, 0) => get-array-element($_, 1)
+                        }).Array
+                    );
                 }
                 elsif $obj === TYPE<Int> {
                     make-int(get-array-element(get-array-element($properties, 0), 1).native-value);
+                }
+                elsif $obj === TYPE<None> {
+                    die X::Uninstantiable.new(:name<None>);
                 }
                 elsif $obj === TYPE<Str> {
                     make-str(get-array-element(get-array-element($properties, 0), 1).native-value);
@@ -605,34 +618,47 @@ class _007::Runtime {
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
-        elsif $obj ~~ Val::Dict && $propname eq "get" {
+        elsif is-dict($obj) && $propname eq "get" {
             return builtin(sub get($prop) {
-                return $obj.properties{$prop.native-value};
+                die X::TypeCheck.new(:operation<get>, :got($prop), :expected(Str))
+                    unless is-str($prop);
+
+                return get-dict-property($obj, $prop.native-value);
             });
         }
-        elsif $obj ~~ Val::Dict && $propname eq "keys" {
+        elsif is-dict($obj) && $propname eq "keys" {
             return builtin(sub keys() {
-                return make-array($obj.properties.keys.map(&make-str).Array);
+                return make-array(get-all-dict-keys($obj).map(&make-str).Array);
             });
         }
-        elsif $obj ~~ Val::Dict && $propname eq "has" {
+        elsif is-dict($obj) && $propname eq "has" {
             return builtin(sub has($prop) {
-                my $value = $obj.properties{$prop.native-value} :exists;
-                return make-bool($value);
+                die X::TypeCheck.new(:operation<has>, :got($prop), :expected(Str))
+                    unless is-str($prop);
+
+                return make-bool(dict-property-exists($obj, $prop.native-value));
             });
         }
-        elsif $obj ~~ Val::Dict && $propname eq "update" {
+        elsif is-dict($obj) && $propname eq "update" {
             return builtin(sub update($newprops) {
-                for $obj.properties.keys {
-                    $obj.properties{$_} = $newprops.properties{$_} // $obj.properties{$_};
+                die X::TypeCheck.new(:operation<update>, :got($newprops), :expected(Hash))
+                    unless is-dict($newprops);
+
+                for get-all-dict-keys($obj) {
+                    if dict-property-exists($newprops, $_) {
+                        set-dict-property($obj, $_, get-dict-property($newprops, $_));
+                    }
                 }
                 return $obj;
             });
         }
-        elsif $obj ~~ Val::Dict && $propname eq "extend" {
+        elsif is-dict($obj) && $propname eq "extend" {
             return builtin(sub extend($newprops) {
-                for $newprops.properties.keys {
-                    $obj.properties{$_} = $newprops.properties{$_};
+                die X::TypeCheck.new(:operation<extend>, :got($newprops), :expected(Hash))
+                    unless is-dict($newprops);
+
+                for get-all-dict-keys($newprops) {
+                    set-dict-property($obj, $_, get-dict-property($newprops, $_));
                 }
                 return $obj;
             });
@@ -653,8 +679,8 @@ class _007::Runtime {
         if $obj ~~ Q {
             die "We don't handle assigning to Q object properties yet";
         }
-        elsif $obj !~~ Val::Dict {
-            die "We don't handle assigning to non-Val::Dict types yet";
+        elsif !is-dict($obj) {
+            die "We don't handle assigning to non-Dict types yet";
         }
         else {
             $obj.properties{$propname} = $newvalue;
