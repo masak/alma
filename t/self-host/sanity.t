@@ -1,5 +1,6 @@
 use Test;
 use _007;
+use _007::Value;
 
 my class StrOutput {
     has $.result = "";
@@ -14,7 +15,7 @@ sub run_007_on_007($program) {
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     my $ast = _007.parser(:$runtime).parse($runtime-program);
-    $ast.block.static-lexpad.properties<ast> = $compunit;
+    set-dict-property($ast.block.static-lexpad, "ast", $compunit);
     $runtime.run($ast);
     return $output.result;
 }

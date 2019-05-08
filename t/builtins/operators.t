@@ -217,7 +217,7 @@ use _007::Test;
         say(o1 == o2);
         .
 
-    outputs $program, "true\nfalse\n", "object equality";
+    outputs $program, "true\nfalse\n", "dict equality";
 }
 
 {
@@ -228,7 +228,7 @@ use _007::Test;
         say(o1 != o2);
         .
 
-    outputs $program, "false\ntrue\n", "object inequality";
+    outputs $program, "false\ntrue\n", "dict inequality";
 }
 
 {
@@ -238,7 +238,7 @@ use _007::Test;
         say(o3 == o3);
         .
 
-    outputs $program, "true\n", "nested object equality";
+    outputs $program, "true\n", "nested dict equality";
 }
 
 {
@@ -614,7 +614,7 @@ use _007::Test;
         my q = {}; say(q ~~ Dict)
         .
 
-    outputs $program, "true\n", "typecheck works for Val::Dict";
+    outputs $program, "true\n", "typecheck works for Dict";
 }
 
 {

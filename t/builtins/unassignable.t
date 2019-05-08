@@ -1,8 +1,9 @@
+use _007::Value;
 use _007::Builtins;
 use Test;
 use _007::Test;
 
-for builtins-pad().properties {
+for get-all-dict-properties(builtins-pad()) {
     my $name = .value.?escaped-name || .key;
     
     my $program = qq:to/./;

@@ -197,7 +197,7 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
 ### in the program.
 ###
 class Q::Term::Identifier::Direct is Q::Term::Identifier {
-    has Val::Dict $.frame;
+    has _007::Value $.frame where &is-dict;
 
     method eval($runtime) {
         return $runtime.get-direct($.frame, $.name.native-value);
@@ -335,6 +335,12 @@ class Q::Term::Object does Q::Term {
                 );
                 return make-array($native-value);
             }
+            elsif $.type === TYPE<Dict> {
+                my @properties = get-all-array-elements($.propertylist.properties).map({
+                    .key.native-value => .value.eval($runtime)
+                });
+                return make-dict(@properties);
+            }
             elsif $.type === TYPE<Str> {
                 my $native-value = get-array-element($.propertylist.properties, 0).value.eval($runtime).native-value;
                 return make-str($native-value);
@@ -364,9 +370,9 @@ class Q::Term::Dict does Q::Term {
     has $.propertylist;
 
     method eval($runtime) {
-        return Val::Dict.new(:properties(
-            get-all-array-elements($.propertylist.properties).map({.key.native-value => .value.eval($runtime)})
-        ));
+        return make-dict(
+            get-all-array-elements($.propertylist.properties).map({ .key.native-value => .value.eval($runtime) })
+        );
     }
 }
 
@@ -457,7 +463,7 @@ class Q::Term::Func does Q::Term does Q::Declaration {
 class Q::Block does Q {
     has $.parameterlist;
     has $.statementlist;
-    has Val::Dict $.static-lexpad is rw = Val::Dict.new;
+    has _007::Value $.static-lexpad is rw where &is-dict = make-dict();
 
     method attribute-order { <parameterlist statementlist> }
 }
@@ -595,7 +601,17 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.native-value < 0;
                 return get-array-element($_, $index.native-value);
             }
+            when &is-dict {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                die X::Property::NotFound.new(:$propname, :type({}))
+                    unless dict-property-exists($_, $propname);
+                return get-dict-property($_, $propname);
+            }
             when Val::Dict {
+                die "Oh no someone tried to index into a Val::Dict";
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless is-str($property);
@@ -628,7 +644,22 @@ class Q::Postfix::Index is Q::Postfix {
                     if $index.native-value < 0;
                 return set-array-element($_, $index.native-value, $value);
             }
-            when Val::Dict | Q {
+            when &is-dict {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                set-dict-property($_, $propname, $value);
+            }
+            when Val::Dict {
+                die "Oh no someone tried to index into a Val::Dict";
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                $runtime.put-property($_, $propname, $value);
+            }
+            when Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless is-str($property);
@@ -677,7 +708,12 @@ class Q::Postfix::Property is Q::Postfix {
 
     method put-value($value, $runtime) {
         given $.operand.eval($runtime) {
+            when &is-dict {
+                my $propname = $.property.name.native-value;
+                set-dict-property($_, $propname, $value);
+            }
             when Val::Dict | Q {
+                die "Oh no someone tried to index into a Val::Dict";
                 my $propname = $.property.name.native-value;
                 $runtime.put-property($_, $propname, $value);
             }
@@ -760,6 +796,9 @@ class Q::Term::Quasi does Q::Term {
             return make-array(get-all-array-elements($thing).map(&interpolate).Array)
                 if is-array($thing);
 
+            return make-dict(get-all-dict-properties($thing).map({ .key => interpolate(.value) }).Array)
+                if is-dict($thing);
+
             return $thing
                 if $thing ~~ _007::Value::Backed;
 
@@ -812,14 +851,14 @@ class Q::Term::Quasi does Q::Term {
             }
 
             if $thing ~~ Q::Term::Func {
-                $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+                $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
                 for get-all-array-elements($thing.block.parameterlist.parameters).map(*.identifier) -> $identifier {
                     $runtime.declare-var($identifier);
                 }
             }
 
             if $thing ~~ Q::Block {
-                $runtime.enter($runtime.current-frame, Val::Dict.new, $thing.statementlist);
+                $runtime.enter($runtime.current-frame, make-dict(), $thing.statementlist);
             }
 
             my %attributes = $thing.attributes.map: -> $attr {
@@ -836,7 +875,7 @@ class Q::Term::Quasi does Q::Term {
         if $.qtype.native-value eq "Q.Unquote" && $.contents ~~ Q::Unquote {
             return $.contents;
         }
-        $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+        $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
         $quasi-frame = $runtime.current-frame;
         my $r = interpolate($.contents);
         $runtime.leave();

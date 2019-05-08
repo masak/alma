@@ -158,6 +158,10 @@ our $global-object-id = 0;
 class Val::Dict does Val {
     has %.properties{Str};
 
+    submethod BUILD {
+        die "Old class Val::Dict -- do not use anymore";
+    }
+
     method quoted-Str {
         if %*stringification-seen{self.WHICH}++ {
             return "\{...\}";
@@ -282,8 +286,8 @@ class Val::Func does Val {
     has &.hook = Callable;
     has $.parameterlist;
     has $.statementlist;
-    has Val::Dict $.static-lexpad is rw = Val::Dict.new;
-    has Val::Dict $.outer-frame;
+    has _007::Value $.static-lexpad is rw where &is-dict = make-dict();
+    has _007::Value $.outer-frame where &is-dict;
 
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
         self.bless(:name(make-str($name)), :&hook, :$parameterlist, :$statementlist);

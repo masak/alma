@@ -20,7 +20,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, make-dict(), Q::StatementList.new);
     } }
 
     token finishpad { <?> {

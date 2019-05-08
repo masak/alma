@@ -49,10 +49,25 @@ multi equal-value(_007::Value $l, _007::Value $r) {
         my $R = get-array-length($r);
         return [&&] $L == $R, |(^$L).map(&equal-at-index);
     }
+    elsif is-dict($l) && is-dict($r) {
+        if %*equality-seen{$l.WHICH} && %*equality-seen{$r.WHICH} {
+            return $l === $r;
+        }
+        %*equality-seen{$l.WHICH}++;
+        %*equality-seen{$r.WHICH}++;
 
-    return is-int($l) && is-int($r) && $l.native-value == $r.native-value
-        || is-str($l) && is-str($r) && $l.native-value eq $r.native-value
-        || is-none($l) && is-none($r)
-        || is-bool($l) && is-bool($r) && $l === $r
-        || is-type($l) && is-type($r) && $l === $r;
+        sub equal-at-key(Str $key) {
+            equal-value(get-dict-property($l, $key), get-dict-property($r, $key));
+        }
+
+        [&&] get-all-dict-keys($l).sort.perl eq get-all-dict-keys($r).sort.perl,
+            |get-all-dict-keys($l).map(&equal-at-key);
+    }
+    else {
+        return is-int($l) && is-int($r) && $l.native-value == $r.native-value
+            || is-str($l) && is-str($r) && $l.native-value eq $r.native-value
+            || is-none($l) && is-none($r)
+            || is-bool($l) && is-bool($r) && $l === $r
+            || is-type($l) && is-type($r) && $l === $r;
+    }
 }
