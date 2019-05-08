@@ -303,9 +303,6 @@ class _007::Runtime {
                     return make-dict(get-all-dict-properties($thing).map({ .key => interpolate(.value) }).Array)
                         if is-dict($thing);
 
-                    return $thing.new(:properties(%($thing.properties.map(.key => interpolate(.value)))))
-                        if $thing ~~ Val::Dict;
-
                     return $thing
                         if $thing ~~ Val;
 

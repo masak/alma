@@ -610,16 +610,6 @@ class Q::Postfix::Index is Q::Postfix {
                     unless dict-property-exists($_, $propname);
                 return get-dict-property($_, $propname);
             }
-            when Val::Dict {
-                die "Oh no someone tried to index into a Val::Dict";
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                die X::Property::NotFound.new(:$propname, :type(Val::Dict))
-                    if .properties{$propname} :!exists;
-                return .properties{$propname};
-            }
             when Val::Func | Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
@@ -650,14 +640,6 @@ class Q::Postfix::Index is Q::Postfix {
                     unless is-str($property);
                 my $propname = $property.native-value;
                 set-dict-property($_, $propname, $value);
-            }
-            when Val::Dict {
-                die "Oh no someone tried to index into a Val::Dict";
-                my $property = $.index.eval($runtime);
-                die X::Subscript::NonString.new
-                    unless is-str($property);
-                my $propname = $property.native-value;
-                $runtime.put-property($_, $propname, $value);
             }
             when Q {
                 my $property = $.index.eval($runtime);
@@ -712,8 +694,7 @@ class Q::Postfix::Property is Q::Postfix {
                 my $propname = $.property.name.native-value;
                 set-dict-property($_, $propname, $value);
             }
-            when Val::Dict | Q {
-                die "Oh no someone tried to index into a Val::Dict";
+            when Q {
                 my $propname = $.property.name.native-value;
                 $runtime.put-property($_, $propname, $value);
             }
@@ -807,9 +788,6 @@ class Q::Term::Quasi does Q::Term {
 
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;
-
-            return $thing.new(:properties(%($thing.properties.map({ .key => interpolate(.value) }))))
-                if $thing ~~ Val::Dict;
 
             return $thing
                 if $thing ~~ Val;
