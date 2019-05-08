@@ -119,66 +119,6 @@ class Val::Regex does Val {
 
 our $global-object-id = 0;
 
-### ### Dict
-###
-### A mutable unordered collection of key/value entries. A dict
-### contains zero or more such entries, each with a unique string
-### name.
-###
-### The way to create a dict from scratch is to use the dict term
-### syntax:
-###
-###     my d1 = { foo: 42 };        # autoquoted key
-###     my d2 = { "foo": 42 };      # string key
-###     say(d1 == d2);              # --> `true`
-###
-### There's a way to extract an array of a dict's keys. The order of the keys in
-### this list is not defined and may even change from call to call.
-###
-###     my d3 = {
-###         one: 1,
-###         two: 2,
-###         three: 3
-###     };
-###     say(d3.keys().sort());      # --> `["one", "three", "two"]`
-###
-### You can also ask whether an entry exists in a dict.
-###
-###     my d4 = {
-###         foo: 42,
-###         bar: none
-###     };
-###     say(d4.has("foo"));        # --> `true`
-###     say(d4.has("bar"));        # --> `true`
-###     say(d4.has("bazinga"));    # --> `false`
-###
-### Note that the criterion is whether the *entry* exists, not whether the
-### corresponding value is defined.
-###
-class Val::Dict does Val {
-    has %.properties{Str};
-
-    submethod BUILD {
-        die "Old class Val::Dict -- do not use anymore";
-    }
-
-    method quoted-Str {
-        if %*stringification-seen{self.WHICH}++ {
-            return "\{...\}";
-        }
-        return '{' ~ %.properties.map({
-            my $key = .key ~~ /^<!before \d> [\w+]+ % '::'$/
-                ?? .key
-                !! make-str(.key).quoted-Str;
-            "{$key}: {.value.quoted-Str}"
-        }).sort.join(', ') ~ '}';
-    }
-
-    method truthy {
-        ?%.properties
-    }
-}
-
 ### ### Type
 ###
 ### A type in 007's type system. All values have a type, which determines
@@ -240,10 +180,7 @@ class Val::Type does Val {
     }
 
     method create(@properties) {
-        if $.type ~~ Val::Dict {
-            return $.type.new(:@properties);
-        }
-        elsif $.type ~~ Val::Type {
+        if $.type ~~ Val::Type {
             my $name = @properties[0].value;
             return $.type.new(:type(EVAL qq[class :: \{
                 method attributes \{ () \}
@@ -333,7 +270,6 @@ class Val::Macro is Val::Func {
 class Helper {
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
-        when Val::Dict { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
         when Val::Func { "<sub {.escaped-name}{.pretty-parameters}>" }
