@@ -20,7 +20,7 @@ my @example-readme-urls = @example-headings.map({ / "(" (<-[)]>*) ")" / && ~$0 }
 }
 
 for @example-readme-names Z @example-readme-urls -> ($name, $url) {
-    is $url, "/masak/007/blob/master/examples/$name", "correct URL for $name";
+    is $url, "/examples/$name", "correct URL for $name";
 }
 
 done-testing;
