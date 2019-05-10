@@ -24,7 +24,7 @@ sub assert-new-type(:$value, :$type, Str :$operation) {
                 ?? die X::TypeCheck.new(:$operation, :got($value.type), :expected($type))
                 !! die X::TypeCheck.new(:$operation, :got($value), :expected($type));
     die X::TypeCheck.new(:$operation, :got($value), :expected($type-obj))
-        unless $value ~~ _007::Value && $value.type === $type-obj;
+        unless $value ~~ _007::Value && is-instance($value, $type-obj);
 }
 
 sub assert-nonzero(:$value, :$operation, :$numerator) {
@@ -329,7 +329,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
     my $type = ::($name);
     push @builtins, ($type.^name.subst("Val::", "") => Val::Type.of($type));
 }
-for <Array Bool Dict Exception Int None Object Str> -> $name {
+for <Array Bool Dict Exception Func Int Macro None Object Str> -> $name {
     push @builtins, $name => TYPE{$name};
 }
 push @builtins, "Q" => Val::Type.of(Q);
@@ -358,30 +358,23 @@ my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str(
         .key => .value;
     }
     when .value ~~ Block {
-        my @elements = .value.signature.params».name».&ditch-sigil».&parameter;
-        if .key eq "say" {
-            @elements = parameter("...args");
-        }
-        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
-        my $statementlist = Q::StatementList.new();
-        .key => Val::Func.new-builtin(.value, .key, $parameterlist, $statementlist);
+        my @parameters = .key eq "say"
+            ?? parameter("...args")
+            !! .value.signature.params».name».&ditch-sigil».&parameter;
+        .key => make-func(.value, .key, @parameters);
     }
     when .value ~~ Placeholder::MacroOp {
         my $name = .key;
         install-op($name, .value);
-        my @elements = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
-        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
-        my $statementlist = Q::StatementList.new();
-        .key => Val::Func.new-builtin(sub () {}, $name, $parameterlist, $statementlist);
+        my @parameters = .value.qtype.attributes».name».substr(2).grep({ $_ ne "identifier" })».&parameter;
+        .key => make-func(sub () {}, $name, @parameters);
     }
     when .value ~~ Placeholder::Op {
         my $name = .key;
         install-op($name, .value);
         my &fn = .value.fn;
-        my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-        my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
-        my $statementlist = Q::StatementList.new();
-        .key => Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
+        my @parameters = &fn.signature.params».name».&ditch-sigil».&parameter;
+        .key => make-func(&fn, $name, @parameters);
     }
     default { die "Unknown type {.value.^name} installed in builtins" }
 });

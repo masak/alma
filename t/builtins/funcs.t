@@ -133,10 +133,10 @@ use _007::Test;
     my $program = q:to/./;
         macro moo() {}
 
-        assertType(moo, Func);
+        assertType(moo, Object);
         .
 
-    outputs $program, "", "assertType respects inheritance, so this will work since a Macro is a Func";
+    outputs $program, "", "assertType respects inheritance, so this will work since a Macro is an Object";
 }
 
 {

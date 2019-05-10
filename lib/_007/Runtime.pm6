@@ -66,12 +66,14 @@ class _007::Runtime {
 
     method handle-main() {
         if self.maybe-get-var("MAIN") -> $main {
-            if $main ~~ Val::Func {
+            if is-func($main) {
                 self.call($main, @!arguments.map(&make-str));
 
                 CATCH {
                     when X::ParameterMismatch {
-                        my @main-parameters = get-all-array-elements($main.parameterlist.parameters).map(*.identifier.name.native-value);
+                        my @main-parameters = get-all-array-elements(
+                            $main.slots<parameterlist>.parameters
+                        ).map(*.identifier.name.native-value);
                         self.print-usage(@main-parameters);
                         $!exit-code = 1;
                     }
@@ -100,23 +102,17 @@ class _007::Runtime {
         }
         for get-all-array-elements($statementlist.statements).kv -> $i, $_ {
             when Q::Statement::Func {
-                my $name = .identifier.name;
-                my $parameterlist = .block.parameterlist;
-                my $statementlist = .block.statementlist;
-                my $static-lexpad = .block.static-lexpad;
-                my $outer-frame = $frame;
-                my $val = Val::Func.new(
-                    :$name,
-                    :$parameterlist,
-                    :$statementlist,
-                    :$static-lexpad,
-                    :$outer-frame
-                );
-                self.declare-var(.identifier, $val);
+                self.declare-var(.identifier, make-func(
+                    .identifier.name,
+                    .block.parameterlist,
+                    .block.statementlist,
+                    $frame,
+                    .block.static-lexpad,
+                ));
             }
         }
         if $routine {
-            my $name = $routine.name;
+            my $name = $routine.slots<name>;
             my $identifier = Q::Identifier.new(:$name);
             self.declare-var($identifier, $routine);
         }
@@ -221,7 +217,7 @@ class _007::Runtime {
         self.leave;
     }
 
-    method call(Val::Func $c, @arguments) {
+    method call($c where &is-callable, @arguments) {
         if $c === $!say-builtin {
             for @arguments -> $argument {
                 $.output.print($argument.Str);
@@ -230,7 +226,9 @@ class _007::Runtime {
             return NONE;
         }
         else {
-            my $paramcount = get-array-length($c.parameterlist.parameters);
+            my $paramcount = $c ~~ _007::Value::Backed
+                ?? $c.native-value[2].elems
+                !! get-array-length($c.slots<parameterlist>.parameters);
             my $argcount = @arguments.elems;
             die X::ParameterMismatch.new(:type<Sub>, :$paramcount, :$argcount)
                 unless $paramcount == $argcount || $c === $!exit-builtin && $argcount < 2;
@@ -245,25 +243,28 @@ class _007::Runtime {
             }
             return make-str($value);
         }
-        if $c.hook -> &hook {
-            return &hook(|@arguments) || NONE;
+        my $value;
+        if $c ~~ _007::Value::Backed {
+            $value = $c.native-value[0](|@arguments);
         }
-        self.enter($c.outer-frame, $c.static-lexpad, $c.statementlist, $c);
-        for @(get-all-array-elements($c.parameterlist.parameters)) Z @arguments -> ($param, $arg) {
-            self.declare-var($param.identifier, $arg);
-        }
-        self.register-subhandler;
-        my $frame = self.current-frame;
-        my $value = $c.statementlist.run(self);
-        self.leave;
-        CATCH {
-            when X::Control::Return {
-                self.unroll-to($frame);
-                self.leave;
-                return .value;
+        else {
+            self.enter($c.slots<outer-frame>, $c.slots<static-lexpad>, $c.slots<statementlist>, $c);
+            for @(get-all-array-elements($c.slots<parameterlist>.parameters)) Z @arguments -> ($param, $arg) {
+                self.declare-var($param.identifier, $arg);
+            }
+            self.register-subhandler;
+            my $frame = self.current-frame;
+            $value = $c.slots<statementlist>.run(self);
+            self.leave;
+            CATCH {
+                when X::Control::Return {
+                    self.unroll-to($frame);
+                    self.leave;
+                    return .value;
+                }
             }
         }
-        $value || NONE
+        return $value;
     }
 
     method trigger-next() {
@@ -284,10 +285,8 @@ class _007::Runtime {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
             my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str($^value))))) };
-            my @elements = &fn.signature.params».name».&ditch-sigil».&parameter;
-            my $parameterlist = Q::ParameterList.new(:parameters(make-array(@elements)));
-            my $statementlist = Q::StatementList.new();
-            return Val::Func.new-builtin(&fn, $name, $parameterlist, $statementlist);
+            my @parameters = &fn.signature.params».name».&ditch-sigil».&parameter;
+            return make-func(&fn, $name, @parameters);
         }
 
         my $type = Val::Type.of($obj.WHAT).name;
@@ -609,8 +608,13 @@ class _007::Runtime {
                 }
             });
         }
-        elsif $obj ~~ Val::Func && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
-            return $obj."$propname"();
+        elsif is-func($obj) && $propname eq any <outer-frame static-lexpad parameterlist statementlist> {
+            if $obj ~~ _007::Value::Backed {
+                die "XXX It's a backed func -- if the test suite passes with this `die` intact, we should have more tests";
+            }
+            else {
+                $obj.slots{$propname};
+            }
         }
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};

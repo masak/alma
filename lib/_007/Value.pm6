@@ -51,7 +51,9 @@ BEGIN {
     TYPE<Bool> = make-type "Bool";
     TYPE<Dict> = make-type "Dict", :backed;
     TYPE<Exception> = make-type "Exception";
+    TYPE<Func> = make-type "Func", :backed;
     TYPE<Int> = make-type "Int", :backed;
+    TYPE<Macro> = make-type "Macro", :backed;
     TYPE<None> = make-type "None";
     TYPE<Str> = make-type "Str", :backed;
 }
@@ -162,12 +164,60 @@ sub is-exception($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Exception>);
 }
 
+multi make-func(
+    _007::Value $name where &is-str,
+    $parameterlist where *.^name eq "Q::ParameterList",
+    $statementlist where *.^name eq "Q::StatementList",
+    $outer-frame,
+    $static-lexpad = make-dict()
+) is export {
+    _007::Value.new(:type(TYPE<Func>), slots => {
+        :$name,
+        :$parameterlist,
+        :$statementlist,
+        :$outer-frame,
+        :$static-lexpad,
+    });
+}
+
+multi make-func(&fn, Str $name, @parameters) is export {
+    _007::Value::Backed.new(:type(TYPE<Func>), native-value => [&fn, $name, @parameters]);
+}
+
+sub is-func($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Func>);
+}
+
 sub make-int(Int $native-value) is export {
     _007::Value::Backed.new(:type(TYPE<Int>), :$native-value);
 }
 
 sub is-int($v) is export {
     $v ~~ _007::Value::Backed && is-instance($v, TYPE<Int>);
+}
+
+sub make-macro(
+    _007::Value $name where &is-str,
+    $parameterlist where *.^name eq "Q::ParameterList",
+    $statementlist where *.^name eq "Q::StatementList",
+    $outer-frame,
+    $static-lexpad = make-dict()
+) is export {
+    _007::Value.new(:type(TYPE<Macro>), slots => {
+        :$name,
+        :$parameterlist,
+        :$statementlist,
+        :$outer-frame,
+        :$static-lexpad,
+    });
+}
+
+sub is-macro($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Macro>);
+}
+
+sub is-callable($v) is export {
+    is-func($v) || is-macro($v);
 }
 
 constant NONE is export = _007::Value.new(:type(TYPE<None>));
@@ -186,6 +236,33 @@ sub make-str(Str $native-value) is export {
 
 sub is-str($v) is export {
     $v ~~ _007::Value::Backed && is-instance($v, TYPE<Str>);
+}
+
+sub escaped-name($func) is export {
+    sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
+    sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
+
+    my $name = $func ~~ _007::Value::Backed
+        ?? $func.native-value[1]
+        !! $func.slots<name>.native-value;
+
+    return $name
+        unless $name ~~ /^ (prefix | infix | postfix) ':' (.+) /;
+
+    return "{$0}:<{escape-less-thans escape-backslashes $1}>"
+        if $1.contains(">") && $1.contains("»");
+
+    return "{$0}:«{escape-backslashes $1}»"
+        if $1.contains(">");
+
+    return "{$0}:<{escape-backslashes $1}>";
+}
+
+sub pretty-parameters($func) {
+    my @parameters = $func ~~ _007::Value::Backed
+        ?? @($func.native-value[2])
+        !! get-all-array-elements($func.slots<parameterlist>.parameters);
+    sprintf "(%s)", @parameters».identifier».name.join(", ");
 }
 
 sub stringify(_007::Value $value) {
@@ -208,22 +285,34 @@ sub stringify(_007::Value $value) {
             "{$key}: {.value ~~ _007::Value ?? stringify-quoted(.value) !! .value.quoted-Str}"
         }).sort.join(', ') ~ '}';
     }
+    elsif $value ~~ _007::Value::Backed && $value.type === TYPE<Func> {
+        return "<func {escaped-name($value)}{pretty-parameters($value)}>";
+    }
+    elsif $value ~~ _007::Value::Backed && $value.type === TYPE<Macro> {
+        return "<macro {escaped-name($value)}{pretty-parameters($value)}>";
+    }
     elsif $value ~~ _007::Value::Backed {
         return ~$value.native-value;
-    }
-    elsif $value.type === TYPE<Type> {
-        return "<type {$value.slots<name>}>";
     }
     elsif $value.type === TYPE<Bool> {
         return $value === TRUE
             ?? "true"
             !! "false";
     }
+    elsif $value.type === TYPE<Func> {
+        return "<func {escaped-name($value)}{pretty-parameters($value)}>";
+    }
+    elsif $value.type === TYPE<Macro> {
+        return "<macro {escaped-name($value)}{pretty-parameters($value)}>";
+    }
     elsif $value.type === TYPE<None> {
         return "none";
     }
     elsif $value.type === TYPE<Object> {
         return "<object>";
+    }
+    elsif $value.type === TYPE<Type> {
+        return "<type {$value.slots<name>}>";
     }
     else {
         die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;
@@ -238,7 +327,7 @@ sub stringify-quoted(_007::Value $value) {
 }
 
 sub truth-value(_007::Value $value) {
-    $value ~~ _007::Value::Backed
+    is-func($value) || is-macro($value) || ($value ~~ _007::Value::Backed
         ?? ?$value.native-value
-        !! !is-none($value) && !is-bool($value) || $value === TRUE;
+        !! !is-none($value) && !is-bool($value) || $value === TRUE);
 }

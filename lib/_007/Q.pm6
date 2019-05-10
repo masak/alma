@@ -440,12 +440,12 @@ class Q::Term::Func does Q::Term does Q::Declaration {
         my $name = is-none($.identifier)
             ?? make-str("")
             !! $.identifier.name;
-        return Val::Func.new(
-            :$name,
-            :parameterlist($.block.parameterlist),
-            :statementlist($.block.statementlist),
-            :static-lexpad($.block.static-lexpad),
-            :outer-frame($runtime.current-frame),
+        make-func(
+            $name,
+            $.block.parameterlist,
+            $.block.statementlist,
+            $runtime.current-frame,
+            $.block.static-lexpad
         );
     }
 }
@@ -610,7 +610,14 @@ class Q::Postfix::Index is Q::Postfix {
                     unless dict-property-exists($_, $propname);
                 return get-dict-property($_, $propname);
             }
-            when Val::Func | Q {
+            when &is-func {
+                my $property = $.index.eval($runtime);
+                die X::Subscript::NonString.new
+                    unless is-str($property);
+                my $propname = $property.native-value;
+                return $runtime.property($_, $propname);
+            }
+            when Q {
                 my $property = $.index.eval($runtime);
                 die X::Subscript::NonString.new
                     unless is-str($property);
@@ -665,9 +672,9 @@ class Q::Postfix::Call is Q::Postfix {
     method eval($runtime) {
         my $c = $.operand.eval($runtime);
         die "macro is called at runtime"
-            if $c ~~ Val::Macro;
-        die "Trying to invoke a {$c.^name.subst(/^'Val::'/, '')}" # XXX: make this into an X::
-            unless $c ~~ Val::Func;
+            if is-macro($c);
+        die "Trying to invoke a {$c.type.slots<name>}" # XXX: make this into an X::
+            unless is-func($c);
         my @arguments = get-all-array-elements($.argumentlist.arguments).map(*.eval($runtime));
         return $runtime.call($c, @arguments);
     }

@@ -54,6 +54,8 @@ multi equal-value(_007::Value $l, _007::Value $r) {
             || is-str($l) && is-str($r) && $l.native-value eq $r.native-value
             || is-none($l) && is-none($r)
             || is-bool($l) && is-bool($r) && $l === $r
-            || is-type($l) && is-type($r) && $l === $r;
+            || is-type($l) && is-type($r) && $l === $r
+            || is-func($l) && is-func($r) && $l === $r
+            || is-macro($l) && is-macro($r) && $l === $r;
     }
 }
