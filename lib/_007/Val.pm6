@@ -226,7 +226,12 @@ class Val::Func does Val {
     has _007::Value $.static-lexpad is rw where &is-dict = make-dict();
     has _007::Value $.outer-frame where &is-dict;
 
+    submethod BUILD {
+        die "Old class Val::Dict -- do not use anymore";
+    }
+
     method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
+        die "Old class Val::Dict, called from Builtins.pm6 -- do not use anymore";
         self.bless(:name(make-str($name)), :&hook, :$parameterlist, :$statementlist);
     }
 

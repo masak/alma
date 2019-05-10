@@ -150,11 +150,11 @@ class _007::Parser::Actions {
         my $val;
         if $<routine> eq "func" {
             make Q::Statement::Func.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            $val = make-func($name, $parameterlist, $statementlist, $outer-frame, $static-lexpad);
         }
         elsif $<routine> eq "macro" {
             make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
-            $val = Val::Macro.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            $val = make-macro($name, $parameterlist, $statementlist, $outer-frame, $static-lexpad);
         }
         else {
             die "Unknown routine type $<routine>"; # XXX: Turn this into an X:: exception
@@ -267,10 +267,10 @@ class _007::Parser::Actions {
         };
     }
 
-    sub is-macro($q, $qtype, $identifier) {
+    sub is-a-macro($q, $qtype, $identifier) {
         $q ~~ $qtype
             && $identifier ~~ Q::Identifier
-            && (my $macro = $*runtime.maybe-get-var($identifier.name.native-value)) ~~ Val::Macro
+            && is-macro(my $macro = $*runtime.maybe-get-var($identifier.name.native-value))
             && $macro;
     }
 
@@ -339,7 +339,7 @@ class _007::Parser::Actions {
                 return;
             }
 
-            if my $macro = is-macro($infix, Q::Infix, $infix.identifier) {
+            if my $macro = is-a-macro($infix, Q::Infix, $infix.identifier) {
                 @termstack.push(expand($macro, [$t1, $t2],
                     -> { $infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)) }));
             }
@@ -415,7 +415,7 @@ class _007::Parser::Actions {
                 return;
             }
 
-            if my $macro = is-macro($prefix, Q::Prefix, $prefix.identifier) {
+            if my $macro = is-a-macro($prefix, Q::Prefix, $prefix.identifier) {
                 make expand($macro, [$/.ast],
                     -> { $prefix.new(:operand($/.ast), :identifier($prefix.identifier)) });
             }
@@ -427,7 +427,7 @@ class _007::Parser::Actions {
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
-            if my $macro = is-macro($postfix, Q::Postfix::Call, $/.ast) {
+            if my $macro = is-a-macro($postfix, Q::Postfix::Call, $/.ast) {
                 make expand($macro, get-all-array-elements($postfix.argumentlist.arguments),
                     -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
             }
@@ -441,7 +441,7 @@ class _007::Parser::Actions {
                 make $postfix.new(:$identifier, :operand($/.ast), :property($postfix.property));
             }
             else {
-                if my $macro = is-macro($postfix, Q::Postfix, $identifier) {
+                if my $macro = is-a-macro($postfix, Q::Postfix, $identifier) {
                     make expand($macro, [$/.ast],
                         -> { $postfix.new(:$identifier, :operand($/.ast)) });
                 }
@@ -572,9 +572,9 @@ class _007::Parser::Actions {
             $*parser.postpone: sub checking-postdeclared {
                 my $value = $*runtime.maybe-get-var($name, $frame);
                 die X::Macro::Postdeclared.new(:$name)
-                    if $value ~~ Val::Macro;
+                    if is-macro($value);
                 die X::Undeclared.new(:symbol($name))
-                    unless $value ~~ Val::Func;
+                    unless is-func($value);
             };
         }
         make Q::Term::Identifier.new(:name($<identifier>.ast.name));
@@ -637,7 +637,7 @@ class _007::Parser::Actions {
             my $name = $<identifier>.ast.name;
             my $outer-frame = get-dict-property($*runtime.current-frame, "outer-frame");
             my $static-lexpad = get-dict-property($*runtime.current-frame, "pad");
-            my $val = Val::Func.new(:$name, :$parameterlist, :$statementlist, :$outer-frame, :$static-lexpad);
+            my $val = make-func($name, $parameterlist, $statementlist, $outer-frame, $static-lexpad);
             $*runtime.put-var($<identifier>.ast, $val);
         }
         finish-block($block);
@@ -864,11 +864,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Statement::Func $func) {
         my $outer-frame = $runtime.current-frame;
         my $name = $func.identifier.name;
-        my $val = Val::Func.new(:$name,
-            :parameterlist($func.block.parameterlist),
-            :statementlist($func.block.statementlist),
-            :$outer-frame
-        );
+        my $val = make-func($name, $func.block.parameterlist, $func.block.statementlist, $outer-frame);
         $runtime.enter($outer-frame, make-dict(), $func.block.statementlist, $val);
         handle($func.block);
         $runtime.leave();
@@ -879,10 +875,11 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Statement::Macro $macro) {
         my $outer-frame = $runtime.current-frame;
         my $name = $macro.identifier.name;
-        my $val = Val::Macro.new(:$name,
-            :parameterlist($macro.block.parameterlist),
-            :statementlist($macro.block.statementlist),
-            :$outer-frame
+        my $val = make-macro(
+            $macro.identifier.name,
+            $macro.block.parameterlist,
+            $macro.block.statementlist,
+            $outer-frame,
         );
         $runtime.enter($outer-frame, make-dict(), $macro.block.statementlist, $val);
         handle($macro.block);
