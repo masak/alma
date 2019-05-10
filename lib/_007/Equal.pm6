@@ -7,9 +7,6 @@ multi equal-value($, $) is export { False }
 multi equal-value(Val::Type $l, Val::Type $r) {
     $l.type === $r.type
 }
-multi equal-value(Val::Func $l, Val::Func $r) {
-    $l === $r
-}
 multi equal-value(Q $l, Q $r) {
     sub same-avalue($attr) {
         equal-value($attr.get_value($l), $attr.get_value($r));

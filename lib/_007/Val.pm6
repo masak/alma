@@ -200,84 +200,10 @@ class Val::Type does Val {
     }
 }
 
-### ### Func
-###
-### A function. When you define a function in 007, the value of the
-### name bound is a `Func` object.
-###
-###     func agent() {
-###         return "Bond";
-###     }
-###     say(agent);             # --> `<func agent()>`
-###
-### Subroutines are mostly distinguished by being *callable*, that is, they
-### can be called at runtime by passing some values into them.
-###
-###     func add(x, y) {
-###         return x + y;
-###     }
-###     say(add(2, 5));         # --> `7`
-###
-class Val::Func does Val {
-    has _007::Value $.name where &is-str;
-    has &.hook = Callable;
-    has $.parameterlist;
-    has $.statementlist;
-    has _007::Value $.static-lexpad is rw where &is-dict = make-dict();
-    has _007::Value $.outer-frame where &is-dict;
-
-    submethod BUILD {
-        die "Old class Val::Dict -- do not use anymore";
-    }
-
-    method new-builtin(&hook, Str $name, $parameterlist, $statementlist) {
-        die "Old class Val::Dict, called from Builtins.pm6 -- do not use anymore";
-        self.bless(:name(make-str($name)), :&hook, :$parameterlist, :$statementlist);
-    }
-
-    method escaped-name {
-        sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
-        sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
-
-        return $.name.native-value
-            unless $.name.native-value ~~ /^ (prefix | infix | postfix) ':' (.+) /;
-
-        return "{$0}:<{escape-less-thans escape-backslashes $1}>"
-            if $1.contains(">") && $1.contains("»");
-
-        return "{$0}:«{escape-backslashes $1}»"
-            if $1.contains(">");
-
-        return "{$0}:<{escape-backslashes $1}>";
-    }
-
-    method pretty-parameters {
-        sprintf "(%s)", get-all-array-elements($.parameterlist.parameters)».identifier».name.join(", ");
-    }
-
-    method Str { "<func {$.escaped-name}{$.pretty-parameters}>" }
-}
-
-### ### Macro
-###
-### A macro. When you define a macro in 007, the value of the name bound
-### is a macro object.
-###
-###     macro agent() {
-###         return quasi { "Bond" };
-###     }
-###     say(agent);             # --> `<macro agent()>`
-###
-class Val::Macro is Val::Func {
-    method Str { "<macro {$.escaped-name}{$.pretty-parameters}>" }
-}
-
 class Helper {
     our sub Str($_) {
         when Val::Regex { .quoted-Str }
         when Val::Type { "<type {.name}>" }
-        when Val::Macro { "<macro {.escaped-name}{.pretty-parameters}>" }
-        when Val::Func { "<sub {.escaped-name}{.pretty-parameters}>" }
         default {
             my $self = $_;
             my $name = .^name;
