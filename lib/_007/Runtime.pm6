@@ -497,20 +497,20 @@ class _007::Runtime {
                 return make-str($s.substr($pos.native-value, 1));
             });
         }
-        elsif $obj ~~ Val::Regex && $propname eq "fullmatch" {
+        elsif is-regex($obj) && $propname eq "fullmatch" {
             return builtin(sub fullmatch($str) {
                 die X::Regex::InvalidMatchType.new
                     unless is-str($str);
 
-                return make-bool($obj.fullmatch($str.native-value));
+                return make-bool(regex-fullmatch($obj, $str.native-value));
             });
         }
-        elsif $obj ~~ Val::Regex && $propname eq "search" {
+        elsif is-regex($obj) && $propname eq "search" {
             return builtin(sub search($str) {
                 die X::Regex::InvalidMatchType.new
                     unless is-str($str);
 
-                return make-bool($obj.search($str.native-value));
+                return make-bool(regex-search($obj, $str.native-value));
             });
         }
         elsif is-array($obj) && $propname eq "filter" {
