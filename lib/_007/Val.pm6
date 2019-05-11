@@ -21,108 +21,6 @@ role Val {
     }
 }
 
-### ### Regex
-###
-### A regex. As a runtime value, a regex is like a black box that can be put
-### to work matching strings or parts of strings. Its main purpose is
-### to let us know whether the string matches the pattern described in the
-### regex. In other words, it returns `true` or `false`.
-###
-### (Regexes are currently under development, and are hidden behind a feature
-### flag for the time being: `FLAG_007_REGEX`.)
-###
-### A few methods are defined on regexes:
-###
-###     say(/"Bond"/.fullmatch("J. Bond"));     # --> `false`
-###     say(/"Bond"/.search("J. Bond"));        # --> `true`
-###
-class Val::Regex does Val {
-    # note: a regex should probably keep its lexpad or something to resolve calls&identifiers
-    has $.contents;
-
-    submethod BUILD {
-        die "Old class Val::Regex -- do not use anymore";
-    }
-
-    method search(Str $str) {
-        for ^$str.chars {
-            return True with parse($str, $.contents, $_);
-        }
-        return False;
-    }
-
-    method fullmatch(Str $str) {
-        return ?($_ == $str.chars with parse($str, $.contents, 0));
-    }
-
-    sub parse($str, $fragment, Int $last-index is copy) {
-        when $fragment.^name eq "Q::Regex::Str" {
-            my $value = $fragment.contents.native-value;
-            my $slice = $str.substr($last-index, $value.chars);
-            return Nil if $slice ne $value;
-            return $last-index + $value.chars;
-        }
-        #when Q::Regex::Identifier {
-        #    die "Unhandled regex fragment";
-        #}
-        #when Q::Regex::Call {
-        #    die "Unhandled regex fragment";
-        #}
-        when $fragment.^name eq "Q::Regex::Group" {
-            for $fragment.fragments -> $group-fragment {
-                with parse($str, $group-fragment, $last-index) {
-                    $last-index = $_;
-                } else {
-                    return Nil;
-                }
-            }
-            return $last-index;
-        }
-        when $fragment.^name eq "Q::Regex::ZeroOrOne" {
-            with parse($str, $fragment.fragment, $last-index) {
-                return $_;
-            } else {
-                return $last-index;
-            }
-        }
-        when $fragment.^name eq "Q::Regex::OneOrMore" {
-            # XXX technically just a fragment+a ZeroOrMore
-            return Nil unless $last-index = parse($str, $fragment.fragment, $last-index);
-            loop {
-                with parse($str, $fragment.fragment, $last-index) {
-                    $last-index = $_;
-                } else {
-                    last;
-                }
-            }
-            return $last-index;
-        }
-        when $fragment.^name eq "Q::Regex::ZeroOrMore" {
-            loop {
-                with parse($str, $fragment.fragment, $last-index) {
-                    $last-index = $_;
-                } else {
-                    last;
-                }
-            }
-            return $last-index;
-        }
-        when $fragment.^name eq "Q::Regex::Alternation" {
-            for $fragment.alternatives -> $alternative {
-                with parse($str, $alternative, $last-index) {
-                    return $_;
-                }
-            }
-            return Nil;
-        }
-        default {
-            die "No handler for {$fragment.^name}";
-        }
-    }
-}
-
-our $global-object-id = 0;
-
 ### ### Type
 ###
 ### A type in 007's type system. All values have a type, which determines
@@ -206,7 +104,6 @@ class Val::Type does Val {
 
 class Helper {
     our sub Str($_) {
-        when Val::Regex { .quoted-Str }
         when Val::Type { "<type {.name}>" }
         default {
             my $self = $_;
