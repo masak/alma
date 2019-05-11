@@ -40,6 +40,10 @@ class Val::Regex does Val {
     # note: a regex should probably keep its lexpad or something to resolve calls&identifiers
     has $.contents;
 
+    submethod BUILD {
+        die "Old class Val::Regex -- do not use anymore";
+    }
+
     method search(Str $str) {
         for ^$str.chars {
             return True with parse($str, $.contents, $_);

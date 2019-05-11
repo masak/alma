@@ -55,6 +55,7 @@ BEGIN {
     TYPE<Int> = make-type "Int", :backed;
     TYPE<Macro> = make-type "Macro", :backed;
     TYPE<None> = make-type "None";
+    TYPE<Regex> = make-type "Regex";
     TYPE<Str> = make-type "Str", :backed;
 }
 
@@ -228,6 +229,95 @@ sub make-none() is export {
 
 sub is-none($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<None>);
+}
+
+sub make-regex(
+    $contents where *.^name.starts-with("Q::Regex::"),
+) is export {
+    _007::Value.new(:type(TYPE<Regex>), slots => {
+        :$contents,
+    });
+}
+
+sub is-regex($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Regex>);
+}
+
+sub regex-parse(Str $str, $fragment, Int $last-index is copy) {
+    when $fragment.^name eq "Q::Regex::Str" {
+        my $value = $fragment.contents.native-value;
+        my $slice = $str.substr($last-index, $value.chars);
+        return Nil if $slice ne $value;
+        return $last-index + $value.chars;
+    }
+    #when Q::Regex::Identifier {
+    #    die "Unhandled regex fragment";
+    #}
+    #when Q::Regex::Call {
+    #    die "Unhandled regex fragment";
+    #}
+    when $fragment.^name eq "Q::Regex::Group" {
+        for $fragment.fragments -> $group-fragment {
+            with regex-parse($str, $group-fragment, $last-index) {
+                $last-index = $_;
+            } else {
+                return Nil;
+            }
+        }
+        return $last-index;
+    }
+    when $fragment.^name eq "Q::Regex::ZeroOrOne" {
+        with regex-parse($str, $fragment.fragment, $last-index) {
+            return $_;
+        } else {
+            return $last-index;
+        }
+    }
+    when $fragment.^name eq "Q::Regex::OneOrMore" {
+        # XXX technically just a fragment+a ZeroOrMore
+        return Nil unless $last-index = regex-parse($str, $fragment.fragment, $last-index);
+        loop {
+            with regex-parse($str, $fragment.fragment, $last-index) {
+                $last-index = $_;
+            } else {
+                last;
+            }
+        }
+        return $last-index;
+    }
+    when $fragment.^name eq "Q::Regex::ZeroOrMore" {
+        loop {
+            with regex-parse($str, $fragment.fragment, $last-index) {
+                $last-index = $_;
+            } else {
+                last;
+            }
+        }
+        return $last-index;
+    }
+    when $fragment.^name eq "Q::Regex::Alternation" {
+        for $fragment.alternatives -> $alternative {
+            with regex-parse($str, $alternative, $last-index) {
+                return $_;
+            }
+        }
+        return Nil;
+    }
+    default {
+        die "No handler for {$fragment.^name}";
+    }
+}
+
+sub regex-fullmatch(_007::Value $regex where &is-regex, Str $str) is export {
+    return ?($_ == $str.chars with regex-parse($str, $regex.slots<contents>, 0));
+}
+
+sub regex-search(_007::Value $regex where &is-regex, Str $str) is export {
+    for ^$str.chars {
+        return True
+            with regex-parse($str, $regex.slots<contents>, $_);
+    }
+    return False;
 }
 
 sub make-str(Str $native-value) is export {

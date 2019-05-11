@@ -296,7 +296,7 @@ class Q::Term::Regex does Q::Term {
     has Q::Regex::Fragment $.contents;
 
     method eval($runtime) {
-        Val::Regex.new(:$.contents);
+        make-regex($.contents);
     }
 }
 
