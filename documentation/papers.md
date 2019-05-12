@@ -80,7 +80,7 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
 ## Programming language design
 
 <dl>
-  <dt>Next-Paradigm Programming Languages: What WillThey Look Like and What Changes Will They Bring?</dt>
+  <dt>Next-Paradigm Programming Languages: What Will They Look Like and What Changes Will They Bring?</dt>
   <dd><a href="https://arxiv.org/pdf/1905.00402.pdf">2019 paper</a></dd>
   <dd><a href="https://news.ycombinator.com/item?id=19803379">HN discussion</a></dd>
 </dl>
