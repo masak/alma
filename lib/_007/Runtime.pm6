@@ -7,6 +7,20 @@ constant NO_OUTER = Val::Dict.new;
 constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
 constant EXIT_SUCCESS = 0;
 
+my %q-mappings{Any};
+
+sub tree-walk($type) {
+    my %package := $type.WHO;
+    for %package.keys -> $name {
+        my $subtype = ::(%package ~ "::$name");
+        %q-mappings{$type} //= {};
+        %q-mappings{$type}{$name} = $subtype;
+        tree-walk($subtype);
+    }
+}
+
+tree-walk(Q);
+
 class _007::Runtime {
     has $.input;
     has $.output;
@@ -561,200 +575,9 @@ class _007::Runtime {
                 return $obj;
             });
         }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ArgumentList" {
-            return Val::Type.of(Q::ArgumentList);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Block" {
-            return Val::Type.of(Q::Block);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "CompUnit" {
-            return Val::Type.of(Q::CompUnit);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Declaration" {
-            return Val::Type.of(Q::Declaration);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Expr" {
-            return Val::Type.of(Q::Expr);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Identifier" {
-            return Val::Type.of(Q::Identifier);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Infix" {
-            return Val::Type.of(Q::Infix);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Literal" {
-            return Val::Type.of(Q::Literal);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Parameter" {
-            return Val::Type.of(Q::Parameter);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "ParameterList" {
-            return Val::Type.of(Q::ParameterList);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Postfix" {
-            return Val::Type.of(Q::Postfix);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Prefix" {
-            return Val::Type.of(Q::Prefix);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Property" {
-            return Val::Type.of(Q::Property);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "PropertyList" {
-            return Val::Type.of(Q::PropertyList);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Regex" {
-            return Val::Type.of(Q::Regex);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Statement" {
-            return Val::Type.of(Q::Statement);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "StatementList" {
-            return Val::Type.of(Q::StatementList);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Term" {
-            return Val::Type.of(Q::Term);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Trait" {
-            return Val::Type.of(Q::Trait);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "TraitList" {
-            return Val::Type.of(Q::TraitList);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q && $propname eq "Unquote" {
-            return Val::Type.of(Q::Unquote);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Expr && $propname eq "BlockAdapter" {
-            return Val::Type.of(Q::Expr::BlockAdapter);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Infix && $propname eq "And" {
-            return Val::Type.of(Q::Infix::And);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Infix && $propname eq "Assignment" {
-            return Val::Type.of(Q::Infix::Assignment);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Infix && $propname eq "DefinedOr" {
-            return Val::Type.of(Q::Infix::DefinedOr);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Infix && $propname eq "Or" {
-            return Val::Type.of(Q::Infix::Or);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Bool" {
-            return Val::Type.of(Q::Literal::Bool);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Int" {
-            return Val::Type.of(Q::Literal::Int);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "None" {
-            return Val::Type.of(Q::Literal::None);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Literal && $propname eq "Str" {
-            return Val::Type.of(Q::Literal::Str);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Call" {
-            return Val::Type.of(Q::Postfix::Call);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Index" {
-            return Val::Type.of(Q::Postfix::Index);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Postfix && $propname eq "Property" {
-            return Val::Type.of(Q::Postfix::Property);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Alternation" {
-            return Val::Type.of(Q::Regex::Alternation);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Call" {
-            return Val::Type.of(Q::Regex::Call);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Fragment" {
-            return Val::Type.of(Q::Regex::Fragment);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Group" {
-            return Val::Type.of(Q::Regex::Group);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Identifier" {
-            return Val::Type.of(Q::Regex::Identifier);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "OneOrMore" {
-            return Val::Type.of(Q::Regex::OneOrMore);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "Str" {
-            return Val::Type.of(Q::Regex::Str);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "ZeroOrMore" {
-            return Val::Type.of(Q::Regex::ZeroOrMore);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Regex && $propname eq "ZeroOrOne" {
-            return Val::Type.of(Q::Regex::ZeroOrOne);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "BEGIN" {
-            return Val::Type.of(Q::Statement::BEGIN);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Block" {
-            return Val::Type.of(Q::Statement::Block);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Class" {
-            return Val::Type.of(Q::Statement::Class);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Expr" {
-            return Val::Type.of(Q::Statement::Expr);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "For" {
-            return Val::Type.of(Q::Statement::For);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Func" {
-            return Val::Type.of(Q::Statement::Func);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "If" {
-            return Val::Type.of(Q::Statement::If);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Macro" {
-            return Val::Type.of(Q::Statement::Macro);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "My" {
-            return Val::Type.of(Q::Statement::My);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Return" {
-            return Val::Type.of(Q::Statement::Return);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "Throw" {
-            return Val::Type.of(Q::Statement::Throw);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Statement && $propname eq "While" {
-            return Val::Type.of(Q::Statement::While);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Array" {
-            return Val::Type.of(Q::Term::Array);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Dict" {
-            return Val::Type.of(Q::Term::Dict);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Func" {
-            return Val::Type.of(Q::Term::Func);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Identifier" {
-            return Val::Type.of(Q::Term::Identifier);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "My" {
-            return Val::Type.of(Q::Term::My);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Object" {
-            return Val::Type.of(Q::Term::Object);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Quasi" {
-            return Val::Type.of(Q::Term::Quasi);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term && $propname eq "Regex" {
-            return Val::Type.of(Q::Term::Regex);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Term::Identifier && $propname eq "Direct" {
-            return Val::Type.of(Q::Term::Identifier::Direct);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Unquote && $propname eq "Infix" {
-            return Val::Type.of(Q::Unquote::Infix);
-        }
-        elsif $obj ~~ Val::Type && $obj.type === Q::Unquote && $propname eq "Prefix" {
-            return Val::Type.of(Q::Unquote::Prefix);
+        elsif $obj ~~ Val::Type && (%q-mappings{$obj.type}{$propname} :exists) {
+            my $subtype = %q-mappings{$obj.type}{$propname};
+            return Val::Type.of($subtype);
         }
         else {
             if $obj ~~ Val::Type {
