@@ -1,0 +1,57 @@
+func createGraph(nodes) {
+    return {
+        "nodes": nodes,
+        "edges": {},
+    };
+}
+
+func addGraphEdge(graph, node1, node2) {
+    if !graph["edges"].has(node1) {
+        graph["edges"][node1] = [];
+    }
+    graph["edges"][node1].push({
+        "type": "edge",
+        "target": node2,
+    });
+}
+
+func prettyPrintGraph(graph) {
+    for graph["nodes"] -> node {
+        say(node);
+        my edges = [];
+        if graph["edges"].has(node) {
+            edges = graph["edges"][node];
+        }
+        for edges -> edge {
+            say("    ----> ", edge["target"]);
+        }
+    }
+}
+
+func generateControlFlowGraph(qStatementFunc) {
+    my graph = createGraph(["0", "exit"]);
+    my nodeSequenceNumber = 0;
+    my statements = qStatementFunc.block.statementlist.statements;
+    for statements -> statement {
+        if statement ~~ Q.Statement.Expr {
+            # ignore; stipulate for now that Q.Statement.Expr doesn't affect BB graph
+        }
+        else {
+            throw new Exception { message: "Unknown statement type " ~ type(statement) };
+        }
+    }
+    addGraphEdge(graph, "0", "exit");
+    return graph;
+}
+
+my f1 = quasi {
+    func f1() {
+        my message = "OH HAI";
+        say(message);
+    }
+};
+
+my qStatementFunc = f1.statementlist.statements[0];
+my graph = generateControlFlowGraph(qStatementFunc);
+
+prettyPrintGraph(graph);
