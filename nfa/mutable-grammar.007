@@ -1,0 +1,107 @@
+## minimal test framework
+
+my ANSI_GREEN = 27.chr() ~ "[1;32m";
+my ANSI_RED = 27.chr() ~ "[1;31m";
+my ANSI_RESET = 27.chr() ~ "[m";
+
+my testsRun = 0;
+
+func is(actual, expected, message) {
+    my status = "ok";
+    my colorCode = ANSI_GREEN;
+    my cond = actual == expected;
+    if !cond {
+        status = "NOT OK";
+        colorCode = ANSI_RED;
+    }
+    say(colorCode, status, ANSI_RESET, " - ", message);
+    if !cond {
+        say("# Expected: ", expected);
+        say("# Got: ", actual);
+    }
+    testsRun = testsRun + 1;
+}
+
+func done() {
+    say("1..", testsRun);
+}
+
+## grammar/parser stuff
+
+my RX_QUANT_1_OR_MORE = "<quantifier(+)>";
+my RX_CCLASS = "<character class>";
+my CC_RANGE = "<cclass range>";
+
+my grammar = {
+    "TOP": [RX_QUANT_1_OR_MORE, [RX_CCLASS, [CC_RANGE, "a", "z"]]],
+};
+
+func parse(input) {
+    # Returns either an array `[newPos, ast]` on success,
+    # or `none` on failure.
+    func handle(ruleFragment, pos) {
+        my fragmentType = ruleFragment[0];
+        if fragmentType == RX_QUANT_1_OR_MORE {
+            my atom = ruleFragment[1];
+            if !(my progress = handle(atom, pos)) {
+                return none;
+            }
+            pos = progress[0];
+            while (progress = handle(atom, pos)) {
+                pos = progress[0];
+            }
+            return [pos, true];
+        }
+        else if fragmentType == RX_CCLASS {
+            my character = input.substr(pos, 1);
+            if character == "" {
+                return none;
+            }
+            # Returns true iff the cclass part matches the character
+            func handlePart(part) {
+                my partType = part[0];
+                if partType == CC_RANGE {
+                    my lower = part[1];
+                    my upper = part[2];
+                    return lower <= character && character <= upper;
+                }
+                throw new Exception { message: "Unknown cclass part type " ~ partType };
+            }
+            my n = ruleFragment.size();
+            for ^n -> i {
+                if i != 0 {
+                    my part = ruleFragment[i];
+                    if handlePart(part) {
+                        return [pos + 1, true];
+                    }
+                }
+            }
+            return none;
+        }
+        throw new Exception { message: "Unknown fragment type " ~ fragmentType };
+    }
+
+    my result = handle(grammar["TOP"], 0);
+    if result == none {
+        return none;
+    }
+    else {
+        return result[1];
+    }
+}
+
+## the tests
+
+is(
+    parse(""),
+    none,
+    "an empty input does not match"
+);
+
+is(
+    parse("foo"),
+    new Q.Term.Identifier { name: "foo" },
+    "matching an identifier"
+);
+
+done();
