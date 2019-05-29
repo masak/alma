@@ -28,20 +28,63 @@ func done() {
 
 ## grammar/parser stuff
 
+my RX_SEQUENCE = "<sequence>";
+my RX_POS_CAPTURE = "<positional capture>";
+my RX_BLOCK = "<block>";
 my RX_QUANT_1_OR_MORE = "<quantifier(+)>";
 my RX_CCLASS = "<character class>";
 my CC_RANGE = "<cclass range>";
 
 my grammar = {
-    "TOP": [RX_QUANT_1_OR_MORE, [RX_CCLASS, [CC_RANGE, "a", "z"]]],
+    "TOP":
+        [RX_SEQUENCE,
+            [RX_POS_CAPTURE,
+                [RX_QUANT_1_OR_MORE,
+                    [RX_CCLASS, [CC_RANGE, "a", "z"]]
+                ]
+            ],
+            [RX_BLOCK, func (match) {
+                my name = match["pos"][0];
+                return new Q.Term.Identifier { name };
+            }],
+        ],
 };
 
 func parse(input) {
+    my match = {
+        "pos": [],
+    };
+
     # Returns either an array `[newPos, ast]` on success,
     # or `none` on failure.
     func handle(ruleFragment, pos) {
         my fragmentType = ruleFragment[0];
-        if fragmentType == RX_QUANT_1_OR_MORE {
+        if fragmentType == RX_SEQUENCE {
+            my n = ruleFragment.size();
+            my progress = [pos, true];
+            for ^n -> i {
+                if i != 0 {
+                    my element = ruleFragment[i];
+                    if !(progress = handle(element, pos)) {
+                        return none;
+                    }
+                    pos = progress[0];
+                }
+            }
+            return progress;
+        }
+        else if fragmentType == RX_POS_CAPTURE {
+            my atom = ruleFragment[1];
+            my fromPos = pos;
+            my result = handle(atom, fromPos);
+            if result == none {
+                return none;
+            }
+            my toPos = result[0];
+            match["pos"].push("foo");
+            return result;
+        }
+        else if fragmentType == RX_QUANT_1_OR_MORE {
             my atom = ruleFragment[1];
             if !(my progress = handle(atom, pos)) {
                 return none;
@@ -77,6 +120,11 @@ func parse(input) {
                 }
             }
             return none;
+        }
+        else if fragmentType == RX_BLOCK {
+            my fn = ruleFragment[1];
+            my result = fn(match);
+            return [pos, result];
         }
         throw new Exception { message: "Unknown fragment type " ~ fragmentType };
     }
