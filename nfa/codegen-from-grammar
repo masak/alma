@@ -1,0 +1,357 @@
+#! /usr/local/bin/perl6
+
+class Shortcut {
+    has Str $.type;
+}
+
+class Quant {
+    has $.atom;
+    has Str $.type;
+    has $.separator;
+}
+
+class Separator {
+    has $.atom;
+    has Bool $.allow-trailing;
+}
+
+class PosCapture {
+    has @.atoms;
+}
+
+class RxBlock {
+    has @.statements;
+}
+
+class StMy {
+    has Str $.ident;
+    has $.expr;
+}
+
+class StReturn {
+    has $.expr;
+}
+
+class ExDollarVar {
+    has Int $.index;
+}
+
+class ExNew {
+    has Str $.name;
+    has Str $.initblock;
+}
+
+grammar Grammar {
+    token TOP {
+        'grammar' <.ws> '{'
+            <.ws>
+            <rule>*
+        ['}' || <panic("Expected 'token' or '}'")>]
+        <.ws>
+
+        {
+            die "There must be a 'TOP' rule defined"
+                unless 'TOP' ∈ $<rule>».ast»<name>;
+            make $<rule>».ast;
+        }
+    }
+
+    token rule {
+        'token' <.ws> <ident> <.ws> '{'
+            <.ws>
+            $<contents>=[
+                <quanted-atom>*
+            ]
+        ['}' || <panic("Expected atom or '}'")>]
+        <.ws>
+
+        {
+            make {
+                name => ~$<ident>,
+                contents => $<contents>.Str.trim,
+                atoms => $<quanted-atom>».ast,
+            };
+        }
+    }
+
+    token quanted-atom {
+        <atom>
+        [
+            <quant>
+            <separator>?
+        ]?
+
+        {
+            my $type = $<quant>.ast;
+            my $atom = $<atom>.ast;
+            my $separator = $<separator>.?ast;
+
+            make $<quant>
+                ?? Quant.new(:$type, :$atom, :$separator)
+                !! $atom;
+        }
+    }
+
+    proto token atom {*}
+
+    token atom:literal {
+        <[']>
+            $<literal>=(<-[']>*)
+        <[']>
+        <.ws>
+
+        { make ~$<literal> }
+    }
+
+    token atom:character-class {
+        '<['
+            <charclass-element>*
+        ']>'
+        <.ws>
+
+        { make (my Range @ = $<charclass-element>».ast) }
+    }
+
+    token atom:charclass-shortcut {
+        '\\'
+        $<type>=<[wdhsWDHS]>
+        <.ws>
+
+        { make Shortcut.new(type => ~$<type>) }
+    }
+
+    token atom:positional-capture {
+        '('
+            <.ws>
+            <quanted-atom>*
+        ')'
+        <.ws>
+
+        { make PosCapture.new(atoms => $<quanted-atom>».ast) }
+    }
+
+    token atom:block {
+        '{'
+            <.ws>
+            <statement>*
+        '}'
+        <.ws>
+
+        { make RxBlock.new(statements => $<statement>».ast) }
+    }
+
+    proto token charclass-element {*}
+
+    token charclass-element:char {
+        <-[\]]>
+
+        { make Range.new(~$/, ~$/) }
+    }
+
+    token charclass-element:range {
+        $<from>=<-[\]]>
+        '..'
+        $<to>=<-[\]]>
+
+        { make Range.new(~$<from>, ~$<to>) }
+    }
+
+    token quant {
+        $<type>=<[ ? * + ]>
+        <.ws>
+
+        { make ~$<type> }
+    }
+
+    token separator {
+        $<percents>=[ '%' | '%%' ]
+        <.ws>
+        <atom>
+
+        {
+            my $atom = $<atom>.ast;
+            my $allow-trailing = ~$<percents> eq "%%";
+            make Separator.new(:$atom, :$allow-trailing);
+        }
+    }
+
+    proto token statement {*}
+
+    token statement:my {
+        'my'
+        <.ws>
+        <ident>
+        <.ws>
+        '='
+        <.ws>
+        <expr>
+        ';'
+        <.ws>
+
+        { make StMy.new(ident => ~$<ident>, expr => $<expr>.ast) }
+    }
+
+    token statement:return {
+        'return'
+        <.ws>
+        <expr>
+        ';'
+        <.ws>
+
+        { make StReturn.new(expr => $<expr>.ast) }
+    }
+
+    proto token expr {*}
+
+    token expr:dollarvar {
+        '$' (\d+)
+        <.ws>
+
+        { make ExDollarVar.new(index => +$0) }
+    }
+
+    token expr:new {
+        'new'
+        <.ws>
+        (\S+)
+        <.ws>
+        (
+            '{'         # {
+                <-[}]>*
+            '}'
+        )
+        <.ws>
+
+        { make ExNew.new(name => ~$0, initblock => ~$1) }
+    }
+
+    method panic($message) {
+        my $pos = self.pos;
+        my $orig = self.orig;
+
+        sub de-nl($s) {
+            $s.subst(/\n/, "\x[2424]", :g);
+        }
+
+        my $before-length = 12;
+        my $before = de-nl $orig.substr( ($pos - $before-length max 0) ..^ $pos );
+        my $before-ellipsis = $pos - $before-length > 0
+            ?? "..."
+            !! "";
+
+        my $snippet-length = 12;
+        my $snippet = de-nl $orig.substr($pos, $snippet-length);
+        my $snippet-ellipsis = $pos < $orig.chars - $snippet-length
+            ?? "..."
+            !! "";
+
+        my $some-text = "$before-ellipsis$before⏏$snippet$snippet-ellipsis";
+        note "Parse failed: $message (`$some-text` at pos $pos)";
+        exit 1;
+    }
+}
+
+sub indent($code) {
+    "\n" ~ $code.indent(4);
+}
+
+sub nlize($line) {
+    "$line\n";
+}
+
+sub commaize($line) {
+    "$line,";
+}
+
+multi gen-code(@ranges where { all(@ranges) ~~ Range }) {
+    return "[RX_CCLASS, {
+        @ranges.map(&gen-code).map(&indent).map(&commaize)
+    }\n]";
+}
+
+multi gen-code(@rules) {
+    return @rules.map(&gen-code)».indent(4).join;
+}
+
+multi gen-code(%rule) {
+    return qq["{%rule<name>}": [RX_SEQUENCE, {
+        %rule<atoms>.map(&gen-code).map(&indent).map(&commaize)
+    }\n],];
+}
+
+multi gen-code(PosCapture $pc) {
+    return "[RX_POS_CAPTURE, {
+        $pc.atoms.map(&gen-code).map(&indent).map(&commaize)
+    }\n]";
+}
+
+multi gen-code(Quant $q) {
+    my $type = "RX_QUANT_" ~ do given $q.type {
+        when '+' { "1_OR_MORE" }
+        default { die "Unknown quant type '$_'" }
+    };
+    return "[{$type}, {
+        commaize(indent(gen-code($q.atom)))
+    }\n]";
+}
+
+multi gen-code(Range $r) {
+    my $from = $r.min;
+    my $to = $r.max;
+    return qq|[CC_RANGE, "{$from}", "{$to}"]|;
+}
+
+multi gen-code(RxBlock $b) {
+    return "[RX_BLOCK, func (match) "
+        ~ q[{]
+        ~ indent($b.statements.map(&gen-code).map(&nlize).join)
+        ~ q[}]
+        ~ "]";
+}
+
+multi gen-code(StMy $my) {
+    return "my {$my.ident} = {gen-code($my.expr)};";
+}
+
+multi gen-code(StReturn $return) {
+    return "return {gen-code($return.expr)};";
+}
+
+multi gen-code(ExDollarVar $dv) {
+    return qq|match["pos"][{$dv.index}]|;
+}
+
+multi gen-code(ExNew $new) {
+    return "new {$new.name} {$new.initblock}";
+}
+
+constant $IN_OUT_FILE = "nfa/mutable-grammar.007";
+
+sub MAIN($grammar-path = "nfa/double-oh-one.grammar") {
+    my $match = Grammar.parse(slurp($grammar-path));
+    die "Couldn't match grammar"
+        unless $match;
+    my $grammar = $match.ast;
+
+    my $generated-grammar-code = gen-code($grammar);
+    $generated-grammar-code ~~ s:g[ \h+ $$ ] = "";
+
+    my @lines = $IN_OUT_FILE.IO.lines;
+
+    given open($IN_OUT_FILE, :w) -> $fh {
+        my $remove-old-grammar = False;
+        for @lines -> $line {
+            if $line eq '};' {
+                $remove-old-grammar = False;
+            }
+            next if $remove-old-grammar;
+            
+            $fh.say($line);
+
+            if $line eq 'my grammar = {' {
+                $fh.say($generated-grammar-code);
+                $remove-old-grammar = True;
+            }
+        }
+    }
+}

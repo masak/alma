@@ -36,18 +36,19 @@ my RX_CCLASS = "<character class>";
 my CC_RANGE = "<cclass range>";
 
 my grammar = {
-    "TOP":
-        [RX_SEQUENCE,
-            [RX_POS_CAPTURE,
-                [RX_QUANT_1_OR_MORE,
-                    [RX_CCLASS, [CC_RANGE, "a", "z"]]
-                ]
+    "TOP": [RX_SEQUENCE,
+        [RX_POS_CAPTURE,
+            [RX_QUANT_1_OR_MORE,
+                [RX_CCLASS,
+                    [CC_RANGE, "a", "z"],
+                ],
             ],
-            [RX_BLOCK, func (match) {
-                my name = match["pos"][0];
-                return new Q.Term.Identifier { name };
-            }],
         ],
+        [RX_BLOCK, func (match) {
+            my name = match["pos"][0];
+            return new Q.Term.Identifier { name };
+        }],
+    ],
 };
 
 func parse(input) {

@@ -1,0 +1,9 @@
+grammar {
+    token TOP {
+        (<[a..z]>+)
+        {
+            my name = $0;
+            return new Q.Term.Identifier { name };
+        }
+    }
+}
