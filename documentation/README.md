@@ -197,7 +197,8 @@ tightest operators at the top, loosest at the bottom.
 | (tightest)           | left  | postfix  | `[] () .` |
 |                      | left  | prefix   | `+ - ~ ? ! ^` |
 | Multiplicative       | left  | infix    | `* % %% divmod` |
-| Additive             | left  | infix    | `+ - ~` |
+| Additive             | left  | infix    | `+ -` |
+| Concatenation        | left  | infix    | `~` |
 | Comparison           | left  | infix    | `== != < <= > >= ~~ !~~` |
 | Conjuctive           | left  | infix    | `&&` |
 | Disjunctive          | left  | infix    | `\|\| //` |
