@@ -880,12 +880,7 @@ class Q::Statement::If does Q::Statement {
                     die X::ParameterMismatch.new(
                         :type("Else block"), :$paramcount, :argcount("0 or 1"))
                         if $paramcount > 1;
-                    $runtime.enter($runtime.current-frame, $.else.static-lexpad, $.else.statementlist);
-                    for @($.else.parameterlist.parameters.elements) Z $expr -> ($param, $arg) {
-                        $runtime.declare-var($param.identifier, $arg);
-                    }
-                    $.else.statementlist.run($runtime);
-                    $runtime.leave;
+                    $runtime.run-block($.else, [$expr]);
                 }
             }
         }
@@ -900,9 +895,7 @@ class Q::Statement::Block does Q::Statement {
     has $.block;
 
     method run($runtime) {
-        $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);
-        $.block.statementlist.run($runtime);
-        $runtime.leave;
+        $runtime.run-block($.block, []);
     }
 }
 
@@ -935,8 +928,11 @@ class Q::Statement::For does Q::Statement {
             unless $array ~~ Val::Array;
 
         for $array.elements -> $arg {
-            $runtime.run-block($.block, $count ?? [$arg] !! []);
+            $runtime.run-block($.block, [$arg]);
+            last if $runtime.last-triggered;
+            $runtime.reset-triggers();
         }
+        $runtime.reset-triggers();
     }
 }
 
@@ -956,8 +952,11 @@ class Q::Statement::While does Q::Statement {
             die X::ParameterMismatch.new(
                 :type("While loop"), :$paramcount, :argcount("0 or 1"))
                 if $paramcount > 1;
-            $runtime.run-block($.block, $paramcount ?? [$expr] !! []);
+            $runtime.run-block($.block, [$expr]);
+            last if $runtime.last-triggered;
+            $runtime.reset-triggers();
         }
+        $runtime.reset-triggers();
     }
 }
 
@@ -990,6 +989,26 @@ class Q::Statement::Throw does Q::Statement {
             if $value !~~ Val::Exception;
 
         die X::_007::RuntimeException.new(:msg($value.message.value));
+    }
+}
+
+### ### Q::Statement::Next
+###
+### A `next` statement.
+###
+class Q::Statement::Next does Q::Statement {
+    method run($runtime) {
+        $runtime.trigger-next();
+    }
+}
+
+### ### Q::Statement::Last
+###
+### A `last` statement.
+###
+class Q::Statement::Last does Q::Statement {
+    method run($runtime) {
+        $runtime.trigger-last();
     }
 }
 
@@ -1060,6 +1079,7 @@ class Q::StatementList does Q {
     method run($runtime) {
         for $.statements.elements -> $statement {
             my $value = $statement.run($runtime);
+            last if $runtime.next-triggered || $runtime.last-triggered;
             LAST if $statement ~~ Q::Statement::Expr {
                 return $value;
             }

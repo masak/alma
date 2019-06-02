@@ -55,4 +55,30 @@ use _007::Test;
     outputs $program, ".\n.\n.\n", "can loop over variable, not just literal array";
 }
 
+{
+    my $program = q:to/./;
+        for [1, 2, 3, 4] -> n {
+            if n %% 2 {
+                next;
+            }
+            say(n);
+        }
+        .
+
+    outputs $program, "1\n3\n", "`next` can skip to the next iteration of a `for` loop";
+}
+
+{
+    my $program = q:to/./;
+        for [1, 2, 3, 4] -> n {
+            say(n);
+            if n == 3 {
+                last;
+            }
+        }
+        .
+
+    outputs $program, "1\n2\n3\n", "`last` can abort a `for` loop early";
+}
+
 done-testing;

@@ -81,6 +81,14 @@ grammar _007::Parser::Syntax {
         throw» [<.ws> <EXPR>]?
     }
 
+    token statement:next {
+        next»
+    }
+
+    token statement:last {
+        last»
+    }
+
     token statement:if {
         if» <.ws> <xblock>
         [  <.ws> else <.ws>

@@ -176,6 +176,14 @@ class _007::Parser::Actions {
         make Q::Statement::Throw.new(:$expr);
     }
 
+    method statement:next ($/) {
+        make Q::Statement::Next.new();
+    }
+
+    method statement:last ($/) {
+        make Q::Statement::Last.new();
+    }
+
     method statement:if ($/) {
         my %parameters = $<xblock>.ast;
         %parameters<else> = ast-if-any($<else>);
