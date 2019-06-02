@@ -81,4 +81,54 @@ use _007::Test;
     outputs $program, "1\n2\n3\n", "`last` can abort a `for` loop early";
 }
 
+{
+    my $program = q:to/./;
+        next;
+        .
+
+    parse-error
+        $program,
+        X::ControlFlow,
+        "cannot `next` outside of loop";
+}
+
+{
+    my $program = q:to/./;
+        last;
+        .
+
+    parse-error
+        $program,
+        X::ControlFlow,
+        "cannot `last` outside of loop";
+}
+
+{
+    my $program = q:to/./;
+        if 42 {
+            next;
+        }
+        .
+
+    parse-error
+        $program,
+        X::ControlFlow,
+        "cannot `next` outside of loop -- `if` statements don't count";
+}
+
+{
+    my $program = q:to/./;
+        for [1, 2, 3] {
+            func foo() {
+                next;
+            }
+        }
+        .
+
+    parse-error
+        $program,
+        X::ControlFlow,
+        "cannot `next` outside of loop -- functions are opaque to loops";
+}
+
 done-testing;

@@ -15,7 +15,8 @@ class _007::Parser {
     method parse($program, Bool :$*unexpanded) {
         my %*assigned;
         my @*declstack;
-        my $*in_routine = False;
+        my $*in-routine = False;
+        my $*in-loop = False;
         my $*parser = self;
         my $*runtime = $!runtime;
         @!checks = ();
