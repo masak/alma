@@ -57,7 +57,8 @@ grammar _007::Parser::Syntax {
     token statement:block { <pblock> }
     rule statement:func-or-macro {
         [export\s+]?$<routine>=(func|macro)» [<identifier> || <.panic("identifier")>]
-        :my $*in_routine = True;
+        :my $*in-routine = True;
+        :my $*in-loop = False;
         {
             declare($<routine> eq "func"
                         ?? Q::Statement::Func
@@ -81,6 +82,14 @@ grammar _007::Parser::Syntax {
         throw» [<.ws> <EXPR>]?
     }
 
+    token statement:next {
+        next»
+    }
+
+    token statement:last {
+        last»
+    }
+
     token statement:if {
         if» <.ws> <xblock>
         [  <.ws> else <.ws>
@@ -92,10 +101,14 @@ grammar _007::Parser::Syntax {
     }
 
     token statement:for {
-        for» <.ws> <xblock>
+        for» <.ws> <EXPR>
+        :my $*in-loop = True;
+        <pblock>
     }
     token statement:while {
-        while» <.ws> <xblock>
+        while» <.ws> <EXPR>
+        :my $*in-loop = True;
+        <pblock>
     }
     token statement:BEGIN {
         BEGIN» <.ws> <statement>
@@ -266,7 +279,7 @@ grammar _007::Parser::Syntax {
     }
     token term:func {
         func» <.ws> <identifier>?
-        :my $*in_routine = True;
+        :my $*in-routine = True;
         <.newpad>
         {
             if $<identifier> {
@@ -300,7 +313,7 @@ grammar _007::Parser::Syntax {
     rule property:method {
         <identifier>
         '(' ~ ')' [
-            :my $*in_routine = True;
+            :my $*in-routine = True;
             <.newpad>
             <parameterlist>
         ]

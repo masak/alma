@@ -166,7 +166,7 @@ class _007::Parser::Actions {
 
     method statement:return ($/) {
         die X::ControlFlow::Return.new
-            unless $*in_routine;
+            unless $*in-routine;
         my $expr = ast-if-any($<EXPR>);
         make Q::Statement::Return.new(:$expr);
     }
@@ -174,6 +174,18 @@ class _007::Parser::Actions {
     method statement:throw ($/) {
         my $expr = ast-if-any($<EXPR>);
         make Q::Statement::Throw.new(:$expr);
+    }
+
+    method statement:next ($/) {
+        die X::ControlFlow.new
+            unless $*in-loop;
+        make Q::Statement::Next.new();
+    }
+
+    method statement:last ($/) {
+        die X::ControlFlow.new
+            unless $*in-loop;
+        make Q::Statement::Last.new();
     }
 
     method statement:if ($/) {
@@ -184,11 +196,17 @@ class _007::Parser::Actions {
     }
 
     method statement:for ($/) {
-        make Q::Statement::For.new(|$<xblock>.ast);
+        make Q::Statement::For.new(
+            expr => $<EXPR>.ast,
+            block => $<pblock>.ast,
+        );
     }
 
     method statement:while ($/) {
-        make Q::Statement::While.new(|$<xblock>.ast);
+        make Q::Statement::While.new(
+            expr => $<EXPR>.ast,
+            block => $<pblock>.ast,
+        );
     }
 
     method statement:BEGIN ($/) {

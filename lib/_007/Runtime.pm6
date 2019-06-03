@@ -32,6 +32,8 @@ class _007::Runtime {
     has $!prompt-builtin;
     has $!exit-builtin;
     has $.exit-code;
+    has $.next-triggered;
+    has $.last-triggered;
 
     submethod BUILD(:$!input, :$!output, :@!arguments) {
         $!builtin-opscope = opscope();
@@ -260,6 +262,19 @@ class _007::Runtime {
             }
         }
         $value || NONE
+    }
+
+    method trigger-next() {
+        $!next-triggered = True;
+    }
+
+    method trigger-last() {
+        $!last-triggered = True;
+    }
+
+    method reset-triggers() {
+        $!next-triggered = False;
+        $!last-triggered = False;
     }
 
     method property($obj, Str $propname) {
