@@ -12,33 +12,25 @@ is called `Q`.
 
 ## Get it
 
-You need to have [Rakudo Perl 6](https://perl6.org/downloads/) installed and in
-your path.
+If you're just planning to be a 007 end user, `zef` is the recommended way to
+install 007:
 
-Then, clone the 007 repository. (This step requires Git. There's also [a zip
-file](https://github.com/masak/007/archive/master.zip).)
-
-```
-$ git clone https://github.com/masak/007.git
-[...]
+```sh
+zef install 007
 ```
 
-## Run it
+(If you want to install from source, see [the
+documentation](http://masak.github.io/007/#installation-from-source).)
 
-Set the `PERL6LIB` environment variable:
-
-```
-$ cd 007
-$ export PERL6LIB=$(pwd)/lib
-```
+### Run it
 
 Now this should work:
 
-```
-$ bin/007 -e='say("OH HAI")'
+```sh
+$ 007 -e='say("OH HAI")'
 OH HAI
 
-$ bin/007 examples/format.007
+$ 007 examples/format.007
 abracadabra
 foo{1}bar
 ```
