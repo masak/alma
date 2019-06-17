@@ -1,4 +1,6 @@
-func infix:<**>(x, n) is tighter(infix:<*>) is assoc("right") {
+@tighter(infix:<*>)
+@assoc("right")
+func infix:<**>(x, n) {
     if n == 0 {
         return 1;
     }

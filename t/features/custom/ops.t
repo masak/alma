@@ -117,26 +117,28 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<~?>(left, right) is looser(infix:<+>) {
+        @looser(infix:<+>)
+        func infix:<~?>(left, right) {
             return 6;
         }
 
         say(1 + 9 ~? 12);
         .
 
-    outputs $program, "6\n", "can specify trait to bind loose";
+    outputs $program, "6\n", "can specify decorator to bind loose";
 }
 
 {
     my $program = q:to/./;
-        func infix:<~?>(left, right) is tighter(infix:<+>) {
+        @tighter(infix:<+>)
+        func infix:<~?>(left, right) {
             return 6;
         }
 
         say(1 + 9 ~? 12);
         .
 
-    outputs $program, "7\n", "can specify trait to bind tight";
+    outputs $program, "7\n", "can specify decorator to bind tight";
 }
 
 {
@@ -145,7 +147,8 @@ use _007::Test;
             return 18;
         }
 
-        func infix:<~@>(left, right) is tighter(infix:<+>) {
+        @tighter(infix:<+>)
+        func infix:<~@>(left, right) {
             return 30;
         }
 
@@ -157,20 +160,24 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!?!>(left, right) is tighter(infix:<+>) is looser(infix:<+>) {
+        @tighter(infix:<+>)
+        @looser(infix:<+>)
+        func infix:<!?!>(left, right) {
         }
         .
 
-    parse-error $program, X::Trait::Conflict, "can't have both tighter and looser traits";
+    parse-error $program, X::Decorator::Conflict, "can't have both tighter and looser decorators";
 }
 
 {
     my $program = q:to/./;
-        func infix:<!?!>(left, right) is equiv(infix:<+>) is equiv(infix:<*>) {
+        @equiv(infix:<+>)
+        @equiv(infix:<*>)
+        func infix:<!?!>(left, right) {
         }
         .
 
-    parse-error $program, X::Trait::Duplicate, "can't use the same trait more than once";
+    parse-error $program, X::Decorator::Duplicate, "can't use the same decorator more than once";
 }
 
 
@@ -180,7 +187,8 @@ use _007::Test;
             return "@";
         }
 
-        func infix:<!>(left, right) is equiv(infix:<@>) {
+        @equiv(infix:<@>)
+        func infix:<!>(left, right) {
             return "!";
         }
 
@@ -188,30 +196,35 @@ use _007::Test;
         say(30 ! 2 @ 14);
         .
 
-    outputs $program, "!\n@\n", "can specify trait to bind equal";
+    outputs $program, "!\n@\n", "can specify decorator to bind equiv";
 }
 
 {
     my $program = q:to/./;
-        func infix:<!?!>(left, right) is tighter(infix:<+>) is equiv(infix:<+>) {
+        @tighter(infix:<+>)
+        @equiv(infix:<+>)
+        func infix:<!?!>(left, right) {
         }
         .
 
-    parse-error $program, X::Trait::Conflict, "can't have both tighter and equal traits";
+    parse-error $program, X::Decorator::Conflict, "can't have both tighter and equiv decorators";
 }
 
 {
     my $program = q:to/./;
-        func infix:<!++>(left, right) is looser(infix:<+>) is equiv(infix:<+>) {
+        @looser(infix:<+>)
+        @equiv(infix:<+>)
+        func infix:<!++>(left, right) {
         }
         .
 
-    parse-error $program, X::Trait::Conflict, "can't have both looser and equal traits";
+    parse-error $program, X::Decorator::Conflict, "can't have both looser and equiv decorators";
 }
 
 {
     my $program = q:to/./;
-        func infix:<@>(left, right) is assoc("right") {
+        @assoc("right")
+        func infix:<@>(left, right) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -223,7 +236,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<%>(left, right) is assoc("left") {
+        @assoc("left")
+        func infix:<%>(left, right) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
@@ -247,7 +261,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!>(left, right) is assoc("non") {
+        @assoc("non")
+        func infix:<!>(left, right) {
             return "oh, James";
         }
 
@@ -259,7 +274,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!>(left, right) is assoc("non") {
+        @assoc("non")
+        func infix:<!>(left, right) {
             return "oh, James";
         }
 
@@ -271,54 +287,62 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<&-&>(left, right) is assoc("salamander") {
+        @assoc("salamander")
+        func infix:<&-&>(left, right) {
         }
         .
 
-    parse-error $program, X::Trait::IllegalValue, "you can't just put any old value in an assoc trait";
+    parse-error $program, X::Decorator::IllegalValue, "you can't just put any old value in an assoc decorator";
 }
 
 {
     my $program = q:to/./;
-        func infix:<@>(left, right) is assoc("right") {
+        @assoc("right")
+        func infix:<@>(left, right) {
         }
 
-        func infix:<@@>(left, right) is equiv(infix:<@>) {
+        @equiv(infix:<@>)
+        func infix:<@@>(left, right) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
         say("A" @@ "B" @@ "C");
         .
 
-    outputs $program, "(A, (B, C))\n", "right associativity inherits through the 'is equiv' trait";
+    outputs $program, "(A, (B, C))\n", "right associativity inherits through the equiv decorator";
 }
 
 {
     my $program = q:to/./;
-        func infix:<@>(left, right) is assoc("non") {
+        @assoc("non")
+        func infix:<@>(left, right) {
         }
 
-        func infix:<@@>(left, right) is equiv(infix:<@>) {
+        @equiv(infix:<@>)
+        func infix:<@@>(left, right) {
             return "(" ~ left ~ ", " ~ right ~ ")";
         }
 
         say("A" @@ "B" @@ "C");
         .
 
-    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equiv' trait";
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the equiv decorator";
 }
 
 {
     my $program = q:to/./;
-        func infix:<%>(left, right) is assoc("left") {
+        @assoc("left")
+        func infix:<%>(left, right) {
         }
 
-        func infix:<%%>(left, right) is equiv(infix:<%>) is assoc("right") {
+        @equiv(infix:<%>)
+        @assoc("right")
+        func infix:<%%>(left, right) {
         }
         .
 
     parse-error $program, X::Associativity::Conflict,
-        "if you're using the 'is equiv' trait, you can't contradict the associativity";
+        "if you're using the equiv decorator, you can't contradict the associativity";
 }
 
 {
@@ -376,7 +400,8 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        func postfix:<!>(term) is looser(prefix:<¿>) {
+        @looser(prefix:<¿>)
+        func postfix:<!>(term) {
             return "postfix is looser";
         }
 
@@ -384,7 +409,8 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        func prefix:<%>(term) is tighter(postfix:<$>) {
+        @tighter(postfix:<$>)
+        func prefix:<%>(term) {
             return "prefix is looser";
         }
 
@@ -392,7 +418,7 @@ use _007::Test;
         say(%[]$);
         .
 
-    outputs $program, "postfix is looser\n" x 2, "postfixes can be made looser with traits";
+    outputs $program, "postfix is looser\n" x 2, "postfixes can be made looser with decorators";
 }
 
 {
@@ -401,7 +427,8 @@ use _007::Test;
             return "postfix is looser";
         }
 
-        func prefix:<¿>(term) is tighter(postfix:<!>) {
+        @tighter(postfix:<!>)
+        func prefix:<¿>(term) {
             return "prefix is looser";
         }
 
@@ -409,7 +436,8 @@ use _007::Test;
             return "prefix is looser";
         }
 
-        func postfix:<$>(term) is looser(prefix:<%>) {
+        @looser(prefix:<%>)
+        func postfix:<$>(term) {
             return "postfix is looser";
         }
 
@@ -417,24 +445,28 @@ use _007::Test;
         say(%[]$);
         .
 
-    outputs $program, "postfix is looser\n" x 2, "prefixes can be made tighter with traits";
+    outputs $program, "postfix is looser\n" x 2, "prefixes can be made tighter with decorators";
 }
 
 {
     my $program = q:to/./;
-        func postfix:<¡>(term) is assoc("right") {
+        @assoc("right")
+        func postfix:<¡>(term) {
             return "postfix is looser";
         }
 
-        func prefix:<¿>(term) is equiv(postfix:<¡>) {
+        @equiv(postfix:<¡>)
+        func prefix:<¿>(term) {
             return "prefix is looser";
         }
 
-        func prefix:<%>(term) is assoc("left") {
+        @assoc("left")
+        func prefix:<%>(term) {
             return "prefix is looser";
         }
 
-        func postfix:<$>(term) is equiv(prefix:<%>) {
+        @equiv(prefix:<%>)
+        func postfix:<$>(term) {
             return "postfix is looser";
         }
 
@@ -448,21 +480,24 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func prefix:<¿>(left, right) is assoc("non") {
+        @assoc("non")
+        func prefix:<¿>(left, right) {
         }
 
-        func postfix:<!>(left, right) is equiv(prefix:<¿>) {
+        @equiv(prefix:<¿>)
+        func postfix:<!>(left, right) {
         }
 
         say(¿0!);
         .
 
-    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the 'is equiv' trait";
+    parse-error $program, X::Op::Nonassociative, "non-associativity inherits through the equiv decorator";
 }
 
 {
     my $program = q:to/./;
-        func postfix:<!>(left, right) is tighter(infix:<+>) {
+        @tighter(infix:<+>)
+        func postfix:<!>(left, right) {
         }
         .
 
@@ -471,7 +506,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<!>(left, right) is tighter(prefix:<->) {
+        @tighter(prefix:<->)
+        func infix:<!>(left, right) {
         }
         .
 
@@ -504,7 +540,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func postfix:<‡>(x) is looser(prefix:<^>) {
+        @looser(prefix:<^>)
+        func postfix:<‡>(x) {
             return [];
         }
 
@@ -524,7 +561,8 @@ use _007::Test;
             return x ~ " prefix:<&>";
         }
 
-        func postfix:<‡>(x) is looser(prefix:<&>) {
+        @looser(prefix:<&>)
+        func postfix:<‡>(x) {
             return x ~ " postfix:<‡>";
         }
 
@@ -665,7 +703,8 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        func infix:<@->(a, b) is looser(infix:<+>) {
+        @looser(infix:<+>)
+        func infix:<@->(a, b) {
             if b == 0 {
                 return a;
             }
@@ -714,21 +753,29 @@ use _007::Test;
 {
     my $program = q:to/./;
         {
-            func postfix:<!>(t) is assoc("right") {
+            @assoc("right")
+            func postfix:<!>(t) {
                 "postfix:<!>(" ~ t ~ ")";
             }
-            func prefix:<?>(t) is equiv(postfix:<!>) {
+
+            @equiv(postfix:<!>)
+            func prefix:<?>(t) {
                 "prefix:<?>(" ~ t ~ ")";
             }
+
             say(?"term"!);
         }
         {
-            func prefix:<?>(t) is assoc("right") {
+            @assoc("right")
+            func prefix:<?>(t) {
                 "prefix:<?>(" ~ t ~ ")";
             }
-            func postfix:<!>(t) is equiv(prefix:<?>) {
+
+            @equiv(prefix:<?>)
+            func postfix:<!>(t) {
                 "postfix:<!>(" ~ t ~ ")";
             }
+
             say(?"term"!);
         }
         .

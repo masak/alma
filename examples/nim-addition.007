@@ -22,7 +22,8 @@ func binfmt(number) {
     return result || "0";
 }
 
-func infix:<⊕>(lhs, rhs) is equiv(infix:<+>) {
+@equiv(infix:<+>)
+func infix:<⊕>(lhs, rhs) {
     my lb = binfmt(lhs);
     my rb = binfmt(rhs);
     lb = padLeft(lb, rb.chars(), "0");
