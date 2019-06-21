@@ -33,10 +33,15 @@ my RX_POS_CAPTURE = "<positional capture>";
 my RX_BLOCK = "<block>";
 my RX_QUANT_1_OR_MORE = "<quantifier(+)>";
 my RX_CCLASS = "<character class>";
+my RX_LITERAL = "<literal>";
+my RX_RULE_CALL = "<rule call>";
 my CC_RANGE = "<cclass range>";
 
 my grammar = {
     "TOP": [RX_SEQUENCE,
+        [RX_RULE_CALL, "term", false],
+    ],
+    "term:identifier": [RX_SEQUENCE,
         [RX_POS_CAPTURE,
             [RX_QUANT_1_OR_MORE,
                 [RX_CCLASS,
@@ -47,6 +52,21 @@ my grammar = {
         [RX_BLOCK, func (match) {
             my name = match["pos"][0];
             return new Q.Term.Identifier { name };
+        }],
+    ],
+    "term:my": [RX_SEQUENCE,
+        [RX_LITERAL, "my"],
+        [RX_RULE_CALL, "ws", true],
+        [RX_POS_CAPTURE,
+            [RX_QUANT_1_OR_MORE,
+                [RX_CCLASS,
+                    [CC_RANGE, "a", "z"],
+                ],
+            ],
+        ],
+        [RX_BLOCK, func (match) {
+            my name = match["pos"][0];
+            return new Q.Term.My { identifier: new Q.Identifier { name } };
         }],
     ],
 };
@@ -126,6 +146,33 @@ func parse(input) {
             my fn = ruleFragment[1];
             my result = fn(match);
             return [pos, result];
+        }
+        else if fragmentType == RX_RULE_CALL {
+            my ruleName = ruleFragment[1];
+            if grammar.has(ruleName) {
+                return handle(grammar[ruleName], pos);
+            }
+            else {
+                func startsWith(s1, s2) { s1.substr(0, s2.chars()) == s2 }
+                func startsWithRuleName(name) { startsWith(name, ruleName ~ ":") }
+
+                for grammar.keys().filter(startsWithRuleName) -> rn {
+                    my result = handle(grammar[rn], pos);
+                    if result {
+                        return result;
+                    }
+                }
+                return none;
+            }
+        }
+        else if fragmentType == RX_LITERAL {
+            my literal = ruleFragment[1];
+            my length = literal.chars();
+            my substring = input.substr(pos, length);
+            if literal == substring {
+                return [pos + length, true];
+            }
+            return none;
         }
         throw new Exception { message: "Unknown fragment type " ~ fragmentType };
     }

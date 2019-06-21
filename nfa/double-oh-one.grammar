@@ -1,9 +1,21 @@
 grammar {
-    token TOP {
+    token TOP { <term> }
+
+    token term:identifier {
         (<[a..z]>+)
         {
             my name = $0;
             return new Q.Term.Identifier { name };
+        }
+    }
+
+    token term:my {
+        "my" <.ws> (<[a..z]>+)
+        {
+            my name = $0;
+            return new Q.Term.My {
+                identifier: new Q.Identifier { name },
+            };
         }
     }
 }

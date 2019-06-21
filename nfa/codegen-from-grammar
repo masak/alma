@@ -32,13 +32,30 @@ class StReturn {
     has $.expr;
 }
 
-class ExDollarVar {
+role Ex {
+}
+
+class ExDollarVar does Ex {
     has Int $.index;
 }
 
-class ExNew {
+class ExNew does Ex {
     has Str $.name;
-    has Str $.initblock;
+    has @.props;
+}
+
+class PropVar {
+    has Str $.ident;
+}
+
+class PropKeyValue {
+    has Str $.key;
+    has Ex $.value;
+}
+
+class RuleCall {
+    has Str $.ident;
+    has Bool $.dot;
 }
 
 grammar Grammar {
@@ -57,7 +74,7 @@ grammar Grammar {
     }
 
     token rule {
-        'token' <.ws> <ident> <.ws> '{'
+        'token' <.ws> $<name>=[<ident>[':'<ident>]?] <.ws> '{'
             <.ws>
             $<contents>=[
                 <quanted-atom>*
@@ -67,7 +84,7 @@ grammar Grammar {
 
         {
             make {
-                name => ~$<ident>,
+                name => ~$<name>,
                 contents => $<contents>.Str.trim,
                 atoms => $<quanted-atom>».ast,
             };
@@ -95,9 +112,9 @@ grammar Grammar {
     proto token atom {*}
 
     token atom:literal {
-        <[']>
-            $<literal>=(<-[']>*)
-        <[']>
+        <["]>
+            $<literal>=(<-["]>*)
+        <["]>
         <.ws>
 
         { make ~$<literal> }
@@ -138,6 +155,16 @@ grammar Grammar {
         <.ws>
 
         { make RxBlock.new(statements => $<statement>».ast) }
+    }
+
+    token atom:rulecall {
+        '<'
+            $<dot>=['.'?]
+            <ident>
+        '>'
+        <.ws>
+
+        { make RuleCall.new(ident => ~$<ident>, dot => $<dot> eq ".") }
     }
 
     proto token charclass-element {*}
@@ -215,14 +242,32 @@ grammar Grammar {
         <.ws>
         (\S+)
         <.ws>
-        (
-            '{'         # {
-                <-[}]>*
-            '}'
-        )
+        '{'
+            <.ws>
+            <prop>* %% [',' <.ws>]
+        '}'
         <.ws>
 
-        { make ExNew.new(name => ~$0, initblock => ~$1) }
+        { make ExNew.new(name => ~$0, props => $<prop>».ast) }
+    }
+
+    proto token prop {*}
+
+    token prop:kv {
+        <ident>
+        <.ws>
+        ':'
+        <.ws>
+        <expr>
+
+        { make PropKeyValue.new(key => ~$<ident>, value => $<expr>.ast) }
+    }
+
+    token prop:var {
+        <ident>
+        <.ws>
+
+        { make PropVar.new(ident => ~$<ident>) }
     }
 
     method panic($message) {
@@ -270,7 +315,7 @@ multi gen-code(@ranges where { all(@ranges) ~~ Range }) {
 }
 
 multi gen-code(@rules) {
-    return @rules.map(&gen-code)».indent(4).join;
+    return @rules.map(&gen-code)».indent(4).join("\n");
 }
 
 multi gen-code(%rule) {
@@ -322,7 +367,26 @@ multi gen-code(ExDollarVar $dv) {
 }
 
 multi gen-code(ExNew $new) {
-    return "new {$new.name} {$new.initblock}";
+    my $initblock = $new.props
+        ?? '{ ' ~ $new.props.map(&gen-code).join(", ") ~ ' }'
+        !! '{}';
+    return "new {$new.name} {$initblock}";
+}
+
+multi gen-code(RuleCall $call) {
+    return qq|[RX_RULE_CALL, "{$call.ident}", {$call.dot.Str.lc}]|;
+}
+
+multi gen-code(PropVar $var) {
+    return $var.ident;
+}
+
+multi gen-code(PropKeyValue $kv) {
+    return [~] $kv.key, ": ", gen-code($kv.value);
+}
+
+multi gen-code(Str $literal) {
+    return qq|[RX_LITERAL, "{$literal}"]|;
 }
 
 constant $IN_OUT_FILE = "nfa/mutable-grammar.007";
