@@ -1,6 +1,5 @@
 use _007::Val;
 use _007::Value;
-use _007::Q;
 use _007::Parser::Syntax;
 use MONKEY-SEE-NO-EVAL;
 
@@ -83,16 +82,16 @@ class _007::Parser::Actions {
     }
 
     method compunit($/) {
-        my $cu = Q::CompUnit.new(:block(Q::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist($<statementlist>.ast)
-        )));
+        my $cu = make-q-compunit(make-q-block(
+            make-q-parameterlist(),
+            $<statementlist>.ast
+        ));
         make $cu;
         finish-block($cu.block);
     }
 
     method statementlist($/) {
-        make Q::StatementList.new(:statements(make-array($<statement>».ast)));
+        make make-q-statementlist(make-array($<statement>».ast));
     }
 
     method statement:expr ($/) {
@@ -105,11 +104,11 @@ class _007::Parser::Actions {
                 die X::Export::Nothing.new;
             }
 
-            multi enforce-leftmost-my(Q::Term::My $) {}     # everything's fine
-            multi enforce-leftmost-my(Q::Term $) { panicExportNothing() }
-            multi enforce-leftmost-my(Q::Prefix $) { panicExportNothing() }
-            multi enforce-leftmost-my(Q::Postfix $postfix) { enforce-leftmost-my($postfix.term) }
-            multi enforce-leftmost-my(Q::Infix $infix) { enforce-leftmost-my($infix.lhs) }
+            multi enforce-leftmost-my(_007::Value $ where &is-q-term-my) {}     # everything's fine
+            multi enforce-leftmost-my(_007::Value $ where &is-q-term) { panicExportNothing() }
+            multi enforce-leftmost-my(_007::Value $ where &is-q-prefix) { panicExportNothing() }
+            multi enforce-leftmost-my(_007::Value $postfix where &is-q-postfix) { enforce-leftmost-my($postfix.term) }
+            multi enforce-leftmost-my(_007::Value $infix where &is-q-infix) { enforce-leftmost-my($infix.lhs) }
 
             enforce-leftmost-my($<EXPR>.ast);
         }
@@ -117,22 +116,22 @@ class _007::Parser::Actions {
         # XXX: this is a special case for macros that have been expanded at the
         #      top level of an expression statement, but it could happen anywhere
         #      in the expression tree
-        if $<EXPR>.ast ~~ Q::Block {
-            make Q::Statement::Expr.new(:expr(Q::Postfix::Call.new(
-                :identifier(Q::Identifier.new(:name(make-str("postfix:()")))),
-                :operand(Q::Term::Func.new(:identifier(NONE), :block($<EXPR>.ast))),
-                :argumentlist(Q::ArgumentList.new)
-            )));
+        if is-q-block($<EXPR>.ast) {
+            make make-q-statement-expr(make-q-postfix-call(
+                make-q-identifier(make-str("postfix:()")),
+                make-q-term-func(NONE, $<EXPR>.ast),
+                make-q-argumentlist()
+            ));
         }
         else {
-            make Q::Statement::Expr.new(:expr($<EXPR>.ast));
+            make make-q-statement-expr($<EXPR>.ast);
         }
     }
 
     method statement:block ($/) {
         die X::PointyBlock::SinkContext.new
             if $<pblock><parameterlist>;
-        make Q::Statement::Block.new(:block($<pblock>.ast));
+        make make-q-statement-block($<pblock>.ast);
     }
 
     method statement:func-or-macro ($/) {
@@ -142,18 +141,18 @@ class _007::Parser::Actions {
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
-        my $block = Q::Block.new(:$parameterlist, :$statementlist);
+        my $block = make-q-block($parameterlist, $statementlist);
         my $static-lexpad = get-dict-property($*runtime.current-frame, "pad");
         finish-block($block);
 
         my $outer-frame = $*runtime.current-frame;
         my $val;
         if $<routine> eq "func" {
-            make Q::Statement::Func.new(:$identifier, :$traitlist, :$block);
+            make make-q-statement-func($identifier, $traitlist, $block);
             $val = make-func($name, $parameterlist, $statementlist, $outer-frame, $static-lexpad);
         }
         elsif $<routine> eq "macro" {
-            make Q::Statement::Macro.new(:$identifier, :$traitlist, :$block);
+            make make-q-statement-macro($identifier, $traitlist, $block);
             $val = make-macro($name, $parameterlist, $statementlist, $outer-frame, $static-lexpad);
         }
         else {
@@ -169,57 +168,51 @@ class _007::Parser::Actions {
         die X::ControlFlow::Return.new
             unless $*in-routine;
         my $expr = ast-if-any($<EXPR>);
-        make Q::Statement::Return.new(:$expr);
+        make make-q-statement-return($expr);
     }
 
     method statement:throw ($/) {
         my $expr = ast-if-any($<EXPR>);
-        make Q::Statement::Throw.new(:$expr);
+        make make-q-statement-throw($expr);
     }
 
     method statement:next ($/) {
         die X::ControlFlow.new
             unless $*in-loop;
-        make Q::Statement::Next.new();
+        make make-q-statement-next();
     }
 
     method statement:last ($/) {
         die X::ControlFlow.new
             unless $*in-loop;
-        make Q::Statement::Last.new();
+        make make-q-statement-last();
     }
 
     method statement:if ($/) {
         my %parameters = $<xblock>.ast;
         %parameters<else> = ast-if-any($<else>);
 
-        make Q::Statement::If.new(|%parameters);
+        make make-q-statement-if(|%parameters);
     }
 
     method statement:for ($/) {
-        make Q::Statement::For.new(
-            expr => $<EXPR>.ast,
-            block => $<pblock>.ast,
-        );
+        make make-q-statement-for($<EXPR>.ast, $<pblock>.ast);
     }
 
     method statement:while ($/) {
-        make Q::Statement::While.new(
-            expr => $<EXPR>.ast,
-            block => $<pblock>.ast,
-        );
+        make make-q-statement-while($<EXPR>.ast, $<pblock>.ast);
     }
 
     method statement:BEGIN ($/) {
         my $statement = $<statement>.ast;
-        make Q::Statement::BEGIN.new(:$statement);
+        make make-q-statement-begin($statement);
         $statement.run($*runtime);
     }
 
     method statement:class ($/) {
         my $identifier = $<identifier>.ast;
         my $block = $<block>.ast;
-        make Q::Statement::Class.new(:$block);
+        make make-q-statement-class($block);
         my $val = Val::Type.of(EVAL qq[class :: \{
             method attributes \{ () \}
             method ^name(\$) \{ "{$identifier.name.native-value}" \}
@@ -233,33 +226,39 @@ class _007::Parser::Actions {
             my $trait = $p.key;
             die X::Trait::Duplicate.new(:$trait);
         }
-        make Q::TraitList.new(:traits(make-array(@traits)));
+        make make-q-traitlist(make-array(@traits));
     }
+
     method trait($/) {
-        make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
+        make make-q-trait($<identifier>.ast, $<EXPR>.ast);
     }
 
     method blockoid ($/) {
         make $<statementlist>.ast;
     }
+
     method block ($/) {
-        my $block = Q::Block.new(
-            :parameterlist(Q::ParameterList.new),
-            :statementlist($<blockoid>.ast));
+        my $block = make-q-block(
+            make-q-parameterlist(),
+            $<blockoid>.ast,
+        );
         make $block;
         finish-block($block);
     }
+
     method pblock ($/) {
         if $<parameterlist> {
-            my $block = Q::Block.new(
-                :parameterlist($<parameterlist>.ast),
-                :statementlist($<blockoid>.ast));
+            my $block = make-q-block(
+                $<parameterlist>.ast,
+                $<blockoid>.ast,
+            );
             make $block;
             finish-block($block);
         } else {
             make $<block>.ast;
         }
     }
+
     method xblock ($/) {
         make {
             expr => $<EXPR>.ast,
@@ -267,9 +266,9 @@ class _007::Parser::Actions {
         };
     }
 
-    sub is-a-macro($q, $qtype, $identifier) {
-        $q ~~ $qtype
-            && $identifier ~~ Q::Identifier
+    sub is-a-macro($q where &is-q, $qtype where &is-type, $identifier where &is-q-identifier) {
+        is-instance($q, $qtype)
+            && is-q-identifier($identifier)
             && is-macro(my $macro = $*runtime.maybe-get-var($identifier.name.native-value))
             && $macro;
     }
@@ -281,29 +280,34 @@ class _007::Parser::Actions {
             return &unexpanded-callback();
         }
         else {
-            if $expansion ~~ Q::Statement {
-                $expansion = Q::StatementList.new(:statements(make-array([$expansion])));
+            if is-q-statement($expansion) {
+                $expansion = make-q-statementlist(make-array([$expansion]));
             }
             elsif $expansion === NONE {
-                $expansion = Q::StatementList.new(:statements(make-array([])));
+                $expansion = make-q-statementlist();
             }
 
-            if $expansion ~~ Q::StatementList {
+            if is-q-statementlist($expansion) {
                 $*runtime.enter($*runtime.current-frame, make-dict(), $expansion);
-                $expansion = Q::Block.new(
-                    :parameterlist(Q::ParameterList.new())
-                    :statementlist($expansion));
+                $expansion = make-q-block(
+                    make-q-parameterlist(),
+                    $expansion,
+                );
                 finish-block($expansion);
 
             }
 
-            if $expansion ~~ Q::Block {
-                $expansion = Q::Expr::BlockAdapter.new(:block($expansion));
+            if is-q-block($expansion) {
+                $expansion = make-q-expr-blockadapter($expansion);
             }
 
             check($expansion, $*runtime);
             return $expansion;
         }
+    }
+
+    sub create-of-type($obj, %slots) {
+        _007::Value.new(:type($obj.type), :%slots);
     }
 
     method EXPR($/) {
@@ -334,19 +338,19 @@ class _007::Parser::Actions {
             my $infix = @opstack.pop;
             my $t1 = @termstack.pop;
 
-            if $infix ~~ Q::Unquote {
-                @termstack.push(Q::Unquote::Infix.new(:qtype($infix.qtype), :expr($infix.expr), :lhs($t1), :rhs($t2)));
+            if is-q-unquote($infix) {
+                @termstack.push(make-q-unquote-infix($infix.qtype, $infix.expr, $t1, $t2));
                 return;
             }
 
-            if my $macro = is-a-macro($infix, Q::Infix, $infix.identifier) {
+            if my $macro = is-a-macro($infix, TYPE<Q.Infix>, $infix.identifier) {
                 @termstack.push(expand($macro, [$t1, $t2],
-                    -> { $infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)) }));
+                    -> { create-of-type($infix.type, { :lhs($t1), :rhs($t2), :identifier($infix.identifier) }) }));
             }
             else {
-                @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
+                @termstack.push(create-of-type($infix.type, { :lhs($t1), :rhs($t2), :identifier($infix.identifier) }));
 
-                if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
+                if is-q-infix-assignment($infix) && is-q-identifier($t1) {
                     my $frame = $*runtime.current-frame;
                     my $symbol = $t1.name.native-value;
                     if @*declstack[*-1]{$symbol} :!exists {
@@ -369,7 +373,10 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.native-value), :op2($infix.identifier.name.native-value))
+            die X::Op::Nonassociative.new(
+                :op1(@opstack[*-1].identifier.name.native-value),
+                :op2($infix.identifier.name.native-value),
+            )
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -410,43 +417,47 @@ class _007::Parser::Actions {
         sub handle-prefix($/) {
             my $prefix = @prefixes.shift.ast;
 
-            if $prefix ~~ Q::Unquote {
-                make Q::Unquote::Prefix.new(:qtype($prefix.qtype), :expr($prefix.expr), :operand($/.ast));
+            if is-q-unquote($prefix) {
+                make make-q-unquote-prefix($prefix.qtype, $prefix.expr, $/.ast);
                 return;
             }
 
-            if my $macro = is-a-macro($prefix, Q::Prefix, $prefix.identifier) {
+            if my $macro = is-a-macro($prefix, TYPE<Q.Prefix>, $prefix.identifier) {
                 make expand($macro, [$/.ast],
-                    -> { $prefix.new(:operand($/.ast), :identifier($prefix.identifier)) });
+                    -> { create-of-type($prefix.type, { :operand($/.ast), :identifier($prefix.identifier) }) });
             }
             else {
-                make $prefix.new(:operand($/.ast), :identifier($prefix.identifier));
+                make create-of-type($prefix.type, { :operand($/.ast), :identifier($prefix.identifier) });
             }
         }
 
         sub handle-postfix($/) {
             my $postfix = @postfixes.shift.ast;
             my $identifier = $postfix.identifier;
-            if my $macro = is-a-macro($postfix, Q::Postfix::Call, $/.ast) {
+            if my $macro = is-a-macro($postfix, TYPE<Q.Postfix.Call>, $/.ast) {
                 make expand($macro, get-all-array-elements($postfix.argumentlist.arguments),
-                    -> { $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist)) });
+                    -> { create-of-type($postfix.type, { :$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist) }) });
             }
-            elsif $postfix ~~ Q::Postfix::Index {
-                make $postfix.new(:$identifier, :operand($/.ast), :index($postfix.index));
+            elsif is-q-postfix-index($postfix) {
+                make create-of-type($postfix.type, { :$identifier, :operand($/.ast), :index($postfix.index) });
             }
-            elsif $postfix ~~ Q::Postfix::Call {
-                make $postfix.new(:$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist));
+            elsif is-q-postfix-call($postfix) {
+                make create-of-type($postfix.type, { :$identifier, :operand($/.ast), :argumentlist($postfix.argumentlist) });
             }
-            elsif $postfix ~~ Q::Postfix::Property {
-                make $postfix.new(:$identifier, :operand($/.ast), :property($postfix.property));
+            elsif is-q-postfix-property($postfix) {
+                make create-of-type($postfix.type, { :$identifier, :operand($/.ast), :property($postfix.property) });
             }
             else {
-                if my $macro = is-a-macro($postfix, Q::Postfix, $identifier) {
+                if my $macro = is-a-macro($postfix, TYPE<Q.Postfix>, $identifier) {
                     make expand($macro, [$/.ast],
-                        -> { $postfix.new(:$identifier, :operand($/.ast)) });
+                        -> { create-of-type($postfix.type, { :$identifier, :operand($/.ast) }) });
                 }
                 else {
-                    make $postfix.new(:$identifier, :operand($/.ast));
+                    make expand($macro, [$/.ast],
+                        -> { create-of-type($postfix.type, { :$identifier, :operand($/.ast) }) });
+                }
+                else {
+                    make create-of-type($postfix.type, { :$identifier, :operand($/.ast) });
                 }
             }
         }
@@ -477,10 +488,8 @@ class _007::Parser::Actions {
 
     method prefix($/) {
         my $op = ~$/;
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("prefix:$op")),
-        );
-        make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(NONE));
+        my $identifier = make-q-term-identifier(make-str("prefix:$op"));
+        make create-of-type($*parser.opscope.ops<prefix>{$op}, { :$identifier, :operand(NONE) });
     }
 
     method prefix-unquote($/) {
@@ -493,26 +502,23 @@ class _007::Parser::Actions {
                 if $s ~~ /\n/;
         }(~$0);
         my $value = make-str((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
-        make Q::Literal::Str.new(:$value);
+        make make-q-literal-str($value);
     }
 
     method term:none ($/) {
-        make Q::Literal::None.new;
+        make make-q-literal-none();
     }
 
     method term:false ($/) {
-        make Q::Literal::Bool.new(:value(make-bool(False)));
+        make make-q-literal-book(make-bool(False));
     }
 
     method term:true ($/) {
-        make Q::Literal::Bool.new(:value(make-bool(True)));
+        make make-q-literal-bool(make-bool(True));
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(_007::Value::Backed.new(
-            :type(TYPE<Int>),
-            :native-value(+$/),
-        )));
+        make make-q-literal-int(make-int(+$/));
     }
 
     method term:str ($/) {
@@ -520,7 +526,7 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        make Q::Term::Array.new(:elements(make-array($<EXPR>».ast)));
+        make make-q-term-array(make-array($<EXPR>».ast));
     }
 
     method term:parens ($/) {
@@ -528,33 +534,33 @@ class _007::Parser::Actions {
     }
 
     method regex-part($/) {
-        make Q::Regex::Alternation.new(:alternatives($<regex-group>».ast));
+        make make-regex-alternation($<regex-group>».ast);
     }
 
     method regex-group($/) {
-        make Q::Regex::Group.new(:fragments($<regex-quantified>».ast));
+        make make-q-regex-group($<regex-quantifier>».ast);
     }
 
     method regex-quantified($/) {
         given $<quantifier>.Str {
             when ''  { make $<regex-fragment>.ast }
-            when '+'  { make Q::Regex::OneOrMore.new(:fragment($<regex-fragment>.ast)) }
-            when '*'  { make Q::Regex::ZeroOrMore.new(:fragment($<regex-fragment>.ast)) }
-            when '?'  { make Q::Regex::ZeroOrOne.new(:fragment($<regex-fragment>.ast)) }
+            when '+'  { make make-q-regex-oneormore($<regex-fragment>.ast) }
+            when '*'  { make make-q-regex-zeroormore($<regex-fragment>.ast) }
+            when '?'  { make make-q-regex-zeroorone($<regex-fragment>.ast) }
             default { die 'Unrecognized regex quantifier '; }
         }
     }
 
     method regex-fragment:str ($/) {
-        make Q::Regex::Str.new(:contents($<str>.ast.value));
+        make make-q-regex-str($<str>.ast.value);
     }
 
     method regex-fragment:identifier ($/) {
-        make Q::Regex::Identifier.new(:identifier($<term>.ast));
+        make make-q-regex-identifier($<term>.ast);
     }
 
     method regex-fragment:call ($/) {
-        make Q::Regex::Call.new(:identifier($<identifier>.ast));
+        make make-q-regex-call($<identifier>.ast);
     }
 
     method regex-fragment:group ($/) {
@@ -562,7 +568,7 @@ class _007::Parser::Actions {
     }
 
     method term:regex ($/) {
-        make Q::Term::Regex.new(:contents($<regex-part>.ast));
+        make make-q-term-regex($<regex-part>.ast);
     }
 
     method term:identifier ($/) {
@@ -577,7 +583,7 @@ class _007::Parser::Actions {
                     unless is-func($value);
             };
         }
-        make Q::Term::Identifier.new(:name($<identifier>.ast.name));
+        make make-q-term-identifier($<identifier>.ast.name);
     }
 
     method term:block ($/) {
@@ -591,7 +597,7 @@ class _007::Parser::Actions {
             # If the quasi consists of a block with a single expression statement, it's very
             # likely that what we want to inject is the expression, not the block.
             #
-            # The exception to that heuristic is when we've explicitly specified `@ Q::Block`
+            # The exception to that heuristic is when we've explicitly specified `@ Q.Block`
             # on the quasi.
             #
             # This is not a "nice" solution, nor a comprehensive one. In the end it's connected
@@ -601,21 +607,21 @@ class _007::Parser::Actions {
             if $qtype.native-value eq "Q.Statement" {
                 # XXX: make sure there's only one statement (suboptimal; should parse-error sooner)
                 my $contents = get-array-element($block.ast.statementlist.statements, 0);
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                make make-q-term-quasi($contents, $qtype);
                 return;
             }
             elsif $qtype.native-value eq "Q.StatementList" {
                 my $contents = $block.ast.statementlist;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                make make-q-term-quasi($contents, $qtype);
                 return;
             }
             elsif $qtype.native-value ne "Q.Block"
-                && $block.ast ~~ Q::Block
+                && is-q-block($block.ast)
                 && get-array-length($block.ast.statementlist.statements) == 1
-                && get-array-element($block.ast.statementlist.statements, 0) ~~ Q::Statement::Expr {
+                && is-q-statement-expr(get-array-element($block.ast.statementlist.statements, 0)) {
 
                 my $contents = get-array-element($block.ast.statementlist.statements, 0).expr;
-                make Q::Term::Quasi.new(:$contents, :$qtype);
+                make make-q-term-quasi($contents, $qtype);
                 return;
             }
         }
@@ -624,7 +630,7 @@ class _007::Parser::Actions {
             if !$/.hash.keys.grep({ $_ ne "qtype" });
 
         my $contents = $/.hash.pairs.first({ .key ne "qtype" }).value.ast;
-        make Q::Term::Quasi.new(:$contents, :$qtype);
+        make q-term-quasi($contents, $qtype);
     }
 
     method term:func ($/) {
@@ -632,7 +638,7 @@ class _007::Parser::Actions {
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
-        my $block = Q::Block.new(:$parameterlist, :$statementlist);
+        my $block = make-q-block($parameterlist, $statementlist);
         if $<identifier> {
             my $name = $<identifier>.ast.name;
             my $outer-frame = get-dict-property($*runtime.current-frame, "outer-frame");
@@ -644,11 +650,11 @@ class _007::Parser::Actions {
 
         my $name = $<identifier>.ast.name;
         my $identifier = ast-if-any($<identifier>);
-        make Q::Term::Func.new(:$identifier, :$traitlist, :$block);
+        make make-q-term-func($identifier, $traitlist, $block);
     }
 
     method unquote ($/) {
-        my $qtype = Q::Term;
+        my $qtype = TYPE<Q.Term>;
         if $<identifier> {
             for $<identifier>.list -> $fragment {
                 my $identifier = ~$fragment;
@@ -657,7 +663,7 @@ class _007::Parser::Actions {
                     !! $*runtime.get-var($identifier);
             }
         }
-        make Q::Unquote.new(:$qtype, :expr($<EXPR>.ast));
+        make make-q-unquote($qtype, $<EXPR>.ast);
     }
 
     sub is-role($type) {
@@ -699,74 +705,65 @@ class _007::Parser::Actions {
             }
         }
 
-        make Q::Term::Object.new(
-            :$type,
-            :propertylist($<propertylist>.ast));
+        make make-q-term-object($type, $<propertylist>.ast);
     }
 
     method term:dict ($/) {
-        make Q::Term::Dict.new(:propertylist($<propertylist>.ast));
+        make make-q-term-dict($<propertylist>.ast);
     }
 
     method term:my ($/) {
         my $identifier = $<identifier>.ast;
 
-        make Q::Term::My.new(
-            :identifier(Q::Term::Identifier.new(:name($identifier.name)))
-        );
+        make make-q-term-my(make-q-term-identifier($identifier.name));
 
         $*parser.opscope.maybe-install($identifier.name, []);
     }
 
     method propertylist ($/) {
         my %seen;
-        for $<property>».ast -> Q::Property $p {
+        for $<property>».ast -> _007::Value $p where &is-q-property {
             my Str $property = $p.key.native-value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }
 
-        make Q::PropertyList.new(:properties(make-array($<property>».ast)));
+        make make-q-propertylist(make-array($<property>».ast));
     }
 
     method property:str-expr ($/) {
-        make Q::Property.new(:key($<str>.ast.value), :value($<value>.ast));
+        make make-q-property($<str>.ast.value, $<value>.ast);
     }
 
     method property:identifier-expr ($/) {
         my $key = $<identifier>.ast.name;
-        make Q::Property.new(:$key, :value($<value>.ast));
+        make make-q-property($key, $<value>.ast);
     }
 
     method property:identifier ($/) {
         self."term:identifier"($/);
         my $value = $/.ast;
         my $key = $value.name;
-        make Q::Property.new(:$key, :$value);
+        make make-q-property($key, $value);
     }
 
     method property:method ($/) {
-        my $block = Q::Block.new(
-            :parameterlist($<parameterlist>.ast),
-            :statementlist($<blockoid>.ast));
+        my $block = make-q-block($<parameterlist>.ast, $<blockoid>.ast);
         my $name = $<identifier>.ast.name;
-        my $identifier = Q::Identifier.new(:$name);
-        make Q::Property.new(:key($name), :value(
-            Q::Term::Func.new(:$identifier, :$block)));
+        my $identifier = make-q-identifier($name);
+        make make-q-property($name, make-q-term-func($identifier, $block));
         finish-block($block);
     }
 
     method infix($/) {
         my $op = ~$/;
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("infix:$op")),
-        );
-        make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
+        my $identifier = make-q-term-identifier(make-str("infix:$op"));
+        make create-of-type($*parser.opscope.ops<infix>{$op}, { :lhs(NONE), :rhs(NONE) });
     }
 
     method infix-unquote($/) {
         my $got = ~($<unquote><identifier>.join(".") // "Q.Term");
-        die X::TypeCheck.new(:operation<parsing>, :$got, :expected(Q::Infix))
+        die X::TypeCheck.new(:operation<parsing>, :$got, :expected(TYPE<Q.Infix>))
             unless $got eq "Q.Infix";
 
         make $<unquote>.ast;
@@ -783,22 +780,20 @@ class _007::Parser::Actions {
         elsif $<prop> {
             $op = ".";
         }
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("postfix:$op")),
-        );
+        my $identifier = make-q-term-identifier(make-str("postfix:$op"));
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
-            make Q::Postfix::Index.new(index => $<EXPR>.ast, :$identifier, :operand(NONE));
+            make make-q-postfix-index($identifier, NONE, $<EXPR>.ast);
         }
         elsif $<call> {
-            make Q::Postfix::Call.new(argumentlist => $<argumentlist>.ast, :$identifier, :operand(NONE));
+            make make-q-postfix-index($identifier, NONE, $<argumentlist>.ast);
         }
         elsif $<prop> {
-            make Q::Postfix::Property.new(property => $<identifier>.ast, :$identifier, :operand(NONE));
+            make make-q-postfix-index($identifier, NONE, $<property>.ast);
         }
         else {
-            make $*parser.opscope.ops<postfix>{$op}.new(:$identifier, :operand(NONE));
+            make create-of-type($*parser.opscope.ops<postfix>{$op}, { :$identifier, :operand(NONE) });
         }
     }
 
@@ -811,57 +806,56 @@ class _007::Parser::Actions {
             $value ~~ s:g['\\»'] = '»';
             $value ~~ s:g['\\\\'] = '\\';
         }();
-        make Q::Identifier.new(:name(make-str($value)));
+        make make-q-identifier(make-str($value));
     }
 
     method argumentlist($/) {
-        make Q::ArgumentList.new(:arguments(make-array($<EXPR>».ast)));
+        make make-q-argumentlist(make-array($<EXPR>».ast));
     }
 
     method parameterlist($/) {
-        make Q::ParameterList.new(:parameters(make-array($<parameter>».ast)));
+        make make-q-parameterlist(make-array($<parameter>».ast));
     }
 
     method parameter($/) {
         my $identifier = $<identifier>.ast;
         my $name = $identifier.name;
 
-        make Q::Parameter.new(:$identifier);
+        make make-q-parameter($identifier);
 
         $*parser.opscope.maybe-install($name, []);
     }
 }
 
-sub check(Q $ast, $runtime) is export {
+sub check(_007::Value $ast where &is-q, $runtime) is export {
     my %*assigned;
     handle($ast);
 
     # a bunch of nodes we don't care about descending into
-    multi handle(Q::ParameterList $) {}
-    multi handle(Q::Statement::Return $) {}
-    multi handle(Q::Statement::BEGIN $) {}
-    multi handle(Q::Literal $) {}
-    multi handle(Q::Term $) {} # with two exceptions, see below
-    multi handle(Q::Postfix $) {}
+    multi handle(_007::Value $ where &is-q-parameterlist) {}
+    multi handle(_007::Value $ where &is-q-statement-return) {}
+    multi handle(_007::Value $ where &is-q-statement-begin) {}
+    multi handle(_007::Value $ where &is-q-literal) {}
+    multi handle(_007::Value $ where &is-q-postfix) {}
 
-    multi handle(Q::StatementList $statementlist) {
+    multi handle(_007::Value $statementlist where &is-q-statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {
             handle($statement);
         }
     }
 
-    multi handle(Q::Statement::Block $block) {
+    multi handle(_007::Value $block where &is-q-statement-block) {
         $runtime.enter($runtime.current-frame, $block.block.static-lexpad, $block.block.statementlist);
         handle($block.block.statementlist);
         $block.block.static-lexpad = get-dict-property($runtime.current-frame, "pad");
         $runtime.leave();
     }
 
-    multi handle(Q::Statement::Expr $expr) {
+    multi handle(_007::Value $expr where &is-q-statement-expr) {
         handle($expr.expr);
     }
 
-    multi handle(Q::Statement::Func $func) {
+    multi handle(_007::Value $func where &is-q-statement-func) {
         my $outer-frame = $runtime.current-frame;
         my $name = $func.identifier.name;
         my $val = make-func($name, $func.block.parameterlist, $func.block.statementlist, $outer-frame);
@@ -872,7 +866,7 @@ sub check(Q $ast, $runtime) is export {
         $runtime.declare-var($func.identifier, $val);
     }
 
-    multi handle(Q::Statement::Macro $macro) {
+    multi handle(_007::Value $macro where &is-q-statement-macro) {
         my $outer-frame = $runtime.current-frame;
         my $name = $macro.identifier.name;
         my $val = make-macro(
@@ -888,31 +882,31 @@ sub check(Q $ast, $runtime) is export {
         $runtime.declare-var($macro.identifier, $val);
     }
 
-    multi handle(Q::Statement::If $if) {
+    multi handle(_007::Value $if where &is-q-statement-if) {
         handle($if.block);
     }
 
-    multi handle(Q::Statement::For $for) {
+    multi handle(_007::Value $for where &is-q-statement-for) {
         handle($for.block);
     }
 
-    multi handle(Q::Statement::While $while) {
+    multi handle(_007::Value $while where &is-q-statement-while) {
         handle($while.block);
     }
 
-    multi handle(Q::Block $block) {
-        $runtime.enter($runtime.current-frame, make-dict(), Q::StatementList.new);
+    multi handle(_007::Value $block where &is-q-block) {
+        $runtime.enter($runtime.current-frame, make-dict(), make-q-statementlist());
         handle($block.parameterlist);
         handle($block.statementlist);
         $block.static-lexpad = get-dict-property($runtime.current-frame, "pad");
         $runtime.leave();
     }
 
-    multi handle(Q::Term::Dict $object) {
+    multi handle(_007::Value $object where &is-q-term-dict) {
         handle($object.propertylist);
     }
 
-    multi handle(Q::Term::My $my) {
+    multi handle(_007::Value $my where &is-q-term-my) {
         my $symbol = $my.identifier.name.native-value;
         my $block = $runtime.current-frame();
         die X::Redeclaration.new(:$symbol)
@@ -922,36 +916,34 @@ sub check(Q $ast, $runtime) is export {
         $runtime.declare-var($my.identifier);
     }
 
-    multi handle(Q::PropertyList $propertylist) {
+    multi handle(_007::Value $propertylist where &is-q-propertylist) {
         my %seen;
-        for $propertylist.properties.elements -> Q::Property $p {
+        for $propertylist.properties.elements -> $p where &is-q-property {
             my Str $property = $p.key.native-value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;
         }
     }
 
-    multi handle(Q::Infix $infix) {
+    multi handle(_007::Value $infix where &is-q-infix) {
         handle($infix.lhs);
         handle($infix.rhs);
     }
 
-    multi handle(Q::Expr::BlockAdapter $blockadapter) {
+    multi handle(_007::Value $blockadapter where &is-q-expr-blockadapter) {
         handle($blockadapter.block);
     }
 
-    multi handle(Q::Postfix::Call $call) {
+    multi handle(_007::Value $call where &is-q-postfix-call) {
         handle($call.operand);
         for get-all-array-elements($call.argumentlist.arguments) -> $e {
             handle($e);
         }
     }
 
-    multi handle(Q::Term::Func $func) {
+    multi handle(_007::Value $func where &is-q-term-func) {
         handle($func.block);
     }
 
-    multi handle(Q::Prefix $prefix) {
-        handle($prefix.operand);
-    }
+    multi handle(_007::Value $ where &is-q-term) {}
 }

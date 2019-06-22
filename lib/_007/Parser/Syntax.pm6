@@ -20,7 +20,7 @@ grammar _007::Parser::Syntax {
     token newpad { <?> {
         $*parser.push-opscope;
         @*declstack.push(@*declstack ?? @*declstack[*-1].clone !! {});
-        $*runtime.enter($*runtime.current-frame, make-dict(), Q::StatementList.new);
+        $*runtime.enter($*runtime.current-frame, make-dict(), make-q-statementlist());
     } }
 
     token finishpad { <?> {
@@ -36,13 +36,13 @@ grammar _007::Parser::Syntax {
         die X::Syntax::Missing.new(:$what);
     }
 
-    our sub declare(Q::Declaration $decltype, Str $symbol) {
+    our sub declare(_007::Value $decltype where &is-q-declaration, Str $symbol) {
         die X::Redeclaration.new(:$symbol)
             if $*runtime.declared-locally($symbol);
         my $frame = $*runtime.current-frame();
         die X::Redeclaration::Outer.new(:$symbol)
             if %*assigned{$frame.WHICH ~ $symbol};
-        my $identifier = Q::Identifier.new(:name(make-str($symbol)));
+        my $identifier = make-q-identifier(make-str($symbol));
         $*runtime.declare-var($identifier);
         @*declstack[*-1]{$symbol} = $decltype;
     }
@@ -60,8 +60,8 @@ grammar _007::Parser::Syntax {
         :my $*in-loop = False;
         {
             declare($<routine> eq "func"
-                        ?? Q::Statement::Func
-                        !! Q::Statement::Macro,
+                        ?? TYPE<Q.Statement.Func>
+                        !! TYPE<Q.Statement.Macro>,
                     $<identifier>.ast.name.native-value);
         }
         <.newpad>
@@ -116,7 +116,7 @@ grammar _007::Parser::Syntax {
         class» <.ws>
         { check-feature-flag("'class' keyword", "CLASS"); }
         <identifier> <.ws>
-        { declare(Q::Statement::Class, $<identifier>.ast.name.native-value); }
+        { declare(TYPE<Q.Statement.Class>, $<identifier>.ast.name.native-value); }
         <block>
     }
 
@@ -282,7 +282,7 @@ grammar _007::Parser::Syntax {
         <.newpad>
         {
             if $<identifier> {
-                declare(Q::Term::Func, $<identifier>.ast.name.native-value);
+                declare(TYPE<Q.Term.Func>, $<identifier>.ast.name.native-value);
             }
         }
         '(' ~ ')' <parameterlist>
@@ -292,7 +292,7 @@ grammar _007::Parser::Syntax {
     }
     token term:my {
         my» <.ws> [<identifier> || <.panic("identifier")>]
-        { declare(Q::Term::My, $<identifier>.ast.name.native-value); }
+        { declare(TYPE<Q.Term.My>, $<identifier>.ast.name.native-value); }
     }
 
 
@@ -373,7 +373,7 @@ grammar _007::Parser::Syntax {
     rule parameterlist {
         [
             <parameter>
-            { declare(Q::Parameter, $<parameter>[*-1]<identifier>.ast.name.native-value); }
+            { declare(TYPE<Q.Parameter>, $<parameter>[*-1]<identifier>.ast.name.native-value); }
         ]* %% ','
     }
 

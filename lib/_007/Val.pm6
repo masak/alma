@@ -114,7 +114,7 @@ class Helper {
             sub aname($attr) { $attr.name.substr(2) }
             sub avalue($attr, $obj) {
                 my $value = $attr.get_value($obj);
-                # XXX: this is a temporary fix until we patch Q::Unquote's qtype to be an identifier
+                # XXX: this is a temporary fix until we patch Q.Unquote's qtype to be an identifier
                 $value
                     ?? $value.quoted-Str
                     !! $value.^name.subst(/"::"/, ".", :g);

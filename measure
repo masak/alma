@@ -1,0 +1,17 @@
+# c32784d 16a6395 1ead6d9 f7bd099 ade0257 34897ae 805b183 3ac6627
+for commit in 61a752a fa5ce66
+do
+    echo ""
+    echo "Checking out $commit..."
+    git checkout -q $commit
+    bin/007 -e='say("Compiled.")'
+
+    for n in $(seq 20)
+    do
+        echo "$commit Iteration $n"
+        (time FLAG_007_CLASS=1 FLAG_007_REGEX=1 FLAG_007_DOCS=1 prove -e 'perl6 -Ilib' -r t/ > /dev/null) 2>&1 |
+            perl -nle"print qq[$commit \$_]" >> stat
+    done
+done
+
+git checkout master

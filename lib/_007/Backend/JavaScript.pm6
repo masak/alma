@@ -11,14 +11,14 @@ my %builtins =
 ;
 
 class _007::Backend::JavaScript {
-    method emit(Q::CompUnit $compunit) {
+    method emit(_007::Value $compunit where &is-q-compunit) {
         return ""
-            unless ?get-array-length($compunit.block.statementlist.statements);
+            unless ?get-array-length($compunit.slots<block>.slots<statementlist>.slots<statements>);
 
         my @builtins;
         my @main;
 
-        for get-all-array-elements($compunit.block.statementlist.statements) -> $stmt {
+        for get-all-array-elements($compunit.slots<block>.slots<statementlist>.slots<statements>) -> $stmt {
             emit-stmt($stmt);
         }
 
@@ -30,44 +30,44 @@ class _007::Backend::JavaScript {
             \})();
             PROGRAM
 
-        multi emit-stmt(Q::Statement $stmt) {
+        multi emit-stmt(_007::Value $stmt where &is-q-statement) {
             die "Cannot handle {$stmt.^name}";
         }
 
-        multi emit-stmt(Q::Statement::Expr $stmt) {
-            my $expr = $stmt.expr;
-            when $expr ~~ Q::Postfix::Call
-                && $expr.operand ~~ Q::Identifier
-                && $expr.operand.name.native-value eq "say" {
+        multi emit-stmt(_007::Value $stmt where &is-q-statement-expr) {
+            my $expr = $stmt.slots<expr>;
+            when is-q-postfix-call($expr)
+                && is-q-identifier($expr.slots<operand>)
+                && $expr.slots<operand>.slots<name>.native-value eq "say" {
 
                 @builtins.push(%builtins<say>);
-                my @arguments = get-all-array-elements($expr.argumentlist.arguments).map: {
+                my @arguments = get-all-array-elements($expr.slots<argumentlist>.slots<arguments>).map: {
                     die "Cannot handle non-literal-Str arguments just yet!"
-                        unless $_ ~~ Q::Literal::Str;
+                        unless is-q-literal-str($_);
                     .value.quoted-Str;
                 };
                 @main.push("say({@arguments.join(", ")});");
             }
 
-            when $expr ~~ Q::Term::My {
-                my $name = $expr.identifier.name.native-value;
+            when is-q-term-my($expr) {
+                my $name = $expr.slots<identifier>.slots<name>.native-value;
                 @main.push("let {$name};");
             }
 
-            when $expr ~~ Q::Infix::Assignment
-                && $expr.lhs ~~ Q::Term::My {
+            when is-q-infix-assignment($expr)
+                && is-q-term-my($expr.slots<lhs>) {
 
-                my $lhs = $expr.lhs;
-                my $name = $lhs.identifier.name.native-value;
-                my $rhs = $expr.rhs;
+                my $lhs = $expr.slots<lhs>;
+                my $name = $lhs.slots<identifier>.slots<name>.native-value;
+                my $rhs = $expr.slots<rhs>;
 
                 die "Cannot handle non-literal-Int rhs just yet!"
-                        unless $rhs ~~ Q::Literal::Int;
-                my $int = $rhs.value.Str;
+                        unless is-q-literal-int($rhs);
+                my $int = $rhs.slots<value>.native-value.Str;
                 @main.push("let {$name} = {$int};");
             }
 
-            die "Cannot handle this type of Q::Statement::Expr yet!";
+            die "Cannot handle this type of Q.Statement.Expr yet!";
         }
     }
 }

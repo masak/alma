@@ -101,6 +101,10 @@ role Q {
 class Q::Identifier does Q {
     has _007::Value $.name where &is-str;
 
+    submethod BUILD {
+        die "Old class Q::Identifier -- do not use anymore";
+    }
+
     method attribute-order { <name> }
 }
 
@@ -137,6 +141,10 @@ role Q::Literal does Q::Term {
 ###
 class Q::Literal::None does Q::Literal {
     method eval($) { NONE }
+
+    submethod BUILD {
+        die "Old class Q::Literal::None -- do not use anymore";
+    }
 }
 
 ### ### Q::Literal::Bool
@@ -145,6 +153,10 @@ class Q::Literal::None does Q::Literal {
 ###
 class Q::Literal::Bool does Q::Literal {
     has _007::Value $.value where &is-bool;
+
+    submethod BUILD {
+        die "Old class Q::Literal::Bool -- do not use anymore";
+    }
 
     method eval($) { $.value }
 }
@@ -159,6 +171,10 @@ class Q::Literal::Bool does Q::Literal {
 class Q::Literal::Int does Q::Literal {
     has _007::Value $.value where &is-int;
 
+    submethod BUILD {
+        die "Old class Q::Literal::Int -- do not use anymore";
+    }
+
     method eval($) { $.value }
 }
 
@@ -168,6 +184,10 @@ class Q::Literal::Int does Q::Literal {
 ###
 class Q::Literal::Str does Q::Literal {
     has _007::Value $.value when &is-str;
+
+    submethod BUILD {
+        die "Old class Q::Literal::Str -- do not use anymore";
+    }
 
     method eval($) { $.value }
 }
@@ -182,6 +202,10 @@ class Q::Literal::Str does Q::Literal {
 ### locations at different times when accessed from different call frames.
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
+    submethod BUILD {
+        die "Old class Q::Term::Identifier -- do not use anymore";
+    }
+
     method eval($runtime) {
         return $runtime.get-var($.name.native-value);
     }
@@ -198,6 +222,10 @@ class Q::Term::Identifier is Q::Identifier does Q::Term {
 ###
 class Q::Term::Identifier::Direct is Q::Term::Identifier {
     has _007::Value $.frame where &is-dict;
+
+    submethod BUILD {
+        die "Old class Q::Term::Identifier::Direct -- do not use anymore";
+    }
 
     method eval($runtime) {
         return $runtime.get-direct($.frame, $.name.native-value);
@@ -222,6 +250,10 @@ role Q::Regex::Fragment {
 ###
 class Q::Regex::Str does Q::Regex::Fragment {
     has _007::Value $.contents where &is-str;
+
+    submethod BUILD {
+        die "Old class Q::Regex::Str -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::Identifier
@@ -231,6 +263,10 @@ class Q::Regex::Str does Q::Regex::Fragment {
 ###
 class Q::Regex::Identifier does Q::Regex::Fragment {
     has Q::Identifier $.identifier;
+
+    submethod BUILD {
+        die "Old class Q::Regex::Identifier -- do not use anymore";
+    }
 
     method eval($runtime) {
         # XXX check that the value is a string
@@ -245,6 +281,10 @@ class Q::Regex::Identifier does Q::Regex::Fragment {
 ###
 class Q::Regex::Call does Q::Regex::Fragment {
     has Q::Identifier $.identifier;
+
+    submethod BUILD {
+        die "Old class Q::Regex::Call -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::Alternation
@@ -253,6 +293,10 @@ class Q::Regex::Call does Q::Regex::Fragment {
 ###
 class Q::Regex::Alternation does Q::Regex::Fragment {
     has Q::Regex::Fragment @.alternatives;
+
+    submethod BUILD {
+        die "Old class Q::Regex::Alternation -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::Group
@@ -262,6 +306,10 @@ class Q::Regex::Alternation does Q::Regex::Fragment {
 ###
 class Q::Regex::Group does Q::Regex::Fragment {
     has Q::Regex::Fragment @.fragments;
+
+    submethod BUILD {
+        die "Old class Q::Regex::Group -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::OneOrMore
@@ -270,6 +318,10 @@ class Q::Regex::Group does Q::Regex::Fragment {
 ###
 class Q::Regex::OneOrMore does Q::Regex::Fragment {
     has Q::Regex::Fragment $.fragment;
+
+    submethod BUILD {
+        die "Old class Q::Regex::OneOrMore -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::ZeroOrMore
@@ -278,6 +330,10 @@ class Q::Regex::OneOrMore does Q::Regex::Fragment {
 ###
 class Q::Regex::ZeroOrMore does Q::Regex::Fragment {
     has Q::Regex::Fragment $.fragment;
+
+    submethod BUILD {
+        die "Old class Q::Regex::ZeroOrMore -- do not use anymore";
+    }
 }
 
 ### ### Q::Regex::ZeroOrOne
@@ -286,6 +342,10 @@ class Q::Regex::ZeroOrMore does Q::Regex::Fragment {
 ###
 class Q::Regex::ZeroOrOne does Q::Regex::Fragment {
     has Q::Regex::Fragment $.fragment;
+
+    submethod BUILD {
+        die "Old class Q::Regex::ZeroOrOne -- do not use anymore";
+    }
 }
 
 ### ### Q::Term::Regex
@@ -294,6 +354,10 @@ class Q::Regex::ZeroOrOne does Q::Regex::Fragment {
 ###
 class Q::Term::Regex does Q::Term {
     has Q::Regex::Fragment $.contents;
+
+    submethod BUILD {
+        die "Old class Q::Term::Regex -- do not use anymore";
+    }
 
     method eval($runtime) {
         make-regex($.contents);
@@ -308,20 +372,28 @@ class Q::Term::Regex does Q::Term {
 class Q::Term::Array does Q::Term {
     has _007::Value $.elements where &is-array;
 
+    submethod BUILD {
+        die "Old class Q::Term::Array -- do not use anymore";
+    }
+
     method eval($runtime) {
         make-array(get-all-array-elements($.elements).map(*.eval($runtime)).Array);
     }
 }
 
-subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
+subset ToV_ of Any where { $_ ~~ Val::Type || is-type($_) }
 
 ### ### Q::Term::Object
 ###
 ### An object.
 ###
 class Q::Term::Object does Q::Term {
-    has ToV $.type;
+    has ToV_ $.type;
     has $.propertylist;
+
+    submethod BUILD {
+        die "Old class Q::Term::Object -- do not use anymore";
+    }
 
     method eval($runtime) {
         if is-type($.type) {
@@ -369,6 +441,10 @@ class Q::Term::Object does Q::Term {
 class Q::Term::Dict does Q::Term {
     has $.propertylist;
 
+    submethod BUILD {
+        die "Old class Q::Term::Dict -- do not use anymore";
+    }
+
     method eval($runtime) {
         return make-dict(
             get-all-array-elements($.propertylist.properties).map({ .key.native-value => .value.eval($runtime) })
@@ -383,6 +459,10 @@ class Q::Term::Dict does Q::Term {
 class Q::Property does Q {
     has _007::Value $.key where &is-str;
     has $.value;
+
+    submethod BUILD {
+        die "Old class Q::Property -- do not use anymore";
+    }
 }
 
 ### ### Q::PropertyList
@@ -393,6 +473,10 @@ class Q::Property does Q {
 ###
 class Q::PropertyList does Q {
     has _007::Value $.properties where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::PropertyList -- do not use anymore";
+    }
 }
 
 ### ### Q::Declaration
@@ -412,6 +496,10 @@ class Q::Trait does Q {
     has $.identifier;
     has $.expr;
 
+    submethod BUILD {
+        die "Old class Q::Trait -- do not use anymore";
+    }
+
     method attribute-order { <identifier expr> }
 }
 
@@ -421,6 +509,10 @@ class Q::Trait does Q {
 ###
 class Q::TraitList does Q {
     has _007::Value $.traits where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::TraitList -- do not use anymore";
+    }
 
     method attribute-order { <traits> }
 }
@@ -433,6 +525,10 @@ class Q::Term::Func does Q::Term does Q::Declaration {
     has $.identifier;
     has $.traitlist = Q::TraitList.new;
     has $.block;
+
+    submethod BUILD {
+        die "Old class Q::Term::Func -- do not use anymore";
+    }
 
     method attribute-order { <identifier traitlist block> }
 
@@ -465,6 +561,10 @@ class Q::Block does Q {
     has $.statementlist;
     has _007::Value $.static-lexpad is rw where &is-dict = make-dict();
 
+    submethod BUILD {
+        die "Old class Q::Block -- do not use anymore";
+    }
+
     method attribute-order { <parameterlist statementlist> }
 }
 
@@ -476,6 +576,10 @@ class Q::Block does Q {
 class Q::Prefix does Q::Expr {
     has $.identifier;
     has $.operand;
+
+    submethod BUILD {
+        die "Old class Q::Prefix -- do not use anymore";
+    }
 
     method attribute-order { <identifier operand> }
 
@@ -496,6 +600,10 @@ class Q::Infix does Q::Expr {
     has $.lhs;
     has $.rhs;
 
+    submethod BUILD {
+        die "Old class Q::Infix -- do not use anymore";
+    }
+
     method attribute-order { <identifier lhs rhs> }
 
     method eval($runtime) {
@@ -511,6 +619,10 @@ class Q::Infix does Q::Expr {
 ### An assignment operator. Puts a value in a storage location.
 ###
 class Q::Infix::Assignment is Q::Infix {
+    submethod BUILD {
+        die "Old class Q::Infix::Assignment -- do not use anymore";
+    }
+
     method eval($runtime) {
         my $value = $.rhs.eval($runtime);
         $.lhs.put-value($value, $runtime);
@@ -524,6 +636,10 @@ class Q::Infix::Assignment is Q::Infix {
 ### side only if the left-hand side is falsy.
 ###
 class Q::Infix::Or is Q::Infix {
+    submethod BUILD {
+        die "Old class Q::Infix::Or -- do not use anymore";
+    }
+
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         return $l.truthy
@@ -538,6 +654,10 @@ class Q::Infix::Or is Q::Infix {
 ### right-hand side only if the left-hand side is `none`.
 ###
 class Q::Infix::DefinedOr is Q::Infix {
+    submethod BUILD {
+        die "Old class Q::Infix::DefinedOr -- do not use anymore";
+    }
+
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         return !is-none($l)
@@ -552,6 +672,10 @@ class Q::Infix::DefinedOr is Q::Infix {
 ### right-hand side only if the left-hand side is truthy.
 ###
 class Q::Infix::And is Q::Infix {
+    submethod BUILD {
+        die "Old class Q::Infix::And -- do not use anymore";
+    }
+
     method eval($runtime) {
         my $l = $.lhs.eval($runtime);
         return !$l.truthy
@@ -569,6 +693,10 @@ class Q::Postfix does Q::Expr {
     has $.identifier;
     has $.operand;
 
+    submethod BUILD {
+        die "Old class Q::Postfix -- do not use anymore";
+    }
+
     method attribute-order { <identifier operand> }
 
     method eval($runtime) {
@@ -585,6 +713,10 @@ class Q::Postfix does Q::Expr {
 ###
 class Q::Postfix::Index is Q::Postfix {
     has $.index;
+
+    submethod BUILD {
+        die "Old class Q::Postfix::Infix -- do not use anymore";
+    }
 
     method attribute-order { <identifier operand index> }
 
@@ -667,6 +799,10 @@ class Q::Postfix::Index is Q::Postfix {
 class Q::Postfix::Call is Q::Postfix {
     has $.argumentlist;
 
+    submethod BUILD {
+        die "Old class Q::Postfix::Call -- do not use anymore";
+    }
+
     method attribute-order { <identifier operand argumentlist> }
 
     method eval($runtime) {
@@ -686,6 +822,10 @@ class Q::Postfix::Call is Q::Postfix {
 ###
 class Q::Postfix::Property is Q::Postfix {
     has $.property;
+
+    submethod BUILD {
+        die "Old class Q::Postfix::Property -- do not use anymore";
+    }
 
     method attribute-order { <identifier operand property> }
 
@@ -718,6 +858,10 @@ class Q::Unquote does Q {
     has $.qtype;
     has $.expr;
 
+    submethod BUILD {
+        die "Old class Q::Unquote -- do not use anymore";
+    }
+
     method eval($runtime) {
         die "Should never hit an unquote at runtime"; # XXX: turn into X::
     }
@@ -729,6 +873,10 @@ class Q::Unquote does Q {
 ###
 class Q::Unquote::Prefix is Q::Unquote {
     has $.operand;
+
+    submethod BUILD {
+        die "Old class Q::Unquote::Prefix -- do not use anymore";
+    }
 }
 
 ### ### Q::Unquote::Infix
@@ -738,6 +886,10 @@ class Q::Unquote::Prefix is Q::Unquote {
 class Q::Unquote::Infix is Q::Unquote {
     has $.lhs;
     has $.rhs;
+
+    submethod BUILD {
+        die "Old class Q::Unquote::Infix -- do not use anymore";
+    }
 }
 
 ### ### Q::Term::My
@@ -746,6 +898,10 @@ class Q::Unquote::Infix is Q::Unquote {
 ###
 class Q::Term::My does Q::Term does Q::Declaration {
     has $.identifier;
+
+    submethod BUILD {
+        die "Old class Q::Term::My -- do not use anymore";
+    }
 
     method is-assignable { True }
 
@@ -774,6 +930,10 @@ class Q::StatementList { ... }
 class Q::Term::Quasi does Q::Term {
     has $.qtype;
     has $.contents;
+
+    submethod BUILD {
+        die "Old class Q::Term::Quasi -- do not use anymore";
+    }
 
     method attribute-order { <qtype contents> }
 
@@ -876,6 +1036,10 @@ class Q::Term::Quasi does Q::Term {
 class Q::Parameter does Q does Q::Declaration {
     has $.identifier;
 
+    submethod BUILD {
+        die "Old class Q::Parameter -- do not use anymore";
+    }
+
     method is-assignable { True }
 }
 
@@ -885,6 +1049,10 @@ class Q::Parameter does Q does Q::Declaration {
 ###
 class Q::ParameterList does Q {
     has _007::Value $.parameters where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::ParameterList -- do not use anymore";
+    }
 }
 
 ### ### Q::ArgumentList
@@ -893,6 +1061,10 @@ class Q::ParameterList does Q {
 ###
 class Q::ArgumentList does Q {
     has _007::Value $.arguments where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::ArgumentList -- do not use anymore";
+    }
 }
 
 ### ### Q::Statement
@@ -909,6 +1081,10 @@ role Q::Statement does Q {
 class Q::Statement::Expr does Q::Statement {
     has $.expr;
 
+    submethod BUILD {
+        die "Old class Q::Statement::Expr -- do not use anymore";
+    }
+
     method run($runtime) {
         $.expr.eval($runtime);
     }
@@ -922,6 +1098,10 @@ class Q::Statement::If does Q::Statement {
     has $.expr;
     has $.block;
     has $.else = NONE;
+
+    submethod BUILD {
+        die "Old class Q::Statement::If -- do not use anymore";
+    }
 
     method attribute-order { <expr block else> }
 
@@ -958,6 +1138,10 @@ class Q::Statement::If does Q::Statement {
 class Q::Statement::Block does Q::Statement {
     has $.block;
 
+    submethod BUILD {
+        die "Old class Q::Statement::Block -- do not use anymore";
+    }
+
     method run($runtime) {
         $runtime.run-block($.block, []);
     }
@@ -969,6 +1153,9 @@ class Q::Statement::Block does Q::Statement {
 ### We can read "compilation unit" here as meaning "file".
 ###
 class Q::CompUnit is Q::Statement::Block {
+    submethod BUILD {
+        die "Old class Q::CompUnit -- do not use anymore";
+    }
 }
 
 ### ### Q::Statement::For
@@ -978,6 +1165,10 @@ class Q::CompUnit is Q::Statement::Block {
 class Q::Statement::For does Q::Statement {
     has $.expr;
     has $.block;
+
+    submethod BUILD {
+        die "Old class Q::Statement::For -- do not use anymore";
+    }
 
     method attribute-order { <expr block> }
 
@@ -1008,6 +1199,10 @@ class Q::Statement::While does Q::Statement {
     has $.expr;
     has $.block;
 
+    submethod BUILD {
+        die "Old class Q::Statement::While -- do not use anymore";
+    }
+
     method attribute-order { <expr block> }
 
     method run($runtime) {
@@ -1031,6 +1226,10 @@ class Q::Statement::While does Q::Statement {
 class Q::Statement::Return does Q::Statement {
     has $.expr = NONE;
 
+    submethod BUILD {
+        die "Old class Q::Statement::Return -- do not use anymore";
+    }
+
     method run($runtime) {
         my $value = is-none($.expr) ?? $.expr !! $.expr.eval($runtime);
         my $frame = $runtime.get-var("--RETURN-TO--");
@@ -1044,6 +1243,10 @@ class Q::Statement::Return does Q::Statement {
 ###
 class Q::Statement::Throw does Q::Statement {
     has $.expr = NONE;
+
+    submethod BUILD {
+        die "Old class Q::Statement::Throw -- do not use anymore";
+    }
 
     method run($runtime) {
         my $value = is-none($.expr)
@@ -1085,6 +1288,10 @@ class Q::Statement::Func does Q::Statement does Q::Declaration {
     has $.traitlist = Q::TraitList.new;
     has Q::Block $.block;
 
+    submethod BUILD {
+        die "Old class Q::Statement::Func -- do not use anymore";
+    }
+
     method attribute-order { <identifier traitlist block> }
 
     method run($runtime) {
@@ -1100,6 +1307,10 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
     has $.traitlist = Q::TraitList.new;
     has $.block;
 
+    submethod BUILD {
+        die "Old class Q::Statement::Macro -- do not use anymore";
+    }
+
     method attribute-order { <identifier traitlist block> }
 
     method run($runtime) {
@@ -1113,6 +1324,10 @@ class Q::Statement::Macro does Q::Statement does Q::Declaration {
 class Q::Statement::BEGIN does Q::Statement {
     has $.block;
 
+    submethod BUILD {
+        die "Old class Q::Statement::BEGIN -- do not use anymore";
+    }
+
     method run($runtime) {
         # a BEGIN block does not run at runtime
     }
@@ -1124,6 +1339,10 @@ class Q::Statement::BEGIN does Q::Statement {
 ###
 class Q::Statement::Class does Q::Statement does Q::Declaration {
     has $.block;
+
+    submethod BUILD {
+        die "Old class Q::Statement::Class -- do not use anymore";
+    }
 
     method run($runtime) {
         # a class block does not run at runtime
@@ -1139,6 +1358,10 @@ class Q::Statement::Class does Q::Statement does Q::Declaration {
 ###
 class Q::StatementList does Q {
     has _007::Value $.statements where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::StatementList -- do not use anymore";
+    }
 
     method run($runtime) {
         for get-all-array-elements($.statements) -> $statement {
@@ -1168,6 +1391,10 @@ class Q::StatementList does Q {
 ###
 class Q::Expr::BlockAdapter does Q::Expr {
     has $.block;
+
+    submethod BUILD {
+        die "Old class Q::Expr::BlockAdapter -- do not use anymore";
+    }
 
     method eval($runtime) {
         $runtime.enter($runtime.current-frame, $.block.static-lexpad, $.block.statementlist);

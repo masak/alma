@@ -5,7 +5,7 @@ use _007::Builtins;
 use _007::Equal;
 
 constant NO_OUTER = make-dict();
-constant RETURN_TO = Q::Identifier.new(:name(make-str("--RETURN-TO--")));
+constant RETURN_TO = make-q-identifier(make-str("--RETURN-TO--"));
 constant EXIT_SUCCESS = 0;
 
 my %q-mappings{Any};
@@ -49,7 +49,7 @@ class _007::Runtime {
         $!exit-code = EXIT_SUCCESS;
     }
 
-    method run(Q::CompUnit $compunit) {
+    method run(_007::Value $compunit where &is-q-compunit) {
         self.enter(self.current-frame, $compunit.block.static-lexpad, $compunit.block.statementlist);
         $compunit.block.statementlist.run(self);
         self.handle-main();
@@ -97,11 +97,11 @@ class _007::Runtime {
         ]);
         @!frames.push($frame);
         for get-all-dict-properties($static-lexpad) -> Pair (:$key, :$value) {
-            my $identifier = Q::Identifier.new(:name(make-str($key)));
+            my $identifier = make-q-identifier(make-str($key));
             self.declare-var($identifier, $value);
         }
         for get-all-array-elements($statementlist.statements).kv -> $i, $_ {
-            when Q::Statement::Func {
+            when &is-q-statement-func {
                 self.declare-var(.identifier, make-func(
                     .identifier.name,
                     .block.parameterlist,
@@ -113,7 +113,7 @@ class _007::Runtime {
         }
         if $routine {
             my $name = $routine.slots<name>;
-            my $identifier = Q::Identifier.new(:$name);
+            my $identifier = make-q-identifier($name);
             self.declare-var($identifier, $routine);
         }
     }
@@ -150,7 +150,7 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
-    method lookup-frame-outside(Q::Term::Identifier $identifier, $quasi-frame) {
+    method lookup-frame-outside(_007::Value $identifier where &is-q-term-identifier, $quasi-frame) {
         my Str $name = $identifier.name.native-value;
         my $frame = self.current-frame;
         my $seen-quasi-frame = False;
@@ -166,7 +166,7 @@ class _007::Runtime {
         die "something is very off with lexical lookup ($name)";    # XXX: turn into X::
     }
 
-    method put-var(Q::Identifier $identifier, $value) {
+    method put-var(_007::Value $identifier where &is-q-identifier, $value) {
         my $name = $identifier.name.native-value;
         my $pad = self!find-pad($name, self.current-frame);
         set-dict-property($pad, $name, $value);
@@ -191,7 +191,7 @@ class _007::Runtime {
         set-dict-property(get-dict-property($frame, "pad"), $name, $value);
     }
 
-    method declare-var(Q::Identifier $identifier, $value?) {
+    method declare-var(_007::Value $identifier where &is-q-identifier, $value?) {
         my $name = $identifier.name.native-value;
         set-dict-property(get-dict-property(self.current-frame, "pad"), $name, $value // NONE);
     }
@@ -208,7 +208,7 @@ class _007::Runtime {
         self.declare-var(RETURN_TO, $.current-frame);
     }
 
-    method run-block(Q::Block $block, @arguments) {
+    method run-block(_007::Value $block where &is-q-block, @arguments) {
         self.enter(self.current-frame, $block.static-lexpad, $block.statementlist);
         for @(get-all-array-elements($block.parameterlist.parameters)) Z @arguments -> ($param, $arg) {
             self.declare-var($param.identifier, $arg);
@@ -284,7 +284,7 @@ class _007::Runtime {
         sub builtin(&fn) {
             my $name = &fn.name;
             my &ditch-sigil = { $^str.substr(1) };
-            my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str($^value))))) };
+            my &parameter = { make-q-parameter(make-q-identifier(make-str($^value))) };
             my @parameters = &fn.signature.params».name».&ditch-sigil».&parameter;
             return make-func(&fn, $name, @parameters);
         }
@@ -305,11 +305,11 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return Q::Term::Identifier.new(:name($thing.name))
-                        if $thing ~~ Q::Term::Identifier;
+                    return make-q-term-identifier($thing.name)
+                        if is-q-term-identifier($thing);
 
                     return $thing
-                        if $thing ~~ Q::Unquote;
+                        if is-q-unquote($thing);
 
                     my %attributes = $thing.attributes.map: -> $attr {
                         aname($attr) => interpolate(avalue($attr, $thing))
@@ -326,7 +326,7 @@ class _007::Runtime {
             sub aname($attr) { $attr.name.substr(2) }
             my %known-properties = $obj.WHAT.attributes.map({ aname($_) => 1 });
             # XXX: hack
-            if $obj ~~ Q::Block {
+            if is-q-block($obj) {
                 %known-properties<static-lexpad> = 1;
             }
 

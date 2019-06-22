@@ -1,0 +1,77 @@
+sub sum(@values) {
+    [+] @values;
+}
+
+sub mean(@values) {
+    PRE { @values.elems > 0 }
+
+    sum(@values) / @values.elems;
+}
+
+sub variance(@values) {
+    PRE { @values.elems > 1 }
+
+    my $m = mean(@values);
+    my $N = @values.elems;
+    sum(@values.map(-> $v { ($v - $m) ** 2 })) / ($N - 1);
+}
+
+sub standard-deviation(@values) {
+    sqrt(variance(@values));
+}
+
+sub nth-percentile($n, @values) {
+    my $index = ceiling(@values.elems * $n / 100);
+    @values[$index];
+}
+
+sub ninth(@values) {
+    nth-percentile(9, @values);
+}
+
+sub lower(@values) {
+    mean(@values) - standard-deviation(@values);
+}
+
+sub median(@values) {
+    PRE { @values.elems > 0 }
+
+    if @values.elems % 2 == 0 {
+        mean([@values[* div 2], @values[* div 2 + 1]]);
+    }
+    else {
+        @values[* div 2];
+    }
+}
+
+sub upper(@values) {
+    mean(@values) + standard-deviation(@values);
+}
+
+sub ninety-first(@values) {
+    nth-percentile(91, @values);
+}
+
+my %stat;
+my @commits;
+
+given open("stat") -> $fh {
+    for $fh.lines -> $line {
+        $line ~~ /(\S+) \s+ (\S+)/
+            or die "Unknown format: '$_'";
+        my $commit = ~$0;
+        my $time-in-seconds = +$1;
+        unless %stat{$commit} :exists {
+            @commits.push($commit);
+        }
+        %stat{$commit}.push($time-in-seconds);
+    }
+    $fh.close;
+}
+
+for @commits -> $commit {
+    my @times = @(%stat{$commit});
+    @times.=sort();
+    say sprintf "%s: 9th %7.3f, lower %7.3f, median %7.3f, upper %7.3f, 91st %7.3f",
+        $commit, ninth(@times), lower(@times), median(@times), upper(@times), ninety-first(@times);
+}

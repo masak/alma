@@ -52,35 +52,35 @@ class _007::Linter {
 
             my @blocks;
 
-            multi traverse(Q::Statement::Block $stblock) {
+            multi traverse(_007::Value $stblock where &is-q-statement-block) {
                 traverse($stblock.block);
             }
 
-            multi traverse(Q::Block $block) {
+            multi traverse(_007::Value $block where &is-q-block) {
                 @blocks.push: $block;
                 traverse($block.statementlist);
                 @blocks.pop;
             }
 
-            multi traverse(Q::ParameterList $parameterlist) {
+            multi traverse(_007::Value $parameterlist where &is-q-parameterlist) {
             }
 
-            multi traverse(Q::StatementList $statementlist) {
+            multi traverse(_007::Value $statementlist where &is-q-statementlist) {
                 for get-all-array-elements($statementlist.statements) -> $stmt {
                     traverse($stmt);
                 }
             }
 
-            multi traverse(Q::Statement::Func $func) {
+            multi traverse(_007::Value $func where &is-q-statement-func) {
                 my $name = $func.identifier.name;
                 %declared{"{@blocks[*-1].WHICH.Str}|$name"} = L::SubNotUsed;
             }
 
-            multi traverse(Q::Statement::Expr $stexpr) {
+            multi traverse(_007::Value $stexpr where &q-statement-expr) {
                 traverse($stexpr.expr);
             }
 
-            multi traverse(Q::Postfix::Call $call) {
+            multi traverse(_007::Value $call where &q-postfix-call) {
                 traverse($call.operand);
                 traverse($call.argumentlist);
             }
@@ -95,7 +95,7 @@ class _007::Linter {
                 fail X::AssertionFailure.new("A thing that is used must be declared somewhere");
             }
 
-            multi traverse(Q::Identifier $identifier) {
+            multi traverse(_007::Value $identifier where &q-identifier) {
                 my $name = $identifier.name.native-value;
                 # XXX: what we should really do is whitelist all of he built-ins
                 return if $name eq "say";
@@ -107,30 +107,30 @@ class _007::Linter {
                 }
             }
 
-            multi traverse(Q::ArgumentList $argumentlist) {
+            multi traverse(_007::Value $argumentlist where &is-q-argumentlist) {
                 for get-all-array-elements($argumentlist.arguments) -> $expr {
                     traverse($expr);
                 }
             }
 
-            multi traverse(Q::Literal $literal) {
+            multi traverse(_007::Value $literal where &is-q-literal) {
             }
 
-            multi traverse(Q::Term $term) {
+            multi traverse(_007::Value $term where &is-q-term) {
             }
 
-            multi traverse(Q::Term::My $my) {
+            multi traverse(_007::Value $my where &is-q-term-my) {
                 my $name = $my.identifier.name;
                 my $ref = "{@blocks[*-1].WHICH.Str}|$name";
                 %declared{$ref} = L::VariableNotUsed;
             }
 
-            multi traverse(Q::Statement::For $for) {
+            multi traverse(_007::Value $for where &is-q-statement-for) {
                 traverse($for.expr);
                 traverse($for.block);
             }
 
-            multi traverse(Q::Infix::Assignment $infix) {
+            multi traverse(_007::Value $infix where &is-q-infix-assignment) {
                 traverse($infix.rhs);
                 my $lhs = $infix.lhs;
                 if $lhs ~~ Q::Term::My {
@@ -146,7 +146,7 @@ class _007::Linter {
                 traverse($infix.lhs);
             }
 
-            multi traverse(Q::Infix $infix) {
+            multi traverse(_007::Value $infix where &is-q-infix) {
                 traverse($infix.lhs);
                 traverse($infix.rhs);
             }

@@ -62,7 +62,7 @@ class _007::OpScope {
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equiv" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
-                    unless $identifier ~~ Q::Identifier;
+                    unless is-q-identifier($identifier);
                 my $s = $identifier.name;
                 die "Unknown thing in '$name' trait"
                     unless $s ~~ /^ < pre in post > 'fix:' /;
@@ -74,7 +74,7 @@ class _007::OpScope {
             elsif $name eq "assoc" {
                 my $string = $trait<EXPR>.ast;
                 die "The associativity must be a string"
-                    unless $string ~~ Q::Literal::Str;
+                    unless is-q-literal-str($string);
                 my $value = $string.value.native-value;
                 die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
@@ -95,12 +95,12 @@ class _007::OpScope {
 
     method install($category, $op, $q?, :%precedence, :$assoc) {
         my $name = "$category:$op";
-        my $identifier = Q::Identifier.new(:name(make-str($name)));
+        my $identifier = make-q-identifier(make-str($name));
 
         %!ops{$category}{$op} = $q !=== Any ?? $q !! {
-            prefix => Q::Prefix.new(:$identifier),
-            infix => Q::Infix.new(:$identifier),
-            postfix => Q::Postfix.new(:$identifier),
+            prefix => make-q-prefix($identifier, make-q-literal-none()),
+            infix => make-q-infix($identifier, make-q-literal-none(), make-q-literal-none()),
+            postfix => make-q-postfix($identifier, make-q-literal-none()),
         }{$category};
 
         my @namespace := $category eq 'infix' ?? @!infixprec !! @!prepostfixprec;

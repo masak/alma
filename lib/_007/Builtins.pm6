@@ -55,15 +55,15 @@ my role Placeholder {
 }
 my class Placeholder::MacroOp does Placeholder {
 }
-sub macro-op(:$qtype, :$assoc?, :%precedence?) {
+sub macro-op(_007::Value :$qtype where &is-type, :$assoc?, :%precedence?) {
     Placeholder::MacroOp.new(:$qtype, :$assoc, :%precedence);
 }
 
 my class Placeholder::Op does Placeholder {
     has &.fn;
 }
-sub op(&fn, :$qtype, :$assoc?, :%precedence?) {
-    Placeholder::Op.new(:&fn, :$qtype, :$assoc, :%precedence);
+sub op(&fn, :$assoc?, :%precedence?) {
+    Placeholder::Op.new(:&fn, :$assoc, :%precedence);
 }
 
 my @builtins =
@@ -98,22 +98,22 @@ my @builtins =
 
     # assignment precedence
     'infix:=' => macro-op(
-        :qtype(Q::Infix::Assignment),
+        :qtype(TYPE<Q.Infix.Assignment>),
         :assoc<right>,
     ),
 
     # disjunctive precedence
     'infix:||' => macro-op(
-        :qtype(Q::Infix::Or),
+        :qtype(TYPE<Q.Infix.Or>),
     ),
     'infix://' => macro-op(
-        :qtype(Q::Infix::DefinedOr),
+        :qtype(TYPE<Q.Infix.DefinedOr>),
         :precedence{ equiv => "infix:||" },
     ),
 
     # conjunctive precedence
     'infix:&&' => macro-op(
-        :qtype(Q::Infix::And),
+        :qtype(TYPE<Q.Infix.And>),
     ),
 
     # comparison precedence
@@ -315,13 +315,13 @@ my @builtins =
 
     # postfixes
     'postfix:[]' => macro-op(
-        :qtype(Q::Postfix::Index),
+        :qtype(TYPE<Q.Postfix.Index>),
     ),
     'postfix:()' => macro-op(
-        :qtype(Q::Postfix::Call),
+        :qtype(TYPE<Q.Postfix.Call>),
     ),
     'postfix:.' => macro-op(
-        :qtype(Q::Postfix::Property),
+        :qtype(TYPE<Q.Postfix.Property>),
     ),
 ;
 
@@ -348,7 +348,7 @@ sub install-op($name, $placeholder) {
 }
 
 my &ditch-sigil = { $^str.substr(1) };
-my &parameter = { Q::Parameter.new(:identifier(Q::Identifier.new(:name(make-str($^value))))) };
+my &parameter = { make-q-parameter(make-q-identifier(make-str($^value))) };
 
 @builtins.=map({
     when .value ~~ Val::Type {
@@ -391,3 +391,4 @@ sub builtins-pad() is export {
 sub opscope() is export {
     return $opscope;
 }
+
