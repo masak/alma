@@ -268,4 +268,16 @@ use _007::Test;
     outputs $program, "<func ()>\n", "an anonymous func stringifies without a name";
 }
 
+{
+    my $program = q:to/./;
+        func foo() is test {
+            say("OH HAI");
+        }
+
+        foo();
+        .
+
+    outputs $program, "OH HAI\n", "traits don't have to be followed by parentheses";
+}
+
 done-testing;

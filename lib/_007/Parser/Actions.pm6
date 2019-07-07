@@ -235,7 +235,7 @@ class _007::Parser::Actions {
         make Q::TraitList.new(:traits(Val::Array.new(:elements(@traits))));
     }
     method trait($/) {
-        make Q::Trait.new(:identifier($<identifier>.ast), :expr($<EXPR>.ast));
+        make Q::Trait.new(:identifier($<identifier>.ast), :expr(ast-if-any($<EXPR>)));
     }
 
     method blockoid ($/) {
