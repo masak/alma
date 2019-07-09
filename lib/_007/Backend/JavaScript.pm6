@@ -62,8 +62,8 @@ class _007::Backend::JavaScript {
                 my $rhs = $expr.rhs;
 
                 die "Cannot handle non-literal-Int rhs just yet!"
-                        unless $rhs ~~ Q::Literal::Int;
-                my $int = $rhs.value.Str;
+                        unless is-q-literal-int($rhs);
+                my $int = $rhs.slots<value>.native-value.Str;
                 @main.push("let {$name} = {$int};");
             }
 

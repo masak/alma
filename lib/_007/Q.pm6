@@ -138,6 +138,10 @@ role Q::Literal does Q::Term {
 ###
 class Q::Literal::Int does Q::Literal {
     has _007::Value $.value where &is-int;
+
+    submethod BUILD {
+        die "Old class Q::Literal::Int -- do not use anymore";
+    }
 }
 
 ### ### Q::Literal::Str

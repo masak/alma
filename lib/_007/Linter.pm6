@@ -116,6 +116,9 @@ class _007::Linter {
             multi traverse(Q::Literal $literal) {
             }
 
+            multi traverse(_007::Value $literal where &is-q-literal-int) {
+            }
+
             multi traverse(Q::Term $term) {
             }
 

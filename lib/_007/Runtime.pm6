@@ -24,6 +24,7 @@ tree-walk(Q);
 
 %q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
 %q-mappings{Q::Literal}<Bool> = TYPE<Q.Literal.Bool>;
+%q-mappings{Q::Literal}<Int> = TYPE<Q.Literal.Int>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -705,8 +706,8 @@ class _007::Runtime {
         $bool.slots<value>;
     }
 
-    multi method eval-q(Q::Literal::Int $int) {
-        $int.value;
+    multi method eval-q(_007::Value $int where &is-q-literal-int) {
+        $int.slots<value>;
     }
 
     multi method eval-q(Q::Literal::Str $str) {
@@ -765,6 +766,10 @@ class _007::Runtime {
             }
             elsif $object.type === TYPE<Q.Literal.None> {
                 return make-q-literal-none();
+            }
+            elsif $object.type === TYPE<Q.Literal.Int> {
+                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+                return make-q-literal-int($value);
             }
             else {
                 die "Don't know how to create an object of type ", $object.type.slots<name>;
@@ -984,6 +989,9 @@ class _007::Runtime {
             return make-q-literal-bool($thing.slots<value>)
                 if is-q-literal-bool($thing);
 
+            return make-q-literal-int($thing.slots<value>)
+                if is-q-literal-int($thing);
+
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;
 
@@ -1018,7 +1026,7 @@ class _007::Runtime {
             if $thing ~~ Q::Unquote {
                 my $ast = self.eval-q($thing.expr);
                 die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                    unless $ast ~~ Q;
+                    unless $ast ~~ Q || is-q-literal-int($ast);
                 return $ast;
             }
 

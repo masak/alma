@@ -159,6 +159,10 @@ my @builtins =
     ),
     'infix:~~' => op(
         sub ($lhs, $rhs) {
+            # XXX: Short-term workaround
+            if $rhs ~~ Val::Type && ($rhs.type === Q || $rhs.type === Q::Literal) && is-q-literal-int($lhs) {
+                return TRUE;
+            }
             if is-type($rhs) {
                 # XXX: Once we drop Val::Type, we should turn the type test below into an assert.
                 # XXX: Once everything is ported over to _007::Value, the test against _007::Value
@@ -173,6 +177,10 @@ my @builtins =
     ),
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
+            # XXX: Short-term workaround
+            if $rhs ~~ Val::Type && ($rhs.type === Q || $rhs.type === Q::Literal) && is-q-literal-int($lhs) {
+                return FALSE;
+            }
             if is-type($rhs) {
                 # XXX: Once we drop Val::Type, we should turn the type test below into an assert.
                 # XXX: Once everything is ported over to _007::Value, the test against _007::Value

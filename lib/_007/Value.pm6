@@ -58,8 +58,9 @@ BEGIN {
     TYPE<Regex> = make-type "Regex";
     TYPE<Str> = make-type "Str", :backed;
 
-    TYPE<Q.Literal.None> = make-type "Q.Literal.None";
     TYPE<Q.Literal.Bool> = make-type "Q.Literal.Bool";
+    TYPE<Q.Literal.Int> = make-type "Q.Literal.Int";
+    TYPE<Q.Literal.None> = make-type "Q.Literal.None";
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -339,14 +340,20 @@ sub is-q-literal-none($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.None>);
 }
 
-sub make-q-literal-bool(_007::Value $bool where &is-bool) is export {
-    _007::Value.new(:type(TYPE<Q.Literal.Bool>), slots => {
-        :value($bool),
-    });
+sub make-q-literal-bool(_007::Value $value where &is-bool) is export {
+    _007::Value.new(:type(TYPE<Q.Literal.Bool>), slots => { :$value });
 }
 
 sub is-q-literal-bool($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Bool>);
+}
+
+sub make-q-literal-int(_007::Value $value where &is-int) is export {
+    _007::Value.new(:type(TYPE<Q.Literal.Int>), slots => { :$value });
+}
+
+sub is-q-literal-int($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Int>);
 }
 
 sub escaped-name($func) is export {
@@ -424,6 +431,9 @@ sub stringify(_007::Value $value) {
     }
     elsif $value.type === TYPE<Type> {
         return "<type {$value.slots<name>}>";
+    }
+    elsif $value.type === TYPE<Q.Literal.Int> {
+        return "Q.Literal.Int {$value.slots<value>}";
     }
     else {
         die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;

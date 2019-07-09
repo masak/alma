@@ -107,6 +107,7 @@ class _007::Parser::Actions {
 
             multi enforce-leftmost-my(Q::Term::My $) {}     # everything's fine
             multi enforce-leftmost-my(Q::Term $) { panicExportNothing() }
+            multi enforce-leftmost-my(_007::Value $ where &is-q-literal-int) { panicExportNothing() }
             multi enforce-leftmost-my(Q::Prefix $) { panicExportNothing() }
             multi enforce-leftmost-my(Q::Postfix $postfix) { enforce-leftmost-my($postfix.term) }
             multi enforce-leftmost-my(Q::Infix $infix) { enforce-leftmost-my($infix.lhs) }
@@ -509,10 +510,7 @@ class _007::Parser::Actions {
     }
 
     method term:int ($/) {
-        make Q::Literal::Int.new(:value(_007::Value::Backed.new(
-            :type(TYPE<Int>),
-            :native-value(+$/),
-        )));
+        make make-q-literal-int(make-int(+$/));
     }
 
     method term:str ($/) {
@@ -844,6 +842,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Term $) {} # with two exceptions, see below
     multi handle(Q::Postfix $) {}
     multi handle(_007::Value $ where &is-q-literal-bool) {}
+    multi handle(_007::Value $ where &is-q-literal-int) {}
 
     multi handle(Q::StatementList $statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {
