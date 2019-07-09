@@ -129,21 +129,6 @@ role Q::Term does Q::Expr {
 role Q::Literal does Q::Term {
 }
 
-### ### Q::Literal::Int
-###
-### An integer literal; a non-negative number.
-###
-### Negative numbers are not themselves considered integer literals: something
-### like `-5` is parsed as a `prefix:<->` containing a literal `5`.
-###
-class Q::Literal::Int does Q::Literal {
-    has _007::Value $.value where &is-int;
-
-    submethod BUILD {
-        die "Old class Q::Literal::Int -- do not use anymore";
-    }
-}
-
 ### ### Q::Literal::Str
 ###
 ### A string literal.
