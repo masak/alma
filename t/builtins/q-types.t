@@ -1,6 +1,17 @@
+use _007::Value;
 use _007::Q;
 use Test;
 use _007::Test;
+
+for TYPE.keys -> $type {
+    next unless $type eq "Q" || $type ~~ /^ "Q."/;
+
+    my $program = qq:to/./;
+        say({$type});
+        .
+
+    outputs $program, "<type {$type}>\n", "can access {$type}";
+}
 
 my @q-types;
 
