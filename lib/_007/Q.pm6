@@ -129,18 +129,6 @@ role Q::Term does Q::Expr {
 role Q::Literal does Q::Term {
 }
 
-### ### Q::Literal::Str
-###
-### A string literal.
-###
-class Q::Literal::Str does Q::Literal {
-    has _007::Value $.value when &is-str;
-
-    submethod BUILD {
-        die "Old class Q::Literal::Str -- do not use anymore";
-    }
-}
-
 ### ### Q::Term::Identifier
 ###
 ### An identifier; a name which identifies a storage location in the program.
