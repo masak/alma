@@ -23,6 +23,7 @@ sub tree-walk($type) {
 tree-walk(Q);
 
 %q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
+%q-mappings{Q::Literal}<Bool> = TYPE<Q.Literal.Bool>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -700,8 +701,8 @@ class _007::Runtime {
         NONE;
     }
 
-    multi method eval-q(Q::Literal::Bool $bool) {
-        $bool.value;
+    multi method eval-q(_007::Value $bool where &is-q-literal-bool) {
+        $bool.slots<value>;
     }
 
     multi method eval-q(Q::Literal::Int $int) {
@@ -979,6 +980,9 @@ class _007::Runtime {
 
             return make-q-literal-none()
                 if is-q-literal-none($thing);
+
+            return make-q-literal-bool($thing.slots<value>)
+                if is-q-literal-bool($thing);
 
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;

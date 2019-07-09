@@ -501,11 +501,11 @@ class _007::Parser::Actions {
     }
 
     method term:false ($/) {
-        make Q::Literal::Bool.new(:value(make-bool(False)));
+        make make-q-literal-bool(FALSE);
     }
 
     method term:true ($/) {
-        make Q::Literal::Bool.new(:value(make-bool(True)));
+        make make-q-literal-bool(TRUE);
     }
 
     method term:int ($/) {
@@ -843,6 +843,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Literal $) {}
     multi handle(Q::Term $) {} # with two exceptions, see below
     multi handle(Q::Postfix $) {}
+    multi handle(_007::Value $ where &is-q-literal-bool) {}
 
     multi handle(Q::StatementList $statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {

@@ -59,6 +59,7 @@ BEGIN {
     TYPE<Str> = make-type "Str", :backed;
 
     TYPE<Q.Literal.None> = make-type "Q.Literal.None";
+    TYPE<Q.Literal.Bool> = make-type "Q.Literal.Bool";
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -336,6 +337,16 @@ sub make-q-literal-none() is export {
 
 sub is-q-literal-none($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.None>);
+}
+
+sub make-q-literal-bool(_007::Value $bool where &is-bool) is export {
+    _007::Value.new(:type(TYPE<Q.Literal.Bool>), slots => {
+        :value($bool),
+    });
+}
+
+sub is-q-literal-bool($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Bool>);
 }
 
 sub escaped-name($func) is export {
