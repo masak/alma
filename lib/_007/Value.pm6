@@ -61,6 +61,7 @@ BEGIN {
     TYPE<Q.Literal.Bool> = make-type "Q.Literal.Bool";
     TYPE<Q.Literal.Int> = make-type "Q.Literal.Int";
     TYPE<Q.Literal.None> = make-type "Q.Literal.None";
+    TYPE<Q.Literal.Str> = make-type "Q.Literal.Str";
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -354,6 +355,14 @@ sub make-q-literal-int(_007::Value $value where &is-int) is export {
 
 sub is-q-literal-int($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Int>);
+}
+
+sub make-q-literal-str(_007::Value $value where &is-str) is export {
+    _007::Value.new(:type(TYPE<Q.Literal.Str>), slots => { :$value });
+}
+
+sub is-q-literal-str($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Str>);
 }
 
 sub escaped-name($func) is export {

@@ -43,8 +43,8 @@ class _007::Backend::JavaScript {
                 @builtins.push(%builtins<say>);
                 my @arguments = get-all-array-elements($expr.argumentlist.arguments).map: {
                     die "Cannot handle non-literal-Str arguments just yet!"
-                        unless $_ ~~ Q::Literal::Str;
-                    .value.quoted-Str;
+                        unless is-q-literal-str($_);
+                    .slots<value>.quoted-Str;
                 };
                 @main.push("say({@arguments.join(", ")});");
             }

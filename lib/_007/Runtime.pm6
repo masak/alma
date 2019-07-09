@@ -22,9 +22,10 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
-%q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
 %q-mappings{Q::Literal}<Bool> = TYPE<Q.Literal.Bool>;
 %q-mappings{Q::Literal}<Int> = TYPE<Q.Literal.Int>;
+%q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
+%q-mappings{Q::Literal}<Str> = TYPE<Q.Literal.Str>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -620,6 +621,9 @@ class _007::Runtime {
                 $obj.slots{$propname};
             }
         }
+        elsif is-q-literal-str($obj) && $propname eq "value" {
+            return $obj.slots<value>;
+        }
         elsif $obj ~~ Q && ($obj.properties{$propname} :exists) {
             return $obj.properties{$propname};
         }
@@ -710,8 +714,8 @@ class _007::Runtime {
         $int.slots<value>;
     }
 
-    multi method eval-q(Q::Literal::Str $str) {
-        $str.value;
+    multi method eval-q(_007::Value $str where &is-q-literal-str) {
+        $str.slots<value>;
     }
 
     multi method eval-q(Q::Term::Identifier $identifier) {
@@ -770,6 +774,10 @@ class _007::Runtime {
             elsif $object.type === TYPE<Q.Literal.Int> {
                 my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
                 return make-q-literal-int($value);
+            }
+            elsif $object.type === TYPE<Q.Literal.Str> {
+                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+                return make-q-literal-str($value);
             }
             else {
                 die "Don't know how to create an object of type ", $object.type.slots<name>;
@@ -992,6 +1000,9 @@ class _007::Runtime {
             return make-q-literal-int($thing.slots<value>)
                 if is-q-literal-int($thing);
 
+            return make-q-literal-str($thing.slots<value>)
+                if is-q-literal-str($thing);
+
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;
 
@@ -1026,7 +1037,7 @@ class _007::Runtime {
             if $thing ~~ Q::Unquote {
                 my $ast = self.eval-q($thing.expr);
                 die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                    unless $ast ~~ Q || is-q-literal-int($ast);
+                    unless $ast ~~ Q || is-q-literal-int($ast) || is-q-literal-str($ast);
                 return $ast;
             }
 

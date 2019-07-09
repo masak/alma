@@ -135,6 +135,10 @@ role Q::Literal does Q::Term {
 ###
 class Q::Literal::Str does Q::Literal {
     has _007::Value $.value when &is-str;
+
+    submethod BUILD {
+        die "Old class Q::Literal::Str -- do not use anymore";
+    }
 }
 
 ### ### Q::Term::Identifier

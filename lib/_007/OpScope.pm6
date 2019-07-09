@@ -74,8 +74,8 @@ class _007::OpScope {
             elsif $name eq "assoc" {
                 my $string = $trait<EXPR>.ast;
                 die "The associativity must be a string"
-                    unless $string ~~ Q::Literal::Str;
-                my $value = $string.value.native-value;
+                    unless is-q-literal-str($string);
+                my $value = $string.slots<value>.native-value;
                 die X::Trait::IllegalValue.new(:trait<assoc>, :$value)
                     unless $value eq any "left", "non", "right";
                 $assoc = $value;

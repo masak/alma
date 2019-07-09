@@ -108,6 +108,7 @@ class _007::Parser::Actions {
             multi enforce-leftmost-my(Q::Term::My $) {}     # everything's fine
             multi enforce-leftmost-my(Q::Term $) { panicExportNothing() }
             multi enforce-leftmost-my(_007::Value $ where &is-q-literal-int) { panicExportNothing() }
+            multi enforce-leftmost-my(_007::Value $ where &is-q-literal-str) { panicExportNothing() }
             multi enforce-leftmost-my(Q::Prefix $) { panicExportNothing() }
             multi enforce-leftmost-my(Q::Postfix $postfix) { enforce-leftmost-my($postfix.term) }
             multi enforce-leftmost-my(Q::Infix $infix) { enforce-leftmost-my($infix.lhs) }
@@ -494,7 +495,7 @@ class _007::Parser::Actions {
                 if $s ~~ /\n/;
         }(~$0);
         my $value = make-str((~$0).subst(q[\"], q["], :g).subst(q[\\\\], q[\\], :g));
-        make Q::Literal::Str.new(:$value);
+        make make-q-literal-str($value);
     }
 
     method term:none ($/) {
@@ -544,7 +545,7 @@ class _007::Parser::Actions {
     }
 
     method regex-fragment:str ($/) {
-        make Q::Regex::Str.new(:contents($<str>.ast.value));
+        make Q::Regex::Str.new(:contents($<str>.ast.slots<value>));
     }
 
     method regex-fragment:identifier ($/) {
@@ -728,7 +729,7 @@ class _007::Parser::Actions {
     }
 
     method property:str-expr ($/) {
-        make Q::Property.new(:key($<str>.ast.value), :value($<value>.ast));
+        make Q::Property.new(:key($<str>.ast.slots<value>), :value($<value>.ast));
     }
 
     method property:identifier-expr ($/) {
@@ -830,7 +831,7 @@ class _007::Parser::Actions {
     }
 }
 
-sub check(Q $ast, $runtime) is export {
+sub check($ast where Q | _007::Value, $runtime) is export {
     my %*assigned;
     handle($ast);
 
@@ -843,6 +844,7 @@ sub check(Q $ast, $runtime) is export {
     multi handle(Q::Postfix $) {}
     multi handle(_007::Value $ where &is-q-literal-bool) {}
     multi handle(_007::Value $ where &is-q-literal-int) {}
+    multi handle(_007::Value $ where &is-q-literal-str) {}
 
     multi handle(Q::StatementList $statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {
