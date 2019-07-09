@@ -129,16 +129,6 @@ role Q::Term does Q::Expr {
 role Q::Literal does Q::Term {
 }
 
-### ### Q::Literal::None
-###
-### The `none` literal.
-###
-class Q::Literal::None does Q::Literal {
-    submethod BUILD {
-        die "Old class Q::Literal::None -- do not use anymore";
-    }
-}
-
 ### ### Q::Literal::Bool
 ###
 ### A boolean literal; either `true` or `false`.
