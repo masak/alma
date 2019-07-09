@@ -129,18 +129,6 @@ role Q::Term does Q::Expr {
 role Q::Literal does Q::Term {
 }
 
-### ### Q::Literal::Bool
-###
-### A boolean literal; either `true` or `false`.
-###
-class Q::Literal::Bool does Q::Literal {
-    has _007::Value $.value where &is-bool;
-
-    submethod BUILD {
-        die "Old class Q::Literal::Bool -- do not use anymore";
-    }
-}
-
 ### ### Q::Literal::Int
 ###
 ### An integer literal; a non-negative number.
