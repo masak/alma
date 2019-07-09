@@ -22,6 +22,8 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
+%q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
+
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
 
@@ -666,7 +668,9 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Type && (%q-mappings{$obj.type}{$propname} :exists) {
             my $subtype = %q-mappings{$obj.type}{$propname};
-            return Val::Type.of($subtype);
+            return is-type($subtype)
+                ?? $subtype
+                !! Val::Type.of($subtype);
         }
         else {
             if $obj ~~ Val::Type {
@@ -692,7 +696,7 @@ class _007::Runtime {
         die "Unhandled Q::Expr type ", $expr.^name;
     }
 
-    multi method eval-q(Q::Literal::None $) {
+    multi method eval-q(_007::Value $ where &is-q-literal-none) {
         NONE;
     }
 
@@ -757,6 +761,9 @@ class _007::Runtime {
             }
             elsif $object.type === TYPE<Object> {
                 return make-object();
+            }
+            elsif $object.type === TYPE<Q.Literal.None> {
+                return make-q-literal-none();
             }
             else {
                 die "Don't know how to create an object of type ", $object.type.slots<name>;
@@ -969,6 +976,9 @@ class _007::Runtime {
 
             return $thing
                 if $thing === TRUE | FALSE | NONE;
+
+            return make-q-literal-none()
+                if is-q-literal-none($thing);
 
             die "Unknown ", $thing.type.Str
                 if $thing ~~ _007::Value;

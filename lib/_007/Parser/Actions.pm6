@@ -497,7 +497,7 @@ class _007::Parser::Actions {
     }
 
     method term:none ($/) {
-        make Q::Literal::None.new;
+        make make-q-literal-none();
     }
 
     method term:false ($/) {

@@ -134,6 +134,9 @@ role Q::Literal does Q::Term {
 ### The `none` literal.
 ###
 class Q::Literal::None does Q::Literal {
+    submethod BUILD {
+        die "Old class Q::Literal::None -- do not use anymore";
+    }
 }
 
 ### ### Q::Literal::Bool

@@ -57,6 +57,8 @@ BEGIN {
     TYPE<None> = make-type "None";
     TYPE<Regex> = make-type "Regex";
     TYPE<Str> = make-type "Str", :backed;
+
+    TYPE<Q.Literal.None> = make-type "Q.Literal.None";
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -326,6 +328,14 @@ sub make-str(Str $native-value) is export {
 
 sub is-str($v) is export {
     $v ~~ _007::Value::Backed && is-instance($v, TYPE<Str>);
+}
+
+sub make-q-literal-none() is export {
+    _007::Value.new(:type(TYPE<Q.Literal.None>));
+}
+
+sub is-q-literal-none($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.None>);
 }
 
 sub escaped-name($func) is export {
