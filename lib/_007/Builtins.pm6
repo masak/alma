@@ -160,7 +160,7 @@ my @builtins =
     'infix:~~' => op(
         sub ($lhs, $rhs) {
             # XXX: Short-term workaround
-            if $rhs ~~ Val::Type && ($rhs.type === Q || $rhs.type === Q::Literal) && is-q-literal-int($lhs) {
+            if ($rhs ~~ Val::Type && $rhs.type === Q || $rhs === TYPE<Q.Literal>) && is-q-literal-int($lhs) {
                 return TRUE;
             }
             if is-type($rhs) {
@@ -178,7 +178,7 @@ my @builtins =
     'infix:!~~' => op(
         sub ($lhs, $rhs) {
             # XXX: Short-term workaround
-            if $rhs ~~ Val::Type && ($rhs.type === Q || $rhs.type === Q::Literal) && is-q-literal-int($lhs) {
+            if ($rhs ~~ Val::Type && $rhs.type === Q || $rhs === TYPE<Q.Literal>) && is-q-literal-int($lhs) {
                 return FALSE;
             }
             if is-type($rhs) {

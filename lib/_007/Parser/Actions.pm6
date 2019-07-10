@@ -672,7 +672,9 @@ class _007::Parser::Actions {
                 ?? $*runtime.property($type, $identifier)
                 !! $*runtime.maybe-get-var($identifier);
         }
-        my $type-obj = $type.type;
+        my $type-obj = is-type($type)
+            ?? $type
+            !! $type.type;
         my $name = $type-obj.^name.subst("::", ".", :g);
 
         if $type-obj !=== TYPE<Dict> && !is-type($type-obj) {
@@ -696,6 +698,9 @@ class _007::Parser::Actions {
                 die X::Property::Required.new(:type($name), :$property)
                     unless $property eq any(get-all-array-elements($<propertylist>.ast.properties)».key».native-value);
             }
+        }
+        elsif is-type($type-obj) && $type-obj.slots<abstract> {
+            die X::Uninstantiable.new(:$name, :abstract);
         }
 
         make Q::Term::Object.new(
@@ -839,12 +844,9 @@ sub check($ast where Q | _007::Value, $runtime) is export {
     multi handle(Q::ParameterList $) {}
     multi handle(Q::Statement::Return $) {}
     multi handle(Q::Statement::BEGIN $) {}
-    multi handle(Q::Literal $) {}
     multi handle(Q::Term $) {} # with two exceptions, see below
     multi handle(Q::Postfix $) {}
-    multi handle(_007::Value $ where &is-q-literal-bool) {}
-    multi handle(_007::Value $ where &is-q-literal-int) {}
-    multi handle(_007::Value $ where &is-q-literal-str) {}
+    multi handle(_007::Value $ where &is-q-literal) {}
 
     multi handle(Q::StatementList $statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {

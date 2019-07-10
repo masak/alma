@@ -118,17 +118,6 @@ role Q::Expr does Q {
 role Q::Term does Q::Expr {
 }
 
-### ### Q::Literal
-###
-### A literal; a constant value written out explicitly in the program, such as
-### `none`, `true`, `5`, or `"James Bond"`.
-###
-### Compound values such as arrays and objects are considered terms but not
-### literals.
-###
-role Q::Literal does Q::Term {
-}
-
 ### ### Q::Term::Identifier
 ###
 ### An identifier; a name which identifies a storage location in the program.

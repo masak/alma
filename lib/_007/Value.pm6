@@ -32,9 +32,8 @@ class _007::Value::Backed is _007::Value {
 
 constant TYPE is export = {};
 
-sub make-type(Str $name, Bool :$backed) {
-    my $base = TYPE<Object>;
-    _007::Value.new(:type(TYPE<Type>), slots => { :$name, :$backed, :$base });
+sub make-type(Str $name, :$base = TYPE<Object>, Bool :$backed, Bool :$abstract) {
+    _007::Value.new(:type(TYPE<Type>), slots => { :$name, :$base, :$backed, :$abstract });
 }
 
 BEGIN {
@@ -58,10 +57,11 @@ BEGIN {
     TYPE<Regex> = make-type "Regex";
     TYPE<Str> = make-type "Str", :backed;
 
-    TYPE<Q.Literal.Bool> = make-type "Q.Literal.Bool";
-    TYPE<Q.Literal.Int> = make-type "Q.Literal.Int";
-    TYPE<Q.Literal.None> = make-type "Q.Literal.None";
-    TYPE<Q.Literal.Str> = make-type "Q.Literal.Str";
+    TYPE<Q.Literal> = make-type "Q.Literal", :abstract;
+    TYPE<Q.Literal.Bool> = make-type "Q.Literal.Bool", :base(TYPE<Q.Literal>);
+    TYPE<Q.Literal.Int> = make-type "Q.Literal.Int", :base(TYPE<Q.Literal>);
+    TYPE<Q.Literal.None> = make-type "Q.Literal.None", :base(TYPE<Q.Literal>);
+    TYPE<Q.Literal.Str> = make-type "Q.Literal.Str", :base(TYPE<Q.Literal>);
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -363,6 +363,10 @@ sub make-q-literal-str(_007::Value $value where &is-str) is export {
 
 sub is-q-literal-str($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal.Str>);
+}
+
+sub is-q-literal($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal>);
 }
 
 sub escaped-name($func) is export {

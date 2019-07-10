@@ -22,10 +22,11 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
-%q-mappings{Q::Literal}<Bool> = TYPE<Q.Literal.Bool>;
-%q-mappings{Q::Literal}<Int> = TYPE<Q.Literal.Int>;
-%q-mappings{Q::Literal}<None> = TYPE<Q.Literal.None>;
-%q-mappings{Q::Literal}<Str> = TYPE<Q.Literal.Str>;
+%q-mappings{Q}<Literal> = TYPE<Q.Literal>;
+%q-mappings{TYPE<Q.Literal>}<Bool> = TYPE<Q.Literal.Bool>;
+%q-mappings{TYPE<Q.Literal>}<Int> = TYPE<Q.Literal.Int>;
+%q-mappings{TYPE<Q.Literal>}<None> = TYPE<Q.Literal.None>;
+%q-mappings{TYPE<Q.Literal>}<Str> = TYPE<Q.Literal.Str>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -678,6 +679,9 @@ class _007::Runtime {
                 ?? $subtype
                 !! Val::Type.of($subtype);
         }
+        elsif is-type($obj) && (%q-mappings{$obj}{$propname} :exists) {
+            return %q-mappings{$obj}{$propname};
+        }
         else {
             if $obj ~~ Val::Type {
                 die X::Property::NotFound.new(:$propname, :type("$type ({$obj.type.^name})"));
@@ -741,7 +745,11 @@ class _007::Runtime {
 
     multi method eval-q(Q::Term::Object $object) {
         if is-type($object.type) {
-            if $object.type === TYPE<Int> {
+            if $object.type.slots<abstract> {
+                my Str $name = $object.type.slots<name>;
+                die X::Uninstantiable.new(:$name, :abstract);
+            }
+            elsif $object.type === TYPE<Int> {
                 my $native-value = self.eval-q(get-array-element($object.propertylist.properties, 0).value).native-value;
                 return make-int($native-value);
             }
