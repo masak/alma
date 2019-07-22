@@ -440,6 +440,9 @@ class _007::Runtime {
                 die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
                     if $pos.value >= $s.chars + 1;
 
+                die X::Subscript::Negative.new(:value($pos.value))
+                    if $pos.value < 0;
+
                 return Val::Str.new(:value($s.substr($pos.value, $chars.value)));
             });
         }

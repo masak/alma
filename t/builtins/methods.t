@@ -154,7 +154,18 @@ use _007::Test;
     runtime-error
         $program,
         X::Subscript::TooLarge,
-        "substr() can be out of range";
+        "substr() starting index can't be too large";
+}
+
+{
+    my $program = q:to/./;
+        "abc".substr(-2, 1);
+        .
+
+    runtime-error
+        $program,
+        X::Subscript::Negative,
+        "substr() starting index can't be negative";
 }
 
 {
