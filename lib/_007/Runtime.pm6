@@ -435,9 +435,12 @@ class _007::Runtime {
         }
         elsif $obj ~~ Val::Str && $propname eq "substr" {
             return builtin(sub substr($pos, $chars) {
-                return Val::Str.new(:value($obj.value.substr(
-                    $pos.value,
-                    $chars.value)));
+                my $s = $obj.value;
+
+                die X::Subscript::TooLarge.new(:value($pos.value), :length($s.chars))
+                    if $pos.value >= $s.chars + 1;
+
+                return Val::Str.new(:value($s.substr($pos.value, $chars.value)));
             });
         }
         elsif $obj ~~ Val::Str && $propname eq "contains" {
