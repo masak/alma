@@ -140,9 +140,32 @@ use _007::Test;
     my $program = q:to/./;
         say("abc".substr(0, 1));
         say("abc".substr(0, 5));
+        say("abc".substr(3, 1));
         .
 
-    outputs $program, "a\nabc\n", "substr() picks out a substring of a string";
+    outputs $program, "a\nabc\n\n", "substr() picks out a substring of a string";
+}
+
+{
+    my $program = q:to/./;
+        "abc".substr(4, 1);
+        .
+
+    runtime-error
+        $program,
+        X::Subscript::TooLarge,
+        "substr() starting index can't be too large";
+}
+
+{
+    my $program = q:to/./;
+        "abc".substr(-2, 1);
+        .
+
+    runtime-error
+        $program,
+        X::Subscript::Negative,
+        "substr() starting index can't be negative";
 }
 
 {
