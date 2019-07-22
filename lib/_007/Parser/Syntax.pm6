@@ -1,6 +1,12 @@
 use _007::Val;
 use _007::Q;
 
+class X::Syntax::WhitespaceInIdentifier is Exception {
+    method message {
+        "Cannot have whitespace in identifier";
+    }
+}
+
 sub check-feature-flag($feature, $word) {
     my $flag = "FLAG_007_{$word}";
     die "{$feature} is experimental and requires \%*ENV<{$flag}> to be set"
@@ -365,6 +371,12 @@ grammar _007::Parser::Syntax {
             [ <?after \w> || <.panic("identifier")> ]
             [ [':<' [ '\\>' | '\\\\' | <-[>]> ]+ '>']
             | [':«' [ '\\»' | '\\\\' | <-[»]> ]+ '»'] ]?
+        {
+            my $identifier = ~$/;
+            if $identifier ~~ /\s/ {
+                die X::Syntax::WhitespaceInIdentifier.new;
+            }
+        }
     }
 
     rule argumentlist {
