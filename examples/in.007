@@ -20,7 +20,7 @@ func infix:<in>(value, container) is equiv(infix:<~~>) {
     }
 }
 
-func infix:<not in>(value, container) is equiv(infix:<!~~>) {
+func infix:<!in>(value, container) is equiv(infix:<!~~>) {
     if container ~~ Array {
         for container -> elem {
             if elem == value {
@@ -49,9 +49,9 @@ say(8 in [1, 2, 3, 4]);                 # false
 say("foo" in "foolish");                # true
 say("I" in "team");                     # false
 
-say("job" not in { name: "James" });    # true
-say("name" not in { name: "James" });   # false
-say("d" not in ["a", "b", "c"]);        # true
-say("b" not in ["a", "b", "c"]);        # false
-say("we" not in "Kansas");              # true
-say("pi" not in "pie");                 # false
+say("job" !in { name: "James" });    # true
+say("name" !in { name: "James" });   # false
+say("d" !in ["a", "b", "c"]);        # true
+say("b" !in ["a", "b", "c"]);        # false
+say("we" !in "Kansas");              # true
+say("pi" !in "pie");                 # false
