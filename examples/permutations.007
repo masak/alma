@@ -1,0 +1,37 @@
+my permutation = [1, 2, 3, 4];
+my n = permutation.size();
+
+func swap(i, j) {
+    my t = permutation[i];
+    permutation[i] = permutation[j];
+    permutation[j] = t;
+}
+
+while true {
+    say(permutation);
+
+    my j = n - 2;
+    while permutation[j] >= permutation[j + 1] {
+        j = j - 1;
+        if j < 0 {
+            last;
+        }
+    }
+    if j < 0 {
+        last;
+    }
+
+    my l = n - 1;
+    while permutation[j] >= permutation[l] {
+        l = l - 1;
+    }
+    swap(j, l);
+
+    my k = j + 1;
+    l = n - 1;
+    while k < l {
+        swap(k, l);
+        k = k + 1;
+        l = l - 1;
+    }
+}
