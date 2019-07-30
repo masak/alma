@@ -62,8 +62,8 @@ class _007::OpScope {
                 my $identifier = $trait<EXPR>.ast;
                 my $prep = $name eq "equiv" ?? "to" !! "than";
                 die "The thing your op is $name $prep must be an identifier"
-                    unless $identifier ~~ Q::Identifier;
-                my $s = $identifier.name;
+                    unless is-q-term-identifier($identifier);
+                my $s = $identifier.slots<name>.native-value;
                 die "Unknown thing in '$name' trait"
                     unless $s ~~ /^ < pre in post > 'fix:' /;
                 die X::Precedence::Incompatible.new

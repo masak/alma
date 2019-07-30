@@ -2,7 +2,7 @@ macro name(expr) {
     if expr ~~ Q.Postfix.Property {
         expr = expr.property;
     }
-    assertType(expr, Q.Identifier);
+    # assertType(expr, Q.Identifier);
     return quasi { expr.name };
 }
 

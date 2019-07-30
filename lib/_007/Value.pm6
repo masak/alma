@@ -62,6 +62,9 @@ BEGIN {
     TYPE<Q.Literal.Int> = make-type "Q.Literal.Int", :base(TYPE<Q.Literal>);
     TYPE<Q.Literal.None> = make-type "Q.Literal.None", :base(TYPE<Q.Literal>);
     TYPE<Q.Literal.Str> = make-type "Q.Literal.Str", :base(TYPE<Q.Literal>);
+
+    TYPE<Q.Term.Identifier> = make-type "Q.Term.Identifier";
+    TYPE<Q.Term.Identifier.Direct> = make-type "Q.Term.Identifier.Direct", :base(TYPE<Q.Term.Identifier>);
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -369,6 +372,25 @@ sub is-q-literal($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal>);
 }
 
+sub make-q-term-identifier(_007::Value $name where &is-str) is export {
+    _007::Value.new(:type(TYPE<Q.Term.Identifier>), slots => { :$name });
+}
+
+sub is-q-term-identifier($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Term.Identifier>);
+}
+
+sub make-q-term-identifier-direct(
+    _007::Value $name where &is-str,
+    _007::Value $frame where &is-dict,
+) is export {
+    _007::Value.new(:type(TYPE<Q.Term.Identifier.Direct>), slots => { :$name, :$frame });
+}
+
+sub is-q-term-identifier-direct($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Term.Identifier.Direct>);
+}
+
 sub escaped-name($func) is export {
     sub escape-backslashes($s) { $s.subst(/\\/, "\\\\", :g) }
     sub escape-less-thans($s) { $s.subst(/"<"/, "\\<", :g) }
@@ -447,6 +469,9 @@ sub stringify(_007::Value $value) {
     }
     elsif $value.type === TYPE<Q.Literal.Int> {
         return "Q.Literal.Int {$value.slots<value>}";
+    }
+    elsif $value.type === TYPE<Q.Term.Identifier> {
+        return "Q.Term.Identifier {stringify($value.slots<name>)}";
     }
     else {
         die "Unknown _007::Value type sent to stringify: ", $value.type.slots<name>;

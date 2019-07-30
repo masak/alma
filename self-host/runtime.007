@@ -37,10 +37,10 @@ my Runtime = {
         func find_pad(symbol) {
             my frame = current_frame();
             while frame.has("pad") {
-                if frame.pad.has(symbol) {
-                    return frame.pad;
+                if frame["pad"].has(symbol) {
+                    return frame["pad"];
                 }
-                frame = frame.outer_frame;
+                frame = frame["outer_frame"];
             }
             throw new Exception { message: "Cannot find variable '" ~ symbol ~ "'" };
         }
@@ -57,7 +57,7 @@ my Runtime = {
             # XXX: don't know if we should expose identifier.frame in 007
             # my frame = identifier.frame || current_frame();
             my frame = current_frame();
-            frame.pad[name] = value;
+            frame["pad"][name] = value;
         }
 
         func sigbind(c, arguments) {
@@ -82,7 +82,7 @@ my Runtime = {
         }
 
         my eval_of_type = {
-            "Q.Identifier": func(ident) {
+            "Q.Term.Identifier": func(ident) {
                 return get_var(ident.name);
             },
             "Q.Infix.Addition": func(op) {
@@ -145,7 +145,7 @@ my Runtime = {
             },
             "Q.Postfix.Call": func(op) {
                 # XXX: short-term hack to get `say` early; needs to go away
-                if op.operand ~~ Q.Identifier && op.operand.name == "say" {
+                if op.operand ~~ Q.Term.Identifier && op.operand.name == "say" {
                     return say(eval(op.argumentlist.arguments[0]));
                 }
                 my c = eval(op.operand);

@@ -107,6 +107,18 @@ class _007::Linter {
                 }
             }
 
+            multi traverse(_007::Value $identifier where &is-q-term-identifier) {
+                my $name = $identifier.slots<name>.native-value;
+                # XXX: what we should really do is whitelist all of he built-ins
+                return if $name eq "say";
+                my $ref = ref $name;
+
+                %used{ref $name} = True;
+                if !%assigned{ref $name} {
+                    %readbeforeassigned{$ref} = True;
+                }
+            }
+
             multi traverse(Q::ArgumentList $argumentlist) {
                 for get-all-array-elements($argumentlist.arguments) -> $expr {
                     traverse($expr);
@@ -120,7 +132,7 @@ class _007::Linter {
             }
 
             multi traverse(Q::Term::My $my) {
-                my $name = $my.identifier.name;
+                my $name = $my.identifier.slots<name>;
                 my $ref = "{@blocks[*-1].WHICH.Str}|$name";
                 %declared{$ref} = L::VariableNotUsed;
             }
@@ -137,9 +149,9 @@ class _007::Linter {
                     $lhs = $lhs.identifier;
                 }
                 die "LHS was not an identifier"
-                    unless $lhs ~~ Q::Identifier;
-                my $name = $lhs.name.native-value;
-                if $infix.rhs ~~ Q::Identifier && $infix.rhs.name eq $name {
+                    unless is-q-term-identifier($lhs);
+                my $name = $lhs.slots<name>.native-value;
+                if is-q-term-identifier($infix.rhs) && $infix.rhs.slots<name>.native-value eq $name {
                     @complaints.push: L::RedundantAssignment.new(:$name);
                 }
                 %assigned{ref $name} = True;

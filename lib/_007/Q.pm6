@@ -128,6 +128,9 @@ role Q::Term does Q::Expr {
 ### locations at different times when accessed from different call frames.
 ###
 class Q::Term::Identifier is Q::Identifier does Q::Term {
+    submethod BUILD {
+        die "Old class Q::Term::Identifier -- do not use anymore";
+    }
 }
 
 ### ### Q::Term::Identifier::Direct

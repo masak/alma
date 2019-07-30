@@ -27,6 +27,8 @@ tree-walk(Q);
 %q-mappings{TYPE<Q.Literal>}<Int> = TYPE<Q.Literal.Int>;
 %q-mappings{TYPE<Q.Literal>}<None> = TYPE<Q.Literal.None>;
 %q-mappings{TYPE<Q.Literal>}<Str> = TYPE<Q.Literal.Str>;
+%q-mappings{Q::Term}<Identifier> = TYPE<Q.Term.Identifier>;
+%q-mappings{TYPE<Q.Term.Identifier>}<Direct> = TYPE<Q.Term.Identifier.Direct>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -159,8 +161,8 @@ class _007::Runtime {
             if $symbol eq RETURN_TO;
     }
 
-    method lookup-frame-outside(Q::Term::Identifier $identifier, $quasi-frame) {
-        my Str $name = $identifier.name.native-value;
+    method lookup-frame-outside(_007::Value $identifier where &is-q-term-identifier, $quasi-frame) {
+        my Str $name = $identifier.slots<name>.native-value;
         my $frame = self.current-frame;
         my $seen-quasi-frame = False;
         repeat until $frame === NO_OUTER {
@@ -175,8 +177,14 @@ class _007::Runtime {
         die "something is very off with lexical lookup ($name)";    # XXX: turn into X::
     }
 
-    method put-var(Q::Identifier $identifier, $value) {
+    multi method put-var(Q::Identifier $identifier, $value) {
         my $name = $identifier.name.native-value;
+        my $pad = self!find-pad($name, self.current-frame);
+        set-dict-property($pad, $name, $value);
+    }
+
+    multi method put-var(_007::Value $identifier where &is-q-term-identifier, $value) {
+        my $name = $identifier.slots<name>.native-value;
         my $pad = self!find-pad($name, self.current-frame);
         set-dict-property($pad, $name, $value);
     }
@@ -200,8 +208,13 @@ class _007::Runtime {
         set-dict-property(get-dict-property($frame, "pad"), $name, $value);
     }
 
-    method declare-var(Q::Identifier $identifier, $value?) {
+    multi method declare-var(Q::Identifier $identifier, $value?) {
         my $name = $identifier.name.native-value;
+        set-dict-property(get-dict-property(self.current-frame, "pad"), $name, $value // NONE);
+    }
+
+    multi method declare-var(_007::Value $identifier where &is-q-term-identifier, $value?) {
+        my $name = $identifier.slots<name>.native-value;
         set-dict-property(get-dict-property(self.current-frame, "pad"), $name, $value // NONE);
     }
 
@@ -312,8 +325,8 @@ class _007::Runtime {
                     return $thing
                         if $thing ~~ Val;
 
-                    return Q::Term::Identifier.new(:name($thing.name))
-                        if $thing ~~ Q::Term::Identifier;
+                    return make-q-term-identifier($thing.slots<name>)
+                        if is-q-term-identifier($thing);
 
                     return $thing
                         if $thing ~~ Q::Unquote;
@@ -682,11 +695,14 @@ class _007::Runtime {
         elsif is-type($obj) && (%q-mappings{$obj}{$propname} :exists) {
             return %q-mappings{$obj}{$propname};
         }
+        elsif $obj ~~ _007::Value && ($obj.slots{$propname} :exists) {
+            return $obj.slots{$propname};
+        }
         else {
             if $obj ~~ Val::Type {
                 die X::Property::NotFound.new(:$propname, :type("$type ({$obj.type.^name})"));
             }
-            die X::Property::NotFound.new(:$propname, :$type);
+            die X::Property::NotFound.new(:$propname, :type($obj.type.slots<name>));
         }
     }
 
@@ -722,12 +738,12 @@ class _007::Runtime {
         $str.slots<value>;
     }
 
-    multi method eval-q(Q::Term::Identifier $identifier) {
-        self.get-var($identifier.name.native-value);
+    multi method eval-q(_007::Value $direct where &is-q-term-identifier-direct) {
+        self.get-direct($direct.slots<frame>, $direct.slots<name>.native-value);
     }
 
-    multi method eval-q(Q::Term::Identifier::Direct $direct) {
-        self.get-direct($direct.frame, $direct.name.native-value);
+    multi method eval-q(_007::Value $identifier where &is-q-term-identifier) {
+        self.get-var($identifier.slots<name>.native-value);
     }
 
     multi method eval-q(Q::Regex::Identifier $identifier) {
@@ -787,6 +803,10 @@ class _007::Runtime {
                 my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
                 return make-q-literal-str($value);
             }
+            elsif $object.type === TYPE<Q.Term.Identifier> {
+                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+                return make-q-term-identifier($value);
+            }
             else {
                 die "Don't know how to create an object of type ", $object.type.slots<name>;
             }
@@ -834,10 +854,10 @@ class _007::Runtime {
         my $lhs = $assignment.lhs;
 
         given $lhs {
-            when Q::Term::Identifier::Direct {
-                self.put-direct($lhs.frame, $lhs.name.native-value, $value);
+            when &is-q-term-identifier-direct {
+                self.put-direct($lhs.slots<frame>, $lhs.slots<name>.native-value, $value);
             }
-            when Q::Term::Identifier {
+            when &is-q-term-identifier {
                 self.put-var($lhs, $value);
             }
             when Q::Postfix::Index {
@@ -1011,20 +1031,20 @@ class _007::Runtime {
             return make-q-literal-str($thing.slots<value>)
                 if is-q-literal-str($thing);
 
-            die "Unknown ", $thing.type.Str
-                if $thing ~~ _007::Value;
-
-            return $thing
-                if $thing ~~ Val;
-
-            if $thing ~~ Q::Term::Identifier {
+            if is-q-term-identifier($thing) {
                 if self.lookup-frame-outside($thing, $quasi-frame) -> $frame {
-                    return Q::Term::Identifier::Direct.new(:name($thing.name), :$frame);
+                    return make-q-term-identifier-direct($thing.slots<name>, $frame);
                 }
                 else {
                     return $thing;
                 }
             }
+
+            die "Unknown ", $thing.type.Str
+                if $thing ~~ _007::Value;
+
+            return $thing
+                if $thing ~~ Val;
 
             return $thing.new(:name($thing.name))
                 if $thing ~~ Q::Identifier;
@@ -1045,7 +1065,7 @@ class _007::Runtime {
             if $thing ~~ Q::Unquote {
                 my $ast = self.eval-q($thing.expr);
                 die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                    unless $ast ~~ Q || is-q-literal-int($ast) || is-q-literal-str($ast);
+                    unless $ast ~~ Q || is-q-literal-int($ast) || is-q-literal-str($ast) || is-q-term-identifier($ast);
                 return $ast;
             }
 

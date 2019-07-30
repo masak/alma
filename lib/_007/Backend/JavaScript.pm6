@@ -37,8 +37,8 @@ class _007::Backend::JavaScript {
         multi emit-stmt(Q::Statement::Expr $stmt) {
             my $expr = $stmt.expr;
             when $expr ~~ Q::Postfix::Call
-                && $expr.operand ~~ Q::Identifier
-                && $expr.operand.name.native-value eq "say" {
+                && is-q-term-identifier($expr.operand)
+                && $expr.operand.slots<name>.native-value eq "say" {
 
                 @builtins.push(%builtins<say>);
                 my @arguments = get-all-array-elements($expr.argumentlist.arguments).map: {
@@ -50,7 +50,7 @@ class _007::Backend::JavaScript {
             }
 
             when $expr ~~ Q::Term::My {
-                my $name = $expr.identifier.name.native-value;
+                my $name = $expr.identifier.slots<name>.native-value;
                 @main.push("let {$name};");
             }
 
@@ -58,7 +58,7 @@ class _007::Backend::JavaScript {
                 && $expr.lhs ~~ Q::Term::My {
 
                 my $lhs = $expr.lhs;
-                my $name = $lhs.identifier.name.native-value;
+                my $name = $lhs.identifier.slots<name>.native-value;
                 my $rhs = $expr.rhs;
 
                 die "Cannot handle non-literal-Int rhs just yet!"

@@ -271,8 +271,8 @@ class _007::Parser::Actions {
 
     sub is-a-macro($q, $qtype, $identifier) {
         $q ~~ $qtype
-            && $identifier ~~ Q::Identifier
-            && is-macro(my $macro = $*runtime.maybe-get-var($identifier.name.native-value))
+            && is-q-term-identifier($identifier)
+            && is-macro(my $macro = $*runtime.maybe-get-var($identifier.slots<name>.native-value))
             && $macro;
     }
 
@@ -310,7 +310,7 @@ class _007::Parser::Actions {
 
     method EXPR($/) {
         sub name($op) {
-            $op.identifier.name.native-value;
+            $op.identifier.slots<name>.native-value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.infixprec) {
@@ -348,9 +348,9 @@ class _007::Parser::Actions {
             else {
                 @termstack.push($infix.new(:lhs($t1), :rhs($t2), :identifier($infix.identifier)));
 
-                if $infix ~~ Q::Infix::Assignment && $t1 ~~ Q::Identifier {
+                if $infix ~~ Q::Infix::Assignment && is-q-term-identifier($t1) {
                     my $frame = $*runtime.current-frame;
-                    my $symbol = $t1.name.native-value;
+                    my $symbol = $t1.slots<name>.native-value;
                     if @*declstack[*-1]{$symbol} :!exists {
                         if $*runtime.maybe-get-var($symbol) {
                             die X::Assignment::ReadOnly.new(:declname("builtin"), :$symbol);
@@ -371,7 +371,7 @@ class _007::Parser::Actions {
                 || equal(@opstack[*-1], $infix) && left-associative($infix)) {
                 REDUCE;
             }
-            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.name.native-value), :op2($infix.identifier.name.native-value))
+            die X::Op::Nonassociative.new(:op1(@opstack[*-1].identifier.slots<name>.native-value), :op2($infix.identifier.slots<name>.native-value))
                 if @opstack && equal(@opstack[*-1], $infix) && non-associative($infix);
             @opstack.push($infix);
             @termstack.push($term);
@@ -385,7 +385,7 @@ class _007::Parser::Actions {
 
     method termish($/) {
         sub name($op) {
-            $op.identifier.name.native-value;
+            $op.identifier.slots<name>.native-value;
         }
 
         sub tighter($op1, $op2, $_ = $*parser.opscope.prepostfixprec) {
@@ -479,9 +479,7 @@ class _007::Parser::Actions {
 
     method prefix($/) {
         my $op = ~$/;
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("prefix:$op")),
-        );
+        my $identifier = make-q-term-identifier(make-str("prefix:$op"));
         make $*parser.opscope.ops<prefix>{$op}.new(:$identifier, :operand(NONE));
     }
 
@@ -576,7 +574,7 @@ class _007::Parser::Actions {
                     unless is-func($value);
             };
         }
-        make Q::Term::Identifier.new(:name($<identifier>.ast.name));
+        make make-q-term-identifier($<identifier>.ast.name);
     }
 
     method term:block ($/) {
@@ -716,7 +714,7 @@ class _007::Parser::Actions {
         my $identifier = $<identifier>.ast;
 
         make Q::Term::My.new(
-            :identifier(Q::Term::Identifier.new(:name($identifier.name)))
+            :identifier(make-q-term-identifier($identifier.name)),
         );
 
         $*parser.opscope.maybe-install($identifier.name, []);
@@ -745,7 +743,7 @@ class _007::Parser::Actions {
     method property:identifier ($/) {
         self."term:identifier"($/);
         my $value = $/.ast;
-        my $key = $value.name;
+        my $key = $value.slots<name>;
         make Q::Property.new(:$key, :$value);
     }
 
@@ -762,9 +760,7 @@ class _007::Parser::Actions {
 
     method infix($/) {
         my $op = ~$/;
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("infix:$op")),
-        );
+        my $identifier = make-q-term-identifier(make-str("infix:$op"));
         make $*parser.opscope.ops<infix>{$op}.new(:$identifier, :lhs(NONE), :rhs(NONE));
     }
 
@@ -787,9 +783,7 @@ class _007::Parser::Actions {
         elsif $<prop> {
             $op = ".";
         }
-        my $identifier = Q::Term::Identifier.new(
-            :name(make-str("postfix:$op")),
-        );
+        my $identifier = make-q-term-identifier(make-str("postfix:$op"));
         # XXX: this can't stay hardcoded forever, but we don't have the machinery yet
         # to do these right enough
         if $<index> {
@@ -847,6 +841,11 @@ sub check($ast where Q | _007::Value, $runtime) is export {
     multi handle(Q::Term $) {} # with two exceptions, see below
     multi handle(Q::Postfix $) {}
     multi handle(_007::Value $ where &is-q-literal) {}
+    multi handle(_007::Value $ where &is-q-term-identifier) {}
+    multi handle(_007::Value $ where &is-str) {}    # XXX: Shouldn't need this
+    multi handle(_007::Value $v) {
+        say($v.type.slots<name>);
+    }
 
     multi handle(Q::StatementList $statementlist) {
         for get-all-array-elements($statementlist.statements) -> $statement {
@@ -917,7 +916,7 @@ sub check($ast where Q | _007::Value, $runtime) is export {
     }
 
     multi handle(Q::Term::My $my) {
-        my $symbol = $my.identifier.name.native-value;
+        my $symbol = $my.identifier.slots<name>.native-value;
         my $block = $runtime.current-frame();
         die X::Redeclaration.new(:$symbol)
             if $runtime.declared-locally($symbol);
