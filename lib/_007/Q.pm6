@@ -118,30 +118,6 @@ role Q::Expr does Q {
 role Q::Term does Q::Expr {
 }
 
-### ### Q::Term::Identifier
-###
-### An identifier; a name which identifies a storage location in the program.
-###
-### Identifiers in expressions are subject to *scoping*: the same name can
-### point to different storage locations because they belong to different scopes.
-### The same name in the same scope might even point to different storage
-### locations at different times when accessed from different call frames.
-###
-class Q::Term::Identifier is Q::Identifier does Q::Term {
-    submethod BUILD {
-        die "Old class Q::Term::Identifier -- do not use anymore";
-    }
-}
-
-### ### Q::Term::Identifier::Direct
-###
-### A direct identifier; a name which directly identifies a storage location
-### in the program.
-###
-class Q::Term::Identifier::Direct is Q::Term::Identifier {
-    has _007::Value $.frame where &is-dict;
-}
-
 ### ### Q::Regex::Fragment
 ###
 ### The parent role to all regex fragment types.
