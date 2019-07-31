@@ -131,6 +131,9 @@ class _007::Linter {
             multi traverse(Q::Term $term) {
             }
 
+            multi traverse(_007::Value $ where &is-q-term-array) {
+            }
+
             multi traverse(Q::Term::My $my) {
                 my $name = $my.identifier.slots<name>;
                 my $ref = "{@blocks[*-1].WHICH.Str}|$name";

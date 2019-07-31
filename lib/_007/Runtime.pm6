@@ -27,6 +27,7 @@ tree-walk(Q);
 %q-mappings{TYPE<Q.Literal>}<Int> = TYPE<Q.Literal.Int>;
 %q-mappings{TYPE<Q.Literal>}<None> = TYPE<Q.Literal.None>;
 %q-mappings{TYPE<Q.Literal>}<Str> = TYPE<Q.Literal.Str>;
+%q-mappings{Q::Term}<Array> = TYPE<Q.Term.Array>;
 %q-mappings{Q::Term}<Identifier> = TYPE<Q.Term.Identifier>;
 %q-mappings{TYPE<Q.Term.Identifier>}<Direct> = TYPE<Q.Term.Identifier.Direct>;
 
@@ -755,8 +756,8 @@ class _007::Runtime {
         make-regex($regex.contents);
     }
 
-    multi method eval-q(Q::Term::Array $array) {
-        make-array(get-all-array-elements($array.elements).map({ self.eval-q($_) }).Array);
+    multi method eval-q(_007::Value $array where &is-q-term-array) {
+        make-array(get-all-array-elements($array.slots<elements>).map({ self.eval-q($_) }).Array);
     }
 
     multi method eval-q(Q::Term::Object $object) {
@@ -1031,6 +1032,9 @@ class _007::Runtime {
             return make-q-literal-str($thing.slots<value>)
                 if is-q-literal-str($thing);
 
+            return make-q-term-array($thing.slots<elements>)
+                if is-q-term-array($thing);
+
             if is-q-term-identifier($thing) {
                 if self.lookup-frame-outside($thing, $quasi-frame) -> $frame {
                     return make-q-term-identifier-direct($thing.slots<name>, $frame);
@@ -1065,7 +1069,7 @@ class _007::Runtime {
             if $thing ~~ Q::Unquote {
                 my $ast = self.eval-q($thing.expr);
                 die "Expression inside unquote did not evaluate to a Q" # XXX: turn into X::
-                    unless $ast ~~ Q || is-q-literal-int($ast) || is-q-literal-str($ast) || is-q-term-identifier($ast);
+                    unless $ast ~~ Q || is-q-literal-int($ast) || is-q-literal-str($ast) || is-q-term-identifier($ast) || is-q-term-array($ast);
                 return $ast;
             }
 

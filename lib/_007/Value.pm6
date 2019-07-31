@@ -63,6 +63,7 @@ BEGIN {
     TYPE<Q.Literal.None> = make-type "Q.Literal.None", :base(TYPE<Q.Literal>);
     TYPE<Q.Literal.Str> = make-type "Q.Literal.Str", :base(TYPE<Q.Literal>);
 
+    TYPE<Q.Term.Array> = make-type "Q.Term.Array";
     TYPE<Q.Term.Identifier> = make-type "Q.Term.Identifier";
     TYPE<Q.Term.Identifier.Direct> = make-type "Q.Term.Identifier.Direct", :base(TYPE<Q.Term.Identifier>);
 }
@@ -370,6 +371,14 @@ sub is-q-literal-str($v) is export {
 
 sub is-q-literal($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal>);
+}
+
+sub make-q-term-array(_007::Value $elements where &is-array) is export {
+    _007::Value.new(:type(TYPE<Q.Term.Array>), slots => { :$elements });
+}
+
+sub is-q-term-array($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Term.Array>);
 }
 
 sub make-q-term-identifier(_007::Value $name where &is-str) is export {

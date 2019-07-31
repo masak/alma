@@ -208,6 +208,10 @@ class Q::Term::Regex does Q::Term {
 ###
 class Q::Term::Array does Q::Term {
     has _007::Value $.elements where &is-array;
+
+    submethod BUILD {
+        die "Old class Q::Term::Array -- do not use anymore";
+    }
 }
 
 subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }

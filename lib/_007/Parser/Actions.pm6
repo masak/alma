@@ -517,7 +517,7 @@ class _007::Parser::Actions {
     }
 
     method term:array ($/) {
-        make Q::Term::Array.new(:elements(make-array($<EXPR>».ast)));
+        make make-q-term-array(make-array($<EXPR>».ast));
     }
 
     method term:parens ($/) {
