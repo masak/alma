@@ -201,21 +201,6 @@ class Q::Term::Regex does Q::Term {
     has Q::Regex::Fragment $.contents;
 }
 
-subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
-
-### ### Q::Term::Object
-###
-### An object.
-###
-class Q::Term::Object does Q::Term {
-    has ToV $.type;
-    has $.propertylist;
-
-    submethod BUILD {
-        die "Old class Q::Term::Object -- do not use anymore";
-    }
-}
-
 ### ### Q::Term::Dict
 ###
 ### A dict. Dict terms consist of an entry list with zero or more key/value pairs.
@@ -231,20 +216,6 @@ class Q::Term::Dict does Q::Term {
 class Q::Property does Q {
     has _007::Value $.key where &is-str;
     has $.value;
-}
-
-### ### Q::PropertyList
-###
-### A property list in an object. Property lists have zero or more key/value
-### pairs. Keys in objects are considered unordered, but a property list has
-### a specified order: the order the properties occur in the program text.
-###
-class Q::PropertyList does Q {
-    has _007::Value $.properties where &is-array = make-array([]);
-
-    submethod BUILD {
-        die "Old class Q::PropertyList -- do not use anymore";
-    }
 }
 
 ### ### Q::Declaration
