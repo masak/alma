@@ -63,9 +63,12 @@ BEGIN {
     TYPE<Q.Literal.None> = make-type "Q.Literal.None", :base(TYPE<Q.Literal>);
     TYPE<Q.Literal.Str> = make-type "Q.Literal.Str", :base(TYPE<Q.Literal>);
 
+    TYPE<Q.PropertyList> = make-type "Q.PropertyList";
+
     TYPE<Q.Term.Array> = make-type "Q.Term.Array";
     TYPE<Q.Term.Identifier> = make-type "Q.Term.Identifier";
     TYPE<Q.Term.Identifier.Direct> = make-type "Q.Term.Identifier.Direct", :base(TYPE<Q.Term.Identifier>);
+    TYPE<Q.Term.Object> = make-type "Q.Term.Object";
 }
 
 # XXX: Not using &is-type in the `where` clause because that leads to a circularity.
@@ -373,6 +376,14 @@ sub is-q-literal($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Literal>);
 }
 
+sub make-q-propertylist(_007::Value $properties where &is-array) is export {
+    _007::Value.new(:type(TYPE<Q.PropertyList>), slots => { :$properties });
+}
+
+sub is-q-propertylist($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.PropertyList>);
+}
+
 sub make-q-term-array(_007::Value $elements where &is-array) is export {
     _007::Value.new(:type(TYPE<Q.Term.Array>), slots => { :$elements });
 }
@@ -398,6 +409,15 @@ sub make-q-term-identifier-direct(
 
 sub is-q-term-identifier-direct($v) is export {
     $v ~~ _007::Value && is-instance($v, TYPE<Q.Term.Identifier.Direct>);
+}
+
+# XXX: later, will be able to type $type &is-type
+sub make-q-term-object($type, _007::Value $propertylist where &is-q-propertylist) is export {
+    _007::Value.new(:type(TYPE<Q.Term.Object>), slots => { :$type, :$propertylist });
+}
+
+sub is-q-term-object($v) is export {
+    $v ~~ _007::Value && is-instance($v, TYPE<Q.Term.Object>);
 }
 
 sub escaped-name($func) is export {

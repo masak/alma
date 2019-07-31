@@ -27,9 +27,11 @@ tree-walk(Q);
 %q-mappings{TYPE<Q.Literal>}<Int> = TYPE<Q.Literal.Int>;
 %q-mappings{TYPE<Q.Literal>}<None> = TYPE<Q.Literal.None>;
 %q-mappings{TYPE<Q.Literal>}<Str> = TYPE<Q.Literal.Str>;
+%q-mappings{Q}<PropertyList> = TYPE<Q.PropertyList>;
 %q-mappings{Q::Term}<Array> = TYPE<Q.Term.Array>;
 %q-mappings{Q::Term}<Identifier> = TYPE<Q.Term.Identifier>;
 %q-mappings{TYPE<Q.Term.Identifier>}<Direct> = TYPE<Q.Term.Identifier.Direct>;
+%q-mappings{Q::Term}<Object> = TYPE<Q.Term.Object>;
 
 sub aname($attr) { $attr.name.substr(2) }
 sub avalue($attr, $obj) { $attr.get_value($obj) }
@@ -760,66 +762,66 @@ class _007::Runtime {
         make-array(get-all-array-elements($array.slots<elements>).map({ self.eval-q($_) }).Array);
     }
 
-    multi method eval-q(Q::Term::Object $object) {
-        if is-type($object.type) {
-            if $object.type.slots<abstract> {
+    multi method eval-q(_007::Value $object where &is-q-term-object) {
+        if is-type($object.slots<type>) {
+            if $object.slots<type>.slots<abstract> {
                 my Str $name = $object.type.slots<name>;
                 die X::Uninstantiable.new(:$name, :abstract);
             }
-            elsif $object.type === TYPE<Int> {
-                my $native-value = self.eval-q(get-array-element($object.propertylist.properties, 0).value).native-value;
+            elsif $object.slots<type> === TYPE<Int> {
+                my $native-value = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value).native-value;
                 return make-int($native-value);
             }
-            elsif $object.type === TYPE<Array> {
+            elsif $object.slots<type> === TYPE<Array> {
                 my $native-value = get-all-array-elements(
-                    self.eval-q(get-array-element($object.propertylist.properties, 0).value)
+                    self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value)
                 );
                 return make-array($native-value);
             }
-            elsif $object.type === TYPE<Dict> {
-                my @properties = get-all-array-elements($object.propertylist.properties).map({
+            elsif $object.slots<type> === TYPE<Dict> {
+                my @properties = get-all-array-elements($object.slots<propertylist>.slots<properties>).map({
                     .key.native-value => self.eval-q(.value)
                 });
                 return make-dict(@properties);
             }
-            elsif $object.type === TYPE<Str> {
-                my $native-value = self.eval-q(get-array-element($object.propertylist.properties, 0).value).native-value;
+            elsif $object.slots<type> === TYPE<Str> {
+                my $native-value = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value).native-value;
                 return make-str($native-value);
             }
-            elsif $object.type === TYPE<Exception> {
-                my $message = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+            elsif $object.slots<type> === TYPE<Exception> {
+                my $message = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value);
                 return make-exception($message);
             }
-            elsif $object.type === TYPE<Object> {
+            elsif $object.slots<type> === TYPE<Object> {
                 return make-object();
             }
-            elsif $object.type === TYPE<Q.Literal.None> {
+            elsif $object.slots<type> === TYPE<Q.Literal.None> {
                 return make-q-literal-none();
             }
-            elsif $object.type === TYPE<Q.Literal.Int> {
-                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+            elsif $object.slots<type> === TYPE<Q.Literal.Int> {
+                my $value = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value);
                 return make-q-literal-int($value);
             }
-            elsif $object.type === TYPE<Q.Literal.Str> {
-                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+            elsif $object.slots<type> === TYPE<Q.Literal.Str> {
+                my $value = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value);
                 return make-q-literal-str($value);
             }
-            elsif $object.type === TYPE<Q.Term.Identifier> {
-                my $value = self.eval-q(get-array-element($object.propertylist.properties, 0).value);
+            elsif $object.slots<type> === TYPE<Q.Term.Identifier> {
+                my $value = self.eval-q(get-array-element($object.slots<propertylist>.slots<properties>, 0).value);
                 return make-q-term-identifier($value);
             }
             else {
-                die "Don't know how to create an object of type ", $object.type.slots<name>;
+                die "Don't know how to create an object of type ", $object.slots<type>.slots<name>;
             }
         }
-        $object.type.create(
-            get-all-array-elements($object.propertylist.properties).map({.key.native-value => self.eval-q(.value)})
+        $object.slots<type>.create(
+            get-all-array-elements($object.slots<propertylist>.slots<properties>).map({.key.native-value => self.eval-q(.value)})
         );
     }
 
     multi method eval-q(Q::Term::Dict $dict) {
         make-dict(
-            get-all-array-elements($dict.propertylist.properties).map({.key.native-value => self.eval-q(.value)}).Array
+            get-all-array-elements($dict.propertylist.slots<properties>).map({.key.native-value => self.eval-q(.value)}).Array
         );
     }
 
@@ -1032,8 +1034,14 @@ class _007::Runtime {
             return make-q-literal-str($thing.slots<value>)
                 if is-q-literal-str($thing);
 
+            return make-q-propertylist($thing.slots<properties>)
+                if is-q-propertylist($thing);
+
             return make-q-term-array($thing.slots<elements>)
                 if is-q-term-array($thing);
+
+            return make-q-term-object($thing.slots<type>, $thing.slots<propertylist>)
+                if is-q-term-object($thing);
 
             if is-q-term-identifier($thing) {
                 if self.lookup-frame-outside($thing, $quasi-frame) -> $frame {

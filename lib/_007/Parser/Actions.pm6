@@ -683,7 +683,7 @@ class _007::Parser::Actions {
             my %known-properties = $type-obj === TYPE<Type>
                 ?? (value => 1)
                 !! $type-obj.attributes.map({ aname($_) => 1 });
-            for get-all-array-elements($<propertylist>.ast.properties) -> $p {
+            for get-all-array-elements($<propertylist>.ast.slots<properties>) -> $p {
                 my $property = $p.key.native-value;
                 die X::Property::NotDeclared.new(:type($name), :$property)
                     unless %known-properties{$property};
@@ -694,16 +694,14 @@ class _007::Parser::Actions {
                 next if $type-obj.^attributes.first({ .name.substr(2) eq $property }).build;
 
                 die X::Property::Required.new(:type($name), :$property)
-                    unless $property eq any(get-all-array-elements($<propertylist>.ast.properties)».key».native-value);
+                    unless $property eq any(get-all-array-elements($<propertylist>.ast.slots<properties>)».key».native-value);
             }
         }
         elsif is-type($type-obj) && $type-obj.slots<abstract> {
             die X::Uninstantiable.new(:$name, :abstract);
         }
 
-        make Q::Term::Object.new(
-            :$type,
-            :propertylist($<propertylist>.ast));
+        make make-q-term-object($type, $<propertylist>.ast);
     }
 
     method term:dict ($/) {
@@ -728,7 +726,7 @@ class _007::Parser::Actions {
                 if %seen{$property}++;
         }
 
-        make Q::PropertyList.new(:properties(make-array($<property>».ast)));
+        make make-q-propertylist(make-array($<property>».ast));
     }
 
     method property:str-expr ($/) {
@@ -925,9 +923,9 @@ sub check($ast where Q | _007::Value, $runtime) is export {
         $runtime.declare-var($my.identifier);
     }
 
-    multi handle(Q::PropertyList $propertylist) {
+    multi handle(_007::Value $propertylist where &is-q-propertylist) {
         my %seen;
-        for $propertylist.properties.elements -> Q::Property $p {
+        for $propertylist.slots<properties>.elements -> Q::Property $p {
             my Str $property = $p.key.native-value;
             die X::Property::Duplicate.new(:$property)
                 if %seen{$property}++;

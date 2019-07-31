@@ -210,6 +210,10 @@ subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
 class Q::Term::Object does Q::Term {
     has ToV $.type;
     has $.propertylist;
+
+    submethod BUILD {
+        die "Old class Q::Term::Object -- do not use anymore";
+    }
 }
 
 ### ### Q::Term::Dict
@@ -237,6 +241,10 @@ class Q::Property does Q {
 ###
 class Q::PropertyList does Q {
     has _007::Value $.properties where &is-array = make-array([]);
+
+    submethod BUILD {
+        die "Old class Q::PropertyList -- do not use anymore";
+    }
 }
 
 ### ### Q::Declaration
