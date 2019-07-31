@@ -201,19 +201,6 @@ class Q::Term::Regex does Q::Term {
     has Q::Regex::Fragment $.contents;
 }
 
-### ### Q::Term::Array
-###
-### An array. Array terms consist of zero or more *elements*, each of which
-### can be an arbitrary expression.
-###
-class Q::Term::Array does Q::Term {
-    has _007::Value $.elements where &is-array;
-
-    submethod BUILD {
-        die "Old class Q::Term::Array -- do not use anymore";
-    }
-}
-
 subset ToV of Any where { $_ ~~ Val::Type || is-type($_) }
 
 ### ### Q::Term::Object
