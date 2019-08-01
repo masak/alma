@@ -840,9 +840,11 @@ sub check($ast where Q | _007::Value, $runtime) is export {
     multi handle(Q::Postfix $) {}
     multi handle(_007::Value $ where &is-q-literal) {}
     multi handle(_007::Value $ where &is-q-term-identifier) {}
-    multi handle(_007::Value $ where &is-str) {}    # XXX: Shouldn't need this
+    multi handle(_007::Value $ where &is-q-term-array) {}
+    multi handle(_007::Value $ where &is-q-term-object) {}
+    multi handle(_007::Value $ where &is-str) {}
     multi handle(_007::Value $v) {
-        say($v.type.slots<name>);
+        die $v.type.slots<name>;
     }
 
     multi handle(Q::StatementList $statementlist) {
