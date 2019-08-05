@@ -1,0 +1,107 @@
+role Gra {}
+
+enum Shortcut does Gra <
+    whitespace digit wordchar
+>;
+
+enum RulNam does Gra <
+    TOP statementlist statement statement-expr statement-block statement-if
+    statement-while xblock block expr term term-int term-identifier term-my
+    identifier op op-add op-assign
+>;
+
+class Sta does Gra { has ($.elem, $.sep, $.trailing) }
+sub sta(Gra $elem, Gra $sep?, Bool :$trailing) { Sta.new(:$elem, :$sep, :$trailing) }
+
+class Plu does Gra { has ($.elem, $.sep) }
+sub plu(Gra $elem, Gra $sep?) { Plu.new(:$elem, :$sep) }
+
+class Lit does Gra { has $.str }
+sub lit(Str $str) { Lit.new(:$str) }
+
+class _Seq does Gra { has @.items }
+sub seq(*@items where { all(@$_) ~~ Gra }) { _Seq.new(:@items) }
+
+class Ran { has ($.min, $.max) }
+sub ran(Str $min, Str $max) { Ran.new(:$min, :$max) }
+
+class Cla does Gra { has @.items }
+sub cla(*@items where { all(@$_) ~~ Ran }) { Cla.new(:@items) }
+
+class Alt does Gra { has @.alts }
+sub alt(*@alts where { all(@$_) ~~ Gra }) { Alt.new(:@alts) }
+
+my Gra %grammar{RulNam} =
+    (TOP) => term,
+
+    (term) => alt(term-int, term-identifier, term-my),
+    (term-int) => plu(digit),
+    (term-identifier) => identifier,
+    (term-my) => seq(lit("my"), plu(whitespace), identifier),
+    (identifier) => seq(cla(ran("a", "z"), ran("A", "Z")), sta(wordchar)),
+;
+
+my $*indent = 0;
+sub indented($thing) {
+    return " " x 4 x $*indent ~ $thing;
+}
+
+multi visit(RulNam $rule) {
+    say indented($rule.Str.subst("-", ":"));
+    temp $*indent += 1;
+    visit(%grammar{$rule});
+}
+
+multi visit(Alt $alt) {
+    say indented("| (alteration)");
+    temp $*indent += 1;
+    for $alt.alts -> $a {
+        visit($a);
+    }
+}
+
+multi visit(Plu $plu) {
+    say indented("+ (plus quantifier)");
+    temp $*indent += 1;
+    visit($plu.elem);
+    # XXX: separator
+}
+
+multi visit(Sta $sta) {
+    say indented("* (star quantifier)");
+    temp $*indent += 1;
+    visit($sta.elem);
+    # XXX: separator
+}
+
+multi visit(Shortcut $shortcut) {
+    my $name = do given $shortcut {
+        when whitespace { "\\s" }
+        when digit { "\\d" }
+        when wordchar { "\\w" }
+    };
+    say indented("$name ($shortcut)");
+}
+
+multi visit(_Seq $seq) {
+    say indented("(sequence)");
+    temp $*indent += 1;
+    for $seq.items -> $item {
+        visit($item);
+    }
+}
+
+multi visit(Cla $cla) {
+    my $presentation = $cla.items.map(&presentation).join(" ");
+    say indented("/$presentation/");
+}
+
+multi presentation(Ran $ran) {
+    return "{$ran.min}..{$ran.max}";
+}
+
+multi visit(Lit $lit) {
+    say indented("(literal) \"{$lit.str}\"");
+}
+
+visit(TOP);
