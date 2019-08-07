@@ -84,3 +84,10 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
   <dd><a href="https://arxiv.org/pdf/1905.00402.pdf">2019 paper</a></dd>
   <dd><a href="https://news.ycombinator.com/item?id=19803379">HN discussion</a></dd>
 </dl>
+
+## Programming language history
+
+<dl>
+  <dt>The use of sub-routines in programmes</dt>
+  <dd><a href="http://www.laputan.org/pub/papers/wheeler.pdf">1952 paper by David Wheeler</dd>
+</dl>
