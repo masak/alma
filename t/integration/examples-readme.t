@@ -2,7 +2,7 @@ use v6;
 use Test;
 use _007::Test;
 
-my @examples = find("examples", / ".007" $/).map(*.basename);
+my @examples = find("examples", / ".alma" $/).map(*.basename);
 
 my @example-readme-lines = lines("examples/README.md".IO);
 my @example-headings = @example-readme-lines.grep(/^ "## "/);

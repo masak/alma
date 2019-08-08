@@ -10,7 +10,7 @@ my class StrOutput {
 
 sub run_007_on_007($program) {
     my $compunit = _007.parser.parse($program);
-    my $runtime-program = slurp("self-host/runtime.007");
+    my $runtime-program = slurp("self-host/runtime.alma");
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     my $ast = _007.parser(:$runtime).parse($runtime-program);

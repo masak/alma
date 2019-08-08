@@ -1,7 +1,7 @@
 use Test;
 use _007::Test;
 
-my @lines = run-and-collect-lines("examples/nim-addition.007");
+my @lines = run-and-collect-lines("examples/nim-addition.alma");
 
 is +@lines, 5, "correct number of lines of output";
 is @lines[0], "0", "line #1 correct";

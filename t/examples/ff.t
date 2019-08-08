@@ -1,7 +1,7 @@
 use Test;
 use _007::Test;
 
-my @lines = run-and-collect-output("examples/ff.007").lines;
+my @lines = run-and-collect-output("examples/ff.alma").lines;
 
 {
     is @lines[^5].join, "xBxBx", "ff works";

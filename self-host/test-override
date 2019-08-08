@@ -10,7 +10,7 @@ my class StrOutput {
 
 sub is-result($input, $expected, $desc) {
     my $compunit = read($input);
-    my $runtime-program = slurp("self-host/runtime.007");
+    my $runtime-program = slurp("self-host/runtime.alma");
     my $output = StrOutput.new;
     my $runtime = _007.runtime(:$output);
     check($compunit, $runtime);
@@ -26,7 +26,7 @@ sub outputs($program, $expected, $desc) {
     my $runtime = _007.runtime(:$output);
     my $parser = _007.parser(:$runtime);
     my $compunit = $parser.parse($program);
-    my $runtime-program = slurp("self-host/runtime.007");
+    my $runtime-program = slurp("self-host/runtime.alma");
     my $ast = _007.parser(:$runtime).parse($runtime-program);
     $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);
@@ -35,21 +35,21 @@ sub outputs($program, $expected, $desc) {
 }
 
 sub is-error($input, $expected-error, $desc = $expected-error.^name) is export {
-    skip("not at all sure what to do with is-error in runtime.007");
-    # like, how does the error propagate up from runtime.007 to Runtime.pm?
+    skip("not at all sure what to do with is-error in runtime.alma");
+    # like, how does the error propagate up from runtime.alma to Runtime.pm?
     # there's probably a very nice answer to that, but we're not yet at the
     # point where we can easily see that answer
 }
 
 sub throws-exception($input, $expected-error, $desc = $expected-error.^name) is export {
-    skip("not at all sure what to do with throws-exception in runtime.007");
+    skip("not at all sure what to do with throws-exception in runtime.alma");
     # see comment about is-error above
 }
 
 sub parses-to($program, $expected, $desc = "MISSING TEST DESCRIPTION", Bool :$unexpanded) {
-    skip("test is parser-only and we're testing runtime.007");
+    skip("test is parser-only and we're testing runtime.alma");
 }
 
 sub parse-error($program, $expected-error, $desc = $expected-error.^name) {
-    skip("test is parser-only and we're testing runtime.007");
+    skip("test is parser-only and we're testing runtime.alma");
 }

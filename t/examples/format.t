@@ -1,12 +1,12 @@
 use Test;
 use _007::Test;
 
-constant MODIFIED_FORMAT_007_FILENAME = "format-$*PID.007";
-LEAVE unlink MODIFIED_FORMAT_007_FILENAME;
+constant MODIFIED_FORMAT_ALMA_FILENAME = "format-$*PID.alma";
+LEAVE unlink MODIFIED_FORMAT_ALMA_FILENAME;
 my $changed-line = False;
 
-given open(MODIFIED_FORMAT_007_FILENAME, :w) -> $fh {
-    for "examples/format.007".IO.lines -> $line {
+given open(MODIFIED_FORMAT_ALMA_FILENAME, :w) -> $fh {
+    for "examples/format.alma".IO.lines -> $line {
         if $line ~~ /^^ '# ' (.+) $$/ {
             $changed-line = True;
             $fh.say: ~$0;
@@ -18,10 +18,10 @@ given open(MODIFIED_FORMAT_007_FILENAME, :w) -> $fh {
     $fh.close;
 }
 
-ok $changed-line, "found a line to un-comment from format.007";
+ok $changed-line, "found a line to un-comment from format.alma";
 
 {
-    my @lines = run-and-collect-lines("examples/format.007");
+    my @lines = run-and-collect-lines("examples/format.alma");
 
     is +@lines, 2, "correct number of lines";
 
@@ -30,7 +30,7 @@ ok $changed-line, "found a line to un-comment from format.007";
 }
 
 {
-    my $message = run-and-collect-error-message(MODIFIED_FORMAT_007_FILENAME);
+    my $message = run-and-collect-error-message(MODIFIED_FORMAT_ALMA_FILENAME);
 
     is $message, "Highest index was 1 but got only 1 arguments.", "got the right error";
 }
