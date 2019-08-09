@@ -141,6 +141,71 @@ class _007::Parser::Actions {
         my $traitlist = $<traitlist>.ast;
         my $statementlist = $<blockoid>.ast;
 
+        if $<routine> eq "macro" {
+            for $traitlist.traits.elements -> $trait {
+                if $trait.identifier.name.value eq "succinct" {
+                    multi walk(Q::StatementList $statementlist) {
+                        my @elements;
+                        for $statementlist.statements.elements -> $statement {
+                            @elements.push(walk($statement));
+                        }
+                        return Q::StatementList.new(:statements(Val::Array.new(:@elements)));
+                    }
+
+                    multi walk(Q::Statement::Expr $statement) {
+                        return Q::Statement::Expr.new(:expr(walk($statement.expr)));
+                    }
+
+                    multi walk(Q::Infix::Assignment $infix) {
+                        return Q::Infix::Assignment.new(
+                            :identifier($infix.identifier),
+                            :lhs(walk($infix.lhs)),
+                            :rhs(walk($infix.rhs)),
+                        );
+                    }
+
+                    multi walk(Q::Term::My $my) {
+                        return Q::Term::My.new(
+                            :identifier(walk($my.identifier)),
+                        );
+                    }
+
+                    multi walk(Q::Term::Identifier $identifier) {
+                        my $expr = Q::Term::Identifier.new(
+                            :name($identifier.name),
+                        );
+                        # XXX: This string-based comparison is fragile and not acceptable for merge. If you see this comment
+                        #      during code review, kindly cry bloody murder and body-slam people who go for the merge button.
+                        return $identifier.name.value eq any($parameterlist.parameters.elements».identifier».name».value)
+                            ?? Q::Unquote.new(:qtype(Val::Str.new(:value(""))), :$expr)
+                            !! $expr;
+                    }
+
+                    $statementlist = walk($statementlist);
+
+                    $statementlist = Q::StatementList.new(
+                        :statements(Val::Array.new(
+                            :elements([
+                                Q::Statement::Return.new(
+                                    :expr(
+                                        Q::Term::Quasi.new(
+                                            :qtype(Val::Str.new(:value(""))),
+                                            :contents(
+                                                Q::Block.new(
+                                                    :parameterlist(Q::ParameterList.new())
+                                                    :$statementlist,
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            ])
+                        ))
+                    );
+                }
+            }
+        }
+
         my $block = Q::Block.new(:$parameterlist, :$statementlist);
         my $static-lexpad = $*runtime.current-frame.properties<pad>;
         finish-block($block);
