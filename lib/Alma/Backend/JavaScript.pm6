@@ -9,7 +9,7 @@ my %builtins =
         ----
 ;
 
-class _007::Backend::JavaScript {
+class Alma::Backend::JavaScript {
     method emit(Q::CompUnit $compunit) {
         return ""
             unless $compunit.block.statementlist.statements.elements;

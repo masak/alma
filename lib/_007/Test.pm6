@@ -2,7 +2,7 @@ use Alma;
 use _007::Val;
 use _007::Q;
 use _007::Parser::Actions;
-use _007::Backend::JavaScript;
+use Alma::Backend::JavaScript;
 
 use Test;
 
@@ -123,7 +123,7 @@ sub emits-js($program, @expected-builtins, $expected, $desc = "MISSING TEST DESC
     my $runtime = Alma.runtime(:$output);
     my $parser = Alma.parser(:$runtime);
     my $ast = $parser.parse($program);
-    my $emitted-js = _007::Backend::JavaScript.new.emit($ast);
+    my $emitted-js = Alma::Backend::JavaScript.new.emit($ast);
     my $actual = $emitted-js ~~ /^^ '(() => { // main program' \n ([<!before '})();'> \N+ [\n|$$]]*)/
         ?? (~$0).indent(*)
         !! $emitted-js;
