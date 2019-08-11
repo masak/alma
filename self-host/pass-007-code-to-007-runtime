@@ -1,4 +1,4 @@
-use _007;
+use Alma;
 
 sub run_007_on_007($program) {
     my $compunit = _007.parser.parse($program);

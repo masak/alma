@@ -7,7 +7,7 @@
     "depends"   : [],
     "license"   : "Artistic-2.0",
     "provides" : {
-        "_007" : "lib/_007.pm6",
+        "Alma" : "lib/Alma.pm6",
         "_007::Backend::JavaScript" : "lib/_007/Backend/JavaScript.pm6",
         "_007::Equal" : "lib/_007/Equal.pm6",
         "_007::Linter" : "lib/_007/Linter.pm6",

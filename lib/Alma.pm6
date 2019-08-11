@@ -2,7 +2,7 @@ use _007::Runtime;
 use _007::Parser;
 use _007::Linter;
 
-class _007 {
+class Alma {
     method runtime(:$input = $*IN, :$output = $*OUT, :@arguments) {
         _007::Runtime.new(:$input, :$output, :@arguments);
     }

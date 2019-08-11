@@ -1,5 +1,5 @@
 use Test;
-use _007;
+use Alma;
 
 my $program = q:to/EOF/;
     my PIN   = "    |    ";
@@ -61,8 +61,8 @@ my class LinesOutput {
 }
 
 my $output = LinesOutput.new;
-given _007.runtime(:input($*IN), :$output) -> $runtime {
-    my $ast = _007.parser(:$runtime).parse($program);
+given Alma.runtime(:input($*IN), :$output) -> $runtime {
+    my $ast = Alma.parser(:$runtime).parse($program);
     $runtime.run($ast);
 }
 
