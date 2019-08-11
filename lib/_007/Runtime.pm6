@@ -1,7 +1,7 @@
 use _007::Val;
 use _007::Q;
 use _007::Builtins;
-use _007::Equal;
+use Alma::Equal;
 
 constant NO_OUTER = Val::Dict.new;
 constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));

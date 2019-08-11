@@ -1,7 +1,7 @@
 use _007::Val;
 use _007::Q;
 use _007::OpScope;
-use _007::Equal;
+use Alma::Equal;
 
 class X::Control::Exit is Exception {
     has Int $.exit-code;
