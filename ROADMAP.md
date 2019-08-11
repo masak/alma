@@ -4,7 +4,7 @@ Stability and backwards compatibility stand in conflict with the need to
 iterate on ideas and replace newly discovered better ideas with old
 worse ideas. 
 
-007 is still a v0.x.x product. There are no guarantees about backwards
+Alma is still a v0.x.x product. There are no guarantees about backwards
 compatibility, as the need for inwards fluidity exceeds the need for
 outwards stability.
 
@@ -54,15 +54,15 @@ ordering. That's what this roadmap is for.
 ## `is parsed` macros
 
 After most of the rest of the roadmap was written, one issue in particular
-emerged as setting the agenda for what needs to be done short-term with 007:
-[#194](https://github.com/masak/007/issues/194). It has proved to be important because it re-focuses 007 to get useful
+emerged as setting the agenda for what needs to be done short-term with Alma:
+[#194](https://github.com/masak/007/issues/194). It has proved to be important because it re-focuses Alma to get useful
 and usable macros ASAP.
 
 Most of those were mentioned above, but here are the ones that require some
 form of `is parsed` mechanism, the underpinnings of which has a slightly more
 uncertain time plan:
 
-* Reduction metaoperator, such as `[+](1, 2, 3)`. In 007, the `[+]` would
+* Reduction metaoperator, such as `[+](1, 2, 3)`. In Alma, the `[+]` would
   parse into a code-generated anonymous subroutine. This one is interesting
   for two reasons. It *really* uses closures and hygiene all-out.
   ([#176](https://github.com/masak/007/issues/176))
@@ -83,13 +83,13 @@ uncertain time plan:
 
 ## Pre-v1.0.0
 
-Work on 007 falls into two main tracks:
+Work on Alma falls into two main tracks:
 
 * Features that help explore macro-like things (ultimately for Perl 6)
-* Features for 007 the language (ultimately for 007)
+* Features for Alma the language (ultimately for Alma)
 
-The first track is still the *raison d'être* for 007. The second track rounds
-007 off as a nicer tool to work with.
+The first track was the *raison d'être* for 007. The second track rounds
+Alma off as a nicer tool to work with.
 
 See also the [Reach Hacker News
 completeness](https://github.com/masak/007/issues/335) issue, which outlines
@@ -141,9 +141,9 @@ expected areas of focus after v1.0.0.
 * [007 parser in 007](https://github.com/masak/007/issues/38)
 * [syntax macros](https://github.com/masak/007/issues/80)
 
-Two things would be worthy enough to produce a v2.0.0 version. Either 007 being
+Two things would be worthy enough to produce a v2.0.0 version. Either Alma being
 bootstrapping enough to have both a runtime and a parser written in itself; or
-007 having all three of regular macros, syntax macros, and visitor macros.
+Alma having all three of regular macros, syntax macros, and contextual macros.
 
 ## Various protocols
 
