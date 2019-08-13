@@ -71,12 +71,12 @@ sub ast-if-any($submatch) {
         !! NONE;
 }
 
-class _007::Parser::Actions {
-    sub finish-block($block) {
-        $block.static-lexpad = $*runtime.current-frame.properties<pad>;
-        $*runtime.leave;
-    }
+sub finish-block($block) {
+    $block.static-lexpad = $*runtime.current-frame.properties<pad>;
+    $*runtime.leave;
+}
 
+class _007::Parser::Actions {
     method TOP($/) {
         make $<compunit>.ast;
     }
@@ -182,6 +182,15 @@ class _007::Parser::Actions {
                     }
 
                     $statementlist = walk($statementlist);
+                    my $succinct-block = Q::Block.new(
+                        :parameterlist(Q::ParameterList.new())
+                        :$statementlist,
+                    );
+
+                    # Because we generated a Q::Block without going through the parser, we have to manually call
+                    # operations that would otherwise be done for us in Syntax's <.newpad>.
+                    $*runtime.enter($*runtime.current-frame, Val::Dict.new, Q::StatementList.new);
+                    finish-block($succinct-block);
 
                     $statementlist = Q::StatementList.new(
                         :statements(Val::Array.new(
@@ -190,12 +199,7 @@ class _007::Parser::Actions {
                                     :expr(
                                         Q::Term::Quasi.new(
                                             :qtype(Val::Str.new(:value(""))),
-                                            :contents(
-                                                Q::Block.new(
-                                                    :parameterlist(Q::ParameterList.new())
-                                                    :$statementlist,
-                                                )
-                                            )
+                                            :contents($succinct-block)
                                         )
                                     )
                                 )
@@ -967,8 +971,8 @@ sub check(Q $ast, $runtime) is export {
         $runtime.enter($runtime.current-frame, Val::Dict.new, Q::StatementList.new);
         handle($block.parameterlist);
         handle($block.statementlist);
-        $block.static-lexpad = $runtime.current-frame.properties<pad>;
-        $runtime.leave();
+        my $*runtime = $runtime;
+        finish-block($block);
     }
 
     multi handle(Q::Term::Dict $object) {
