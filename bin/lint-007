@@ -4,7 +4,7 @@ use Alma;
 
 multi MAIN($path, Bool :$lint!) {
     my $program = slurp($path);
-    for _007.linter.lint($program) -> $complaint {
+    for Alma.linter.lint($program) -> $complaint {
         say "line N, column N: $complaint.message()";
     }
 }

@@ -1,6 +1,6 @@
 use _007::Runtime;
 use _007::Parser;
-use _007::Linter;
+use Alma::Linter;
 
 class Alma {
     method runtime(:$input = $*IN, :$output = $*OUT, :@arguments) {
@@ -18,6 +18,6 @@ class Alma {
     }
 
     method linter(:$parser = self!parser-with-no-output) {
-        _007::Linter.new(:$parser);
+        Alma::Linter.new(:$parser);
     }
 }

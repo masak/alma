@@ -1,7 +1,7 @@
 use v6;
 use Test;
 use Alma;
-use _007::Linter;
+use Alma::Linter;
 
 {
     my $program = 'func f() {}';
