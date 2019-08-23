@@ -1,4 +1,4 @@
-use _007::Parser::Syntax;
+use Alma::Parser::Syntax;
 use Alma::Parser::Actions;
 
 class Alma::Parser {
@@ -20,7 +20,7 @@ class Alma::Parser {
         my $*parser = self;
         my $*runtime = $!runtime;
         @!checks = ();
-        _007::Parser::Syntax.parse($program, :actions(Alma::Parser::Actions))
+        Alma::Parser::Syntax.parse($program, :actions(Alma::Parser::Actions))
             or die "Could not parse program";   # XXX: make this into X::
         for @!checks -> &check {
             &check();

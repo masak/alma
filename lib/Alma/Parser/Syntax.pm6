@@ -13,7 +13,7 @@ sub check-feature-flag($feature, $word) {
         unless %*ENV{$flag};
 }
 
-grammar _007::Parser::Syntax {
+grammar Alma::Parser::Syntax {
     token TOP { <compunit> }
 
     token compunit {
