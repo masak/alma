@@ -21,7 +21,7 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
-class _007::Runtime {
+class Alma::Runtime {
     has $.input;
     has $.output;
     has @.arguments;

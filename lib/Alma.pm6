@@ -1,10 +1,10 @@
-use _007::Runtime;
+use Alma::Runtime;
 use Alma::Parser;
 use Alma::Linter;
 
 class Alma {
     method runtime(:$input = $*IN, :$output = $*OUT, :@arguments) {
-        _007::Runtime.new(:$input, :$output, :@arguments);
+        Alma::Runtime.new(:$input, :$output, :@arguments);
     }
 
     method parser(:$runtime = $.runtime) {
