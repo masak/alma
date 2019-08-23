@@ -61,7 +61,7 @@ Implements a number guessing game.
 Implements a `infix:<⊕>` operator for "bitwise xor".
 
 Showcases custom operators with `equiv` precedence. Also inadvertently
-showcases how 007 is somewhat suffering from the lack of support for low-level
+showcases how Alma is somewhat suffering from the lack of support for low-level
 bitwise operators; see [#461](/masak/007/issues/461).
 
 ## [power.alma](/examples/power.alma)
