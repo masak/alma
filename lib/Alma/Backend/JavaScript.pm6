@@ -1,5 +1,5 @@
 use _007::Val;
-use _007::Q;
+use Alma::Q;
 
 my %builtins =
     "say" => q:to '----',

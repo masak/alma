@@ -1,5 +1,5 @@
 use _007::Val;
-use _007::Q;
+use Alma::Q;
 use Alma::OpScope;
 use Alma::Equal;
 
