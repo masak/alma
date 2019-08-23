@@ -89,5 +89,25 @@ Eugene Burmako implemented macros in Scala. (I don't know the full picture here,
 
 <dl>
   <dt>The use of sub-routines in programmes</dt>
-  <dd><a href="http://www.laputan.org/pub/papers/wheeler.pdf">1952 paper by David Wheeler</dd>
+  <dd><a href="http://www.laputan.org/pub/papers/wheeler.pdf">1952 paper by David Wheeler</a></dd>
+</dl>
+
+## Papers from diakopter
+
+<dl>
+  <dt>Size-Change Termination and Constraint Transition Systems </dt>
+  <dd>Size-Change Termination is <a href="http://www2.mta.ac.il/~amirben/sct.html">a method of proving the termination of computer programs</a></dd>
+  <dt>Functional Pearl: Theorem-Proving for All</dt>
+  <dd><a href="https://arxiv.org/pdf/1806.03541.pdf">Equational Reasoning in Liquid Haskell</a></dd>
+  <dt>(The closest thing diakopter could find to) how to write a type checker</dt>
+  <dd><a href="https://github.com/jozefg/higher-order-unification/blob/master/explanation.md">An Explanation of Unification.hs</a></dd>
+  <dt>OMeta: an Object-Oriented Language for Pattern Matching</dt>
+  <dd>diakopter said I should read <a href="http://www.tinlizzie.org/~awarth/papers/dls07.pdf">this one</a> after I explained my mutable parser ideas to him. he added "when you're defining the grammar, the actions aren't just parser combinators, they can run any arbitrary code/application/reduction or chain thunks. I think the solution to making a parse-time-extensible grammar/parser is to get rid of the "compilation" step entirely (as OMeta does), and make the grammar/parser an object whose entire state and API is available to code in the grammar actions. so the parser wouldn't try to "optimize" at all, but instead act fully as an interpreter. so if you add/replace a rule to the grammar, the point at which it's supposed to enact the change can swap in a modified grammar on a stack"</dd>
+  <dt>Formal verification of AI software</dt>
+  <dd><a href="https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19890015440.pdf">"this paper is awesome"</a></dd>
+  <dt>Compiling with continuations or without? Whatever</dt>
+  <dd><a href="https://www.researchgate.net/profile/Youyou_Cong/publication/335277314_Compiling_with_Continuations_or_without_Whatever/links/5d5c6702299bf1b97cfa1893/Compiling-with-Continuations-or-without-Whatever.pdf?origin=publication_detail">some talk slides</a></dd>
+  <dt>An algebraic approach to typechecking and elaboration</dt>
+  <dd><a href="https://bentnib.org/docs/algebraic-typechecking-20150218.pdf">a paper</a>. diakopter says "the final question of the last slide is relevant"</dd>
+  <dd><a href="https://www.youtube.com/watch?v=ypU3j6Wpkoo">talk video</a></dd>
 </dl>
