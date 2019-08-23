@@ -11,7 +11,7 @@
         "Alma::Backend::JavaScript" : "lib/Alma/Backend/JavaScript.pm6",
         "Alma::Equal" : "lib/Alma/Equal.pm6",
         "Alma::Linter" : "lib/Alma/Linter.pm6",
-        "_007::OpScope" : "lib/_007/OpScope.pm6",
+        "Alma::OpScope" : "lib/Alma/OpScope.pm6",
         "_007::Parser" : "lib/_007/Parser.pm6",
         "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm6",
         "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm6",

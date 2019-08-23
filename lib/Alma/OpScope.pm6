@@ -26,7 +26,7 @@ class X::Category::Unknown is Exception {
     method message { "Unknown category '$.category'" }
 }
 
-class _007::OpScope {
+class Alma::OpScope {
     has %.ops =
         prefix => {},
         infix => {},
