@@ -99,7 +99,7 @@ sub throws-exception($program, $message, $desc = "MISSING TEST DESCRIPTION") is 
     $runtime.run($ast);
 
     CATCH {
-        when X::_007::RuntimeException {
+        when X::Alma::RuntimeException {
             is .message, $message, "passing the right Exception's message";
             pass $desc;
         }

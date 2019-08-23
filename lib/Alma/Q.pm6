@@ -54,7 +54,7 @@ class X::TypeCheck::HeterogeneousArray is Exception {
     }
 }
 
-class X::_007::RuntimeException is Exception {
+class X::Alma::RuntimeException is Exception {
     has $.msg;
 
     method message {
@@ -988,7 +988,7 @@ class Q::Statement::Throw does Q::Statement {
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die X::_007::RuntimeException.new(:msg($value.message.value));
+        die X::Alma::RuntimeException.new(:msg($value.message.value));
     }
 }
 
