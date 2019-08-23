@@ -1,4 +1,4 @@
-use _007::Val;
+use Alma::Val;
 use Alma::Q;
 
 role Lint {

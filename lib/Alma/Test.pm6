@@ -1,5 +1,5 @@
 use Alma;
-use _007::Val;
+use Alma::Val;
 use Alma::Q;
 use Alma::Parser::Actions;
 use Alma::Backend::JavaScript;

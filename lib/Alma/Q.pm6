@@ -1,4 +1,4 @@
-use _007::Val;
+use Alma::Val;
 
 class X::Control::Return is Exception {
     has $.frame;

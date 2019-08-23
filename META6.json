@@ -20,7 +20,7 @@
         "Alma::Q" : "lib/Alma/Q.pm6",
         "Alma::Runtime" : "lib/Alma/Runtime.pm6",
         "Alma::Test" : "lib/Alma/Test.pm6",
-        "_007::Val" : "lib/_007/Val.pm6"
+        "Alma::Val" : "lib/Alma/Val.pm6"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }
 }

@@ -1,4 +1,4 @@
-use _007::Val;
+use Alma::Val;
 use Alma::Q;
 
 class X::Syntax::WhitespaceInIdentifier is Exception {
