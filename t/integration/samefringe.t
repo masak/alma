@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 # See https://github.com/masak/007/issues/345
 

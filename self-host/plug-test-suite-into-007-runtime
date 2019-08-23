@@ -30,7 +30,7 @@ sub MAIN() {
         my $tempfile-name = "$basename-$*PID.t";
         LEAVE { unlink $tempfile-name if $tempfile-name }
         signal(SIGINT).act: { unlink $tempfile-name if $tempfile-name; exit 1 }
-        $contents.=subst(/^^ \h* "use _007::Test;" \h* $$/, $test-override);
+        $contents.=subst(/^^ \h* "use Alma::Test;" \h* $$/, $test-override);
         spurt($tempfile-name, $contents);
 
         my $proc = run("perl6", $tempfile-name, :out);

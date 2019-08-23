@@ -19,7 +19,7 @@
         "Alma::Precedence" : "lib/Alma/Precedence.pm6",
         "Alma::Q" : "lib/Alma/Q.pm6",
         "Alma::Runtime" : "lib/Alma/Runtime.pm6",
-        "_007::Test" : "lib/_007/Test.pm6",
+        "Alma::Test" : "lib/Alma/Test.pm6",
         "_007::Val" : "lib/_007/Val.pm6"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }

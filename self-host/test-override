@@ -1,5 +1,5 @@
 use Alma;
-use _007::Test <&read &check &ensure-feature-flag>;
+use Alma::Test <&read &check &ensure-feature-flag>;
 
 my class StrOutput {
     has $.result = "";
@@ -12,9 +12,9 @@ sub is-result($input, $expected, $desc) {
     my $compunit = read($input);
     my $runtime-program = slurp("self-host/runtime.alma");
     my $output = StrOutput.new;
-    my $runtime = _007.runtime(:$output);
+    my $runtime = Alma.runtime(:$output);
     check($compunit, $runtime);
-    my $ast = _007.parser(:$runtime).parse($runtime-program);
+    my $ast = Alma.parser(:$runtime).parse($runtime-program);
     $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);
 
@@ -23,11 +23,11 @@ sub is-result($input, $expected, $desc) {
 
 sub outputs($program, $expected, $desc) {
     my $output = StrOutput.new;
-    my $runtime = _007.runtime(:$output);
-    my $parser = _007.parser(:$runtime);
+    my $runtime = Alma.runtime(:$output);
+    my $parser = Alma.parser(:$runtime);
     my $compunit = $parser.parse($program);
     my $runtime-program = slurp("self-host/runtime.alma");
-    my $ast = _007.parser(:$runtime).parse($runtime-program);
+    my $ast = Alma.parser(:$runtime).parse($runtime-program);
     $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);
 

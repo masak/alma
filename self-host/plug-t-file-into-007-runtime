@@ -5,7 +5,7 @@ sub MAIN($file) {
     LEAVE { unlink $tempfile-name if $tempfile-name }
     signal(SIGINT).act: { unlink $tempfile-name if $tempfile-name; exit 1 }
     my $test-override = slurp("self-host/test-override");
-    $contents .= subst(/^^ \h* "use _007::Test;" \h* $$/, $test-override);
+    $contents .= subst(/^^ \h* "use Alma::Test;" \h* $$/, $test-override);
     spurt($tempfile-name, $contents);
 
     my $failures = shell("perl6 $tempfile-name");

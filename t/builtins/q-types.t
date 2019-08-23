@@ -1,6 +1,6 @@
 use Alma::Q;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my @q-types;
 

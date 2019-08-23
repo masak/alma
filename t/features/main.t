@@ -1,7 +1,7 @@
 use v6;
 use Test;
 use Alma;
-use _007::Test;
+use Alma::Test;
 
 {
     my $program = q:to/./;

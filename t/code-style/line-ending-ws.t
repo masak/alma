@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my @lines-ending-with-ws;
 for find(".", /[".pm6" | ".007"] $/) -> $file {

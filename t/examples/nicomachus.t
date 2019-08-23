@@ -1,5 +1,5 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my class CannedInput {
     has @.lines;

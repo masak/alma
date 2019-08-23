@@ -1,5 +1,5 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
 constant MODIFIED_FORMAT_ALMA_FILENAME = "format-$*PID.alma";
 LEAVE unlink MODIFIED_FORMAT_ALMA_FILENAME;
