@@ -2,8 +2,8 @@ use v6;
 use Test;
 use Alma::Test;
 
-%*ENV<FLAG_007_CLASS> = "1";    # so that we can parse class declarations in the documentation
-%*ENV<FLAG_007_REGEX> = "1";    # so that we can parse regexes in the documentation
+%*ENV<FLAG_ALMA_CLASS> = "1";    # so that we can parse class declarations in the documentation
+%*ENV<FLAG_ALMA_REGEX> = "1";    # so that we can parse regexes in the documentation
 
 for <lib/Alma/Val.pm6 lib/Alma/Q.pm6> -> $file {
     my ($topic, @snippet-lines);

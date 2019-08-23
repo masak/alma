@@ -3,4 +3,4 @@ sudo: false
 perl6:
   - latest
 env:
-  - FLAG_007_REGEX=1 FLAG_007_CLASS=1
+  - FLAG_ALMA_REGEX=1 FLAG_ALMA_CLASS=1

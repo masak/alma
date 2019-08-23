@@ -203,7 +203,7 @@ class Val::Str does Val {
 ### regex. In other words, it returns `true` or `false`.
 ###
 ### (Regexes are currently under development, and are hidden behind a feature
-### flag for the time being: `FLAG_007_REGEX`.)
+### flag for the time being: `FLAG_ALMA_REGEX`.)
 ###
 ### A few methods are defined on regexes:
 ###

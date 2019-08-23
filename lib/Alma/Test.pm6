@@ -160,7 +160,7 @@ sub run-and-collect-error-message($filepath) is export {
 }
 
 sub ensure-feature-flag($flag) is export {
-    my $envvar = "FLAG_007_{$flag}";
+    my $envvar = "FLAG_ALMA_{$flag}";
     unless %*ENV{$envvar} {
         skip("$envvar is not enabled", 1);
         done-testing;
