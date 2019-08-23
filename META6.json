@@ -15,7 +15,7 @@
         "Alma::Parser" : "lib/Alma/Parser.pm6",
         "Alma::Parser::Actions" : "lib/Alma/Parser/Actions.pm6",
         "Alma::Parser::Syntax" : "lib/Alma/Parser/Syntax.pm6",
-        "_007::Precedence" : "lib/_007/Precedence.pm6",
+        "Alma::Precedence" : "lib/Alma/Precedence.pm6",
         "_007::Q" : "lib/_007/Q.pm6",
         "_007::Runtime" : "lib/_007/Runtime.pm6",
         "_007::Builtins" : "lib/_007/Builtins.pm6",

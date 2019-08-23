@@ -1,6 +1,6 @@
 use _007::Val;
 use _007::Q;
-use _007::Precedence;
+use Alma::Precedence;
 
 class X::Trait::IllegalValue is Exception {
     has Str $.trait;
@@ -109,7 +109,7 @@ class Alma::OpScope {
         }
 
         sub new-prec {
-            _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
+            Alma::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
         if %precedence<tighter> || %precedence<looser> -> $other-op {
