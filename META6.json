@@ -8,6 +8,7 @@
     "license"   : "Artistic-2.0",
     "provides" : {
         "Alma" : "lib/Alma.pm6",
+        "Alma::Builtins" : "lib/Alma/Builtins.pm6",
         "Alma::Backend::JavaScript" : "lib/Alma/Backend/JavaScript.pm6",
         "Alma::Equal" : "lib/Alma/Equal.pm6",
         "Alma::Linter" : "lib/Alma/Linter.pm6",
@@ -18,7 +19,6 @@
         "Alma::Precedence" : "lib/Alma/Precedence.pm6",
         "Alma::Q" : "lib/Alma/Q.pm6",
         "Alma::Runtime" : "lib/Alma/Runtime.pm6",
-        "_007::Builtins" : "lib/_007/Builtins.pm6",
         "_007::Test" : "lib/_007/Test.pm6",
         "_007::Val" : "lib/_007/Val.pm6"
     },

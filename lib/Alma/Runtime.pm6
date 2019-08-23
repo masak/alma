@@ -1,6 +1,6 @@
 use _007::Val;
 use Alma::Q;
-use _007::Builtins;
+use Alma::Builtins;
 use Alma::Equal;
 
 constant NO_OUTER = Val::Dict.new;
