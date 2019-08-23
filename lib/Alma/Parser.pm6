@@ -1,7 +1,7 @@
 use _007::Parser::Syntax;
 use _007::Parser::Actions;
 
-class _007::Parser {
+class Alma::Parser {
     has $.runtime = die "Must supply a runtime";
     has @!opscopes = $!runtime.builtin-opscope;
     has @!checks;

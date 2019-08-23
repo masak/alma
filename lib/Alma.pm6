@@ -1,5 +1,5 @@
 use _007::Runtime;
-use _007::Parser;
+use Alma::Parser;
 use Alma::Linter;
 
 class Alma {
@@ -8,7 +8,7 @@ class Alma {
     }
 
     method parser(:$runtime = $.runtime) {
-        _007::Parser.new(:$runtime);
+        Alma::Parser.new(:$runtime);
     }
 
     method !parser-with-no-output {
