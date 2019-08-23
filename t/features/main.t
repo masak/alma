@@ -61,7 +61,7 @@ use Alma::Test;
     my $ast = $parser.parse($program);
     $runtime.run($ast);
 
-    is $output.result, "Usage:\n  bin/007 <script> <x>\n", "usage message printed on too few arguments";
+    is $output.result, "Usage:\n  bin/alma <script> <x>\n", "usage message printed on too few arguments";
     is $runtime.exit-code, 1, "non-zero exit code (1) on too few arguments";
 }
 
@@ -83,7 +83,7 @@ use Alma::Test;
     my $ast = $parser.parse($program);
     $runtime.run($ast);
 
-    is $output.result, "Usage:\n  bin/007 <script> <x> <y> <z>\n", "usage message printed on too many arguments";
+    is $output.result, "Usage:\n  bin/alma <script> <x> <y> <z>\n", "usage message printed on too many arguments";
     is $runtime.exit-code, 1, "non-zero exit code (1) on too many arguments";
 }
 

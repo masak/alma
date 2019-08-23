@@ -84,7 +84,7 @@ class Alma::Runtime {
     method print-usage(@main-parameters) {
         $.output.print("Usage:");
         $.output.print("\n");
-        $.output.print("  bin/007 <script> ");
+        $.output.print("  bin/alma <script> ");
         $.output.print(@main-parameters.map({ "<" ~ $_ ~ ">" }).join(" "));
         $.output.print("\n");
     }
