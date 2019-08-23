@@ -71,7 +71,7 @@ sub ast-if-any($submatch) {
         !! NONE;
 }
 
-class _007::Parser::Actions {
+class Alma::Parser::Actions {
     sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
         $*runtime.leave;
