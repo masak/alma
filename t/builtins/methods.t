@@ -29,10 +29,10 @@ use Alma::Test;
 
 {
     my $program = q:to/./;
-        say("007".chars());
+        say("Alma".chars());
         .
 
-    outputs $program, "3\n", "chars() returns the length (number of characters) of a string";
+    outputs $program, "4\n", "chars() returns the length (number of characters) of a string";
 }
 
 {
@@ -338,9 +338,9 @@ use Alma::Test;
 
 {
     my $program = q:to/./;
-        my a = "007";
-        say(a.contains("07"));
-        say(a.contains("8"));
+        my a = "Alma";
+        say(a.contains("lm"));
+        say(a.contains("L"));
         .
 
     outputs $program, "true\nfalse\n", "contains() returns whether a string contains another";

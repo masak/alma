@@ -331,7 +331,8 @@ use Alma::Test;
         "boolean operators give the values expected";
     outputs 'say(false && say("foo")); say(true || say("bar"))', "false\ntrue\n",
         "boolean operators short-circuit";
-    outputs 'say(1 && 2); say("" && 3); say(false || none); say([0, 0, 7] || false)', "2\n\nnone\n[0, 0, 7]\n",
+    outputs 'say(1 && 2); say("" && 3); say(false || none); say(["A", "l", "m", "a"] || false)',
+        qq[2\n\nnone\n["A", "l", "m", "a"]\n],
         "boolean operators return one of their operands";
 }
 
@@ -663,10 +664,10 @@ use Alma::Test;
         func f() {
             say("I never get run, you know");
         }
-        say(007 // f());
+        say("Alma" // f());
         .
 
-    outputs $program, "7\n", "short-circuiting: if the lhs is defined, the (thunkish) rhs never runs";
+    outputs $program, "Alma\n", "short-circuiting: if the lhs is defined, the (thunkish) rhs never runs";
 }
 
 {
@@ -717,7 +718,7 @@ use Alma::Test;
 
 {
     my $program = q:to/./;
-        say( +"007" ~~ Int );
+        say( +"42" ~~ Int );
         .
 
     outputs
