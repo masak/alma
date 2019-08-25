@@ -97,7 +97,7 @@ class Alma::Parser::Actions {
     method statement:expr ($/) {
         if $<export> {
             # For now, we're just enforcing that there's a `my` at the far left, according to the
-            # rules in https://github.com/masak/007/issues/404#issuecomment-432176865 -- we're
+            # rules in https://github.com/masak/alma/issues/404#issuecomment-432176865 -- we're
             # not actually doing anything with the information yet
 
             sub panicExportNothing() {
@@ -592,7 +592,7 @@ class Alma::Parser::Actions {
             # on the quasi.
             #
             # This is not a "nice" solution, nor a comprehensive one. In the end it's connected
-            # to the troubled musings in <https://github.com/masak/007/issues/7>, which aren't
+            # to the troubled musings in <https://github.com/masak/alma/issues/7>, which aren't
             # completely solved yet.
 
             if $qtype.value eq "Q.Statement" {

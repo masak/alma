@@ -22,5 +22,5 @@
         "Alma::Test" : "lib/Alma/Test.pm6",
         "Alma::Val" : "lib/Alma/Val.pm6"
     },
-    "support" : { "source"    : "git://github.com/masak/007.git" }
+    "support" : { "source"    : "git://github.com/masak/alma.git" }
 }
