@@ -1,8 +1,8 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
-my @examples = find("examples", / ".007" $/).map(-> $file { $file.basename.subst(/ ".007" $/, "", :g) });
+my @examples = find("examples", / ".alma" $/).map(-> $file { $file.basename.subst(/ ".alma" $/, "", :g) });
 
 my @example-tests = find("t/examples", / ".t" $/).map(-> $file { $file.basename.subst(/ ".t" $/, "", :g) });
 

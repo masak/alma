@@ -2,48 +2,48 @@
 
 These scripts showcase various parts of the language.
 
-## [euclid-gcd.007](/examples/euclid-gcd.007)
+## [euclid-gcd.alma](/examples/euclid-gcd.alma)
 
 Implements [Euclid's
 algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm).
 
 Showcases recursion and the `swap` macro.
 
-## [factorial.007](/examples/factorial.007)
+## [factorial.alma](/examples/factorial.alma)
 
 Declares a `postfix:<!>` operator for the
 [factorial](https://en.wikipedia.org/wiki/Factorial).
 
 Showcases custom operators.
 
-## [ff.007](/examples/ff.007)
+## [ff.alma](/examples/ff.alma)
 
 Implements the `infix:<ff>` macro and family.
 
 Showcases stateful macros, and operator macros with their own `tighter`
 precedence level. Also showcases thunky macro arguments.
 
-## [format.007](/examples/format.007)
+## [format.alma](/examples/format.alma)
 
 Implements a `format` macro for formatting text.
 
 This macro does some checking at compile-time, catching possible logical errors
 early.
 
-## [in.007](/examples/in.007)
+## [in.alma](/examples/in.alma)
 
 Implements an `infix:<in>` operator for checking membership/elementhood.
 
 Showcases custom (non-macro) operators with `equiv` precedence.
 
-## [incdec.007](/examples/incdec.007)
+## [incdec.alma](/examples/incdec.alma)
 
 Implements the various prefix/postfix `--` and `++` operators.
 
 Showcases mutating operators. Currently not-quite-correctly, due to known
 problems with the Single Evaluation Rule.
 
-## [name.007](/examples/name.007)
+## [name.alma](/examples/name.alma)
 
 Implements a `name` macro which extracts the name of a variable or property.
 
@@ -52,41 +52,41 @@ variables are a property of the source text/AST, but usually not a part of the
 running code. By virtue of running at compile time, a macro can extract the
 name and re-insert it as a string literal in the code.
 
-## [nicomachus.007](/examples/nicomachus.007)
+## [nicomachus.alma](/examples/nicomachus.alma)
 
 Implements a number guessing game.
 
-## [nim-addition.007](/examples/nim-addition.007)
+## [nim-addition.alma](/examples/nim-addition.alma)
 
 Implements a `infix:<⊕>` operator for "bitwise xor".
 
 Showcases custom operators with `equiv` precedence. Also inadvertently
-showcases how 007 is somewhat suffering from the lack of support for low-level
-bitwise operators; see [#461](/masak/007/issues/461).
+showcases how Alma is somewhat suffering from the lack of support for low-level
+bitwise operators; see [#461](http://github.com/masak/007/issues/461).
 
-## [power.007](/examples/power.007)
+## [power.alma](/examples/power.alma)
 
 Implements an `infix:<**>` power/exponentiation operator.
 
 Showcases a custom right-associative operator.
 
-## [quicksort.007](/examples/quicksort.007)
+## [quicksort.alma](/examples/quicksort.alma)
 
 Implements [QuickSort](https://en.wikipedia.org/wiki/Quicksort) (though not the
 in-place version).
 
-## [quine.007](/examples/quine.007)
+## [quine.alma](/examples/quine.alma)
 
 A [quine](https://en.wikipedia.org/wiki/Quine_(computing)), that is, a program
 that outputs its own source code.
 
-## [swap.007](/examples/swap.007)
+## [swap.alma](/examples/swap.alma)
 
 An implementation of the `swap` macro.
 
 Also currently suffers from effects from the Single Evaluation Rule.
 
-## [x-and-xx.007](/examples/x-and-xx.007)
+## [x-and-xx.alma](/examples/x-and-xx.alma)
 
 Implements `infix:<x>` and `infix:<xx>`, for duplicating strings and arrays, respectively.
 

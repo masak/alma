@@ -1,6 +1,6 @@
 This documentation has four parts:
 
-* The [language guide](#language-guide) describes how to author 007 programs.
+* The [language guide](#language-guide) describes how to author Alma programs.
 
 > #### 🔮 Future documentation:
 >
@@ -10,10 +10,10 @@ This documentation has four parts:
 > * The *API reference* section documents each built-in types, functions and
 >   operators in detail.
 >
-> * Finally, there's a short section about how to contribute to 007.
+> * Finally, there's a short section about how to contribute to Alma.
 
 *This document is still being written. Paragraphs marked 🔮 represent future
-features of 007 that are planned but not yet implemented.*
+features of Alma that are planned but not yet implemented.*
 
 # Language guide
 
@@ -21,11 +21,11 @@ features of 007 that are planned but not yet implemented.*
 
 ### Installation (with zef)
 
-If you're just planning to be a 007 end user, `zef` is the recommended way to
-install 007:
+If you're just planning to be an Alma end user, `zef` is the recommended way to
+install Alma:
 
 ```sh
-zef install 007
+zef install alma
 ```
 
 In order to get the `zef` installer, you first need [Rakudo Perl
@@ -34,15 +34,15 @@ can be found in the [`zef` README](https://github.com/ugexe/zef#installation).
 
 > #### 💡 Using `zef`
 >
-> At any later point, you can use `zef upgrade` to get an up-to-date 007, or
-> `zef uninstall` to remove 007 from your system.
+> At any later point, you can use `zef upgrade` to get an up-to-date Alma, or
+> `zef uninstall` to remove Alma from your system.
 
 ### Installation (from source)
 
 Make sure you have [Rakudo Perl 6](https://perl6.org/downloads/) installed and
 in your path.
 
-Then, clone the 007 repository. (This step requires Git. There's also [a zip
+Then, clone the Alma repository. (This step requires Git. There's also [a zip
 file](https://github.com/masak/007/archive/master.zip).)
 
 ```sh
@@ -60,19 +60,19 @@ $ export PERL6LIB=$(pwd)/lib
 > #### 💡 `PERL6LIB`
 >
 > `PERL6LIB` is used to tell Rakudo Perl 6 which paths to look in whenever it
-> sees a `use` module import in a program. Since `bin/007` imports some
-> 007-specific modules, which in turn import other modules, we need to set this
+> sees a `use` module import in a program. Since `bin/alma` imports some
+> Alma-specific modules, which in turn import other modules, we need to set this
 > environment variable.
 
-### Running 007
+### Running Alma
 
 Now this should work:
 
 ```sh
-$ bin/007 -e='say("OH HAI")'
+$ bin/alma -e='say("OH HAI")'
 OH HAI
 
-$ bin/007 examples/format.007
+$ bin/alma examples/format.alma
 abracadabra
 foo{1}bar
 ```
@@ -82,7 +82,7 @@ foo{1}bar
 Variables are declared with `my`. You can read out their values in an ordinary
 expression, and you can assign to them.
 
-```_007
+```alma
 my name = "James";
 say("My name is ", name);      # "My name is James"
 name = "Mr. Smith";
@@ -94,7 +94,7 @@ say("Now my name is ", name);  # "Now my name is Mr. Smith"
 > Variables are *lexically scoped*. You can only use/see the variable in the
 > scope it was declared, after it's been declared.
 >
-> ```_007
+> ```alma
 > # can't use x
 > {
 >     # can't use x
@@ -111,10 +111,10 @@ say("Now my name is ", name);  # "Now my name is Mr. Smith"
 
 That's all there is to variables; they are meant to be predictable and
 straightforward. Later, when writing macros has richer demands on variables,
-007's [location protocol](#evaluating-expressions) will allow us to manipulate
+Alma's [location protocol](#evaluating-expressions) will allow us to manipulate
 variables more finely, controlling exactly when to read and/or assign to them.
 
-In 007, these "scalar value" types are built in:
+In Alma, these "scalar value" types are built in:
 
     none          None
     false         Bool
@@ -128,7 +128,7 @@ And these "container" types:
 
 ## Operators and expressions
 
-Gramatically, a 007 expression always looks like this:
+Gramatically, an Alma expression always looks like this:
 
     expr := <termish> +% <infix>
     termish := <prefix>* <term> <postfix>*
@@ -142,7 +142,7 @@ You can have whitespace before or after terms and operators, and it largely
 doesn't change the meaning of the program. The recommended style is to use
 whitespace around infixes, but not after prefixes or before postfixes.
 
-007 has 28 built-in operators. Here we describe them by group. (These are just
+Alma has 28 built-in operators. Here we describe them by group. (These are just
 short descriptions. For more detail, see each individual operator in the API
 docs.)
 
@@ -204,7 +204,7 @@ tightest operators at the top, loosest at the bottom.
 | Disjunctive          | left  | infix    | `\|\| //` |
 | Assignment (loosest) | right | infix    | `=` |
 
-007's precedence rules are a bit simpler than Perl 6's. In 007, the prefixes
+Alma's precedence rules are a bit simpler than Perl 6's. In Alma, the prefixes
 and postfixes _have_ to bind tighter than the infixes.
 
 The table also shows the associativity of the different precedence levels.
@@ -216,7 +216,7 @@ parentheses in a certain way for operators on the same level:
     x || y // z            becomes        (x || y) // z        (associating to the left)
     a = b = c = 0          becomes        a = (b = (c = 0))    (associating to the right)
 
-Besides the built-in operators, you can also extend the 007 grammar by writing
+Besides the built-in operators, you can also extend the Alma grammar by writing
 your own [custom operators](#custom-operators).
 
 ## Control flow
@@ -231,7 +231,7 @@ being on the same line or separated by a newline character. When a statement
 ends in a closing curly brace (`}`), you can omit the semicolon as long as you
 have a newline character instead.
 
-```_007
+```alma
 func f1() {
 }                               # OK
 func f2() {};   say("hi!")      # OK
@@ -240,10 +240,10 @@ func f3() {}    say("oh noes")  # not ok
 
 ### Block statements
 
-007 has `if` statements, `while` loops and `for` loops by default. This example
+Alma has `if` statements, `while` loops and `for` loops by default. This example
 probably won't look too surprising to anyone who has seen C-like syntax before:
 
-```_007
+```alma
 my array = [5, func() { say("OH HAI") }, none];
 for array -> e {
     if e ~~ Int {
@@ -269,7 +269,7 @@ parentheses (`()`) are optional around expressions after `if`, `for` and
 The `if` and `while` statements evaluate their expression and runs their block
 if the resulting value is `true`, possibly after coercing to `Bool`. (We
 sometimes refer to a value that is `true` when coerced to `Bool` as _truthy_,
-and the other values as _falsy_.) Several other mechanisms in 007, such as `&&`
+and the other values as _falsy_.) Several other mechanisms in Alma, such as `&&`
 and the `.filter` method, accept these "generalized `Bool` values".
 
 The optional `-> e` syntax is a _block parameter_, and is a way to pass each
@@ -292,7 +292,7 @@ There's also `throw` statement.
 
 ### Custom statement types
 
-007 allows you to add new statement forms for control flow if you want to
+Alma allows you to add new statement forms for control flow if you want to
 &mdash; the three statements above are very common but don't form a closed set.
 For more information on how to do this, see the section [interacting with
 control flow](#control-flow).
@@ -302,7 +302,7 @@ control flow](#control-flow).
 Functions take parameters, can be called, and return a value. Definitions and
 calls look like this:
 
-```_007
+```alma
 func add(n1, n2) {
     return n1 + n2;
 }
@@ -317,9 +317,9 @@ have been written as just `n1 + n2;` because it's last in the function.
 
 When defined using a function statement, it's also allowed to call the function
 _before_ its definition. (This is not true for any other type of defined thing
-in 007.)
+in Alma.)
 
-```_007
+```alma
 whoa();     # Amazingly, this works!
 
 func whoa() {
@@ -333,7 +333,7 @@ is issued _only_ if it hasn't since been declared as a function.
 
 There's also a way to declare functions as terms, and they work just the same:
 
-```_007
+```alma
 my id = func(x) { x };
 say(id("OH HAI"));      # OH HAI
 ```
@@ -343,7 +343,7 @@ before its definition &mdash; the declaration in this case is a normal lexical
 variable.
 
 Unlike in Perl 6 (but like Python), a function call must have the parentheses.
-You can write `say(42);` in 007, but not `say 42;` &mdash; the latter is a
+You can write `say(42);` in Alma, but not `say 42;` &mdash; the latter is a
 parse error and counts as Two Terms In A Row.
 
 ### Arguments and parameters
@@ -351,7 +351,7 @@ parse error and counts as Two Terms In A Row.
 When declaring a function, we talk about function *parameters*. A parameter is
 a kind of variable scoped to the function.
 
-```_007
+```alma
 func goodnight(name) {
     say("Goodnight ", name);
 }
@@ -360,7 +360,7 @@ func goodnight(name) {
 When calling a function, we instead talk about *arguments*. Arguments are
 expressions that we pass in with the function call.
 
-```_007
+```alma
 goodnight("moon");
 ```
 
@@ -377,7 +377,7 @@ the number of arguments to differ from the number of parameters.
 
 > #### 🔮 Future feature: optional parameter and parameter defaults
 >
-> 007 will at some point incorporate optional parameters and parameter default
+> Alma will at some point incorporate optional parameters and parameter default
 > values into the language. (These are already supported in some of the
 > built-ins, albeit still inaccessible to the user.) The number of arguments
 > can of course go as low as the number
@@ -414,7 +414,7 @@ that point.
 If you return a function from a certain environment, the function will
 physically leave that environment but still be able to find all its names.
 
-```_007
+```alma
 func goodnight(name) {
     my fn = func() { say("Goodnight ", name) };
     return fn;
@@ -450,7 +450,7 @@ the need to import them.
 
 By far the most common builtin is `say`, a function for printing things.
 
-```_007
+```alma
 say();                          # empty line
 say("OH HAI");
 say("The answer is: ", answer);
@@ -458,13 +458,13 @@ say("The answer is: ", answer);
 
 For reading input, there's `prompt`:
 
-```_007
+```alma
 my answer = prompt("Rock, paper, or scissors? ");
 ```
 
 The third important builtin allows you to get the type of a value:
 
-```_007
+```alma
 type(42);           # <type Int>
 type("hi");         # <type Str>
 type(prompt);       # <type Func>
@@ -476,7 +476,7 @@ during debugging. If you want to test for the type of a value in a program, you
 probably shouldn't test `type(value) == Array` but instead use the
 smartmatching operator: `value ~~ Array`.
 
-Technically, all the operators and types available by default in 007 are also
+Technically, all the operators and types available by default in Alma are also
 builtins.
 
 ## Classes and objects
@@ -484,11 +484,11 @@ builtins.
 > #### 🔮 Future feature: classes
 >
 > The implementation of classes has started behind a feature flag, but mostly,
-> classes are not implemented yet in 007.
+> classes are not implemented yet in Alma.
 
-You can declare classes in 007.
+You can declare classes in Alma.
 
-```_007
+```alma
 class Color {
     has red;
     has green;
@@ -506,11 +506,11 @@ class Color {
 }
 ```
 
-As you can see, classes in 007 look like in most other languages. They can have
+As you can see, classes in Alma look like in most other languages. They can have
 fields, a constructor, and methods. Fields can optionally have _initializers_,
 expressions that evaluate before the constructor runs.
 
-```_007
+```alma
 has red = 0;
 ```
 
@@ -525,7 +525,7 @@ field writable from the outside.
 
 Classes can inherit, using the `extends` keyword:
 
-```_007
+```alma
 class AlphaColor extends Color {
     has alpha;
 }
@@ -534,13 +534,13 @@ class AlphaColor extends Color {
 All the public fields and methods from the base class are also available on the
 extending class. If a field or method has the same name as in a base class,
 then it will _override_ and effectively hide the field or method in the base
-class. 007 stops short of having a `super` mechanism to call overridden methods
+class. Alma stops short of having a `super` mechanism to call overridden methods
 or constructors.
 
-Class declarations are _slangs_ in 007, so the above desugars to something very
+Class declarations are _slangs_ in Alma, so the above desugars to something very
 much like this:
 
-```_007
+```alma
 BEGIN my Color = Type(
     name: "Color",
     fields: [{ name: "red" }, { name: "green" }, { name: "blue" }],
@@ -560,14 +560,14 @@ BEGIN my AlphaColor = Type(
 (Note how `self` has been made an explicit parameter along the way.)
 
 `None`, `Int`, `Str`, `Bool`, `Array`, `Dict`, `Regex`, `Symbol`,
-and `Type` are all built-in types in 007. Besides that, there are all the types
+and `Type` are all built-in types in Alma. Besides that, there are all the types
 in [the `Q` hierarchy](#the-q-hierarchy), used to reasoning about program
 structure. There are also a number of exception types, under the `X` hierarchy.
 
 Here's an example involving a custom `Range` class, which we'll use later to
 also declare custom range operators:
 
-```_007
+```alma
 class Range {
     @get has min;
     @get has max;
@@ -612,7 +612,7 @@ full name.
 > Using generator functions, we could skip writing the `Range.Iterator` class,
 > and write the `iterator` method like this:
 >
-> ```_007
+> ```alma
 > method iterator() {
 >     return func*() {
 >         my currentValue = self.min;
@@ -626,7 +626,7 @@ full name.
 
 ## Custom operators
 
-007 is built to give the programmer the power to add to and modify the
+Alma is built to give the programmer the power to add to and modify the
 language, to the point where everything in the language _could_
 have been added by the programmer. Macros are the prime example, but custom
 operators qualify too. This chapter is the longest in the guide so far; the
@@ -638,7 +638,7 @@ Besides the [built-in operators](#operators-and-expressions), you can supply
 your own operators. Here, for example, is an implementation of a factorial
 operator:
 
-```_007
+```alma
 func postfix:<!>(N) {
     my product = 1;
     my n = 2;
@@ -654,7 +654,7 @@ say(postfix:<!>(5));    # 120
 ```
 
 Operators are special in that they install themselves both as specially named
-functions, but also as _syntax_ &mdash; writing `5!` in a 007 program doesn't
+functions, but also as _syntax_ &mdash; writing `5!` in an Alma program doesn't
 work normally, but it does after you've defined `postfix:<!>`.
 
 Just like with ordinary identifiers, they go out of scope at the end of the
@@ -668,7 +668,7 @@ it's defined).
 > Using the reduction metaoperator, argument spread, and a range operator, we
 > can implement `postfix:<!>` much more succinctly:
 >
-> ```_007
+> ```alma
 > func postfix:<!>(N) { [*](...(2..N)) }
 > ```
 
@@ -676,9 +676,9 @@ it's defined).
 
 Now that the truth is out about user-defined operators being fairly normal
 functions, it's time for another bombshell: built-in operators are normal
-functions too! These are two equivalent ways to add two numbers in 007:
+functions too! These are two equivalent ways to add two numbers in Alma:
 
-```_007
+```alma
 3 + 4;              # 7
 infix:<+>(3, 4);    # 7
 ```
@@ -688,7 +688,7 @@ and some other functions.
 
 ### Operator categories
 
-The thing before the colon is called a _category_. For 007 operators, there are
+The thing before the colon is called a _category_. For Alma operators, there are
 three categories:
 
     prefix:<!>            !x
@@ -711,7 +711,7 @@ established naming convention for prefix and postfix operators.
 It's possible for operator functions to be recursive, so we can actually write
 the factorial in a slightly shorter way:
 
-```_007
+```alma
 func postfix:<!>(N) {
     if N < 2 {
         return 1;
@@ -726,7 +726,7 @@ func postfix:<!>(N) {
 >
 > With the ternary operator macro imported, the solution becomes downright cute:
 >
-> ```_007
+> ```alma
 > func postfix:<!>(N) { N < 2 ?? 1 !! N * (N-1)! }
 > ```
 
@@ -737,7 +737,7 @@ precedence and associativity. (For an introduction to those concepts, see
 [built-in operators](#operators-and-expressions).) Here is an implementation of
 a right-associative [cons](https://en.wikipedia.org/wiki/Cons) operator:
 
-```_007
+```alma
 func infix:<::>(lhs, rhs) is tighter(infix:<==>) is assoc("right") {
     return [lhs, rhs];
 }
@@ -759,7 +759,7 @@ things when several operators of the exact same precedence follow one another:
 With the `"non"` value, it's illegal for two operators on the same level to
 occur next to each other without being parenthesized. Here is an example:
 
-```_007
+```alma
 func infix:<^_^>(lhs, rhs) is assoc("non") {
 }
 
@@ -772,7 +772,7 @@ A postfix and a prefix can share a precedence level, and if it comes down to
 one being evaluated first or the other, associativity comes into play. This
 pair of operators associates to the left:
 
-```_007
+```alma
 func prefix:<?>(term) is assoc("left") {
     return "prefix:<?>(" ~ term ~ ")";
 }
@@ -786,7 +786,7 @@ say(?"term"!);       # postfix:<!>(prefix:<?>(term)) (left associativity) (defau
 
 While this pair associates to the right:
 
-```_007
+```alma
 func prefix:<¿>(term) is assoc("right") {
     return term ~ " prefix:<?>";
 }
@@ -814,7 +814,7 @@ A small exception happens for prefixes and postfixes: while you _can_ make
 these have any relative precedence, the convention is that postfixes be tigher
 and prefixes be looser. (This is true for [the precedence
 table](#expressions-and-operators) of the built-in operators: postfix at the
-top, then prefix, then infix.) 007 tries to respect this convention by default;
+top, then prefix, then infix.) Alma tries to respect this convention by default;
 instead of making a new custom prefix maximally tight by default, it only makes
 it tighter than all other prefixes, but looser than all other postfixes.
 
@@ -827,7 +827,7 @@ infix, or vice versa, leads to a compile-time error.
 We can define operators that construct `Range` objects, using the class we
 defined earlier:
 
-```_007
+```alma
 func infix:<..>(lhs, rhs) is looser(infix:<==>) {
     return Range(lhs, rhs);
 }
@@ -845,7 +845,7 @@ func prefix:<^>(expr) {     # overrides the builtin
 >
 > Now we can use ranges in `for` loops:
 >
-> ```_007
+> ```alma
 > for 1..10 -> i { say(i) }
 > for ^100 { say("I shall never waste chalk again") }
 > ```
@@ -858,7 +858,7 @@ parsing and stringification, it will always show up as `infix:<+>`.
 
 If your operator symbol contains `>`, then you can use a backslash to escape
 the symbol: `infix:<\>>`. Another way to avoid ambiguity is to use different
-angle brackets: `infix:«>»`. (This is 007's default when it stringifies.)
+angle brackets: `infix:«>»`. (This is Alma's default when it stringifies.)
 
 If two or more operators could all match a given piece of text, then the rule
 is that the _longest_ operator wins. This is regardless of the order in which
@@ -871,7 +871,7 @@ they were defined, and regardless of their category.
                   # (these are all built-in operators, so that's what happens by default)
 
 Whitespace does not enter into consideration when the parser tries to determine
-whether something is an infix, prefix, or postfix. At least in this regard, 007
+whether something is an infix, prefix, or postfix. At least in this regard, Alma
 is whitespace-agnostic.
 
 Given the above, if an infix and a postfix are defined with the exact same
@@ -884,11 +884,11 @@ of whether the already installed operator is a built-in or user-defined.
 
 > #### 🔮 Future feature: modules
 >
-> Modules have not been implemented yet in 007. This whole chapter is a
+> Modules have not been implemented yet in Alma. This whole chapter is a
 > best-guess at how they will work.
 
-007 files can be run directly as _scripts_, or they can be imported from other
-007 files as _modules_.
+Alma files can be run directly as _scripts_, or they can be imported from other
+Alma files as _modules_.
 
 The purpose of modules is to break up a big program into multiple independent
 compilation units.
@@ -912,14 +912,14 @@ Let's say we want to package up our `Range` class, and the custom operators
 that help construct ranges, as a module. That way, a user of our module will
 just be able to write this in their program:
 
-```_007
+```alma
 import * from range;
 ```
 
 From that point on for the rest of the block, all the things related to ranges
 will be lexically available.
 
-```_007
+```alma
 for 2 .. 7 -> n {   # works because infix:<..> was imported
     say(n);
 }
@@ -927,14 +927,14 @@ for 2 .. 7 -> n {   # works because infix:<..> was imported
 
 If we only wanted the `infix:<..>` operator, we could import only that:
 
-```_007
+```alma
 import { infix:<..> } from range;
 ```
 
-The `range` module is in fact a `range.007` file in 007's lib path. We'd write
+The `range` module is in fact a `range.alma` file in Alma's lib path. We'd write
 it with the same definition as before, except we also export them:
 
-```_007
+```alma
 export class Range { ... }
 
 export func infix:<..>(lhs, rhs) # ...
@@ -949,7 +949,7 @@ There are three forms of the `import` statement.
 The *named import* form lists all the names we want to declare in the current
 scope:
 
-```_007
+```alma
 import { nameA, nameB, nameC } from some.module;
 ```
 
@@ -961,7 +961,7 @@ together all the exported names make up the *export list*.
 
 The *star import* form imports the entire export list into the current scope:
 
-```_007
+```alma
 import * from some.module;
 ```
 
@@ -972,14 +972,14 @@ introducing into the scope.
 Finally, the *module object import* creates a module object with all the
 names from the export list as properties:
 
-```_007
+```alma
 import m from some.module;
 # m now has m.nameA, m.nameB, m.nameC, etc.
 ```
 
-Imports are *not* hoisted in 007.
+Imports are *not* hoisted in Alma.
 
-```_007
+```alma
 foo();  # won't work
 import { foo } from some.module;
 ```
@@ -994,7 +994,7 @@ There are two forms of export statement:
 The *exported declaration* form is an export plus one of the declaration
 statements:
 
-```_007
+```alma
 export my someVar ...;
 export func foo(...) ...;
 export macro moo(...) ...;
@@ -1006,7 +1006,7 @@ scope, but also exports it.
 
 The *export list* form lists existing names to export:
 
-```_007
+```alma
 export { nameA, nameB, nameC };
 ```
 
@@ -1015,7 +1015,7 @@ recommended to put one at the end.
 
 # Macrology
 
-007 has extensible syntax and semantics, to an extent not found in many other
+Alma has extensible syntax and semantics, to an extent not found in many other
 languages.  It lets you define the syntax and semantics not just for operators,
 but for terms and statements as well. This part of the documentation is about
 that.
@@ -1037,7 +1037,7 @@ need to interoperate not just with the core language but with other people's
 
 Function calls run at runtime:
 
-```_007
+```alma
 func foo() {
     say("OH HAI");
 }
@@ -1051,7 +1051,7 @@ This will output `before`, `OH HAI`, and `after`.
 
 Compare this to a macro call:
 
-```_007
+```alma
 macro moo() {
     say("OH HAI");
 }
@@ -1069,7 +1069,7 @@ Macros can return code, which will then be injected at the point of the macro
 call. Code that we return has to be *quoted*, so that it doesn't run
 immediately:
 
-```_007
+```alma
 macro moo() {
     return quasi {
         say("OH HAI");
@@ -1090,7 +1090,7 @@ actually potentially useful in your code:
 Let's say you want an operator for repeating an array. Let's call the new
 operator `infix:<xx>`:
 
-```_007
+```alma
 [1] xx 5;                   # [1, 1, 1, 1, 1]
 [1, 2] xx 3;                # [1, 2, 1, 2, 1, 2]
 ```
@@ -1099,7 +1099,7 @@ The above is perfectly definable as an operator _function_, but... we could get
 a little bit of extra use out of the thing if the left-hand side was
 re-evaluated each time:
 
-```_007
+```alma
 my i = 0;
 [i = i + 10] xx 4;          # [10, 20, 30, 40]
 ```
@@ -1109,7 +1109,7 @@ expressions](#evaluating-expressions) chapter.)
 
 Here's how an implementation of `infix:<xx>` might look:
 
-```_007
+```alma
 macro infix:<xx>(left, right) is equiv(infix:<*>) {
     return quasi {
         (^{{{right}}}).flatMap(func(_) { {{{left}}} })
@@ -1125,9 +1125,9 @@ the code directly) comes when renaming things using automatic refactor actions
 &mdash; the variable in the `nameof` expression will be renamed with everything
 else, but a name in a string won't be.
 
-Here's a 007 implementation of this operator:
+Here's an Alma implementation of this operator:
 
-```_007
+```alma
 macro prefix:<nameof>(expr) {
     assertType(expr, Q.Identifier);
     return quasi { expr.name };
@@ -1136,7 +1136,7 @@ macro prefix:<nameof>(expr) {
 
 And here's how to use it:
 
-```_007
+```alma
 my agents = ["Bond", "Nexus"];
 
 say(nameof agents);         # "agents"
@@ -1147,7 +1147,7 @@ say(nameof agents);         # "agents"
 A _`quasi`_ (or _`quasi` block_ or _quasiquote_) is a way to create a Qtree
 program fragment by simply typing out the code as you'd usually do.
 
-```_007
+```alma
 macro moo() {
     return quasi {
         say("OH HAI");
@@ -1174,7 +1174,7 @@ traditionally called _macro expansion_.
 Together with the ability to represent code literally, quasis also allow you to
 _interpolate code_ into the `quasi` code:
 
-```_007
+```alma
 macro doubleDo(stmt) {
     return quasi {
         {{{stmt}}};
@@ -1197,11 +1197,11 @@ parameterized code that can vary from call to call.
 What's the value of a `quasi` block? When a macro returns, what does it
 actually return?
 
-In 007, your entire program is a _document_, much like the HTML DOM treats an
+In Alma, your entire program is a _document_, much like the HTML DOM treats an
 HTML page as a document. This document is made up of _nodes_, all subclasses of
 the `Q` class. (Usually referred to as _Qnodes_.)
 
-In other words, they are regular 007 values, instances of some subclass of `Q`.
+In other words, they are regular Alma values, instances of some subclass of `Q`.
 
 * Any statement is a `Q.Statement`.
 * Any expression or expression fragment is a `Q.Expr`.
@@ -1209,8 +1209,8 @@ In other words, they are regular 007 values, instances of some subclass of `Q`.
 
 And so on. The entire Q hierarchy is detailed in the API documentation.
 
-Philosophically, this is where 007 departs from Lisp. In Lisp, everything is
-nested lists, even the entire program structure. 007 instead exposes an
+Philosophically, this is where Alma departs from Lisp. In Lisp, everything is
+nested lists, even the entire program structure. Alma instead exposes an
 object-oriented API to the program structure. It will never be as simple and
 uniform as the list interface, but it can have other strengths, such as the
 ability to strongly type the program structure, or access values in Qnodes
@@ -1223,7 +1223,7 @@ the runtime are able to act on the same values without any fuss.
 
 Consider this macro:
 
-```_007
+```alma
 macro onlyOnce(expr) {
     my alreadyRan = false;
     return quasi {
@@ -1256,7 +1256,7 @@ macro's local _state_. Macros with local state are called _stateful_.
 As a prototypical example of a stateful macro, consider the `infix:<ff>`
 operator from Perl 6 (spelled `infix:<..>` in Perl 5):
 
-```_007
+```alma
 my values = ["A", "B", "A", "B", "A"];
 for values -> v {
     if v == "B" ff v == "B" {
@@ -1271,7 +1271,7 @@ for values -> v {
 
 Here's how we can simply implement this macro:
 
-```_007
+```alma
 macro infix:<ff>(lhs, rhs) {
     my active = false;
     return quasi {
@@ -1289,7 +1289,7 @@ macro infix:<ff>(lhs, rhs) {
 
 We can eliminate the `if` statements by using assignment operators instead:
 
-```_007
+```alma
 import * from syntax.op.assign;
 
 macro infix:<ff>(lhs, rhs) {
@@ -1310,7 +1310,7 @@ its surrounding block is re-entered.
 Here's an implementation that stores the state such that it's per block entry,
 not per program run:
 
-```_007
+```alma
 import * from syntax.op.assign;
 import * from syntax.term.state;
 
@@ -1338,7 +1338,7 @@ When macros are thrown into the mix, the situation is different: code can be
 "copy-pasted" so that variables get separated from their definitions. Here's
 a simple example:
 
-```_007
+```alma
 import * from syntax.op.incdec;
 
 macro nth() {
@@ -1359,7 +1359,7 @@ _fail_.
 
 What's worse, if the code looked a little bit different:
 
-```_007
+```alma
 # macro nth as before
 
 my count = "haha, busted!";
@@ -1388,12 +1388,12 @@ In contrast, Common Lisp allows variables from macros and the mainline to
 intermix; proponents of this unhygienic approach point to greater macro
 expressivity as the main advantage.
 
-007 goes with Scheme's hygienic behavior by default, as this seems to adhere to
+Alma goes with Scheme's hygienic behavior by default, as this seems to adhere to
 Least Surprise for unwary users. But it also allows the macro author to opt
 into Common Lisp's unhygienic behavior, through the special namespace
 `COMPILING`, which denotes the block from which the macro was _invoked_:
 
-```_007
+```alma
 macro moo(expr) {
     return quasi {
         say(COMPILING.x);       # prints "OH"
@@ -1428,7 +1428,7 @@ section on regexes](#regexes) before reading this one.
 
 Here's how we would implement the `loop` statement:
 
-```_007
+```alma
 @parsed(/ "loop"» :: <.ws> <block> /)
 macro statement:loop(match) {
     my block = match["block"].ast;
@@ -1465,7 +1465,7 @@ Here's another example, one which involves macro hygiene. This macro defines a
 _reduction metaoperator_, allowing code such as `[+](1, 2, 3)` (getting a sum
 of 6) or `[~]("OH", " ", "HAI")` (concatenating to `"OH HAI"`):
 
-```_007
+```alma
 import * from syntax.param.rest;
 
 @parsed(/ "[" :: <infix> "]" /)
@@ -1488,7 +1488,7 @@ used.)
 
 As a final example in this section, let's define the `?? !!` operator:
 
-```_007
+```alma
 @parsed(/ "??" :: <.ws> <expr> "!!" <rhs=expr> /)
 macro infix:cond(lhs, match) {
     my expr = match["expr"].ast;
@@ -1535,7 +1535,7 @@ iteration through the loop (unlike `while` which does it before). Futhermore,
 the programmer gets to choose whether to write the condition before or after
 the loop (but the condition will always run after regardless).
 
-```_007
+```alma
 @parsed(/"repeat" <.ws> [
     | "while"» :: <.ws> <expr> <.ws> <block>
     | :: <block> <.ws> "while"» <.ws> <expr>
@@ -1562,7 +1562,7 @@ Just from the above, the consumer of the `repeat while` macro gets to declare a
 variable in the condition, and then use it in the loop block (or later in the
 surrounding block):
 
-```_007
+```alma
 repeat while my line = prompt("> ") {
     # do something with `line` here
     # (first iteration `line` will have the value `none`)
@@ -1575,7 +1575,7 @@ This falls out automatically from how `my` works. By the same token, if you
 declare a variable when the condition comes _after_ the block, that variable is
 _not_ visible inside the block:
 
-```_007
+```alma
 repeat {
     # now `line` isn't visible here
 } while my line = prompt("> ");
@@ -1588,7 +1588,7 @@ block. The gory details have been omitted here.)
 
 As a last example, let's look at how the `for` loop can be defined:
 
-```_007
+```alma
 import * from syntax.my.destructure;
 
 @parsed(/ "for"» <xblock> /)
@@ -1626,7 +1626,7 @@ details.)
 
 In a macro definition such as
 
-```_007
+```alma
 @parsed(/ ... /)
 macro statement:loop(match) { ... }
 ```
@@ -1639,7 +1639,7 @@ grammatical category indicates _when_ it can parse. Statements, for example,
 can parse at the beginning of a block, or after another statement. They can not
 parse (say) right in the middle of an expression.
 
-The grammar rules in 007 form an open set &mdash; you can add new ones if you
+The grammar rules in Alma form an open set &mdash; you can add new ones if you
 want &mdash; but the grammatical _categories_ form a closed set. They are as
 follows:
 
@@ -1660,7 +1660,7 @@ environments is to extend these just like you would extend the expression
 environment. For example, the commas between parameters could be defined like
 this:
 
-```_007
+```alma
 @trailing
 @assoc("list")
 macro parameter:infix:<,>(...parameters) {
@@ -1674,7 +1674,7 @@ one line.
 
 Similarly, the rest parameter syntax can be defined like this:
 
-```_007
+```alma
 macro parameter:prefix:<...>(parameter) {
     return Q.Parameter.Rest(parameter);
 }
@@ -1695,7 +1695,7 @@ a _host_ attached to some syntactically surrounding thing in the code. For
 example, there's an `each()` macro, which can turn a statement into several
 repeated statements with different data:
 
-```_007
+```alma
 say(each(1, 2, 3), "testing");
 # 1 testing
 # 2 testing
@@ -1704,7 +1704,7 @@ say(each(1, 2, 3), "testing");
 
 The `each()` macro can be implemented like this:
 
-```_007
+```alma
 import * from syntax.param.rest;
 
 @usesContext(Q.Statement.Expr)
@@ -1719,7 +1719,7 @@ macro each(context, ...values) {
 The `each()` macro locates the whole statement (the AST of the surrounding
 context), and for each value in `values`, it clones a new statement while also
 replacing _itself_ (the `each()` invocation) with just one particular value.
-The whole array of new statements is returned, and 007's macro expansion does
+The whole array of new statements is returned, and Alma's macro expansion does
 the right thing expanding the entire old statement (containing the `each()`
 call) into those new statements (containing individual values).
 
@@ -1730,7 +1730,7 @@ providing the context), and `context.target`, the macro itself.
 The inquisitive reader might wonder what the above macro definition does if a
 statement has _two_ (or more) `each()` invocations. For example, this code:
 
-```_007
+```alma
 say(my p = each(1, 2, 3), " * ", my q = each(4, 5, 6), " = ", p * q);
 ```
 
@@ -1766,7 +1766,7 @@ A common rule-of-thumb for macros is that they typically only want to unquote
 their arguments _once_. An example will serve to show why. Let's start with
 this (insufficient) implementation of `prefix:<++>`:
 
-```_007
+```alma
 macro prefix:<++>(term) {
     return quasi {
         {{{term}}} = {{{term}}} + 1;
@@ -1777,7 +1777,7 @@ macro prefix:<++>(term) {
 Why is this insufficient? Well, consider this contrived bit of code to tease
 out a behavior which breaks Least Surprise:
 
-```_007
+```alma
 my a = [0, 0, 0];
 
 func sideEffecty() {
@@ -1795,7 +1795,7 @@ and the user likely also expects `sideEffecty` to only run once.
 Unfortunately, since `{{{term}}}` was spelled out twice in the `quasi`, there
 are two `sideEffecty()` calls in the resulting expanded code:
 
-```_007
+```alma
 sideEffecty()[1] = sideEffecty()[1] + 1;
 ```
 
@@ -1809,7 +1809,7 @@ combat it:
 >
 > Typically, a variable should be unquoted at most once in a quasi.
 
-To this end, 007 also serves up a compile-time error if you break this rule.
+To this end, Alma also serves up a compile-time error if you break this rule.
 
 Since it's just a rule-of-thumb, though, you might want to suppress this error
 message. You do that by annotating the parameter or variable with `@many`.
@@ -1817,7 +1817,7 @@ message. You do that by annotating the parameter or variable with `@many`.
 Also, the compiler is relatively clever in what it means by "more than one
 evaluation". For example, this macro doesn't get you in trouble:
 
-```_007
+```alma
 macro fine(expr) {
     return quasi {
         if Bool.roll() {
@@ -1835,7 +1835,7 @@ at most _once_ on each path through the quasi code.
 
 Moreover, this macro is also fine:
 
-```_007
+```alma
 macro alsoFine(expr) {
     return quasi {
         for ^10 {
@@ -1865,7 +1865,7 @@ other cases, such as the `infix:<+=>` family of operators, or the
 
 Here's how we do that correctly, again using `prefix:<++>` as an example:
 
-```_007
+```alma
 macro prefix:<++>(term) {
     return quasi {
         my L = location({{{term}}});
@@ -1886,7 +1886,7 @@ replacing it with simpler code. For example, with this better definition of
 `prefix:<++>`, the expression `++sideEffecty()[1]` would result in something
 like this:
 
-```_007
+```alma
 my _uniqueSymbol873643 = sideEffecty();
 _uniqueSymbol873643[1] = _uniqueSymbol873643[1] + 1;
 ```
@@ -1922,4 +1922,4 @@ XXX
 
 ## Exceptions
 
-# How to contribute to 007
+# How to contribute to Alma

@@ -1,10 +1,10 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my @lib-pms = find("lib", / ".pm6" $/)».Str;
 
-my @meta-info-pms = "META6.json".IO.lines.map({ ~$0 if /\" \h* \: \h* \" (lib\/_007<-["]>+)/ });
+my @meta-info-pms = "META6.json".IO.lines.map({ ~$0 if /\" \h* \: \h* \" (lib\/Alma<-["]>+)/ });
 
 {
     my $missing-meta-info-lines = (@lib-pms (-) @meta-info-pms).keys.map({ "- $_" }).join("\n");

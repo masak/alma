@@ -1,6 +1,6 @@
-use _007::Val;
-use _007::Q;
-use _007::Precedence;
+use Alma::Val;
+use Alma::Q;
+use Alma::Precedence;
 
 class X::Trait::IllegalValue is Exception {
     has Str $.trait;
@@ -26,7 +26,7 @@ class X::Category::Unknown is Exception {
     method message { "Unknown category '$.category'" }
 }
 
-class _007::OpScope {
+class Alma::OpScope {
     has %.ops =
         prefix => {},
         infix => {},
@@ -109,7 +109,7 @@ class _007::OpScope {
         }
 
         sub new-prec {
-            _007::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
+            Alma::Precedence.new(:assoc($assoc // "left"), :ops($name => $q));
         }
 
         if %precedence<tighter> || %precedence<looser> -> $other-op {

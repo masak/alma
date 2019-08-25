@@ -1,7 +1,7 @@
-use _007::Val;
-use _007::Q;
-use _007::OpScope;
-use _007::Equal;
+use Alma::Val;
+use Alma::Q;
+use Alma::OpScope;
+use Alma::Equal;
 
 class X::Control::Exit is Exception {
     has Int $.exit-code;
@@ -300,7 +300,7 @@ for Val::.keys.map({ "Val::" ~ $_ }) -> $name {
 }
 push @builtins, "Q" => Val::Type.of(Q);
 
-my $opscope = _007::OpScope.new();
+my $opscope = Alma::OpScope.new();
 
 sub install-op($name, $placeholder) {
     $name ~~ /^ (prefix | infix | postfix) ':' (.+) $/

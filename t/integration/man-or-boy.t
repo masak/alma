@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 {
     my $program = q:to/./;
@@ -25,7 +25,7 @@ use _007::Test;
         say(A(10, x1, x2, x3, x4, x5))
         .
 
-    outputs $program, "-67\n", "007 is a man-compiler";
+    outputs $program, "-67\n", "Alma is grown up and can pass first-class functions";
 }
 
 done-testing;

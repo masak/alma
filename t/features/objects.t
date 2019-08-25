@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 {
     outputs 'say({})', qq[\{\}\n], "empty object";
@@ -168,14 +168,14 @@ use _007::Test;
     my $program = q:to/./;
         my obj = {
             meth() {
-                return 007;
+                return "Alma";
             }
         };
 
         say(obj["meth"]());
         .
 
-    outputs $program, "7\n", "a `return` inside of a (short-form) method is fine";
+    outputs $program, "Alma\n", "a `return` inside of a (short-form) method is fine";
 }
 
 {

@@ -1,7 +1,7 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
-my @lines = run-and-collect-lines("examples/factorial.007");
+my @lines = run-and-collect-lines("examples/factorial.alma");
 
 is +@lines, 4, "correct number of lines of output";
 is @lines[0], "1", "line #1 correct";

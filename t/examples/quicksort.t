@@ -1,7 +1,7 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
-my @lines = run-and-collect-lines("examples/quicksort.007");
+my @lines = run-and-collect-lines("examples/quicksort.alma");
 
 is +@lines, 3, "correct number of lines of output";
 

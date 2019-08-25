@@ -1,5 +1,5 @@
-use _007::Val;
-use _007::Q;
+use Alma::Val;
+use Alma::Q;
 
 my %builtins =
     "say" => q:to '----',
@@ -9,7 +9,7 @@ my %builtins =
         ----
 ;
 
-class _007::Backend::JavaScript {
+class Alma::Backend::JavaScript {
     method emit(Q::CompUnit $compunit) {
         return ""
             unless $compunit.block.statementlist.statements.elements;

@@ -1,4 +1,4 @@
-use _007::Val;
+use Alma::Val;
 
 class X::Control::Return is Exception {
     has $.frame;
@@ -54,7 +54,7 @@ class X::TypeCheck::HeterogeneousArray is Exception {
     }
 }
 
-class X::_007::RuntimeException is Exception {
+class X::Alma::RuntimeException is Exception {
     has $.msg;
 
     method message {
@@ -707,7 +707,7 @@ class Q::StatementList { ... }
 
 ### ### Q::Term::Quasi
 ###
-### A quasi; a piece of 007 code which evaluates to that code's Qtree
+### A quasi; a piece of Alma code which evaluates to that code's Qtree
 ### representation. A way to "quote" code in a program instead of running
 ### it directly in place. Used together with macros.
 ###
@@ -988,7 +988,7 @@ class Q::Statement::Throw does Q::Statement {
         die X::TypeCheck.new(:got($value), :excpected(Val::Exception))
             if $value !~~ Val::Exception;
 
-        die X::_007::RuntimeException.new(:msg($value.message.value));
+        die X::Alma::RuntimeException.new(:msg($value.message.value));
     }
 }
 
@@ -1091,7 +1091,7 @@ class Q::StatementList does Q {
 ### ### Q::Expr::BlockAdapter
 ###
 ### An expression which holds a block. Surprisingly, this never
-### happens in the source code text itself; because of 007's grammar, an
+### happens in the source code text itself; because of Alma's grammar, an
 ### expression can never consist of a block.
 ###
 ### However, it can happen as a macro call (an expression) expands into

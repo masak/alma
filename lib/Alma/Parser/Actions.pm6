@@ -1,6 +1,6 @@
-use _007::Val;
-use _007::Q;
-use _007::Parser::Syntax;
+use Alma::Val;
+use Alma::Q;
+use Alma::Parser::Syntax;
 use MONKEY-SEE-NO-EVAL;
 
 class X::String::Newline is Exception {
@@ -71,7 +71,7 @@ sub ast-if-any($submatch) {
         !! NONE;
 }
 
-class _007::Parser::Actions {
+class Alma::Parser::Actions {
     sub finish-block($block) {
         $block.static-lexpad = $*runtime.current-frame.properties<pad>;
         $*runtime.leave;

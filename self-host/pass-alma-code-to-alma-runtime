@@ -1,0 +1,18 @@
+use Alma;
+
+sub run_alma_on_alma($program) {
+    my $compunit = Alma.parser.parse($program);
+    my $runtime-program = slurp("self-host/runtime.alma");
+    my $runtime = Alma.runtime;
+    my $ast = Alma.parser(:$runtime).parse($runtime-program);
+    $ast.block.static-lexpad.properties<ast> = $compunit;
+    $runtime.run($ast);
+}
+
+multi MAIN($path) {
+    run_alma_on_alma(slurp($path));
+}
+
+multi MAIN(Str :e($program)!) {
+    run_alma_on_alma($program);
+}

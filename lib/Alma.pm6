@@ -1,14 +1,14 @@
-use _007::Runtime;
-use _007::Parser;
-use _007::Linter;
+use Alma::Runtime;
+use Alma::Parser;
+use Alma::Linter;
 
-class _007 {
+class Alma {
     method runtime(:$input = $*IN, :$output = $*OUT, :@arguments) {
-        _007::Runtime.new(:$input, :$output, :@arguments);
+        Alma::Runtime.new(:$input, :$output, :@arguments);
     }
 
     method parser(:$runtime = $.runtime) {
-        _007::Parser.new(:$runtime);
+        Alma::Parser.new(:$runtime);
     }
 
     method !parser-with-no-output {
@@ -18,6 +18,6 @@ class _007 {
     }
 
     method linter(:$parser = self!parser-with-no-output) {
-        _007::Linter.new(:$parser);
+        Alma::Linter.new(:$parser);
     }
 }

@@ -1,7 +1,7 @@
 use v6;
 use Test;
-use _007;
-use _007::Test;
+use Alma;
+use Alma::Test;
 
 {
     my $program = q:to/./;
@@ -35,8 +35,8 @@ use _007::Test;
         method print($s) { $!result ~= $s.gist }
     }.new;
 
-    my $runtime = _007.runtime(:$output, :arguments("James", "Bond"));
-    my $parser = _007.parser(:$runtime);
+    my $runtime = Alma.runtime(:$output, :arguments("James", "Bond"));
+    my $parser = Alma.parser(:$runtime);
     my $ast = $parser.parse($program);
     $runtime.run($ast);
 
@@ -56,12 +56,12 @@ use _007::Test;
         method print($s) { $!result ~= $s.gist }
     }.new;
 
-    my $runtime = _007.runtime(:$output, :arguments(["one", "two"]));
-    my $parser = _007.parser(:$runtime);
+    my $runtime = Alma.runtime(:$output, :arguments(["one", "two"]));
+    my $parser = Alma.parser(:$runtime);
     my $ast = $parser.parse($program);
     $runtime.run($ast);
 
-    is $output.result, "Usage:\n  bin/007 <script> <x>\n", "usage message printed on too few arguments";
+    is $output.result, "Usage:\n  bin/alma <script> <x>\n", "usage message printed on too few arguments";
     is $runtime.exit-code, 1, "non-zero exit code (1) on too few arguments";
 }
 
@@ -78,12 +78,12 @@ use _007::Test;
         method print($s) { $!result ~= $s.gist }
     }.new;
 
-    my $runtime = _007.runtime(:$output, :arguments(["один"]));
-    my $parser = _007.parser(:$runtime);
+    my $runtime = Alma.runtime(:$output, :arguments(["один"]));
+    my $parser = Alma.parser(:$runtime);
     my $ast = $parser.parse($program);
     $runtime.run($ast);
 
-    is $output.result, "Usage:\n  bin/007 <script> <x> <y> <z>\n", "usage message printed on too many arguments";
+    is $output.result, "Usage:\n  bin/alma <script> <x> <y> <z>\n", "usage message printed on too many arguments";
     is $runtime.exit-code, 1, "non-zero exit code (1) on too many arguments";
 }
 

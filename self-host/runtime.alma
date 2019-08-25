@@ -54,7 +54,7 @@ my Runtime = {
         }
         func declare_var(identifier, value) {
             my name = identifier.name;
-            # XXX: don't know if we should expose identifier.frame in 007
+            # XXX: don't know if we should expose identifier.frame in Alma
             # my frame = identifier.frame || current_frame();
             my frame = current_frame();
             frame.pad[name] = value;

@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my %flags-checked;
 for find("lib", / ".pm6" $/) -> $io {

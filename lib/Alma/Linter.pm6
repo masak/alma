@@ -1,5 +1,5 @@
-use _007::Val;
-use _007::Q;
+use Alma::Val;
+use Alma::Q;
 
 role Lint {
     method message { ... }
@@ -35,7 +35,7 @@ class X::AssertionFailure is Exception {
     method new($message) { self.bless(:$message) }
 }
 
-class _007::Linter {
+class Alma::Linter {
     has $.parser;
 
     method lint($program) {

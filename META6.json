@@ -1,5 +1,5 @@
 {
-    "name"      : "007",
+    "name"      : "Alma",
     "perl"      : "6.c",
     "version"   : "*",
     "auth"      : "github:masak",
@@ -7,20 +7,20 @@
     "depends"   : [],
     "license"   : "Artistic-2.0",
     "provides" : {
-        "_007" : "lib/_007.pm6",
-        "_007::Backend::JavaScript" : "lib/_007/Backend/JavaScript.pm6",
-        "_007::Equal" : "lib/_007/Equal.pm6",
-        "_007::Linter" : "lib/_007/Linter.pm6",
-        "_007::OpScope" : "lib/_007/OpScope.pm6",
-        "_007::Parser" : "lib/_007/Parser.pm6",
-        "_007::Parser::Actions" : "lib/_007/Parser/Actions.pm6",
-        "_007::Parser::Syntax" : "lib/_007/Parser/Syntax.pm6",
-        "_007::Precedence" : "lib/_007/Precedence.pm6",
-        "_007::Q" : "lib/_007/Q.pm6",
-        "_007::Runtime" : "lib/_007/Runtime.pm6",
-        "_007::Builtins" : "lib/_007/Builtins.pm6",
-        "_007::Test" : "lib/_007/Test.pm6",
-        "_007::Val" : "lib/_007/Val.pm6"
+        "Alma" : "lib/Alma.pm6",
+        "Alma::Builtins" : "lib/Alma/Builtins.pm6",
+        "Alma::Backend::JavaScript" : "lib/Alma/Backend/JavaScript.pm6",
+        "Alma::Equal" : "lib/Alma/Equal.pm6",
+        "Alma::Linter" : "lib/Alma/Linter.pm6",
+        "Alma::OpScope" : "lib/Alma/OpScope.pm6",
+        "Alma::Parser" : "lib/Alma/Parser.pm6",
+        "Alma::Parser::Actions" : "lib/Alma/Parser/Actions.pm6",
+        "Alma::Parser::Syntax" : "lib/Alma/Parser/Syntax.pm6",
+        "Alma::Precedence" : "lib/Alma/Precedence.pm6",
+        "Alma::Q" : "lib/Alma/Q.pm6",
+        "Alma::Runtime" : "lib/Alma/Runtime.pm6",
+        "Alma::Test" : "lib/Alma/Test.pm6",
+        "Alma::Val" : "lib/Alma/Val.pm6"
     },
     "support" : { "source"    : "git://github.com/masak/007.git" }
 }

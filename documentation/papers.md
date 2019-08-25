@@ -7,7 +7,7 @@
 
 ## PLOT
 
-David Moon (Common Lisp contributor, inventor of ephemeral garbage collection, co-author of Flavors and Emacs, and co-designer of Dylan) is/was working on a language with goals that seem similar to 007's.
+David Moon (Common Lisp contributor, inventor of ephemeral garbage collection, co-author of Flavors and Emacs, and co-designer of Dylan) is/was working on a language with goals that seem similar to Alma's.
 
 <dl>
   <dt>Programming Language for Old Timers</dt>

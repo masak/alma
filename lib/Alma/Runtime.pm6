@@ -1,7 +1,7 @@
-use _007::Val;
-use _007::Q;
-use _007::Builtins;
-use _007::Equal;
+use Alma::Val;
+use Alma::Q;
+use Alma::Builtins;
+use Alma::Equal;
 
 constant NO_OUTER = Val::Dict.new;
 constant RETURN_TO = Q::Identifier.new(:name(Val::Str.new(:value("--RETURN-TO--"))));
@@ -21,7 +21,7 @@ sub tree-walk($type) {
 
 tree-walk(Q);
 
-class _007::Runtime {
+class Alma::Runtime {
     has $.input;
     has $.output;
     has @.arguments;
@@ -84,7 +84,7 @@ class _007::Runtime {
     method print-usage(@main-parameters) {
         $.output.print("Usage:");
         $.output.print("\n");
-        $.output.print("  bin/007 <script> ");
+        $.output.print("  bin/alma <script> ");
         $.output.print(@main-parameters.map({ "<" ~ $_ ~ ">" }).join(" "));
         $.output.print("\n");
     }

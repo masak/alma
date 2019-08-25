@@ -1,7 +1,7 @@
 use Test;
-use _007;
+use Alma;
 
-my $parser = _007.parser;
+my $parser = Alma.parser;
 
 {
     my $program = 'quasi { if {{{0}}} {} }';

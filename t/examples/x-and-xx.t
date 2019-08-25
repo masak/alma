@@ -1,7 +1,7 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
-my @lines = run-and-collect-lines("examples/x-and-xx.007");
+my @lines = run-and-collect-lines("examples/x-and-xx.alma");
 
 is +@lines, 5, "correct number of lines";
 

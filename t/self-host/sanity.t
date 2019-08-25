@@ -1,5 +1,5 @@
 use Test;
-use _007;
+use Alma;
 
 my class StrOutput {
     has $.result = "";
@@ -8,19 +8,19 @@ my class StrOutput {
     method print($s) { $!result ~= $s.gist }
 }
 
-sub run_007_on_007($program) {
-    my $compunit = _007.parser.parse($program);
-    my $runtime-program = slurp("self-host/runtime.007");
+sub run_alma_on_alma($program) {
+    my $compunit = Alma.parser.parse($program);
+    my $runtime-program = slurp("self-host/runtime.alma");
     my $output = StrOutput.new;
-    my $runtime = _007.runtime(:$output);
-    my $ast = _007.parser(:$runtime).parse($runtime-program);
+    my $runtime = Alma.runtime(:$output);
+    my $ast = Alma.parser(:$runtime).parse($runtime-program);
     $ast.block.static-lexpad.properties<ast> = $compunit;
     $runtime.run($ast);
     return $output.result;
 }
 
-is run_007_on_007(q[]), "", "empty program";
-is run_007_on_007(q[say("Hello, James");]),
+is run_alma_on_alma(q[]), "", "empty program";
+is run_alma_on_alma(q[say("Hello, James");]),
     "Hello, James\n",
     "simple print statement";
 

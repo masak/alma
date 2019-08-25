@@ -1,5 +1,5 @@
-use _007::Val;
-use _007::Q;
+use Alma::Val;
+use Alma::Q;
 
 class X::Syntax::WhitespaceInIdentifier is Exception {
     method message {
@@ -8,12 +8,12 @@ class X::Syntax::WhitespaceInIdentifier is Exception {
 }
 
 sub check-feature-flag($feature, $word) {
-    my $flag = "FLAG_007_{$word}";
+    my $flag = "FLAG_ALMA_{$word}";
     die "{$feature} is experimental and requires \%*ENV<{$flag}> to be set"
         unless %*ENV{$flag};
 }
 
-grammar _007::Parser::Syntax {
+grammar Alma::Parser::Syntax {
     token TOP { <compunit> }
 
     token compunit {

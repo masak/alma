@@ -1,9 +1,9 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my @lines-ending-with-ws;
-for find(".", /[".pm6" | ".007"] $/) -> $file {
+for find(".", /[".pm6" | ".alma"] $/) -> $file {
     for $file.IO.lines.kv -> $i, $line {
         if $line ~~ /\h $/ {
             push @lines-ending-with-ws,

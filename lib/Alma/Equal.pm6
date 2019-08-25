@@ -1,5 +1,5 @@
-use _007::Val;
-use _007::Q;
+use Alma::Val;
+use Alma::Q;
 
 # These multis are used below by infix:<==> and infix:<!=>
 multi equal-value($, $) is export { False }

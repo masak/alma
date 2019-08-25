@@ -1,6 +1,6 @@
-use _007::Builtins;
+use Alma::Builtins;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 for builtins-pad().properties {
     my $name = .value.?escaped-name || .key;

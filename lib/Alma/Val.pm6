@@ -65,7 +65,7 @@ constant NONE is export = Val::None.new;
 
 ### ### Object
 ###
-### The top type of 007. A featureless object. Everything inherits from this type.
+### The top type of Alma. A featureless object. Everything inherits from this type.
 class Val::Object does Val {
     method truthy {
         True
@@ -80,7 +80,7 @@ class Val::Object does Val {
 ###     say(2 + 2 == 5);        # --> `false`
 ###     say(7 ~~ Int);          # --> `true`
 ###
-### In 007 as in many other dynamic languages, it's not necessary to use
+### In Alma as in many other dynamic languages, it's not necessary to use
 ### `true` or `false` values directly in conditions such as `if` statements
 ### or `while` loops. *Any* value can be used, and there's always a way
 ### for each type to convert any of its values to a boolean value:
@@ -203,7 +203,7 @@ class Val::Str does Val {
 ### regex. In other words, it returns `true` or `false`.
 ###
 ### (Regexes are currently under development, and are hidden behind a feature
-### flag for the time being: `FLAG_007_REGEX`.)
+### flag for the time being: `FLAG_ALMA_REGEX`.)
 ###
 ### A few methods are defined on regexes:
 ###
@@ -425,16 +425,16 @@ class Val::Dict does Val {
 
 ### ### Type
 ###
-### A type in 007's type system. All values have a type, which determines
+### A type in Alma's type system. All values have a type, which determines
 ### the value's "shape": what properties it can have, and which of these
 ### are required.
 ###
-###     say(type(007));         # --> `<type Int>`
+###     say(type(42));          # --> `<type Int>`
 ###     say(type("Bond"));      # --> `<type Str>`
 ###     say(type({}));          # --> `<type Dict>`
 ###     say(type(type({})));    # --> `<type Type>`
 ###
-### 007 comes with a number of built-in types: `None`, `Bool`, `Int`,
+### Alma comes with a number of built-in types: `None`, `Bool`, `Int`,
 ### `Str`, `Array`, `Dict`, `Regex`, `Type`, `Block`, `Sub`, `Macro`,
 ### and `Exception`.
 ###
@@ -515,7 +515,7 @@ class Val::Type does Val {
 
 ### ### Func
 ###
-### A function. When you define a function in 007, the value of the
+### A function. When you define a function, the value of the
 ### name bound is a `Func` object.
 ###
 ###     func agent() {
@@ -568,7 +568,7 @@ class Val::Func does Val {
 
 ### ### Macro
 ###
-### A macro. When you define a macro in 007, the value of the name bound
+### A macro. When you define a macro, the value of the name bound
 ### is a macro object.
 ###
 ###     macro agent() {

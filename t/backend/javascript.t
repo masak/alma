@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 emits-js q:to '====', [], q:to '----', "empty program";
     ====

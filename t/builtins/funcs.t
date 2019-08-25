@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 {
     my $program = q:to/./;
@@ -72,11 +72,11 @@ use _007::Test;
 
 {
     my $program = q:to/./;
-        say(0, 0, 7);
+        say("A", "l", "m", "a");
         say(say);
         .
 
-    outputs $program, "007\n<func say(...args)>\n", "builtin func say() has varargs";
+    outputs $program, "Alma\n<func say(...args)>\n", "builtin func say() has varargs";
 }
 
 {

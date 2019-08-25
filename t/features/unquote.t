@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 {
     my $program = q:to/./;
@@ -155,11 +155,11 @@ use _007::Test;
         }
 
         my x = 5;
-        moo(x, "007");
+        moo(x, "Alma");
         say(x);
         .
 
-    outputs $program, "007\n", "unquote parses first in statement";
+    outputs $program, "Alma\n", "unquote parses first in statement";
 }
 
 done-testing;

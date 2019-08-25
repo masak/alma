@@ -1,9 +1,9 @@
 use v6;
 use Test;
-use _007::Test;
+use Alma::Test;
 
 my @lines-with-unorthodox-indent;
-for find("lib/", /[".pm6" | ".007"] $/) -> $file {
+for find("lib/", /[".pm6" | ".alma"] $/) -> $file {
     for $file.IO.lines.kv -> $i, $line {
         next unless $line ~~ /^ \h+/;
 

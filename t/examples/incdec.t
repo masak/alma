@@ -1,5 +1,5 @@
 use Test;
-use _007::Test;
+use Alma::Test;
 
 constant @forms = <prefix postfix>;
 constant @ops = <++ -->;
@@ -8,7 +8,7 @@ constant NUMBER_OF_CASES = @forms * @ops;
 constant LINES_PER_CASE = 4;
 constant EXPECTED_NUMBER_OF_LINES = NUMBER_OF_CASES * LINES_PER_CASE;
 
-my @lines = run-and-collect-lines("examples/incdec.007");
+my @lines = run-and-collect-lines("examples/incdec.alma");
 
 is +@lines, EXPECTED_NUMBER_OF_LINES, "correct number of lines";
 
