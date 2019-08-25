@@ -43,17 +43,17 @@ Make sure you have [Rakudo Perl 6](https://perl6.org/downloads/) installed and
 in your path.
 
 Then, clone the Alma repository. (This step requires Git. There's also [a zip
-file](https://github.com/masak/007/archive/master.zip).)
+file](https://github.com/masak/alma/archive/master.zip).)
 
 ```sh
-$ git clone https://github.com/masak/007.git
+$ git clone https://github.com/masak/alma.git
 [...]
 ```
 
 Finally, we need to set an environment variable `PERL6LIB`:
 
 ```sh
-$ cd 007
+$ cd alma
 $ export PERL6LIB=$(pwd)/lib
 ```
 

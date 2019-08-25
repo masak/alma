@@ -1,4 +1,4 @@
-# Alma [![Build Status](https://secure.travis-ci.org/masak/007.svg?branch=master)](http://travis-ci.org/masak/007)
+# Alma [![Build Status](https://secure.travis-ci.org/masak/alma.svg?branch=master)](http://travis-ci.org/masak/alma)
 
 Alma is a small language created as a testbed for Perl 6 macros. Its goal as a
 language is to inform the implementation of macros in Perl 6, by means of being
@@ -20,7 +20,7 @@ zef install alma
 ```
 
 (If you want to install from source, see [the
-documentation](http://masak.github.io/007/#installation-from-source).)
+documentation](http://masak.github.io/alma/#installation-from-source).)
 
 ### Run it
 
@@ -44,9 +44,9 @@ Alma, and then to backport that solution to Rakudo.
 
 ## Useful links
 
-* [Documentation](http://masak.github.io/007/) (🔧  under construction 🔧 )
-* [examples/ directory](https://github.com/masak/007/tree/master/examples)
-* The [Roadmap](https://github.com/masak/007/blob/master/ROADMAP.md) outlines short- and long-term goals of the Alma project
+* [Documentation](http://masak.github.io/alma/) (🔧  under construction 🔧 )
+* [examples/ directory](https://github.com/masak/alma/tree/master/examples)
+* The [Roadmap](https://github.com/masak/alma/blob/master/ROADMAP.md) outlines short- and long-term goals of the Alma project
 
 To learn more about macros:
 
@@ -58,4 +58,4 @@ To learn more about Alma:
 
 * [Double oh seven](http://strangelyconsistent.org/blog/double-oh-seven) blog post
 * [Has it been three years?](http://strangelyconsistent.org/blog/has-it-been-three-years) blog post
-* This README.md used to contain a [pastiche of the cold open in Casino Royale (2006)](https://github.com/masak/007/tree/master/documentation/bond-pastiche.md), which was entertaining for some and confusing for others
+* This README.md used to contain a [pastiche of the cold open in Casino Royale (2006)](https://github.com/masak/alma/tree/master/documentation/bond-pastiche.md), which was entertaining for some and confusing for others

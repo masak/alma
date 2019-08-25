@@ -2,7 +2,7 @@ use v6;
 use Test;
 use Alma::Test;
 
-# See https://github.com/masak/007/issues/345
+# See https://github.com/masak/alma/issues/345
 
 {
     my $program = q:to/./;

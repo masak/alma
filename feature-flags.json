@@ -1,6 +1,6 @@
 {
     "CLASS": {
-        "issue": "https://github.com/masak/007/issues/32",
+        "issue": "https://github.com/masak/alma/issues/32",
         "tests": [
             "t/features/class.t"
         ],
@@ -15,7 +15,7 @@
         ]
     },
     "REGEX": {
-        "issue": "https://github.com/masak/007/issues/174",
+        "issue": "https://github.com/masak/alma/issues/174",
         "tests": [
             "t/features/regex.t"
         ],
