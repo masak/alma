@@ -41,15 +41,11 @@ use Alma::Test;
         }
 
         func streamEqual(stream1, stream2) {
-            if stream1 == none && stream2 == none {
-                return true;
-            }
-            else if stream1 ~~ Array && stream2 ~~ Array && stream1[0] == stream2[0] {
-                return streamEqual(stream1[1](), stream2[1]());
-            }
-            else {
-                return false;
-            }
+            return (stream1 == none && stream2 == none)
+                || (stream1 ~~ Array
+                    && stream2 ~~ Array
+                    && stream1[0] == stream2[0]
+                    && streamEqual(stream1[1](), stream2[1]()));
         }
 
         func sameFringe(tree1, tree2) {
