@@ -1,0 +1,4 @@
+[ simple test ]
+hello: str!
+[ macro test ]
+hi there
