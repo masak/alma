@@ -148,28 +148,29 @@ func walkAtType(walkers, rootType) {
     }
 }
 
-# XXX maybe we need `append` in Alma?
-func append(to, from) {
-    if from {
-        for from -> x {
-            to.push(x);
+func gather(blockFn) {
+    my result = [];
+
+    blockFn(func (arrayOrNone) {
+        for arrayOrNone // [] -> e {
+            result.push(e);
         }
-    }
+    });
+
+    return result;
 }
 
 func findAllAttributes(rootType) {
-    my attrs = [];
+    return gather(func (take) {
+        take(atType(attrList, rootType));
 
-    append(attrs, atType(attrList, rootType));
-
-    if atType(inheritList, rootType) -> parentTypes {
-        # no breadth-first here since order shouldn't matter...
-        for parentTypes -> parentType {
-            append(attrs, findAllAttributes(parentType));
+        if atType(inheritList, rootType) -> parentTypes {
+            # no breadth-first here since order shouldn't matter...
+            for parentTypes -> parentType {
+                take(findAllAttributes(parentType));
+            }
         }
-    }
-
-    return attrs;
+    });
 }
 
 func walk(root, walkers) {
