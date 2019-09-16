@@ -3,7 +3,7 @@ use Test;
 use Alma::Test;
 
 my @lines-with-unorthodox-indent;
-for find("lib/", /[".pm6" | ".alma"] $/) -> $file {
+for find(".", /[".pm6" | ".alma"] $/) -> $file {
     for $file.IO.lines.kv -> $i, $line {
         next unless $line ~~ /^ \h+/;
 
