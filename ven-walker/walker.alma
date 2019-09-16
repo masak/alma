@@ -119,6 +119,7 @@ BEGIN my inheritList = [
     [Q.Statement.Macro,   [Q.Declaration, Q.Statement]],
     [Q.Statement.Func,    [Q.Declaration, Q.Statement]],
 ];
+
 # Index operation an array of pairs. Does not differentiate between no such value and a nil value.
 func atType(xs, t) {
     for xs -> x {
@@ -127,6 +128,7 @@ func atType(xs, t) {
         }
     }
 }
+
 func walkAtType(walkers, rootType) {
     if atType(inheritList, rootType) -> parentTypes {
         # breadth-first
@@ -145,6 +147,7 @@ func walkAtType(walkers, rootType) {
         }
     }
 }
+
 # XXX maybe we need `append` in Alma?
 func append(to, from) {
     if from {
@@ -153,6 +156,7 @@ func append(to, from) {
         }
     }
 }
+
 func findAllAttributes(rootType) {
     my attrs = [];
 
@@ -167,6 +171,7 @@ func findAllAttributes(rootType) {
 
     return attrs;
 }
+
 func walk(root, walkers) {
     if root ~~ Array {
         return root.map(func (subRoot) { return walk(subRoot, walkers); });
@@ -197,6 +202,7 @@ func walk(root, walkers) {
         return root;
     }
 }
+
 func tag(x) {
     return func show(n) {
         say("hello: " ~ x ~ "!");
