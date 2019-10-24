@@ -150,4 +150,12 @@ use Alma::Test;
         "asserType throws a typecheck exception if the value is of the wrong type";
 }
 
+{
+    my $program = q:to/./;
+        prompt(">>> ", "Alma");
+        .
+
+    outputs $program, ">>> Alma\n", "builtin func prompt() has varargs";
+}
+
 done-testing;

@@ -61,7 +61,7 @@ my @builtins =
     say => -> *$args {
         # implementation in Runtime.pm
     },
-    prompt => sub ($arg) {
+    prompt => -> *$args {
         # implementation in Runtime.pm
     },
     type => -> $arg { Val::Type.of($arg.WHAT) },
