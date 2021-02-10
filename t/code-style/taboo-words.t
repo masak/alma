@@ -21,7 +21,7 @@ for @taboo-words -> $WORD {
     my @lines-with-taboo-words =
         qqx[grep -Fwrin $WORD $files].lines\
             # exception: `signature.params` happens in two places;
-            # that's the Perl 6 Signature class
+            # that's the Raku Signature class
             .grep({ $_ !~~ / "signature.params" / });
 
     is @lines-with-taboo-words.join("\n"), "",

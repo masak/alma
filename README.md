@@ -1,11 +1,11 @@
 # Alma [![Build Status](https://secure.travis-ci.org/masak/alma.svg?branch=master)](http://travis-ci.org/masak/alma)
 
-Alma is a small language created as a testbed for Perl 6 macros. Its goal as a
-language is to inform the implementation of macros in Perl 6, by means of being
+Alma is a small language created as a testbed for Raku macros. Its goal as a
+language is to inform the implementation of macros in Raku, by means of being
 a faster-moving code base and easier to iterate on towards good solutions.
 
 Rakudo already contains a rudimentary implementation of macros, but at this
-point the most mature macro implementation for Perl 6 is embodied in Alma.
+point the most mature macro implementation for Raku is embodied in Alma.
 
 Alma was previously known as "007", in reference to the "Q" data structure
 which represents program fragments.

@@ -68,13 +68,13 @@
 <h3 id="installation-with-zef">Installation (with zef)</h3>
 <p>If you're just planning to be an Alma end user, <code>zef</code> is the recommended way to install Alma:</p>
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">zef</span> install alma</code></pre></div>
-<p>In order to get the <code>zef</code> installer, you first need <a href="https://perl6.org/downloads/">Rakudo Perl 6</a>. Instructions for how to install <code>zef</code> itself can be found in the <a href="https://github.com/ugexe/zef#installation"><code>zef</code> README</a>.</p>
+<p>In order to get the <code>zef</code> installer, you first need <a href="https://raku.org/downloads/">Rakudo</a>. Instructions for how to install <code>zef</code> itself can be found in the <a href="https://github.com/ugexe/zef#installation"><code>zef</code> README</a>.</p>
 <blockquote class="info">
 <h4 id="using-zef">💡 Using <code>zef</code></h4>
 <p>At any later point, you can use <code>zef upgrade</code> to get an up-to-date Alma, or <code>zef uninstall</code> to remove Alma from your system.</p>
 </blockquote>
 <h3 id="installation-from-source">Installation (from source)</h3>
-<p>Make sure you have <a href="https://perl6.org/downloads/">Rakudo Perl 6</a> installed and in your path.</p>
+<p>Make sure you have <a href="https://raku.org/downloads/">Rakudo</a> installed and in your path.</p>
 <p>Then, clone the Alma repository. (This step requires Git. There's also <a href="https://github.com/masak/alma/archive/master.zip">a zip file</a>.)</p>
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="fu">git</span> clone https://github.com/masak/alma.git
 [<span class="ex">...</span>]</code></pre></div>
@@ -82,8 +82,8 @@
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="bu">cd</span> alma
 $ <span class="bu">export</span> <span class="va">PERL6LIB=$(</span><span class="bu">pwd</span><span class="va">)</span>/lib</code></pre></div>
 <blockquote class="info">
-<h4 id="perl6lib">💡 <code>PERL6LIB</code></h4>
-<p><code>PERL6LIB</code> is used to tell Rakudo Perl 6 which paths to look in whenever it sees a <code>use</code> module import in a program. Since <code>bin/alma</code> imports some Alma-specific modules, which in turn import other modules, we need to set this environment variable.</p>
+<h4 id=perl6lib">💡 <code>PERL6LIB</code></h4>
+<p><code>PERL6LIB</code> is used to tell Rakudo Raku which paths to look in whenever it sees a <code>use</code> module import in a program. Since <code>bin/alma</code> imports some Alma-specific modules, which in turn import other modules, we need to set this environment variable.</p>
 </blockquote>
 <h3 id="running-alma">Running Alma</h3>
 <p>Now this should work:</p>
@@ -204,8 +204,8 @@ x &amp;&amp; y || z       becomes         (x &amp;&amp; y) || z</code></pre>
 <td><code>=</code></td>
 </tr>
 </table>
-<p>Alma's precedence rules are a bit simpler than Perl 6's. In Alma, the prefixes and postfixes <em>have</em> to bind tighter than the infixes.</p>
-<p>The table also shows the associativity of the different precedence levels. (Also unlike Perl 6, associativity belongs to the precedence <em>level</em>, not to individual operators.) Associativity makes sure to (conceptually) insert parentheses in a certain way for operators on the same level:</p>
+<p>Alma's precedence rules are a bit simpler than Raku's. In Alma, the prefixes and postfixes <em>have</em> to bind tighter than the infixes.</p>
+<p>The table also shows the associativity of the different precedence levels. (Also unlike Raku, associativity belongs to the precedence <em>level</em>, not to individual operators.) Associativity makes sure to (conceptually) insert parentheses in a certain way for operators on the same level:</p>
 <pre><code>1 + 2 - 3 + 4          becomes        ((1 + 2) - 3) + 4    (associating to the left)
 x || y // z            becomes        (x || y) // z        (associating to the left)
 a = b = c = 0          becomes        a = (b = (c = 0))    (associating to the right)</code></pre>
@@ -266,7 +266,7 @@ func whoa() {
 <pre class="alma"><code>my id = func(x) { x };
 say(id(&quot;OH HAI&quot;));      # OH HAI</code></pre>
 <p>Note that this form does not have the above advantage of being able to be used before its definition — the declaration in this case is a normal lexical variable.</p>
-<p>Unlike in Perl 6 (but like Python), a function call must have the parentheses. You can write <code>say(42);</code> in Alma, but not <code>say 42;</code> — the latter is a parse error and counts as Two Terms In A Row.</p>
+<p>Unlike in Raku (but like Python), a function call must have the parentheses. You can write <code>say(42);</code> in Alma, but not <code>say 42;</code> — the latter is a parse error and counts as Two Terms In A Row.</p>
 <h3 id="arguments-and-parameters">Arguments and parameters</h3>
 <p>When declaring a function, we talk about function <em>parameters</em>. A parameter is a kind of variable scoped to the function.</p>
 <pre class="alma"><code>func goodnight(name) {
@@ -277,7 +277,7 @@ say(id(&quot;OH HAI&quot;));      # OH HAI</code></pre>
 <p>As the function call happens, all the arguments are evaluated, and their resulting values are <em>bound</em> to the parameters. It's a (runtime) error for the number of arguments to differ from the number of parameters.</p>
 <blockquote class="future">
 <h4 id="future-feature-static-checking">🔮 Future feature: static checking</h4>
-<p>In the cases where the function definition is known/visible from the callsite, we could even give this error at compile time (like Perl 6 but unlike Python or Perl 5). Flagging up the error during compilation makes sense, since the call would definitely fail at runtime anyway.</p>
+<p>In the cases where the function definition is known/visible from the callsite, we could even give this error at compile time (like Raku but unlike Python or Perl 5). Flagging up the error during compilation makes sense, since the call would definitely fail at runtime anyway.</p>
 </blockquote>
 <blockquote class="future">
 <h4 id="future-feature-optional-parameter-and-parameter-defaults">🔮 Future feature: optional parameter and parameter defaults</h4>
