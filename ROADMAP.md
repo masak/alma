@@ -85,7 +85,7 @@ uncertain time plan:
 
 Work on Alma falls into two main tracks:
 
-* Features that help explore macro-like things (ultimately for Perl 6)
+* Features that help explore macro-like things (ultimately for Raku)
 * Features for Alma the language (ultimately for Alma)
 
 The first track was the *raison d'être* for 007. The second track rounds

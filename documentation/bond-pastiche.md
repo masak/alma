@@ -162,11 +162,11 @@ Dryden looks amused. "What was that thing about macros you were talking about?",
 
 "Astounding."
 
-"Oh, not really. There's nothing revolutionary to it at all. But we're hoping it will shed some light on Perl 6 macros."
+"Oh, not really. There's nothing revolutionary to it at all. But we're hoping it will shed some light on Raku macros."
 
 Another beat of silence passes.
 
-"*You're* involved in the Perl 6 movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?" Dryden is gaping and wide-eyed, clearly relishing the thought.
+"*You're* involved in the Raku movement?", asks Dryden, incredulous. "Waitwait, have you and Damian Conway ever been in the same room? Did he ask for your autograph? Did you ask for *his* autograph? Or did you just engage in a battle *to the death*, like in 'Highlander'?" Dryden is gaping and wide-eyed, clearly relishing the thought.
 
 "Er, I think we should stay within one franchise here," mumbles Bond, avoiding the sudden questions. "But I want to try the flashback again, I think I can do even better."
 
@@ -202,7 +202,7 @@ The contact gets an abstracted look. "But wait, won't there be weird and interes
 
 The scene fades in smoother this time. The contrasts aren't quite so bright, and the sharp light has dimmed a fraction. Both Bond and the contact are busy each in one end of the room, filling the walls with scribbled notes about compilers, ASTs, and various macro transformations.
 
-"Ok, I think I'm getting the hang of Perl 6 macros. They're unorthodox, for sure," says the contact over his shoulder.
+"Ok, I think I'm getting the hang of Raku macros. They're unorthodox, for sure," says the contact over his shoulder.
 
 "Yes, but the end result feels very Perlish," replies Bond.
 
@@ -244,7 +244,7 @@ Before Bond can answer, Dryden enters and shoots the contact.
 
 "Well, the language itself is only a toy," confesses Bond. "A bit like the trinkets Q division tends to come up with. But we are hopeful about the lessons we will learn from building this."
 
-Dryden nods, sympathetically. "I understand fully. The Perl 6 macros have been a long way coming. You do a first implementation of macros in this fast-moving toy language. The second..."
+Dryden nods, sympathetically. "I understand fully. The Raku macros have been a long way coming. You do a first implementation of macros in this fast-moving toy language. The second..."
 
 Bond takes swift aim, and pulls the trigger. The silencer makes the gun emit a professional kind of \**PEW*\* sound.
 

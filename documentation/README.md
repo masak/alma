@@ -28,8 +28,7 @@ install Alma:
 zef install alma
 ```
 
-In order to get the `zef` installer, you first need [Rakudo Perl
-6](https://perl6.org/downloads/). Instructions for how to install `zef` itself
+In order to get the `zef` installer, you first need [Rakudo](https://raku.org/downloads). Instructions for how to install `zef` itself
 can be found in the [`zef` README](https://github.com/ugexe/zef#installation).
 
 > #### 💡 Using `zef`
@@ -39,7 +38,7 @@ can be found in the [`zef` README](https://github.com/ugexe/zef#installation).
 
 ### Installation (from source)
 
-Make sure you have [Rakudo Perl 6](https://perl6.org/downloads/) installed and
+Make sure you have [Rakudo](https://raku.org/downloads) installed and
 in your path.
 
 Then, clone the Alma repository. (This step requires Git. There's also [a zip
@@ -59,7 +58,7 @@ $ export PERL6LIB=$(pwd)/lib
 
 > #### 💡 `PERL6LIB`
 >
-> `PERL6LIB` is used to tell Rakudo Perl 6 which paths to look in whenever it
+> `PERL6LIB` is used to tell Rakudo Raku which paths to look in whenever it
 > sees a `use` module import in a program. Since `bin/alma` imports some
 > Alma-specific modules, which in turn import other modules, we need to set this
 > environment variable.
@@ -204,11 +203,11 @@ tightest operators at the top, loosest at the bottom.
 | Disjunctive          | left  | infix    | `\|\| //` |
 | Assignment (loosest) | right | infix    | `=` |
 
-Alma's precedence rules are a bit simpler than Perl 6's. In Alma, the prefixes
+Alma's precedence rules are a bit simpler than Raku's. In Alma, the prefixes
 and postfixes _have_ to bind tighter than the infixes.
 
 The table also shows the associativity of the different precedence levels.
-(Also unlike Perl 6, associativity belongs to the precedence _level_, not to
+(Also unlike Raku, associativity belongs to the precedence _level_, not to
 individual operators.) Associativity makes sure to (conceptually) insert
 parentheses in a certain way for operators on the same level:
 
@@ -342,7 +341,7 @@ Note that this form does not have the above advantage of being able to be used
 before its definition &mdash; the declaration in this case is a normal lexical
 variable.
 
-Unlike in Perl 6 (but like Python), a function call must have the parentheses.
+Unlike in Raku (but like Python), a function call must have the parentheses.
 You can write `say(42);` in Alma, but not `say 42;` &mdash; the latter is a
 parse error and counts as Two Terms In A Row.
 
@@ -371,7 +370,7 @@ the number of arguments to differ from the number of parameters.
 > #### 🔮 Future feature: static checking
 >
 > In the cases where the function definition is known/visible from the
-> callsite, we could even give this error at compile time (like Perl 6 but
+> callsite, we could even give this error at compile time (like Raku but
 > unlike Python or Perl 5). Flagging up the error during compilation makes
 > sense, since the call would definitely fail at runtime anyway.
 
@@ -1254,7 +1253,7 @@ We describe this by saying that the `alreadyRan` variable belongs to the
 macro's local _state_. Macros with local state are called _stateful_.
 
 As a prototypical example of a stateful macro, consider the `infix:<ff>`
-operator from Perl 6 (spelled `infix:<..>` in Perl 5):
+operator from Raku (spelled `infix:<..>` in Perl 5):
 
 ```alma
 my values = ["A", "B", "A", "B", "A"];
