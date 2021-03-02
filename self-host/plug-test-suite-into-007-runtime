@@ -13,8 +13,8 @@ sub find($dir, Regex $pattern) {
 
 # Run the following script to re-calculate this constant:
 #
-# $ (for file in `find t/features t/integration -name \*.t`; do perl6 $file | grep '1\.\.'; done) |
-#       perl6 -ne'/\.\.(\d+)/; our $n += $0; END { say $n }'
+# $ (for file in `find t/features t/integration -name \*.t`; do raku $file | grep '1\.\.'; done) |
+#       raku -ne'/\.\.(\d+)/; our $n += $0; END { say $n }'
 
 constant TOTAL = 489;
 
@@ -33,7 +33,7 @@ sub MAIN() {
         $contents.=subst(/^^ \h* "use Alma::Test;" \h* $$/, $test-override);
         spurt($tempfile-name, $contents);
 
-        my $proc = run("perl6", $tempfile-name, :out);
+        my $proc = run("raku", $tempfile-name, :out);
         my $result = "";
         for $proc.out.lines -> $line {
             if $line ~~ /^ "ok "/ {

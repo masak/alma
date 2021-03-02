@@ -37,7 +37,7 @@ sub status($filepath, $n, $line) {
 
     remove($filepath, $n, $line);
 
-    if shell("perl6 $filepath 2> /dev/null").exitcode != 0 {
+    if shell("raku $filepath 2> /dev/null").exitcode != 0 {
         clear-lib();
         return "";
     }
@@ -47,7 +47,7 @@ sub status($filepath, $n, $line) {
 
 sub test-result($filepath, $n, $line) {
     remove($filepath, $n, $line);
-    my $passes = 0 == shell('timeout 10m prove -v -eperl6 -r t/ > prove-output 2>&1').exitcode;
+    my $passes = 0 == shell('timeout 10m prove -v -e raku -r t/ > prove-output 2>&1').exitcode;
     shell("perl -i.bak -nle'print unless /^Files=/' prove-output");
     clear-lib();
 

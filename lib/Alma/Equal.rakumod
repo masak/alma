@@ -32,7 +32,7 @@ multi equal-value(Val::Dict $l, Val::Dict $r) {
         equal-value($l.properties{$key}, $r.properties{$key});
     }
 
-    [&&] $l.properties.keys.sort.perl eq $r.properties.keys.sort.perl,
+    [&&] $l.properties.keys.sort.raku eq $r.properties.keys.sort.raku,
         |($l.properties.keys).map(&equal-at-key);
 }
 multi equal-value(Val::Type $l, Val::Type $r) {

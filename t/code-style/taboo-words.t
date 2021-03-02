@@ -13,7 +13,7 @@ my @taboo-words = <
     qx!find
 >;
 
-my $files = find(".", /[".pm6" | ".t"] $/)\
+my $files = find(".", /[".rakumod" | ".t"] $/)\
         .grep({ $_ !~~ / "taboo-words.t" / })\
         .join(" ");
 

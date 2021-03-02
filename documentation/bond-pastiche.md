@@ -184,7 +184,7 @@ They get up, quickly. The man tries to throw a wastebasket at Bond, who kicks it
 
 "You will never achieve the simplicity of Lisp macros in that way," says the contact, as he slowly gets up.
 
-"True, but we can get quite close. And the aim is not to emulate Lisp slavishly, the aim is to produce a Perlish macro system that can serve Perl users as well as possible," explains Bond. "Someone who reaches for macros is likely to already be a bit of a power user, but even power users appreciate easy things being made easy, and hard things possible."
+"True, but we can get quite close. And the aim is not to emulate Lisp slavishly, the aim is to produce a Perlish macro system that can serve Raku users as well as possible," explains Bond. "Someone who reaches for macros is likely to already be a bit of a power user, but even power users appreciate easy things being made easy, and hard things possible."
 
 The contact gets an abstracted look. "But wait, won't there be weird and interesting interactions between AST fragments and lexical scoping?"
 

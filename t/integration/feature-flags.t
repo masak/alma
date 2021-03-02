@@ -3,7 +3,7 @@ use Test;
 use Alma::Test;
 
 my %flags-checked;
-for find("lib", / ".pm6" $/) -> $io {
+for find("lib", / ".rakumod" $/) -> $io {
     for $io.lines -> $line {
         if $line ~~ / '{ check-feature-flag("' <-["]>+ '",' \h* '"' (\w+) / {
             my $flag = ~$0;
@@ -21,8 +21,8 @@ my $content = slurp("feature-flags.json");
 {
     my %data = from-json($content);
 
-    ok (%data.keys (-) %flags-checked.keys).perl eq "Set.new()", "we're checking all flags we're declaring";
-    ok (%flags-checked.keys (-) %data.keys).perl eq "Set.new()", "we're declaring all flags we're checking";
+    ok (%data.keys (-) %flags-checked.keys).raku eq "Set.new()", "we're checking all flags we're declaring";
+    ok (%flags-checked.keys (-) %data.keys).raku eq "Set.new()", "we're declaring all flags we're checking";
 
     for %data.kv -> $flag, %props {
         ok %props<issue> ~~ Str, "the 'issues' property exists for '$flag' and is a string";

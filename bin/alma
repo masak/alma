@@ -1,4 +1,4 @@
-#!/usr/bin/env perl6
+#!/usr/bin/env raku
 use v6;
 use Alma;
 use Alma::Backend::JavaScript;
@@ -55,7 +55,7 @@ multi MAIN(Str :$backend = "default") {
         exit(1);
     }
 
-    shell "rlwrap perl6 -e '{$REPL_PROGRAM}'";
+    shell "rlwrap raku -e '{$REPL_PROGRAM}'";
 }
 
 multi MAIN($path, Str :$backend = "default", *@arguments) {

@@ -1,7 +1,7 @@
 #! /bin/sh
 
 OUTFILE=${1:-docs/index.html}
-CHECKSUM=$(md5sum documentation/README.md | perl6 -pe'.=substr(0, 6)')
+CHECKSUM=$(md5sum documentation/README.md | raku -pe'.=substr(0, 6)')
 
 cat <<HEADER > $OUTFILE
 <!DOCTYPE html>
@@ -58,9 +58,9 @@ cat <<HEADER > $OUTFILE
 <div class="container">
 HEADER
 
-perl6 -pe'last if /^ "# Macrology" $/' documentation/README.md |    # temporary stopper - the rest is not completed
+raku -pe'last if /^ "# Macrology" $/' documentation/README.md |    # temporary stopper - the rest is not completed
 pandoc -f markdown -t html5 |
-    perl6 -pe '
+    raku -pe '
         next if /^ "<" "/"? "thead>" $/;
         next if /^ "<" "/"? "tbody>" $/;
 
@@ -70,7 +70,7 @@ pandoc -f markdown -t html5 |
         .=subst(q[<th style="text-align: left;">], "  <th                      >");
         .=subst("\\|\\|", "||");
     ' |
-    perl6 -e '
+    raku -e '
         $_ = slurp;
 
         .=subst(/ "<blockquote" <()> ">" \n "<h" \d <-[>]>* ">💡" /, q[ class="info"], :g);

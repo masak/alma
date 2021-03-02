@@ -4,7 +4,7 @@ use Alma::Test;
 
 my @failing-typechecks;
 
-my @files = find(".", /".pm6" $/);
+my @files = find(".", /".rakumod" $/);
 for @files -> $file {
     given slurp($file.IO) -> $content {
         for $content.comb(/"X::TypeCheck.new" <-[;]>+ ";"/) -> $typecheck {

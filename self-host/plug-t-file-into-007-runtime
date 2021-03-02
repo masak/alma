@@ -8,6 +8,6 @@ sub MAIN($file) {
     $contents .= subst(/^^ \h* "use Alma::Test;" \h* $$/, $test-override);
     spurt($tempfile-name, $contents);
 
-    my $failures = shell("perl6 $tempfile-name");
+    my $failures = shell("raku $tempfile-name");
     $failures.exitcode; # to get rid of complaint when test file has failures
 }

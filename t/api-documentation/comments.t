@@ -1,7 +1,7 @@
 use v6;
 use Test;
 
-for <lib/Alma/Val.pm6 lib/Alma/Q.pm6> -> $file {
+for <lib/Alma/Val.rakumod lib/Alma/Q.rakumod> -> $file {
     # I am a state machine. Hello.
     my enum State <Normal ApiComment>;
     my $state = Normal;

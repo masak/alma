@@ -5,7 +5,7 @@ use Alma::Test;
 %*ENV<FLAG_ALMA_CLASS> = "1";    # so that we can parse class declarations in the documentation
 %*ENV<FLAG_ALMA_REGEX> = "1";    # so that we can parse regexes in the documentation
 
-for <lib/Alma/Val.pm6 lib/Alma/Q.pm6> -> $file {
+for <lib/Alma/Val.rakumod lib/Alma/Q.rakumod> -> $file {
     my ($topic, @snippet-lines);
     my $line-number = 0;
     for $file.IO.lines -> $line {
