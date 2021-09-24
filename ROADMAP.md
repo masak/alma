@@ -8,7 +8,7 @@ Alma is still a v0.x.x product. There are no guarantees about backwards
 compatibility, as the need for inwards fluidity exceeds the need for
 outwards stability.
 
-The [issue queue](https://github.com/masak/alma/issues), and that's still the
+The [issue queue](https://github.com/masak/alma/issues) is still the
 place to go to for all the nitty-gritty details about planning and tradeoffs.
 But the picture given by the issue queue is conveys no sense of priorities or
 ordering. That's what this roadmap is for.
