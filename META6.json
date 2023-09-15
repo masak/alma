@@ -1,7 +1,7 @@
 {
     "name"      : "Alma",
     "perl"      : "6.c",
-    "version"   : "*",
+    "version"   : "0.0.1",
     "auth"      : "github:masak",
     "description"   : "Small experimental language with a license to macro",
     "depends"   : [],
