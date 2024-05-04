@@ -182,9 +182,116 @@ But these are not valid identifiers:
 
 ## 1.7 Operators
 
+An expression consists of terms joined together by _operators_, sequences of
+characters which are neither alphanumerics or underscore (`_`).
+
+The following Alma operators are built in:
+
+* `+` (prefix) numification and (infix) addition
+* `-` (prefix) negated numification and (infix) subtraction
+* `*` (infix) multiplication
+* `//` (infix) flooring division
+* `%` (infix) modulo
+* `~` (prefix) stringification and (infix) concatenation
+* `?` (prefix) boolification
+* `!` (prefix) negated boolification
+* `&&` (infix) logical and
+* `||` (infix) logical or
+* `.` (postfix) property lookup
+* `..` (infix) range constructor
+
+For more on these operators and their semantics, see [Chapter 2:
+Expressions](02-expressions.md).
+
+Alma's operators form an open set which can be extended in a given scope by
+defining new operators. For more, see [Chapter 4:
+Declarations](04-declarations.md).
+
 ## 1.8 Delimiters
+
+_Delimiters_ are dedicated tokens to mark the beginning or end of something,
+and they come in pairs. We refer to the two delimiters in a pair as the
+_opener_ and the _closer_, respectively.
+
+The `(` and `)` delimiters are used for various types of grouping:
+
+* In term position in expressions, they are used for grouping and overriding
+  precedence, as in `a * (b + c)`.
+* In postfix position in expressions, they are used for function calls and
+  method calls, as in `foo(1, 2)` and `o.m()`.
+* They are used to enclose the list of parameters in function declarations and
+  macro declarations.
+* They are used to delimit parameters to an annotation.
+* They are used in the `unquote(...)` syntax to delimit an interpolated
+  expression.
+
+The `[` and `]` delimiters are used for syntax having to do with containers:
+
+* In term position in expressions, they act as an array constructor.
+* In postfix position in expressions, they are used both for indexed lookup
+  and for keyed lookup.
+
+The `{` and `}` delimiters are used both for blocks and for containers:
+
+* In term position in expressions, they act as a dictionary constructor.
+* At the start of a statement, they begin a block statement.
+* They serve as syntax for blocks in many statement forms (such as `if`), and
+  many declaration forms (such as `func`).
+* They are part of the `import` syntax, to name or rename the imported items
+  from a module.
+
+Although the delimiters in a language normally form a closed set, in Alma this
+set can be extended. For more, see [Chapter 14: Extending the
+lexer](14-extending-the-lexer.md).
 
 ## 1.9 Separators
 
+Whereas operators occur within expressions, _separators_ happen between
+expressions, or between other things such as statements or declarations.
+Although they are similar in their function to (infix) operators, they are
+governed not by a surrounding expression, but by a surrounding syntactic
+context which is not an expression (such as a parameter list).
+
+The two built-in separators are as follows:
+
+* comma (`,`), which is used in parameter lists, argument lists, import lists,
+  enum declarations, and array and dictionary constructors;
+
+* semicolon (`;`), which is used as an (often optional) terminator for
+  statements and declarations.
+
+Although the separators in a language normally form a closed set, in Alma this
+set can be extended. For more, see [Chapter 14: Extending the
+lexer](14-extending-the-lexer.md).
+
 ## 1.10 Longest token matching
+
+As a matter of language design, the lexer operates independently of the parser
+and without receiving any information from it. In practice, this is only true
+up to a point.
+
+* The lexer operates on the compilation unit from left to right.
+
+* It emits tokens one after another (in a "lazy" or "streaming" fashion),
+  although this detail might not be observable from the outside.
+
+* Whitespace and comments are skipped.
+
+* Given a starting position (assumed to be after any whitespace and comments)
+  characters are considered left-to-right, one by one, until a decision can
+  be made and the next token is emitted. The lexer works with one character
+  of lookahead, meaning that at the time a token is emitted, the lookahead
+  character is not part of the emitted token, but it helped in identifying the
+  end of the token.
+
+* The lexer will always prefer to emit a longer token to a shorter one. The
+  operator `..` trumps the operator `.` if both are an option, because it is
+  the longer one. `123abc` is neither a valid integer literal nor a valid
+  identifier, but the lexer parse the longest alphanumeric (ish) sequence it
+  can find, and only then will it signal an error about a malformed token.
+
+* This longest-token rule is greedy. If the input is `+++` and there are two
+  operators `+` and `++` in scope, the lexer will treat this as seeing
+  `++` then `+`, not `+` then `++`, or three `+`.
+
 
