@@ -199,6 +199,13 @@ The following Alma operators are built in:
 * `||` (infix) logical or
 * `.` (postfix) property lookup
 * `..` (infix) range constructor
+* `==` (infix) equality test
+* `!=` (infix) inequality test
+* `<`/`<=` (infix) less-than/less-than-or-equal comparison
+* `>`/`>=` (infix) greater-than/greater-than-or-equal comparison
+* `=` (right-associating infix) assignment
+* `+=`, `-=`, `*=`, `//=`, `%=`, `~=`, `&&=`, `||=`, `.=` (right-associating
+  infix) derived assignment
 
 For more on these operators and their semantics, see [Chapter 2:
 Expressions](02-expressions.md).
