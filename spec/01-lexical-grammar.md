@@ -123,6 +123,7 @@ The following words are _keywords_ in Alma:
 * `interface`
 * `last`
 * `macro`
+* `method`
 * `my`
 * `next`
 * `return`
@@ -179,6 +180,7 @@ But these are not valid identifiers:
 * `*front`
 * `back*`
 * `mid*dle`
+* `*foo*'`
 
 ## 1.7 Operators
 
@@ -259,13 +261,29 @@ Although they are similar in their function to (infix) operators, they are
 governed not by a surrounding expression, but by a surrounding syntactic
 context which is not an expression (such as a parameter list).
 
-The two built-in separators are as follows:
+The built-in separators are as follows:
 
 * comma (`,`), which is used in parameter lists, argument lists, import lists,
   enum declarations, and array and dictionary constructors;
 
 * semicolon (`;`), which is used as an (often optional) terminator for
   statements and declarations.
+
+The following separators might be called "pseudo-operators":
+
+* colon (`:`), which is used between the key and the value in dictionary
+  constructors, between a name and its (optional) type in declarations, and
+  between the parameter list and the (optional) return type in function
+  declarations.
+
+* equality sign (`=`), usually an assignment operator, but used specially as
+  a separator between a declared parameter (optionally including type) and its
+  (optional) initializer expression.
+
+* question mark (`?`), usually a prefix boolification operator, but used
+  specially as a postfix after a declared parameter (before the colon and its
+  type declaration, if any) to mark it as optional but without giving it an
+  explicit default value.
 
 Although the separators in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 14: Extending the
