@@ -126,9 +126,11 @@ The following words are _keywords_ in Alma:
 * `method`
 * `my`
 * `next`
+* `quote`
 * `return`
 * `throw`
 * `try`
+* `unquote`
 * `while`
 
 Along with the alphabetic literals `none`, `true`, and `false`, the keywords
@@ -200,6 +202,7 @@ The following Alma operators are built in:
 * `&&` (infix) logical and
 * `||` (infix) logical or
 * `.` (postfix) property lookup
+* `::` (infix) custom constructor
 * `..` (infix) range constructor
 * `==` (infix) equality test
 * `!=` (infix) inequality test
