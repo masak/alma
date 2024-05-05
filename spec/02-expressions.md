@@ -188,7 +188,30 @@ outer environment. However, the dynamic code evaluates immediately on
 quasiquote construction, whereas the fixed code closes over its surrounding
 environment, much like a function does.
 
-## 2.7 Function calls
+## 2.7 Call expressions
+
+A _call expression_ can represent a runtime invocation (to something that
+satisfies the invocation protocol), or alternatively a macro invocation
+(which will be handled at compile time).
+
+```
+<call-expression> ::= <expression> "(" <argument>* %% "," ")"
+
+<argument> ::= expression
+```
+
+If the call is a runtime invocation, the following steps happen:
+
+* Evaluate the function expression
+* Confirm that the result is indeed callable, and has a matching signature
+  (or signal a runtime error)
+* Evaluate each of the arguments, from left to right
+* Bind the evaluated argument values to the corresponding parameters
+* Run the function block, expecting a return value back representing the
+  result of the call
+
+If the call is a macro invocation, the steps happen during compile time
+instead of at runtime; for details, see [Chapter 11: Macros](ch11-macros.md).
 
 ## 2.8 Indexed and keyed lookups
 
