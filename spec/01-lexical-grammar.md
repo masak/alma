@@ -126,7 +126,7 @@ The following words are _keywords_ in Alma:
 * `method`
 * `my`
 * `next`
-* `quote`
+* `quasi`
 * `return`
 * `throw`
 * `try`
