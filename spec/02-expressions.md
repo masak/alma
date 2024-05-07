@@ -215,34 +215,79 @@ instead of at runtime; for details, see [Chapter 11: Macros](ch11-macros.md).
 
 ## 2.8 Indexed and keyed lookups
 
+An _indexed lookup_ represents looking up an element in an indexed container,
+and a _keyed lookup_ represents lookup up a value in a keyed container. They
+both share the same syntax.
+
+```
+<index-lookup> ::= <expression> "[" <expression> "]"
+```
+
 ## 2.9 Property lookup
 
-* `.` (postfix) property lookup
+A _property lookup_ represents looking up a property in an object.
+
+```
+<property-lookup> ::= <expression> "." <property>
+
+<property> ::= <identifier> | <keyword> | <alpha-literal>
+```
 
 ## 2.10 Range constructor
 
-* `..` (infix) range constructor
+A _range constructor_ creates a new `Range`.
+
+```
+<range-constructor> ::= <expression> ".." <expression>
+```
 
 ## 2.11 Custom constructor
 
-* `::` (infix) custom constructor
+A _custom constructor_ modulates an array or dictionary with a custom type.
+
+```
+<custom-constructor> ::= <identifier> "::"
+                         (<array-constructor> | <dictionary-constructor>)
+```
 
 ## 2.12 Arithmetic operators
 
-* `+` (infix) addition
-* `-` (infix) subtraction
-* `*` (infix) multiplication
-* `//` (infix) flooring division
-* `%` (infix) modulo
+The _arithmetic operators_, addition, subtraction, multiplication, flooring
+division, and modulo, all take two integers as inputs and give an integer as
+a result. (Flooring division and modulo with a left-hand-side of 0 result in
+a runtime error.)
+
+```
+<additive-expression> ::= <expression> <additive-op> <expression>
+
+<additive-op> ::= "+" | "-"
+
+<multiplicative-expression> ::= <expression> <multiplicative-op> <expression>
+
+<multiplicative-op> ::= "*" | "//" | "%"
+```
 
 ## 2.13 String operators
 
-* `~` (infix) concatenation
+_String concatenation_ takes two values, stringifying them, and gives a
+concatenated string as a result.
+
+```
+<string-expression> ::= <expression> <string-op> <expression>
+
+<string-op> ::= "~"
+```
 
 ## 2.14 Equality operators
 
-* `==` (infix) equality test
-* `!=` (infix) inequality test
+_Equality tests_ check whether two values are either equal or unequal,
+returning a `Bool` to that effect.
+
+```
+<equality-expression> ::= <expression> <equality-op> <expression>
+
+<equality-op> ::= "==" | "!="
+```
 
 ## 2.15 Comparison operators
 
