@@ -175,7 +175,9 @@ computed dynamically.
 ```
 
 Uniquely for the code inside a quasiquote, the syntax `unquote(...)` is allowed
-and allows for dynamic evaluation of an expression.
+and permits dynamic evaluation of an expression. The rule names `statement-unq`
+and `declaration-unq` are like `statement` and `declaration`, respectively,
+except that they allow the `unquote(...)` syntax in term position.
 
 ```
 my fragment = quasi { "OH HAI" };
@@ -291,51 +293,101 @@ returning a `Bool` to that effect.
 
 ## 2.15 Comparison operators
 
-* `<`/`<=` (infix) less-than/less-than-or-equal comparison
-* `>`/`>=` (infix) greater-than/greater-than-or-equal comparison
+_Comparison tests_ compare two values, seen as ordered values or quantities,
+returning a `Bool`.
+
+```
+<comparison-expression> ::= <expression> <comparison-op> <expression>
+
+<comparison-op> ::= "<" | "<=" | ">" | ">="
+```
+
+The semantics of the operators are as follows:
+
+* `a < b`: is `a` strictly less than `b`?
+* `a <= b`: is `a` less than or equal to `b`?
+* `a > b`: is `a` strictly greater than `b`?
+* `a >= b`: is `a` greater than or equal to `b`?
 
 ## 2.16 Logical operators
 
-* `&&` (infix) logical and
-* `||` (infix) logical or
+_Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
+Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
+disjunction (`||`) is falsy if-and-only-if both operands are falsy.
+
+```
+<logical-expression> ::= <expression> <logical-op> <expression>
+
+<logical-op> ::= "&&" | "||"
+```
+
+The built-in logical connectives are _short-circuiting_, meaning that if
+evaluating the left operand is enough to conclude the result, the right
+operand will not be evaluated. Specifically, `false && b == false`, and
+`true || b == true`, both without evaluating `b`.
 
 ## 2.17 Conversion operators
 
-* `+` (prefix) numification
-* `-` (prefix) negated numification
-* `~` (prefix) stringification
-* `?` (prefix) boolification
-* `!` (prefix) negated boolification
+Built-in prefix _conversion operators_ help convert values across types.
+
+```
+<conversion-expression> ::= <conversion-op> <expression>
+
+<conversion-op> ::= "+" | "-" | "~" | "?" | "!"
+```
+
+The `+` operator converts a value to a number, by default `Int`; the `-`
+operator does the conversion, but also negates the number.
+
+The `~` operator converts a value to a string (`Str`).
+
+The `?` operator converts a value to a boolean value (`Bool`); the `!` operator
+does the conversion, but also negates the boolean value.
 
 ## 2.18 Assignment operators
 
-* `=` (right-associating infix) assignment
-* `+=`, `-=`, `*=`, `//=`, `%=`, `~=`, `&&=`, `||=`, `.=` (right-associating
-  infix) derived assignment
+_Assignment operators_ stores a computed value in a location. The `=` operator
+does only this; any operator of the form `a op= b` means `a = (a op b)`.
+
+```
+<assignment-expression> ::= <expression> <assignment-op> <expression>
+
+<assignment-op> ::= "=" | "+=" | "-=" | "*=" | "//=" | "%=" | "~=" | "&&="
+                  | "||=" | ".="
+```
+
+Just like `&&` and `||` are short-circuiting and will not evaluate the right
+operand unless necessary, the `&&=` and `||=` operators are short-circuiting
+and will neither evaluate the right operator, nor do the needless assignment.
+
+Just as the right operator of `.` parses differently, so does `.=`.
+Specifically, you should view the `b` of `a .= b` as parsing in the same way
+as `a = a.b`, where `b` starts with something identifier-like but is otherwise
+an expression.
 
 ## 2.19 Precedence table
 
-* `.` (postfix) property lookup
-* `::` (infix) custom constructor
-* `..` (infix) range constructor
-* `+` (infix) addition
-* `-` (infix) subtraction
-* `*` (infix) multiplication
-* `//` (infix) flooring division
-* `%` (infix) modulo
-* `~` (infix) concatenation
-* `==` (infix) equality test
-* `!=` (infix) inequality test
-* `<`/`<=` (infix) less-than/less-than-or-equal comparison
-* `>`/`>=` (infix) greater-than/greater-than-or-equal comparison
-* `&&` (infix) logical and
-* `||` (infix) logical or
-* `+` (prefix) numification
-* `-` (prefix) negated numification
-* `~` (prefix) stringification
-* `?` (prefix) boolification
-* `!` (prefix) negated boolification
-* `=` (right-associating infix) assignment
-* `+=`, `-=`, `*=`, `//=`, `%=`, `~=`, `&&=`, `||=`, `.=` (right-associating
-  infix) derived assignment
+_Operator precedence_ determines the binding strength of operators; the
+tighter or more strongly binding ones always evaluate before the looser or
+less strongly binding ones.
+
+| precedence           | fixity  | operators                                 |
+|----------------------|---------|-------------------------------------------|
+| term (tightest)      | N/A     | literals, arrays, dicts, functions, quasis|
+| parentheses          | circum  | `(..)`                                    |
+|                      | postfix | calls `f(..)`, lookups `x.y`, `x[y]`      |
+|                      | infix   | `::`                                      |
+|                      | infix   | range `..`                                |
+| multiplicative       | infix   | `*`, `//`, `%`                            |
+| additive             | infix   | `+`, `-`                                  |
+| concatenation        | infix   | `~`                                       |
+| equality             | infix   | `==`, `!=`                                |
+| comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
+| conjunction          | infix   | `&&`                                      |
+| disjunction          | infix   | `||`                                      |
+| conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
+| assignment (loosest) | infix   | `=`, `+=`, `-=`, etc.                     |
+
+All operators are left-associative, except for the assignment operators which
+are right-associative.
 
