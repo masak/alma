@@ -384,7 +384,7 @@ less strongly binding ones.
 | equality             | infix   | `==`, `!=`                                |
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
 | conjunction          | infix   | `&&`                                      |
-| disjunction          | infix   | `||`                                      |
+| disjunction          | infix   | `\|\|`                                    |
 | conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
 | assignment (loosest) | infix   | `=`, `+=`, `-=`, etc.                     |
 
