@@ -346,7 +346,7 @@ does the conversion, but also negates the boolean value.
 
 ## 2.18 Assignment operators
 
-_Assignment operators_ stores a computed value in a location. The `=` operator
+_Assignment operators_ store a computed value in a location. The `=` operator
 does only this; any operator of the form `a op= b` means `a = (a op b)`.
 
 ```
