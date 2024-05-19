@@ -185,7 +185,7 @@ given between plain blocks and pointy blocks:
 <xblock> ::= <block> | <pblock>
 ```
 
-## 3.12 Labeled statements
+## 3.12 Labeled statement
 
 A _labeled statement_ is a statement optionally preceded by a label and a
 colon. All statements are allowed to be labeled statements, although by
