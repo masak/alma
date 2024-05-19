@@ -10,7 +10,8 @@ What happens after a statement executes depends on whether the statement
 finishes _normally_ or _abruptly_. In general, the former means that the
 next statement in order will execute, and the latter means that it will not,
 and something else will happen next. At the extreme end, program execution
-itself can finish abruptly.
+itself can finish abruptly. In order to more finely control the execution of
+blocks, loops, and loop iterations, labels can be declared and used.
 
 Statements are semicolon-terminated; in general, it is legal for any statement
 to end with a semicolon. However, the semicolon can be omitted for any
@@ -33,6 +34,7 @@ to block end, compilation unit end, or closing curly brace and newline.
              |  <throw-statement>
              |  <try-statement>
              |  <block-statement>
+             |  <labeled-statement>
 ```
 
 ## 3.1 Empty statement
@@ -92,7 +94,7 @@ passing in the element as an argument.
 
 A _`next` statement_ abruptly finishes a surrounding loop iteration, and begins
 the next one. This statement can only occur inside a loop block. A label, if
-provided, must resolve to a surrounding loop.
+provided, must resolve to the `Label` of a surrounding loop.
 
 ```
 <next-statement> ::= "next" <label>? <semicolon>
@@ -103,7 +105,7 @@ provided, must resolve to a surrounding loop.
 A _`last` statement_ abruptly finishes by successfully finishing the
 surrounding loop, meaning that execution continues immediately after the loop
 itself. This statement can only occur inside a loop block. A label, if
-provided, must resolve to a surrounding loop.
+provided, must resolve to the `Label` of a surrounding loop.
 
 ```
 <last-statement> ::= "last" <label>? <semicolon>
@@ -183,12 +185,21 @@ given between plain blocks and pointy blocks:
 <xblock> ::= <block> | <pblock>
 ```
 
-## 3.12 Labels
+## 3.12 Labeled statements
 
 A _labeled statement_ is a statement optionally preceded by a label and a
-colon. All statements are allowed to be labeled statements.
+colon. All statements are allowed to be labeled statements, although by
+default only loops and block statements make any use of having a label.
+A statement can have zero or more labels.
+
+The label is an identifier, with the colon not being considered part of the
+label itself. The presence of a label in a labeled statement counts as a
+declaration, and the name of the label is bound in the lexical scope to a
+value of type `Label`.
 
 ```
-<labeled-statement> ::= (<identifier> ":")? <statement>
+<labeled-statement> ::= <label> ":" <statement>
+
+<label> ::= <identifier>
 ```
 
