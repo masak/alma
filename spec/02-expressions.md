@@ -142,13 +142,14 @@ A _function constructor_ creates a new function value.
 <function-constructor> ::= "func"
                            <identifier>?
                            "(" <parameter-list> ")"
+                           (":" <type>)?
                            <block>
 ```
 
-It's important to note that the `func` keyword is also used for function
-declarations (see [Chapter 4: Declarations](04-declarations.md)); in situations
-where the `func` keyword could either be the start of a function declaration or
-a function constructor, it's always a function declaration.
+The `func` keyword is also used for function declarations (see [Chapter 4:
+Declarations](04-declarations.md)); in situations where the `func` keyword
+could either be the start of a function declaration or a function constructor,
+it's always a function declaration.
 
 The function name is optional in a function constructor. If supplied, that
 name is visible in the parameter list and body of the function, but not outside

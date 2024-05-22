@@ -44,6 +44,15 @@ connection with instances of the class.
 
 ## 4.2 Function declaration
 
+```
+<function-declaration> ::= "func"
+                           <identifier>
+                           "(" <parameter-list> ")"
+                           (":" <type>)?
+                           <block>
+                           <semicolon>
+```
+
 ## 4.3 Macro declaration
 
 ## 4.4 Class declaration
