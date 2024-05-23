@@ -7,7 +7,7 @@ executed, declarations add their binding to the lexical environment.
 A declaration belongs to its innermost enclosing block. As a block is run,
 first a new frame is created, empty but linked to the frame of the innermost
 surrounding block, if any. All the declarations belonging to the block get a
-binding with their name, to a pseudo-value called `uninitialized`. After that,
+binding with their name, to the pseudo-value `uninitialized`. After that,
 declarations initialize on two different schedules, depending on their type.
 
 _Hoisted declarations_ initialize immediately, meaning that their binding will
@@ -31,6 +31,9 @@ declarations contain parameters, which declare names to be used in the function
 body. Classes declare fields or methods, which declare names to be used in
 connection with instances of the class.
 
+A declaration needs to have a name which is unique in its scope; any two
+declarations in the same scope must have names which are distinct.
+
 ```
 <declaration> ::= <variable-declaration>
                |  <function-declaration>
@@ -42,7 +45,23 @@ connection with instances of the class.
 
 ## 4.1 Variable declaration
 
+A _variable declaration_ adds a new name to a scope, initially binding it to
+the pseudo-value `uninitialized`. Once execution reaches the point of the
+declaration, the initializer is evaluated (if there is one) and the resulting
+value is assigned to the variable of that name.
+
+```
+<variable-declaration> ::= "my"
+                           <identifier>
+                           (":" <type>)?
+                           ("=" <expression>)?
+                           <semicolon>
+```
+
 ## 4.2 Function declaration
+
+A _function declaration_ adds a new name to a scope, and binds it to a function
+value.
 
 ```
 <function-declaration> ::= "func"
@@ -51,9 +70,25 @@ connection with instances of the class.
                            (":" <type>)?
                            <block>
                            <semicolon>
+
+<parameter-list> ::= <paramter>* %% ","
+
+<parameter> ::= ("..." | ":")?
+                <identifier> "?"?
+                (":" <type>)?
+                ("=" <expression>)?
 ```
 
 ## 4.3 Macro declaration
+
+```
+<macro-declaration> ::= "macro"
+                        <identifier>
+                        "(" <parameter-list> ")"
+                        (":" <type>)?
+                        <block>
+                        <semicolon>
+```
 
 ## 4.4 Class declaration
 
