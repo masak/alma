@@ -8,8 +8,8 @@ of declarations and statements.
 A compilation unit is either a single entry-point file ("script"), a module
 file, or an input at the interactive prompt. Unless otherwise specified, the
 assumption is that the compilation unit is an entry-point file; the exceptions
-are described in [Chapter 7: Modules](07-modules.md) and [Chapter 8:
-Interactivity](08-interactivity.md).
+are described in [Chapter 7: Modules](08-modules.md) and [Chapter 8:
+Interactivity](09-interactivity.md).
 
 As part of parsing a compilation unit, the text is subdivided into tokens,
 whitespace, and comments. The rest of this chapter describes this subdivision.
@@ -106,7 +106,7 @@ small set of letters, there are pre-set meanings:
 
 Although the allowed literals in a language normally form a closed set, in Alma
 this set can be extended. For more, see [Chapter 14: Extending the
-lexer](14-extending-the-lexer.md).
+lexer](15-extending-the-lexer.md).
 
 ## 1.5 Keywords
 
@@ -140,7 +140,7 @@ keys and object properties.
 
 Although the keywords in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 14: Extending the
-lexer](14-extending-the-lexer.md).
+lexer](15-extending-the-lexer.md).
 
 ## 1.6 Identifiers
 
@@ -254,7 +254,7 @@ The `{` and `}` delimiters are used both for blocks and for containers:
 
 Although the delimiters in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 14: Extending the
-lexer](14-extending-the-lexer.md).
+lexer](15-extending-the-lexer.md).
 
 ## 1.9 Separators
 
@@ -290,7 +290,7 @@ The following separators might be called "pseudo-operators":
 
 Although the separators in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 14: Extending the
-lexer](14-extending-the-lexer.md).
+lexer](15-extending-the-lexer.md).
 
 ## 1.10 Longest token matching
 
