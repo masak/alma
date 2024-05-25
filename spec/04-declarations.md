@@ -47,7 +47,7 @@ declarations in the same scope must have names which are distinct.
 
 A _variable declaration_ adds a new name to a scope, initially binding it to
 the pseudo-value `uninitialized`. Once execution reaches the point of the
-declaration, the initializer is evaluated (if there is one) and the resulting
+declaration, its initializer is evaluated (if there is one) and the resulting
 value is assigned to the variable of that name.
 
 ```
@@ -60,8 +60,8 @@ value is assigned to the variable of that name.
 
 ## 4.2 Function declaration
 
-A _function declaration_ adds a new name to a scope, and binds it to a function
-value.
+A _function declaration_ adds a new name to a scope, and binds it to a
+function.
 
 ```
 <function-declaration> ::= "func"
@@ -73,13 +73,18 @@ value.
 
 <parameter-list> ::= <paramter>* %% ","
 
-<parameter> ::= ("..." | ":")?
+<parameter> ::= "..."?
                 <identifier> "?"?
                 (":" <type>)?
                 ("=" <expression>)?
 ```
 
+For more about functions, including how they are invoked, see [Chapter 5:
+Functions](05-functions.md).
+
 ## 4.3 Macro declaration
+
+A _macro declaration_ adds a new name to a scope, and binds it to a macro.
 
 ```
 <macro-declaration> ::= "macro"
@@ -89,6 +94,9 @@ value.
                         <block>
                         <semicolon>
 ```
+
+For more about macros, including how they are invoked, see [Chapter 12:
+Macros](12-macros.md).
 
 ## 4.4 Class declaration
 
