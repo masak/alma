@@ -55,10 +55,11 @@ combining their resulting values. A small few of the built-in operator
 expressions have _thunk semantics_, meaning that the subexpressions might not
 evaluate, or might evaluate multiple times (for side effects).
 
-For user-defined operators, it is even possible for operator expressions to
-_affect the parser_, so that different rules for how to parse the expression
-temporarily hold after parsing the operator. For more on this, see [Chapter
-18: Parsed macros](18-parsed-macros.md).
+Some operators _affect the parser_, so that different grammatical rules for how
+to parse the expression temporarily apply after parsing the operator. An
+example is the `.` property lookup operator, which expects an identifier on its
+right rather than any valid expression. For more on how to do this with
+user-defined operators, see [Chapter 18: Parsed macros](18-parsed-macros.md).
 
 ## 2.1 Literal expressions
 
@@ -253,98 +254,7 @@ A _property lookup_ represents looking up a property in an object.
 <property> ::= <identifier> | <keyword> | <alpha-literal>
 ```
 
-## 2.10 Range constructor
-
-A _range constructor_ creates a new `Range`.
-
-```
-<range-constructor> ::= <expression> ".." <expression>
-```
-
-## 2.11 Custom constructor
-
-A _custom constructor_ modulates an array or dictionary with a custom type.
-
-```
-<custom-constructor> ::= <identifier> "::"
-                         (<array-constructor> | <dictionary-constructor>)
-```
-
-## 2.12 Arithmetic operators
-
-The _arithmetic operators_, addition, subtraction, multiplication, flooring
-division, and modulo, all take two integers as inputs and give an integer as
-a result. (Flooring division and modulo with a left-hand-side of 0 result in
-a runtime error.)
-
-```
-<additive-expression> ::= <expression> <additive-op> <expression>
-
-<additive-op> ::= "+" | "-"
-
-<multiplicative-expression> ::= <expression> <multiplicative-op> <expression>
-
-<multiplicative-op> ::= "*" | "//" | "%"
-```
-
-## 2.13 String operators
-
-_String concatenation_ takes two values, stringifying them, and gives a
-concatenated string as a result.
-
-```
-<string-expression> ::= <expression> <string-op> <expression>
-
-<string-op> ::= "~"
-```
-
-## 2.14 Equality operators
-
-_Equality tests_ check whether two values are either equal or unequal,
-returning a `Bool` to that effect.
-
-```
-<equality-expression> ::= <expression> <equality-op> <expression>
-
-<equality-op> ::= "==" | "!="
-```
-
-## 2.15 Comparison operators
-
-_Comparison tests_ compare two values, seen as ordered values or quantities,
-returning a `Bool`.
-
-```
-<comparison-expression> ::= <expression> <comparison-op> <expression>
-
-<comparison-op> ::= "<" | "<=" | ">" | ">="
-```
-
-The semantics of the operators are as follows:
-
-* `a < b`: is `a` strictly less than `b`?
-* `a <= b`: is `a` less than or equal to `b`?
-* `a > b`: is `a` strictly greater than `b`?
-* `a >= b`: is `a` greater than or equal to `b`?
-
-## 2.16 Logical operators
-
-_Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
-Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
-disjunction (`||`) is falsy if-and-only-if both operands are falsy.
-
-```
-<logical-expression> ::= <expression> <logical-op> <expression>
-
-<logical-op> ::= "&&" | "||"
-```
-
-The built-in logical connectives are _short-circuiting_, meaning that if
-evaluating the left operand is enough to conclude the result, the right
-operand will not be evaluated. Specifically, `false && b == false`, and
-`true || b == true`, both without evaluating `b`.
-
-## 2.17 Conversion operators
+## 2.10 Conversion operators
 
 Built-in prefix _conversion operators_ help convert values across types.
 
@@ -362,7 +272,110 @@ The `~` operator converts a value to a string (`Str`).
 The `?` operator converts a value to a boolean value (`Bool`); the `!` operator
 does the conversion, but also negates the boolean value.
 
-## 2.18 Assignment operators
+## 2.9 Range constructor
+
+A _range constructor_ creates a new `Range`.
+
+```
+<range-constructor> ::= <expression> ".." <expression>
+```
+
+## 2.10 Custom constructor
+
+A _custom constructor_ modulates an array or dictionary with a custom type.
+
+```
+<custom-constructor> ::= <identifier> "::"
+                         (<array-constructor> | <dictionary-constructor>)
+```
+
+## 2.11 Arithmetic operators
+
+The _arithmetic operators_, addition, subtraction, multiplication, flooring
+division, and modulo, all take two integers as inputs and give an integer as
+a result. (Flooring division and modulo with a left-hand-side of 0 result in
+a runtime error.)
+
+```
+<additive-expression> ::= <expression> <additive-op> <expression>
+
+<additive-op> ::= "+" | "-"
+
+<multiplicative-expression> ::= <expression> <multiplicative-op> <expression>
+
+<multiplicative-op> ::= "*" | "//" | "%"
+```
+
+## 2.12 String operators
+
+_String concatenation_ takes two values, stringifying them, and gives a
+concatenated string as a result.
+
+```
+<string-expression> ::= <expression> <string-op> <expression>
+
+<string-op> ::= "~"
+```
+
+## 2.13 Equality operators
+
+_Equality tests_ check whether two values are either equal or unequal,
+returning a `Bool` to that effect.
+
+```
+<equality-expression> ::= <expression> <equality-op> <expression>
+
+<equality-op> ::= "==" | "!="
+```
+
+## 2.14 Comparison operators
+
+_Comparison tests_ compare two values, seen as ordered values or quantities,
+returning a `Bool`.
+
+```
+<comparison-expression> ::= <expression> <comparison-op> <expression>
+
+<comparison-op> ::= "<" | "<=" | ">" | ">="
+```
+
+The semantics of the operators are as follows:
+
+* `a < b`: is `a` strictly less than `b`?
+* `a <= b`: is `a` less than or equal to `b`?
+* `a > b`: is `a` strictly greater than `b`?
+* `a >= b`: is `a` greater than or equal to `b`?
+
+## 2.15 Logical operators
+
+_Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
+Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
+disjunction (`||`) is falsy if-and-only-if both operands are falsy.
+
+```
+<logical-expression> ::= <expression> <logical-op> <expression>
+
+<logical-op> ::= "&&" | "||"
+```
+
+The built-in logical connectives are _short-circuiting_, meaning that if
+evaluating the left operand is enough to conclude the result, the right
+operand will not be evaluated. Specifically, `false && b == false`, and
+`true || b == true`, both without evaluating `b`.
+
+## 2.18 Type check/cast operators
+
+The _type check_ operator `is` checks a given value for inclusion in a given
+type. The _type cast_ operator `as` does nothing to the value if it is already
+of the given type, but fails with a runtime error if it isn't.
+
+```
+<type-check-cast-expression> ::= <expression> <type-check-cast-op> <expression>
+
+<type-check-cast-op> ::= "is" | "as"
+```
+
+## 2.17 Assignment operators
 
 _Assignment operators_ store a computed value in a location. The `=` operator
 does only this; any operator of the form `a op= b` means `a = (a op b)`.
@@ -383,7 +396,7 @@ Specifically, you should view the `b` of `a .= b` as parsing in the same way
 as `a = a.b`, where `b` starts with something identifier-like but is otherwise
 an expression.
 
-## 2.19 Precedence table
+## 2.18 Precedence table
 
 _Operator precedence_ determines the binding strength of operators; the
 tighter or more strongly binding ones always evaluate before the looser or
@@ -393,9 +406,10 @@ less strongly binding ones.
 |----------------------|---------|-------------------------------------------|
 | term (tightest)      | N/A     | literals, arrays, dicts, functions, quasis|
 | parentheses          | circum  | `(..)`                                    |
-|                      | postfix | calls `f(..)`, lookups `x.y`, `x[y]`      |
+| calls, lookups       | postfix | `f(..)`, `x.y`, `x[y]`                    |
+| conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
 |                      | infix   | `::`                                      |
-|                      | infix   | range `..`                                |
+| range                | infix   | `..`                                      |
 | multiplicative       | infix   | `*`, `//`, `%`                            |
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
@@ -403,7 +417,7 @@ less strongly binding ones.
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
 | conjunction          | infix   | `&&`                                      |
 | disjunction          | infix   | `\|\|`                                    |
-| conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
+| type check/cast      | infix   | `is`, `as`                                |
 | assignment (loosest) | infix   | `=`, `+=`, `-=`, etc.                     |
 
 All operators are left-associative, except for the assignment operators which
