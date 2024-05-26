@@ -8,7 +8,7 @@ of declarations and statements.
 A compilation unit is either a single entry-point file ("script"), a module
 file, or an input at the interactive prompt. Unless otherwise specified, the
 assumption is that the compilation unit is an entry-point file; the exceptions
-are described in [Chapter 7: Modules](08-modules.md) and [Chapter 8:
+are described in [Chapter 8: Modules](08-modules.md) and [Chapter 9:
 Interactivity](09-interactivity.md).
 
 As part of parsing a compilation unit, the text is subdivided into tokens,

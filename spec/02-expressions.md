@@ -231,7 +231,7 @@ If the call is a runtime invocation, the following steps happen:
   result of the call
 
 If the call is a macro invocation, the steps happen during compile time
-instead of at runtime; for details, see [Chapter 11: Macros](12-macros.md).
+instead of at runtime; for details, see [Chapter 12: Macros](12-macros.md).
 
 ## 2.8 Indexed and keyed lookups
 
