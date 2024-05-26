@@ -43,6 +43,23 @@ interface Environment {
 }
 ```
 
+_Terms_ are expressions without direct subexpressions, including literal
+expressions, variable lookups, data structure and function constructors, and
+quasiquotes.
+
+_Operator expressions_ are expressions with one or more subexpressions, and
+an _operator_ token to determine how the subexpressions are to be combined.
+The majority of the built-in operator expressions are _compositional_, and
+their behavior begins by first evaluating all of the subexpressions and then
+combining their resulting values. A small few of the built-in operator
+expressions have _thunk semantics_, meaning that the subexpressions might not
+evaluate, or might evaluate multiple times (for side effects).
+
+For user-defined operators, it is even possible for operator expressions to
+_affect the parser_, so that different rules for how to parse the expression
+temporarily hold after parsing the operator. For more on this, see [Chapter
+18: Parsed macros](18-parsed-macros.md).
+
 ## 2.1 Literal expressions
 
 A _literal expression_ consists of exactly one literal token, and evaluates
