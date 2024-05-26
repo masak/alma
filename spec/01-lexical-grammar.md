@@ -105,8 +105,8 @@ small set of letters, there are pre-set meanings:
 * `\uXXXX` (four hex digits) means the character with codepoint `XXXX`
 
 Although the allowed literals in a language normally form a closed set, in Alma
-this set can be extended. For more, see [Chapter 14: Extending the
-lexer](15-extending-the-lexer.md).
+this set can be extended. For more, see [Chapter 17: Extending the
+lexer](17-extending-the-lexer.md).
 
 ## 1.5 Keywords
 
@@ -139,8 +139,8 @@ However, they can still be used for unscoped literals such as dictionary
 keys and object properties.
 
 Although the keywords in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 14: Extending the
-lexer](15-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 17: Extending the
+lexer](17-extending-the-lexer.md).
 
 ## 1.6 Identifiers
 
@@ -253,8 +253,8 @@ The `{` and `}` delimiters are used both for blocks and for containers:
   from a module.
 
 Although the delimiters in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 14: Extending the
-lexer](15-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 17: Extending the
+lexer](17-extending-the-lexer.md).
 
 ## 1.9 Separators
 
@@ -289,8 +289,8 @@ The following separators might be called "pseudo-operators":
   explicit default value.
 
 Although the separators in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 14: Extending the
-lexer](15-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 17: Extending the
+lexer](17-extending-the-lexer.md).
 
 ## 1.10 Longest token matching
 
