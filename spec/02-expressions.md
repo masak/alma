@@ -13,6 +13,7 @@ might raise one or more side effects.
               |  <quasiquote>
               |  <call-expression>
               |  <index-lookup>
+              |  <conversion-expression>
               |  <property-lookup>
               |  <range-constructor>
               |  <custom-constructor>
@@ -22,7 +23,7 @@ might raise one or more side effects.
               |  <equality-expression>
               |  <comparison-expression>
               |  <logical-expression>
-              |  <conversion-expression>
+              |  <type-check-cast-expression>
               |  <assignment-expression>
 ```
 
@@ -124,7 +125,7 @@ A _dictionary constructor_ creates a new `Dict`.
 ```
 <dictionary-constructor> ::= "{" (<key-value-pair>* %% ",") "}"
 
-<key-value-pair> ::= <key> ":" <expression>
+<key-value-pair> ::= <key> "=>" <expression>
 
 <key> ::= <identifier> | <keyword> | <alpha-literal>
 ```
@@ -132,10 +133,10 @@ A _dictionary constructor_ creates a new `Dict`.
 Usage examples:
 
 ```
-{ foo: 42 };    # new Dict with one entry
+{ foo => 42 };  # new Dict with one entry
 {
-    x: 1,
-    y: 2,
+    x => 1,
+    y => 2,
 };              # new Dict with two entries
 ```
 
@@ -144,12 +145,12 @@ The unadorned curly brace syntax is syntactic sugar for the longer form
 be specified, as long as they support the dictionary constructor syntax:
 
 ```
-Dict::{ foo: 42 };  # dictionary with one key and one value
-Bag::{ foo: 42 };   # bag with 42 copies of "foo"
+Dict::{ foo => 42 };    # dictionary with one key and one value
+Bag::{ foo => 42 };     # bag with 42 copies of "foo"
 Graph::{
-    n1: ["n2"],
-    n2: ["n1"],
-};                  # graph with two nodes, pointing to each other
+    n1 => ["n2"],
+    n2 => ["n1"],
+};                      # graph with two nodes, pointing to each other
 ```
 
 ## 2.5 Function constructors

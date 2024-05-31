@@ -90,7 +90,6 @@ A string literal begins with a double quote (`"`), zero or more characters of
 string content, and ends with a double quote (`"`). The string content is
 parsed as either
 
-* any of the allowed whitespace characters,
 * any non-control ASCII character except for `"` or `\\`, or
 * a backspace (`\\`), followed by any non-control ASCII character.
 
@@ -145,18 +144,9 @@ lexer](17-extending-the-lexer.md).
 ## 1.6 Identifiers
 
 An _identifier_ begins with an alphabetic ASCII character or underscore (`_`),
-and consists of one or more alphanumeric characters or underscore. Also:
-
-* An identifier is allowed to contain one or more hyphens (`-`), as long as
-  each hyphen is neither first nor last in the identifier, and each hyphen
-  is followed by an ASCII letter.
-* An identifier is allowed to contain one or more apostrophes (`'`), as long
-  as each apostrophe is not first in the identifier, and each hyphen either is
-  followed by an ASCII letter, or is part of a sequence of one or more
-  apostrophes last in the identifier as long as there is still at least one
-  other character before.
-* Asterisks may appear in an identifier _only_ if one appears first and one
-  appears last, but no asterisks appear anywhere else.
+and consists of one or more alphanumeric characters or underscore. Asterisks
+may appear in an identifier _only_ if one appears first and one appears last,
+but no asterisks appear anywhere else.
 
 The following are examples of valid identifiers by the above rules:
 
@@ -164,30 +154,32 @@ The following are examples of valid identifiers by the above rules:
 * `_banana42`
 * `_`
 * `_007`
-* `singular-decomposition-matrix`
-* `x'`
-* `y''`
-* `z'''`
-* `_'`
 * `*earmuffs*`
 
 But these are not valid identifiers:
 
 * `42`
-* `'`
-* `'''`
-* `-`
-* `re-'`
-* `-ily`
 * `*front`
 * `back*`
 * `mid*dle`
 * `*foo*'`
 
+In a limited set of circumstances, an _extended identifier_ is recognized
+by the parser. An extended identifier is a maximal sequence of Unicode
+characters, but excluding Unicode whitespace characters and delimiters and
+punctuators.
+
+When it's important to make the distinction, the kind of identifier that is
+not an extended identifier is called a _regular identifier_.
+
 ## 1.7 Operators
 
 An expression consists of terms joined together by _operators_, sequences of
-characters which are neither alphanumerics or underscore (`_`).
+characters which are not underscores (`_`), delimiters, or punctuators.
+
+By these rules, operators can overlap with (regular) identifiers. For example,
+`is` and `as` parse as operators in some contexts, and as identifiers in other
+contexts. For details, see section 1.10, "Scannerless parsing".
 
 The following Alma operators are built in:
 
@@ -208,6 +200,7 @@ The following Alma operators are built in:
 * `!=` (infix) inequality test
 * `<`/`<=` (infix) less-than/less-than-or-equal comparison
 * `>`/`>=` (infix) greater-than/greater-than-or-equal comparison
+* `is`/`as` (infix)
 * `=` (right-associating infix) assignment
 * `+=`, `-=`, `*=`, `//=`, `%=`, `~=`, `&&=`, `||=`, `.=` (right-associating
   infix) derived assignment
@@ -221,11 +214,11 @@ Declarations](04-declarations.md).
 
 ## 1.8 Delimiters
 
-_Delimiters_ are dedicated tokens to mark the beginning or end of something,
-and they come in pairs. We refer to the two delimiters in a pair as the
-_opener_ and the _closer_, respectively.
+_Delimiters_ are tokens to mark the beginning or end of something, and come in
+pairs. We refer to the two delimiters in a pair as the _opener_ and the
+_closer_, respectively.
 
-The `(` and `)` delimiters are used for various types of grouping:
+The `(` and `)` delimiters are used for grouping and enclosure:
 
 * In term position in expressions, they are used for grouping and overriding
   precedence, as in `a * (b + c)`.
@@ -237,7 +230,7 @@ The `(` and `)` delimiters are used for various types of grouping:
 * They are used in the `unquote(...)` syntax to delimit an interpolated
   expression.
 
-The `[` and `]` delimiters are used for syntax having to do with containers:
+The `[` and `]` delimiters are related to containers:
 
 * In term position in expressions, they act as an array constructor.
 * In postfix position in expressions, they are used both for indexed lookup
@@ -245,8 +238,8 @@ The `[` and `]` delimiters are used for syntax having to do with containers:
 
 The `{` and `}` delimiters are used both for blocks and for containers:
 
-* In term position in expressions, they act as a dictionary constructor.
 * At the start of a statement, they begin a block statement.
+* In term position in expressions, they act as a dictionary constructor.
 * They serve as syntax for blocks in many statement forms (such as `if`), and
   many declaration forms (such as `func`).
 * They are part of the `import` syntax, to name or rename the imported items
@@ -256,15 +249,15 @@ Although the delimiters in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 17: Extending the
 lexer](17-extending-the-lexer.md).
 
-## 1.9 Separators
+## 1.9 Punctuators
 
-Whereas operators occur within expressions, _separators_ happen between
+Whereas operators occur within expressions, _punctuators_ happen between
 expressions, or between other things such as statements or declarations.
 Although they are similar in their function to (infix) operators, they are
 governed not by a surrounding expression, but by a surrounding syntactic
 context which is not an expression (such as a parameter list).
 
-The built-in separators are as follows:
+The built-in punctuators are as follows:
 
 * comma (`,`), which is used in parameter lists, argument lists, import lists,
   enum declarations, and array and dictionary constructors;
@@ -272,12 +265,15 @@ The built-in separators are as follows:
 * semicolon (`;`), which is used as an (often optional) terminator for
   statements and declarations.
 
-The following separators might be called "pseudo-operators":
+The following punctuators might be called "pseudo-operators":
 
-* colon (`:`), which is used between the key and the value in dictionary
-  constructors, between a name and its (optional) type in declarations, and
-  between the parameter list and the (optional) return type in function
-  declarations.
+* colon (`:`), which is used between a name and its (optional) type in
+  declarations, and between the parameter list and the (optional) return type
+  in function declarations.
+
+* double arrow (`=>`), used between the key and the value in dictionary
+  constructors, and used between a name and the expression of a named
+  parameter.
 
 * equality sign (`=`), usually an assignment operator, but used specially as
   a separator between a declared parameter (optionally including type) and its
@@ -288,11 +284,11 @@ The following separators might be called "pseudo-operators":
   type declaration, if any) to mark it as optional but without giving it an
   explicit default value.
 
-Although the separators in a language normally form a closed set, in Alma this
+Although the punctuators in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 17: Extending the
 lexer](17-extending-the-lexer.md).
 
-## 1.10 Longest token matching
+## 1.10 Scannerless parsing
 
 As a matter of language design, the lexer operates independently of the parser
 and without receiving any information from it. In practice, this is only true
