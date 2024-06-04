@@ -172,6 +172,19 @@ punctuators.
 When it's important to make the distinction, the kind of identifier that is
 not an extended identifier is called a _regular identifier_.
 
+An extended identifier is considered to be valid if the following three
+conditions hold:
+
+* its first character is an underscore (`_`), or its last character is an
+  underscore, or both,
+* there's at least one more character, and
+* none of the remaining characters is an underscore.
+
+These validity rules allow extended identifiers to denote the three categories
+of operators: `_xyz` (prefix), `_xyz_` (infix), and `xyz_` (postfix), and
+nothing else. Specifically, the following are disallowed: `xy` (terms), and
+`if_then_else_` (mixfix).
+
 ## 1.7 Operators
 
 An expression consists of terms joined together by _operators_, sequences of
