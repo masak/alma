@@ -32,7 +32,8 @@ to block end, compilation unit end, or closing curly brace and newline.
              |  <last-statement>
              |  <return-statement>
              |  <throw-statement>
-             |  <try-statement>
+             |  <catch-phaser>
+             |  <leave-phaser>
              |  <block-statement>
              |  <labeled-statement>
 ```
@@ -135,28 +136,37 @@ clause, program execution finishes abruptly with an error based on the value.
 <throw-statement> ::= "throw" <expression> <semicolon>
 ```
 
-## 3.10 `try` statement
+## 3.10 `CATCH` phaser
 
-A _`try` statement_ runs a block, but intercepts any exceptions bubbling up
-from within the execution of the block; the block either finishes normally
-without any such exception occurring, or it finishes abruptly, in which case
-the `catch` clauses each get a chance, in order, to match against the
-exception. If one matches, its corresponding block runs and the `try`
-statement finishes normally. If no `catch` clause matches, the `try`
-statement finishes abruptly, and the exception keeps bubbling up the dynamic
-call stack. No matter what happens with the `try` block and the `catch`
-clauses, if a `finally` block is supplied, it will always run after the
-(normal or abrupt) execution of the preceding `try` statement.
+A _`CATCH` phaser_ does not run as part of the normal control flow. Instead, it
+triggers if an exception is thrown and unrolls to the dynamic scope of the
+surrounding block. The optional parameter to the `CATCH` block is the
+exception.
 
 ```
-<try-statement> ::= "try"
-                    <block>
-                    ("catch" <type> <xblock>)*
-                    ("finally" <block>)?
-                    <semicolon>
+<catch-phaser> ::= "CATCH" <xblock> <semicolon>
 ```
 
-## 3.11 Block statement
+At most one `CATCH` block per surrounding block is allowed.
+
+## 3.11 `LEAVE` phaser
+
+A _`LEAVE` phaser_ does not run as part of the normal control flow. Instead, it
+triggers unconditionally on the surrounding block's exit, whether that exit is
+a normal exit through the bottom of the block, or an abrupt exit such as via
+`last` or `return` or `throw`.
+
+```
+<leave-phaser> ::= "LEAVE" <block> <semicolon>
+```
+
+Teardown logic that needs to run regardless of how the block exits should be
+put in a `LEAVE` phaser.
+
+If several `LEAVE` phasers are in the same block, they will run in reverse
+textual order.
+
+## 3.12 Block statement
 
 A _block statement_ runs a block, and finishes normally.
 
@@ -185,7 +195,7 @@ given between plain blocks and pointy blocks:
 <xblock> ::= <block> | <pblock>
 ```
 
-## 3.12 Labeled statement
+## 3.13 Labeled statement
 
 A _labeled statement_ is a statement optionally preceded by a label and a
 colon. All statements are allowed to be labeled statements, although by
