@@ -33,16 +33,53 @@ on which the method was called.
 
 ## 6.3 Fields
 
+A _field_ represents an internal variable of a class, and data particular to
+instances of that class.
+
 ```
 <field> ::= "has"
             <identifier>
             (":" <type>)?
+            ("=" <expression>)?
             <semicolon>
 ```
 
 ## 6.4 The `@getter` annotation
 
+By default, fields are internal and not accessible for reading outside of the
+instance in which they are held. A `@getter` annotation ensures this access,
+providing a zero-parameter method (of the same name as the field) which returns
+the value of the field. The return type of the method is the same as the
+declared type of the field, if any.
+
+The `@getter` annotation optionally takes a single parameter in the form of an
+identifier; if provided, this identifier is used for the method name instead of
+the field name.
+
+A method may not be declared in the class body with the same name as the one
+provided (by default or explicitly) by the `@getter` annotation; doing so
+counts as a duplicate declaration, and is signaled as a compile-time error.
+
 ## 6.5 The `@setter` annotation
+
+By default, fields are internal and not accessible for writing outside of the
+instance in which they are held. A `@setter` annotation ensures this access,
+providing a one-parameter method (of the same name as the field), which
+returns the value of the parameter. The type of both the paramter and the
+return value of the method is the same as the declared type of the field, if
+any. The body of the method assigns the value of the parameter to the field.
+
+The `@setter` annotation optionally takes a single parameter in the form of an
+identifier; if provided, this identifier is used for the method name instead of
+the field name.
+
+A method may not be declared in the class body with the same name as the one
+provided (by defulat or explicitly) by the `@setter` annotation; doing so
+counts as a duplicate declaration, and is signaled as a compile-time error.
+
+However, annotating a field with both `@getter` and `@setter` is explicitly
+allowed, and creates a single method which is able to both return the value
+bound by a field, and set the field's value from a provided argument.
 
 ## 6.6 The `@required` and `@optional` annotations
 
