@@ -75,7 +75,8 @@ function.
 <parameter-list> ::= <paramter>* %% ","
 
 <parameter> ::= "..."?
-                <identifier> "?"?
+                <identifier>
+                "?"?
                 (":" <type>)?
                 ("=" <expression>)?
 ```

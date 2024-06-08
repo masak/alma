@@ -39,6 +39,7 @@ instances of that class.
 ```
 <field> ::= "has"
             <identifier>
+            "?"?
             (":" <type>)?
             ("=" <expression>)?
             <semicolon>
@@ -82,6 +83,17 @@ allowed, and creates a single method which is able to both return the value
 bound by a field, and set the field's value from a provided argument.
 
 ## 6.6 The `@required` and `@optional` annotations
+
+A field is _required_ by default, which means that the class's constructor has
+a required named parameter for the field. A `@required` annotation reaffirms
+this, but is essentially a no-op.
+
+Either of the following two are equivalent: an `@optional` annotation on a
+field, or a `?` modifier on the field. These mean that the class's constructor
+has an optional named parameter for the field. A field whose value is not
+passed via the named parameter in its constructor is instead initialized via
+the value provided via its `@default` or `@builder` annotation (which see), or
+`none` if no such annotations are present.
 
 ## 6.7 The `@default` annotation
 
