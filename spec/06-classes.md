@@ -96,11 +96,35 @@ field, or a `?` modifier on the field. These mean that the class's constructor
 has an optional named parameter for the field. A field whose value is not
 passed via the named parameter in its constructor is instead initialized via
 the value provided via its `@default` or `@builder` annotation (which see), or
-`none` if no such annotations are present.
+`none` if no such annotations are present. The presence of either `@default` or
+a `@builder` annotation means the field is optional.
 
 ## 6.7 The `@default` annotation
 
+A `@default` annotation expects a single argument, which is parsed as an
+expression. A field not initialized via the corresponding named parameter to
+the constructor, is instead initialized by evaluating this expression. The
+expression is evaluated in a context where `self` is bound to the instance
+being constructed.
+
+A `@default` annotation on a field is compatible with an `@optional`
+annotation, but not with a `@required` annotation. Using `@default` and
+`@required` together signals a compile error.
+
 ## 6.8 The `@builder` annotation
+
+A `@builder` annotation expects a single argument, an identifier which resolves
+to a method available in the class. A field not initialized via the
+corresponding named parameter to the constructor, is instead initialized by
+calling this method. The method needs to accept zero arguments; referencing a
+method which does not accept zero arguments signals a compile error.
+
+A `@builder` annotation on a field is compatible with an `@optional`
+annotation, but not with a `@required` annotation. Using `@builder` and
+`@required` together signals a compile error.
+
+A `@builder` annotation is incompatible with a `@default` annotation, and using
+these two together signals a compile error.
 
 ## 6.9 The `@type` annotation
 
