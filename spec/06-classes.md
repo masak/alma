@@ -31,6 +31,9 @@ on which the method was called.
 
 ## 6.2 The `@abstract` annotation
 
+An `@abstract` annotation on a class declaration means that the class cannot
+be instantiated. The generated constructor throws an exception when called.
+
 ## 6.3 Fields
 
 A _field_ represents an internal variable of a class, and data particular to
