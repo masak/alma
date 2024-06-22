@@ -9,14 +9,14 @@ might raise one or more side effects.
               |  <variable-lookup>
               |  <array-constructor>
               |  <dictionary-constructor>
-              |  <function-constructor>
               |  <quasiquote>
+              |  <custom-constructor>
+              |  <function-constructor>
               |  <call-expression>
               |  <index-lookup>
-              |  <conversion-expression>
               |  <property-lookup>
+              |  <conversion-expression>
               |  <range-constructor>
-              |  <custom-constructor>
               |  <additive-expression>
               |  <multiplicative-expression>
               |  <string-expression>
@@ -153,35 +153,7 @@ Graph::{
 };                      # graph with two nodes, pointing to each other
 ```
 
-## 2.5 Function constructors
-
-A _function constructor_ creates a new function value.
-
-```
-<function-constructor> ::= "func"
-                           <identifier>?
-                           "(" <parameter-list> ")"
-                           (":" <type>)?
-                           <block>
-```
-
-The `func` keyword is also used for function declarations (see [Chapter 4:
-Declarations](04-declarations.md)); in situations where the `func` keyword
-could either be the start of a function declaration or a function constructor,
-it's always a function declaration.
-
-The function name is optional in a function constructor. If supplied, that
-name is visible in the parameter list and body of the function, but not outside
-the function constructor (since it's not a declaration).
-
-Names that were bound in the environment where the function was constructed
-are also visible inside the function. We say that the function _closes over_
-those names; in practice, the function value gets a copy of the environment
-where it was constructed. This environment is implicitly passed around
-together with the function, if the function value is passed around as a
-first-class value.
-
-## 2.6 Quasiquotes
+## 2.5 Quasiquotes
 
 Quotation can mean many things, but for the purposes of this section, it means
 representing a bit of fixed Alma code as its abstract syntax tree.
@@ -210,7 +182,44 @@ outer environment. However, the dynamic code evaluates immediately on
 quasiquote construction, whereas the fixed code closes over its surrounding
 environment, much like a function does.
 
-## 2.7 Call expressions
+## 2.6 Custom constructor
+
+A _custom constructor_ modulates an array or dictionary with a custom type.
+
+```
+<custom-constructor> ::= <identifier> "::"
+                         (<array-constructor> | <dictionary-constructor>)
+```
+
+## 2.7 Function constructors
+
+A _function constructor_ creates a new function value.
+
+```
+<function-constructor> ::= "func"
+                           <identifier>?
+                           "(" <parameter-list> ")"
+                           (":" <type>)?
+                           <block>
+```
+
+The `func` keyword is also used for function declarations (see [Chapter 4:
+Declarations](04-declarations.md)); in situations where the `func` keyword
+could either be the start of a function declaration or a function constructor,
+it's always a function declaration.
+
+The function name is optional in a function constructor. If supplied, that
+name is visible in the parameter list and body of the function, but not outside
+the function constructor (since it's not a declaration).
+
+Names that were bound in the environment where the function was constructed
+are also visible inside the function. We say that the function _closes over_
+those names; in practice, the function value gets a copy of the environment
+where it was constructed. This environment is implicitly passed around
+together with the function, if the function value is passed around as a
+first-class value.
+
+## 2.8 Call expressions
 
 A _call expression_ can represent a runtime invocation (to something that
 satisfies the invocation protocol), or alternatively a macro invocation
@@ -235,7 +244,7 @@ If the call is a runtime invocation, the following steps happen:
 If the call is a macro invocation, the steps happen during compile time
 instead of at runtime; for details, see [Chapter 12: Macros](12-macros.md).
 
-## 2.8 Indexed and keyed lookups
+## 2.9 Indexed and keyed lookups
 
 An _indexed lookup_ represents looking up an element in an indexed container,
 and a _keyed lookup_ represents lookup up a value in a keyed container. They
@@ -245,7 +254,7 @@ both share the same syntax.
 <index-lookup> ::= <expression> "[" <expression> "]"
 ```
 
-## 2.9 Property lookup
+## 2.10 Property lookup
 
 A _property lookup_ represents looking up a property in an object.
 
@@ -255,7 +264,7 @@ A _property lookup_ represents looking up a property in an object.
 <property> ::= <identifier> | <keyword> | <alpha-literal>
 ```
 
-## 2.10 Conversion operators
+## 2.11 Conversion operators
 
 Built-in prefix _conversion operators_ help convert values across types.
 
@@ -273,7 +282,7 @@ The `~` operator converts a value to a string (`Str`).
 The `?` operator converts a value to a boolean value (`Bool`); the `!` operator
 does the conversion, but also negates the boolean value.
 
-## 2.9 Range constructor
+## 2.12 Range constructor
 
 A _range constructor_ creates a new `Range`.
 
@@ -281,16 +290,7 @@ A _range constructor_ creates a new `Range`.
 <range-constructor> ::= <expression> ".." <expression>
 ```
 
-## 2.10 Custom constructor
-
-A _custom constructor_ modulates an array or dictionary with a custom type.
-
-```
-<custom-constructor> ::= <identifier> "::"
-                         (<array-constructor> | <dictionary-constructor>)
-```
-
-## 2.11 Arithmetic operators
+## 2.13 Arithmetic operators
 
 The _arithmetic operators_, addition, subtraction, multiplication, flooring
 division, and modulo, all take two integers as inputs and give an integer as
@@ -307,7 +307,7 @@ a runtime error.)
 <multiplicative-op> ::= "*" | "//" | "%"
 ```
 
-## 2.12 String operators
+## 2.14 String operators
 
 _String concatenation_ takes two values, stringifying them, and gives a
 concatenated string as a result.
@@ -318,7 +318,7 @@ concatenated string as a result.
 <string-op> ::= "~"
 ```
 
-## 2.13 Equality operators
+## 2.15 Equality operators
 
 _Equality tests_ check whether two values are either equal or unequal,
 returning a `Bool` to that effect.
@@ -329,7 +329,7 @@ returning a `Bool` to that effect.
 <equality-op> ::= "==" | "!="
 ```
 
-## 2.14 Comparison operators
+## 2.16 Comparison operators
 
 _Comparison tests_ compare two values, seen as ordered values or quantities,
 returning a `Bool`.
@@ -347,7 +347,7 @@ The semantics of the operators are as follows:
 * `a > b`: is `a` strictly greater than `b`?
 * `a >= b`: is `a` greater than or equal to `b`?
 
-## 2.15 Logical operators
+## 2.17 Logical operators
 
 _Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
 Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
@@ -376,7 +376,7 @@ of the given type, but fails with a runtime error if it isn't.
 <type-check-cast-op> ::= "is" | "as"
 ```
 
-## 2.17 Assignment operators
+## 2.19 Assignment operators
 
 _Assignment operators_ store a computed value in a location. The `=` operator
 does only this; any operator of the form `a op= b` means `a = (a op b)`.
@@ -397,7 +397,7 @@ Specifically, you should view the `b` of `a .= b` as parsing in the same way
 as `a = a.b`, where `b` starts with something identifier-like but is otherwise
 an expression.
 
-## 2.18 Precedence table
+## 2.20 Precedence table
 
 _Operator precedence_ determines the binding strength of operators; the
 tighter or more strongly binding ones always evaluate before the looser or
