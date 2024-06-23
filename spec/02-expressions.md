@@ -20,10 +20,10 @@ might raise one or more side effects.
               |  <multiplicative-expression>
               |  <string-expression>
               |  <range-constructor>
+              |  <type-check-cast-expression>
               |  <equality-expression>
               |  <comparison-expression>
               |  <logical-expression>
-              |  <type-check-cast-expression>
               |  <assignment-expression>
 ```
 
@@ -318,7 +318,19 @@ A _range constructor_ creates a new `Range`.
 <range-constructor> ::= <expression> ".." <expression>
 ```
 
-## 2.15 Equality operators
+## 2.15 Type check/cast operators
+
+The _type check_ operator `is` checks a given value for inclusion in a given
+type. The _type cast_ operator `as` does nothing to the value if it is already
+of the given type, but fails with a runtime error if it isn't.
+
+```
+<type-check-cast-expression> ::= <expression> <type-check-cast-op> <expression>
+
+<type-check-cast-op> ::= "is" | "as"
+```
+
+## 2.16 Equality operators
 
 _Equality tests_ check whether two values are either equal or unequal,
 returning a `Bool` to that effect.
@@ -329,7 +341,7 @@ returning a `Bool` to that effect.
 <equality-op> ::= "==" | "!="
 ```
 
-## 2.16 Comparison operators
+## 2.17 Comparison operators
 
 _Comparison tests_ compare two values, seen as ordered values or quantities,
 returning a `Bool`.
@@ -347,7 +359,7 @@ The semantics of the operators are as follows:
 * `a > b`: is `a` strictly greater than `b`?
 * `a >= b`: is `a` greater than or equal to `b`?
 
-## 2.17 Logical operators
+## 2.18 Logical operators
 
 _Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
 Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
@@ -363,18 +375,6 @@ The built-in logical connectives are _short-circuiting_, meaning that if
 evaluating the left operand is enough to conclude the result, the right
 operand will not be evaluated. Specifically, `false && b == false`, and
 `true || b == true`, both without evaluating `b`.
-
-## 2.18 Type check/cast operators
-
-The _type check_ operator `is` checks a given value for inclusion in a given
-type. The _type cast_ operator `as` does nothing to the value if it is already
-of the given type, but fails with a runtime error if it isn't.
-
-```
-<type-check-cast-expression> ::= <expression> <type-check-cast-op> <expression>
-
-<type-check-cast-op> ::= "is" | "as"
-```
 
 ## 2.19 Assignment operators
 
@@ -414,11 +414,11 @@ less strongly binding ones.
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
 | range                | infix   | `..`                                      |
+| type check/cast      | infix   | `is`, `as`                                |
 | equality             | infix   | `==`, `!=`                                |
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
 | conjunction          | infix   | `&&`                                      |
 | disjunction          | infix   | `\|\|`                                    |
-| type check/cast      | infix   | `is`, `as`                                |
 | assignment (loosest) | infix   | `=`, `+=`, `-=`, etc.                     |
 
 All operators are left-associative, except for the assignment operators which
