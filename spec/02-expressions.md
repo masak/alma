@@ -388,6 +388,9 @@ does only this; any operator of the form `a op= b` means `a = (a op b)`.
                   | "||=" | ".="
 ```
 
+The assignment operators are right-associative; a chain of them causes the
+assignments to happen "from right to left".
+
 Just like `&&` and `||` are short-circuiting and will not evaluate the right
 operand unless necessary, the `&&=` and `||=` operators are short-circuiting
 and will neither evaluate the right operator, nor do the needless assignment.
@@ -405,11 +408,11 @@ less strongly binding ones.
 
 | precedence           | fixity  | operators                                 |
 |----------------------|---------|-------------------------------------------|
-| term (tightest)      | N/A     | literals, arrays, dicts, functions, quasis|
+| term (tightest)      | N/A     | literals, arrays, dicts, funcs, quasis    |
 | parentheses          | circum  | `(..)`                                    |
 | calls, lookups       | postfix | `f(..)`, `x.y`, `x[y]`                    |
 | conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
-|                      | infix   | `::`                                      |
+| custom constructor   | infix   | `::`                                      |
 | multiplicative       | infix   | `*`, `//`, `%`                            |
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
@@ -419,7 +422,7 @@ less strongly binding ones.
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
 | conjunction          | infix   | `&&`                                      |
 | disjunction          | infix   | `\|\|`                                    |
-| assignment (loosest) | infix   | `=`, `+=`, `-=`, etc.                     |
+| assignment (loosest) | infix   | `=`, `+=`, `-=`, etc. (right-associative) |
 
 All operators are left-associative, except for the assignment operators which
 are right-associative.
