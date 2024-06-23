@@ -120,7 +120,9 @@ Bag::[1, 2, 1];     # bag with elements 1, 1, 2
 
 ## 2.4 Dictionary constructors
 
-A _dictionary constructor_ creates a new `Dict`.
+A _dictionary constructor_ creates a new `Dict`. The keys of a dictionary are
+parsed as "extended identifiers", which means that even tokens usually
+considered to be keywords are recognized and allowed.
 
 ```
 <dictionary-constructor> ::= "{" (<key-value-pair>* %% ",") "}"
