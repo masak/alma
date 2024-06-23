@@ -16,10 +16,10 @@ might raise one or more side effects.
               |  <index-lookup>
               |  <property-lookup>
               |  <conversion-expression>
-              |  <range-constructor>
               |  <additive-expression>
               |  <multiplicative-expression>
               |  <string-expression>
+              |  <range-constructor>
               |  <equality-expression>
               |  <comparison-expression>
               |  <logical-expression>
@@ -282,15 +282,7 @@ The `~` operator converts a value to a string (`Str`).
 The `?` operator converts a value to a boolean value (`Bool`); the `!` operator
 does the conversion, but also negates the boolean value.
 
-## 2.12 Range constructor
-
-A _range constructor_ creates a new `Range`.
-
-```
-<range-constructor> ::= <expression> ".." <expression>
-```
-
-## 2.13 Arithmetic operators
+## 2.12 Arithmetic operators
 
 The _arithmetic operators_, addition, subtraction, multiplication, flooring
 division, and modulo, all take two integers as inputs and give an integer as
@@ -307,7 +299,7 @@ a runtime error.)
 <multiplicative-op> ::= "*" | "//" | "%"
 ```
 
-## 2.14 String operators
+## 2.13 String operators
 
 _String concatenation_ takes two values, stringifying them, and gives a
 concatenated string as a result.
@@ -316,6 +308,14 @@ concatenated string as a result.
 <string-expression> ::= <expression> <string-op> <expression>
 
 <string-op> ::= "~"
+```
+
+## 2.14 Range constructor
+
+A _range constructor_ creates a new `Range`.
+
+```
+<range-constructor> ::= <expression> ".." <expression>
 ```
 
 ## 2.15 Equality operators
@@ -410,10 +410,10 @@ less strongly binding ones.
 | calls, lookups       | postfix | `f(..)`, `x.y`, `x[y]`                    |
 | conversion           | prefix  | `+`, `-`, `~`, `?`, `!`                   |
 |                      | infix   | `::`                                      |
-| range                | infix   | `..`                                      |
 | multiplicative       | infix   | `*`, `//`, `%`                            |
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
+| range                | infix   | `..`                                      |
 | equality             | infix   | `==`, `!=`                                |
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
 | conjunction          | infix   | `&&`                                      |
