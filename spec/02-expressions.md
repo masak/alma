@@ -77,6 +77,7 @@ Usage example:
 false;          # value `false`
 42;             # value `42`
 "foo";          # value `"foo"`
+none;           # value `none`
 ```
 
 ## 2.2 Variable lookups
