@@ -22,10 +22,10 @@ the time of evaluating the call expression, these steps happen:
   _arguments_.
 * The `call` method of the invocation protocol is invoked, with an array of
   the arguments.
-    * Parameter binding happens, explained in section 5.8. If successful,
-      this results in an extended environment.
+    * Parameter binding happens, explained in section 5.7 "Parameter binding".
+      If successful, this results in an extended environment.
     * The function's body is run in the extended environment. This is explained
-      in section 5.9 "Function body".
+      in section 5.8 "Function body".
     * Eventually, control might return normally, in which case a value is also
       returned. This value is then the value of entire call expression. This is
       explained in section 5.10 "Returning from a function".
@@ -44,36 +44,229 @@ see [Chapter 12: Macros](12-macros.md).
 
 ## 5.2 Optional parameters
 
-xxx `@optional` syntax
+A parameter is _required_ by default, but there are two different ways to
+declare it _optional_, meaning that a call to the function will still succeed
+even if the parameter is not passed.
 
-xxx `?` syntax
+A parameter can be declared optional using the `@optional` annotation:
+
+```
+func fnWithOptParam(@optional param) {
+    say param;
+}
+
+fnWithOptParam(42);         // 42
+fnWithOptParam();           // none
+
+func fnWithReqParam(param) {
+    say param;
+}
+
+fnWithReqParam(42);         // 42
+fnWithReqParam();           // <error: too few arguments>
+```
+
+Or it can be declared optional using the `?` suffix on parameters:
+
+```
+func fnWithOptParam(param?) {
+    say param;
+}
+
+fnWithOptParam(42);         // 42
+fnWithOptParam();           // none
+```
+
+Using both forms at once is valid but redundant, and might be flagged by a code
+linter:
+
+```
+func fnWithOptParam(@optional param?) {
+    say param;
+}
+
+fnWithOptParam(42);         // 42
+fnWithOptParam();           // none
+```
+
+In a function declaration with both required and optional parameters, all the
+optional parameters must be declared after all the required ones.
 
 ## 5.3 Parameter defaults
 
-xxx `@default(expr)` syntax
+_Parameter defaults_ are expressions that are evaluated if (and only if) an
+argument was not passed. There are two different ways to declare a parameter
+default.
 
-xxx `=` syntax
+The first way uses an annotation:
+
+```
+func fnWithParamDefault(@default(5) param) {
+    say param;
+}
+
+fnWithParamDefault(42);     // 42
+fmWithParamDefault();       // 5
+```
+
+The second way uses an infix `=` syntax:
+
+```
+func fnWithParamDefault(param = 5) {
+    say param;
+}
+
+fnWithParamDefault(42);     // 42
+fmWithParamDefault();       // 5
+```
+
+Using both syntaxes for the same parameter results in a declaration-time error:
+
+```
+func fnWithParamDefault(@default(1) param = 2) {    // <error: two defaults>
+    say param;
+}
+```
+
+Giving a parameter a default implies that the parameter is optional. Declaring
+a parameter both optional and having a default is allowed, but the default is
+enough.
+
+```
+func fnWithOptionalParamWithDefault(@optional @default(1) param) {  // fine
+}
+
+func fnWithOptionalParamWithDefault(@default(2) param?) {           // fine
+}
+
+func fnWithOptionalParamWithDefault(@optional param = 3) {          // fine
+}
+
+func fnWithOptionalParamWithDefault(param? = 4) {                   // fine
+}
+```
+
+Because the parameter name itself indicates the point at which the parameter
+is declared and thus visible, one difference between the annotation form and
+the `=` form is that the parameter itself is bound and visible in the `=` form
+but not in the annotation form:
+
+```
+func fnUsingParamInDefault(x = x) {             // fine
+}
+
+func fnUsingParamInDefault(@default(x) x) {     // <error: no such variable x>
+}
+```
 
 ## 5.4 Rest parameter
 
-xxx `@rest` syntax
+A function can handle an excess of arguments being passed by declaring a _rest
+parameter_, which will bind to an array containing the excess arguments. There
+are two syntaxes for declaring a rest parameter.
 
-xxx `...` syntax
+The first syntax uses a `@rest` annotation:
+
+```
+func fnWithRestParam(x, y, z, @rest r) {
+    say r;
+}
+
+fnWithRestParam(1, 2, 3);           // []
+fnWithRestParam(1, 2, 3, 4, 5);     // [4, 5]
+```
+
+The second syntax uses a prefix `...` on the parameter:
+
+```
+func fnWithRestParam(x, y, z, ...r) {
+    say r;
+}
+
+fnWithRestParam(1, 2, 3);           // []
+fnWithRestParam(1, 2, 3, 4, 5);     // [4, 5]
+```
+
+Using both forms at once is valid but redundant, and might be flagged by a code
+linter:
+
+```
+func fnWithRestParam(x, y, z, @rest ...r) {
+    say r;
+}
+
+fnWithRestParam(1, 2, 3);           // []
+fnWithRestParam(1, 2, 3, 4, 5);     // [4, 5]
+```
+
+A parameter which is not a rest parameter is called an _individual_ parameter.
 
 ## 5.5 Named parameter
 
-xxx `@named` syntax
+A _named_ parameter indicates that the corresponding operand should be written
+as a key/value pair, using the same syntax as for dictionary key/value pairs:
+
+```
+func fnWithNamedParameter(@named param) {
+    say param;
+}
+
+fnWithNamedParameter(param => "hi");    // hi
+fnWithNamedParameter("hi");             // <error: missing named param "param">
+```
+
+There is only one syntax for declaring named parameters: the above `@named`
+annotation syntax.
+
+A parameter which is not named is called _positional_, as it is identified by
+its position in the list of parameters.
+
+In a function declaration with both positional and named parameters, all the
+named parameters must be declared after all the positional ones.
+
+By default, a named parameter is required, but it can be used together with the
+`@optional` annotation (or the `?` syntax) to make it an optional named
+parameter.
+
+Similarly, a named parameter can be given a default, using either the
+`@default` annotation, or the `=` syntax.
 
 ## 5.6 Named rest parameter
 
-xxx it's a combination of `@named` and `@rest` (in any order)
+A named parameter which is also declared as a rest parameter is a _named rest
+parameter_: it collects up any named arguments that were passed but don't have
+a corresponding argument into a dictionary of excess named arguments.
 
-xxx or `@named` and `...`
+```
+func fnWithNamedRestArgument(
+    @named x,
+    @named @rest rest,      // @rest @named also works
+) {
+    say rest;
+}
 
-## 5.8 Parameter binding
+fnWithNamedRestArgument(x => 1, y => 2);    // { y => 2 }
+fnWithNamedRestArgument(x => 1);            // {}
+```
+
+Any syntax for declaring the parameter a rest parameter works:
+
+```
+func fnWithNamedRestArgument(
+    @named x,
+    @named ...rest,
+) {
+    say rest;
+}
+
+fnWithNamedRestArgument(x => 1, y => 2);    // { y => 2 }
+fnWithNamedRestArgument(x => 1);            // {}
+```
+
+## 5.7 Parameter binding
 
 During function invocation, when arguments have been passed to a function for
-invocation, and before the function body can run, an environment is constructed in which to run the function body.
+invocation, and before the function body can run, an environment is constructed in which the function body later runs.
 
 This happens in two steps: first, making sure that there is an argument for
 each required parameter and a parameter for each passed argument, and second,
@@ -115,7 +308,18 @@ passed that rest parameters weren't present to absorb.
 The resulting environment is the one that will be used when running the
 function body.
 
-## 5.9 Function body
+## 5.8 Function body
 
-## 5.10 Returning from a function
+The function body runs normally, except that the environment it runs in is
+extended with the parameters bound to either arguments or parameter defaults.
+
+Inside a function body, it is also valid to use the statement `return <expr>;`
+which has the effect of evaluating `<expr>` and immediately terminating the
+running of the function body, returning the value that results to the caller.
+
+## 5.9 Returning from a function
+
+A value is returned from the function, either by explicitly executing a
+`return` statement in the function body, or by "falling off the end" of the
+function. In the latter case, the value returned from the function is `none`.
 
