@@ -5,13 +5,15 @@ called _instances_ can be created from a (non-abstract) class; an instance `x`
 created from class `X` satisfies the relation `x is X`.
 
 Classes can also relate via subtyping. If a class `Y` is declared a subclass of
-a class `X` (that is, `Y <: X`), then `y is Y` implies `y is X`.
+a class `X` (that is, `Y <: X`), then `y is Y` implies `y is X`. Besides the
+subclassing relation, classes can also implement interfaces; see section 6.14
+"Interfaces".
 
 Parts of the class declaration's body are called _class members_, and are
-either _fields_ or _methods_. A field represents data kept within an instance.
-A method represents a callable behavior of an instance. A method is like a
-function, except that its body also binds the identifier `self` to the instance
-on which the method was called.
+either _fields_ or _methods_. A field represents property data kept within an
+instance. A method represents a callable behavior of an instance. A method is
+like a function, except that its body also binds the identifier `self` to the
+_receiver_, the instance on which the method was called.
 
 ## 6.1 Class declarations
 
@@ -32,12 +34,12 @@ on which the method was called.
 ## 6.2 The `@abstract` annotation
 
 An `@abstract` annotation on a class declaration means that the class cannot
-be instantiated. The generated constructor throws an exception when called.
+be instantiated. The generated constructor still exists, but throws an
+exception when called.
 
 ## 6.3 Fields
 
-A _field_ represents an internal variable of a class, and data particular to
-instances of that class.
+A _field_ represents property data of an instance of a class.
 
 ```
 <field> ::= "has"
@@ -69,7 +71,7 @@ counts as a duplicate declaration, and is signaled as a compile-time error.
 By default, fields are internal and not accessible for writing outside of the
 instance in which they are held. A `@setter` annotation ensures this access,
 providing a one-parameter method (of the same name as the field), which
-returns the value of the parameter. The type of both the paramter and the
+returns the value of the parameter. The type of both the parameter and the
 return value of the method is the same as the declared type of the field, if
 any. The body of the method assigns the value of the parameter to the field.
 
@@ -78,7 +80,7 @@ identifier; if provided, this identifier is used for the method name instead of
 the field name.
 
 A method may not be declared in the class body with the same name as the one
-provided (by defulat or explicitly) by the `@setter` annotation; doing so
+provided (by default or explicitly) by the `@setter` annotation; doing so
 counts as a duplicate declaration, and is signaled as a compile-time error.
 
 However, annotating a field with both `@getter` and `@setter` is explicitly
@@ -111,6 +113,11 @@ A `@default` annotation on a field is compatible with an `@optional`
 annotation, but not with a `@required` annotation. Using `@default` and
 `@required` together signals a compile error.
 
+Instead of the `@default` annotation, the `=` syntax can be used.
+
+It is a compile error to use both the `@default` annotation and the `=` syntax
+together on the same field.
+
 ## 6.8 The `@builder` annotation
 
 A `@builder` annotation expects a single argument, an identifier which resolves
@@ -128,7 +135,22 @@ these two together signals a compile error.
 
 ## 6.9 The `@type` annotation
 
+A `@type` annotation expects a single argument, an expression which needs to
+statically evaluate to a `Type`.
+
+As an alternative syntax, the infix `:` can be used to specify a type.
+
+It is a compile error to use both `@type` and `:` together.
+
 ## 6.10 The `@lazy` annotation
+
+Supplying the `@lazy` annotation means that the property will not be
+initialized on object construction, but will instead be initialized on first
+property read.
+
+Supplying a `@lazy` annotation is only allowed in combination with either a
+`@default` annotation or the `=` syntax (but not both together). Supplying a
+`@lazy` annotation without either of these results in a compile error.
 
 ## 6.11 Methods
 
@@ -149,4 +171,8 @@ identifier is bound to the instance on which the method was called.
 ## 6.12 The `@class` annotation
 
 ## 6.13 The `@static` annotation
+
+## 6.14 Interfaces
+
+## 6.15 The `object` syntax
 
