@@ -97,21 +97,27 @@ A _macro declaration_ adds a new name to a scope, and binds it to a macro.
                         <semicolon>
 ```
 
-For more about macros, including how they are invoked, see [Chapter 12:
-Macros](12-macros.md).
+For more about macros, including how they are invoked, see [Chapter 13:
+Macros](13-macros.md).
 
 ## 4.4 Class declaration
 
 A _class declaration_ adds a new name to a scope, and binds it to a class.
+
+For more about classes, see [Chapter 6: Classes](06-classes.md).
 
 ## 4.5 Interface declaration
 
 An _interface declaration_ adds a new name to a scope, and binds it to an
 interface.
 
+For more about interfaces, see [Chapter 6: Classes](06-classes.md).
+
 ## 4.6 Enum declaration
 
 An _enum declaration_ adds a new name to a scope, and binds it to an enum.
+
+For more about enum declarations, see [Chapter 7: Enums](07-enums.md).
 
 ## 4.7 Import directive
 

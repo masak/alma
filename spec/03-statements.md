@@ -1,7 +1,7 @@
 # Chapter 3: Statements
 
 A _statement_ is an imperative representation of a computation; _executing_
-a statement might raise one or more side effects, but does not yield a result
+a statement might cause one or more side effects, but does not yield a result
 value. Whereas expressions are primarily about reaching a result value,
 statements are primarily about orchestrating control flow or raising some
 other effect.
@@ -40,7 +40,7 @@ to block end, compilation unit end, or closing curly brace and newline.
 
 ## 3.1 Empty statement
 
-An _empty statement_ does nothing, and finishes normally.
+An _empty statement_ does nothing.
 
 ```
 <empty-statement> ::= <semicolon>
@@ -48,7 +48,8 @@ An _empty statement_ does nothing, and finishes normally.
 
 ## 3.2 Expression statement
 
-An _expression statement_ evaluates an expression, and finishes normally.
+An _expression statement_ evaluates an expression. The value from the
+expression is discarded.
 
 ```
 <expression-statement> ::= <expression> <semicolon>
@@ -84,8 +85,9 @@ statement finishes normally.
 
 A _`for` statement_ evaluates an expression, expecting it to be an `Array`;
 if it is not, execution terminates abruptly with an error. If it is an
-array, the block is executed once for each element in the array, possibly
-passing in the element as an argument.
+array, the block is executed once for each element in the array. If the block
+provided for the body has a parameter, this parameter is bound to the current
+element at each iteration.
 
 ```
 <for-statement> ::= "for" <expression> <xblock> <semicolon>
@@ -115,7 +117,7 @@ provided, must resolve to the `Label` of a surrounding loop.
 ## 3.8 `return` statement
 
 A _`return` statement_ abruptly finishes and returns a value out of the
-innermost surrounding function. Evaluation continues after the expression that
+innermost surrounding routine. Evaluation continues after the expression that
 called the function. This statement can only occur inside a routine. An
 expression, if provided, is used to determine the return value; if no
 expression is provided, the value `none` is returned.
@@ -128,9 +130,9 @@ expression is provided, the value `none` is returned.
 
 A _`throw` statement_ evaluates an expression to a value (expected to be of
 type `Exception`), and abruptly finishes and proceeds up the dynamic call
-stack, looking for the first `catch` clause that matches the value. Execution
-continues at the `catch` clause's block. In case there is no such `catch`
-clause, program execution finishes abruptly with an error based on the value.
+stack, looking for the first `CATCH` phaser. Execution continues at the `CATCH`
+phaser's block. In case there is no such `CATCH` phaser, program execution
+finishes abruptly with an error based on the value.
 
 ```
 <throw-statement> ::= "throw" <expression> <semicolon>
@@ -147,7 +149,7 @@ exception.
 <catch-phaser> ::= "CATCH" <xblock> <semicolon>
 ```
 
-At most one `CATCH` block per surrounding block is allowed.
+At most one `CATCH` phaser per block is allowed.
 
 ## 3.11 `LEAVE` phaser
 
@@ -171,8 +173,8 @@ textual order.
 A _block statement_ runs a block, and finishes normally.
 
 In case of a grammatical conflict between a `{` starting a block statement and
-a `{` starting an expression statement starting an object literal, it's
-resolved in favor of the block statement.
+a `{` starting an object literal starting an expression statement, parsing
+resolves this conflict in favor of the block statement.
 
 ```
 <block-statement> ::= <block>
@@ -182,10 +184,10 @@ resolved in favor of the block statement.
 ```
 
 Blocks occur regularly inside other statement forms. There are also _pointy
-blocks_, which accept a parameter:
+blocks_, which accept a parameter list:
 
 ```
-<pblock> ::= "->" <parameter> <block>
+<pblock> ::= "->" <parameter-list> <block>
 ```
 
 But pointy blocks are not usually used directly; instead, the option is usually

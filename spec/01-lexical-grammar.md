@@ -8,8 +8,8 @@ of declarations and statements.
 A compilation unit is either a single entry-point file ("script"), a module
 file, or an input at the interactive prompt. Unless otherwise specified, the
 assumption is that the compilation unit is an entry-point file; the exceptions
-are described in [Chapter 8: Modules](08-modules.md) and [Chapter 9:
-Interactivity](09-interactivity.md).
+are described in [Chapter 9: Modules](09-modules.md) and [Chapter 10:
+Interactivity](10-interactivity.md).
 
 As part of parsing a compilation unit, the text is subdivided into tokens,
 whitespace, and comments. The rest of this chapter describes this subdivision.
@@ -104,8 +104,8 @@ small set of letters, there are pre-set meanings:
 * `\uXXXX` (four hex digits) means the character with codepoint `XXXX`
 
 Although the allowed literals in a language normally form a closed set, in Alma
-this set can be extended. For more, see [Chapter 17: Extending the
-lexer](17-extending-the-lexer.md).
+this set can be extended. For more, see [Chapter 18: Extending the
+lexer](18-extending-the-lexer.md).
 
 ## 1.5 Keywords
 
@@ -138,8 +138,8 @@ However, they can still be used for unscoped literals such as dictionary
 keys and object properties.
 
 Although the keywords in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 17: Extending the
-lexer](17-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 18: Extending the
+lexer](18-extending-the-lexer.md).
 
 ## 1.6 Identifiers
 
@@ -259,8 +259,8 @@ The `{` and `}` delimiters are used both for blocks and for containers:
   from a module.
 
 Although the delimiters in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 17: Extending the
-lexer](17-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 18: Extending the
+lexer](18-extending-the-lexer.md).
 
 ## 1.9 Punctuators
 
@@ -286,7 +286,7 @@ The following punctuators might be called "pseudo-operators":
 
 * double arrow (`=>`), used between the key and the value in dictionary
   constructors, and used between a name and the expression of a named
-  parameter.
+  argument.
 
 * equality sign (`=`), usually an assignment operator, but used specially as
   a separator between a declared parameter (optionally including type) and its
@@ -298,8 +298,8 @@ The following punctuators might be called "pseudo-operators":
   explicit default value.
 
 Although the punctuators in a language normally form a closed set, in Alma this
-set can be extended. For more, see [Chapter 17: Extending the
-lexer](17-extending-the-lexer.md).
+set can be extended. For more, see [Chapter 18: Extending the
+lexer](18-extending-the-lexer.md).
 
 ## 1.10 Scannerless parsing
 

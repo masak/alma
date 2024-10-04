@@ -60,7 +60,7 @@ Some operators _affect the parser_, so that different grammatical rules for how
 to parse the expression temporarily apply after parsing the operator. An
 example is the `.` property lookup operator, which expects an identifier on its
 right rather than any valid expression. For more on how to do this with
-user-defined operators, see [Chapter 18: Parsed macros](18-parsed-macros.md).
+user-defined operators, see [Chapter 19: Parsed macros](19-parsed-macros.md).
 
 ## 2.1 Literal expressions
 
@@ -190,7 +190,7 @@ environment, much like a function does.
 A _custom constructor_ modulates an array or dictionary with a custom type.
 
 ```
-<custom-constructor> ::= <identifier> "::"
+<custom-constructor> ::= <qualified-name> "::"
                          (<array-constructor> | <dictionary-constructor>)
 ```
 
@@ -225,8 +225,8 @@ first-class value.
 ## 2.8 Call expressions
 
 A _call expression_ can represent a runtime invocation (to something that
-satisfies the invocation protocol), or alternatively a macro invocation
-(which will be handled at compile time).
+satisfies the invocation protocol), or a macro invocation (which is handled at
+compile time).
 
 ```
 <call-expression> ::= <expression> "(" <argument>* %% "," ")"
@@ -237,15 +237,16 @@ satisfies the invocation protocol), or alternatively a macro invocation
 If the call is a runtime invocation, the following steps happen:
 
 * Evaluate the function expression
-* Confirm that the result is indeed callable, and has a matching signature
+* Assert that the result is indeed callable, and has a matching signature
   (or signal a runtime error)
 * Evaluate each of the arguments, from left to right
 * Bind the evaluated argument values to the corresponding parameters
 * Run the function block, expecting a return value back representing the
   result of the call
 
-If the call is a macro invocation, the steps happen during compile time
-instead of at runtime; for details, see [Chapter 12: Macros](12-macros.md).
+If the call is a macro invocation, the corresponding invocation steps happen
+during compile time instead of at runtime; for details, see [Chapter 13:
+Macros](13-macros.md).
 
 ## 2.9 Indexed and keyed lookups
 
@@ -283,7 +284,7 @@ operator does the conversion, but also negates the number.
 The `~` operator converts a value to a string (`Str`).
 
 The `?` operator converts a value to a boolean value (`Bool`); the `!` operator
-does the conversion, but also negates the boolean value.
+converts to a boolean value, but also negates the result.
 
 ## 2.12 Arithmetic operators
 
@@ -315,17 +316,24 @@ concatenated string as a result.
 
 ## 2.14 Range constructor
 
-A _range constructor_ creates a new `Range`.
+A _range constructor_ creates a new range between a lower and an upper bound.
 
 ```
-<range-constructor> ::= <expression> ".." <expression>
+<range-constructor> ::= <right-inclusive-range>
+                     |  <right-exclusive-range>
+
+<right-inclusive-range> ::= <expression> ".." <expression>
+
+<right-exclusive-range> ::= <expression> "..^" <expression>
 ```
 
 ## 2.15 Type check/cast operators
 
 The _type check_ operator `is` checks a given value for inclusion in a given
-type. The _type cast_ operator `as` does nothing to the value if it is already
-of the given type, but fails with a runtime error if it isn't.
+type.
+
+The _type cast_ operator `as` asserts that a value is of a given type, and
+fails with a runtime error if it isn't.
 
 ```
 <type-check-cast-expression> ::= <expression> <type-check-cast-op> <expression>
@@ -396,7 +404,8 @@ assignments to happen "from right to left".
 
 Just like `&&` and `||` are short-circuiting and will not evaluate the right
 operand unless necessary, the `&&=` and `||=` operators are short-circuiting
-and will neither evaluate the right operator, nor do the needless assignment.
+and will neither evaluate the right operator nor do the assignment unless
+necessary.
 
 Just as the right operator of `.` parses differently, so does `.=`.
 Specifically, you should view the `b` of `a .= b` as parsing in the same way
@@ -419,7 +428,7 @@ less strongly binding ones.
 | multiplicative       | infix   | `*`, `//`, `%`                            |
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
-| range                | infix   | `..`                                      |
+| range                | infix   | `..`, `..^`                               |
 | type check/cast      | infix   | `is`, `as`                                |
 | equality             | infix   | `==`, `!=`                                |
 | comparison           | infix   | `<`, `<=`, `>`, `>=`                      |

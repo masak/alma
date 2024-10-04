@@ -40,7 +40,7 @@ syntactic sugar for the above call expressions.
 Both in the case of call expressions and in the case of operator expressions,
 if the callable expression (statically) resolves to a macro, then macro
 expansion instead takes place at compile time. For more on macro expansion,
-see [Chapter 12: Macros](12-macros.md).
+see [Chapter 13: Macros](13-macros.md).
 
 ## 5.2 Optional parameters
 
@@ -320,6 +320,7 @@ running of the function body, returning the value that results to the caller.
 ## 5.9 Returning from a function
 
 A value is returned from the function, either by explicitly executing a
-`return` statement in the function body, or by "falling off the end" of the
-function. In the latter case, the value returned from the function is `none`.
+`return` statement in the function body, or by statement execution falling off
+the end of the function body. In the latter case, the value returned from the
+function is `none`.
 
