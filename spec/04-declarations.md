@@ -18,21 +18,20 @@ statements; when they do refer to each other, they do so in code which is not
 yet running. The specific initialization order of hoisted declarations in a
 block is unobservable; any order produces the same end result.
 
-_Inline declarations_ (only variable declarations in the base language)
-have an expression called an _initialized expression_, which is evaluated the
-moment execution reaches the declaration. The resulting value is then used to
-initialize the declared name. Reading a variable before it has been initialized
-(which includes in the initializer expression itself) results in a runtime
-error.
+_Inline declarations_ have an expression called an _initialized expression_,
+which is evaluated when execution reaches the declaration. The resulting value
+is then used to initialize the declared name. Reading a variable before it has
+been initialized (includes in the evaluation of the initializer expression
+itself) results in a runtime error.
 
 Many declaration forms are _complex_ and contain nested declarations. These
-nested declarations are typically for a different scope. For example, function
-declarations contain parameters, which declare names to be used in the function
-body. Classes declare fields or methods, which declare names to be used in
-connection with instances of the class.
+nested declarations are typically equipped with their own scope. For example,
+function declarations contain parameters, which declare names to be used in the
+function body. Classes declare fields or methods, which declare names to be
+used in connection with instances of the class.
 
 A declaration needs to have a name which is unique in its scope; any two
-declarations in the same scope must have names which are distinct.
+declarations in the same scope must have distinct names.
 
 ```
 <declaration> ::= <variable-declaration>
@@ -45,10 +44,10 @@ declarations in the same scope must have names which are distinct.
 
 ## 4.1 Variable declaration
 
-A _variable declaration_ adds a new name to a scope, initially binding it to
-the pseudo-value `uninitialized`. Once execution reaches the point of the
-declaration, its initializer is evaluated (if there is one) and the resulting
-value is assigned to the variable of that name.
+A _variable declaration_ adds a new name to a scope, initially letting the
+binding be uninitialized. Once execution reaches the point of the declaration,
+its initializer is evaluated (if there is one) and the resulting value is
+assigned to the variable.
 
 ```
 <variable-declaration> ::= "my"
@@ -103,11 +102,54 @@ Macros](12-macros.md).
 
 ## 4.4 Class declaration
 
+A _class declaration_ adds a new name to a scope, and binds it to a class.
+
 ## 4.5 Interface declaration
+
+An _interface declaration_ adds a new name to a scope, and binds it to an
+interface.
 
 ## 4.6 Enum declaration
 
+An _enum declaration_ adds a new name to a scope, and binds it to an enum.
+
 ## 4.7 Import directive
 
+An _import directive_ is not a kind of declaration, but does have the effect of
+adding names to the current scope.
+
+```
+<import-directive> ::= "import"
+                       "{" <import-list> "}"
+                       "from"
+                       <string>
+                       <semicolon>
+
+<import-list> ::= <import-item>* %% ","
+
+<import-item> ::= <identifier>
+                  ("as" <identifier>)?
+```
+
+Although an import directive doesn't count as a declaration, the import items
+listed count as nested declarations.
+
 ## 4.8 Annotations
+
+Annotations add metadata to declarations, such as providing a field declaration
+with a setter, or providing a parameter with a default.
+
+All declaration forms, including variable declarations, function declarations,
+macro declarations, class declarations, interface declarations, and enum
+declarations, can be preceded by annotations.
+
+```
+<annotated-declaration> ::= <annotation>* <declaration>
+
+<annotation> ::= "@" <identifier>
+                 ("(" <argument-list>* ")")?
+```
+
+Annotations can also be attached to nested declarations, including parameters,
+field declarations, method declarations, enum constants, and import items.
 
