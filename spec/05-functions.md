@@ -22,10 +22,10 @@ the time of evaluating the call expression, these steps happen:
   _arguments_.
 * The `call` method of the invocation protocol is invoked, with an array of
   the arguments.
-    * Parameter binding happens, explained in section 5.7 "Parameter binding".
+    * Parameter binding happens, explained in section 5.8 "Parameter binding".
       If successful, this results in an extended environment.
     * The function's body is run in the extended environment. This is explained
-      in section 5.8 "Function body".
+      in section 5.9 "Function body".
     * Eventually, control might return normally, in which case a value is also
       returned. This value is then the value of entire call expression. This is
       explained in section 5.10 "Returning from a function".
@@ -45,8 +45,8 @@ see [Chapter 13: Macros](13-macros.md).
 ## 5.2 Optional parameters
 
 A parameter is _required_ by default, but there are two different ways to
-declare it _optional_, meaning that a call to the function will still succeed
-even if the parameter is not passed.
+declare it _optional_, so that a call to the function will still succeed even
+if the parameter is not passed.
 
 A parameter can be declared optional using the `@optional` annotation:
 
@@ -263,7 +263,37 @@ fnWithNamedRestArgument(x => 1, y => 2);    // { y => 2 }
 fnWithNamedRestArgument(x => 1);            // {}
 ```
 
-## 5.7 Parameter binding
+## 5.7 Parameter type
+
+A parameter can be associated with a type, in which case the argument is type
+checked against the provided type during parameter binding. That is, the
+expression `arg is T` must evaluate to a truthy value, or the parameter binding
+will fail with (at the latest) a runtime error.
+
+There are two ways to declare a type with a parameter. The first uses a `@type`
+annotation:
+
+```
+func fnWithTypedParameter(@type(Int) x) {
+    say x;
+}
+
+fnWithTypedParameter(42);       // 42
+fnWithTypedParameter("hi");     // <error: type mismatch>
+```
+
+The second way uses an infix `:` syntax:
+
+```
+func fnWithTypedParameter(x: Int) {
+    say x;
+}
+
+fnWithTypedParameter(42);       // 42
+fnWithTypedParameter("hi");     // <error: type mismatch>
+```
+
+## 5.8 Parameter binding
 
 During function invocation, when arguments have been passed to a function for
 invocation, and before the function body can run, an environment is constructed in which the function body later runs.
@@ -279,36 +309,47 @@ The first step breaks down into the following smaller steps:
 * Assert that the number of positional arguments does not exceed the number of
   (required and optional) positional parameters, or that there's a positional
   rest parameter declared in the parameter list. If not, signal an exception.
+    * If the positional rest parameter has a type, assert that the type is
+      `Array<T>` for some `T`.
 * Assert that, for each required named parameter, there is a named argument of
   that name. If not, signal an exception.
 * Assert that all named arguments that were passed have a corresponding named
   parameter, or that a named rest parameter is declared in the parameter list.
   If not, signal an exception.
+    * If the named rest parameter has a type, assert that the type is
+      `Dict<string, V>` for some `V`.
 
 At this point, we know that parameter binding won't fail because not enough
 arguments were passed for the required parameters, or too many arguments were
 passed that rest parameters weren't present to absorb.
 
 * For each required positional parameter, bind it to the corresponding
-  positional argument (of which we just checked there are enough).
+  positional argument (of which we just checked there are enough). If the
+  parameter has a type, check the argument against the type.
 * For each optional positional parameter, bind it left-to-right to the
   corresponding positional argument, the value of the parameter default
-  expression if present, or `none` if not.
+  expression if present, or `none` if not. If the parameter has a type, check
+  the bound value against the type.
 * If there is a positional rest parameter, make an array of the remaining
   positional arguments, and bind the positional rest parameter to this array.
+  If the positional rest parameter has a type `Array<T>`, check each remaining
+  positional argument against `T`.
 * For each required named parameter, bind it to the corresponding named
-  argument (which we just asserted exists).
+  argument (which we just asserted exists). If the parameter has a type, check
+  the argument against the type.
 * For each optional named parameter, bind it left-to-right (in the parameter
   list) to the corresponding named argument, the value of the parameter default
-  expression if present, or `none` if not.
+  expression if present, or `none` if not. If the parameter has a type, check
+  the bound value against the type.
 * If there is a named rest parameter, make a dictionary of the remaining named
   arguments (name and argument), and bind the named rest parameter to this
-  dictionary.
+  dictionary. If the named rest parameter has a type `Dict<string, V>`, check
+  each remaining named argument against `V`.
 
 The resulting environment is the one that will be used when running the
 function body.
 
-## 5.8 Function body
+## 5.9 Function body
 
 The function body runs normally, except that the environment it runs in is
 extended with the parameters bound to either arguments or parameter defaults.
@@ -317,10 +358,12 @@ Inside a function body, it is also valid to use the statement `return <expr>;`
 which has the effect of evaluating `<expr>` and immediately terminating the
 running of the function body, returning the value that results to the caller.
 
-## 5.9 Returning from a function
+## 5.10 Returning from a function
 
 A value is returned from the function, either by explicitly executing a
 `return` statement in the function body, or by statement execution falling off
 the end of the function body. In the latter case, the value returned from the
 function is `none`.
+
+## 5.11 Function return type
 
