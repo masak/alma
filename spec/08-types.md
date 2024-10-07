@@ -36,7 +36,73 @@ in the sense that Alma's type-checker provides the same guarantee -- but you're
 not prevented from running the program absent this guarantee, it's just that
 you do so with the understanding that those runtime errors are not ruled out.
 
+As a rule, it's safe to think of the program as existing on a level separate
+from the type annotations, and having meaning independently of them. Type
+annotations are fully aware of the program, but the program is not aware of
+type annotations, and cannot change its behavior based on what the type
+annotations say. Gilad Bracha calls this a _pluggable type system_.
+
 ## 6.1 Array types
+
+An _array type_ `Array<T>` is a type of arrays whose elements are of type `T`.
+An array constructor `[e1, e2, ..., e3]` is normally created with the type
+`Array<Any>`, with no restriction on the type of its elements. There are three
+ways to provide an array with a narrower element type.
+
+The first way is to use the `as` expression to narrow the type of the array:
+
+```
+let ints = [1, 2, 3, 4] as Array<Int>;
+say type(ints);         // Array<Int>
+```
+
+This way is only allowed on array constructors as above; the constructed array
+will be constructed with the given element type.
+
+Trying to build an array with an element not belonging to the indicated element
+type results in (at the latest) a runtime error:
+
+```
+let notAllInts = [1, 2, "three", 4] as Array<Int>;      // error: type mismatch
+```
+
+Note that using `as` in this way only works for array construction. Using `as`
+on a variable containing an existing array only has the effect of asserting
+that the variable already has exactly the indicated runtime type:
+
+```
+let ints = [1, 2, 3, 4] as Array<Int>;
+let values = [1, 2, 3, 4];
+
+ints as Array<Int>;         // succeeds
+ints as Array<Str>;         // fails
+ints as Array<Any>;         // fails
+
+values as Array<Int>;       // fails
+values as Array<Str>;       // fails
+values as Array<Any>;       // succeeds
+```
+
+The second way is to use the custom constructor syntax with a generic
+parameter:
+
+```
+let ints = Array<Int>::[1, 2, 3, 4];        // Array<Int>
+let values = Array::[1, 2, 3, 4];           // Array<Any>
+```
+
+This also works on all other built-in collection data types.
+
+The third way is to declare the type in a variable declaration in which the
+array is constructed:
+
+```
+let ints: Array<Int> = [1, 2, 3, 4];
+```
+
+Note that, same as the `as` operator, this special behavior (of imbuing the
+runtime type of the array with the element type) only works when the type
+annotation is in direct contact with the array constructor.
 
 ## 6.2 Tuple types
 
