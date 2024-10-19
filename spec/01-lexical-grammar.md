@@ -129,6 +129,7 @@ The following words are _keywords_ in Alma:
 * `return`
 * `throw`
 * `try`
+* `type`
 * `unquote`
 * `while`
 

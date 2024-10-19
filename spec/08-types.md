@@ -1,10 +1,8 @@
 # Chapter 8: Types
 
 In Alma, any value at runtime belongs to a _type_. Some values belong to more
-than one type, but all values belong to at least one type.
-
-We say that a value `v` _belongs_ to a type `T` if the expression `v is T`
-gives a truthy result.
+than one type, but all values belong to at least one type. We say that a value
+`v` _belongs_ to a type `T` if the expression `v is T` gives a truthy result.
 
 A class is a form of type. Values are called _instances_ if they belong to a
 class.
@@ -115,4 +113,10 @@ annotation is in direct contact with the array constructor.
 ## 6.6 The `Any` type
 
 ## 6.7 The `Never` type
+
+## 6.8 Type parameters
+
+## 6.9 Type arguments
+
+## 6.10 Type aliases
 

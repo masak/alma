@@ -367,3 +367,8 @@ function is `none`.
 
 ## 5.11 Function return type
 
+xxx
+
+## 5.12 Lexical closure
+
+xxx
