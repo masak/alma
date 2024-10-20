@@ -2,18 +2,18 @@
 
 ## Table of contents
 
-### Chapter 1: Lexical grammar
+### [Chapter 1](01-lexical-grammar.md#chapter-1-lexical-grammar): Lexical grammar
 
-* 1.1 File format
-* 1.2 Whitespace
-* 1.3 Comments
-* 1.4 Literals
-* 1.5 Keywords
-* 1.6 Identifiers
-* 1.7 Operators
-* 1.8 Delimiters
-* 1.9 Punctuators
-* 1.10 Scannerless parsing
+* [1.1 File format](01-lexical-grammar.md#11-file-format)
+* [1.2 Whitespace](01-lexical-grammar.md#12-whitespace)
+* [1.3 Comments](01-lexical-grammar.md#13-comments)
+* [1.4 Literals](01-lexical-grammar.md#14-literals)
+* [1.5 Keywords](01-lexical-grammar.md#15-keywords)
+* [1.6 Identifiers](01-lexical-grammar.md#16-identifiers)
+* [1.7 Operators](01-lexical-grammar.md#17-operators)
+* [1.8 Delimiters](01-lexical-grammar.md#18-delimiters)
+* [1.9 Punctuators](01-lexical-grammar.md#19-punctuators)
+* [1.10 Scannerless parsing](01-lexical-grammar.md#110-scannerless-parsing)
 
 ### Chapter 2: Expressions
 
