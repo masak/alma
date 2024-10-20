@@ -218,3 +218,5 @@
 
 ### Chapter 25: API documentation
 
+### Chapter 26: Foreign Function Interface
+
