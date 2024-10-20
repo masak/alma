@@ -16,3 +16,7 @@ xxx cycles are allowed, because we bind first and evaluate later
 
 ## 9.6 Packages and distributions
 
+## 9.7 The `main` function
+
+## 9.8 Command-line arguments
+

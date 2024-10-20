@@ -123,6 +123,8 @@
 * 9.4 Aggregate module export
 * 9.5 The import binding mechanism
 * 9.6 Packages and distributions
+* 9.7 The `main` function
+* 9.8 Command-line arguments
 
 ### Chapter 10: Interactivity
 
