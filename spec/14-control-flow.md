@@ -8,5 +8,9 @@ xxx
 
 ## 14.3 Effect handlers
 
-## 14.4 Continuations
+## 14.4 Labels and `goto`
+
+## 14.5 Continuations
+
+## 14.6 Phasers
 
