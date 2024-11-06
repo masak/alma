@@ -120,3 +120,7 @@ annotation is in direct contact with the array constructor.
 
 ## 6.10 Type aliases
 
+## 6.11 Type conversions
+
+## 6.12 Type inference
+

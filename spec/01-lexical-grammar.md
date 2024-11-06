@@ -84,7 +84,8 @@ The `none` literal denotes the unique value of type `None`.
 
 The `true` and `false` literals denote the two values of type `Bool`.
 
-An integer literal is a maximal contiguous sequence of ASCII digits (`0`..`9`).
+An integer literal is a maximal contiguous sequence of ASCII digits (`0`..`9`),
+optionally separated by single underscores (`_`).
 
 A string literal begins with a double quote (`"`), zero or more characters of
 string content, and ends with a double quote (`"`). The string content is
