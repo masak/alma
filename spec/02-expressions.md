@@ -395,6 +395,9 @@ operand will not be evaluated. Specifically, `false && b == false`, and
 _Assignment operators_ store a computed value in a location. The `=` operator
 does only this; any operator of the form `a op= b` means `a = (a op b)`.
 
+There are some expectations on the left-hand side of an assignment, inherent
+in the term "location". See [Chapter 20: Lvalues](20-lvalues.md).
+
 ```
 <assignment-expression> ::= <expression> <assignment-op> <expression>
 
