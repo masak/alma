@@ -1,0 +1,22 @@
+BEGIN my words = ["zeroth", "first", "second", "third"];
+BEGIN my k = 0;
+
+macro mention() {
+    k = k + 1;
+    my n = k;
+    my nthWord = words[n];
+
+    return quasi {
+        say(nthWord, " mention");
+    };
+}
+
+for [{}, {}, {}] {
+    mention();        # first mention
+    mention();        # second mention
+}
+
+mention();            # third mention
+mention();            # fourth mention
+
+say(k);               # 4
