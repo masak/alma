@@ -2,9 +2,9 @@
 
 xxx
 
-## 10.1 Statements in the REPL
+## 10.1 Statements in the interactive shell
 
-## 10.2 Declarations in the REPL
+## 10.2 Declarations in the interactive shell
 
 ## 10.3 Redeclarations
 
