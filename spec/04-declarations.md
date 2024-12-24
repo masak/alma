@@ -4,11 +4,12 @@ Declarations establish a binding between a name and a value. Unlike expressions
 whose primary role is to be evaluated, and statements which are primarily
 executed, declarations add their binding to the lexical environment.
 
-A declaration belongs to its innermost enclosing block. As a block is run,
-first a new frame is created, empty but linked to the frame of the innermost
-surrounding block, if any. All the declarations belonging to the block get a
-binding with their name, to the pseudo-value `uninitialized`. After that,
-declarations initialize on two different schedules, depending on their type.
+Every declaration introduces a name, which is valid in a certain scope. A
+declaration belongs to the scope of its innermost enclosing block. As a block
+is run, first a new frame is created, empty but linked to its outer frame, if
+any. All the declarations belonging to the block get a binding with their name,
+to the pseudo-value `uninitialized`. After that, declarations initialize on two
+different schedules, depending on their kind.
 
 _Hoisted declarations_ initialize immediately, meaning that their binding will
 be initialized by the time the first statement is executed. Hoisted
