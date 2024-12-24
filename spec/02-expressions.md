@@ -368,9 +368,9 @@ returning a `Bool`.
 
 The semantics of the operators are as follows:
 
-* `a < b`: is `a` strictly less than `b`?
+* `a < b`: is `a` less than but not equal to `b`?
 * `a <= b`: is `a` less than or equal to `b`?
-* `a > b`: is `a` strictly greater than `b`?
+* `a > b`: is `a` greater than but not equal to `b`?
 * `a >= b`: is `a` greater than or equal to `b`?
 
 ## 2.18 Logical operators
@@ -436,8 +436,7 @@ less strongly binding ones.
 | concatenation        | infix   | `~`                                       |
 | range                | infix   | `..`, `..^`                               |
 | type check/cast      | infix   | `is`, `as`                                |
-| equality             | infix   | `==`, `!=`                                |
-| comparison           | infix   | `<`, `<=`, `>`, `>=`                      |
+| equality/comparison  | infix   | `== != < <= > >=` (non-assoc)             |
 | conjunction          | infix   | `&&`                                      |
 | disjunction          | infix   | `\|\|`                                    |
 | assignment (loosest) | infix   | `=`, `+=`, `-=`, etc. (right-associative) |
