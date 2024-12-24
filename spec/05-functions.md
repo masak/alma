@@ -263,7 +263,19 @@ fnWithNamedRestArgument(x => 1, y => 2);    // { y => 2 }
 fnWithNamedRestArgument(x => 1);            // {}
 ```
 
-## 5.7 Parameter type
+## 5.7 The `@cbn` annotation
+
+xxx
+
+## 5.8 The `@lazy` annotation
+
+xxx
+
+## 5.9 The `@in`, `@inout` and `@out` annotations
+
+xxx
+
+## 5.10 Parameter type
 
 A parameter can be associated with a type, in which case the argument is type
 checked against the provided type during parameter binding. That is, the
@@ -293,7 +305,7 @@ fnWithTypedParameter(42);       // 42
 fnWithTypedParameter("hi");     // <error: type mismatch>
 ```
 
-## 5.8 Parameter binding
+## 5.11 Parameter binding
 
 During function invocation, when arguments have been passed to a function for
 invocation, and before the function body can run, an environment is constructed in which the function body later runs.
@@ -319,8 +331,8 @@ The first step breaks down into the following smaller steps:
     * If the named rest parameter has a type, assert that the type is
       `Dict<string, V>` for some `V`.
 
-At this point, we know that parameter binding won't fail because not enough
-arguments were passed for the required parameters, or too many arguments were
+At this point, we know that parameter binding won't fail due to not enough
+arguments being passed for the required parameters, or too many arguments being
 passed that rest parameters weren't present to absorb.
 
 * For each required positional parameter, bind it to the corresponding
@@ -349,7 +361,7 @@ passed that rest parameters weren't present to absorb.
 The resulting environment is the one that will be used when running the
 function body.
 
-## 5.9 Function body
+## 5.12 Function body
 
 The function body runs normally, except that the environment it runs in is
 extended with the parameters bound to either arguments or parameter defaults.
@@ -358,17 +370,17 @@ Inside a function body, it is also valid to use the statement `return <expr>;`
 which has the effect of evaluating `<expr>` and immediately terminating the
 running of the function body, returning the value that results to the caller.
 
-## 5.10 Returning from a function
+## 5.13 Returning from a function
 
 A value is returned from the function, either by explicitly executing a
 `return` statement in the function body, or by statement execution falling off
 the end of the function body. In the latter case, the value returned from the
 function is `none`.
 
-## 5.11 Function return type
+## 5.14 Function return type
 
 xxx
 
-## 5.12 Lexical closure
+## 5.15 Lexical closure
 
 xxx
