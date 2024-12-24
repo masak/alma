@@ -156,7 +156,11 @@ Supplying a `@lazy` annotation is only allowed in combination with either a
 `@default` annotation or the `=` syntax (but not both together). Supplying a
 `@lazy` annotation without either of these results in a compile error.
 
-## 6.12 Methods
+## 6.12 The `@computed` annotation
+
+xxx
+
+## 6.13 Methods
 
 ```
 <method> ::= "method"
@@ -172,11 +176,11 @@ The `self` identifier is bound both in the parameter list (available in any
 default expressions) and in the method body. In this scope, the `self`
 identifier is bound to the instance on which the method was called.
 
-## 7.12 The `@class` annotation
+## 6.14 The `@class` annotation
 
-## 7.13 The `@static` annotation
+## 6.15 The `@static` annotation
 
-## 7.14 Interfaces
+## 6.16 Interfaces
 
-## 7.15 The `object` syntax
+## 6.17 The `object` syntax
 
