@@ -160,7 +160,11 @@ Supplying a `@lazy` annotation is only allowed in combination with either a
 
 xxx
 
-## 6.13 Methods
+## 6.13 The `@handles` annotation
+
+xxx
+
+## 6.14 Methods
 
 ```
 <method> ::= "method"
@@ -176,11 +180,11 @@ The `self` identifier is bound both in the parameter list (available in any
 default expressions) and in the method body. In this scope, the `self`
 identifier is bound to the instance on which the method was called.
 
-## 6.14 The `@class` annotation
+## 6.15 The `@class` annotation
 
-## 6.15 The `@static` annotation
+## 6.16 The `@static` annotation
 
-## 6.16 Interfaces
+## 6.17 Interfaces
 
-## 6.17 The `object` syntax
+## 6.18 The `object` syntax
 
