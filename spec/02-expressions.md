@@ -190,11 +190,14 @@ environment, much like a function does.
 
 ## 2.6 Custom constructor
 
-A _custom constructor_ modulates an array or dictionary with a custom type.
+A _custom constructor_ modulates an array constructor, a dictionary
+constructor, or a quasiquote with a custom type.
 
 ```
 <custom-constructor> ::= <qualified-name> "::"
-                         (<array-constructor> | <dictionary-constructor>)
+                         (<array-constructor>
+                          | <dictionary-constructor>
+                          | <quasiquote>)
 ```
 
 ## 2.7 Function constructors
