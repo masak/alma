@@ -177,6 +177,10 @@ halted, but also keep enough of the aborted program state around (local
 variable bindings, call stack, etc.) to be able to debug and inspect the
 program at that point.
 
+```
+<sorry-statement> ::= "sorry" <semicolon>
+```
+
 ## 3.13 Block statement
 
 A _block statement_ runs a block, and finishes normally.
