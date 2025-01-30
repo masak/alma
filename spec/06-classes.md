@@ -20,7 +20,7 @@ _receiver_, the instance on which the method was called.
 ```
 <class-declaration> ::= "class"
                         <identifier>
-                        ("[" <type-parameter-list> "]")?
+                        ("<" <type-parameter-list> ">")?
                         ("<:" <type>)?
                         <class-body>
                         <semicolon>
@@ -169,7 +169,7 @@ xxx
 ```
 <method> ::= "method"
              <identifier>
-             ("[" <type-parameter-list> "]")?
+             ("<" <type-parameter-list> ">")?
              "(" <parameter-list> ")"
              (":" <type>)?
              <block>

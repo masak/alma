@@ -207,6 +207,7 @@ A _function constructor_ creates a new function value.
 ```
 <function-constructor> ::= "func"
                            <identifier>?
+                           ("<" <type-parameter-list> ">")?
                            "(" <parameter-list> ")"
                            (":" <type>)?
                            <block>
@@ -235,7 +236,9 @@ satisfies the invocation protocol), or a macro invocation (which is handled at
 compile time).
 
 ```
-<call-expression> ::= <expression> "(" <argument>* %% "," ")"
+<call-expression> ::= <expression>
+                      ("<" <type-argument-list> ">")?
+                      "(" <argument>* %% "," ")"
 
 <argument> ::= expression
 ```
@@ -253,6 +256,14 @@ If the call is a runtime invocation, the following steps happen:
 If the call is a macro invocation, the corresponding invocation steps happen
 during compile time instead of at runtime; for details, see [Chapter 13:
 Macros](13-macros.md).
+
+The use of the `<` character creates a well-known grammatical conflict between
+type arguments for calls and the infix `<` operator. This conflict is resolved
+by force (outside of normal LR(1) parsing) by first attempting to parse what
+follows as a type argument list, and if that fails, backtracking and trying to
+parse it as the `<` operator. Although it doesn't matter for parsing purposes,
+it's recommended as a matter of style to use whitespace around the `<` operator
+but not around the `<` used to indicate the beginning of a type argument list.
 
 ## 2.9 Indexed and keyed lookups
 

@@ -66,7 +66,7 @@ function.
 ```
 <function-declaration> ::= "func"
                            <identifier>
-                           ("[" <type-parameter-list> "]")?
+                           ("<" <type-parameter-list> ">")?
                            "(" <parameter-list> ")"
                            (":" <type>)?
                            <block>
@@ -91,7 +91,7 @@ A _macro declaration_ adds a new name to a scope, and binds it to a macro.
 ```
 <macro-declaration> ::= "macro"
                         <identifier>
-                        ("[" <type-parameter-list> "]")?
+                        ("<" <type-parameter-list> ">")?
                         "(" <parameter-list> ")"
                         (":" <type>)?
                         <block>
