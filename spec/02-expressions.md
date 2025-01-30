@@ -369,6 +369,9 @@ returning a `Bool` to that effect.
 <equality-op> ::= "==" | "!="
 ```
 
+The equality and comparison operators are _non-associative_ by default, which
+means that you are not allowed to chain them in code.
+
 ## 2.17 Comparison operators
 
 _Comparison tests_ compare two values, seen as ordered values or quantities,
