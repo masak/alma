@@ -16,20 +16,16 @@ whitespace, and comments. The rest of this chapter describes this subdivision.
 
 ## 1.2 Whitespace
 
-A maximal contiguous sequence of the following characters is one unit of
-_whitespace_:
+A maximal contiguous sequence of the following characters, not occurring inside
+a token or a comment, is one unit of _whitespace_:
 
 * `\u0009` horizontal tab
 * `\u000a` line feed
 * `\u000d` carriage return
 * `\u0020` space
 
-The rule for recognizing whitespace is valid only between tokens, not within
-them; when the above characters occur within a string literal or a comment,
-they are not considered to be whitespace.
-
 The tab character is allowed but its use is discouraged. It's recommended to
-use four spaces for indentation.
+use four spaces for indenting Alma code.
 
 The UTF-8 byte-order mark ("BOM") at the beginning of a compilation unit is
 recognized and ignored as whitespace.
@@ -108,6 +104,12 @@ Although the allowed literals in a language normally form a closed set, in Alma
 this set can be extended. For more, see [Chapter 18: Extending the
 lexer](18-extending-the-lexer.md).
 
+Integer literals and boolean literals are known as _bare literals_, whereas
+string literals are known as _enclosed literals_. The fact that string literals
+begin and end with a designated character (the `"` character, in this case)
+makes them enclosed. When extending the set of literals to new forms, bare
+literals are not allowed to contain whitespace, but enclosed literals are.
+
 ## 1.5 Keywords
 
 The following words are _keywords_ in Alma:
@@ -135,13 +137,18 @@ The following words are _keywords_ in Alma:
 * `while`
 
 Along with the alphabetic literals `none`, `true`, and `false`, the keywords
-are _reserved words_: they can not be used as new names in declarations.
-However, they can still be used for unscoped literals such as dictionary
+are _reserved words_: they may not be used as new names in declarations.
+However, they can still be used for unscoped names such as dictionary
 keys and object properties.
 
 Although the keywords in a language normally form a closed set, in Alma this
 set can be extended. For more, see [Chapter 18: Extending the
 lexer](18-extending-the-lexer.md).
+
+When adding new keywords to this set, the keywords are limited to the narrow
+set of identifiers described below. Specifically, added keywords may contain
+neither whitespace characters nor non-alphanumeric characters which are only
+allowed in operator names.
 
 ## 1.6 Identifiers
 
