@@ -387,11 +387,15 @@ The semantics of the operators are as follows:
 * `a > b`: is `a` greater than but not equal to `b`?
 * `a >= b`: is `a` greater than or equal to `b`?
 
+The equality and comparison operators are _non-associative_ by default, which
+means that you are not allowed to chain them in code.
+
 ## 2.18 Logical operators
 
 _Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
-Conjunction (`&&`) is truthy if-and-only-if both operands are truthy, and
-disjunction (`||`) is falsy if-and-only-if both operands are falsy.
+Conjunction (`&&`) returns the first/left operand if it is falsy, and otherwise
+the second/right operand. Disjunction (`||`) returns the first/left operand if
+it is truthy, and otherwise the second/right operand.
 
 ```
 <logical-expression> ::= <expression> <logical-op> <expression>

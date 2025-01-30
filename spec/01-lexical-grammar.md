@@ -212,7 +212,7 @@ The following Alma operators are built in:
 * `%` (infix) modulo
 * `~` (prefix) stringification and (infix) concatenation
 * `?` (prefix) boolification
-* `!` (prefix) negated boolification
+* `!` (prefix) boolean negation
 * `&&` (infix) logical and
 * `||` (infix) logical or
 * `.` (postfix) property lookup
