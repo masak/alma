@@ -287,11 +287,12 @@ The built-in punctuators are as follows:
 * semicolon (`;`), which is used as an (often optional) terminator for
   statements and declarations.
 
-The following punctuators might be called "pseudo-operators":
+The following punctuators might be called "pseudo-operators", since their use
+is outside of expressions:
 
-* colon (`:`), which is used between a name and its (optional) type in
-  declarations, and between the parameter list and the (optional) return type
-  in function declarations.
+* colon (`:`), used between a name and its (optional) type in declarations, and
+  between the parameter list and the (optional) return type in function
+  declarations.
 
 * double arrow (`=>`), used between the key and the value in dictionary
   constructors, and used between a name and the expression of a named
