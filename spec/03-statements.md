@@ -34,6 +34,7 @@ to block end, compilation unit end, or closing curly brace and newline.
              |  <throw-statement>
              |  <catch-phaser>
              |  <leave-phaser>
+             |  <sorry-statement>
              |  <block-statement>
              |  <labeled-statement>
 ```
@@ -116,9 +117,9 @@ provided, must resolve to the `Label` of a surrounding loop.
 
 ## 3.8 `return` statement
 
-A _`return` statement_ abruptly finishes and returns a value out of the
-innermost surrounding routine. Evaluation continues after the expression that
-called the function. This statement can only occur inside a routine. An
+A _`return` statement_ abruptly finishes the innermost surrounding routine and
+returns a value from it. Evaluation continues after the expression that called
+the function. This statement can only occur lexically inside a routine. An
 expression, if provided, is used to determine the return value; if no
 expression is provided, the value `none` is returned.
 
@@ -168,7 +169,15 @@ put in a `LEAVE` phaser.
 If several `LEAVE` phasers are in the same block, they will run in reverse
 textual order.
 
-## 3.12 Block statement
+## 3.12 `sorry` statememt
+
+A _`sorry` statement_ abruptly finishes the program execution. An
+implementation is encouraged to not only indicate clearly where execution
+halted, but also keep enough of the aborted program state around (local
+variable bindings, call stack, etc.) to be able to debug and inspect the
+program at that point.
+
+## 3.13 Block statement
 
 A _block statement_ runs a block, and finishes normally.
 
@@ -197,7 +206,7 @@ given between plain blocks and pointy blocks:
 <xblock> ::= <block> | <pblock>
 ```
 
-## 3.13 Labeled statement
+## 3.14 Labeled statement
 
 A _labeled statement_ is a statement optionally preceded by a label and a
 colon. All statements are allowed to be labeled statements, although by
