@@ -196,7 +196,7 @@ identifier is bound to the instance on which the method was called.
 
 <interface-body> ::= "{" <interface-member>* "}"
 
-<interface-member> ::= <method>
+<interface-member> ::= <method-header>
 ```
 
 Interfaces declare the public part of classes; that is, methods but not field.
@@ -204,6 +204,9 @@ Interfaces declare the public part of classes; that is, methods but not field.
 Interface can extend one or more other interfaces. This extension relation must
 be acyclic; it is not allowed for an interface to extend itself, directly or
 indirectly.
+
+The members declared in an interface are method headers, declaring name and
+parameters and return type, but no method body.
 
 ## 6.18 The `object` syntax
 
