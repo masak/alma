@@ -186,5 +186,20 @@ identifier is bound to the instance on which the method was called.
 
 ## 6.17 Interfaces
 
+```
+<interface-declaration> ::= "interface"
+                            <identifier>
+                            ("<" <type-parameter-list> ">")?
+                            ("<:" <type>)?
+                            <interface-body>
+                            <semicolon>
+
+<interface-body> ::= "{" <interface-member>* "}"
+
+<interface-member> ::= <method>
+```
+
+Interfaces declare the public part of classes; that is, methods but not field.
+
 ## 6.18 The `object` syntax
 
