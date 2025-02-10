@@ -21,7 +21,7 @@ _receiver_, the instance on which the method was called.
 <class-declaration> ::= "class"
                         <identifier>
                         ("<" <type-parameter-list> ">")?
-                        ("<:" <type>)?
+                        ("<:" <type-list>)?
                         <class-body>
                         <semicolon>
 
@@ -190,7 +190,7 @@ identifier is bound to the instance on which the method was called.
 <interface-declaration> ::= "interface"
                             <identifier>
                             ("<" <type-parameter-list> ">")?
-                            ("<:" <type>)?
+                            ("<:" <type-list>)?
                             <interface-body>
                             <semicolon>
 
@@ -200,6 +200,10 @@ identifier is bound to the instance on which the method was called.
 ```
 
 Interfaces declare the public part of classes; that is, methods but not field.
+
+Interface can extend one or more other interfaces. This extension relation must
+be acyclic; it is not allowed for an interface to extend itself, directly or
+indirectly.
 
 ## 6.18 The `object` syntax
 
