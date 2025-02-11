@@ -43,7 +43,7 @@ xxx
 
 ## 6.4 Fields
 
-A _field_ represents property data of an instance of a class.
+A _field_ represents property data belonging to an instance of the class.
 
 ```
 <field> ::= "has"
@@ -93,8 +93,8 @@ bound by a field, and set the field's value from a provided argument.
 
 ## 6.7 The `@required` and `@optional` annotations
 
-A field is _required_ by default, which means that the class's constructor has
-a required named parameter for the field. A `@required` annotation reaffirms
+A field is _required_ by default, in that the class's constructor has a
+required named parameter for the field. A `@required` annotation reaffirms
 this, but is essentially a no-op.
 
 Either of the following two are equivalent: an `@optional` annotation on a
@@ -137,10 +137,13 @@ annotation, but not with a `@required` annotation. Using `@builder` and
 A `@builder` annotation is incompatible with a `@default` annotation, and using
 these two together signals a compile error.
 
+The method call is virtual; a derived class may override the builder method,
+and this overridden method will be called as part of instantiating the derived
+class.
+
 ## 6.10 The `@type` annotation
 
-A `@type` annotation expects a single argument, an expression which needs to
-statically evaluate to a `Type`.
+A `@type` annotation expects a single argument, a type expression.
 
 As an alternative syntax, the infix `:` can be used to specify a type.
 
@@ -158,22 +161,36 @@ Supplying a `@lazy` annotation is only allowed in combination with either a
 
 ## 6.12 The `@computed` annotation
 
-xxx
+Supplying the `@computed` annotation on a field means that any _external_
+access to the property through its read accessor will also re-initialize the
+property via either its `=` initialization syntax, its `@default` annotation,
+or `@builder` annotation. Any direct, internal access to the property still
+reads the last computed value without recomputing it.
+
+`@computed` implies `@lazy`. Annotating a `@computed` field with `@lazy` is
+allowed, but essentially a no-op.
 
 ## 6.13 The `@handles` annotation
 
-xxx
+A `@handles` annotation accepts a list of identifiers, separated by commas.
+For each such identifier, this annotation declares a method of that name,
+delegating to a method of the same name on the annotated property.
+
+The `@handles` annotation can be combined with the `@default` annotation, the
+`=` syntax, the `@builder` annotation, and the `@lazy` and `@computed`
+annotations. A call to one of the handled methods of a `@lazy` field makes sure
+to initialize the field before calling the handled method.
 
 ## 6.14 Methods
 
 ```
-<method> ::= "method"
-             <identifier>
-             ("<" <type-parameter-list> ">")?
-             "(" <parameter-list> ")"
-             (":" <type>)?
-             <block>
-             <semicolon>
+<method> ::= <method-header> <block> <semicolon>
+
+<method-header> ::= "method"
+                    <identifier>
+                    ("<" <type-parameter-list> ">")?
+                    "(" <parameter-list> ")"
+                    (":" <type>)?
 ```
 
 The `self` identifier is bound both in the parameter list (available in any
@@ -182,9 +199,15 @@ identifier is bound to the instance on which the method was called.
 
 ## 6.15 The `@class` annotation
 
+xxx
+
 ## 6.16 The `@static` annotation
 
+xxx
+
 ## 6.17 Interfaces
+
+Interfaces declare the public part of classes; that is, methods but not fields.
 
 ```
 <interface-declaration> ::= "interface"
@@ -199,14 +222,14 @@ identifier is bound to the instance on which the method was called.
 <interface-member> ::= <method-header>
 ```
 
-Interfaces declare the public part of classes; that is, methods but not field.
-
-Interface can extend one or more other interfaces. This extension relation must
-be acyclic; it is not allowed for an interface to extend itself, directly or
-indirectly.
+An interface can extend one or more other interfaces. This extension relation
+must be acyclic; it is not allowed for an interface to extend itself, directly
+or indirectly.
 
 The members declared in an interface are method headers, declaring name and
 parameters and return type, but no method body.
 
 ## 6.18 The `object` syntax
+
+xxx
 
