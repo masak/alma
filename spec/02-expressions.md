@@ -331,20 +331,7 @@ concatenated string as a result.
 <string-op> ::= "~"
 ```
 
-## 2.14 Range constructor
-
-A _range constructor_ creates a new range between a lower and an upper bound.
-
-```
-<range-constructor> ::= <right-inclusive-range>
-                     |  <right-exclusive-range>
-
-<right-inclusive-range> ::= <expression> ".." <expression>
-
-<right-exclusive-range> ::= <expression> "..^" <expression>
-```
-
-## 2.15 Type check/cast operators
+## 2.14 Type check/cast operators
 
 The _type check_ operator `is` checks a given value for inclusion in a given
 type.
@@ -358,7 +345,7 @@ fails with a runtime error if it isn't.
 <type-check-cast-op> ::= "is" | "as"
 ```
 
-## 2.16 Equality operators
+## 2.15 Equality operators
 
 _Equality tests_ check whether two values are either equal or unequal,
 returning a `Bool` to that effect.
@@ -372,7 +359,7 @@ returning a `Bool` to that effect.
 The equality and comparison operators are _non-associative_ by default, which
 means that you are not allowed to chain them in code.
 
-## 2.17 Comparison operators
+## 2.16 Comparison operators
 
 _Comparison tests_ compare two values, seen as ordered values or quantities,
 returning a `Bool`.
@@ -393,7 +380,7 @@ The semantics of the operators are as follows:
 The equality and comparison operators are _non-associative_ by default, which
 means that you are not allowed to chain them in code.
 
-## 2.18 Logical operators
+## 2.17 Logical operators
 
 _Logical connectives_ include _conjunction_ ("and") and _disjunction_ ("or").
 Conjunction (`&&`) returns the first/left operand if it is falsy, and otherwise
@@ -411,7 +398,7 @@ evaluating the left operand is enough to conclude the result, the right
 operand will not be evaluated. Specifically, `false && b == false`, and
 `true || b == true`, both without evaluating `b`.
 
-## 2.19 Assignment operators
+## 2.18 Assignment operators
 
 _Assignment operators_ store a computed value in a location. The `=` operator
 does only this; any operator of the form `a op= b` means `a = (a op b)`.
@@ -439,7 +426,7 @@ Specifically, you should view the `b` of `a .= b` as parsing in the same way
 as `a = a.b`, where `b` starts with something identifier-like but is otherwise
 an expression.
 
-## 2.20 Precedence table
+## 2.19 Precedence table
 
 _Operator precedence_ determines the binding strength of operators; the
 tighter or more strongly binding ones always evaluate before the looser or
@@ -455,7 +442,6 @@ less strongly binding ones.
 | multiplicative       | infix   | `*`, `//`, `%`                            |
 | additive             | infix   | `+`, `-`                                  |
 | concatenation        | infix   | `~`                                       |
-| range                | infix   | `..`, `..^`                               |
 | type check/cast      | infix   | `is`, `as`                                |
 | equality/comparison  | infix   | `== != < <= > >=` (non-assoc)             |
 | conjunction          | infix   | `&&`                                      |
