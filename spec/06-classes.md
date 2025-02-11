@@ -205,7 +205,11 @@ xxx
 
 xxx
 
-## 6.17 Interfaces
+## 6.17 Constructors
+
+xxx
+
+## 6.18 Interfaces
 
 Interfaces declare the public part of classes; that is, methods but not fields.
 
@@ -229,7 +233,7 @@ or indirectly.
 The members declared in an interface are method headers, declaring name and
 parameters and return type, but no method body.
 
-## 6.18 The `object` syntax
+## 6.19 The `object` syntax
 
 xxx
 
